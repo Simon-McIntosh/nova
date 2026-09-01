@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:22:06",
+  "updated": "2026-09-01T23:49:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -70007,9 +70007,203 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T212250566705-pta-census-split-polish-scaling",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-scaling",
+        "node_definition": {
+          "done_when": "tests/test_split_polish_nulls.py gains a rescaling-invariance regression that multiplies the flux by 1e3 and the coordinates by 1e-2 and requires every dimensionless receipt (roundoff floor, representation floor, normalised gradients, acceptance flags) to agree with the unscaled run to a relative 1e-10; the focused suite tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py is 41 or more green when run as JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -s on those four files, captured whole to a log the manifest cites; the Solovev (axis <= 0.2 mm accepted, saddle 0 m explicit fallback), exact-quadratic, limited-mode and six secondary-null receipts are preserved; the source states the derivation in scaled coordinates and no longer claims unit invariance it does not have; the manifest quotes both floors on the Solovev fit before and after the rescaling",
+          "estimated_hours": 1.5,
+          "goal": "Make the split-polish roundoff floor sound in the solver's coefficient coordinates per the final review /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-final-review.md: retain the field-design column scales D from the conditioned fit, evaluate the derivative and value bases as B-prime times D-inverse in the same scaled coordinates as the reported condition number, and nondimensionalise the exterior correction basis by the field range so interior and correction contributions share units before the norm",
+          "id": "pta-census-split-polish-scaling",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212250566705-pta-census-split-polish-scaling/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/linalg/split_spline.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:22:58Z",
+        "completed_at": "2026-09-01T21:43:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1261,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1261,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "b9b8143076c7f5667391d379658518822a017120",
+        "commits": [
+          "6878350dcc4e2724052dbd257b51fef012249225"
+        ],
+        "changed_lines": {
+          "added": 203,
+          "removed": 40,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212250566705-pta-census-split-polish-scaling/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3350016,
+            "cached_input_tokens_cumulative": 6185216,
+            "input_tokens": 3347222,
+            "input_tokens_cumulative": 6297114,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12171,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1846
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -s",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T214414295083-pta-census-split-polish-chain-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-chain-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-chain-review.md with a PASS or FAIL verdict over: (1) git diff --name-only 31daffee^ 6878350d lists exactly the four fenced paths; (2) the roundoff floor now retains the field-design column scales and evaluates the derivative and value bases as B times D-inverse in the same scaled-coefficient coordinates as the reported condition number, and the exterior correction basis is nondimensionalised by the field range so interior and correction terms share units before the norm, quoting file:line and judging soundness; (3) the rescaling-invariance regression multiplies flux by 1e3 and coordinates by 1e-2 and compares every dimensionless receipt with a mixed tolerance abs(a-b) <= 1e-10*max(|a|,|b|) + 1e-13, with acceptance flags compared exactly, and its docstring justifies the absolute term as the roundoff floor; judge whether that tolerance is honest; (4) the log /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212250566705-pta-census-split-polish-scaling/logs/after-suite-repaired.log records 41 passed with the Solovev, exact-quadratic, limited-mode and six secondary-null receipts preserved and the before/after Solovev floors quoted in the manifest agreeing; (5) the source no longer claims a unit invariance it does not have; (6) census remains the sole selector across the whole chain and the polish still touches only the selected O and X rows; (7) naming hygiene across the chain; (8) every defect quoted with file:line. Read-only review of files and logs; do not modify the worktree",
+          "estimated_hours": 0.5,
+          "goal": "Write an independent verdict report on the census split-polish chain 31daffee, b9b81430, 6878350d (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-census-split-polish-scaling, paths nova/equilibrium/topology.py, nova/equilibrium/flux_surface_connectivity.py, nova/linalg/split_spline.py, tests/test_split_polish_nulls.py) against the blocking defect of your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-final-review.md and the plan contract",
+          "id": "pta-census-split-polish-chain-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214414295083-pta-census-split-polish-chain-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "15m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-chain-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T21:44:20Z",
+        "completed_at": "2026-09-01T21:48:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 263,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 263,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "481d9d2dbc5a6081e6e6c5c9019fb3b7fe6467a2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-census-split-polish-chain-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-chain-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214414295083-pta-census-split-polish-chain-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 375296,
+            "cached_input_tokens_cumulative": 1512960,
+            "input_tokens": 360655,
+            "input_tokens_cumulative": 1584414,
+            "output_tokens": 2309,
+            "output_tokens_cumulative": 12471,
+            "reasoning_output_tokens": 1798,
+            "reasoning_output_tokens_cumulative": 5163
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1278
+    "_version": 1280
   }
 }

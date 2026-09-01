@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="105">
+<meta name="plan-version" content="106">
 </head>
 <body>
   <main class="plan-doc">
@@ -198,15 +198,15 @@
     <p class="r-dec-ctx">Until 2026-09-01 the corroboration gates were authored metre literals (worst eligible RMS at 0.55 m), loose enough that a 2.9 cm RMS read as PASS on numbers the lead rejects. The lead&#x27;s physics rationale: EFIT is a magnetics fit, but with its inferred flux functions and corrected coil currents held fixed it is a converged Grad-Shafranov solution with fixed boundary conditions, so a forward solve fed the same inputs must reproduce it to the resolution the source EFIT grid affords. Gates therefore derive from the source reconstruction grid, per machine, read from the data at scoring time - never an authored metre literal.</p>
     <p class="r-dec-rat">Lead decision 2026-09-01: set the gates to a declared fraction of the minimum grid width of the SOURCE EFIT reconstruction grid, computed from the equilibrium data each bank actually read. With flux functions and coil currents fixed, discretisation of the source grid is the only legitimate mismatch budget; anything looser hides solver or input defects, as the 0.55 m gate did.</p>
     </div>
-<div class="r-dec" data-key="efit-match-gate-fraction" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="efit-match-gate-fraction" data-choice="quarter" data-by="Simon McIntosh" data-when="2026-09-01T05:56:02+00:00">
     <p class="r-dec-q">Which fraction of the source-grid minimum width do the gates use?</p>
     <p class="r-dec-ctx">The mechanism is locked in boundary-gate-authority. The remaining free parameter is the fraction. On a 65-by-65 MAST efm grid the minimum width is roughly 3 cm, so one half gives about 1.5 cm, one quarter about 0.8 cm, one tenth about 3 mm. The lead&#x27;s earlier statement that boundary RMS should be sub-centimetre if not tighter is satisfied by one quarter and below on both machines. The efit-fixed-input reproduction node now dispatched measures what the discretisation actually affords, so the fraction can be locked against a measured floor rather than a guess.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="half">1/2 of min grid width</button>
-      <button class="r-opt" data-value="quarter">1/4 of min grid width (recommended: sub-cm on both machines)</button>
+      <button class="r-opt chosen" data-value="quarter">1/4 of min grid width (recommended: sub-cm on both machines)</button>
       <button class="r-opt" data-value="tenth">1/10 of min grid width</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-01: gates lock at one quarter of the source EFIT reconstruction grid&#x27;s minimum width, derived from the data per machine. On a 65-by-65 efm grid this is sub-centimetre (~0.8 cm), consistent with the standing sub-cm bar. Companion directive recorded with the lock: the validation solve is COLD-START - seeding the solve with EFIT&#x27;s psi is rejected as the validation path, because the GS problem must be solvable from a cold start and a failure there must surface, not be masked by a warm seed. The zero-iteration residual evaluation GS(psi_EFIT) under Nova&#x27;s discretised operator stays, endorsed as the formulation-error detector and the measured floor the quarter-width gate must respect.</p>
     </div>
 </section>
 

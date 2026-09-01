@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -108,6 +108,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260901T220428987014-pta-cell-topology-read" data-who="pta-partition" data-when="2026-09-01T22:06:38Z">
     <div class="r-comment-body"><p>Blocked before any topology change: on main at 12286969 the Solovev oracle fails in hex_ring_slots (nova/biot/plasmagrid.py:42, hex neighbours do not occupy distinct HEX_RING slots) on a distorted ring at (1.687, -0.883), a regression introduced by the partition landing c712c98a; repair dispatched, node to be redispatched on the repaired base</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T223900862784-pta-hex-ring-slots-verify" data-who="pta-review-a" data-when="2026-09-01T22:42:17Z">
+    <div class="r-comment-body"><p>Review PASS: hex_ring_slots enumerates injective cyclic-order-preserving placements for 0-6 neighbours and minimises wrapped angular deviation; regular ring stays identity; distorted Solovev fixture and 128 randomised rings asserted; prior caller-order audit remains valid; aggregate evidence pending the suite node</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195359824044-pta-census-split-polish" data-who="pta-census" data-when="2026-09-01T20:17:25Z">
     <div class="r-comment-body"><p>Polish built, 32/32 green, axis 0.066 mm, but independent review FAILED: lattice-coordinate coincidence suppresses the Newton attempt and satisfies stationarity unconditionally (the 0 m saddle result is the untouched seed; the real one-step moved it 2.77e-5 m), and the split interface follows the selected boundary (wall flux on limited reads) which the contract wording left ambiguous; repair routed to the same member</p></div>

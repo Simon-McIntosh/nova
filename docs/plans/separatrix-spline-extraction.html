@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="108">
+<meta name="plan-version" content="109">
 </head>
 <body>
   <main class="plan-doc">
@@ -449,6 +449,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260901T055212194147-sse-efit-fixed-input-reproduction" data-who="diiid-forward-gs" data-when="2026-09-01T06:14:27Z">
     <div class="r-comment-body"><p>Launch sound, measure pending harvest. The amended cold-start contract is in the job: zero-iteration GS residual of EFIT psi under the stride-1 and stride-2 operators on both machines (no coil currents needed), the clean MAST fixed-input cold start through efm fcoil_c, the DIII-D cold start qualified as using shipped inference currents because the parquet schema carries no EFIT fitted-current vector, and the quarter-width gate derived from each source grid. ORCHESTRATOR RETARGET recorded for the harvest: moved from drained vega to rigel by scontrol, memory trimmed 128G to 120G because rigel nodes carry 128000 MB; RUNNING on 98dci4-clu-2009; sacct will show rigel</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260901T053911298970-sse-hex-cell-clipped-rendering" data-who="topology-visuals" data-when="2026-09-01T06:24:06Z">
+    <div class="r-comment-body"><p>All 17 panels now draw the true solver geometry: rectangular Voronoi cells filled by domain label with the six-neighbour half-offset adjacency overlaid from the production edge segments (1879 wall-admissible links per MAST row, 1486 per DIII-D row), the wall, both boundaries, the full candidate census and every landmark, generated from the committed caches with no solve and no scheduler job. The geometry sources are the production symbols _raster_hex_partition_geometry and _points_inside_polygon, and the figures state the corrected premise: on a tensor grid the cells are rectangles, hex is the adjacency graph, wall inclusion is whole-cell by centre test, and the solver performs no partial clipping - the convex-hull hexagon alternative is rejected in the evidence page with its measured 49.093 mm and 23.810 mm neighbour overlaps. Containment records are unchanged, the strong gate stays 4 of 4, and the converged rows keep 43 and 42 shadow cells with zero inside. One residual inconsistency is honestly recorded: centre membership agrees with cached labels on 14 of 16 populated rows, with one mismatched cell on each retained-failure 21985/51 panel. Variant pairs stay deferred to the next full regeneration, with the missing cache fields named</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

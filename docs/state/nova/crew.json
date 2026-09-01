@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T08:16:24",
+  "updated": "2026-09-01T08:24:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64508,9 +64508,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T053911298970-sse-hex-cell-clipped-rendering",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-hex-cell-clipped-rendering",
+        "node_definition": {
+          "done_when": "Every topology panel renders its hex cells as their true clipped polygon geometry, generated from the committed operand caches without a single new solve. The 17 committed panels in docs/figures/topology-visual-corroboration render cells as scatter markers at cell centres; the lead requires the actual cell polygons with the wall clipping the flood fill applies. (1) Extend docs/figures/topology-visual-corroboration/generate_topology_visuals.py (or a sibling renderer it calls) so each hex cell is drawn as its true polygon, clipped by the governed wall exactly as the connectivity flood clips it, filled by domain label: axis-connected core, common SOL, private-flux shadow, and excluded material, with partial cells at the wall visibly cut. The polygon geometry must come from the same source the solver's flood fill uses, and the manifest names that symbol; a re-derivation that could disagree with the solve is not acceptable. Retain everything the panels already carry: wall, Nova closed boundary, EFIT LCFS, the full O and X candidate census, selected primary O and X, closest plasma-wall point, and EFIT labels. (2) For every arm whose record reports two or more qualified X candidates, add one variant pair beside the main panel: the shadow under the selected primary against the shadow under the strongest alternate candidate, with the flipped-cell count stated as a number in the caption, so primary-selection sensitivity is visible on real geometry rather than only on the synthetic walls in docs/figures/wall-height-shadow-safety/metrics.json. (3) All rendering reads the committed NPZ operand caches and JSON records in docs/figures/topology-visual-corroboration; the node performs no equilibrium solve and submits no scheduler job, which is what makes it cheap; if a cache lacks a field the true-polygon rendering needs, name the missing field and render the panels the caches do support rather than re-solving. (4) The 17 panel JSONs keep their numeric containment fields unchanged; docs/evidence/topology-visual-corroboration.html is updated so each figure row shows the new rendering with project-absolute src paths, and reckon audit-doc passes. (5) The focused generator lane is green with the delta stated against the base revision rather than an absolute count, and one panel is visually inspected at original resolution with the inspection stated in the manifest.",
+          "estimated_hours": null,
+          "goal": "Topology panels drawing every hex cell as its true wall-clipped polygon from the committed operand caches, with a primary-variant pair for each multi-candidate arm",
+          "id": "sse-hex-cell-clipped-rendering",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053911298970-sse-hex-cell-clipped-rendering/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration",
+            "docs/evidence/topology-visual-corroboration.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:39:20Z",
+        "completed_at": "2026-09-01T06:24:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2686,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2686,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d1e99809e2652c63aae326ed9cfbae117d35d31b",
+        "commits": [
+          "36f04d658fbaad0f230cba4282a646c5cdcc4d47"
+        ],
+        "changed_lines": {
+          "added": 355,
+          "removed": 319,
+          "files": 40
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "17 PANEL_PUBLISHED with EXIT_MARKER=0 from committed caches; strict verifier 17/17 JSON, 17/17 PNG, 17/17 unchanged containment records, 17424 four-vertex rectangles; audit-doc OK; original-resolution inspection of panel 11",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053911298970-sse-hex-cell-clipped-rendering/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053911298970-sse-hex-cell-clipped-rendering/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3500160,
+            "cached_input_tokens_cumulative": 6534912,
+            "input_tokens": 3250914,
+            "input_tokens_cumulative": 6623390,
+            "output_tokens": 301,
+            "output_tokens_cumulative": 25907,
+            "reasoning_output_tokens": 2488,
+            "reasoning_output_tokens_cumulative": 7829
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1190
+    "_version": 1191
   }
 }

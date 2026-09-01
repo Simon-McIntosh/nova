@@ -142,11 +142,16 @@ __all__ = [
     "separatrix_derivatives",
 ]
 
-#: Direction the separatrix distance grows in normalised flux, per open domain.
-OUTWARD_SENSE: dict[PlasmaDomain, float] = {
-    PlasmaDomain.COMMON_SOL: 1.0,
-    PlasmaDomain.PRIVATE_FLUX: -1.0,
-}
+
+def _outward_sense(domain: PlasmaDomain) -> float:
+    """Return the branch orientation without using a common-SOL cell label."""
+
+    if domain is PlasmaDomain.PRIVATE_FLUX:
+        return -1.0
+    if domain in (PlasmaDomain.CORE, PlasmaDomain.EXCLUDED_MATERIAL):
+        raise ValueError(f"{domain.name.lower()} is not an open domain")
+    return 1.0
+
 
 #: Step in normalised flux the one-sided check of a separatrix derivative is
 #: taken over, and the relative agreement it demands. The check is there to
@@ -502,17 +507,24 @@ class SeparatrixContinuation:
         lets the private-flux branch be varied without touching the common
         scrape-off layer.
         """
-        if domain not in OUTWARD_SENSE:
-            raise ValueError(
-                f"{domain.name.lower()} is not an open domain; a continuation "
-                "runs outward from the separatrix onto "
-                f"{' or '.join(sorted(key.name.lower() for key in OUTWARD_SENSE))}"
-            )
-        if self.support is None and domain is not PlasmaDomain.COMMON_SOL:
+        outward = _outward_sense(domain)
+        if self.support is None and domain is PlasmaDomain.PRIVATE_FLUX:
             raise ValueError(
                 "only a common_sol exponential may use material-bounded support; "
                 "the private-flux branch needs its own finite policy"
             )
+        return self._extend(inner, domain, outward)
+
+    def extend_open_field_line(self, inner: DomainProfile) -> ContinuedDomainProfile:
+        """Continue a core profile onto flux-selected open field lines."""
+
+        return self._extend(inner, PlasmaDomain.COMMON_SOL, 1.0)
+
+    def _extend(
+        self, inner: DomainProfile, domain: PlasmaDomain, outward: float
+    ) -> ContinuedDomainProfile:
+        """Build one continuation with an already-decided branch orientation."""
+
         if inner.rotation_closure is not RotationClosure.STATIC:
             raise NotImplementedError(
                 f"a {inner.rotation_closure.name.lower()} closure makes the "
@@ -520,7 +532,6 @@ class SeparatrixContinuation:
                 "anchor is not a flux function; continuing it needs the "
                 "temperature and rotation primitives continued as well"
             )
-        outward = OUTWARD_SENSE[domain]
         pressure_anchor, pressure = self._taper(inner.p_prime, "p_prime", outward)
         diamagnetic_anchor, diamagnetic = self._taper(
             inner.ff_prime, "ff_prime", outward
@@ -596,7 +607,7 @@ class ContinuedDomainProfile(DomainProfile):
     def __post_init__(self):
         """Validate the continued gradients and the declared domain."""
         super().__post_init__()
-        if self.domain not in OUTWARD_SENSE:
+        if self.outward not in (-1.0, 1.0):
             raise ValueError("a continuation is declared on an open domain")
         for name in ("pressure_taper", "diamagnetic_taper"):
             _validate_flux_function(getattr(self, name), name)

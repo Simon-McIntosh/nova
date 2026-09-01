@@ -37,7 +37,7 @@ import numpy as np
 
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
-from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
     wall_height_shadow_mask,
@@ -707,29 +707,6 @@ class ForwardFluxOperator:
             - cross_second * moments.radial_moment
         ) / determinant
         return CellCurrentMoments(moments.cell_current, radial, vertical)
-
-    def shared_domain_masks(
-        self, masks: DomainMasks, topology: TopologyState, shared_flux
-    ) -> DomainMasks:
-        """Interpolate domain labels onto shared nodes without crossing the LCFS."""
-        owner = self.moment_geometry.shared_flux_stencil.gather_index[:, 0]
-        owner_label = masks.label[owner]
-        psi_norm = (shared_flux - topology.axis_flux) / topology.flux_span
-        closed = psi_norm <= 1.0
-        label = jnp.where(
-            owner_label == int(PlasmaDomain.EXCLUDED_MATERIAL),
-            owner_label,
-            jnp.where(
-                owner_label == int(PlasmaDomain.PRIVATE_FLUX),
-                owner_label,
-                jnp.where(
-                    closed,
-                    jnp.asarray(int(PlasmaDomain.CORE), dtype=owner_label.dtype),
-                    jnp.asarray(int(PlasmaDomain.COMMON_SOL), dtype=owner_label.dtype),
-                ),
-            ),
-        )
-        return DomainMasks(label=label, psi_norm=psi_norm)
 
     def _support_partition(self, psi, requested_class=None):
         """Trace the profile-owned support and sampling state once."""

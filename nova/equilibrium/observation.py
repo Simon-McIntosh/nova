@@ -66,7 +66,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.constants import mu_0
 
-from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+from nova.equilibrium.domain import DomainMasks
 
 __all__ = [
     "MOMENT_NAMES",
@@ -497,8 +497,12 @@ def _select_open(source, masks: DomainMasks, core_value: jax.Array, evaluate):
     which is inside the support of either branch.
     """
     value = core_value
-    for domain, profile in source.open_profiles:
-        selection = masks.mask(domain)
+    for selection, profile in (
+        (masks.open_field_line, source.common_sol),
+        (masks.private_flux, source.private_flux),
+    ):
+        if profile is None:
+            continue
         value = jnp.where(
             selection,
             evaluate(profile, jnp.where(selection, masks.psi_norm, 1.0)),
@@ -548,16 +552,14 @@ def declared_body_force(
 
 
 def current_ledger(cell_current: jax.Array, masks: DomainMasks) -> CurrentLedger:
-    """Return the toroidal current integrated over each domain label."""
-    per_domain = [
-        jnp.sum(jnp.where(masks.mask(domain), cell_current, 0.0))
-        for domain in PlasmaDomain
-    ]
+    """Return current split by live solve support and diagnostic exclusions."""
     return CurrentLedger(
-        core=per_domain[PlasmaDomain.CORE],
-        common_sol=per_domain[PlasmaDomain.COMMON_SOL],
-        private_flux=per_domain[PlasmaDomain.PRIVATE_FLUX],
-        excluded_material=per_domain[PlasmaDomain.EXCLUDED_MATERIAL],
+        core=jnp.sum(jnp.where(masks.confined_profile, cell_current, 0.0)),
+        common_sol=jnp.sum(jnp.where(masks.open_field_line, cell_current, 0.0)),
+        private_flux=jnp.sum(jnp.where(masks.private_flux, cell_current, 0.0)),
+        excluded_material=jnp.sum(
+            jnp.where(masks.excluded_material, cell_current, 0.0)
+        ),
         total=jnp.sum(cell_current),
     )
 

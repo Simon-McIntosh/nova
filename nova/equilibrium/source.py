@@ -17,16 +17,12 @@ plasma-current target; the map records
 :attr:`NormalisationPolicy.DECLARED_SCALAR_CURRENT` and the eliminated common
 amplitude without changing these immutable profile functions.
 
-Source support is domain qualified. A closure declared on
-:class:`~nova.equilibrium.domain.PlasmaDomain.CORE` drives current on the
-axis-connected closed surfaces and nowhere else, so no current can appear in
-the scrape-off layer, the private-flux region or the excluded material. An
-open region carries current only when a continuation is declared on it, and
-each open domain carries its own: the common scrape-off layer and the
-private-flux region are separate physical contracts, never one extrapolation
-applied twice. :mod:`nova.equilibrium.continuation` builds those closures;
-this module holds the declaration, the receipt and the domain-selected
-evaluation.
+Source support is flux and topology qualified. The common scrape-off
+continuation is selected by the flux value at the evaluation point, inside the
+material and outside the topological private mask. The private-flux branch
+stays topological because its flux range overlaps the confined profile.
+:mod:`nova.equilibrium.continuation` builds those closures; this module holds
+the declaration, receipt and evaluation-time selection.
 
 Every profile evaluation is written against major radius as well as
 normalised flux. Under a static closure pressure is a flux function and the
@@ -75,11 +71,31 @@ __all__ = [
     "undeclared_continuation_record",
 ]
 
-#: Open domains a continuation may be declared on, in argument order.
-OPEN_DOMAINS: tuple[tuple[str, PlasmaDomain], ...] = (
-    ("common_sol", PlasmaDomain.COMMON_SOL),
-    ("private_flux", PlasmaDomain.PRIVATE_FLUX),
-)
+#: Open-profile fields in receipt and constructor order.
+_OPEN_PROFILE_FIELDS = ("common_sol", "private_flux")
+
+
+@dataclass(frozen=True)
+class _FluxSelectedProfile:
+    """Select confined or open-field-line current at each flux evaluation."""
+
+    confined: DomainProfile
+    open_field_line: DomainProfile | None
+
+    def current_density(self, radius: jax.Array, psi_norm: jax.Array) -> jax.Array:
+        """Return current density with the separatrix tested pointwise."""
+
+        flux = jnp.asarray(psi_norm)
+        open_support = flux > 1.0
+        confined = self.confined.current_density(
+            radius, jnp.where(open_support, 1.0, flux)
+        )
+        if self.open_field_line is None:
+            return jnp.where(open_support, 0.0, confined)
+        open_density = self.open_field_line.current_density(
+            radius, jnp.where(open_support, flux, 1.0)
+        )
+        return jnp.where(open_support, open_density, confined)
 
 
 class NormalisationPolicy(IntEnum):
@@ -493,7 +509,7 @@ class ForwardSource:
                 "exactly; a declared scalar amplitude closed by a target "
                 "plasma current is a separate normalisation policy"
             )
-        for name, domain in OPEN_DOMAINS:
+        for name in _OPEN_PROFILE_FIELDS:
             profile = getattr(self, name)
             if profile is None:
                 continue
@@ -507,7 +523,8 @@ class ForwardSource:
                     "declares none, and an absolute source without a "
                     "continuation drives the core alone"
                 )
-            if int(record.domain) != int(domain):
+            expected_outward = -1.0 if name == "private_flux" else 1.0
+            if float(profile.outward) != expected_outward:
                 raise ValueError(
                     f"the {name} argument carries a continuation declared on "
                     f"{record.domain_name}; the separatrix distance runs the "
@@ -528,15 +545,6 @@ class ForwardSource:
             return absolute_normalisation_record(dtype)
         return declared_scalar_current_record(amplitude, dtype)
 
-    @property
-    def open_profiles(self) -> tuple[tuple[PlasmaDomain, DomainProfile], ...]:
-        """Return the declared open-region closures with their domains."""
-        return tuple(
-            (domain, getattr(self, name))
-            for name, domain in OPEN_DOMAINS
-            if getattr(self, name) is not None
-        )
-
     def rotation_record(self, radius: jax.Array, masks: DomainMasks) -> RotationRecord:
         """Return the rotation receipt of the declared core closure."""
         return self.core.rotation_record(radius, masks)
@@ -550,15 +558,17 @@ class ForwardSource:
                     if getattr(self, name) is None
                     else getattr(self, name).continuation_record(dtype)
                 )
-                for name, _ in OPEN_DOMAINS
+                for name in _OPEN_PROFILE_FIELDS
             }
         )
 
     def declared_support(self, masks: DomainMasks) -> jax.Array:
         """Return the mask of cells any declared closure drives current on."""
-        support = masks.core
-        for domain, _ in self.open_profiles:
-            support = support | masks.mask(domain)
+        support = masks.confined_profile
+        if self.common_sol is not None:
+            support = support | masks.open_field_line
+        if self.private_flux is not None:
+            support = support | masks.private_flux
         return support
 
     def current_density(self, radius: jax.Array, masks: DomainMasks) -> jax.Array:
@@ -576,18 +586,17 @@ class ForwardSource:
         everything downstream of it. The open closures are held at the
         separatrix, which is inside the support of either branch.
         """
+        profile = _FluxSelectedProfile(self.core, self.common_sol)
         density = jnp.where(
-            masks.core,
-            self.core.current_density(
-                radius, jnp.where(masks.core, masks.psi_norm, 0.0)
-            ),
+            masks.profile_participation,
+            profile.current_density(radius, masks.psi_norm),
             0.0,
         )
-        for domain, profile in self.open_profiles:
-            selection = masks.mask(domain)
+        if self.private_flux is not None:
+            selection = masks.private_flux
             density = density + jnp.where(
                 selection,
-                profile.current_density(
+                self.private_flux.current_density(
                     radius, jnp.where(selection, masks.psi_norm, 1.0)
                 ),
                 0.0,
@@ -599,10 +608,9 @@ class ForwardSource:
     ) -> jax.Array:
         """Return per-cell toroidal current [A] on profile-owned support.
 
-        Domain labels choose the declared closure while profile participation
-        is the sole geometric support. A participating cell with no declared
-        closure receives zero from :meth:`current_density`; shadow and
-        excluded-material cells are removed explicitly.
+        Flux chooses the confined or common-SOL closure while profile
+        participation is the geometric support. Shadow and excluded-material
+        cells are removed explicitly.
         """
         return jnp.where(
             masks.profile_participation,
@@ -620,38 +628,31 @@ class ForwardSource:
     ) -> CellCurrentMoments:
         """Return profile-owned current moments without a boundary clip.
 
-        The static material boundary and the saddle-aware private-flux shadow
-        are the only geometric participation decisions. Achieved domain labels
-        select the core or declared common-SOL flux function, and the latter's
-        declared support owns where its exterior current becomes exactly zero.
+        The static material boundary and saddle-aware private-flux shadow are
+        the only geometric participation decisions. When an open-field-line
+        continuation is declared, a composite profile tests normalised flux at
+        every quadrature evaluation, so a cell straddling the separatrix
+        integrates both profiles without a frozen whole-cell category. With no
+        continuation, the supplied profile path remains bit-identical.
         """
 
-        core = support_moments(
-            self.core,
+        profile = (
+            self.core
+            if self.common_sol is None
+            else _FluxSelectedProfile(self.core, self.common_sol)
+        )
+        selected = support_moments(
+            profile,
             masks.psi_norm,
             sample_flux,
             profile_support,
         )
         total = jnp.stack(
             CellCurrentMoments(
-                *(jnp.where(masks.profile_participation, entry, 0.0) for entry in core)
+                *(
+                    jnp.where(masks.profile_participation, entry, 0.0)
+                    for entry in selected
+                )
             )
-        )
-        if self.common_sol is None:
-            return CellCurrentMoments(*total)
-
-        common = support_moments(
-            self.common_sol,
-            masks.psi_norm,
-            sample_flux,
-            profile_support,
-        )
-        record = self.common_sol.continuation_record(masks.psi_norm.dtype)
-        common_distance = jnp.maximum(masks.psi_norm - 1.0, 0.0)
-        common_selection = masks.common_sol & (common_distance <= record.support)
-        total = jnp.where(
-            common_selection[None, :],
-            jnp.stack(common),
-            jnp.where(masks.common_sol[None, :], 0.0, total),
         )
         return CellCurrentMoments(*total)

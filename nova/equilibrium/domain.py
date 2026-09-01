@@ -1,4 +1,4 @@
-r"""Topology-qualified plasma domain labels.
+r"""Topology-qualified plasma component labels and solve support.
 
 A normalised-flux range is not a domain. In a diverted configuration the
 private-flux region carries :math:`\psi_N < 1` exactly like the core, and the
@@ -7,8 +7,8 @@ outside the material boundary. Selecting a source domain from
 :math:`\psi_N > 1` alone therefore either misses the private-flux branch or
 sweeps in cells that no plasma closure owns.
 
-The labels below split the flux map on the two properties that actually
-distinguish the branches: whether a cell lies inside the material boundary,
+The diagnostic labels below split the flux map on the two properties that
+distinguish the components: whether a cell lies inside the material boundary,
 and whether it is connected to the magnetic axis. With the closed test
 :math:`\psi_N \le 1` written ``closed`` and the axis-connected test written
 ``connected``, the partition is exact and total:
@@ -34,11 +34,13 @@ where it guards cells straddling the edge; it is not a statement about where
 the plasma ends, and using one to partition domains shaves the plasma's outer
 edge into the scrape-off layer.
 
-The open branch is consequently strict. ``COMMON_SOL`` is :math:`\psi_N > 1`
-inside the material — a centroid outside the boundary curve. ``PRIVATE_FLUX``
-is what the CONNECTIVITY test removes from the closed set: geometrically
-outside the boundary curve although its flux value sits below one, which is
-exactly why the connectivity test and not the flux value decides it.
+The open-field-line source support is consequently strict and live:
+:math:`\psi_N > 1` inside the material, excluding the topological private-flux
+mask.  It is derived at every profile evaluation rather than read from the
+``COMMON_SOL`` diagnostic label. ``PRIVATE_FLUX`` remains what the CONNECTIVITY
+test removes from the closed set: geometrically outside the boundary curve
+although its flux value sits below one, which is exactly why connectivity and
+not flux value decides it.
 """
 
 from __future__ import annotations
@@ -86,8 +88,24 @@ class DomainMasks(NamedTuple):
 
     @property
     def common_sol(self) -> jax.Array:
-        """Return the open scrape-off mask inside the material boundary."""
+        """Return the diagnostic common-SOL component label."""
         return self.label == PlasmaDomain.COMMON_SOL
+
+    @property
+    def open_field_line(self) -> jax.Array:
+        """Return live open-field-line support from flux and topology.
+
+        Flux chooses the exterior side of the separatrix at evaluation time.
+        The material and private-flux masks remain topological authorities.
+        """
+
+        return (self.psi_norm > 1.0) & ~self.private_flux & ~self.excluded_material
+
+    @property
+    def confined_profile(self) -> jax.Array:
+        """Return live confined-profile support complementary to the SOL."""
+
+        return self.profile_participation & ~self.open_field_line
 
     @property
     def private_flux(self) -> jax.Array:

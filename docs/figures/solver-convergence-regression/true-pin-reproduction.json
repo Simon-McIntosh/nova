@@ -1,0 +1,274 @@
+{
+  "allocation": {
+    "allocated_cpus": 4,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3",
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1260963,
+    "job_name": "true-pin-reproduction",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "21978/35 pure": {
+      "committed": {
+        "converged": false,
+        "selected_saddle_m": [
+          0.5628646606371921,
+          1.2634878586583973
+        ],
+        "terminal_residual": 0.002450860011177843,
+        "termination_reason": "active_set_cycle_detected"
+      },
+      "comparison": {
+        "convergence_matches": true,
+        "criteria": {
+          "convergence_flag_exact": true,
+          "residual": "math.isclose(rel_tol=1e-9, abs_tol=1e-14)",
+          "selected_saddle_distance_m_max": 1e-09,
+          "termination_reason_exact": true
+        },
+        "reproduced": true,
+        "residual_matches": true,
+        "selected_saddle_absolute_distance_m": 9.155133597044475e-16,
+        "selected_saddle_matches": true,
+        "terminal_residual_absolute_difference": 2.207435623180487e-16,
+        "termination_reason_matches": true
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      },
+      "scheduler": {
+        "elapsed": "00:06:03",
+        "exit_marker": 0,
+        "job_id": 1260963,
+        "node": "98dci4-gpu-0003"
+      },
+      "solve": {
+        "active_set_mask_differences": [
+          31,
+          29,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554852568868313,
+          0.0033463831584596617,
+          0.002674636272346104,
+          0.0024508600111780637
+        ],
+        "converged": false,
+        "selected_saddle_m": [
+          0.5628646606371923,
+          1.2634878586583964
+        ],
+        "solve_wall_seconds_including_compilation": 131.34186801686883,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.0024508600111780637,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4
+      }
+    },
+    "22086/43 pure": {
+      "committed": {
+        "converged": true,
+        "selected_saddle_m": [
+          0.5904799259797128,
+          1.2250633080352826
+        ],
+        "terminal_residual": 6.079771712859504e-12,
+        "termination_reason": "converged"
+      },
+      "comparison": {
+        "convergence_matches": true,
+        "criteria": {
+          "convergence_flag_exact": true,
+          "residual": "math.isclose(rel_tol=1e-9, abs_tol=1e-14)",
+          "selected_saddle_distance_m_max": 1e-09,
+          "termination_reason_exact": true
+        },
+        "reproduced": true,
+        "residual_matches": true,
+        "selected_saddle_absolute_distance_m": 9.992007221626409e-16,
+        "selected_saddle_matches": true,
+        "terminal_residual_absolute_difference": 1.5684298156321294e-16,
+        "termination_reason_matches": true
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      },
+      "scheduler": {
+        "elapsed": "00:06:03",
+        "exit_marker": 0,
+        "job_id": 1260963,
+        "node": "98dci4-gpu-0003"
+      },
+      "solve": {
+        "active_set_mask_differences": [
+          38,
+          23,
+          0,
+          1,
+          22,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976455689734121,
+          0.0034925711304508644,
+          0.002226786846263745,
+          0.002824543671089115,
+          0.0017686695998067922,
+          0.0011202504574493964,
+          0.0007158519978676796,
+          0.00046228423444706694,
+          0.00029898570793831397,
+          0.00019330286566941876,
+          0.00012525252154434573,
+          6.079614869877941e-12
+        ],
+        "converged": true,
+        "selected_saddle_m": [
+          0.5904799259797138,
+          1.2250633080352826
+        ],
+        "solve_wall_seconds_including_compilation": 118.50150795653462,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 6.079614869877941e-12,
+        "termination_reason": "converged",
+        "trip_count": 12
+      }
+    }
+  },
+  "assigned_worktree_nova_diff_stat": "",
+  "candidate_window": {
+    "command": "git log --format=%H%x09%s d47f7cd1ce1c72138b6691c559bbf1be0bcd465e..a4bec44f5cbf80ad5e210c01c984ac8d02a89de9 -- nova/equilibrium",
+    "commits": [
+      {
+        "sha": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+        "subject": "fix(equilibrium): evaluate candidates on induced masks"
+      },
+      {
+        "sha": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+        "subject": "fix(equilibrium): select candidates by model trust"
+      },
+      {
+        "sha": "9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8",
+        "subject": "fix(equilibrium): continue globalization across settled masks"
+      },
+      {
+        "sha": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+        "subject": "fix(equilibrium): continue Newton states across settled masks"
+      },
+      {
+        "sha": "736e2553ffe18f0e146809ca984a1cf3e4647714",
+        "subject": "fix(equilibrium): retain settled active-set best states"
+      },
+      {
+        "sha": "7fc24f01064d37633ed3424f9850aa763ad38f1b",
+        "subject": "feat(equilibrium): record inner solve iterations"
+      },
+      {
+        "sha": "420feb23dc040ae1d0a2f874cff4e93c8f023030",
+        "subject": "feat(equilibrium): stop stagnant active sets"
+      },
+      {
+        "sha": "ebb658bd0d6679bba604cef1e554c08d6a3a38ab",
+        "subject": "feat(equilibrium): report height reference eligibility"
+      },
+      {
+        "sha": "ce686206627a20b2797b70145859a6a42350c90c",
+        "subject": "fix(equilibrium): guard wall height references"
+      },
+      {
+        "sha": "6f08fb19fa4790449d9ff2b652ea488f6ccf9d53",
+        "subject": "feat(equilibrium): expose active-set trip telemetry"
+      }
+    ],
+    "count": 10,
+    "verbatim": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b\tfix(equilibrium): evaluate candidates on induced masks\n565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed\tfix(equilibrium): select candidates by model trust\n9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8\tfix(equilibrium): continue globalization across settled masks\n4ee90ece25ad47cc655dc4531249da24d13763e1\tfix(equilibrium): continue Newton states across settled masks\n736e2553ffe18f0e146809ca984a1cf3e4647714\tfix(equilibrium): retain settled active-set best states\n7fc24f01064d37633ed3424f9850aa763ad38f1b\tfeat(equilibrium): record inner solve iterations\n420feb23dc040ae1d0a2f874cff4e93c8f023030\tfeat(equilibrium): stop stagnant active sets\nebb658bd0d6679bba604cef1e554c08d6a3a38ab\tfeat(equilibrium): report height reference eligibility\nce686206627a20b2797b70145859a6a42350c90c\tfix(equilibrium): guard wall height references\n6f08fb19fa4790449d9ff2b652ea488f6ccf9d53\tfeat(equilibrium): expose active-set trip telemetry"
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.005447586067020893
+  },
+  "execution_contract": {
+    "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T200325049710-scr-true-pin-reproduction/raw/d47f7cd1-h200.json",
+    "raw_capture_sha256": "d367b2fd1843bca390c3c98061d1077846a4ef6a4eac64438a5f8ab15ba5687e",
+    "solver_source_modified": false
+  },
+  "figure": "docs/figures/solver-convergence-regression/true-pin-reproduction.png",
+  "later_revision_histories": {
+    "cpu": [
+      0.004976455689733941,
+      0.0031314746103240894,
+      0.0019512703665675545,
+      0.0006652842022510561,
+      0.0004808521116040719,
+      0.00048023353539180223,
+      0.00048023353539180223
+    ],
+    "gpu": [
+      0.004976455689734301,
+      0.0031314746103240005,
+      0.0019512703665675098,
+      0.000665284202251045,
+      0.0004808521116039148,
+      0.000480233535391836,
+      0.000480233535391836
+    ],
+    "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+    "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+    "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+  },
+  "receipt": "true bank-revision MAST reproduction",
+  "source": {
+    "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+    "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-true-pin-reproduction-shadow",
+    "solver_source_modified": false
+  }
+}

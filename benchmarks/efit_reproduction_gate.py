@@ -34,6 +34,10 @@ from benchmarks.mast_response_carrier_warm import (
 )
 from benchmarks.mast_response_carrier_warm import load_carrier
 from nova.equilibrium.topology import TopologyClass
+from nova.jax.config import (
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 matplotlib.use("Agg")
 
@@ -58,6 +62,45 @@ MAST_FLOOR = 0.0116147034
 DIIID_FLOOR = 0.0832365867
 MARGINAL_MAST_REFERENCES = {(21978, 35), (22086, 43)}
 HEARTBEAT_SECONDS = 30.0
+
+
+def _cache_monitor() -> dict[str, float | int]:
+    """Count persistent-cache events without inferring hits from elapsed time."""
+
+    import jax.monitoring as monitoring
+
+    events: dict[str, float | int] = {"hits": 0, "saved_seconds": 0.0}
+
+    def hit(event: str, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/cache_hits":
+            events["hits"] = int(events["hits"]) + 1
+
+    def saved(event: str, duration_secs: float, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/compile_time_saved_sec":
+            events["saved_seconds"] = float(events["saved_seconds"]) + duration_secs
+
+    monitoring.register_event_listener(hit)
+    monitoring.register_event_duration_secs_listener(saved)
+    return events
+
+
+def _cache_snapshot(events: dict[str, float | int]) -> tuple[int, float]:
+    return int(events["hits"]), float(events["saved_seconds"])
+
+
+def _cache_frame_report(
+    events: dict[str, float | int], before: tuple[int, float]
+) -> dict[str, Any]:
+    """Report cache reuse observed while compiling one frame."""
+
+    hits = int(events["hits"]) - before[0]
+    saved_seconds = float(events["saved_seconds"]) - before[1]
+    return {
+        "status": "hit" if hits else "miss",
+        "hit_count": hits,
+        "compile_time_saved_seconds": saved_seconds,
+        "evidence": "JAX persistent compilation-cache monitoring events",
+    }
 
 
 @contextmanager
@@ -142,6 +185,8 @@ def _schema() -> dict[str, Any]:
             "label_gs_inconsistency",
             "solver_qualification",
             "compile_warm_wall_seconds",
+            "stage_timings_seconds",
+            "compile_cache",
             "passes",
             "figure_src",
         ],
@@ -153,6 +198,19 @@ def _schema() -> dict[str, Any]:
             "label_gs_inconsistency": term,
             "solver_qualification": {"type": "object"},
             "compile_warm_wall_seconds": {"type": "number", "minimum": 0},
+            "stage_timings_seconds": {"type": "object"},
+            "compile_cache": {
+                "type": "object",
+                "required": ["status", "hit_count", "compile_time_saved_seconds"],
+                "properties": {
+                    "status": {"enum": ["hit", "miss"]},
+                    "hit_count": {"type": "integer", "minimum": 0},
+                    "compile_time_saved_seconds": {
+                        "type": "number",
+                        "minimum": 0,
+                    },
+                },
+            },
             "passes": {"type": "boolean"},
             "figure_src": {"type": "string", "pattern": "^/nova/figures/"},
         },
@@ -354,6 +412,7 @@ def _mast_rows(
     floor_fields: Any,
     backend: dict[str, Any],
     response_carrier: Path,
+    cache_events: dict[str, float | int],
     *,
     frame_limit: int | None = None,
 ) -> list[dict[str, Any]]:
@@ -379,7 +438,7 @@ def _mast_rows(
         response_cache, carrier = _persisted_mast_response_cache(response_carrier)
     rows = []
     for index, (selected_row, qualification) in enumerate(selected):
-        visible = index == 0
+        visible = True
         shot = int(selected_row["shot"])
         slice_index = int(selected_row["slice_index"])
         frame_label = f"MAST:{shot}/{slice_index}"
@@ -409,12 +468,14 @@ def _mast_rows(
             raise RuntimeError("the persisted MAST response carrier was not reused")
         reference = case["reference"]
         target_current = abs(float(reference["plasma_current_a"]))
+        cache_before = _cache_snapshot(cache_events)
         with _timed_stage(
             "jit_compile", stage_timings, frame=frame_label, visible=visible
         ):
             compiled_solve, initial = _compile_mast_branch(
                 passive_case, profile, target_current
             )
+        compile_cache = _cache_frame_report(cache_events, cache_before)
         with _timed_stage(
             "first_solve", stage_timings, frame=frame_label, visible=visible
         ):
@@ -491,6 +552,7 @@ def _mast_rows(
                 "solver_qualification": solver_qualification,
                 "compile_warm_wall_seconds": elapsed,
                 "stage_timings_seconds": stage_timings,
+                "compile_cache": compile_cache,
                 "persisted_response_carrier": carrier,
                 "passes": passes,
                 "pass_rule": (
@@ -502,7 +564,9 @@ def _mast_rows(
         )
         print(
             f"MAST {shot}/{slice_index} wall={elapsed:.3f}s "
-            f"solve={value:.10f} floor={MAST_FLOOR:.10f} pass={passes}",
+            f"solve={value:.10f} floor={MAST_FLOOR:.10f} pass={passes} "
+            f"compile_cache={compile_cache['status']} "
+            f"cache_hits={compile_cache['hit_count']}",
             flush=True,
         )
     return rows
@@ -513,49 +577,64 @@ def _diiid_rows(
     floor: dict[str, Any],
     floor_fields: Any,
     machine_artifact_cache: Path,
+    cache_events: dict[str, float | int],
 ) -> list[dict[str, Any]]:
     _use_diiid_machine_artifact_cache(machine_artifact_cache)
-    paths = sorted(diiid.DEFAULT_DATA.glob("*.parquet"))
-    selected = diiid.select_frames(
-        paths, diiid.EXECUTION_FRAME_COUNT, diiid.polarity_population()
-    )
+    shared_timings: dict[str, float] = {}
+    with _timed_stage(
+        "frame_selection", shared_timings, frame="DIII-D:first", visible=True
+    ):
+        paths = sorted(diiid.DEFAULT_DATA.glob("*.parquet"))
+        selected = diiid.select_frames(
+            paths, diiid.EXECUTION_FRAME_COUNT, diiid.polarity_population()
+        )
     rows = []
-    for selected_frame in selected:
+    for index, selected_frame in enumerate(selected):
         started = time.perf_counter()
-        row = diiid._read(
-            selected_frame.path,
-            diiid._LABEL_COLUMNS
-            + diiid._GEOMETRY_COLUMNS
-            + diiid._CURRENT_COLUMNS
-            + diiid._PLASMA_CURRENT_COLUMNS,
-        )
-        row["_source_path"] = str(selected_frame.path)
-        result, fields = diiid._solve_frame_retaining_failure(
-            row,
-            selected_frame.frame,
-            diiid.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
-        )
-        unavailable = fields.get("plot_unavailable_reason")
-        if unavailable is not None:
-            raise RuntimeError(
-                f"DIII-D {result.shot}:{result.frame} has no scoreable field: "
-                f"{unavailable}"
+        frame_label = f"DIII-D:{Path(selected_frame.path).name}:{selected_frame.frame}"
+        stage_timings = dict(shared_timings) if index == 0 else {}
+        with _timed_stage("input_read", stage_timings, frame=frame_label, visible=True):
+            row = diiid._read(
+                selected_frame.path,
+                diiid._LABEL_COLUMNS
+                + diiid._GEOMETRY_COLUMNS
+                + diiid._CURRENT_COLUMNS
+                + diiid._PLASMA_CURRENT_COLUMNS,
             )
-        span = float(np.ptp(fields["labelled"]))
-        field = np.asarray(fields["difference"], dtype=np.float64) / span
-        value = float(result.metrics.interior_fractional_rms)
+            row["_source_path"] = str(selected_frame.path)
+        cache_before = _cache_snapshot(cache_events)
+        with _timed_stage(
+            "production_solve", stage_timings, frame=frame_label, visible=True
+        ):
+            result, fields = diiid._solve_frame_retaining_failure(
+                row,
+                selected_frame.frame,
+                diiid.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+            )
+        compile_cache = _cache_frame_report(cache_events, cache_before)
+        with _timed_stage("comparison", stage_timings, frame=frame_label, visible=True):
+            unavailable = fields.get("plot_unavailable_reason")
+            if unavailable is not None:
+                raise RuntimeError(
+                    f"DIII-D {result.shot}:{result.frame} has no scoreable field: "
+                    f"{unavailable}"
+                )
+            span = float(np.ptp(fields["labelled"]))
+            field = np.asarray(fields["difference"], dtype=np.float64) / span
+            value = float(result.metrics.interior_fractional_rms)
         stem = Path(result.shot).stem
         name = f"diiid-{stem}-frame-{result.frame}.png"
-        _plot_pair(
-            output / name,
-            f"DIII-D {stem}:{result.frame}",
-            fields["radius"],
-            fields["height"],
-            field,
-            floor_fields["DIII_D_1_radius"],
-            floor_fields["DIII_D_1_height"],
-            floor_fields["DIII_D_1_relative"],
-        )
+        with _timed_stage("figure", stage_timings, frame=frame_label, visible=True):
+            _plot_pair(
+                output / name,
+                f"DIII-D {stem}:{result.frame}",
+                fields["radius"],
+                fields["height"],
+                field,
+                floor_fields["DIII_D_1_radius"],
+                floor_fields["DIII_D_1_height"],
+                floor_fields["DIII_D_1_relative"],
+            )
         elapsed = time.perf_counter() - started
         passes = bool(result.converged and value <= DIIID_FLOOR)
         rows.append(
@@ -595,6 +674,8 @@ def _diiid_rows(
                     "marginal_solver_basin": False,
                 },
                 "compile_warm_wall_seconds": elapsed,
+                "stage_timings_seconds": stage_timings,
+                "compile_cache": compile_cache,
                 "passes": passes,
                 "pass_rule": (
                     "solver converged and solve_against_label.value <= "
@@ -605,7 +686,9 @@ def _diiid_rows(
         )
         print(
             f"DIII-D {result.shot}:{result.frame} wall={elapsed:.3f}s "
-            f"solve={value:.10f} floor={DIIID_FLOOR:.10f} pass={passes}",
+            f"solve={value:.10f} floor={DIIID_FLOOR:.10f} pass={passes} "
+            f"compile_cache={compile_cache['status']} "
+            f"cache_hits={compile_cache['hit_count']}",
             flush=True,
         )
     return rows
@@ -621,6 +704,15 @@ def run(
     diiid_machine_artifact_cache: Path,
 ) -> dict[str, Any]:
     mast.configure_dtypes()
+    cache_events = _cache_monitor()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    print(
+        f"EFIT_COMPILATION_CACHE directory={compilation_cache.directory} ",
+        f"version={compilation_cache.version_key}",
+        flush=True,
+    )
     floor_rows, fields = _floor_inputs(zero_receipt, zero_fields)
     backend = _backend_qualification(backend_receipt)
     rows = _mast_rows(
@@ -629,6 +721,7 @@ def run(
         fields,
         backend,
         mast_response_carrier,
+        cache_events,
     )
     rows.extend(
         _diiid_rows(
@@ -636,6 +729,7 @@ def run(
             floor_rows["DIII-D"],
             fields,
             diiid_machine_artifact_cache,
+            cache_events,
         )
     )
     allocation = {
@@ -657,9 +751,17 @@ def run(
         "execution": {
             "allocation": allocation,
             "compile_policy": (
-                "one process; equal-shaped frames retain JAX compilations; "
+                "one process with the explicit versioned persistent JAX compilation "
+                "cache; per-frame monitoring events distinguish hits from misses; "
                 "recorded wall is per complete frame after preceding compilation state"
             ),
+            "persistent_compilation_cache": {
+                **compilation_cache.receipt(),
+                "observed_hits": int(cache_events["hits"]),
+                "observed_compile_time_saved_seconds": float(
+                    cache_events["saved_seconds"]
+                ),
+            },
             "solver_source_modified": False,
             "source_commit": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], text=True
@@ -748,6 +850,7 @@ def main() -> None:
             fields,
             qualification,
             arguments.mast_response_carrier,
+            {"hits": 0, "saved_seconds": 0.0},
             frame_limit=1,
         )
         row = rows[0]

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:52:03",
+  "updated": "2026-09-01T23:09:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -344,6 +344,15 @@
         "created": "2026-08-16"
       },
       {
+        "id": "cpu-viability",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "criteria-scout",
         "harness": "codex",
         "role": "implement",
@@ -542,9 +551,11 @@
         "id": "efit-reproduction",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e8a-a85b-78c0-a254-9f840be8d0b7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e8a-a85b-78c0-a254-9f840be8d0b7"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1503,6 +1514,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "stall-remedy-krylov",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "stall-witness",
@@ -69589,9 +69609,112 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T204709093064-scr-root-cause-reading",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-root-cause-reading",
+        "node_definition": {
+          "done_when": "docs/figures/solver-convergence-regression/root-cause.json names at least one commit plus function for each of the two behavioural differences with the quoted hunk, records the residual history, mask differences, termination reason, trip count, SLURM job for every confirming re-solve (at most two), states the defect-or-policy verdict in one sentence, ranks the remedy rungs with a one-line reason each, root-cause.png plots every measured history on one log axis beside the banked old plus new histories, git diff --stat shows no change under nova/ in the assigned worktree",
+          "estimated_hours": 2.0,
+          "goal": "The root-cause receipt docs/figures/solver-convergence-regression/root-cause.json (with figure root-cause.png) that names, by targeted reading of the ten nova/equilibrium/fixed_point.py commits in git log d47f7cd1..a4bec44f against the two banked 22086/43 pure histories in true-pin-reproduction.json (the old history diverges from the new at trip 2, 3.493e-3 versus 3.131e-3, re-opens the mask at trip 4 by 1 cell plus at trip 5 by 22 cells, contracts to 6.08e-12 at trip 12, while the new history holds the trip-3 mask, plateaus at 4.80e-4, stops at trip 7), the specific mechanism or mechanisms that change the trip-2 Newton promotion as well as prevent the trip-4 to trip-5 mask re-opening, quoting the responsible hunks by commit plus function, confirmed by at most two re-solves through benchmarks/bank_revision_reproduction.py from detached shadow worktrees at named intermediate commits chosen by the reading (one reserved H200, 4 CPUs, JAX_PLATFORMS=cuda,cpu, about 6 minutes each), each re-solve recorded with its residual history, mask differences, termination, SLURM evidence, together with a plain statement of whether the new behaviour is a defect (a promotion the old acceptance would have refused, or a refusal the old code would have accepted) or a deliberate policy consequence, with a ranking of the s3 stall-remedy ladder rungs the mechanism makes most promising, with no solver source modified anywhere",
+          "id": "scr-root-cause-reading",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/solver-convergence-regression/root-cause.json",
+            "docs/figures/solver-convergence-regression/root-cause.png",
+            "benchmarks/bank_revision_reproduction.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:47:17Z",
+        "completed_at": "2026-09-01T21:06:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1176,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1176,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e3269c62ab4be06c3c2286e0c0ba7ef60ed2d00d",
+        "commits": [
+          "1926a170a5684c62ca09ea929bd9bb983e38095d"
+        ],
+        "changed_lines": {
+          "added": 965,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/bank_revision_reproduction.py root-cause check (see check.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/logs/check.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 10294784,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 10559363,
+            "output_tokens": 643,
+            "output_tokens_cumulative": 35676,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 9186
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1270
+    "_version": 1274
   }
 }

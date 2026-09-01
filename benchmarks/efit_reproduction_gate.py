@@ -395,7 +395,6 @@ def _mast_rows(
                 mast.SHOT_STORE,
                 selected_row,
                 qualification,
-                grid_points=mast.REFERENCE_NATIVE_GRID_POINTS,
             )
         with _timed_stage(
             "passive_inclusive_case",

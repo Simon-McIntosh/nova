@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T21:36:52",
+  "updated": "2026-09-01T21:49:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1111,9 +1111,11 @@
         "id": "pta-scout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e78-c120-7473-8f8b-338f4d923ee5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e78-c120-7473-8f8b-338f4d923ee5"
+        },
         "created": "2026-09-01"
       },
       {
@@ -68083,9 +68085,209 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T192933908171-accuracy-reuse-scout",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "",
+        "node": "accuracy-reuse-scout",
+        "node_definition": {
+          "done_when": "docs/research/forward-accuracy-reuse-map.html exists with reckon-type=research, an HTML table per capability area (a-d) listing at least every named candidate above plus what the capability-shaped search found, each row with path, symbol, fitness verdict, and uv run --project ~/Code/reckon reckon audit-doc on the file reports 0 ERRORs",
+          "estimated_hours": 0.5,
+          "goal": "A reuse map research document at docs/research/forward-accuracy-reuse-map.html (reckon-type=research, plan-informs the four forward-accuracy plans: solver-convergence-regression, gs-absolute-accuracy-gates, solver-trip-orchestration, millisecond-converged-solve) that inventories, capability-shaped rather than filename-shaped, the machinery already in reach across nova, imas-ambix (~/Code/imas-ambix) and reckon (~/Code/reckon) for four capability areas: (a) absolute error norms with convergence-order fits against exact Solovev references (tests/rotating_equilibrium_references.py, benchmarks/split_fit_jump_field.py, the split-spline basis, any existing resolution-ladder scripts), (b) EFIT reproduction scoring with the two-source split (existing GS-consistency scoring that produced the 0.083 DIII-D and 0.0116 MAST figures, comparator machinery on efit-baseline-demonstration), (c) fixed-point stall remedies for a near-unit eigenvalue of the outer map (existing GMRES depth controls, step_cap clipping, Anderson or deflation code, vertical-moment pins or continuation weights in nova/equilibrium/fixed_point.py and forward.py), (d) per-trip quantum restructuring (Newton re-linearization reuse, mask reconciliation) plus the referee test surface named in docs/figures/solver-trip-orchestration/settlement-histogram.json, each entry carrying module, symbol, test or receipt path with a one-line fitness verdict (fits whole, fits part, unfit with the reason)",
+          "id": "accuracy-reuse-scout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T192933908171-accuracy-reuse-scout/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/research/forward-accuracy-reuse-map.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "accuracy-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T19:29:42Z",
+        "completed_at": "2026-09-01T19:35:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 349,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 349,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ddceeef6814af497bbbe6e836e79f07ec7e560a6",
+        "commits": [
+          "3dc4bb57073bac5fd0ba575a1f64fb38f4f03f99"
+        ],
+        "changed_lines": {
+          "added": 112,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --project ~/Code/reckon reckon audit-doc docs/research/forward-accuracy-reuse-map.html",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T192933908171-accuracy-reuse-scout/gate-audit-doc.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T192933908171-accuracy-reuse-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e72-e37a-7ef2-9d7b-b28c6d08a1d4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2878208,
+            "cached_input_tokens_cumulative": 2878208,
+            "input_tokens": 3097369,
+            "input_tokens_cumulative": 3097369,
+            "output_tokens": 15957,
+            "output_tokens_cumulative": 15957,
+            "reasoning_output_tokens": 1300,
+            "reasoning_output_tokens_cumulative": 1300
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T193027784189-sto-evidence-record",
+        "plan": "solver-trip-orchestration",
+        "section": "",
+        "node": "sto-evidence-record",
+        "node_definition": {
+          "done_when": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/solver-trip-orchestration-landed.html reports 0 ERRORs, the document carries plan-evidence-for=solver-trip-orchestration, five anchored sections s1 through s5 each citing its receipt JSON path with headline numbers matching that JSON (383.5 s cold compile, 63.7 s cache-warm, 25.0 ms/member/trip = 12.61 + 12.34 + 0.048, MAST settled mean 2.0 trips, DIII-D 4.2, achieved 1.755 ms/slice at width 1024 vs 0.22-0.47 projection, strict-exit 1.163 ms/slice vs residual-window 0.915), and every embedded figure resolves to an existing file",
+          "estimated_hours": 1.0,
+          "goal": "The cumulative evidence record docs/evidence/archive/solver-trip-orchestration-landed.html (reckon-type=evidence, plan-evidence-for=solver-trip-orchestration, plan-informs=millisecond-converged-solve) with one stable anchor per landed section of the plan (compile cadence with the cache wiring, per-trip quantum decomposition, settlement census with the bank regeneration diff, settled-exit implementation with its out-of-band width-1024 measurement, qualified-suffix census with the two exit-window projections), each anchor embedding the existing receipt figures under docs/figures/solver-trip-orchestration/ by project-absolute src with a one-paragraph reading, HTML tables for every tabular verdict (never an image of a table), the numbers exactly as the receipt JSONs record them, and a closing open-record table naming what the residual-progress-exit-window decision must choose between with both projected ms/slice figures",
+          "id": "sto-evidence-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T193027784189-sto-evidence-record/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/evidence/archive/solver-trip-orchestration-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-evidence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T19:30:35Z",
+        "completed_at": "2026-09-01T19:35:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 314,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 314,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ddceeef6814af497bbbe6e836e79f07ec7e560a6",
+        "commits": [
+          "5d7e93e6cc25577f342417db8738f424c4aac024"
+        ],
+        "changed_lines": {
+          "added": 245,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/solver-trip-orchestration-landed.html",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T193027784189-sto-evidence-record/gate-audit-doc.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T193027784189-sto-evidence-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e73-b521-7390-93d2-3df0e88c6ec2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2245376,
+            "cached_input_tokens_cumulative": 2245376,
+            "input_tokens": 2394391,
+            "input_tokens_cumulative": 2394391,
+            "output_tokens": 14231,
+            "output_tokens_cumulative": 14231,
+            "reasoning_output_tokens": 1710,
+            "reasoning_output_tokens_cumulative": 1710
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1245
+    "_version": 1248
   }
 }

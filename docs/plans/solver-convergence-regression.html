@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-impl" content="0.333">
 </head>
 <body>
@@ -53,6 +53,17 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T163037816333-scr-mechanism" data-who="scr-mechanism" data-when="2026-09-01T17:46:05Z">
     <div class="r-comment-body"><p>Mechanism attributed: the refusal is the fixed-point residual threshold - 22086/43 pure mask settles at trip 3 but the residual plateaus at 4.8e-4, 48023x over the 1e-8 tolerance. Telemetry EXONERATED on GPU (compiled-out vs in bit-identical terminal states). Robust, not knife-edge: 5/5 perturbed seeds stagnate in a tight band; 21978/35 is basin-sensitive (4 cycles, 1 stagnation). HEAD genuinely cannot converge this arm; the pinned-revision discriminator now decides code-vs-backend</p></div>
 </div>
+<div class="r-comment" data-section="s1" data-id="c-20260901T1856-discriminator" data-who="reckon-ship-s18" data-when="2026-09-01T18:56:00+00:00">
+    <div class="r-comment-body">s1 discriminator consumed from the shadow score (run r-...-hdg-cache-replay, promoted): the pinned-revision GPU solve did NOT reproduce committed pure-arm convergence (active_set_stagnated, selected O/X residuals 4.5e-3 / 5.2e-3 m) while the mixed arm reproduced O/X to 8.53e-16 / 2.48e-16 m. The nonreproduction is therefore NOT isolated to HEAD code. Per the locked forensics-first decision, the backend-sensitivity reading is not yet accepted; the paired per-trip divergence forensics decides.</div>
+</div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="forensics-before-diagnosis" data-choice="forensics-first" data-by="Simon McIntosh" data-when="2026-09-01T18:55:00+00:00">
+    <p class="r-dec-q">forensics-before-diagnosis</p>
+    <p class="r-dec-ctx">The 2x2 matrix so far: committed-revision CPU converged (the committed bank), committed-revision GPU stagnates (pinned shadow run, O/X residuals 4.5-5.2 mm), HEAD GPU stagnates (mechanism probe, robust under seed perturbation), HEAD CPU unknown (3 h timeout). The mixed arm reproduces across backends to 8.5e-16 m, bounding the sensitivity to the pure arm&#x27;s margin.</p>
+    <p class="r-dec-rat">Lead decision 2026-09-01: do not accept the backend-sensitivity reading yet - run the paired instruction-level forensics first: same revision, same arm, both backends, per-trip state capture locating the first divergence trip and the operation that amplifies it, with the divergence growth curve plotted. The pinned-revision CPU leg also completes the 2x2 matrix and tests whether the CPU slowdown is HEAD-side.</p>
+    </div>
 </section>
 </main>
 </body>

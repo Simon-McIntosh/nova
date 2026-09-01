@@ -1,0 +1,34 @@
+{
+  "atomic_node_signed_flux_count": 1156,
+  "atomic_node_signed_flux_zero_count": 0,
+  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache_source_identity": "sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae",
+  "cache_staleness_check": "passed",
+  "cached_selected_x_candidate_index": 1,
+  "candidate_private_cell_counts": [
+    0,
+    42,
+    0,
+    0,
+    0
+  ],
+  "cell_count": 1089,
+  "committed_private_cells": 42,
+  "current_cell_polygon_capacity": 4,
+  "current_cell_polygon_count": 1089,
+  "falsifier": "fires on any nonzero private-mask symmetric difference",
+  "grid_shape": [
+    33,
+    33
+  ],
+  "operand": "MAST 22086/43 mixed",
+  "passes": true,
+  "per_candidate_domain_label_differences": 0,
+  "replayed_private_cells": 42,
+  "schema": "nova.topology-mask-cache-replay",
+  "selected_x_candidate_index": 1,
+  "selected_x_candidate_matches": true,
+  "selected_x_position_residual_m": 0.002882939403054736,
+  "symmetric_difference_private_mask_cells": 0,
+  "x_candidate_count": 5
+}

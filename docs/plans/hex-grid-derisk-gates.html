@@ -23,9 +23,9 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="13">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
-<meta name="plan-impl" content="0.667">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -85,6 +85,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260901T1058-s2-respec-clear" data-who="reckon-ship-s18" data-when="2026-09-01T10:58:00+00:00">
     <div class="r-comment-body">hdg-jump-field-gate landed — commit ead6db9a; re-specified gate s2-jump-field PASSED, falsifier CLEAR with a FINITE, THIN margin: at matched 16-dof on the jump-bearing diverted Solovev forward field (4037 plasma cells with finite edge density 4.05e5-4.58e5 A/m2, closed-form jump mu0*R*j_phi LCFS RMS 0.852 Wb/rad/m2), boundary-band Hessian RMS split 216.786 vs global C2 219.277 over 461 cells — advantage factor 1.0115x. Curvature truth analytic throughout (Solovev Hessian inside, automatic derivatives of the current-truncated vacuum field outside); continuation value/gradient RMS mismatches 1.47e-5 Wb/rad and 1.07e-3 Wb/rad/m; DeltaStar(psi)+mu0*R*j_phi exactly zero at probes. Receipt docs/figures/hex-cell-single-grid/jump-field-advantage.json + .png. READ HONESTLY: the split representation clears the preregistered falsifier (factor &gt; 1) but the 1.15% advantage at equal capacity is far from the prototype's circular e-15 — the split basis buys a real but small boundary-band gain at 16 dof on a maximal-step field; worth revisiting at production dof budgets during basis s3/s4.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T080826950119-hdg-cache-replay" data-who="hdg-cache-replay" data-when="2026-09-01T18:47:07Z">
+    <div class="r-comment-body"><p>S1 falsifier CLEAR: cache-only replay of MAST 22086/43 mixed reproduces the committed private mask exactly (0 of 42 differing cells, candidate index matched, zero label differences) with all four schema-4 fields banked at the pinned revision. REGRESSION LINE: the pinned-revision GPU solve does NOT reproduce committed pure-arm convergence (stagnated, O/X residuals 4.5-5.2 mm) while mixed reproduces to 8.5e-16 m - backend/runtime implicated, not HEAD code; refreshed bank rows leave the focused suite red (250/38 vs 277/20), preserved for lead adjudication before merge. Manifest SHA tail confabulated; promoted at rev-parsed tips</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260901T1850-s1-clear" data-who="reckon-ship-s18" data-when="2026-09-01T18:50:00+00:00">
+    <div class="r-comment-body">hdg-cache-replay landed — commits 33e55954/605cd720/20a377a7 (worktree, integration pending lead adjudication below); gate s1-mask-replay PASSED under the locked s1-scoring-route: the cache-only replay of MAST 22086/43 mixed from pinned-revision schema-4 operands reproduces the committed private mask EXACTLY — symmetric difference 0 of 42 cells, selected X-candidate index matched, zero per-candidate label differences — with per_cell_flux_values [1089], per_candidate_domain_labels [5,1089], current_cell_polygons [1089,4,2] and atomic_node_signed_flux [1156] banked and staleness-validated (receipt mask-replay-gate.json sha 049b4cf8, in the run worktree). ALL THREE FALSIFIERS ARE NOW CLEAR (s1 zero-diff, s2 jump-field 1.0115x, s3 H200 ladder sustained). TWO ITEMS AWAIT LEAD ADJUDICATION BEFORE THE PLAN SHIPS: (1) the pinned-revision GPU solve did NOT reproduce committed pure-arm convergence (stagnated, O/X residuals 4.5-5.2 mm) while the mixed arm reproduced to 8.5e-16 m — the nonreproduction is backend/runtime, not HEAD code, feeding solver-convergence-regression s1; (2) the worker's refreshed operand bank rows leave the focused suite red (partition counts 250/38 vs expected 277/20), so the worktree is NOT merged — the integration choice (merge harness and receipt while restoring the committed bank rows, versus adjudicating the bank refresh) is with the lead.</div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:41:12",
+  "updated": "2026-09-01T20:48:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -67837,9 +67837,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T080826950119-hdg-cache-replay",
+        "plan": "hex-grid-derisk-gates",
+        "section": "\u00a71",
+        "node": "hdg-cache-replay",
+        "node_definition": {
+          "done_when": "docs/figures/hex-cell-single-grid/mask-replay-gate.json records the symmetric-difference private-mask cell count for MAST 22086/43 mixed replayed from cache alone including the X-candidate selection step (the falsifier fires on ANY nonzero count; the prototype measured 0 of 42), the regenerated caches pass their own staleness checks, and uv run pytest tests/test_topology_domain_partition.py tests/test_topology_o_qualification.py stays green; if full-bank regeneration exceeds the fence, regenerate at minimum every MAST row needed for the replay and report the measured per-row cost for the remainder",
+          "estimated_hours": 6.0,
+          "goal": "The \u00a71 de-risk gate verdict: an independent replay of saddle-edge admissibility plus the MAST 22086/43 private mask from regenerated topology operand caches carrying the four missing fields (per_cell_flux_values, per_candidate_domain_labels, current_cell_polygons, atomic_node_signed_flux), extended only through the existing producers _mast_rows/_write_cache/_read_cache in docs/figures/topology-visual-corroboration/generate_topology_visuals.py per the reuse map at /home/ITER/mcintos/.config/reckon/crew/reports/nova/single-grid-reuse-map.md, replaying with the production authorities hex_edge_admissibility, label_saddle_aware_hex_connected_components and private_flux_mask",
+          "id": "hdg-cache-replay",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+          "plan": "hex-grid-derisk-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/",
+            "benchmarks/topology_mask_replay.py",
+            "docs/figures/hex-cell-single-grid/mask-replay-gate.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hdg-cache-replay",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T08:08:36Z",
+        "completed_at": "2026-09-01T18:47:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 38311,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "196588dd8f3130bc3e4261fa2348a0faf16a35b1",
+        "commits": [
+          "33e55954d03c71c60ca9b00f45ad5976b8a9bcec",
+          "605cd720cdda1a587c073207dbc4347ed932b829",
+          "20a377a7e8df270a57cf4d6d56659ef10765ccaf"
+        ],
+        "changed_lines": {
+          "added": 516,
+          "removed": 5,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/topology_mask_replay.py (one invocation, exit 0) + pinned _read_cache identity validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay/docs/figures/topology-visual-corroboration/mask-replay.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05c03-523a-71e2-bdbe-7d45af9b89b8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19438336,
+            "cached_input_tokens_cumulative": 19438336,
+            "input_tokens": 19725494,
+            "input_tokens_cumulative": 19725494,
+            "output_tokens": 33134,
+            "output_tokens_cumulative": 33134,
+            "reasoning_output_tokens": 6504,
+            "reasoning_output_tokens_cumulative": 6504
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 5,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/test_topology_domain_partition.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1238
+    "_version": 1239
   }
 }

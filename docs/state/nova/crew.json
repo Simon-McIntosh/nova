@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:30:25",
+  "updated": "2026-09-01T20:41:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -67731,9 +67731,115 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T183139584257-sto-suffix-census",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a75",
+        "node": "sto-suffix-census",
+        "node_definition": {
+          "done_when": "docs/figures/solver-trip-orchestration/suffix-census.json states the qualified-suffix fraction per bank with trip-of-first-qualification histograms, the representativeness verdict with the member composition of the width-1024 measurement named, and a per-criterion projected ms/slice table, closing with the policy question framed for the lead",
+          "estimated_hours": 4.0,
+          "goal": "The \u00a75 receipt answering why the settled exit never fires at production width: the qualified-no-op-suffix fraction across both committed banks (how many members ever satisfy the strict conjunction - zero mask difference, own-mask acceptance enabled, zero accepted Newton promotions, bit-identical retention - before trip 16, as distinct from the mask-only settlement the census counted), the workload-representativeness verdict for the width-1024 replicated-member measurement against bank-regeneration member diversity, and the projected speedup under each candidate exit criterion including a residual-progress-aware relaxation (stop when the retained best iterate stops improving beyond tolerance), computed from banked histories with no solver source modified and no implementation dispatched",
+          "id": "sto-suffix-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183139584257-sto-suffix-census/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/qualified_suffix_census.py",
+            "docs/figures/solver-trip-orchestration/suffix-census.json",
+            "docs/figures/solver-trip-orchestration/suffix-census.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-quantum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:31:45Z",
+        "completed_at": "2026-09-01T18:40:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 551,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 551,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "154334c6ea5b2b86324a9ebd69f9fa1948d0749b",
+        "commits": [
+          "759be066b75d3331f1c1148b7be161e481084fe2"
+        ],
+        "changed_lines": {
+          "added": 1238,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run python benchmarks/qualified_suffix_census.py + receipt assertions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183139584257-sto-suffix-census/validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183139584257-sto-suffix-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-dadf-7532-8d74-0d95eb74480f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1307136,
+            "cached_input_tokens_cumulative": 3345920,
+            "input_tokens": 1447891,
+            "input_tokens_cumulative": 3514406,
+            "output_tokens": 12804,
+            "output_tokens_cumulative": 22109,
+            "reasoning_output_tokens": 4667,
+            "reasoning_output_tokens_cumulative": 6870
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1237
+    "_version": 1238
   }
 }

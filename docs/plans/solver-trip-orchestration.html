@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="14">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="16">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -50,6 +50,11 @@
 <div class="r-dec" data-key="settled-exit-policy" data-choice="adopt-behind-test-surface" data-by="Simon McIntosh" data-when="2026-09-01T16:28:14+00:00">
     <p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3&#x27;s histogram and test surface are banked?</p>
     <p class="r-dec-rat">Lead decision 2026-09-01 on the full census: adopt the settled-early trip exit as a masked no-op continuation, gated on the seven named preservation tests (own-mask acceptance, best-iterate retention, paired bit-identity where the mask does not move) staying green plus a paired before/after bank comparison. Basis: MAST settles in mean 2.0 trips and DIII-D in 4.2 of 16, projecting 0.22-0.47 ms/slice - through the 1 ms target on both machines - and every post-settlement trip is provably a no-op today, so the exit removes work that changes nothing. The fixed-shorter-cap alternative was rejected as leaving 2-4x on the table and risking the 4-trip tail; deferral was rejected because the histogram shape is robust to the open drift question, whose arms are fenced.</p>
+    </div>
+<div class="r-dec" data-key="residual-progress-exit-window" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">residual-progress-exit-window</p>
+    <p class="r-dec-ctx">The suffix census (docs/figures/solver-trip-orchestration/suffix-census.json) gives the trade: the landed strict exit is semantically free and projects 1.163 ms/slice (1.504x) on the observable bank mix (DIII-D 5/5 qualify at trips 3-6, observable MAST arms keep improving, declared-bank lower bound 29.4%); a causal residual-progress window projects 0.915 ms/slice observed (through the 1 ms target) but tolerates an explicit state/residual error and requires paired semantic validation. Mask-only exit is inadmissible. The width-1024 replicated-state measurement cannot exhibit exit incidence and does not bear on this choice.</p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 
@@ -91,6 +96,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260901T162954085724-sto-settled-exit" data-who="sto-quantum" data-when="2026-09-01T18:30:12Z">
     <div class="r-comment-body"><p>Settled-exit implemented and proven safe (referees 12/12 both lanes, 1024/1024 bit-identical vs control, qualified no-op suffixes exact) but the production width-1024 workload never fires it: both arms ran mean 16.0 trips, speedup 0.997x, achieved 1.755 ms/slice vs the 0.22-0.47 projection - OUTSIDE BAND, stated honestly. Cause visible in the conjunction: members keep accepting Newton promotions after mask settlement on this workload; five DIII-D bank histories do carry qualified no-op suffixes. Follow-on folded as plan s5</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260901T183139584257-sto-suffix-census" data-who="sto-quantum" data-when="2026-09-01T18:40:56Z">
+    <div class="r-comment-body"><p>Qualified-suffix census: DIII-D 5/5 strict-qualify at trips 3-6, MAST 0/6 observable (improving residuals), combined 5/11 observable / 29.4% declared lower bound. The width-1024 measurement was one replicated synthetic state - timing-representative, exit-incidence-unrepresentative. Projections: strict semantics 1.163 ms/slice (1.504x) observed; residual-1% hindsight 0.915 observed but requires a lead-authorized causal progress window with tolerated error. Mask-only exit inadmissible</p></div>
 </div>
 </section>
 </main>

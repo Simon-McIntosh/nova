@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="solver-convergence-regression">
+<meta name="plan-title" content="Solver convergence regression — HEAD no longer reproduces the committed bank">
+<meta name="plan-summary" content="Own the drift: 22086/43 pure flipped converged to stagnated, 10/12 arms moved selected primaries, and the CPU lane stopped finishing at all.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="12.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,active-set,convergence,telemetry,retained-failures">
+<title>Solver convergence regression | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Solver convergence regression</h1>
+<p class="lede">Activated by lead ruling 2026-09-01 (the C option on the gate-scoring brief): current HEAD does not reproduce the committed twelve-arm MAST bank, and this plan owns that drift as first-class work. Measured symptoms, all from committed receipts: the H200 regeneration at HEAD moved selected primaries on <strong>10 of 12 arms</strong> and flipped <strong>22086/43 pure from converged to <code>active_set_stagnated</code></strong> (no predicted closed boundary, saddle delta 5.2 mm; per-row diff in <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code>); the settlement census independently corroborates the anomaly (zero-mask suffix from trip 3 without qualification, and 21978/35 pure cycling); and the CPU lane could not finish the same arm's pair in 3 h at 1.5-of-16-core utilisation (job 1260726; the CPU half is scoped separately on <code>cpu-solve-viability</code> and may share this root cause). The committed bank's revision predates months of solver work including the per-trip telemetry, so the diff conflates code drift with backend — separating those is this plan's first measurement.</p></header>
+
+<h2 id="s1">§1 — The discriminating datum arrives from the shadow score</h2>
+<p>The gates-§1 shadow score (locked as <code>s1-scoring-route</code> on <code>hex-grid-derisk-gates</code>) regenerates 22086/43 operands at the committed bank's recorded source revision on the H200. That run is this plan's backend/code discriminator for free: <strong>if the pinned-revision GPU solve reproduces the committed convergence and primaries, the drift is code between that revision and HEAD, not backend numerics</strong>; if it also stagnates, the backend is implicated and the committed bank's own reproducibility is in question. This section consumes that receipt — it dispatches nothing of its own.</p>
+
+<h2 id="s2">§2 — Mechanism at HEAD</h2>
+<p>From the already-banked telemetry, characterise <em>how</em> 22086/43 pure fails at HEAD before asking <em>which commit</em>: the trip history shows the active-set mask difference reaching zero by trip 3 yet the run terminating <code>active_set_stagnated</code> without qualification — so the mask settles and something else refuses convergence (residual criterion, own-mask acceptance, or the qualification seam). Attribute the refusal to its specific criterion from the retained residual histories, and run the cheap HEAD discriminators on the H200: telemetry compiled in versus out (the telemetry landed after the committed bank and its debug callbacks are the prime suspect for the CPU pathology; on GPU the question is whether its presence perturbs the compiled program), and the two anomalous arms re-solved at perturbed seeds to test basin sensitivity. Done-when: a receipt names the refusing criterion with the residual numbers, and states whether telemetry-out restores convergence.</p>
+
+<h2 id="s3">§3 — Root cause and repair</h2>
+<p>With §1's revision verdict and §2's mechanism, identify the responsible change by targeted reading of the named subsystem's history — never a git-bisect workflow — and repair it or, if the new behaviour is judged correct (the old convergence was spurious), re-adjudicate the committed bank with the lead. Acceptance either way: 22086/43 pure and 21978/35 pure reach an explained terminal state, the twelve-arm bank regenerates reproducibly, and the paired preservation tests stay green. A repair that touches solver semantics returns to the lead before merging.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="" data-resolved-by="">
+<h4 class="r-fu-title">Run the mechanism characterisation, then root-cause</h4>
+<div class="r-fu-body">§2 dispatches now (mechanism from banked telemetry plus HEAD discriminators); §1 consumes the shadow-score receipt when the gates plan lands it; §3 follows both.</div>
+<pre class="r-fu-prompt">/reckon-ship solver-convergence-regression</pre>
+</article>
+</section>
+</main>
+</body>
+</html>

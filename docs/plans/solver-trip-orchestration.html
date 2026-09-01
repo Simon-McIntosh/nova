@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="9">
-<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -39,11 +39,14 @@
 <h2 id="s3">§3 — Trip-count cut-through</h2>
 <p>The 1.75 ms floor stands only while every member pays 16 outer trips. The cut-through question: how many trips does the active set actually need before it settles? Mine the committed bank telemetry (per-trip mask-difference records, the retained per-iteration histories) for the settlement histogram across the MAST twelve-arm and DIII-D five-frame banks — if most members settle in far fewer than 16 trips, a settled-early exit (preserving the own-mask acceptance and best-iterate retention semantics exactly, proven by the existing paired bit-identity tests where the mask does not move) turns the mean trip count into the effective divisor. Fixed-shape constraints apply: an early exit must be a masked no-op continuation, not a dynamic shape. Done-when: the settlement histogram is banked per machine, the projected mean-trip ms/slice is stated against the 1 ms target, and the semantic-preservation test surface for a settled-exit policy is named. Any policy change to solver semantics is a lead decision — this section produces the numbers and the test plan, not the cutover.</p>
 
+<h2 id="s4">§4 — The settled-exit implementation</h2>
+<p><em>Added 2026-09-01 under the locked <code>settled-exit-policy</code> decision.</em> Implement the settled-early trip exit as a masked no-op continuation in the fixed-point trip loop: once a member's active-set mask difference has been zero for the qualifying suffix and its acceptance criteria hold, subsequent trips execute as masked no-ops for that member — fixed shapes preserved, no dynamic trip count, telemetry padding distinguishable from executed work exactly as today. The referee surface is untouchable: the seven preservation tests named in <code>settlement-histogram.json</code> (own-mask acceptance inertness and refusal, best-iterate retention, settled-mask retention, constant-mask smooth-solve bit identity, continuation on/off and eager/JIT bit identity) run unmodified and stay green. Acceptance beyond the referees: a paired before/after comparison on the committed banks — bit-identical results wherever the mask history settles identically, and the measured width-1024 ms/slice against the projected 0.22–0.47 band. Done-when: tests green (referees unmodified), the paired bank comparison banked, and the H200 throughput receipt states the achieved ms/slice beside the projection.</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="settled-exit-policy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="settled-exit-policy" data-choice="adopt-behind-test-surface" data-by="Simon McIntosh" data-when="2026-09-01T16:28:14+00:00">
     <p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3&#x27;s histogram and test surface are banked?</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-01 on the full census: adopt the settled-early trip exit as a masked no-op continuation, gated on the seven named preservation tests (own-mask acceptance, best-iterate retention, paired bit-identity where the mask does not move) staying green plus a paired before/after bank comparison. Basis: MAST settles in mean 2.0 trips and DIII-D in 4.2 of 16, projecting 0.22-0.47 ms/slice - through the 1 ms target on both machines - and every post-settlement trip is provably a no-op today, so the exit removes work that changes nothing. The fixed-shorter-cap alternative was rejected as leaving 2-4x on the table and risking the 4-trip tail; deferral was rejected because the histogram shape is robust to the open drift question, whose arms are fenced.</p>
     </div>
 </section>
 

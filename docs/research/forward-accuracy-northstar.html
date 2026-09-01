@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="forward-accuracy-northstar">
+<meta name="plan-title" content="North star — accurate, validated, millisecond Grad-Shafranov forwards">
+<meta name="plan-summary" content="Absolute forward-model accuracy certified against Solovev exact solutions and EFIT solves, with a single converged solve at order 1 ms.">
+<meta name="plan-tags" content="equilibrium,solovev,efit,h200,convergence,throughput">
+<meta name="plan-informs" content="gs-absolute-accuracy-gates,millisecond-converged-solve,solver-convergence-regression,solver-trip-orchestration">
+<meta name="plan-recorded-at" content="2026-09-01">
+<title>Forward accuracy north star | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<p class="eyebrow">North star · declared by the lead 2026-09-01</p>
+<h1>Accurate, validated, millisecond Grad–Shafranov forwards</h1>
+<p class="lede"><strong>Absolute and validated forward-model accuracy for the GS solve — certified against Solov'ev exact solutions and against EFIT solves — with a single converged solve at order 1 ms.</strong> Both halves are load-bearing: a fast solve that is not certified is a liability, and a certified solve that costs 400 ms per member cannot carry campaign-scale work. This page pins the statement to the measured state of 2026-09-01 so a relaunching session inherits the context, the numbers, and the traps rather than rediscovering them.</p>
+</header>
+
+<h2 id="s1">§1 — Where accuracy stands, measured</h2>
+<p><strong>Solov'ev side, strong and close.</strong> The production split-spline basis is shipped (<code>nova/linalg/split_spline.py</code>): all three static Solov'ev references reproduce with normalized Hessian RMS 1.2e-10 / 1.6e-9 / 9.4e-9 (bound 2e-8), interface gaps ≤ 5.3e-10 (value) and 1.8e-8 /m (gradient), and at true production capacity the split representation carries a 1.85× / 2.11× boundary-band curvature advantage on the 33×33 / 65×65 lattices (receipts under <code>docs/figures/hex-cell-single-grid/</code>). The jump-bearing diverted Solov'ev target — truncated source, closed-form curvature step ⟦Δ*ψ⟧ = μ₀R·j_φ(LCFS) — exists as a reusable validation instrument (<code>benchmarks/split_fit_jump_field.py</code>). What is missing is the <em>certificate</em>: preregistered absolute error norms across resolutions with a measured convergence order, banked once and pinned by regression tests.</p>
+<p><strong>EFIT side, conditional on one unresolved margin.</strong> The mask-replay gate proved the topology machinery exactly (0 of 42 differing private cells replayed from cached per-cell flux, X-candidate selection included), and the mixed 22086/43 arm reproduces across backends to 8.5e-16 m. But the pure arm exposed a genuine trust gap: the same committed revision that converged it on CPU stagnates it on the H200 (residual plateau 4.8e-4 against a 1e-8 tolerance, robust under seed perturbation, telemetry exonerated bit-for-bit), and at HEAD 10 of 12 bank arms moved their selected primaries. Until the paired per-trip backend-divergence forensics (in flight, <code>solver-convergence-regression</code>, lead-locked forensics-first) explains that margin, "absolute validated accuracy" cannot honestly be claimed for marginal diverted arms. The standing DIII-D caveat also carries: EFIT's own solution scores 0.083 under our operator at stride 1 (input-side, core-coherent) — a reproduction gate must separate our error from the label's.</p>
+
+<h2 id="s2">§2 — Where speed stands, measured</h2>
+<p>The H200 decomposition is complete and every number is banked. One full fixed-point map application costs <strong>0.784 ms/member</strong> at width 1024 (carrier 0.767, response 0.767, topology 1.030, zero host callbacks) — the map is already at the target. The full settled active-set solve costs 415.6 ms/member because every member pays 16 outer trips at 25.0 ms/trip, split almost evenly between mask reconciliation (12.61) and Newton re-linearization (12.34); host launches and preconditioner cost are exactly zero, so launch fusion buys nothing. The landed strict settled exit (bit-identical proven, referees green on CPU and CUDA) projects <strong>1.163 ms/slice (1.50×)</strong> on the observable bank mix — DIII-D members qualify at trips 3–6 — and the open <code>residual-progress-exit-window</code> decision projects <strong>0.915 ms/slice</strong> at the cost of an explicitly tolerated state/residual error. Mask-only exit is measured inadmissible. Compile is 383.5 s cold, 63.7 s cache-warm; the persistent compilation cache is wired as explicit per-recipe opt-in with exact-key hits on pure-data changes. Deeper cut-through past ~1 ms needs the per-trip quantum itself restructured (linearization reuse/hoist and cheaper reconciliation, ceilings ≈ 22 ms/slice each alone) on top of trip reduction.</p>
+
+<h2 id="s3">§3 — The traps a relaunching session must not rediscover</h2>
+<p>(1) <strong>An EFIT ψ map is a globally smooth representation</strong> — finite-difference curvature of it carries no physical interface jump; validate curvature claims on jump-bearing forward fields, never on EFIT maps (this fired a falsifier before it was understood). (2) <strong>Mask settlement is not solve completion</strong> — members keep accepting Newton promotions after the mask settles; only the strict two-conjunct qualification (zero mask difference AND acceptance criteria) is a safe exit. (3) <strong>A replicated single-state batch cannot exhibit exit incidence</strong> — throughput workloads must carry bank member diversity before exit gains are claimed. (4) <strong>The CPU lane is currently non-viable for full solves at HEAD</strong> (3 h without finishing one pair at 1.5-of-16-core utilisation; suspect ranked on <code>cpu-solve-viability</code>, backlog) — route solves to the H200 with <code>JAX_PLATFORMS=cuda,cpu</code> (the bare-cuda platform crashes the generator's debug callbacks). (5) <strong>Backend changes masquerade as physics</strong> on marginal arms — any cross-backend comparison of convergence or primaries needs the same-revision paired control. (6) <strong>Worker manifests can confabulate SHA tails</strong> — promote at the rev-parsed worktree tip. (7) The gates worktree (<code>s18-hexgrid/hdg-cache-replay</code>) holds the unmerged PASS receipt, refreshed schema-4 operands and pinned scaffolding — integration is lead-held; do not clean it up.</p>
+
+<h2 id="s4">§4 — The path, as sprint S19</h2>
+<p>Four plans in dependency order: <code>solver-convergence-regression</code> (explain the backend margin — the trust prerequisite), <code>gs-absolute-accuracy-gates</code> (the Solov'ev certificate and the EFIT reproduction gate, preregistered norms, machine-checkable artifact), <code>solver-trip-orchestration</code> (close the residual-progress window decision on its banked numbers), and <code>millisecond-converged-solve</code> (the certified end state: one converged-and-accurate solve at order 1 ms on real bank mixes, cache-warm). The S18 hex cutover programme (topology authority, single-grid cutover) remains its own track, held pending the lead's cutover ruling on the plotted evidence; its three falsifiers are clear on committed receipts.</p>
+</main>
+</body>
+</html>

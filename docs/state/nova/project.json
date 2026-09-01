@@ -1,10 +1,19 @@
 {
-  "updated": "2026-08-24T11:44:37+00:00",
+  "updated": "2026-09-01T19:07:04+00:00",
   "project": "nova",
   "doc": "project",
   "data": {
     "project": "nova",
-    "version": 0,
-    "type": "project"
+    "version": 1,
+    "type": "project",
+    "north_stars": [
+      {
+        "id": "ns-accurate-millisecond-gs",
+        "name": "Accurate, validated, millisecond forwards",
+        "statement": "Absolute, validated forward-model accuracy for the Grad-Shafranov solve - certified against exact Solovev solutions and measured EFIT solves - with a single converged solve at order 1 ms.",
+        "href": "/nova/research/forward-accuracy-northstar"
+      }
+    ],
+    "id": "project"
   }
 }

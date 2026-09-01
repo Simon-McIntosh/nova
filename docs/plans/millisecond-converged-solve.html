@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="millisecond-converged-solve">
+<meta name="plan-title" content="Millisecond converged solve — one certified solve at order 1 ms">
+<meta name="plan-summary" content="Carry the measured H200 decomposition to its end state: a single converged, certificate-accurate GS solve at order 1 ms per member on real bank mixes.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="24.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S19">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="h200,jax,throughput,timing,active-set,equilibrium">
+<meta name="plan-depends-on" content="solver-trip-orchestration,gs-absolute-accuracy-gates">
+<title>Millisecond converged solve | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Millisecond converged solve</h1>
+<p class="lede">The north star's second half (<a href="/nova/research/forward-accuracy-northstar">forward-accuracy-northstar</a>): a single <em>converged</em> solve at order 1 ms per member — converged meaning it satisfies the accuracy certificate, not merely terminates. Every input number is banked: the map application costs 0.784 ms/member at width 1024; the 25.0 ms per-trip quantum is mask reconciliation 12.61 + Newton re-linearization 12.34 with zero launch and preconditioner cost; the landed strict settled exit projects 1.163 ms/slice (1.50×) on the observable bank mix; the open <code>residual-progress-exit-window</code> decision projects 0.915 ms/slice with an explicitly tolerated error; the persistent compilation cache restores a fresh process in 63.7 s with exact-key hits on pure-data changes. Mask-only exit is measured inadmissible and a replicated single-state batch cannot exhibit exit incidence — throughput claims are made on real bank member mixes only.</p></header>
+
+<h2 id="s1">§1 — Close and implement the exit window</h2>
+<p>Bring the <code>residual-progress-exit-window</code> decision (open on <code>solver-trip-orchestration</code>, fully fed by the suffix census) to the lead with its tolerated-error framing, and implement whichever branch is locked: the strict-only path stands at a projected 1.163 ms/slice with zero semantic risk; the causal residual-progress window crosses the 1 ms target at 0.915 ms/slice projected and requires the paired semantic validation the census names. Either way the seven referee tests run unmodified and the paired bank comparison is re-banked on the implemented policy. Done-when: the locked branch is implemented, referees green on both lanes, and the measured exit incidence on both committed bank mixes is stated beside the census projection.</p>
+
+<h2 id="s2">§2 — Restructure the per-trip quantum</h2>
+<p>The two compiled blocks that dominate each trip are the deeper cut: Newton re-linearization reuse/hoisting across trips (measured ceiling ≈ 22.5 ms/slice alone) and cheaper active-set mask reconciliation (≈ 22.1 ms/slice alone); combined with trip reduction they are what carries a marginal-arm solve — one that genuinely needs many trips — toward the target. Any change here is semantics-preserving by construction: bit-identity where the mask history does not move, best-iterate retention, and own-mask acceptance are the referee surface, and a restructuring that cannot keep them green returns to the lead as a policy question rather than landing. Done-when: per-candidate implemented-or-refused verdicts with measured per-trip quantum before/after, referees green.</p>
+
+<h2 id="s3">§3 — The certified millisecond measurement</h2>
+<p>The end state, measured honestly: on the H200, cache-warm, at production width over the real MAST and DIII-D bank member mixes, the mean per-member cost of solves that <em>pass the accuracy certificate</em> (from <code>gs-absolute-accuracy-gates</code>) is at or near 1 ms, with the distribution plotted — settled members, deep members, and the certified-converged criterion on one figure — and the non-qualifying arms (the backend-margin arms, pending their forensics verdict) reported separately rather than averaged in. Done-when: the receipt states mean and tail ms/member for certificate-passing solves per machine, beside the 0.784 ms map floor and the 415.6 ms full-trip baseline it replaces.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+<h4 class="r-fu-title">Carry the solve to certified 1 ms</h4>
+<div class="r-fu-body">Close the exit-window decision and implement the locked branch, restructure the per-trip quantum behind the referee surface, and bank the certified millisecond measurement on real bank mixes. Depends on solver-trip-orchestration receipts and the accuracy certificate.</div>
+<pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+</article>
+</section>
+</main>
+</body>
+</html>

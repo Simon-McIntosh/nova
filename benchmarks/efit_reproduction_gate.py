@@ -10,15 +10,18 @@ existing benchmark modules that own those machine conventions.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 import subprocess
+import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 import jax
+import jax.numpy as jnp
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,6 +29,10 @@ from jsonschema import Draft202012Validator
 
 from benchmarks import diiid_forward_gs_match as diiid
 from benchmarks import efit_forward_parity_slice as mast
+from benchmarks.mast_response_carrier_warm import (
+    DEFAULT_CARRIER as DEFAULT_MAST_RESPONSE_CARRIER,
+)
+from benchmarks.mast_response_carrier_warm import load_carrier
 from nova.equilibrium.topology import TopologyClass
 
 matplotlib.use("Agg")
@@ -44,9 +51,55 @@ DEFAULT_BACKEND_RECEIPT = Path(
     "docs/figures/solver-convergence-regression/backend-divergence.json"
 )
 MAIN_BACKEND_RECEIPT = Path("/home/ITER/mcintos/Code/nova") / DEFAULT_BACKEND_RECEIPT
+DEFAULT_DIIID_MACHINE_ARTIFACT_CACHE = Path(
+    "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache"
+)
 MAST_FLOOR = 0.0116147034
 DIIID_FLOOR = 0.0832365867
 MARGINAL_MAST_REFERENCES = {(21978, 35), (22086, 43)}
+HEARTBEAT_SECONDS = 30.0
+
+
+@contextmanager
+def _timed_stage(
+    name: str,
+    timings: dict[str, float],
+    *,
+    frame: str,
+    visible: bool,
+) -> Iterator[None]:
+    """Measure one stage and emit flushed progress while its first frame runs."""
+
+    started = time.perf_counter()
+    stopped = threading.Event()
+
+    def heartbeat() -> None:
+        while not stopped.wait(HEARTBEAT_SECONDS):
+            elapsed = time.perf_counter() - started
+            print(
+                f"EFIT_STAGE_HEARTBEAT frame={frame} stage={name} "
+                f"elapsed_seconds={elapsed:.3f}",
+                flush=True,
+            )
+
+    worker = None
+    if visible:
+        print(f"EFIT_STAGE_BEGIN frame={frame} stage={name}", flush=True)
+        worker = threading.Thread(target=heartbeat, daemon=True)
+        worker.start()
+    try:
+        yield
+    finally:
+        elapsed = time.perf_counter() - started
+        timings[name] = elapsed
+        stopped.set()
+        if worker is not None:
+            worker.join()
+            print(
+                f"EFIT_STAGE_END frame={frame} stage={name} "
+                f"elapsed_seconds={elapsed:.6f}",
+                flush=True,
+            )
 
 
 def _sha256(path: Path) -> str:
@@ -239,65 +292,162 @@ def _band(machine: str) -> dict[str, Any]:
     }
 
 
+def _persisted_mast_response_cache(
+    path: Path,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Load the frozen-six response with its complete semantic ledger."""
+
+    response, carrier = load_carrier(path)
+    with np.load(path, allow_pickle=False) as archive:
+        input_digests = json.loads(
+            str(np.asarray(archive["input_digests_json"]).item())
+        )
+        audit = json.loads(str(np.asarray(archive["audit_json"]).item()))
+    audit["stored_circuit_count"] = carrier["stored_circuit_count"]
+    return (
+        {
+            "response": response,
+            "input_digests": input_digests,
+            "audit": audit,
+        },
+        carrier,
+    )
+
+
+def _compile_mast_branch(
+    case: dict[str, Any],
+    profile: Any,
+    target_current: float,
+) -> tuple[Any, jax.Array]:
+    """Lower and compile the production branch separately from its execution."""
+
+    initial = jnp.asarray(case["state"])
+
+    def solve(state: jax.Array) -> Any:
+        return profile.solve_branch(
+            state,
+            TopologyClass.DIVERTED,
+            route="newton_krylov",
+            target_current=target_current,
+            tolerance=mast.FIXED_POINT_CRITERION,
+            newton_steps=mast.NEWTON_STEPS,
+            gmres_iterations=mast.GMRES_ITERATIONS,
+            warmup=mast.WARMUP_SWEEPS,
+            relaxation=mast.RELAXATION,
+            step_cap=mast.STEP_CAP,
+        )
+
+    return jax.jit(solve).lower(initial).compile(), initial
+
+
+def _use_diiid_machine_artifact_cache(path: Path) -> None:
+    """Bind physical-wall resolution to a compute-node-visible cache."""
+
+    keyword_defaults = dict(diiid.build_profile.__kwdefaults__ or {})
+    keyword_defaults["machine_artifact_cache"] = path
+    diiid.build_profile.__kwdefaults__ = keyword_defaults
+
+
 def _mast_rows(
     output: Path,
     floor: dict[str, Any],
     floor_fields: Any,
     backend: dict[str, Any],
+    response_carrier: Path,
+    *,
+    frame_limit: int | None = None,
 ) -> list[dict[str, Any]]:
-    selected = mast.select_slices_by_shot(mast.DECOMPOSITION_BANK)
-    response_cache = None
+    shared_timings: dict[str, float] = {}
+    with _timed_stage(
+        "slice_selection", shared_timings, frame="MAST:first", visible=True
+    ):
+        selected = mast.select_slices_by_shot(mast.DECOMPOSITION_BANK)
+    if frame_limit is not None:
+        if frame_limit < 1:
+            raise ValueError("frame_limit must be positive")
+        selected = selected[:frame_limit]
+    first_reference = selected[0][0]
+    first_label = (
+        f"MAST:{int(first_reference['shot'])}/{int(first_reference['slice_index'])}"
+    )
+    with _timed_stage(
+        "persisted_response_carrier_load",
+        shared_timings,
+        frame=first_label,
+        visible=True,
+    ):
+        response_cache, carrier = _persisted_mast_response_cache(response_carrier)
     rows = []
-    for selected_row, qualification in selected:
+    for index, (selected_row, qualification) in enumerate(selected):
+        visible = index == 0
+        shot = int(selected_row["shot"])
+        slice_index = int(selected_row["slice_index"])
+        frame_label = f"MAST:{shot}/{slice_index}"
+        stage_timings = dict(shared_timings) if visible else {}
         started = time.perf_counter()
-        case, context = mast._mast_case_from_selection(
-            mast.SHOT_STORE,
-            selected_row,
-            qualification,
-            grid_points=mast.REFERENCE_NATIVE_GRID_POINTS,
-        )
-        passive_case, profile, policy = mast._passive_inclusive_case(
-            case, context, response_cache
-        )
-        if response_cache is None:
-            prescribed = profile.operator.prescribed_current_field
-            response_cache = {
-                "response": np.asarray(prescribed.response, dtype=np.float64),
-                "input_digests": policy["response_input_digests"],
-                "audit": {},
-            }
+        with _timed_stage(
+            "mast_case_from_selection",
+            stage_timings,
+            frame=frame_label,
+            visible=visible,
+        ):
+            case, context = mast._mast_case_from_selection(
+                mast.SHOT_STORE,
+                selected_row,
+                qualification,
+                grid_points=mast.REFERENCE_NATIVE_GRID_POINTS,
+            )
+        with _timed_stage(
+            "passive_inclusive_case",
+            stage_timings,
+            frame=frame_label,
+            visible=visible,
+        ):
+            passive_case, profile, policy = mast._passive_inclusive_case(
+                case, context, response_cache
+            )
+        if not policy["response_matrix_reused"]:
+            raise RuntimeError("the persisted MAST response carrier was not reused")
         reference = case["reference"]
         target_current = abs(float(reference["plasma_current_a"]))
-        solve, _trace, branch = mast._passive_inclusive_solve(
-            passive_case,
-            context,
-            profile,
-            newton_budget=mast.NEWTON_STEPS,
-            target_current=target_current,
-        )
-        equilibrium = branch.equilibrium
-        solved = np.asarray(
-            equilibrium.flux[: profile.lattice.node_count], dtype=np.float64
-        ).reshape(profile.lattice.shape)
-        label = np.asarray(context["reference_flux"], dtype=np.float64)
-        offset = float(np.mean(label - solved))
-        difference = solved + offset - label
-        span = float(np.ptp(label))
-        field = difference / span
-        value = float(np.sqrt(np.mean(field**2)))
+        with _timed_stage(
+            "jit_compile", stage_timings, frame=frame_label, visible=visible
+        ):
+            compiled_solve, initial = _compile_mast_branch(
+                passive_case, profile, target_current
+            )
+        with _timed_stage(
+            "first_solve", stage_timings, frame=frame_label, visible=visible
+        ):
+            branch = compiled_solve(initial)
+            jax.block_until_ready(branch)
+        with _timed_stage(
+            "comparison", stage_timings, frame=frame_label, visible=visible
+        ):
+            equilibrium = branch.equilibrium
+            solved = np.asarray(
+                equilibrium.flux[: profile.lattice.node_count], dtype=np.float64
+            ).reshape(profile.lattice.shape)
+            label = np.asarray(context["reference_flux"], dtype=np.float64)
+            offset = float(np.mean(label - solved))
+            difference = solved + offset - label
+            span = float(np.ptp(label))
+            field = difference / span
+            value = float(np.sqrt(np.mean(field**2)))
         shot = int(reference["shot"])
         slice_index = int(reference["slice_index"])
         name = f"mast-{shot}-row-{slice_index}.png"
-        _plot_pair(
-            output / name,
-            f"MAST {shot}/{slice_index}",
-            np.asarray(profile.lattice.radius),
-            np.asarray(profile.lattice.height),
-            field,
-            floor_fields["MAST_1_radius"],
-            floor_fields["MAST_1_height"],
-            floor_fields["MAST_1_relative"],
-        )
+        with _timed_stage("figure", stage_timings, frame=frame_label, visible=visible):
+            _plot_pair(
+                output / name,
+                f"MAST {shot}/{slice_index}",
+                np.asarray(profile.lattice.radius),
+                np.asarray(profile.lattice.height),
+                field,
+                floor_fields["MAST_1_radius"],
+                floor_fields["MAST_1_height"],
+                floor_fields["MAST_1_relative"],
+            )
         elapsed = time.perf_counter() - started
         marginal = (shot, slice_index) in MARGINAL_MAST_REFERENCES
         solver_qualification = {
@@ -341,6 +491,8 @@ def _mast_rows(
                 },
                 "solver_qualification": solver_qualification,
                 "compile_warm_wall_seconds": elapsed,
+                "stage_timings_seconds": stage_timings,
+                "persisted_response_carrier": carrier,
                 "passes": passes,
                 "pass_rule": (
                     "solver converged and solve_against_label.value <= "
@@ -358,8 +510,12 @@ def _mast_rows(
 
 
 def _diiid_rows(
-    output: Path, floor: dict[str, Any], floor_fields: Any
+    output: Path,
+    floor: dict[str, Any],
+    floor_fields: Any,
+    machine_artifact_cache: Path,
 ) -> list[dict[str, Any]]:
+    _use_diiid_machine_artifact_cache(machine_artifact_cache)
     paths = sorted(diiid.DEFAULT_DATA.glob("*.parquet"))
     selected = diiid.select_frames(
         paths, diiid.EXECUTION_FRAME_COUNT, diiid.polarity_population()
@@ -462,12 +618,27 @@ def run(
     zero_receipt: Path,
     zero_fields: Path,
     backend_receipt: Path,
+    mast_response_carrier: Path,
+    diiid_machine_artifact_cache: Path,
 ) -> dict[str, Any]:
     mast.configure_dtypes()
     floor_rows, fields = _floor_inputs(zero_receipt, zero_fields)
     backend = _backend_qualification(backend_receipt)
-    rows = _mast_rows(figure_directory, floor_rows["MAST"], fields, backend)
-    rows.extend(_diiid_rows(figure_directory, floor_rows["DIII-D"], fields))
+    rows = _mast_rows(
+        figure_directory,
+        floor_rows["MAST"],
+        fields,
+        backend,
+        mast_response_carrier,
+    )
+    rows.extend(
+        _diiid_rows(
+            figure_directory,
+            floor_rows["DIII-D"],
+            fields,
+            diiid_machine_artifact_cache,
+        )
+    )
     allocation = {
         "job_id": os.environ.get("SLURM_JOB_ID"),
         "node": os.environ.get("SLURMD_NODENAME"),
@@ -498,6 +669,8 @@ def run(
             "zero_iteration_receipt": str(zero_receipt),
             "zero_iteration_receipt_sha256": _sha256(zero_receipt),
             "zero_iteration_fields_sha256": _sha256(zero_fields),
+            "mast_response_carrier": str(mast_response_carrier),
+            "diiid_machine_artifact_cache": str(diiid_machine_artifact_cache),
             "reuse_map_rows": [
                 "docs/research/forward-accuracy-reuse-map.html#efit-reproduction "
                 "rows 50-55"
@@ -545,16 +718,68 @@ def main() -> None:
     parser.add_argument("--zero-receipt", type=Path, default=DEFAULT_ZERO_RECEIPT)
     parser.add_argument("--zero-fields", type=Path, default=DEFAULT_ZERO_FIELDS)
     parser.add_argument("--backend-receipt", type=Path, default=DEFAULT_BACKEND_RECEIPT)
+    parser.add_argument(
+        "--mast-response-carrier",
+        type=Path,
+        default=DEFAULT_MAST_RESPONSE_CARRIER,
+    )
+    parser.add_argument(
+        "--diiid-machine-artifact-cache",
+        type=Path,
+        default=DEFAULT_DIIID_MACHINE_ARTIFACT_CACHE,
+    )
+    parser.add_argument(
+        "--diagnostic-mast-frame",
+        action="store_true",
+        help="time one MAST frame without writing the full gate receipt",
+    )
     arguments = parser.parse_args()
     backend = arguments.backend_receipt
     if not backend.exists() and MAIN_BACKEND_RECEIPT.exists():
         backend = MAIN_BACKEND_RECEIPT
+    if arguments.diagnostic_mast_frame:
+        mast.configure_dtypes()
+        floor_rows, fields = _floor_inputs(
+            arguments.zero_receipt, arguments.zero_fields
+        )
+        qualification = _backend_qualification(backend)
+        rows = _mast_rows(
+            arguments.figure_directory,
+            floor_rows["MAST"],
+            fields,
+            qualification,
+            arguments.mast_response_carrier,
+            frame_limit=1,
+        )
+        row = rows[0]
+        print(
+            "EFIT_MAST_DIAGNOSTIC "
+            + json.dumps(
+                {
+                    "frame_identity": row["frame_identity"],
+                    "stage_timings_seconds": row["stage_timings_seconds"],
+                    "compile_warm_wall_seconds": row["compile_warm_wall_seconds"],
+                    "response_matrix_reused": True,
+                    "solve_against_label": row["solve_against_label"],
+                    "solver_qualification": row["solver_qualification"],
+                    "figure": str(
+                        arguments.figure_directory / Path(row["figure_src"]).name
+                    ),
+                },
+                sort_keys=True,
+                allow_nan=False,
+            ),
+            flush=True,
+        )
+        return
     receipt = run(
         arguments.output,
         arguments.figure_directory,
         arguments.zero_receipt,
         arguments.zero_fields,
         backend,
+        arguments.mast_response_carrier,
+        arguments.diiid_machine_artifact_cache,
     )
     aggregate = receipt["data"]["aggregate"]
     print(

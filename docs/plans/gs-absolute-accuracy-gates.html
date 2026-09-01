@@ -24,8 +24,9 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="5">
-<meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html">
+<meta name="plan-version" content="7">
+<meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,benchmarks/efit_reproduction_gate.py">
+<meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf">
 </head>
 <body>
 <main class="plan-doc">
@@ -62,7 +63,13 @@
     <div class="r-comment-body">gaa-solovev-certificate PARKED (worker commit bf6dcdf9 in its worktree: the certificate driver benchmarks/solovev_certificate.py, 4 cases x 4 resolutions, no nova/ change, no receipt fabricated). BLOCKER FOUND, pre-existing on main: the shipped default-lane recovery gate tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point FAILS before its single map application with ValueError 'topology connectivity requires a tensor-product grid' at nova/equilibrium/topology.py:392 (axis_component). The requirement was introduced by 9ccd8165 'derive domains from axis connectivity' on 2026-08-26, so the closed-form oracle (an unstructured hex carrier) has been unsolvable, and its locked 14-bound gate red, for six days without anyone reading the default lane. The certificate cannot run until the hex-carrier topology path is restored; nova/equilibrium/topology.py is fenced to the plasma-cell-topology-authority session (node pta-cell-partition-geometry in flight), which has been asked whether its repair restores this path. Resume the same member once that lands on main.</div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260901T195519540142-gaa-solovev-certificate" data-who="solovev-certificate" data-when="2026-09-01T20:08:38Z">
-    <div class="r-comment-body"><p>parked on a pre-existing main failure: the default-lane Solovev recovery gate raises &#x27;topology connectivity requires a tensor-product grid&#x27; at topology.py:392 since 9ccd8165 (26 Aug); certificate driver landed, no receipt produced; redispatch the node once the plasma-cell topology-read commit lands</p></div>
+    <div class="r-comment-body"><p>parked on a pre-existing main failure: the default-lane Solovev recovery gate raises 'topology connectivity requires a tensor-product grid' at topology.py:392 since 9ccd8165 (26 Aug); certificate driver landed, no receipt produced; redispatch the node once the plasma-cell topology-read commit lands</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195533190820-gaa-efit-reproduction" data-who="efit-reproduction" data-when="2026-09-01T21:21:50Z">
+    <div class="r-comment-body"><p>diagnostic only, gate receipt not produced: the 47-minute silent stall was a cold 95x95 response rebuild after the persisted 33x33 carrier was rejected by a forced native-grid override; with the override removed one MAST frame costs 382 s compile-warm wall (345.5 s cold JIT, 20 s first solve, 16 s case construction, 12 ms carrier load); MAST 21978/35 pure solve-label RMS 0.00341 below the 0.0116 floor but converged=false so the row fails; eleven-frame run redispatched</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260901T2325-efit-diagnostic" data-who="reckon-ship-s19" data-when="2026-09-01T23:25:00+00:00">
+    <div class="r-comment-body">gaa-efit-reproduction landed its driver (commits 9b0be0c8, 6480a228, 69a96bdf, merged) but NOT the gate receipt; promoted gate not-run. WHAT THE LOST HOUR WAS: the first production launch (job 1260961) forced the native 95x95 label grid, which does not match the persisted frozen-six response carrier (33x33 plus 37 wall states), so the driver silently rebuilt the coil-plus-103-passive-loop response cold on one CPU core for 47 minutes without a single flushed print; the GPU sat idle behind XLA's default memory preallocation. Not EFIT running: EFIT is the label, the solve is Nova's passive-inclusive forward. FIXED by removing the grid override so the solve grid is the carrier's banked grid exactly as the parity runs use (label comparison registered to that grid, the independent stride-one floors unchanged) and by redirecting the DIII-D machine-artifact cache from node-local /run/user/39486 to the populated GPFS cache under /work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache/. ONE-FRAME TIMING (job 1261001, MAST 21978/35 pure, 6m38s total): carrier load 12.2 ms, case construction 16.0 s, passive-inclusive validation 0.34 s, cold JIT compile 345.5 s, first solve 20.0 s, comparison 0.05 s, figure 0.36 s, 382.4 s compile-warm wall; heartbeats every 30 s throughout. Science glimpse: solve-label RMS fraction 0.00341 is BELOW the MAST floor 0.0116 but the row fails the gate because converged=false (active-set cycle at residual 2.45e-3), which is exactly the marginal-arm qualification the plan requires. NEXT: the eleven-frame production run from 69a96bdf under the locked build-on-H200-then-reuse-caches pattern (persistent XLA compilation cache enabled per the trip-orchestration cache-wiring recipe, persisted carriers, GPFS caches), single process, longer window.</div>
 </div>
 </section>
 </main>

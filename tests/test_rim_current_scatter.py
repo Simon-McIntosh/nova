@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import jax.numpy as jnp
 import numpy as np
+from scipy.spatial import Delaunay
 
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
 from nova.equilibrium.stencil_mesh import (
@@ -35,6 +36,37 @@ class AffineProfile:
 
     def current_density(self, radius, psi_norm):
         return 2.0 + 3.0 * radius - 4.0 * psi_norm
+
+
+def _complete_ring_sensitivity_mask(reference, direct):
+    """Reconstruct the six-neighbour, all-full-hex restriction locally."""
+    centres = reference["consistent_centres"]
+    canonical_vertices = centres[:, None, :] + direct["cell_hex_offsets"]
+    regular_hex = np.zeros(len(centres), dtype=bool)
+    tolerance = 512.0 * np.finfo(np.float64).eps * np.max(np.abs(canonical_vertices))
+    for cell, count in enumerate(reference["legacy_vertex_count"]):
+        if count != 6:
+            continue
+        vertices = reference["legacy_vertices"][cell, :6]
+        separation = np.linalg.norm(
+            vertices[:, None, :] - canonical_vertices[cell][None, :, :], axis=2
+        )
+        regular_hex[cell] = (
+            max(
+                float(np.max(np.min(separation, axis=0))),
+                float(np.max(np.min(separation, axis=1))),
+            )
+            <= tolerance
+        )
+
+    triangulation = Delaunay(centres)
+    offsets, flat_neighbours = triangulation.vertex_neighbor_vertices
+    complete_ring = np.zeros(len(centres), dtype=bool)
+    for cell in range(len(centres)):
+        neighbours = flat_neighbours[offsets[cell] : offsets[cell + 1]]
+        ring = np.r_[cell, neighbours]
+        complete_ring[cell] = len(neighbours) == 6 and bool(np.all(regular_hex[ring]))
+    return complete_ring
 
 
 def _fixture_stencil():
@@ -73,12 +105,21 @@ def _fixture_stencil():
     )
     centroid_flux = 0.1 + 0.2 * centres[:, 0] - 0.3 * centres[:, 1]
     sample_flux = 0.1 + 0.2 * sample_coordinates[:, 0] - 0.3 * sample_coordinates[:, 1]
-    return reference, stencil, support, centroid_flux, sample_flux
+    return (
+        reference,
+        stencil,
+        support,
+        centroid_flux,
+        sample_flux,
+        _complete_ring_sensitivity_mask(reference, direct),
+    )
 
 
 def test_every_nonempty_fixture_support_receives_its_exact_current():
     """Own-node scatter conserves current on complete and partial-ring cells."""
-    reference, stencil, support, centroid_flux, sample_flux = _fixture_stencil()
+    reference, stencil, support, centroid_flux, sample_flux, _complete_ring = (
+        _fixture_stencil()
+    )
     moments = stencil.support_flux_moments(
         AffineProfile(), centroid_flux, sample_flux, support
     )
@@ -119,6 +160,34 @@ def test_every_nonempty_fixture_support_receives_its_exact_current():
         == 0
     )
     np.testing.assert_array_equal(current_scatter, fixture_exact)
+
+
+def test_complete_ring_sensitivity_control_reproduces_rim_omission():
+    """Restricting current to complete rings reproduces all 96 lost supports."""
+    reference, stencil, _support, _centroid_flux, _sample_flux, complete_ring = (
+        _fixture_stencil()
+    )
+    nonempty = reference["support_vertex_count"] >= 3
+    omitted = nonempty & ~complete_ring
+    with np.load(CURRENT_LOCALISATION) as stored:
+        exact_current = stored["analytic_m0"]
+    restricted = np.zeros_like(exact_current)
+    restricted[complete_ring] = exact_current[complete_ring]
+    lost = omitted & (restricted == 0.0)
+    missing_current = float(np.sum(exact_current[omitted]))
+    missing_fraction = abs(missing_current / float(np.sum(exact_current)))
+
+    assert int(np.count_nonzero(complete_ring)) == 356
+    assert int(np.count_nonzero(nonempty & complete_ring)) == 351
+    assert int(np.count_nonzero(omitted)) == 96
+    assert int(np.count_nonzero(lost)) == 96
+    np.testing.assert_allclose(
+        missing_current, -689_027.2099774083, rtol=0.0, atol=1e-6
+    )
+    np.testing.assert_allclose(
+        missing_fraction, 0.045918550584580275, rtol=0.0, atol=1e-15
+    )
+    np.testing.assert_array_equal(stencil.ring_centre, np.arange(len(nonempty)))
 
 
 def test_complementary_clips_recombine_to_full_cell_current():
@@ -166,7 +235,9 @@ def test_complementary_clips_recombine_to_full_cell_current():
 
 def test_uncut_interior_scatter_is_bitwise_identical_to_direct_contraction():
     """Writing an own-node result leaves an ordinary interior value unchanged."""
-    reference, stencil, _support, centroid_flux, sample_flux = _fixture_stencil()
+    reference, stencil, _support, centroid_flux, sample_flux, complete_ring = (
+        _fixture_stencil()
+    )
     full_support = SimpleNamespace(
         support_vertices=reference["legacy_vertices"],
         vertex_count=reference["legacy_vertex_count"],
@@ -189,7 +260,7 @@ def test_uncut_interior_scatter_is_bitwise_identical_to_direct_contraction():
         stencil.ring_coordinate_scale,
         coefficient,
     )
-    interior = int(np.flatnonzero(reference["consistent_available"])[0])
+    interior = int(np.flatnonzero(complete_ring)[0])
 
     np.testing.assert_array_equal(
         scattered.cell_current[interior], direct_current[interior]

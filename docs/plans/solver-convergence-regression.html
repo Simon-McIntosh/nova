@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.6">
 <meta name="plan-commits" content="4e0d9588">
 <meta name="plan-artifacts" content="docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py">
@@ -77,6 +77,11 @@
     <p class="r-dec-q">forensics-before-diagnosis</p>
     <p class="r-dec-ctx">The 2x2 matrix so far: committed-revision CPU converged (the committed bank), committed-revision GPU stagnates (pinned shadow run, O/X residuals 4.5-5.2 mm), HEAD GPU stagnates (mechanism probe, robust under seed perturbation), HEAD CPU unknown (3 h timeout). The mixed arm reproduces across backends to 8.5e-16 m, bounding the sensitivity to the pure arm&#x27;s margin.</p>
     <p class="r-dec-rat">Lead decision 2026-09-01: do not accept the backend-sensitivity reading yet - run the paired instruction-level forensics first: same revision, same arm, both backends, per-trip state capture locating the first divergence trip and the operation that amplifies it, with the divergence growth curve plotted. The pinned-revision CPU leg also completes the 2x2 matrix and tests whether the CPU slowdown is HEAD-side.</p>
+    </div>
+<div class="r-dec" data-key="marginal-arm-convergence-semantics" data-choice="remedy-first-then-honest-stagnation" data-by="Simon McIntosh" data-when="2026-09-01T22:25:00+00:00">
+    <p class="r-dec-q">On marginal arms where the mask settles but the residual plateaus along a near-neutral mode, what does converged mean and when may the stagnation stop deliver the terminal verdict?</p>
+    <p class="r-dec-ctx">The historical 22086/43 pure row converged to 6.08e-12 at d47f7cd1; every solve after the stagnation stop (420feb23) and the 30 August candidate-selection commits terminates active_set_stagnated at 4.80e-4 with a period-1 repeated residual along one up-down antisymmetric flux mode, while the mixed arm (mode constrained) converges to 1e-16 on every backend. Backend numerics are excluded by the paired forensics. The re-solve at d47f7cd1 (scr-true-pin-reproduction) decides whether the old code genuinely contracted in more than seven trips.</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-01, relayed to this session by the S18 coordinator and recorded verbatim in substance: converged means genuine contraction to tolerance. The stagnation stop remains the terminal verdict, but only after the banked remedy ladder (s3 comment: adaptive Krylov depth, deflation of the plotted eigenvector, Anderson acceleration, mode-aware step handling pending the step_cap audit, vertical-moment pin with weight-to-zero continuation) has attempted to contract the identified mode; slow grinding is neither restored nor faked. Banks re-baseline under this semantics once a remedy lands, or with honest stagnated rows if the remedies fail. CONDITIONAL on the d47f7cd1 re-solve: it applies if that re-solve confirms the stagnation-stop family changed the verdict (the historical row genuinely reached 6.08e-12 in more than seven trips); if the old code converges in seven or fewer trips the ruling dissolves and the candidate-selection reading (the 30 August commits) proceeds instead. Endorsed basis: the mixed arm converging to 1e-16 proves that constraining the mode works, and this branch alone serves both halves of the north star, certified accuracy and the trip budget the millisecond target needs.</p>
     </div>
 </section>
 </main>

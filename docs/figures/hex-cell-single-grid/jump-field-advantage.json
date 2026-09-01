@@ -1,0 +1,126 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-jump-field-gate/docs/figures/hex-cell-single-grid/jump-field-advantage.png",
+    "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-jump-field-gate/docs/figures/hex-cell-single-grid/jump-field-advantage.json"
+  },
+  "falsifier_fired": false,
+  "measurement": "boundary-band second-derivative advantage of a boundary-split fit over a matched-degrees-of-freedom global C2 fit",
+  "method": {
+    "boundary_band": "Euclidean distance at most two cell pitches from the solve LCFS",
+    "fit": "least squares on one 65 by 65 half-offset lattice; both fits have 16 coefficients, with 15 shared degree-at-most-four monomials",
+    "hessian_rms": "RMS over boundary-band cells and all four Hessian entries",
+    "truth": "analytic Solovev Hessian inside the solve LCFS and analytic automatic derivatives of the current-truncated vacuum field outside",
+    "truth_exclusions": "no finite differences, no smoothed-map derivatives, and no term of the boundary-split fit appears in the curvature reference"
+  },
+  "result": {
+    "analytic_fixture": {
+      "axis_flux_per_radian_wb": 0.0010851700426205747,
+      "axis_rz_m": [
+        1.7673817014758004,
+        -0.05866047600021829
+      ],
+      "coefficient_order": [
+        "a",
+        "b",
+        "c0",
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "family": "static diverted Solovev polynomial with homogeneous free-boundary terms",
+      "reuse_anchors": [
+        "scripts.analytic_oracle_fixtures exact-recovery carrier",
+        "scripts.dual_basin_fixtures diverted Solovev coefficients",
+        "tests.rotating_equilibrium_references Grad-Shafranov convention"
+      ],
+      "rotating_reference_static_limit": {
+        "case": "moderate-rotation-conventional-static",
+        "delta_star_plus_mu0_r_j_phi_max_abs": 0.0,
+        "rotation_parameter_per_m2": 0.0
+      },
+      "total_flux_coefficients": [
+        -0.1,
+        -1.6,
+        -0.9717066778084612,
+        0.5788947452393514,
+        -2.5259948490836557,
+        0.7418496289071758,
+        0.014333833567392602
+      ],
+      "x_point_rz_m": [
+        1.198405322435904,
+        -0.43408752240161563
+      ]
+    },
+    "boundary_band_cell_count": 461,
+    "boundary_band_cell_pitch_scaled_second_derivative_rms": {
+      "boundary_split": 0.056906376383453326,
+      "global_c2": 0.05756019568963121,
+      "units": "normalised_flux"
+    },
+    "boundary_band_half_width_m": 0.03240370349203938,
+    "boundary_band_pitches": 2.0,
+    "boundary_band_second_derivative_advantage_factor": 1.0114893856845186,
+    "boundary_band_second_derivative_rms": {
+      "boundary_split": 216.7861957464878,
+      "global_c2": 219.27693596049878,
+      "units": "normalised_flux_per_m2"
+    },
+    "cell_pitch_m": 0.01620185174601969,
+    "closed_form_curvature_jump_mu0_r_j_phi": {
+      "formula": "abs(-(8*a*R^2 + 2*b)/(2*pi))",
+      "lcfs_maximum": 1.0174397023455675,
+      "lcfs_minimum": 0.6921553385517332,
+      "lcfs_rms": 0.8524526060208161,
+      "units": "poloidal_flux_per_radian_per_m2",
+      "x_point": 0.6921553385517332
+    },
+    "degrees_of_freedom_each": 16,
+    "design_condition_number": {
+      "boundary_split": 350590.81993454415,
+      "global_c2": 44.52840490227105
+    },
+    "design_rank": {
+      "boundary_split": 16,
+      "global_c2": 16
+    },
+    "falsifier": "fires when the boundary-split advantage factor is at most one",
+    "falsifier_fired": false,
+    "fit_lattice_shape": [
+      65,
+      65
+    ],
+    "fit_sample_count": 4225,
+    "fit_value_rms": {
+      "boundary_split": 0.6548612562734736,
+      "global_c2": 0.7763763451835044
+    },
+    "interface": "zero-flux solve separatrix of the diverted analytic state",
+    "lcfs_vertex_count": 640,
+    "solve": {
+      "continuation_collocation_count": 316,
+      "continuation_design_condition_number": 2.4142437516961446e+17,
+      "continuation_design_rank": 37,
+      "continuation_effective_rank": 9,
+      "continuation_gradient_mismatch_rms": 0.0010709539938602514,
+      "continuation_svd_relative_cutoff": 0.001,
+      "continuation_value_mismatch_rms": 1.4696927962337388e-05,
+      "edge_current_density_a_per_m2": {
+        "maximum": 458261.4255893825,
+        "minimum": 405285.70642406755
+      },
+      "external_ring_count": 64,
+      "maximum_external_ring_current_a": 1438811.4872037428,
+      "plasma_cell_count": 4037,
+      "plasma_current_a": 27494.465236917466,
+      "source_lattice_shape": [
+        257,
+        257
+      ],
+      "source_support": "plasma-cell centres strictly inside the analytic LCFS only"
+    },
+    "verdict": "PASS"
+  },
+  "verdict": "PASS"
+}

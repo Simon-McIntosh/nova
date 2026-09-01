@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="cpu-solve-viability">
+<meta name="plan-title" content="CPU solve viability — a traced program that should run on CPU no longer does">
+<meta name="plan-summary" content="Diagnose why a full CPU Newton-Krylov solve now exceeds 3 h at ~1.5-core utilisation when the same producer previously finished arms in under an hour.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="mid">
+<meta name="plan-effort-hours" content="8.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="jax,timing,equilibrium,telemetry">
+<title>CPU solve viability | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>CPU solve viability</h1>
+<p class="lede">Lead judgment 2026-09-01: the CPU's inability to finish one shot-pair solve in three hours reads as a bug, not a performance gap — the JAX-traced program's numpy shape should remain viable on CPU. Deliberately backlog: not scheduled to a sprint, recorded here so the anomaly and its freshest evidence survive until it is worth chasing.</p></header>
+
+<h2 id="s1">§1 — The symptom, with its evidence frozen</h2>
+<p>SLURM job 1260726 (rigel, 16 CPUs, 64 GiB, <code>generate_topology_visuals.py --cache-only --regenerate-mast-shot 22086</code>) ran to its 3 h TIMEOUT still inside the first stage, before <code>MAST_STATES_READY</code> — two Newton–Krylov solves (the dual-branch portfolio plus the margin-graded mixed arm) for MAST 22086/43. Three anchors: <strong>(a) utilisation</strong> — at 1h35 wall the batch step had accumulated 2h28 CPU, about 1.5 of 16 allocated cores, so the program was not using the machine; <strong>(b) history</strong> — the same producer completed the committed seventeen-row campaign at roughly a day of lane time (~25–50 min/arm), so a &gt;3 h single pair is a regression against its own record, not a constant; <strong>(c) the H200 reference</strong> — width-32 batch solves complete in ~37.5 s and the trip-quantum receipt (<code>docs/figures/solver-trip-orchestration/trip-quantum.json</code>) shows the per-trip cost is compiled mask-reconciliation and re-linearization compute, which XLA-CPU should execute at a sane ratio to the GPU, not &gt;300×.</p>
+
+<h2 id="s2">§2 — Hypothesis census</h2>
+<p>Ranked by prior evidence, to be measured not argued: <strong>(1) telemetry callbacks serialize the CPU loop</strong> — the solve gained per-trip telemetry after the committed bank's revision, and its <code>jax.debug.callback</code>s (the same ones that crashed the GPU-only launch by demanding a local CPU device) force a host synchronization per invocation inside the trip loop; on CPU that turns a compiled loop into a host round-trip per trip per member. <strong>(2) Scan dispatch overhead on CPU</strong> — the banked 7.6 µs/iteration H200 scan latency has a much larger CPU counterpart, multiplied across GMRES inner scans. <strong>(3) Thread configuration</strong> — XLA-CPU intra-op threading may be pinned to one or two threads by environment or by the launch recipe, consistent with the 1.5-core reading. <strong>(4) A float64 CPU kernel pathology</strong> in one of the trip sub-stages. Hypothesis (1) is cheaply separable: the telemetry is flag-gated at the call site, so one CPU arm with telemetry off against one with it on is the discriminating pair.</p>
+
+<h2 id="s3">§3 — The measurement</h2>
+<p>One bounded CPU profiling arm on a compute node: a single 22086/43 diverted-branch solve with (i) telemetry on vs off, (ii) XLA-CPU thread count swept over {1, 8, 16}, (iii) a callback census (count × mean host time) from the profiler trace, and (iv) the per-trip wall time compared against the H200 trip quantum to state the honest CPU/GPU ratio for the same compiled stages. Done-when: a receipt names the dominant CPU cost with its measured share, states whether the pre-telemetry CPU cost is recovered with telemetry off, and either closes the anomaly as understood-and-accepted or hands a one-line fix target to a followup. The falsifier for hypothesis (1): telemetry-off fails to recover at least half the gap.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-csv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship cpu-solve-viability" data-resolved-at="" data-resolved-by="">
+<h4 class="r-fu-title">Run the CPU-solve discriminating measurement</h4>
+<div class="r-fu-body">Backlog by lead direction — schedule to a sprint before shipping. One bounded profiling arm separates the telemetry-callback hypothesis from thread-configuration and scan-overhead explanations and states the honest CPU/GPU ratio for the same compiled stages.</div>
+<pre class="r-fu-prompt">/reckon-ship cpu-solve-viability</pre>
+</article>
+</section>
+</main>
+</body>
+</html>

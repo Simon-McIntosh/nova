@@ -74,6 +74,17 @@ TARGET_SECONDS = 3600.0
 TARGET_BYTES_PER_SECOND = ARCHIVE_BYTES / TARGET_SECONDS
 TARGET_H200S = 8
 TARGET_L2_SHOTS = 11573
+SPLIT_BATCH_WIDTHS = (32, 64, 128, 256, 512, 1024)
+SPLIT_POINTS_PER_MEMBER = 512
+SPLIT_OVERHEAD_LIMIT = 1.17
+LADDER_RECEIPT = (
+    ROOT
+    / "docs"
+    / "figures"
+    / "diiid-forward-onboarding"
+    / "throughput"
+    / "batched_throughput_budget.json"
+)
 
 
 def _print_field_null_precision(*working_dtypes: Any) -> None:
@@ -390,16 +401,37 @@ def _field_batch(batch: int, dtype: np.dtype) -> tuple[np.ndarray, ...]:
     return np.stack(fields), rg, zg, inside
 
 
-def _compile_single(function, argument):
+def _compile_single(function, *arguments):
     """Compile one single-output batch function and return a runner."""
     start = time.perf_counter()
-    executable = jax.jit(function).lower(argument).compile()
+    executable = jax.jit(function).lower(*arguments).compile()
     compile_seconds = time.perf_counter() - start
     return executable, compile_seconds
 
 
-def _compile_route(name, argument, rg, zg, inside, design_pinv):
+def _compile_route(
+    name,
+    argument,
+    rg=None,
+    zg=None,
+    inside=None,
+    design_pinv=None,
+    *,
+    query=None,
+):
     """Compile one measured route and return its synchronized runner."""
+    if name in ("global_polynomial_carrier", "split_polynomial_carrier"):
+        from benchmarks.hex_cell_field_feasibility import (
+            _evaluate_global,
+            _evaluate_split,
+        )
+
+        evaluator = (
+            _evaluate_global if name == "global_polynomial_carrier" else _evaluate_split
+        )
+        function = jax.vmap(evaluator, in_axes=(0, 0))
+        executable, compile_seconds = _compile_single(function, argument, query)
+        return executable, compile_seconds, 1
     if name == "separate_stencil":
         axis_function = jax.vmap(lambda field: _axis_array(field, rg, zg, inside))
         x_function = jax.vmap(lambda field: _x_array(field, rg, zg, inside))
@@ -428,6 +460,195 @@ def _compile_route(name, argument, rg, zg, inside, design_pinv):
     }
     executable, compile_seconds = _compile_single(functions[name], argument)
     return executable, compile_seconds, 1
+
+
+def _scheduler_environment() -> dict[str, Any]:
+    """Return the allocation identity attached to an accelerator capture."""
+    return {
+        "job_id": os.environ.get("SLURM_JOB_ID"),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "job_gpus": os.environ.get("SLURM_JOB_GPUS"),
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+        "time_limit": os.environ.get("SLURM_TIMELIMIT"),
+    }
+
+
+def _fit_split_carrier() -> tuple[
+    tuple[jax.Array, jax.Array], dict[str, Any], jax.Array
+]:
+    """Compile and measure the prototype split fit independently of evaluation."""
+    from benchmarks.hex_cell_field_feasibility import (
+        fit_coefficients,
+        hex_lattice,
+        solovev_flux,
+    )
+
+    centres, _radial, _vertical = hex_lattice()
+    points = jnp.asarray(centres.reshape(-1, 2), dtype=jnp.float64)
+    values = solovev_flux(points)
+    executable, compile_seconds = _compile_single(fit_coefficients, points, values)
+    start = time.perf_counter()
+    coefficients = executable(points, values)
+    _block(coefficients)
+    first_seconds = time.perf_counter() - start
+    warm = _samples(lambda: executable(points, values))
+    return (
+        coefficients,
+        {
+            "fit_points": int(points.shape[0]),
+            "coefficient_count_per_carrier": int(coefficients[0].shape[0]),
+            "compile_ms": 1.0e3 * compile_seconds,
+            "first_execution_ms": 1.0e3 * first_seconds,
+            "warm": _summary_seconds(warm),
+            "raw_warm_seconds": warm,
+        },
+        points[:SPLIT_POINTS_PER_MEMBER],
+    )
+
+
+def _timed_polynomial_carrier(
+    name: str,
+    coefficient: jax.Array,
+    query: jax.Array,
+    width: int,
+) -> dict[str, Any]:
+    """Measure one exact-width fixed-point carrier through the shared route compiler."""
+    device = jax.devices()[0]
+    coefficients = jax.device_put(
+        jnp.broadcast_to(coefficient, (width, coefficient.shape[0])), device
+    )
+    queries = jax.device_put(jnp.broadcast_to(query, (width,) + query.shape), device)
+    run, compile_seconds, launches = _compile_route(
+        name,
+        coefficients,
+        query=queries,
+    )
+    start = time.perf_counter()
+    first = run(coefficients, queries)
+    _block(first)
+    first_seconds = time.perf_counter() - start
+    warm = _samples(lambda: run(coefficients, queries))
+    median = float(np.median(warm))
+    evaluations = width * int(query.shape[0])
+    return {
+        "route": name,
+        "batch_width": width,
+        "fixed_points_per_member": int(query.shape[0]),
+        "coefficient_count": int(coefficient.shape[0]),
+        "compile_ms": 1.0e3 * compile_seconds,
+        "first_execution_ms": 1.0e3 * first_seconds,
+        "warm": _summary_seconds(warm),
+        "raw_warm_seconds": warm,
+        "million_point_evaluations_per_second": evaluations / median / 1.0e6,
+        "members_per_second": width / median,
+        "input_bytes": int(coefficients.nbytes + queries.nbytes),
+        "output_bytes": _tree_bytes(first),
+        "executable_launches": launches,
+    }
+
+
+def measure_split_batch(platform_name: str) -> dict[str, Any]:
+    """Measure the boundary-split fit and fixed-slot evaluation saturation ladder."""
+    configure_dtypes()
+    environment = _environment(platform_name)
+    coefficients, fit, query = _fit_split_carrier()
+    global_coefficient, split_coefficient = coefficients
+    measurements = []
+    for width in SPLIT_BATCH_WIDTHS:
+        global_row = _timed_polynomial_carrier(
+            "global_polynomial_carrier", global_coefficient, query, width
+        )
+        split_row = _timed_polynomial_carrier(
+            "split_polynomial_carrier", split_coefficient, query, width
+        )
+        measurements.append(
+            {
+                "batch_width": width,
+                "global": global_row,
+                "split": split_row,
+                "split_to_global_warm_time_ratio": (
+                    split_row["warm"]["median_ms"] / global_row["warm"]["median_ms"]
+                ),
+            }
+        )
+
+    ladder = _load(LADDER_RECEIPT)
+    ladder_rows = {row["batch_size"]: row for row in ladder["budget_rows"]}
+    ladder_base = ladder_rows[SPLIT_BATCH_WIDTHS[0]]["slices_per_second"]
+    split_base = measurements[0]["split"]["million_point_evaluations_per_second"]
+    comparisons = []
+    for row in measurements:
+        width = row["batch_width"]
+        split_gain = row["split"]["million_point_evaluations_per_second"] / split_base
+        ladder_gain = ladder_rows[width]["slices_per_second"] / ladder_base
+        comparisons.append(
+            {
+                "batch_width": width,
+                "split_throughput_gain_from_width_32": split_gain,
+                "committed_ladder_gain_from_width_32": ladder_gain,
+                "minimum_allowed_split_gain": ladder_gain / SPLIT_OVERHEAD_LIMIT,
+                "sustains_ladder_shape": split_gain
+                >= ladder_gain / SPLIT_OVERHEAD_LIMIT,
+                "within_split_overhead_limit": row["split_to_global_warm_time_ratio"]
+                <= SPLIT_OVERHEAD_LIMIT,
+            }
+        )
+    fires = not all(
+        row["sustains_ladder_shape"] and row["within_split_overhead_limit"]
+        for row in comparisons
+    )
+    return {
+        "schema": "nova.hex_split_batch_throughput",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "command": sys.argv,
+        "source_revision": os.environ.get("NOVA_SOURCE_REVISION"),
+        "environment": environment,
+        "scheduler": _scheduler_environment(),
+        "method": {
+            "batch_widths": list(SPLIT_BATCH_WIDTHS),
+            "fixed_points_per_member": SPLIT_POINTS_PER_MEMBER,
+            "precision": "float64",
+            "timing_repeats": REPEATS,
+            "timing_statistic": (
+                "synchronized median with minimum, maximum, and raw samples retained"
+            ),
+            "compile_policy": "lowering and compilation separated at every exact width",
+            "fit_policy": "split coefficient fit compiled and timed separately",
+        },
+        "fit": fit,
+        "measurements": measurements,
+        "committed_ladder": {
+            "path": str(LADDER_RECEIPT.relative_to(ROOT)),
+            "sha256": hashlib.sha256(LADDER_RECEIPT.read_bytes()).hexdigest(),
+            "width_one_to_1024_gain": ladder["saturation_summary"][
+                "width_one_to_last_measured_gain"
+            ],
+            "first_out_of_memory_width": ladder["saturation_summary"][
+                "first_out_of_memory_width"
+            ],
+        },
+        "shape_comparison": comparisons,
+        "verdict": {
+            "falsifier_fires": fires,
+            "status": "fail" if fires else "pass",
+            "criterion": (
+                "every split width must retain the committed ladder gain from width 32 "
+                "after the 17 percent allowance and split warm latency must not exceed "
+                "the equal-capacity global carrier by more than 17 percent"
+            ),
+            "prototype_split_overhead_band_percent": [12, 17],
+        },
+        "source_hashes": {
+            "benchmarks/fieldnull_gpu_throughput.py": hashlib.sha256(
+                Path(__file__).read_bytes()
+            ).hexdigest(),
+            "benchmarks/hex_cell_field_feasibility.py": hashlib.sha256(
+                (ROOT / "benchmarks/hex_cell_field_feasibility.py").read_bytes()
+            ).hexdigest(),
+        },
+    }
 
 
 def _timed_route(
@@ -1557,6 +1778,9 @@ def main() -> None:
     memory = subparsers.add_parser("measure-memory")
     memory.add_argument("--platform", choices=("gpu",), required=True)
     memory.add_argument("--partial", type=Path, required=True)
+    split_batch = subparsers.add_parser("measure-split-batch")
+    split_batch.add_argument("--platform", choices=("gpu",), required=True)
+    split_batch.add_argument("--partial", type=Path, required=True)
     merge = subparsers.add_parser("combine")
     merge.add_argument("--cpu", type=Path, required=True)
     merge.add_argument("--gpu", type=Path, required=True)
@@ -1571,6 +1795,9 @@ def main() -> None:
     elif args.command == "measure-memory":
         _print_field_null_precision(np.float32)
         _write_json(args.partial, measure_memory(args.platform))
+    elif args.command == "measure-split-batch":
+        _print_field_null_precision(np.float64)
+        _write_json(args.partial, measure_split_batch(args.platform))
     elif args.command == "combine":
         _write_json(
             args.output,

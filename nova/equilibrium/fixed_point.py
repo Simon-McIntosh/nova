@@ -320,6 +320,7 @@ class FixedPointTerminationReason(IntEnum):
     ACTIVE_SET_CYCLE_DETECTED = 7
     ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED = 8
     ACTIVE_SET_STAGNATED = 9
+    ACTIVE_SET_SETTLED = 10
 
 
 class FixedPointResult(NamedTuple):
@@ -576,6 +577,7 @@ class _ActiveSetIterationState(NamedTuple):
     cycle_detected: jax.Array
     nonfinite: jax.Array
     stagnated: jax.Array
+    settled: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -2771,6 +2773,7 @@ def _active_set_newton_krylov(
     stream_active_set: bool,
     stream_inner_iterations: bool,
     stop_on_active_set_stagnation: bool,
+    stop_on_active_set_settlement: bool,
     retain_outer_best_iterate: bool,
     continue_newton_trajectory: bool,
     continue_globalization_state: bool,
@@ -2910,6 +2913,16 @@ def _active_set_newton_krylov(
             & (selected_difference == 0)
             & (selected_residual == previous_live_residual)
         )
+        settled = (
+            stop_on_active_set_settlement
+            & own_mask_acceptance
+            & selected_finite
+            & ~converged
+            & ~cycle_detected
+            & (selected_difference == 0)
+            & (inner_result.accepted_newton_promotions == 0)
+            & jnp.all(selected_state == state)
+        )
         if stream_active_set:
             jax.debug.callback(
                 _print_active_set_trip,
@@ -2920,7 +2933,9 @@ def _active_set_newton_krylov(
                 jnp.asarray(inner_result.attempted_newton_promotions, dtype=jnp.int32),
                 ordered=True,
             )
-        can_continue = selected_finite & ~converged & ~cycle_detected & ~stagnated
+        can_continue = (
+            selected_finite & ~converged & ~cycle_detected & ~stagnated & ~settled
+        )
         record_mask = can_continue & (history_count < mask_history.shape[0])
         mask_history = mask_history.at[history_count].set(
             jnp.where(record_mask, selected_mask, mask_history[history_count])
@@ -2940,6 +2955,7 @@ def _active_set_newton_krylov(
             cycle_detected,
             ~selected_finite,
             stagnated,
+            settled,
             trajectory_state,
             continue_trajectory,
             inner_globalization,
@@ -2962,6 +2978,7 @@ def _active_set_newton_krylov(
         first_cycle,
         first_nonfinite,
         first_stagnated,
+        first_settled,
         first_trajectory_state,
         first_continue_trajectory,
         first_globalization,
@@ -3009,6 +3026,7 @@ def _active_set_newton_krylov(
         cycle_detected=first_cycle,
         nonfinite=first_nonfinite,
         stagnated=first_stagnated,
+        settled=first_settled,
     )
 
     def outer_body(index, carry):
@@ -3036,6 +3054,7 @@ def _active_set_newton_krylov(
                 cycle_detected,
                 nonfinite,
                 stagnated,
+                settled,
                 trajectory_state,
                 continue_trajectory,
                 globalization_state,
@@ -3087,6 +3106,7 @@ def _active_set_newton_krylov(
                 cycle_detected=cycle_detected,
                 nonfinite=nonfinite,
                 stagnated=stagnated,
+                settled=settled,
             )
 
         return jax.lax.cond(carry.active, solve_active, lambda value: value, carry)
@@ -3102,9 +3122,13 @@ def _active_set_newton_krylov(
                 outer.nonfinite,
                 FixedPointTerminationReason.NONFINITE_RESIDUAL,
                 jnp.where(
-                    outer.stagnated,
-                    FixedPointTerminationReason.ACTIVE_SET_STAGNATED,
-                    FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                    outer.settled,
+                    FixedPointTerminationReason.ACTIVE_SET_SETTLED,
+                    jnp.where(
+                        outer.stagnated,
+                        FixedPointTerminationReason.ACTIVE_SET_STAGNATED,
+                        FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                    ),
                 ),
             ),
         ),
@@ -3144,6 +3168,7 @@ def newton_krylov(
     stream_inner_iterations: bool = False,
     checkpoint_path: str | Path | None = None,
     stop_on_active_set_stagnation: bool = True,
+    stop_on_active_set_settlement: bool = True,
     retain_outer_best_iterate: bool = True,
     continue_newton_trajectory: bool = True,
     continue_globalization_state: bool = True,
@@ -3164,6 +3189,14 @@ def newton_krylov(
     trips have bit-identical live residuals and the later trip changes no mask
     cells.  It can be disabled to reproduce the full bounded loop for diagnostic
     comparisons.
+    ``stop_on_active_set_settlement`` masks every later outer trip after an
+    executed trip changes no active-set cells and accepts no Newton promotion
+    under own-mask qualification, while retaining the trip's incoming state.
+    The two no-change checks prove the retained best iterate did not advance.
+    The compiled trip extent and telemetry shapes stay fixed; skipped rows retain
+    the same NaN and -1 padding as every other terminal condition.  Disabling it
+    runs the complete bounded loop for paired comparisons.  It is inert when
+    own-mask acceptance is disabled.
     ``retain_outer_best_iterate`` prevents an unchanged active set from
     replacing its incoming state with a candidate that is worse in the smooth
     relative-sup promotion merit.  Active-set changes still advance normally
@@ -3251,6 +3284,7 @@ def newton_krylov(
             stream_active_set=stream_active_set,
             stream_inner_iterations=stream_inner_iterations,
             stop_on_active_set_stagnation=stop_on_active_set_stagnation,
+            stop_on_active_set_settlement=stop_on_active_set_settlement,
             retain_outer_best_iterate=retain_outer_best_iterate,
             continue_newton_trajectory=continue_newton_trajectory,
             continue_globalization_state=continue_globalization_state,

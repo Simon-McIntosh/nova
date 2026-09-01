@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T15:52:54",
+  "updated": "2026-09-01T16:38:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1447,6 +1447,46 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "sto-bank",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05d55-53f3-7271-a866-ca59e431e5b2",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d55-53f3-7271-a866-ca59e431e5b2"
+        },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "sto-compile",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "sto-quantum",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05d4e-dadf-7532-8d74-0d95eb74480f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d4e-dadf-7532-8d74-0d95eb74480f"
+        },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "sto-trips",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "supply-topology",
@@ -66598,9 +66638,132 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T141736915762-sto-mast-bank-telemetry",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a73",
+        "node": "sto-mast-bank-telemetry",
+        "node_definition": {
+          "done_when": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json carries 12/12 rows with per-trip telemetry at the current measurement revision, a diff summary against the previous committed bank states any changed qualification or selection per row (zero expected where semantics did not change), and the SLURM receipt records device, reservation and exit 0",
+          "estimated_hours": 5.0,
+          "goal": "The twelve-arm MAST bank regenerated on current code so its rows carry the active-set trip telemetry the settlement census requires (active_set_iterations, active_set_mask_differences, active_set_residuals and retained residual histories, which the serializer already banks since telemetry commit 6f08fb19 while the committed bank at revision e076ea1a predates it), run on one reserved H200 with the hardened submission pattern (explicit --job-name, python -u, merged stderr, 30 s heartbeat, TMPDIR=/tmp, hours not the debug cap), with every row whose qualification, selected primaries or retained-failure classification differs from the committed bank reported explicitly in the receipt rather than silently absorbed",
+          "id": "sto-mast-bank-telemetry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141736915762-sto-mast-bank-telemetry/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-bank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:17:47Z",
+        "completed_at": "2026-09-01T14:38:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1215,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1215,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141736915762-sto-mast-bank-telemetry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d55-53f3-7271-a866-ca59e431e5b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9603584,
+            "cached_input_tokens_cumulative": 9603584,
+            "input_tokens": 9829085,
+            "input_tokens_cumulative": 9829085,
+            "output_tokens": 28867,
+            "output_tokens_cumulative": 28867,
+            "reasoning_output_tokens": 13242,
+            "reasoning_output_tokens_cumulative": 13242
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4535,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 8135,
+              "log_age_seconds": 4785,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 4813,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1219
+    "_version": 1226
   }
 }

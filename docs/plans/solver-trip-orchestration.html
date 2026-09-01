@@ -21,6 +21,8 @@
 <title>Solver trip orchestration | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -39,18 +41,23 @@
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="settled-exit-policy" data-choice="" data-by="" data-when="">
-<p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3's histogram and test surface are banked?</p>
-<p class="r-dec-rat"></p>
-</div>
+    <p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3&#x27;s histogram and test surface are banked?</p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-sto-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-trip-orchestration" data-resolved-at="" data-resolved-by="">
-<h4 class="r-fu-title">Run the three orchestration investigations</h4>
-<div class="r-fu-body">Measure the compile cadence and its decomposition (§1), attribute the per-trip orchestration quantum to named sub-stages (§2), and mine the committed bank telemetry for the active-set settlement histogram with a projected mean-trip ms/slice (§3). Each section lands a receipt with numbers; the settled-exit policy itself stays an open lead decision fed by §3.</div>
-<pre class="r-fu-prompt">/reckon-ship solver-trip-orchestration</pre>
-</article>
+    <h4 class="r-fu-title">Run the three orchestration investigations</h4>
+    <div class="r-fu-body">Measure the compile cadence and its decomposition (§1), attribute the per-trip orchestration quantum to named sub-stages (§2), and mine the committed bank telemetry for the active-set settlement histogram with a projected mean-trip ms/slice (§3). Each section lands a receipt with numbers; the settled-exit policy itself stays an open lead decision fed by §3.</div>
+    <pre class="r-fu-prompt">/reckon-ship solver-trip-orchestration</pre>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T141736915762-sto-mast-bank-telemetry" data-who="sto-bank" data-when="2026-09-01T14:38:02Z">
+    <div class="r-comment-body"><p>Two launch failures with different corrections, zero rows regenerated, artifacts untouched (digests verified): job 1260792 duplicate-venv wrap defect (2 s, exit 2), job 1260801 GPU-only JAX platform breaking jax.debug.callback CPU lookup (3m17s, exit 1). Root cause named: next launch needs JAX_PLATFORMS=cuda,cpu</p></div>
+</div>
 </section>
 </main>
 </body>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="efit-fixed-input-reproduction">
+  <meta name="plan-title" content="EFIT fixed-input reproduction">
+  <meta name="plan-summary" content="Pinned launch and harvest contract for EFIT zero-iteration formulation residuals and cold-start forward reproductions">
+  <meta name="plan-status" content="active">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-09-01">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,efit,diii-d,mast,grad-shafranov,slurm">
+  <title>EFIT fixed-input reproduction | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Durable measurement launch &middot; scientific result pending</p>
+      <h1>EFIT formulation residuals and cold-start reproductions are queued</h1>
+      <p class="lead">
+        SLURM job <strong>1260038</strong> was submitted exactly once to
+        <code>vega</code> from clean source <code>c0401ce8&hellip;</code>. It will
+        measure the coil-independent, zero-iteration interior Grad&ndash;Shafranov
+        residual of EFIT&rsquo;s own flux at source-grid strides 1 and 2 for MAST
+        and DIII-D, then run both validation solves from production cold seeds.
+        SLURM accepted <strong>48 hours</strong>, 16 CPUs and 128 GiB. The job is
+        pending on priority at this handoff; this page makes no convergence or
+        formulation claim before harvest.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Locked interpretation.</strong> The boundary gate is one quarter
+        of each machine&rsquo;s source EFIT grid minimum width. EFIT&rsquo;s
+        <code>psi</code> is used only for the zero-iteration formulation test;
+        neither solve is seeded with it. A cold-start failure remains a finding.
+      </p>
+    </aside>
+
+    <section id="measurement-split">
+      <h2>Two authorities, kept separate</h2>
+      <figure>
+        <svg viewBox="0 0 980 290" role="img" aria-labelledby="split-title split-desc">
+          <title id="split-title">Zero-iteration and cold-start measurement flow</title>
+          <desc id="split-desc">EFIT psi and flux functions enter a coil-free interior operator residual at two strides. Separately, cold seeds enter MAST with EFIT fitted currents and DIII-D with shipped inference currents. Both routes produce durable receipts for a later harvest.</desc>
+          <defs>
+            <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#135d6a"/>
+            </marker>
+          </defs>
+          <rect x="20" y="80" width="175" height="120" rx="8" fill="#eef6f7" stroke="#135d6a"/>
+          <text x="108" y="109" text-anchor="middle" font-size="15">EFIT data</text>
+          <text x="108" y="136" text-anchor="middle" font-size="12">psi, p-prime, FF-prime</text>
+          <text x="108" y="161" text-anchor="middle" font-size="12">axis, X and LCFS</text>
+          <text x="108" y="184" text-anchor="middle" font-size="12">native source axes</text>
+          <line x1="195" y1="115" x2="275" y2="75" stroke="#135d6a" stroke-width="3" marker-end="url(#flow-arrow)"/>
+          <line x1="195" y1="165" x2="275" y2="215" stroke="#135d6a" stroke-width="3" marker-end="url(#flow-arrow)"/>
+          <rect x="285" y="20" width="255" height="110" rx="8" fill="#f5f0fa" stroke="#512b81"/>
+          <text x="413" y="49" text-anchor="middle" font-size="15">Zero iteration &middot; both machines</text>
+          <text x="413" y="75" text-anchor="middle" font-size="12">interior conservation ledger</text>
+          <text x="413" y="98" text-anchor="middle" font-size="12">stride 1 beside stride 2</text>
+          <text x="413" y="119" text-anchor="middle" font-size="12">no coil-current term</text>
+          <rect x="285" y="160" width="255" height="110" rx="8" fill="#fff8e7" stroke="#9a6b00"/>
+          <text x="413" y="189" text-anchor="middle" font-size="15">Cold-start solves &middot; stride 1</text>
+          <text x="413" y="215" text-anchor="middle" font-size="12">MAST: 101 fitted efm circuits</text>
+          <text x="413" y="238" text-anchor="middle" font-size="12">DIII-D: shipped 24-conductor inference</text>
+          <text x="413" y="259" text-anchor="middle" font-size="12">per-trip and per-iteration telemetry</text>
+          <line x1="540" y1="75" x2="620" y2="110" stroke="#135d6a" stroke-width="3" marker-end="url(#flow-arrow)"/>
+          <line x1="540" y1="215" x2="620" y2="175" stroke="#135d6a" stroke-width="3" marker-end="url(#flow-arrow)"/>
+          <rect x="630" y="70" width="185" height="135" rx="8" fill="#f4f4f4" stroke="#555"/>
+          <text x="723" y="101" text-anchor="middle" font-size="15">Durable evidence</text>
+          <text x="723" y="128" text-anchor="middle" font-size="12">strict JSON receipts</text>
+          <text x="723" y="151" text-anchor="middle" font-size="12">relative residual fields</text>
+          <text x="723" y="174" text-anchor="middle" font-size="12">four-panel PNG</text>
+          <text x="723" y="195" text-anchor="middle" font-size="12">complete job log</text>
+          <line x1="815" y1="138" x2="865" y2="138" stroke="#135d6a" stroke-width="3" marker-end="url(#flow-arrow)"/>
+          <rect x="875" y="98" width="85" height="80" rx="8" fill="#eef6f7" stroke="#135d6a"/>
+          <text x="918" y="130" text-anchor="middle" font-size="15">Harvest</text>
+          <text x="918" y="153" text-anchor="middle" font-size="12">findings</text>
+        </svg>
+        <figcaption>
+          The zero-iteration arm detects formulation disagreement without any
+          external-current contribution. The solve arm answers a different
+          question: whether the fixed inputs are reachable from Nova&rsquo;s cold
+          initialisation. The generated four-panel residual-field figure will
+          be harvested from the durable output directory named below.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="operand-authority">
+      <h2>Operand and current authority</h2>
+      <table>
+        <caption>Exactly two declared validation operands</caption>
+        <thead>
+          <tr><th>Operand</th><th>Zero-iteration source</th><th>Cold-start current source</th><th>Interpretation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MAST 22086/43 pure</td>
+            <td>EFIT <code>psirz</code>, p-prime and FF-prime</td>
+            <td><code>efm/fcoil_c</code> in zero-based <code>fcoil_n</code> order; all 101 fitted circuits</td>
+            <td>Clean fixed-input reproduction</td>
+          </tr>
+          <tr>
+            <td>DIII-D <code>d3d_shot_002495e835:146</code></td>
+            <td>EFIT <code>psirz</code> and <code>extract_flux_functions</code> p-prime/FF-prime</td>
+            <td>Shipped 24-conductor inference vector from fixed wiring; explicitly not EFIT fitted currents</td>
+            <td>Bounded-below indicator, not a clean reproduction</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>Named data gap:</strong> the declared DIII-D parquet schema has
+        no EFIT fitted-current vector. The job does not substitute the
+        Tikhonov regression equivalents because deriving currents from the
+        same flux residual would make this validation circular. A clean DIII-D
+        reproduction therefore requires an externally sourced fitted-current
+        vector in a future measurement.
+      </p>
+    </section>
+
+    <section id="scheduler">
+      <h2>Scheduler and source receipt</h2>
+      <table>
+        <caption>Accepted durable allocation at handoff</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1260038</code></td></tr>
+          <tr><th scope="row">State at handoff</th><td>PENDING, reason Priority</td></tr>
+          <tr><th scope="row">Partition</th><td><code>vega</code>; <code>MaxTime=UNLIMITED</code></td></tr>
+          <tr><th scope="row">Allocation</th><td>1 node, 16 CPUs, 128 GiB</td></tr>
+          <tr><th scope="row">Accepted time limit</th><td><code>2-00:00:00</code></td></tr>
+          <tr><th scope="row">Submitted</th><td>2026-09-01 08:09:00 +02:00</td></tr>
+          <tr><th scope="row">Source HEAD</th><td><code>c0401ce8868aa5c9ca2238e8a76add2009ab3365</code>; clean <code>origin/main</code> snapshot</td></tr>
+          <tr><th scope="row">Batch script SHA-256</th><td><code>a8a9f3ea1af2fd05f3ca53caa6579648c8e7d87d9fa72a9d305c9200a0b9b3b3</code></td></tr>
+          <tr><th scope="row">Measurement wrapper SHA-256</th><td><code>7ae609b311ef27c1d42ecaad8843e4f6e7021d112248971867761ed1a63b1e9c</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        Login preflight used the same absolute command and arguments as the
+        submitted job, with only its preflight mode changing execution. It
+        resolved exactly the two declared identities, invoked
+        <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> directly,
+        observed <code>VIRTUAL_ENV</code> absent, and pinned
+        <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv</code>.
+        The batch execution also pins CPU JAX, float64 and durable writable
+        cache directories.
+      </p>
+    </section>
+
+    <section id="input-identity">
+      <h2>Transported DIII-D wall identity</h2>
+      <table>
+        <caption>Verified before the only submission</caption>
+        <tbody>
+          <tr><th scope="row">Wall transport text SHA-256</th><td><code>ae63ee3840033eba861e7021f584c03e94882ece3b95ecdc00fb1b63d1cc602a</code>; 4,444 characters</td></tr>
+          <tr><th scope="row">Decoded coordinate identity</th><td><code>a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8</code>; finite, closed, 84 &times; 2 float64</td></tr>
+          <tr><th scope="row">Machine-artifact digest</th><td><code>sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e</code></td></tr>
+          <tr><th scope="row">Machine-description file SHA-256</th><td><code>11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="harvest">
+      <h2>Harvest contract and durable paths</h2>
+      <table>
+        <caption>Outputs survive removal of this worker worktree</caption>
+        <tbody>
+          <tr><th scope="row">Complete log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T055212194147-sse-efit-fixed-input-reproduction/slurm-1260038.log</code></td></tr>
+          <tr><th scope="row">Output directory</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T055212194147-sse-efit-fixed-input-reproduction/job-output</code></td></tr>
+          <tr><th scope="row">Zero-iteration receipt</th><td><code>job-output/zero_iteration_receipt.json</code></td></tr>
+          <tr><th scope="row">Residual-field figure</th><td><code>job-output/zero_iteration_residual_fields.png</code></td></tr>
+          <tr><th scope="row">Residual-field arrays</th><td><code>job-output/zero_iteration_residual_fields.npz</code></td></tr>
+          <tr><th scope="row">MAST cold-start receipt</th><td><code>job-output/mast_cold_solve_receipt.json</code></td></tr>
+          <tr><th scope="row">DIII-D cold-start receipt</th><td><code>job-output/diiid_cold_solve_receipt.json</code></td></tr>
+          <tr><th scope="row">Final strict receipt</th><td><code>job-output/fixed_input_reproduction_receipt.json</code></td></tr>
+          <tr><th scope="row">Artifact digest list</th><td><code>job-output/artifact-digests.sha256</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        Harvest must require a terminal scheduler success, a log ending in
+        <code>EXIT_MARKER=0</code>, strict JSON, the four zero-iteration rows,
+        both named cold-start solve rows, and a non-empty spatial figure before
+        reporting any number. It must report source dimensions and extents,
+        minimum cell widths, quarter-width gates, stride cost ratios, residual
+        locations relative to the EFIT axis/X/boundary, terminal residuals and
+        trips, and shared-comparator RMS/sup/saddle distances. Until those checks
+        pass, there is no result to soften or promote.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

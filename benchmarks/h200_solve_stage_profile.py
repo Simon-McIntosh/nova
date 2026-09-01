@@ -364,9 +364,16 @@ def _ranked_candidates(
     first_stage_ms = (
         COMPARISON_BASELINE_MS * shares["reconciliation_newton_setup_and_first_krylov"]
     )
+    active_trips = factorial["trip_counts"]["active_set_outer_iterations"]["median"]
+    scan_ceiling_ms = active_trips * SCAN_ITERATION_US / 1.0e3
+    transfers = operator["device_transfers"]
+    boundary_transfer_ms = (
+        transfers["host_to_device"]["median_ms_per_member"]
+        + transfers["device_to_host"]["median_ms_per_member"]
+    )
     candidates = [
         (
-            "reduce active-set reconciliation and repeated topology reads",
+            "reduce sixteen active-set and Newton trips",
             first_stage_ms
             * (
                 map_share["topology_and_primary_masks_ms"]
@@ -395,6 +402,28 @@ def _ranked_candidates(
             "remove the warmup sweep",
             COMPARISON_BASELINE_MS * shares["one_warmup_sweep"],
             "banked warmup factorial slope",
+        ),
+        (
+            "remove scan-loop bookkeeping",
+            scan_ceiling_ms,
+            "banked 7.6 microseconds per iteration times 16 measured trips",
+        ),
+        (
+            "retain device residency",
+            0.0,
+            "solve timer already excludes transfers; measured boundary cost is "
+            f"{boundary_transfer_ms:.6f} ms per slice",
+        ),
+        (
+            "remove host callbacks",
+            0.0,
+            "fresh closed-jaxpr census found zero callback primitives",
+        ),
+        (
+            "precompile and reuse the executable",
+            0.0,
+            "compile is separated from steady state and therefore has zero "
+            "steady-state Amdahl ceiling",
         ),
     ]
     rows = []
@@ -433,8 +462,8 @@ def _plot(receipt: dict[str, Any], output: Path) -> None:
     values = [parts[name] for name in parts]
     axes[0].barh(labels, values, color=("#4c78a8", "#72b7b2", "#f58518", "#e45756"))
     axes[0].invert_yaxis()
-    axes[0].set_xlabel("H200 ms per member map")
-    axes[0].set_title(f"Fresh additive map split, width {width}")
+    axes[0].set_xlabel("H200 ms per member map; negative means fusion benefit")
+    axes[0].set_title(f"Nested program differences, width {width}")
     for index, value in enumerate(values):
         axes[0].text(value, index, f" {value:.3f}", va="center", fontsize=8)
 

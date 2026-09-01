@@ -1,0 +1,635 @@
+{
+  "banked_solve_factorials": [
+    {
+      "arms": [
+        {
+          "compile_and_first_execute_seconds": 386.45735125709325,
+          "gmres_iterations": 1,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w32-w1-g1.json",
+          "sha256": "43326656a6e2136f563dbee802859a839501bb60c98e45a7410e645e98d10da7",
+          "steady_median_batch_seconds": 35.954692489,
+          "warmup_sweeps": 1
+        },
+        {
+          "compile_and_first_execute_seconds": 385.0326391644776,
+          "gmres_iterations": 4,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w32-w1-g4.json",
+          "sha256": "d551378f23984c813b6b0e90ad7052df589b23281bb0d52d239ed6dcc1ac074f",
+          "steady_median_batch_seconds": 36.520445217,
+          "warmup_sweeps": 1
+        },
+        {
+          "compile_and_first_execute_seconds": 395.3134363265708,
+          "gmres_iterations": 1,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w32-w2-g1.json",
+          "sha256": "5bc409d0d02a133c63d8c51af6e13e0fea381ba6f4e24b2a3171f593c296e64f",
+          "steady_median_batch_seconds": 36.894674238,
+          "warmup_sweeps": 2
+        },
+        {
+          "compile_and_first_execute_seconds": 393.1683360654861,
+          "gmres_iterations": 4,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w32-w2-g4.json",
+          "sha256": "86703766bbe593289b1b055946269aeed276ad2b107445cdd1bbe10b20b5415a",
+          "steady_median_batch_seconds": 37.409157218,
+          "warmup_sweeps": 2
+        }
+      ],
+      "coefficients_batch_seconds": {
+        "per_additional_gmres_action": 0.17243041683332389,
+        "per_warmup_sweep": 0.8868056441666549,
+        "reconciliation_newton_setup_and_first_krylov": 35.10120748375002
+      },
+      "method": "least-squares factorial over every banked warm sample: latency = intercept + warmup_sweeps*slope + (GMRES_iterations-1)*slope",
+      "selected_policy_observed_ms_per_member": 1140.7907618255201,
+      "selected_policy_stage_share": {
+        "one_warmup_sweep": 0.024292514725366015,
+        "reconciliation_newton_setup_and_first_krylov": 0.9615371815528051,
+        "three_additional_gmres_actions": 0.014170303721828828
+      },
+      "trip_counts": {
+        "accepted_newton_promotions": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "active_set_outer_iterations": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "attempted_newton_promotions": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "configured_gmres_inner_iterations": 4,
+        "configured_newton_steps_per_active_set_trip": 1,
+        "configured_warmup_sweeps": 1,
+        "converged_members": 0,
+        "member_count": 32,
+        "terminal_relative_residual": {
+          "maximum": 0.4657927980267833,
+          "median": 0.4657927980267833,
+          "minimum": 0.4657927980267833
+        }
+      }
+    },
+    {
+      "arms": [
+        {
+          "compile_and_first_execute_seconds": 798.5089263487607,
+          "gmres_iterations": 1,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w1024-w1-g1.json",
+          "sha256": "3091a6bfd2d8756bf66845d32bb2f155ff9ead3eed484555c7e3e7c55e743b84",
+          "steady_median_batch_seconds": 422.891009683,
+          "warmup_sweeps": 1
+        },
+        {
+          "compile_and_first_execute_seconds": 800.5615774514154,
+          "gmres_iterations": 4,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w1024-w1-g4.json",
+          "sha256": "595c714d4c90477e52361c7c16667ba611ad780fec4acde6071a32de86c8eaf4",
+          "steady_median_batch_seconds": 427.245281383,
+          "warmup_sweeps": 1
+        },
+        {
+          "compile_and_first_execute_seconds": 816.1088079279289,
+          "gmres_iterations": 1,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w1024-w2-g1.json",
+          "sha256": "c1244741b889ae87e161bc1b368894d44fed9db83af20a127d0477a578a71609",
+          "steady_median_batch_seconds": 436.849136256,
+          "warmup_sweeps": 2
+        },
+        {
+          "compile_and_first_execute_seconds": 821.1790033290163,
+          "gmres_iterations": 4,
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/factorial-w1024-w2-g4.json",
+          "sha256": "07aea12a8a76a6417c4be75d180accb7122dea3d08e03258763f43bc4472ab37",
+          "steady_median_batch_seconds": 440.523779551,
+          "warmup_sweeps": 2
+        }
+      ],
+      "coefficients_batch_seconds": {
+        "per_additional_gmres_action": 1.2795446774442876,
+        "per_warmup_sweep": 13.59052813966652,
+        "reconciliation_newton_setup_and_first_krylov": 409.5338514000002
+      },
+      "method": "least-squares factorial over every banked warm sample: latency = intercept + warmup_sweeps*slope + (GMRES_iterations-1)*slope",
+      "selected_policy_observed_ms_per_member": 416.9560679414058,
+      "selected_policy_stage_share": {
+        "one_warmup_sweep": 0.03183069190459216,
+        "reconciliation_newton_setup_and_first_krylov": 0.9591787540888239,
+        "three_additional_gmres_actions": 0.008990554006583867
+      },
+      "trip_counts": {
+        "accepted_newton_promotions": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "active_set_outer_iterations": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "attempted_newton_promotions": {
+          "maximum": 16,
+          "median": 16.0,
+          "minimum": 16
+        },
+        "configured_gmres_inner_iterations": 4,
+        "configured_newton_steps_per_active_set_trip": 1,
+        "configured_warmup_sweeps": 1,
+        "converged_members": 0,
+        "member_count": 1024,
+        "terminal_relative_residual": {
+          "maximum": 0.46579279802678114,
+          "median": 0.46579279802678114,
+          "minimum": 0.46579279802678114
+        }
+      }
+    }
+  ],
+  "comparison_width": 1024,
+  "compile_amortization": {
+    "compile_ms_per_slice_at_1000000_slices": 0.8005615774514153,
+    "compile_ms_per_slice_at_10000_slices": 80.05615774514153,
+    "method": "banked compile-and-first-execute seconds divided by delivered member slices",
+    "slices_to_amortize_compile_below_1_ms": 800562,
+    "width_1024_warmup_1_gmres_4_compile_seconds": 800.5615774514154
+  },
+  "configuration": {
+    "comparison_baseline_ms_per_slice": 42.77,
+    "comparison_gap_ms_per_slice": 41.77,
+    "steady_samples_per_probe": 10,
+    "target_ms_per_slice": 1.0,
+    "widths": [
+      32,
+      1024
+    ]
+  },
+  "device": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "id": 0,
+    "jax_enable_x64": true,
+    "jax_version": "0.11.0",
+    "kind": "NVIDIA H200 NVL",
+    "memory_bytes_limit": 112585605120,
+    "peak_device_memory_bytes": 11586638592,
+    "platform": "gpu"
+  },
+  "driver": {
+    "path": "benchmarks/h200_solve_stage_profile.py",
+    "sha256": "26e11617b2b237b1eace87a20d07a8a6de6d8beba10a5ebfa45d427ec2d69692"
+  },
+  "evidence_inputs": {
+    "banked_evidence_reused": "warmup/GMRES factorial, compile time, Newton promotions, active-set trips, terminal residuals, and conditioning timing are not remeasured",
+    "banked_step_decomposition_run": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition",
+    "committed_ladder": {
+      "lead_stated_comparison_ms_per_slice": 42.77,
+      "path": "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json",
+      "provenance_warning": "the ladder arithmetic is not 42.77 ms; 42.77 ms is retained as the separately stated comparison baseline rather than attributed to the JSON row",
+      "sha256": "81e1f6e0024e3cbae1832350da3b14f406bfcf06075736caa9832678095b8ea5",
+      "width_1024_recorded_ms_per_member_slice": 373.80547193733724,
+      "width_1024_slices_per_second": 2.6751338680619385
+    },
+    "jax_scan_latency": {
+      "estimated_16_trip_ceiling_ms_per_slice": 0.1216,
+      "microseconds_per_iteration": 7.6,
+      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/live-plan-context.log"
+    }
+  },
+  "measurement_state": "complete",
+  "operator_profiles": [
+    {
+      "additive_nested_differences_ms_per_member_map": {
+        "dense_response_after_carrier_ms": -0.020479390514083207,
+        "profile_carrier_after_topology_ms": -0.7507710542995483,
+        "shadow_mask_and_map_composition_ms": 0.4529151483438909,
+        "topology_and_primary_masks_ms": 2.479118818882853
+      },
+      "additive_sum_ms_per_member_map": 2.1607835224131122,
+      "device_transfers": {
+        "device_to_host": {
+          "iqr_batch_seconds": 1.0624527931213379e-05,
+          "iqr_ms_per_member": 0.0003320164978504181,
+          "maximum_batch_seconds": 0.0006075799465179443,
+          "median_batch_seconds": 1.4469027519226074e-05,
+          "median_ms_per_member": 0.0004521571099758148,
+          "minimum_batch_seconds": 1.047179102897644e-05,
+          "sample_count": 10,
+          "samples_seconds": [
+            0.0006075799465179443,
+            0.00010636821389198303,
+            1.4505349099636078e-05,
+            1.9626691937446594e-05,
+            1.047179102897644e-05,
+            1.4076009392738342e-05,
+            1.2258067727088928e-05,
+            1.0544434189796448e-05,
+            1.443270593881607e-05,
+            2.4573877453804016e-05
+          ]
+        },
+        "host_to_device": {
+          "iqr_batch_seconds": 0.0001886745449155569,
+          "iqr_ms_per_member": 0.005896079528611153,
+          "maximum_batch_seconds": 0.0008866777643561363,
+          "median_batch_seconds": 0.00015678023919463158,
+          "median_ms_per_member": 0.004899382474832237,
+          "minimum_batch_seconds": 0.00012016948312520981,
+          "sample_count": 10,
+          "samples_seconds": [
+            0.0008866777643561363,
+            0.0003861254081130028,
+            0.0004790863022208214,
+            0.00016528647392988205,
+            0.0001765042543411255,
+            0.0001482740044593811,
+            0.00014516431838274002,
+            0.0001450059935450554,
+            0.00013347715139389038,
+            0.00012016948312520981
+          ]
+        },
+        "payload_bytes": 175616,
+        "solve_timer_residency": "inputs and outputs remain device-resident; these boundary probes are reported separately and are not added to the solve stages"
+      },
+      "host_callbacks": {
+        "callback_primitive_count": 0,
+        "callback_primitives": [],
+        "method": "recursive primitive census of the complete-map closed jaxpr"
+      },
+      "negative_difference_warning": true,
+      "programs": {
+        "carrier_cell_current": {
+          "compile_seconds": 4.106564263813198,
+          "first_execute_seconds": 0.06714514456689358,
+          "steady": {
+            "iqr_batch_seconds": 5.985656753182411e-05,
+            "iqr_ms_per_member": 0.0018705177353695035,
+            "maximum_batch_seconds": 0.05546034965664148,
+            "median_batch_seconds": 0.055307128466665745,
+            "median_ms_per_member": 1.7283477645833045,
+            "minimum_batch_seconds": 0.05515530705451965,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.05529697146266699,
+              0.05537975672632456,
+              0.05515530705451965,
+              0.05526966601610184,
+              0.05523698963224888,
+              0.05546034965664148,
+              0.0553172854706645,
+              0.05527739133685827,
+              0.055335596203804016,
+              0.05531902704387903
+            ]
+          }
+        },
+        "complete_flux_map": {
+          "compile_seconds": 15.10884714126587,
+          "first_execute_seconds": 0.09929113276302814,
+          "steady": {
+            "iqr_batch_seconds": 4.9097463488578796e-05,
+            "iqr_ms_per_member": 0.0015342957340180874,
+            "maximum_batch_seconds": 0.06917876098304987,
+            "median_batch_seconds": 0.06914507271721959,
+            "median_ms_per_member": 2.1607835224131122,
+            "minimum_batch_seconds": 0.0690210061147809,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.06917461007833481,
+              0.06917876098304987,
+              0.06910611130297184,
+              0.06916223652660847,
+              0.0691598616540432,
+              0.06907894741743803,
+              0.06914133857935667,
+              0.06914880685508251,
+              0.06913184747099876,
+              0.0690210061147809
+            ]
+          }
+        },
+        "plasma_response": {
+          "compile_seconds": 5.289289557375014,
+          "first_execute_seconds": 0.07377285417169333,
+          "steady": {
+            "iqr_batch_seconds": 6.12128060311079e-05,
+            "iqr_ms_per_member": 0.001912900188472122,
+            "maximum_batch_seconds": 0.054725151509046555,
+            "median_batch_seconds": 0.05465178797021508,
+            "median_ms_per_member": 1.7078683740692213,
+            "minimum_batch_seconds": 0.05446185451000929,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.054693580605089664,
+              0.054649402387440205,
+              0.054707703180611134,
+              0.05468222312629223,
+              0.054725151509046555,
+              0.0546352993696928,
+              0.05446185451000929,
+              0.05465417355298996,
+              0.05462760478258133,
+              0.054579438641667366
+            ]
+          }
+        },
+        "topology_read": {
+          "compile_seconds": 9.922532328404486,
+          "first_execute_seconds": 0.4099666913971305,
+          "steady": {
+            "iqr_batch_seconds": 8.01661517471075e-05,
+            "iqr_ms_per_member": 0.0025051922420971096,
+            "maximum_batch_seconds": 0.07943308539688587,
+            "median_batch_seconds": 0.07933180220425129,
+            "median_ms_per_member": 2.479118818882853,
+            "minimum_batch_seconds": 0.07925610803067684,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.07932745665311813,
+              0.07933614775538445,
+              0.0793832279741764,
+              0.07937222719192505,
+              0.07934006210416555,
+              0.07929795049130917,
+              0.07927937619388103,
+              0.07925995625555515,
+              0.07925610803067684,
+              0.07943308539688587
+            ]
+          }
+        }
+      },
+      "width": 32
+    },
+    {
+      "additive_nested_differences_ms_per_member_map": {
+        "dense_response_after_carrier_ms": -0.0003563791324268095,
+        "profile_carrier_after_topology_ms": -0.26326996839998174,
+        "shadow_mask_and_map_composition_ms": 0.017075668893085094,
+        "topology_and_primary_masks_ms": 1.030215466471418
+      },
+      "additive_sum_ms_per_member_map": 0.7836647878320946,
+      "device_transfers": {
+        "device_to_host": {
+          "iqr_batch_seconds": 2.1177344024181366e-05,
+          "iqr_ms_per_member": 2.0681000023614615e-05,
+          "maximum_batch_seconds": 0.0015186630189418793,
+          "median_batch_seconds": 1.0613817721605301e-05,
+          "median_ms_per_member": 1.0365056368755177e-05,
+          "minimum_batch_seconds": 7.08363950252533e-06,
+          "sample_count": 10,
+          "samples_seconds": [
+            0.0015186630189418793,
+            3.187358379364014e-05,
+            1.1927448213100433e-05,
+            1.8176622688770294e-05,
+            7.781200110912323e-06,
+            9.300187230110168e-06,
+            7.08363950252533e-06,
+            7.102265954017639e-06,
+            7.090158760547638e-06,
+            4.115235060453415e-05
+          ]
+        },
+        "host_to_device": {
+          "iqr_batch_seconds": 0.00016139401122927666,
+          "iqr_ms_per_member": 0.00015761133909109049,
+          "maximum_batch_seconds": 0.0011338870972394943,
+          "median_batch_seconds": 0.0010093864984810352,
+          "median_ms_per_member": 0.000985729002422886,
+          "minimum_batch_seconds": 0.0008539343252778053,
+          "sample_count": 10,
+          "samples_seconds": [
+            0.001050783321261406,
+            0.0011338870972394943,
+            0.0010261088609695435,
+            0.0008630352094769478,
+            0.0010517491027712822,
+            0.0008913520723581314,
+            0.0008897008374333382,
+            0.0010595927014946938,
+            0.0008539343252778053,
+            0.000992664135992527
+          ]
+        },
+        "payload_bytes": 5619712,
+        "solve_timer_residency": "inputs and outputs remain device-resident; these boundary probes are reported separately and are not added to the solve stages"
+      },
+      "host_callbacks": {
+        "callback_primitive_count": 0,
+        "callback_primitives": [],
+        "method": "recursive primitive census of the complete-map closed jaxpr"
+      },
+      "negative_difference_warning": true,
+      "programs": {
+        "carrier_cell_current": {
+          "compile_seconds": 4.482581206597388,
+          "first_execute_seconds": 0.7977293906733394,
+          "steady": {
+            "iqr_batch_seconds": 0.0002463622950017452,
+            "iqr_ms_per_member": 0.00024058817871264182,
+            "maximum_batch_seconds": 0.7855268884450197,
+            "median_batch_seconds": 0.7853521900251508,
+            "median_ms_per_member": 0.7669454980714363,
+            "minimum_batch_seconds": 0.7850721646100283,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.7855268884450197,
+              0.7851191218942404,
+              0.7854519439861178,
+              0.7854864085093141,
+              0.7853572005406022,
+              0.7853471795096993,
+              0.7850721646100283,
+              0.7853909432888031,
+              0.7853446695953608,
+              0.7851388854905963
+            ]
+          }
+        },
+        "complete_flux_map": {
+          "compile_seconds": 13.527485634200275,
+          "first_execute_seconds": 0.8382991962134838,
+          "steady": {
+            "iqr_batch_seconds": 0.000359570374712348,
+            "iqr_ms_per_member": 0.00035114294405502733,
+            "maximum_batch_seconds": 0.8029206721112132,
+            "median_batch_seconds": 0.8024727427400649,
+            "median_ms_per_member": 0.7836647878320946,
+            "minimum_batch_seconds": 0.8023589327931404,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.8029206721112132,
+              0.8027944341301918,
+              0.8028019750490785,
+              0.8028099657967687,
+              0.8024036735296249,
+              0.8023589327931404,
+              0.8024414693936706,
+              0.802482289262116,
+              0.8024402027949691,
+              0.8024631962180138
+            ]
+          }
+        },
+        "plasma_response": {
+          "compile_seconds": 5.128416637890041,
+          "first_execute_seconds": 0.7983077066019177,
+          "steady": {
+            "iqr_batch_seconds": 0.00016718381084501743,
+            "iqr_ms_per_member": 0.00016326544027833734,
+            "maximum_batch_seconds": 0.7852146308869123,
+            "median_batch_seconds": 0.7849872577935457,
+            "median_ms_per_member": 0.7665891189390095,
+            "minimum_batch_seconds": 0.7847843589261174,
+            "sample_count": 10,
+            "samples_seconds": [
+              0.7850688695907593,
+              0.7849983312189579,
+              0.7852146308869123,
+              0.785069796256721,
+              0.7848874274641275,
+              0.784846305847168,
+              0.7847843589261174,
+              0.7849761843681335,
+              0.7850516065955162,
+              0.7849271977320313
+            ]
+          }
+        },
+        "topology_read": {
+          "compile_seconds": 9.852868098765612,
+          "first_execute_seconds": 1.2366407066583633,
+          "steady": {
+            "iqr_batch_seconds": 0.0001224216539412737,
+            "iqr_ms_per_member": 0.00011955239642702509,
+            "maximum_batch_seconds": 1.055156733840704,
+            "median_batch_seconds": 1.054940637666732,
+            "median_ms_per_member": 1.030215466471418,
+            "minimum_batch_seconds": 1.0546717820689082,
+            "sample_count": 10,
+            "samples_seconds": [
+              1.0548301003873348,
+              1.0549408961087465,
+              1.0549148125573993,
+              1.0549403792247176,
+              1.0546717820689082,
+              1.055156733840704,
+              1.0549917770549655,
+              1.0550496215000749,
+              1.0548387132585049,
+              1.0549453077837825
+            ]
+          }
+        }
+      },
+      "width": 1024
+    }
+  ],
+  "ranked_speedup_candidates": [
+    {
+      "candidate": "reduce sixteen active-set and Newton trips",
+      "fraction_of_41_77_ms_target_gap_closed": 0.982142095101245,
+      "ideal_remaining_ms_per_slice": 1.7459246876209988,
+      "ideal_speedup_x": 24.49704749766641,
+      "maximum_removable_ms_per_slice": 41.024075312379004,
+      "measured_ceiling_basis": "fresh nested operator split apportioned within the banked factorial intercept",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "compress Newton setup and the first Krylov action",
+      "fraction_of_41_77_ms_target_gap_closed": 0.982142095101245,
+      "ideal_remaining_ms_per_slice": 1.7459246876209988,
+      "ideal_speedup_x": 24.49704749766641,
+      "maximum_removable_ms_per_slice": 41.024075312379004,
+      "measured_ceiling_basis": "banked factorial intercept; overlaps the operator-specific candidates",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "remove the warmup sweep",
+      "fraction_of_41_77_ms_target_gap_closed": 0.03259273863441242,
+      "ideal_remaining_ms_per_slice": 41.408601307240595,
+      "ideal_speedup_x": 1.0328771957946177,
+      "maximum_removable_ms_per_slice": 1.3613986927594068,
+      "measured_ceiling_basis": "banked warmup factorial slope",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "remove three additional GMRES actions",
+      "fraction_of_41_77_ms_target_gap_closed": 0.009205793508776441,
+      "ideal_remaining_ms_per_slice": 42.38547400513841,
+      "ideal_speedup_x": 1.0090721173677324,
+      "maximum_removable_ms_per_slice": 0.384525994861592,
+      "measured_ceiling_basis": "banked GMRES factorial slope",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "remove scan-loop bookkeeping",
+      "fraction_of_41_77_ms_target_gap_closed": 0.0029111802729231504,
+      "ideal_remaining_ms_per_slice": 42.6484,
+      "ideal_speedup_x": 1.0028512206788531,
+      "maximum_removable_ms_per_slice": 0.1216,
+      "measured_ceiling_basis": "banked 7.6 microseconds per iteration times 16 measured trips",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "fuse or sparsify the dense plasma response",
+      "fraction_of_41_77_ms_target_gap_closed": 0.0,
+      "ideal_remaining_ms_per_slice": 42.77,
+      "ideal_speedup_x": 1.0,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "fresh nested operator split apportioned within the banked factorial intercept",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "retain device residency",
+      "fraction_of_41_77_ms_target_gap_closed": 0.0,
+      "ideal_remaining_ms_per_slice": 42.77,
+      "ideal_speedup_x": 1.0,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "solve timer already excludes transfers; measured boundary cost is 0.000996 ms per slice",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "remove host callbacks",
+      "fraction_of_41_77_ms_target_gap_closed": 0.0,
+      "ideal_remaining_ms_per_slice": 42.77,
+      "ideal_speedup_x": 1.0,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "fresh closed-jaxpr census found zero callback primitives",
+      "reaches_1_ms_target_alone": false
+    },
+    {
+      "candidate": "precompile and reuse the executable",
+      "fraction_of_41_77_ms_target_gap_closed": 0.0,
+      "ideal_remaining_ms_per_slice": 42.77,
+      "ideal_speedup_x": 1.0,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "compile is separated from steady state and therefore has zero steady-state Amdahl ceiling",
+      "reaches_1_ms_target_alone": false
+    }
+  ],
+  "scheduler": {
+    "accepted_time_limit": "02:00:00",
+    "cpus_per_task": "4",
+    "job_gpus": "4",
+    "job_id": "1260762",
+    "job_name": "nova-solve-profile",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.h200_forward_solve_stage_profile",
+  "source_revision": "aaa1fb1f785e3c69342035a47f1bf6ebc871a9ef",
+  "verdict": {
+    "headline": "No isolated candidate can close the 41.77 ms comparison gap; the banked reconciliation/Newton/first-Krylov intercept is the dominant ceiling.",
+    "qualification": "Amdahl ceilings normalize measured stage shares to the mandated 42.77 ms baseline. They are ceilings, not a prediction that the stages can be eliminated independently.",
+    "required_action": "attack active-set reconciliation and its repeated topology/map evaluations together; transfer elimination and scan-loop overhead cannot materially move the target",
+    "target_reached": false
+  }
+}

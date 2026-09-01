@@ -1,0 +1,686 @@
+{
+  "schema": "nova.qualified_suffix_census/1",
+  "recorded_at": "2026-09-01",
+  "question": "why the strict settled exit never fires on the width-1024 workload",
+  "solver_source_modified": false,
+  "implementation_dispatched": false,
+  "constants": {
+    "trip_limit": 16,
+    "full_trip_floor_ms_per_slice": 1.75,
+    "target_ms_per_slice": 1.0,
+    "measured_full_trip_control_ms_per_member": 415.60787488197093
+  },
+  "evidence_inputs": {
+    "settlement_histogram": {
+      "path": "docs/figures/solver-trip-orchestration/settlement-histogram.json",
+      "sha256": "30e20c08252c4ec1e777d28229fd32664dab8381250a98236e4e387bb99c94ef"
+    },
+    "settled_exit_throughput": {
+      "path": "docs/figures/solver-trip-orchestration/settled-exit-throughput.json",
+      "sha256": "4d3cbd52f0f31407dac7871aa54ca96bd5cb15f88f6fa67ce29a42793514b3c5"
+    },
+    "mast_bank": {
+      "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "sha256": "f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053"
+    },
+    "diiid_bank": {
+      "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+      "sha256": "298f36f1093fdaca4e3430e569af061d97475f9c14922857c88d831563a0288b"
+    }
+  },
+  "qualified_suffix_census": {
+    "definition": {
+      "required_conjunction": [
+        "final observed active-set mask-difference suffix is zero",
+        "own-mask acceptance is enabled",
+        "the qualifying trip accepts zero Newton promotions",
+        "the retained result is bit-identical to the full recorded result"
+      ],
+      "deadline": "qualification must occur before trip 16",
+      "classification_authority": "reuse the landed paired bank replay; do not promote mask-only settlement or a merely improving residual history to strict qualification",
+      "telemetry_boundary": "the source banks do not store per-trip promotion counters or state hashes; the five strict classifications are therefore inherited from the landed paired replay rather than re-inferred from residual equality by this census"
+    },
+    "per_bank": {
+      "MAST": {
+        "declared_bank_members": 12,
+        "telemetry_observable_members": 6,
+        "telemetry_unavailable_members": 6,
+        "strict_qualified_members": 0,
+        "strict_qualified_fraction_of_observable": 0.0,
+        "strict_confirmed_fraction_of_declared_bank": 0.0,
+        "first_qualification_trip_histogram": {}
+      },
+      "DIII-D": {
+        "declared_bank_members": 5,
+        "telemetry_observable_members": 5,
+        "telemetry_unavailable_members": 0,
+        "strict_qualified_members": 5,
+        "strict_qualified_fraction_of_observable": 1.0,
+        "strict_confirmed_fraction_of_declared_bank": 1.0,
+        "first_qualification_trip_histogram": {
+          "3": 2,
+          "4": 1,
+          "5": 1,
+          "6": 1
+        }
+      }
+    },
+    "combined": {
+      "declared_bank_members": 17,
+      "telemetry_observable_members": 11,
+      "telemetry_unavailable_members": 6,
+      "strict_qualified_members": 5,
+      "strict_qualified_fraction_of_observable": 0.45454545454545453,
+      "strict_confirmed_fraction_of_declared_bank": 0.29411764705882354,
+      "first_qualification_trip_histogram": {
+        "3": 2,
+        "4": 1,
+        "5": 1,
+        "6": 1
+      },
+      "mask_only_settling_members": 10,
+      "mask_only_settling_fraction_of_observable": 0.9090909090909091
+    },
+    "rows": [
+      {
+        "machine": "MAST",
+        "identity": "21978/35 pure",
+        "recorded_trips": 4,
+        "mask_settlement_trip": null,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "non_settling_full_trip_fallback",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "no stable mask suffix was recorded"
+      },
+      {
+        "machine": "MAST",
+        "identity": "21983/35 pure",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 1,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "qualification_unproven_residual_progress",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "not established because the recorded residual improves"
+      },
+      {
+        "machine": "MAST",
+        "identity": "21985/51 pure",
+        "recorded_trips": 7,
+        "mask_settlement_trip": 4,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "qualification_unproven_residual_progress",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "not established because the recorded residual improves"
+      },
+      {
+        "machine": "MAST",
+        "identity": "21986/46 pure",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 1,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "qualification_unproven_residual_progress",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "not established because the recorded residual improves"
+      },
+      {
+        "machine": "MAST",
+        "identity": "21989/55 pure",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 1,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "qualification_unproven_residual_progress",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "not established because the recorded residual improves"
+      },
+      {
+        "machine": "MAST",
+        "identity": "22086/43 pure",
+        "recorded_trips": 7,
+        "mask_settlement_trip": 3,
+        "strict_qualified_before_trip_limit": false,
+        "first_strict_qualification_trip": null,
+        "classification": "qualification_unproven_residual_progress",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": null,
+        "bit_identical_retention_at_qualification": null,
+        "qualification_evidence": "not established because the recorded residual improves"
+      },
+      {
+        "machine": "DIII-D",
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 6,
+        "strict_qualified_before_trip_limit": true,
+        "first_strict_qualification_trip": 6,
+        "classification": "qualified_recorded_noop_suffix",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": true,
+        "bit_identical_retention_at_qualification": true,
+        "qualification_evidence": "retained result is a recorded no-op"
+      },
+      {
+        "machine": "DIII-D",
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 3,
+        "strict_qualified_before_trip_limit": true,
+        "first_strict_qualification_trip": 3,
+        "classification": "qualified_recorded_noop_suffix",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": true,
+        "bit_identical_retention_at_qualification": true,
+        "qualification_evidence": "retained result is a recorded no-op"
+      },
+      {
+        "machine": "DIII-D",
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 4,
+        "strict_qualified_before_trip_limit": true,
+        "first_strict_qualification_trip": 4,
+        "classification": "qualified_recorded_noop_suffix",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": true,
+        "bit_identical_retention_at_qualification": true,
+        "qualification_evidence": "retained result is a recorded no-op"
+      },
+      {
+        "machine": "DIII-D",
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 5,
+        "strict_qualified_before_trip_limit": true,
+        "first_strict_qualification_trip": 5,
+        "classification": "qualified_recorded_noop_suffix",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": true,
+        "bit_identical_retention_at_qualification": true,
+        "qualification_evidence": "retained result is a recorded no-op"
+      },
+      {
+        "machine": "DIII-D",
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "recorded_trips": 16,
+        "mask_settlement_trip": 3,
+        "strict_qualified_before_trip_limit": true,
+        "first_strict_qualification_trip": 3,
+        "classification": "qualified_recorded_noop_suffix",
+        "own_mask_acceptance_enabled": true,
+        "zero_accepted_newton_promotions_at_qualification": true,
+        "bit_identical_retention_at_qualification": true,
+        "qualification_evidence": "retained result is a recorded no-op"
+      }
+    ]
+  },
+  "workload_representativeness": {
+    "width_1024_measurement": {
+      "batch_members": 1024,
+      "unique_initial_states": 1,
+      "unique_external_current_vectors": 1,
+      "unique_physical_workloads": 1,
+      "composition": "one synthetic bootstrapped Solovev free-boundary member and one sixteen-conductor current vector, each repeated exactly 1024 times",
+      "bank_identity_members": 0,
+      "observed_trip_distribution": {
+        "16": 1024
+      }
+    },
+    "bank_regeneration": {
+      "machines": 2,
+      "declared_solver_members": 17,
+      "telemetry_observable_members": 11,
+      "member_composition": {
+        "MAST": "six distinct shot/slice identities crossed with pure and mixed arms (12 declared); only the six pure arms carry trip telemetry",
+        "DIII-D": "five distinct parquet shot/frame identities"
+      },
+      "telemetry_member_identities": [
+        "21978/35 pure",
+        "21983/35 pure",
+        "21985/51 pure",
+        "21986/46 pure",
+        "21989/55 pure",
+        "22086/43 pure",
+        "d3d_shot_00000c4a7b.parquet frame 179",
+        "d3d_shot_0003ff34e7.parquet frame 44",
+        "d3d_shot_001554e054.parquet frame 144",
+        "d3d_shot_002495e835.parquet frame 146",
+        "d3d_shot_0040ca9bdc.parquet frame 137"
+      ]
+    },
+    "verdict": "not_representative_of_bank_member_diversity",
+    "reason": "replication preserves the width and compiled compute shape but makes qualification all-or-none across 1024 identical lanes; it cannot sample the two-machine, member-dependent qualification incidence in regeneration",
+    "valid_use": "fixed-shape H200 throughput and bit-identity comparison",
+    "invalid_use": "estimating the fraction of regeneration members that exit early"
+  },
+  "projected_cost_by_criterion": {
+    "method": {
+      "projection_formula": "1.75 ms/slice * mean charged trips / 16",
+      "direct_h200_formula": "415.60787488197093 ms/member * mean charged trips / 16",
+      "fallback": "charge sixteen trips to every member that does not qualify and to each of the six MAST mixed arms without trip telemetry",
+      "residual_relaxation": "banked-hindsight ceiling: after the final-zero mask suffix begins, find the first trip whose residual can improve by no more than the stated fraction relative to the best later residual",
+      "causality_caveat": "the hindsight criterion is not an online stopping rule; any policy implementation needs a causal progress window and paired state/error validation before dispatch"
+    },
+    "observed_telemetry_cohort": [
+      {
+        "members": 11,
+        "mean_charged_trips": 16.0,
+        "trip_histogram": {
+          "16": 11
+        },
+        "projected_ms_per_slice": 1.75,
+        "projected_speedup_x": 1.0,
+        "projected_direct_h200_ms_per_member": 415.60787488197093,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": false,
+        "criterion": "full_trip_control",
+        "definition": "charge all sixteen trips",
+        "relative_remaining_improvement_tolerance": null,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 16.0,
+            "trip_histogram": {
+              "16": 6
+            },
+            "projected_ms_per_slice": 1.75,
+            "projected_speedup_x": 1.0,
+            "projected_direct_h200_ms_per_member": 415.60787488197093,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 16.0,
+            "trip_histogram": {
+              "16": 5
+            },
+            "projected_ms_per_slice": 1.75,
+            "projected_speedup_x": 1.0,
+            "projected_direct_h200_ms_per_member": 415.60787488197093,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 16.0,
+          "trip_histogram": {
+            "16": 17
+          },
+          "projected_ms_per_slice": 1.75,
+          "projected_speedup_x": 1.0,
+          "projected_direct_h200_ms_per_member": 415.60787488197093,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": false
+        }
+      },
+      {
+        "members": 11,
+        "mean_charged_trips": 10.636363636363637,
+        "trip_histogram": {
+          "3": 2,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "16": 6
+        },
+        "projected_ms_per_slice": 1.1633522727272727,
+        "projected_speedup_x": 1.5042735042735043,
+        "projected_direct_h200_ms_per_member": 276.2847804613102,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": false,
+        "criterion": "strict_qualified_noop",
+        "definition": "locked four-conjunct qualification; otherwise charge sixteen trips",
+        "relative_remaining_improvement_tolerance": null,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 16.0,
+            "trip_histogram": {
+              "16": 6
+            },
+            "projected_ms_per_slice": 1.75,
+            "projected_speedup_x": 1.0,
+            "projected_direct_h200_ms_per_member": 415.60787488197093,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 4.2,
+            "trip_histogram": {
+              "3": 2,
+              "4": 1,
+              "5": 1,
+              "6": 1
+            },
+            "projected_ms_per_slice": 0.45937500000000003,
+            "projected_speedup_x": 3.8095238095238093,
+            "projected_direct_h200_ms_per_member": 109.09706715651737,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 12.529411764705882,
+          "trip_histogram": {
+            "3": 2,
+            "4": 1,
+            "5": 1,
+            "6": 1,
+            "16": 12
+          },
+          "projected_ms_per_slice": 1.3704044117647058,
+          "projected_speedup_x": 1.2769953051643192,
+          "projected_direct_h200_ms_per_member": 325.45763731566103,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": false
+        }
+      },
+      {
+        "members": 11,
+        "mean_charged_trips": 4.2727272727272725,
+        "trip_histogram": {
+          "1": 3,
+          "3": 3,
+          "4": 2,
+          "5": 1,
+          "6": 1,
+          "16": 1
+        },
+        "projected_ms_per_slice": 0.4673295454545454,
+        "projected_speedup_x": 3.7446808510638303,
+        "projected_direct_h200_ms_per_member": 110.98619386052633,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": true,
+        "criterion": "mask_only_counterfactual",
+        "definition": "first final-zero mask suffix; semantic counterfactual, not admissible",
+        "relative_remaining_improvement_tolerance": null,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 4.333333333333333,
+            "trip_histogram": {
+              "1": 3,
+              "3": 1,
+              "4": 1,
+              "16": 1
+            },
+            "projected_ms_per_slice": 0.4739583333333333,
+            "projected_speedup_x": 3.6923076923076925,
+            "projected_direct_h200_ms_per_member": 112.56046611386712,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 4.2,
+            "trip_histogram": {
+              "3": 2,
+              "4": 1,
+              "5": 1,
+              "6": 1
+            },
+            "projected_ms_per_slice": 0.45937500000000003,
+            "projected_speedup_x": 3.8095238095238093,
+            "projected_direct_h200_ms_per_member": 109.09706715651737,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 8.411764705882353,
+          "trip_histogram": {
+            "1": 3,
+            "3": 3,
+            "4": 2,
+            "5": 1,
+            "6": 1,
+            "16": 7
+          },
+          "projected_ms_per_slice": 0.9200367647058824,
+          "projected_speedup_x": 1.902097902097902,
+          "projected_direct_h200_ms_per_member": 218.49972833868324,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": true
+        }
+      },
+      {
+        "members": 11,
+        "mean_charged_trips": 8.818181818181818,
+        "trip_histogram": {
+          "3": 2,
+          "4": 1,
+          "5": 1,
+          "6": 3,
+          "16": 4
+        },
+        "projected_ms_per_slice": 0.9644886363636364,
+        "projected_speedup_x": 1.8144329896907216,
+        "projected_direct_h200_ms_per_member": 229.05661286108625,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": true,
+        "criterion": "residual_plateau_exact",
+        "definition": "stable mask and no remaining improvement in the banked residual suffix",
+        "relative_remaining_improvement_tolerance": 0.0,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 12.666666666666666,
+            "trip_histogram": {
+              "6": 2,
+              "16": 4
+            },
+            "projected_ms_per_slice": 1.3854166666666665,
+            "projected_speedup_x": 1.2631578947368423,
+            "projected_direct_h200_ms_per_member": 329.02290094822695,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 4.2,
+            "trip_histogram": {
+              "3": 2,
+              "4": 1,
+              "5": 1,
+              "6": 1
+            },
+            "projected_ms_per_slice": 0.45937500000000003,
+            "projected_speedup_x": 3.8095238095238093,
+            "projected_direct_h200_ms_per_member": 109.09706715651737,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 11.352941176470589,
+          "trip_histogram": {
+            "3": 2,
+            "4": 1,
+            "5": 1,
+            "6": 3,
+            "16": 10
+          },
+          "projected_ms_per_slice": 1.2417279411764706,
+          "projected_speedup_x": 1.4093264248704664,
+          "projected_direct_h200_ms_per_member": 294.8982347508103,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": false
+        }
+      },
+      {
+        "members": 11,
+        "mean_charged_trips": 8.363636363636363,
+        "trip_histogram": {
+          "3": 2,
+          "4": 1,
+          "5": 2,
+          "6": 2,
+          "13": 1,
+          "15": 1,
+          "16": 2
+        },
+        "projected_ms_per_slice": 0.9147727272727273,
+        "projected_speedup_x": 1.9130434782608696,
+        "projected_direct_h200_ms_per_member": 217.24957096103026,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": true,
+        "criterion": "residual_progress_relative_1pct",
+        "definition": "stable mask and at most 1% improvement remains to the best banked suffix",
+        "relative_remaining_improvement_tolerance": 0.01,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 11.833333333333334,
+            "trip_histogram": {
+              "5": 1,
+              "6": 1,
+              "13": 1,
+              "15": 1,
+              "16": 2
+            },
+            "projected_ms_per_slice": 1.2942708333333335,
+            "projected_speedup_x": 1.3521126760563378,
+            "projected_direct_h200_ms_per_member": 307.37665746479104,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 4.2,
+            "trip_histogram": {
+              "3": 2,
+              "4": 1,
+              "5": 1,
+              "6": 1
+            },
+            "projected_ms_per_slice": 0.45937500000000003,
+            "projected_speedup_x": 3.8095238095238093,
+            "projected_direct_h200_ms_per_member": 109.09706715651737,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 11.058823529411764,
+          "trip_histogram": {
+            "3": 2,
+            "4": 1,
+            "5": 2,
+            "6": 2,
+            "13": 1,
+            "15": 1,
+            "16": 8
+          },
+          "projected_ms_per_slice": 1.2095588235294117,
+          "projected_speedup_x": 1.446808510638298,
+          "projected_direct_h200_ms_per_member": 287.25838410959756,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": false
+        }
+      },
+      {
+        "members": 11,
+        "mean_charged_trips": 7.090909090909091,
+        "trip_histogram": {
+          "3": 2,
+          "4": 1,
+          "5": 3,
+          "6": 1,
+          "8": 1,
+          "9": 1,
+          "14": 1,
+          "16": 1
+        },
+        "projected_ms_per_slice": 0.7755681818181818,
+        "projected_speedup_x": 2.2564102564102564,
+        "projected_direct_h200_ms_per_member": 184.18985364087348,
+        "target_ms_per_slice": 1.0,
+        "meets_one_ms_target": true,
+        "criterion": "residual_progress_relative_5pct",
+        "definition": "stable mask and at most 5% improvement remains to the best banked suffix",
+        "relative_remaining_improvement_tolerance": 0.05,
+        "per_machine": {
+          "MAST": {
+            "members": 6,
+            "mean_charged_trips": 9.5,
+            "trip_histogram": {
+              "5": 2,
+              "8": 1,
+              "9": 1,
+              "14": 1,
+              "16": 1
+            },
+            "projected_ms_per_slice": 1.0390625,
+            "projected_speedup_x": 1.6842105263157894,
+            "projected_direct_h200_ms_per_member": 246.76717571117024,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": false
+          },
+          "DIII-D": {
+            "members": 5,
+            "mean_charged_trips": 4.2,
+            "trip_histogram": {
+              "3": 2,
+              "4": 1,
+              "5": 1,
+              "6": 1
+            },
+            "projected_ms_per_slice": 0.45937500000000003,
+            "projected_speedup_x": 3.8095238095238093,
+            "projected_direct_h200_ms_per_member": 109.09706715651737,
+            "target_ms_per_slice": 1.0,
+            "meets_one_ms_target": true
+          }
+        },
+        "declared_bank_sensitivity": {
+          "members": 17,
+          "mean_charged_trips": 10.235294117647058,
+          "trip_histogram": {
+            "3": 2,
+            "4": 1,
+            "5": 3,
+            "6": 1,
+            "8": 1,
+            "9": 1,
+            "14": 1,
+            "16": 7
+          },
+          "projected_ms_per_slice": 1.119485294117647,
+          "projected_speedup_x": 1.5632183908045978,
+          "projected_direct_h200_ms_per_member": 265.86680231420195,
+          "target_ms_per_slice": 1.0,
+          "meets_one_ms_target": false
+        }
+      }
+    ]
+  },
+  "headline": {
+    "strict_qualified_observable": "5/11 (45.5%)",
+    "strict_confirmed_declared_bank_lower_bound": "5/17 (29.4%)",
+    "machine_split": "DIII-D 5/5; MAST 0/6 observable, 6/12 unavailable",
+    "width_1024_verdict": "one member replicated 1024 times is not representative of bank member diversity or exit incidence",
+    "strict_observed_projection_ms_per_slice": 1.1633522727272727
+  },
+  "policy_question_for_lead": "Keep the strict no-op policy, whose heterogeneous observed-bank ceiling is 1.163 ms/slice (1.370 ms/slice when six telemetry-unavailable mixed arms are conservatively charged 16 trips), or authorize a separately validated residual-progress rule? A 1% hindsight tolerance projects 0.915 ms/slice on observable histories but does not preserve bit identity by construction; select the tolerated state/residual error and causal progress window before any implementation. The mask-only 0.467 ms/slice counterfactual is not semantically admissible.",
+  "project_absolute_figure_src": "/nova/figures/solver-trip-orchestration/suffix-census.png"
+}

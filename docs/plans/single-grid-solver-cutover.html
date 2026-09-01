@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
 </head>
 <body>
@@ -55,6 +55,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260901T0905-carrier-cost-decomposed" data-who="reckon-ship-s18" data-when="2026-09-01T09:05:00+00:00">
     <div class="r-comment-body">SUPERSEDES c-20260901T0830-carrier-cost, decomposed with the S16 measurement session from the probe's own script: 5768 s was one timer around the FULL cold case construction at native 65x65 on a rigel CPU node (JAX_PLATFORMS=cpu, 16 CPUs) — shot-store load, mesh and operand construction, profile assembly AND the prescribed-response build together (receipt key response_and_profile_build_seconds), with the response assembled host-side per circuit through the exact analytic polygon route (polygon_greens over 101 circuits at 4262 targets, NumPy column_stack), NOT the optimized conductor-coupling kernels, never on a GPU. Treat it strictly as the measured cold-CPU-exact upper bound. The optimized-kernel H200 build at this shape is UNMEASURED and is a number this section owes before budgeting. Unchanged: the durable digest-pinned cache is mandatory on first build, and any cold rebuild runs in a launch-plus-harvest lane, not inside a worker fence.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T1330-h200-routing" data-who="reckon-ship-s18" data-when="2026-09-01T13:30:00+00:00">
+    <div class="r-comment-body">Lead directive 2026-09-01, banked for the s3 lane design: ROUTE THE BANK REGENERATION THROUGH THE H200, not the CPU producer. Evidence: the hex-grid-derisk-gates s1 cache regeneration is paying the measured >25 min/arm Newton-Krylov cost on a 16-CPU rigel node for solves the H200 runs at the committed 42.8 ms/slice — and the topology-visual-corroboration record estimates the full seventeen-row bank at roughly one day of CPU lane time. Two conditions attach: (1) settle the GPU-vs-CPU mask-stability question ONCE, deliberately — a cross-backend regeneration compared against a CPU-produced committed bank can flip marginal saddle cells for code-generation rather than topology reasons, so the first H200 bank needs a paired same-backend control or an explicit mask-difference adjudication; (2) the lead states the H200 solve itself should be nearer 1 ms/slice than the committed 42.8 ms/slice — a stage-decomposition profiling node is dispatched to find the gap (receipt to docs/figures/single-grid-solver-cutover/h200-solve-profile.json), building on the S16 step-decomposition receipts.</div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

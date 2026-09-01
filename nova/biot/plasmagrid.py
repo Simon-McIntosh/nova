@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
+from itertools import combinations
 
 import numpy as np
 from shapely.geometry.linestring import LineString
@@ -34,13 +35,29 @@ def hex_ring_slots(centre, neighbours) -> np.ndarray:
     offset = coordinates - origin
     if np.any(np.linalg.norm(offset, axis=1) == 0.0):
         raise ValueError("a hex neighbour must differ from its centre")
+    if len(coordinates) > len(HEX_RING):
+        raise ValueError("a hex ring cannot contain more than six neighbours")
+    if len(coordinates) == 0:
+        return np.empty(0, dtype=int)
+
     angles = np.arctan2(offset[:, 1], offset[:, 0])
     difference = angles[:, np.newaxis] - _HEX_RING_ANGLES[np.newaxis, :]
     distance = np.abs(np.arctan2(np.sin(difference), np.cos(difference)))
-    slots = np.argmin(distance, axis=1)
-    if len(np.unique(slots)) != len(slots):
-        raise ValueError("hex neighbours do not occupy distinct HEX_RING slots")
-    return slots
+
+    phase = np.mod(angles - _HEX_RING_ANGLES[0], 2.0 * np.pi)
+    cyclic_order = np.argsort(phase)
+    best_cost = np.inf
+    best_slots = None
+    for offset_index in range(len(coordinates)):
+        ordered_neighbours = np.roll(cyclic_order, -offset_index)
+        for ordered_slots in combinations(range(len(HEX_RING)), len(coordinates)):
+            cost = distance[ordered_neighbours, ordered_slots].sum()
+            if cost < best_cost:
+                best_cost = cost
+                best_slots = np.empty(len(coordinates), dtype=int)
+                best_slots[ordered_neighbours] = ordered_slots
+
+    return best_slots
 
 
 @dataclass

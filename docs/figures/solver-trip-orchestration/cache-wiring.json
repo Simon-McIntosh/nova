@@ -1,0 +1,115 @@
+{
+  "schema": "nova.persistent_compilation_cache_wiring",
+  "status": "complete",
+  "source_revision": "3e8a0b27fec8bb360a4433556991f59c6a12ab3d",
+  "source_files": {
+    "nova/jax/config.py": "1bfdb9251b2cdb66efe13fd777982f3f8552ff4e8c41223a0a3260e7554df675",
+    "benchmarks/tiled_backend.py": "67cde1ca2b474be2963925012d4299e0ad7c45e85d30c99044ed456f713e7967",
+    "benchmarks/observable_batch_acceptance.py": "e38626db28e53de97e64ce1cf1867669dbb1f0fd33e3a439123b8ab7df3af66f"
+  },
+  "selection": {
+    "policy": "explicit_per_recipe",
+    "ambient_jax_cache_environment_used": false,
+    "imperative_shell_configuration_required": false,
+    "default_parent": "~/.cache",
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "one_leaf_shared_by_named_recipes": true,
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0
+  },
+  "recipes": [
+    {
+      "name": "bank regeneration",
+      "driver": "benchmarks/observable_batch_acceptance.py",
+      "opt_in": "--cache-recipe bank-regeneration",
+      "cache_root_override": "--persistent-cache-root <path>",
+      "profile_construction_override_guard": "the explicit recipe is reapplied after profile construction before scalar or batched solve compilation"
+    },
+    {
+      "name": "scheduled test",
+      "driver": "benchmarks/tiled_backend.py",
+      "opt_in": "--cache-recipe scheduled-test",
+      "cache_root_override": "--persistent-cache-root <path>",
+      "fresh_process_rule": "every repetition is a separate child process sharing only the explicitly selected versioned directory"
+    }
+  ],
+  "invalidation": {
+    "directory_version_key_fields": [
+      "backend and compiler options",
+      "device topology",
+      "jax and jaxlib/XLA build"
+    ],
+    "jax_entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "pure_data_change": "reuses the entry when shapes and the serialized computation are unchanged",
+    "traced_code_change": "changes the serialized-computation entry key and recompiles",
+    "runtime_change": "selects a distinct directory version key and a distinct JAX entry key"
+  },
+  "h200_demonstration": {
+    "scheduler": {
+      "job_id": "1260811",
+      "job_name": "nova-cache-wiring",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "accepted_time_limit": "UNLIMITED",
+      "elapsed_seconds": 30,
+      "exit_code": 0
+    },
+    "device": {
+      "platform": "gpu",
+      "kind": "NVIDIA H200 NVL",
+      "visible_device_count": 1,
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0",
+      "backend_version": "PJRT C API; cuda 12090",
+      "x64_enabled": true
+    },
+    "recipe": "scheduled test",
+    "variant": "jax-vmap",
+    "cells": 32,
+    "tile": 8,
+    "pairs": 1024,
+    "process_count": 2,
+    "cache_root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/h200-cache-final",
+    "cache_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/h200-cache-final/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "version_key": "runtime-0745ecebea4cb264e054",
+    "cold": {
+      "compile_seconds": 2.748434173874557,
+      "cache_hits": 0,
+      "compile_seconds_saved": 0.0
+    },
+    "fresh_process_warm": {
+      "compile_seconds": 0.22962308954447508,
+      "cache_hits": 1,
+      "compile_seconds_saved": 1.949492377229035
+    },
+    "cold_over_warm_speedup": 11.969328430023673,
+    "banked_solve_warm_reference_seconds": 63.720444202,
+    "warm_fraction_of_banked_reference": 0.0036036015194204794,
+    "banked_reference_over_warm_ratio": 277.5001604952195,
+    "verdict": "PASS: the second fresh process hit the same versioned cache leaf and loaded its executable in 0.230 s, below the banked 63.7 s solve restart reference"
+  },
+  "evidence": {
+    "raw_measurement": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/h200-warm-final.json",
+    "raw_measurement_sha256": "04f23ab7298dd7c6341c099ab56f44fb2c44faa7d15dac029a6610d2de50da7a",
+    "slurm_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/slurm-1260811.log",
+    "merged_process_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/h200-run.log",
+    "focused_pytest_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/pytest-cache-focused.log",
+    "broad_pytest_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/pytest.log"
+  },
+  "test_summary": {
+    "jax_config_passed_before_broad_lane_resource_exit": 12,
+    "observable_acceptance_passed_before_broad_lane_resource_exit": 12,
+    "tiled_backend_passed_before_broad_lane_resource_exit": 10,
+    "broad_lane_exit_code": 137,
+    "broad_lane_qualification": "resource termination after 34 visible passes, not a test assertion failure",
+    "cache_focused_passed": 5,
+    "cache_focused_failed": 0
+  }
+}

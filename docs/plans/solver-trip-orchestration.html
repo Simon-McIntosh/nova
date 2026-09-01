@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,6 +57,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T141736915762-sto-mast-bank-telemetry" data-who="sto-bank" data-when="2026-09-01T14:38:02Z">
     <div class="r-comment-body"><p>Two launch failures with different corrections, zero rows regenerated, artifacts untouched (digests verified): job 1260792 duplicate-venv wrap defect (2 s, exit 2), job 1260801 GPU-only JAX platform breaking jax.debug.callback CPU lookup (3m17s, exit 1). Root cause named: next launch needs JAX_PLATFORMS=cuda,cpu</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T141031246939-sto-quantum-decomposition" data-who="sto-quantum" data-when="2026-09-01T14:43:24Z">
+    <div class="r-comment-body"><p>Per-trip quantum attributed at width 1024: 25.0 ms/member/trip = mask reconciliation 12.61 + Newton re-linearization 12.34 + first-GMRES sync 0.048 + host launch 0 + preconditioner 0 (none exists; all 16 trips already in one compiled launch). Explicit fusion measured near-nil (1.006x); ranked ceilings put trip-body collapse at the 1.746 ms floor and mask/linearization restructuring at ~22 ms each alone</p></div>
 </div>
 </section>
 </main>

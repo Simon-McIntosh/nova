@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:38:47",
+  "updated": "2026-09-01T16:43:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -66761,9 +66761,147 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T141031246939-sto-quantum-decomposition",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a72",
+        "node": "sto-quantum-decomposition",
+        "node_definition": {
+          "done_when": "docs/figures/solver-trip-orchestration/trip-quantum.json records per-sub-stage times at width 1024 on one reserved H200 (hardened submission: explicit --job-name, python -u, merged stderr, heartbeat, TMPDIR=/tmp) and a ranked list of fusion/restructuring candidates each with its measured ceiling against the 1.75 ms sixteen-trip floor",
+          "estimated_hours": 6.0,
+          "goal": "The \u00a72 per-trip quantum receipt: attribute the reconciliation + Newton-setup + first-Krylov block carrying 95.9 percent of H200 solve time to named sub-stages with measured times at width 1024 \u2014 mask reconciliation gather/scatter, Newton re-linearization and preconditioner assembly, first GMRES action synchronization, and fixed per-trip launch overhead removable by fusing the trip body \u2014 building on the S16 factorial receipts (run r-20260901T053948341346-sse-h200-step-decomposition: 16 trips, 16 accepted Newton promotions, GMRES=4 for all 1024 members) and the landed stage profile docs/figures/single-grid-solver-cutover/h200-solve-profile.json rather than re-measuring what they carry",
+          "id": "sto-quantum-decomposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141031246939-sto-quantum-decomposition/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/trip_quantum_profile.py",
+            "docs/figures/solver-trip-orchestration/trip-quantum.json",
+            "docs/figures/solver-trip-orchestration/trip-quantum.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-quantum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:10:43Z",
+        "completed_at": "2026-09-01T14:43:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1961,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1961,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+        "commits": [
+          "fefab63fde0b6a606763964c2afd7d33f8d19948",
+          "5228ffb884c6456d00032ece4e1ffc008743610f",
+          "b0bf0575a3b8bd808725aa2ba611fc8d91f52949"
+        ],
+        "changed_lines": {
+          "added": 902,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260803 trip_quantum_profile (2m10s, exit 0) + strict receipt validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141031246939-sto-quantum-decomposition/receipt-validation-qualified.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141031246939-sto-quantum-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-dadf-7532-8d74-0d95eb74480f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8252416,
+            "cached_input_tokens_cumulative": 8252416,
+            "input_tokens": 8483594,
+            "input_tokens_cumulative": 8483594,
+            "output_tokens": 32239,
+            "output_tokens_cumulative": 32239,
+            "reasoning_output_tokens": 13750,
+            "reasoning_output_tokens_cumulative": 13750
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4109,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 7709,
+              "log_age_seconds": 4359,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 4387,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1226
+    "_version": 1227
   }
 }

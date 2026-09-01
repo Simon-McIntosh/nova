@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T10:07:29",
+  "updated": "2026-09-01T10:12:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -65411,9 +65411,116 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T072320254057-sse-sol-label-retirement",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-sol-label-retirement",
+        "node_definition": {
+          "done_when": "The COMMON_SOL label exits the solve path: open-field-line current support is selected by the flux value at evaluation time and the topological private mask, never by a frozen per-cell category. The lead's rationale, recorded with the mesh-authority lock: cells are far too large to resolve the SOL, so a per-cell SOL category is always wrong at our mesh scale; current enters the SOL through flux functions extending past psi_norm = 1. The survey found the label load-bearing in six modules: source.py OPEN_DOMAINS, sol_closure.py policy extension, forward_operator.py owner-label routing at line 728, continuation.py per-domain defaults at 147 and the special case at 511, observation.py per-domain reporting at 558, and benchmarks/newton_cycle_mask_switch.py. It also carries a staleness seam worth stating in the record: labels refresh once per active-set trip while psi_norm moves every Newton iteration, so label-selected behaviour lags the flux it describes, and selection at evaluation psi_norm removes that lag. (1) Replace every solver consumption of COMMON_SOL with the equivalent flux-support test: a continuation declared on the common scrape-off applies where psi_norm exceeds one, the point is inside the vessel, and the topological private mask does not claim it. PRIVATE_FLUX selection stays topological and unchanged, because private flux overlaps the confined psi_norm range and no flux test can replace it. (2) The PlasmaDomain enum may keep COMMON_SOL as a diagnostic component label for the flood visualization and observation reporting, but no solve-path branch, routing, or continuation selection may read it; state in the record which consumers became flux tests, which became derivations for reporting only, and which were deleted. (3) Prove the cutover on committed fixtures: where no cell straddles the boundary the labels and the flux test agree by construction, so the focused solver lanes must return results bit-identical to base or carry a stated numeric delta with its mechanism named - a straddling-cell difference is the intended semantic change and must be quantified on at least one fixture that exercises it, not hidden. (4) Update benchmarks/newton_cycle_mask_switch.py to the surviving semantics. (5) All focused lanes covering the six touched modules green with the delta stated against the base revision; no committed bank artifact modified; no scheduler job beyond tests.",
+          "estimated_hours": null,
+          "goal": "Open-field-line current support selected by flux value and private mask at evaluation time, with the COMMON_SOL label removed from every solve-path consumer",
+          "id": "sse-sol-label-retirement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072320254057-sse-sol-label-retirement/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/source.py",
+            "nova/equilibrium/sol_closure.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/continuation.py",
+            "nova/equilibrium/observation.py",
+            "nova/equilibrium/domain.py",
+            "benchmarks/newton_cycle_mask_switch.py",
+            "tests/test_sol_support_selection.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:23:32Z",
+        "completed_at": "2026-09-01T08:12:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2924,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2924,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9ebbc9dace8a286685e7fb270fea9d029f3743b4",
+        "commits": [
+          "8b88abb7a5207451035efe579c5324675eb62801"
+        ],
+        "changed_lines": {
+          "added": 348,
+          "removed": 137,
+          "files": 8
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six focused suites 66 passed 0 failed in 50.99 s with seven new cutover tests and zero new failures against base; py_compile, ruff check and format clean on all eight staged paths; naming checks zero hits",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072320254057-sse-sol-label-retirement/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072320254057-sse-sol-label-retirement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22890496,
+            "cached_input_tokens_cumulative": 27130368,
+            "input_tokens": 23433611,
+            "input_tokens_cumulative": 27859500,
+            "output_tokens": 28855,
+            "output_tokens_cumulative": 39652,
+            "reasoning_output_tokens": 13328,
+            "reasoning_output_tokens_cumulative": 15073
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1204
+    "_version": 1205
   }
 }

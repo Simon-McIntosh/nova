@@ -90,6 +90,127 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
     )
 
 
+def _rescaled_solovev_polish(flux_scale: float, coordinate_scale: float):
+    radial, vertical, values, _level_set = _carrier((41, 49))
+    extremum_position = jnp.asarray(AXIS + (0.005, 0.0)) * coordinate_scale
+    saddle_position = jnp.asarray(SADDLE) * coordinate_scale
+    extremum_seed = jnp.r_[
+        extremum_position,
+        flux_scale * solovev_flux(jnp.asarray(AXIS + (0.005, 0.0))),
+        0.0,
+    ]
+    saddle_seed = jnp.r_[
+        saddle_position,
+        flux_scale * solovev_flux(jnp.asarray(SADDLE)),
+        0.0,
+    ]
+    extremum, saddle, receipt = polish_census_stationary_points(
+        flux_scale * values,
+        coordinate_scale * radial,
+        coordinate_scale * vertical,
+        flux_scale * solovev_flux(jnp.asarray(SADDLE)),
+        jnp.asarray(-1.0),
+        extremum_seed,
+        saddle_seed,
+    )
+    return extremum, saddle, receipt
+
+
+def _rescaled_quadratic_polish(flux_scale: float, coordinate_scale: float):
+    radial = coordinate_scale * jnp.linspace(-1.0, 1.0, 33)
+    vertical = coordinate_scale * jnp.linspace(-1.0, 1.0, 33)
+    radial_grid, vertical_grid = jnp.meshgrid(radial, vertical)
+    values = flux_scale * (
+        (radial_grid / coordinate_scale) ** 2 - (vertical_grid / coordinate_scale) ** 2
+    )
+    pitch = radial[1] - radial[0]
+    sampled_saddle = jnp.asarray(
+        (
+            3.0 * pitch,
+            0.0,
+            flux_scale * 9.0 * (pitch / coordinate_scale) ** 2,
+            0.0,
+        )
+    )
+    absent_extremum = jnp.full_like(sampled_saddle, jnp.nan)
+    return polish_census_stationary_points(
+        values,
+        radial,
+        vertical,
+        jnp.asarray(0.0),
+        jnp.asarray(-1.0),
+        absent_extremum,
+        sampled_saddle,
+    )
+
+
+def _assert_dimensionless_receipts_invariant(unscaled, scaled):
+    dimensionless_receipts = (
+        "roundoff_floor",
+        "representation_floor",
+        "seed_normalized_gradient",
+        "normalized_gradient",
+        "normalized_value_change",
+        "stationarity_tolerance",
+        "value_consistency_tolerance",
+    )
+    for name in dimensionless_receipts:
+        unscaled_value = np.asarray(unscaled[name])
+        scaled_value = np.asarray(scaled[name])
+        np.testing.assert_array_equal(np.isnan(scaled_value), np.isnan(unscaled_value))
+        finite = np.isfinite(unscaled_value) & np.isfinite(scaled_value)
+        allowed = (
+            1.0e-10 * np.maximum(np.abs(unscaled_value), np.abs(scaled_value)) + 1.0e-13
+        )
+        assert np.all(
+            np.abs(unscaled_value[finite] - scaled_value[finite]) <= allowed[finite]
+        ), name
+    for name in ("converged", "seed_stationary"):
+        np.testing.assert_array_equal(
+            np.asarray(scaled[name]), np.asarray(unscaled[name])
+        )
+
+
+def test_dimensionless_polish_receipts_are_rescaling_invariant():
+    """Flux and coordinate units leave every resolved receipt unchanged.
+
+    The mixed bound is relative at resolved scales.  Its 1e-13 absolute term is
+    about 450 float64 machine epsilons, below which rescaling a physical-value
+    solve may legitimately reorder cancellation in a roundoff-scale receipt.
+    Acceptance decisions remain exact boolean invariants.
+    """
+    coordinate_scale = 1.0e-2
+    unscaled_extremum, unscaled_saddle, unscaled = _rescaled_quadratic_polish(1.0, 1.0)
+    scaled_extremum, scaled_saddle, scaled = _rescaled_quadratic_polish(
+        1.0e3, coordinate_scale
+    )
+    _assert_dimensionless_receipts_invariant(unscaled, scaled)
+    np.testing.assert_allclose(
+        np.asarray(scaled_extremum[:2]) / coordinate_scale,
+        np.asarray(unscaled_extremum[:2]),
+        rtol=1.0e-10,
+        atol=1.0e-13,
+    )
+    np.testing.assert_allclose(
+        np.asarray(scaled_saddle[:2]) / coordinate_scale,
+        np.asarray(unscaled_saddle[:2]),
+        rtol=1.0e-10,
+        atol=1.0e-13,
+    )
+    _, _, solovev_unscaled = _rescaled_solovev_polish(1.0, 1.0)
+    _, _, solovev_scaled = _rescaled_solovev_polish(1.0e3, coordinate_scale)
+    _assert_dimensionless_receipts_invariant(solovev_unscaled, solovev_scaled)
+    print(
+        "solovev_rescaling_receipt "
+        f"unscaled_roundoff={np.asarray(solovev_unscaled['roundoff_floor']).tolist()} "
+        f"scaled_roundoff={np.asarray(solovev_scaled['roundoff_floor']).tolist()} "
+        "unscaled_representation="
+        f"{np.asarray(solovev_unscaled['representation_floor']).tolist()} "
+        "scaled_representation="
+        f"{np.asarray(solovev_scaled['representation_floor']).tolist()}"
+    )
+
+
 def test_sample_coincidence_does_not_imply_stationarity():
     radial = jnp.linspace(-1.0, 1.0, 33)
     vertical = jnp.linspace(-1.0, 1.0, 33)

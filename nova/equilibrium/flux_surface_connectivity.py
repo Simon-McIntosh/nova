@@ -908,14 +908,18 @@ def polish_census_stationary_points(
     receives its two fixed slots.  Stationarity is measured by the fitted
     gradient made dimensionless with the coordinate span and field range.  Its
     tolerance is the larger of two independently derived floors.  The
-    deterministic coefficient forward-error scale is
-    ``n_active * condition_number * eps * field_range``; multiplying by the
-    evaluated derivative-basis norm and dividing by ``field_range / span``
-    gives the dimensionless roundoff gradient floor.  The representation floor
+    deterministic coefficient forward-error scale in the solved coordinates is
+    ``n_active * condition_number * eps * field_range``.  The fit retains its
+    column scales ``D``; multiplying that error by ``B' D^-1`` and dividing by
+    ``field_range / span`` gives the dimensionless roundoff gradient floor.  The
+    exterior level-squared basis is normalized by the field range before the
+    solve, so its columns have the same units as the interior columns.  The
+    representation floor
     treats the fit's sample RMS residual as unresolved field variation across
     one cell: ``(rms / field_range) / (cell_pitch / span)``.  Both floors are
-    invariant to coordinate and field units, and the active coefficient count
-    is evaluated separately at each slot.
+    is separately invariant to coordinate and field units.  The complete
+    scaled-coordinate construction makes the roundoff floor invariant as well,
+    and the active coefficient count is evaluated separately at each slot.
 
     A seed already below that fitted-gradient floor takes zero active updates.
     Every other valid seed receives exactly one bounded Newton update.  Flux
@@ -951,9 +955,11 @@ def polish_census_stationary_points(
         jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
     )
     seed_evaluation = spline.evaluate(selected[:, 0], selected[:, 1])
-    seed_active_count, seed_derivative_basis_norm = spline.derivative_basis_receipt(
-        selected[:, 0], selected[:, 1]
-    )
+    (
+        seed_active_count,
+        _seed_value_basis_norm,
+        seed_derivative_basis_norm,
+    ) = spline.scaled_basis_receipt(selected[:, 0], selected[:, 1])
     normalized_cell_pitch = _minimum_cell_pitch(radial, vertical) / coordinate_span
     representation_floor = (
         spline.sample_rms_residual / field_scale / normalized_cell_pitch
@@ -1028,7 +1034,7 @@ def polish_census_stationary_points(
         "in_domain": jnp.where(seed_stationary, valid, attempted["in_domain"]),
     }
     normalized_gradient = attempted["gradient_norm"] * coordinate_span / field_scale
-    active_count, derivative_basis_norm = spline.derivative_basis_receipt(
+    active_count, value_basis_norm, derivative_basis_norm = spline.scaled_basis_receipt(
         attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
     )
     roundoff_floor = (
@@ -1044,7 +1050,8 @@ def polish_census_stationary_points(
         spline.sample_rms_residual / field_scale,
         active_count.astype(values.dtype)
         * spline.condition_number
-        * jnp.finfo(values.dtype).eps,
+        * jnp.finfo(values.dtype).eps
+        * value_basis_norm,
     )
     expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)
     converged = (
@@ -1072,6 +1079,7 @@ def polish_census_stationary_points(
         "representation_floor": jnp.broadcast_to(representation_floor, valid.shape),
         "active_derivative_basis_count": active_count,
         "derivative_basis_norm": derivative_basis_norm,
+        "value_basis_norm": value_basis_norm,
         "sample_rms_residual": jnp.broadcast_to(
             spline.sample_rms_residual, valid.shape
         ),

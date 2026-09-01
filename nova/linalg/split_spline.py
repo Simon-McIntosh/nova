@@ -120,7 +120,7 @@ def _conditioned_fit(
     values: jax.Array,
     weights: jax.Array,
     regularization: jax.Array,
-) -> tuple[jax.Array, jax.Array, jax.Array]:
+) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array]:
     """Column-scale a fixed design before solving its normal equations."""
     squared_norm = jnp.sum(weights[:, None] * design**2, axis=0)
     scale = jnp.sqrt(squared_norm)
@@ -141,6 +141,7 @@ def _conditioned_fit(
         scaled_coefficient / scale,
         condition_number,
         jnp.linalg.norm(normal_residual) / residual_scale,
+        scale,
     )
 
 
@@ -160,6 +161,8 @@ class SplitTensorBSpline(Pytree):
     solve_residual: jax.Array
     solve_converged: jax.Array
     sample_rms_residual: jax.Array
+    field_column_scale: jax.Array
+    field_scale: jax.Array
 
     @property
     def interior_coefficients(self) -> jax.Array:
@@ -281,17 +284,19 @@ class SplitTensorBSpline(Pytree):
         """Evaluate fixed slots with exact-zero inactive padding."""
         return mask_tensor_spline_evaluation(self.evaluate(radial, vertical), valid)
 
-    def derivative_basis_receipt(
+    def scaled_basis_receipt(
         self, radial: jax.Array, vertical: jax.Array
-    ) -> tuple[jax.Array, jax.Array]:
-        """Return the active coefficient count and gradient-basis norm.
+    ) -> tuple[jax.Array, jax.Array, jax.Array]:
+        """Return active count plus value and gradient operator norms.
 
-        The level-set coefficients are fixed before the field solve.  The field
-        gradient is therefore linear in the interior and correction
-        coefficients.  This evaluates those derivative columns at each point;
-        correction columns are active only on the positive side of the fitted
-        level set.  Their Euclidean norm maps a coefficient-error norm into a
-        physical gradient-error norm.
+        The field solve uses ``A D^-1`` and reports the condition number in its
+        scaled coefficient coordinates.  These operators therefore evaluate
+        ``B D^-1`` and ``B' D^-1``.  The exterior level weight is divided by the
+        square of the field range before fitting and in these basis operators,
+        so interior and correction columns both map flux-valued scaled
+        coefficients to a field value (or gradient) before their Euclidean
+        norms combine.  The stored correction coefficient is converted back to
+        the physical level-squared parameterization used by field evaluation.
         """
         radial, vertical = jnp.broadcast_arrays(
             jnp.asarray(radial, dtype=self.coefficients.dtype),
@@ -307,15 +312,16 @@ class SplitTensorBSpline(Pytree):
         )(identity)
         level = self._patch_evaluation(self.level_set_coefficients, radial, vertical)
         exterior_level = jnp.maximum(level.value, 0.0)
-        weight = exterior_level**2
+        inverse_field_scale_squared = self.field_scale**-2
+        weight = exterior_level**2 * inverse_field_scale_squared
         weight_radial = jnp.where(
             level.value > 0.0,
-            2.0 * level.value * level.radial_derivative,
+            2.0 * level.value * level.radial_derivative * inverse_field_scale_squared,
             0.0,
         )
         weight_vertical = jnp.where(
             level.value > 0.0,
-            2.0 * level.value * level.vertical_derivative,
+            2.0 * level.value * level.vertical_derivative * inverse_field_scale_squared,
             0.0,
         )
         interior_gradient_basis = jnp.stack(
@@ -328,6 +334,18 @@ class SplitTensorBSpline(Pytree):
             ),
             axis=-1,
         )
+        interior_scale = self.field_column_scale[0].reshape(
+            (coefficient_count,) + (1,) * radial.ndim
+        )
+        correction_scale = self.field_column_scale[1].reshape(
+            (coefficient_count,) + (1,) * radial.ndim
+        )
+        interior_value_basis = basis.value / interior_scale
+        correction_value_basis = weight * basis.value / correction_scale
+        interior_gradient_basis = interior_gradient_basis / interior_scale[..., None]
+        correction_gradient_basis = (
+            correction_gradient_basis / correction_scale[..., None]
+        )
         active_correction = level.value > 0.0
         squared_norm = jnp.sum(interior_gradient_basis**2, axis=(0, -1))
         squared_norm += jnp.where(
@@ -336,7 +354,13 @@ class SplitTensorBSpline(Pytree):
             0.0,
         )
         active_count = coefficient_count * (1 + active_correction.astype(jnp.int32))
-        return active_count, jnp.sqrt(squared_norm)
+        value_squared_norm = jnp.sum(interior_value_basis**2, axis=0)
+        value_squared_norm += jnp.where(
+            active_correction,
+            jnp.sum(correction_value_basis**2, axis=0),
+            0.0,
+        )
+        return active_count, jnp.sqrt(value_squared_norm), jnp.sqrt(squared_norm)
 
     def tree_flatten(self):
         """Return all fixed-shape arrays for JAX transformations."""
@@ -352,6 +376,8 @@ class SplitTensorBSpline(Pytree):
             self.solve_residual,
             self.solve_converged,
             self.sample_rms_residual,
+            self.field_column_scale,
+            self.field_scale,
         ), {}
 
 
@@ -407,26 +433,34 @@ def fit_split_spline(
         vertical_bounds,
         order,
     )
-    level_coefficient, level_condition, level_residual = _conditioned_fit(
-        base_design,
-        level_set.reshape(-1),
-        weights,
-        regularization_array,
+    level_coefficient, _level_condition, level_residual, _level_scale = (
+        _conditioned_fit(
+            base_design,
+            level_set.reshape(-1),
+            weights,
+            regularization_array,
+        )
     )
     patch_shape = (order + 1, order + 1)
     level_patch = level_coefficient.reshape(patch_shape)
     level_at_samples = base_design @ level_coefficient
-    exterior_weight = jnp.maximum(level_at_samples, 0.0) ** 2
+    field_scale = jnp.maximum(
+        jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
+    )
+    exterior_weight = (jnp.maximum(level_at_samples, 0.0) / field_scale) ** 2
     split_design = jnp.concatenate(
         (base_design, exterior_weight[:, None] * base_design), axis=1
     )
-    field_coefficient, field_condition, field_residual = _conditioned_fit(
-        split_design,
-        values.reshape(-1),
-        weights,
-        regularization_array,
+    field_coefficient, field_condition, field_residual, field_column_scale = (
+        _conditioned_fit(
+            split_design,
+            values.reshape(-1),
+            weights,
+            regularization_array,
+        )
     )
     field_patch = field_coefficient.reshape((2,) + patch_shape)
+    field_patch = field_patch.at[1].divide(field_scale**2)
     sample_residual = weights * (split_design @ field_coefficient - values.reshape(-1))
     sample_rms_residual = jnp.sqrt(
         jnp.sum(sample_residual**2)
@@ -434,9 +468,7 @@ def fit_split_spline(
     )
     field_patch = jnp.where(execute, field_patch, 0.0)
     level_patch = jnp.where(execute, level_patch, 0.0)
-    condition_number = jnp.where(
-        execute, jnp.maximum(level_condition, field_condition), 1.0
-    )
+    condition_number = jnp.where(execute, field_condition, 1.0)
     solve_residual = jnp.where(
         execute, jnp.maximum(level_residual, field_residual), 0.0
     )
@@ -459,6 +491,8 @@ def fit_split_spline(
         solve_residual,
         solve_converged,
         jnp.where(execute, sample_rms_residual, 0.0),
+        field_column_scale.reshape((2,) + patch_shape),
+        field_scale,
     )
 
 

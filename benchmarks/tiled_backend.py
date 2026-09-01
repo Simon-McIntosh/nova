@@ -77,9 +77,12 @@ from nova.biot.tiledassembly import (
     COMPONENTS,
     TilePlan,
     assemble,
-    compilation_cache,
     tile_coupling,
     tile_evaluator,
+)
+from nova.jax.config import (
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
 )
 
 CPU_VARIANTS = ("numpy-1", "numpy-8", "numpy-16", "jax-scan", "jax-vmap")
@@ -174,22 +177,6 @@ def watch_cache() -> None:
 
     monitoring.register_event_listener(hit)
     monitoring.register_event_duration_secs_listener(saved)
-
-
-def store_every_compile() -> None:
-    """Lower the cache's worth-keeping threshold, when a directory was named.
-
-    JAX stores only compiles above a second, which is the right default and the
-    wrong one for a probe whose subject IS the store: the quadrature kernel
-    compiles in about that time, so whether its executable was kept would be a
-    coin toss. Only a run that explicitly named a cache directory is affected --
-    an ordinary timing has the cache off and reaches none of this.
-    """
-    if not os.environ.get("NOVA_COMPILATION_CACHE"):
-        return
-    directory = compilation_cache()
-    if directory is not None:
-        compilation_cache(directory, min_compile_seconds=0.0)
 
 
 def cache_report() -> dict:
@@ -304,7 +291,13 @@ def _pair_geometry(target_r, target_z, edge, weight, norm):
 
 
 def measure_traced(
-    batched: bool, cells: int, tile: int, kernel: str = "quadrature"
+    batched: bool,
+    cells: int,
+    tile: int,
+    kernel: str = "quadrature",
+    *,
+    persistent_cache_root: pathlib.Path | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict:
     """Return each product stage of one traced, reduced, stored operator build."""
     import jax
@@ -326,6 +319,12 @@ def measure_traced(
         evaluate = tile_evaluator(
             plan, batched=batched, kernel=kernel, edge_count=edge.shape[0]
         )
+        cache_configuration = None
+        if persistent_cache_root is not None:
+            cache_configuration = configure_persistent_compilation_cache(
+                persistent_cache_root,
+                minimum_compile_seconds=minimum_compile_seconds,
+            ).receipt()
         first_rows, first_columns = bounds[0]
         start = time.perf_counter()
         first = evaluate.prepare(
@@ -432,6 +431,7 @@ def measure_traced(
         "authored_sources": len(sections),
         "reduced_sources": reduced_sources,
         "compile_count": evaluate.compile_count,
+        "persistent_cache_configuration": cache_configuration,
         **cache_report(),
         **device_report(),
     }
@@ -572,7 +572,14 @@ def measure_parity(cells: int, tile: int) -> dict:
     }
 
 
-def measure(variant: str, cells: int, tile: int) -> dict:
+def measure(
+    variant: str,
+    cells: int,
+    tile: int,
+    *,
+    persistent_cache_root: pathlib.Path | None = None,
+    minimum_compile_seconds: float = 1.0,
+) -> dict:
     """Return one measurement record for one variant.
 
     Matched most specific first: a kernel prefix alone would swallow the variants
@@ -586,13 +593,26 @@ def measure(variant: str, cells: int, tile: int) -> dict:
     if variant.startswith("numpy-"):
         return measure_numpy(int(variant.split("-")[1]), cells, tile)
     if variant in ("jax-scan", "jax-vmap"):
-        return measure_traced(variant.endswith("vmap"), cells, tile)
+        return measure_traced(
+            variant.endswith("vmap"),
+            cells,
+            tile,
+            persistent_cache_root=persistent_cache_root,
+            minimum_compile_seconds=minimum_compile_seconds,
+        )
     if variant == "closed-host":
         return measure_host_closed(cells, tile)
     if variant == "closed-numpy":
         return measure_packed_closed(cells, tile)
     if variant in ("closed-scan", "closed-vmap"):
-        return measure_traced(variant.endswith("vmap"), cells, tile, kernel="closed")
+        return measure_traced(
+            variant.endswith("vmap"),
+            cells,
+            tile,
+            kernel="closed",
+            persistent_cache_root=persistent_cache_root,
+            minimum_compile_seconds=minimum_compile_seconds,
+        )
     if variant == "closed-parity":
         return measure_closed_parity(cells, tile)
     if variant == "parity":
@@ -601,35 +621,50 @@ def measure(variant: str, cells: int, tile: int) -> dict:
 
 
 def run_child(
-    variant: str, device: str, cells: int, tile: int, cache: str = "off"
+    variant: str,
+    device: str,
+    cells: int,
+    tile: int,
+    persistent_cache_root: pathlib.Path | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict:
     """Return the record from a fresh process, so nothing is warm on entry.
 
-    ``cache`` is where the child may keep compiled executables. It defaults to
-    OFF, because a compile figure read out of a shared cache would be a disk read
-    wearing a compile's name; only the cache probe passes a directory.
+    ``persistent_cache_root`` is where an explicitly selected recipe may keep
+    compiled executables. It defaults to OFF, because a compile figure read out
+    of a shared cache would be a disk read wearing a compile's name.
     """
     environment = dict(
         os.environ,
         TMPDIR=os.environ.get("TMPDIR", "/tmp"),
-        NOVA_COMPILATION_CACHE=cache,
     )
     environment.pop("JAX_COMPILATION_CACHE_DIR", None)
+    environment.pop("NOVA_COMPILATION_CACHE", None)
     if device == "cpu":
         environment["JAX_PLATFORMS"] = "cpu"
     else:
         environment.pop("JAX_PLATFORMS", None)
+    command = [
+        sys.executable,
+        str(pathlib.Path(__file__).resolve()),
+        "--measure",
+        variant,
+        "--cells",
+        str(cells),
+        "--tile",
+        str(tile),
+    ]
+    if persistent_cache_root is not None:
+        command.extend(
+            [
+                "--persistent-cache-root",
+                str(persistent_cache_root),
+                "--minimum-compile-seconds",
+                str(minimum_compile_seconds),
+            ]
+        )
     completed = subprocess.run(
-        [
-            sys.executable,
-            str(pathlib.Path(__file__).resolve()),
-            "--measure",
-            variant,
-            "--cells",
-            str(cells),
-            "--tile",
-            str(tile),
-        ],
+        command,
         capture_output=True,
         text=True,
         env=environment,
@@ -652,7 +687,14 @@ def cache_probe(variant: str, device: str, cells: int, tile: int) -> dict:
     directory = pathlib.Path(tempfile.mkdtemp(prefix="tiled-cache-"))
     try:
         runs = [
-            run_child(measured, device, cells, tile, cache=str(directory))
+            run_child(
+                measured,
+                device,
+                cells,
+                tile,
+                persistent_cache_root=directory,
+                minimum_compile_seconds=0.0,
+            )
             for _ in range(2)
         ]
         stored = sum(
@@ -722,7 +764,13 @@ def table(rows: list[dict]) -> str:
 
 
 def sweep(
-    device: str, cells: int, tile: int, repeat: int, variants, parity: bool = True
+    device: str,
+    cells: int,
+    tile: int,
+    repeat: int,
+    variants,
+    parity: bool = True,
+    persistent_cache_root: pathlib.Path | None = None,
 ) -> dict:
     """Return the median record of every variant, plus the parity check."""
     rows = []
@@ -730,7 +778,16 @@ def sweep(
         if variant.endswith("-cache"):  # a probe over two processes, not a timing
             rows.append(cache_probe(variant, device, cells, tile))
             continue
-        records = [run_child(variant, device, cells, tile) for _ in range(repeat)]
+        records = [
+            run_child(
+                variant,
+                device,
+                cells,
+                tile,
+                persistent_cache_root=persistent_cache_root,
+            )
+            for _ in range(repeat)
+        ]
         # a parity variant reports deviations rather than a rate, so only the keys it
         # actually carries are aggregated -- and the deviations are a worst case over
         # every pair, so the worst run is the summary rather than the median
@@ -800,11 +857,34 @@ if __name__ == "__main__":
     )
     parser.add_argument("--measure", help="run one variant in this process")
     parser.add_argument("--json", type=pathlib.Path)
+    parser.add_argument(
+        "--cache-recipe",
+        choices=("scheduled-test",),
+        help="explicitly reuse the tracked persistent cache for this launch recipe",
+    )
+    parser.add_argument("--persistent-cache-root", type=pathlib.Path)
+    parser.add_argument("--minimum-compile-seconds", type=float, default=1.0)
     arguments = parser.parse_args()
     if arguments.measure:
-        store_every_compile()
-        print(json.dumps(measure(arguments.measure, arguments.cells, arguments.tile)))
+        print(
+            json.dumps(
+                measure(
+                    arguments.measure,
+                    arguments.cells,
+                    arguments.tile,
+                    persistent_cache_root=arguments.persistent_cache_root,
+                    minimum_compile_seconds=arguments.minimum_compile_seconds,
+                )
+            )
+        )
         raise SystemExit(0)
+    if arguments.persistent_cache_root is not None and arguments.cache_recipe is None:
+        raise SystemExit("--persistent-cache-root requires --cache-recipe")
+    persistent_cache_root = (
+        arguments.persistent_cache_root or default_persistent_compilation_cache_root()
+        if arguments.cache_recipe == "scheduled-test"
+        else None
+    )
     names = (
         arguments.variants.split(",")
         if arguments.variants
@@ -817,6 +897,7 @@ if __name__ == "__main__":
         arguments.repeat,
         names,
         parity=arguments.parity,
+        persistent_cache_root=persistent_cache_root,
     )
     if arguments.json:
         arguments.json.write_text(json.dumps(summary, indent=2))

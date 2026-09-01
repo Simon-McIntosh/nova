@@ -31,7 +31,11 @@ from benchmarks import jitted_eager_parity_gate as parity
 from nova.equilibrium.observable_acceptance import (
     evaluate_observable_bound_acceptance,
 )
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 
 HERE = Path(__file__).resolve().parents[1]
@@ -126,20 +130,37 @@ def _watch_compilation_cache() -> None:
     monitoring.register_event_duration_secs_listener(saved)
 
 
-def _configure_compilation_cache(request: str) -> None:
+def _apply_compilation_cache(
+    request: str | None,
+    *,
+    minimum_compile_seconds: float,
+) -> None:
+    """Apply an explicit cache selection after profile construction."""
+
+    if request is None:
+        return
+    if request.strip().lower() == "off":
+        jax.config.update("jax_compilation_cache_dir", None)
+        return
+    configure_persistent_compilation_cache(
+        Path(request),
+        minimum_compile_seconds=minimum_compile_seconds,
+    )
+
+
+def _configure_compilation_cache(
+    request: str,
+    *,
+    minimum_compile_seconds: float,
+) -> None:
     """Select an explicit cache-off or persistent-cache process route."""
 
-    from nova.biot.tiledassembly import compilation_cache
-
     _watch_compilation_cache()
-    os.environ["NOVA_COMPILATION_CACHE"] = request
-    if request.strip().lower() == "off":
-        if jax.config.jax_compilation_cache_dir is not None:
-            raise RuntimeError("cache-off process inherited a compilation cache")
-        return
-    directory = compilation_cache(request, min_compile_seconds=0.0)
-    if directory is None:
-        raise RuntimeError("persistent compilation cache was not configured")
+    configure_dtypes()
+    _apply_compilation_cache(
+        request,
+        minimum_compile_seconds=minimum_compile_seconds,
+    )
 
 
 def _array_sha256(value: Any) -> str:
@@ -280,6 +301,8 @@ def _case_measurement(
     slice_index: int,
     batch_sizes: tuple[int, ...],
     registered_names: set[str],
+    cache_request: str | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict[str, Any]:
     """Measure scalar and batched terminal labels for one held-out case."""
 
@@ -291,6 +314,10 @@ def _case_measurement(
     boundary = parity._stored_lcfs(group, slice_index)
     target_current = abs(float(group["plasma_current_c"][slice_index]))
     seed = profile.moment_seed(boundary, target_current)
+    _apply_compilation_cache(
+        cache_request,
+        minimum_compile_seconds=minimum_compile_seconds,
+    )
 
     scalar = profile.solve(
         seed.flux, target_current=target_current, **parity.SOLVE_OPTIONS
@@ -690,6 +717,8 @@ def _case_repetition_measurement(
     batch_sizes: tuple[int, ...],
     registered_names: set[str],
     repetitions: int,
+    cache_request: str | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict[str, Any]:
     """Repeat each compiled case/width solve without rebuilding its executable."""
 
@@ -701,6 +730,10 @@ def _case_repetition_measurement(
     boundary = parity._stored_lcfs(group, slice_index)
     target_current = abs(float(group["plasma_current_c"][slice_index]))
     seed = profile.moment_seed(boundary, target_current)
+    _apply_compilation_cache(
+        cache_request,
+        minimum_compile_seconds=minimum_compile_seconds,
+    )
 
     scalar = profile.solve(
         seed.flux, target_current=target_current, **parity.SOLVE_OPTIONS
@@ -1328,7 +1361,7 @@ def _run_process_invocation(
     ]
     environment = dict(os.environ)
     environment.pop("JAX_COMPILATION_CACHE_DIR", None)
-    environment["NOVA_COMPILATION_CACHE"] = cache_request
+    environment.pop("NOVA_COMPILATION_CACHE", None)
     environment["PYTHONPATH"] = str(HERE)
     started = time.perf_counter()
     with log_path.open("w", encoding="utf-8") as log:
@@ -1570,6 +1603,8 @@ def measure_state_label_reproducibility(
     array_output: Path,
     batch_sizes: tuple[int, ...] = DEFAULT_BATCH_SIZES,
     repetitions: int = DEFAULT_REPETITIONS,
+    cache_request: str | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict[str, Any]:
     """Retain and compare repeated terminal states and all registered labels."""
 
@@ -1596,6 +1631,8 @@ def measure_state_label_reproducibility(
             batch_sizes,
             registered_names,
             repetitions,
+            cache_request,
+            minimum_compile_seconds,
         )
         for shot, slice_index, _row in parity._case_rows(store)
     ]
@@ -1701,6 +1738,8 @@ def measure(
     store: Path,
     output: Path,
     batch_sizes: tuple[int, ...] = DEFAULT_BATCH_SIZES,
+    cache_request: str | None = None,
+    minimum_compile_seconds: float = 1.0,
 ) -> dict[str, Any]:
     """Measure and persist observable-bound acceptance at each batch size."""
 
@@ -1731,6 +1770,8 @@ def measure(
             slice_index,
             batch_sizes,
             registered_names,
+            cache_request,
+            minimum_compile_seconds,
         )
         for shot, slice_index, _row in parity._case_rows(store)
     ]
@@ -1908,6 +1949,12 @@ def parser() -> argparse.ArgumentParser:
         help="use 'off' or one fixed persistent-cache directory in this process",
     )
     result.add_argument(
+        "--cache-recipe",
+        choices=("bank-regeneration",),
+        help="explicitly reuse the tracked persistent cache for this launch recipe",
+    )
+    result.add_argument("--persistent-cache-root", type=Path)
+    result.add_argument(
         "--executable-boundary-output",
         type=Path,
         help="write the two-arm fresh-process determinism receipt",
@@ -1928,14 +1975,23 @@ def parser() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     arguments = parser().parse_args()
+    if arguments.persistent_cache_root is not None and arguments.cache_recipe is None:
+        raise SystemExit("--persistent-cache-root requires --cache-recipe")
+    if arguments.cache_recipe is not None and arguments.compilation_cache is not None:
+        raise SystemExit("--cache-recipe cannot be combined with --compilation-cache")
+    cache_request = arguments.compilation_cache
+    minimum_compile_seconds = 0.0
+    if arguments.cache_recipe == "bank-regeneration":
+        cache_request = str(
+            arguments.persistent_cache_root
+            or default_persistent_compilation_cache_root()
+        )
+        minimum_compile_seconds = 1.0
     if arguments.executable_boundary_output is not None:
-        if (
-            arguments.state_output is not None
-            or arguments.compilation_cache is not None
-        ):
+        if arguments.state_output is not None or cache_request is not None:
             raise SystemExit(
                 "--executable-boundary-output cannot be combined with "
-                "--state-output or --compilation-cache"
+                "--state-output or a compilation-cache recipe"
             )
         if arguments.scratch is None:
             raise SystemExit("--executable-boundary-output requires --scratch")
@@ -1947,20 +2003,32 @@ if __name__ == "__main__":
             arguments.process_invocations,
         )
     elif arguments.state_output is None:
-        if arguments.compilation_cache is not None:
-            _configure_compilation_cache(arguments.compilation_cache)
+        if cache_request is not None:
+            _configure_compilation_cache(
+                cache_request,
+                minimum_compile_seconds=minimum_compile_seconds,
+            )
         result = measure(
             arguments.store,
             arguments.output,
             tuple(arguments.batch_sizes),
+            cache_request,
+            minimum_compile_seconds,
         )
     else:
+        if cache_request is not None:
+            _configure_compilation_cache(
+                cache_request,
+                minimum_compile_seconds=minimum_compile_seconds,
+            )
         result = measure_state_label_reproducibility(
             arguments.store,
             arguments.state_output,
             arguments.state_array_output,
             tuple(arguments.batch_sizes),
             arguments.repetitions,
+            cache_request,
+            minimum_compile_seconds,
         )
     print(
         json.dumps(

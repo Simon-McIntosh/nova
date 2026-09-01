@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="solver-trip-orchestration">
+<meta name="plan-title" content="Solver trip orchestration — collapsing the per-trip quantum toward 1 ms/slice">
+<meta name="plan-summary" content="Attack the 95.9% Newton/Krylov orchestration share of H200 solve time: compile cadence, the per-trip quantum, and trip-count cut-through.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="16.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="h200,jax,throughput,timing,active-set,profiling">
+<title>Solver trip orchestration | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Solver trip orchestration</h1>
+<p class="lede">The H200 stage profile (receipt <code>docs/figures/single-grid-solver-cutover/h200-solve-profile.json</code>, landed 2026-09-01) settled where forward-solve time goes: one complete fixed-point map application costs <strong>0.784 ms/member</strong> at width 1024 (carrier 0.767, response 0.767, standalone topology 1.030, zero host callbacks), while <strong>95.9%</strong> of solve time sits in per-trip orchestration — active-set reconciliation, Newton setup and the first Krylov action — repeated across 16 outer trips, with one warmup sweep at 3.2% and extra GMRES actions at 0.9%. Scan latency is negligible (0.12 ms at 16 trips). The lead's ~1 ms/slice target is therefore an orchestration-restructuring problem, not a map-acceleration problem: the ideal collapse of the per-trip quantum floors at <strong>1.75 ms/slice</strong> under the 16-trip structure, and only trip-count reduction cuts below that. Lead guidance 2026-09-01: the 1.75 ms floor is acceptable, and the cut-through below it is attractive — investigate both. Baseline provenance stands reconciled on the cutover plan: the committed ladder's width-1024 row records 373.8 ms/member for the full settled active-set solve; 42.77 ms/slice was a separate earlier single-slice measurement.</p></header>
+
+<h2 id="s1">§1 — Compile cost and cadence</h2>
+<p>The profile recorded an <strong>800.6 s</strong> compile that amortizes below 1 ms/slice only past ~800k slices. Two questions the lane designs need answered as numbers. <em>Cadence:</em> the compile is paid once per (program shape, device, jaxlib) per process — nova's suite and bank lanes are deliberately fresh-process, and each batch-width bucket is its own program — so establish exactly which lanes repay it and whether the JAX persistent compilation cache (<code>jax_compilation_cache_dir</code>) is enabled anywhere in nova's launch recipes; if not, measure the warm-restart compile time with the cache on, on the reserved H200, and state the cache-key stability across our own commits (an XLA/jaxlib bump invalidates; a pure-data change must not). <em>Decomposition:</em> where do the 800 s go — trace-time versus XLA passes (measure with <code>JAX_LOG_COMPILES</code> and the XLA compilation-time breakdown), whether the dual-branch stacked program doubles it, and whether donating buffers or splitting the settled-loop program into per-trip executables moves it materially. Done-when: a receipt states compile seconds cold and cache-warm, the pass breakdown, the per-lane payment cadence (bank regeneration, small lanes, tests), and a recommendation with numbers.</p>
+
+<h2 id="s2">§2 — The per-trip orchestration quantum</h2>
+<p>Decompose the reconciliation + Newton-setup + first-Krylov block that carries 95.9% of solve time: how much is mask reconciliation (gather/scatter and comparison over the active set), how much is Newton operator setup (re-linearization, preconditioner assembly), how much is the first GMRES action's synchronization, and how much is fixed per-trip launch overhead that fusing the trip body into one program would remove. The S16 factorial arms (run <code>r-20260901T053948341346-sse-h200-step-decomposition</code>) carry the trip census — all 1024 members execute 16 active-set outer trips, 16 attempted and accepted Newton promotions, GMRES=4 — and are the unremeasured baseline this section builds on. Done-when: a receipt attributes the per-trip quantum to named sub-stages with measured times at width 1024, and states the fusion/restructuring candidates with their individual ceilings against the 1.75 ms floor.</p>
+
+<h2 id="s3">§3 — Trip-count cut-through</h2>
+<p>The 1.75 ms floor stands only while every member pays 16 outer trips. The cut-through question: how many trips does the active set actually need before it settles? Mine the committed bank telemetry (per-trip mask-difference records, the retained per-iteration histories) for the settlement histogram across the MAST twelve-arm and DIII-D five-frame banks — if most members settle in far fewer than 16 trips, a settled-early exit (preserving the own-mask acceptance and best-iterate retention semantics exactly, proven by the existing paired bit-identity tests where the mask does not move) turns the mean trip count into the effective divisor. Fixed-shape constraints apply: an early exit must be a masked no-op continuation, not a dynamic shape. Done-when: the settlement histogram is banked per machine, the projected mean-trip ms/slice is stated against the 1 ms target, and the semantic-preservation test surface for a settled-exit policy is named. Any policy change to solver semantics is a lead decision — this section produces the numbers and the test plan, not the cutover.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="settled-exit-policy" data-choice="" data-by="" data-when="">
+<p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3's histogram and test surface are banked?</p>
+<p class="r-dec-rat"></p>
+</div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sto-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-trip-orchestration" data-resolved-at="" data-resolved-by="">
+<h4 class="r-fu-title">Run the three orchestration investigations</h4>
+<div class="r-fu-body">Measure the compile cadence and its decomposition (§1), attribute the per-trip orchestration quantum to named sub-stages (§2), and mine the committed bank telemetry for the active-set settlement histogram with a projected mean-trip ms/slice (§3). Each section lands a receipt with numbers; the settled-exit policy itself stays an open lead decision fed by §3.</div>
+<pre class="r-fu-prompt">/reckon-ship solver-trip-orchestration</pre>
+</article>
+</section>
+</main>
+</body>
+</html>

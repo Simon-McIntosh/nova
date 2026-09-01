@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.333">
 </head>
 <body>
@@ -55,6 +55,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260901T1856-discriminator" data-who="reckon-ship-s18" data-when="2026-09-01T18:56:00+00:00">
     <div class="r-comment-body">s1 discriminator consumed from the shadow score (run r-...-hdg-cache-replay, promoted): the pinned-revision GPU solve did NOT reproduce committed pure-arm convergence (active_set_stagnated, selected O/X residuals 4.5e-3 / 5.2e-3 m) while the mixed arm reproduced O/X to 8.53e-16 / 2.48e-16 m. The nonreproduction is therefore NOT isolated to HEAD code. Per the locked forensics-first decision, the backend-sensitivity reading is not yet accepted; the paired per-trip divergence forensics decides.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T2130-stall-remedies" data-who="reckon-ship-s18" data-when="2026-09-01T21:30:00+00:00">
+    <div class="r-comment-body">STALL-REMEDY MENU for s3, recorded from the plotted evidence (pure-arm comparison + residual figures in the gate evidence record) so the S19 session prototypes against a mechanism, not a symptom. The stall's shape: one coherent up-down antisymmetric flux mode (~5e-3 Wb/rad sup, lower-half and divertor concentrated) that the outer iteration cannot contract - a near-unit eigenvalue of the fixed-point map along a vertical-displacement direction - with the mask settled from trip 3 and the terminal residual EXACTLY repeated (a period-1 limit cycle, which points at a step being computed and identically cancelled each trip; audit the step_cap clipping along the mode as the cheapest check). Candidate remedies, cheapest first, each fixed-shape-compatible: (1) adaptive Krylov depth - raise GMRES actions above 4 only when per-trip residual contraction stalls, since a near-unit eigenvalue is invisible to a 4-vector Krylov space; (2) deflation/recycling - the plotted mode IS the eigenvector estimate (successive residual differences supply it), deflate it from the Krylov solve or augment the space; (3) Anderson acceleration on the outer fixed-point iteration with a fixed window - the classic remedy for eigenvalue-near-1 stalls and JAX-friendly; (4) mode-aware step handling - if the step_cap audit confirms identical clipping, scale or line-search along the offending direction instead of capping it; (5) vertical-mode regularization - the mixed arm converging to machine precision is direct evidence that constraining this mode fixes the stall, so a weak vertical-moment pin with a weight-to-zero continuation is the physics-shaped remedy. Each prototype must keep the referee surface green and report per-trip contraction of the identified mode before and after.</div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

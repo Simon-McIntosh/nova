@@ -22,7 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.333">
 </head>
 <body>
 <main class="plan-doc">
@@ -60,6 +61,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T141031246939-sto-quantum-decomposition" data-who="sto-quantum" data-when="2026-09-01T14:43:24Z">
     <div class="r-comment-body"><p>Per-trip quantum attributed at width 1024: 25.0 ms/member/trip = mask reconciliation 12.61 + Newton re-linearization 12.34 + first-GMRES sync 0.048 + host launch 0 + preconditioner 0 (none exists; all 16 trips already in one compiled launch). Explicit fusion measured near-nil (1.006x); ranked ceilings put trip-body collapse at the 1.746 ms floor and mask/linearization restructuring at ~22 ms each alone</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260901T1445-quantum" data-who="reckon-ship-s18" data-when="2026-09-01T14:45:00+00:00">
+    <div class="r-comment-body">sto-quantum-decomposition landed — commits fefab63f/5228ffb8/b0bf0575, merged a9183ade; gate PASSED (SLURM 1260803, 2m10s). The per-trip quantum is COMPILED COMPUTATION, not host overhead: 25.0 ms/member/trip = mask reconciliation 12.61 + Newton re-linearization 12.34 + first-GMRES sync 0.048, with host launches 0 (all sixteen trips already inside one compiled launch) and preconditioner 0 (none exists). Explicit fusion measured near-nil (1.006x, 0.236 ms/slice ceiling). Ranked ceilings: complete trip-body collapse reaches the 1.746 ms floor; mask-reconciliation restructuring alone → 22.07 ms/slice; linearization reuse/hoist alone → 22.52. Consequence for s3: trip-count reduction divides the whole 25 ms quantum and is the only multiplicative lever — the DIII-D partial census (mean 4.2 of 16 trips) projects ~0.46 ms/slice if MAST agrees. Receipt docs/figures/solver-trip-orchestration/trip-quantum.json + .png.</div>
 </div>
 </section>
 </main>

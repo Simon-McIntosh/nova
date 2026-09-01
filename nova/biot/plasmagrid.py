@@ -12,10 +12,35 @@ from nova.biot.error import PlasmaTopologyError
 from nova.biot.grid import BaseGrid
 from nova.biot.solve import Solve
 from nova.frame.error import GridError
+from nova.geometry.hexstencil import HEX_RING
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
 
 from nova.frame.plasmaloc import PlasmaLoc
+
+
+_HEX_RING_ANGLES = np.arctan2(
+    np.sqrt(3.0) / 2.0 * HEX_RING[:, 1],
+    HEX_RING[:, 0] + 0.5 * HEX_RING[:, 1],
+)
+
+
+def hex_ring_slots(centre, neighbours) -> np.ndarray:
+    """Map neighbour coordinates to the angular slots defined by ``HEX_RING``."""
+    origin = np.asarray(centre, dtype=np.float64)
+    coordinates = np.asarray(neighbours, dtype=np.float64)
+    if origin.shape != (2,) or coordinates.ndim != 2 or coordinates.shape[1] != 2:
+        raise ValueError("hex ring coordinates must be two-dimensional")
+    offset = coordinates - origin
+    if np.any(np.linalg.norm(offset, axis=1) == 0.0):
+        raise ValueError("a hex neighbour must differ from its centre")
+    angles = np.arctan2(offset[:, 1], offset[:, 0])
+    difference = angles[:, np.newaxis] - _HEX_RING_ANGLES[np.newaxis, :]
+    distance = np.abs(np.arctan2(np.sin(difference), np.cos(difference)))
+    slots = np.argmin(distance, axis=1)
+    if len(np.unique(slots)) != len(slots):
+        raise ValueError("hex neighbours do not occupy distinct HEX_RING slots")
+    return slots
 
 
 @dataclass
@@ -328,9 +353,8 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             neighbour_index = neighbor_vertices[1][slice_index]
             if len(neighbour_index) != 6:
                 continue
-            delta = points[neighbour_index] - center_point
-            angle = np.arctan2(delta[:, 1], delta[:, 0])
-            neighbours[i] = neighbour_index[np.argsort(angle)[::-1]]
+            slots = hex_ring_slots(center_point, points[neighbour_index])
+            neighbours[i, slots] = neighbour_index
         mask = neighbours[:, 0] != -1
         stencil_index = np.arange(point_number)[mask]
         stencil = np.append(

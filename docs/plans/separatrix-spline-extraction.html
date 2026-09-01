@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="112">
+<meta name="plan-version" content="113">
 </head>
 <body>
   <main class="plan-doc">
@@ -208,15 +208,15 @@
       </p>
     <p class="r-dec-rat">Lead decision 2026-09-01: gates lock at one quarter of the source EFIT reconstruction grid&#x27;s minimum width, derived from the data per machine. On a 65-by-65 efm grid this is sub-centimetre (~0.8 cm), consistent with the standing sub-cm bar. Companion directive recorded with the lock: the validation solve is COLD-START - seeding the solve with EFIT&#x27;s psi is rejected as the validation path, because the GS problem must be solvable from a cold start and a failure there must surface, not be masked by a warm seed. The zero-iteration residual evaluation GS(psi_EFIT) under Nova&#x27;s discretised operator stays, endorsed as the formulation-error detector and the measured floor the quarter-width gate must respect.</p>
     </div>
-<div class="r-dec" data-key="flood-fill-mesh-authority" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="flood-fill-mesh-authority" data-choice="assess-first" data-by="Simon McIntosh" data-when="2026-09-01T07:07:06+00:00">
     <p class="r-dec-q">Does the flood fill move from the flux raster onto the plasma current cells?</p>
     <p class="r-dec-ctx">The lead&#x27;s question of 2026-09-01: why does the flood-fill topology diagnostic run on a regular grid at all, and should flood fill and solve both use the plasma cells? The measured state: the tensor flux raster is NOT dead code - it is the live production authority carrying psi, the global spline, X/O extraction and the saddle-aware flood that produces the private mask (connectivity_boundary.py, this sprint&#x27;s shadow work). The hexagonal plasma mesh (PolyGrid.grid_coordinates, polytrim, AtomicCellMesh.from_cells, traced_clip) separately carries current, with per-cell current resolved by flux functions plus the private mask. The SEAM between the two representations is real and has produced two measured symptoms: the panel census found centre membership disagreeing with cached labels on one cell of each retained-failure 21985/51 panel, and the hex-clip defect map recorded 96 of 447 nonempty plasma supports receiving exactly zero scattered current (-0.689 MA, 4.592 percent) at the mesh rim, now under mandated repair. Consolidating flood plus source onto the plasma cells would remove the seam, and cells carry psi_norm at centroids already; the flux raster would remain the PDE and spline authority. The cost is a refactor through connectivity_boundary, domain, forward_operator and the mask/telemetry machinery this sprint just stabilised, and the flood&#x27;s saddle-aware cut logic would need re-deriving on the unstructured Delaunay adjacency.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="consolidate-on-plasma-cells">move flood fill onto the plasma cells</button>
       <button class="r-opt" data-value="keep-two-meshes-harden-seam">keep both meshes; pin the transfer seam with conservation tests</button>
-      <button class="r-opt" data-value="assess-first">costed design assessment before choosing (recommended)</button>
+      <button class="r-opt chosen" data-value="assess-first">costed design assessment before choosing (recommended)</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-01: a feasibility and prototype worker investigates hex plasma-cell support EVERYWHERE - one grid for a GPU-batchable 2D spline representation and for the flood fill - before any commitment to consolidation. Design constraints stated with the decision: the fast null identifier is the existing six-neighbour sign-change count around each cell centroid (nova/biot/fieldnull.py categorize_2d) and remains primary, with the global 2D spline fit reserved for polish; and the spline solution is split in two at the plasma boundary with a discontinuous C2 - an interior spline separated from an exterior spline - because the current-density jump at the separatrix makes the second derivative discontinuous there, and a single global C2 fit smooths across that jump. The measured motivation stands beside it: MAST&#x27;s zero-iteration residual is edge-concentrated (peak 0.0665 m from the LCFS) and halves with resolution, exactly the error class a boundary-split representation targets.</p>
     </div>
 </section>
 

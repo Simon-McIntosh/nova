@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.spatial import Delaunay
 
-from nova.biot.plasmagrid import PlasmaGrid
+from nova.biot.plasmagrid import PlasmaGrid, hex_ring_slots
 from nova.equilibrium.cell_partition import (
     cell_partition_geometry,
     missing_link_mask,
@@ -32,6 +32,66 @@ def _expected_rings(centres: np.ndarray, shape: tuple[int, int]) -> np.ndarray:
     neighbour_coordinates = centre_coordinates[:, np.newaxis, :] + HEX_RING
     neighbours = np.ravel_multi_index(np.moveaxis(neighbour_coordinates, -1, 0), shape)
     return np.column_stack((centres, neighbours))
+
+
+def _assert_distinct_cyclic_slots(centre, neighbours, slots):
+    assert len(np.unique(slots)) == len(neighbours)
+    physical_ring = np.c_[
+        HEX_RING[:, 0] + 0.5 * HEX_RING[:, 1],
+        np.sqrt(3.0) / 2.0 * HEX_RING[:, 1],
+    ]
+    anchor = np.arctan2(physical_ring[0, 1], physical_ring[0, 0])
+    angles = np.arctan2(neighbours[:, 1] - centre[1], neighbours[:, 0] - centre[0])
+    order = np.argsort(np.mod(angles - anchor, 2.0 * np.pi))
+    ordered_slots = slots[order]
+    advances = np.mod(np.diff(np.r_[ordered_slots, ordered_slots[0]]), 6)
+    assert np.all(advances > 0)
+    assert advances.sum() == 6
+
+
+def test_distorted_complete_ring_uses_distinct_cyclic_slots():
+    centre = np.array([1.68734968, -0.88282491])
+    neighbours = np.array(
+        [
+            [1.56502188, -0.81219892],
+            [1.68734968, -0.74157293],
+            [1.80967749, -0.81219892],
+            [1.80500973, -0.94719674],
+            [1.68574649, -1.00392057],
+            [1.56520607, -0.95311162],
+        ]
+    )
+
+    slots = hex_ring_slots(centre, neighbours)
+
+    _assert_distinct_cyclic_slots(centre, neighbours, slots)
+
+
+def test_randomly_distorted_complete_rings_preserve_cyclic_order():
+    rng = np.random.default_rng(2749)
+    pitch = 0.16
+    centre = np.array([1.7, -0.4])
+    regular_offsets = (
+        pitch
+        * np.c_[
+            HEX_RING[:, 0] + 0.5 * HEX_RING[:, 1],
+            np.sqrt(3.0) / 2.0 * HEX_RING[:, 1],
+        ]
+    )
+    np.testing.assert_array_equal(
+        hex_ring_slots(centre, centre + regular_offsets), np.arange(6)
+    )
+
+    for _ in range(128):
+        perturbation_angle = rng.uniform(-np.pi, np.pi, 6)
+        perturbation_radius = rng.uniform(0.0, 0.4 * pitch, 6)
+        perturbation = (
+            perturbation_radius[:, None]
+            * np.c_[np.cos(perturbation_angle), np.sin(perturbation_angle)]
+        )
+        neighbours = centre + regular_offsets + perturbation
+        slots = hex_ring_slots(centre, neighbours)
+        _assert_distinct_cyclic_slots(centre, neighbours, slots)
 
 
 def test_complete_hex_lattice_uses_contract_rings_and_physical_edges():

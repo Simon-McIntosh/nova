@@ -70,6 +70,7 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4 as _dilate4
+from nova.linalg.split_spline import fit_split_spline
 from nova.linalg.tensor_spline import fit_tensor_spline
 
 
@@ -85,6 +86,7 @@ __all__ = [
     "label_saddle_aware_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
+    "polish_census_stationary_points",
     "polish_stationary_points",
     "private_flux_mask",
     "traced_spline_contour",
@@ -815,11 +817,29 @@ def _polish_stationary_points_in_bounds(
     )
     converged = in_domain & finite_result & (gradient_norm <= gradient_tolerance)
     hessian_type = jnp.sign(determinant).astype(jnp.int8)
+    gradient = jnp.stack(
+        (evaluation.radial_derivative, evaluation.vertical_derivative), axis=-1
+    )
+    hessian = jnp.stack(
+        (
+            jnp.stack(
+                (evaluation.radial_second_derivative, evaluation.mixed_derivative),
+                axis=-1,
+            ),
+            jnp.stack(
+                (evaluation.mixed_derivative, evaluation.vertical_second_derivative),
+                axis=-1,
+            ),
+        ),
+        axis=-2,
+    )
 
     return {
         "position_rz": jnp.where(valid[..., None], position, 0.0),
         "value": jnp.where(valid, evaluation.value, 0.0),
         "gradient_norm": jnp.where(valid, gradient_norm, 0.0),
+        "gradient": jnp.where(valid[..., None], gradient, 0.0),
+        "hessian": jnp.where(valid[..., None, None], hessian, 0.0),
         "hessian_type": jnp.where(valid, hessian_type, 0),
         "converged": valid & converged,
         "in_domain": valid & in_domain,
@@ -849,6 +869,230 @@ def polish_stationary_points(
     return _polish_stationary_points_in_bounds(
         spline, seed_rz, valid, lower_rz, upper_rz, stationary_steps
     )
+
+
+def _coordinate_grids(
+    radial: jnp.ndarray, vertical: jnp.ndarray
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return paired sample coordinates for axes or half-offset arrays."""
+    if radial.ndim == 1 and vertical.ndim == 1:
+        return jnp.meshgrid(radial, vertical)
+    return jnp.broadcast_arrays(radial, vertical)
+
+
+def _minimum_cell_pitch(radial: jnp.ndarray, vertical: jnp.ndarray) -> jnp.ndarray:
+    """Return the shortest adjacent sample spacing on a structured lattice."""
+    radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
+    horizontal = jnp.hypot(
+        jnp.diff(radial_grid, axis=1), jnp.diff(vertical_grid, axis=1)
+    )
+    vertical_step = jnp.hypot(
+        jnp.diff(radial_grid, axis=0), jnp.diff(vertical_grid, axis=0)
+    )
+    return jnp.minimum(jnp.min(horizontal), jnp.min(vertical_step))
+
+
+@jax.jit
+def polish_census_stationary_points(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    interface_value: jnp.ndarray,
+    polarity: jnp.ndarray,
+    selected_extremum: jnp.ndarray,
+    selected_saddle: jnp.ndarray,
+) -> tuple[jnp.ndarray, jnp.ndarray, dict[str, jnp.ndarray]]:
+    """Apply one fit-qualified Newton step to census-selected nulls.
+
+    Candidate production, ranking, and count are complete before this function
+    receives its two fixed slots.  Stationarity is measured by the fitted
+    gradient made dimensionless with the coordinate span and field range.  Its
+    tolerance is the larger of two independently derived floors.  The
+    deterministic coefficient forward-error scale in the solved coordinates is
+    ``n_active * condition_number * eps * field_range``.  The fit retains its
+    column scales ``D``; multiplying that error by ``B' D^-1`` and dividing by
+    ``field_range / span`` gives the dimensionless roundoff gradient floor.  The
+    exterior level-squared basis is normalized by the field range before the
+    solve, so its columns have the same units as the interior columns.  The
+    representation floor
+    treats the fit's sample RMS residual as unresolved field variation across
+    one cell: ``(rms / field_range) / (cell_pitch / span)``.  Both floors are
+    is separately invariant to coordinate and field units.  The complete
+    scaled-coordinate construction makes the roundoff floor invariant as well,
+    and the active coefficient count is evaluated separately at each slot.
+
+    A seed already below that fitted-gradient floor takes zero active updates.
+    Every other valid seed receives exactly one bounded Newton update.  Flux
+    value consistency has its own dimensionless floor: the larger of the
+    normalized sample RMS and ``n_active * condition_number * eps``.  It is not
+    divided by cell pitch because it bounds a value rather than a gradient.
+    Thus gradient stationarity cannot admit a representation that materially
+    changes the selected boundary level.  A fit or result
+    outside the finite, Hessian-type, stationarity, and value-consistency gates
+    retains the complete census row while preserving the attempted receipt.
+    """
+    values = jnp.asarray(values)
+    radial = jnp.asarray(radial, dtype=values.dtype)
+    vertical = jnp.asarray(vertical, dtype=values.dtype)
+    interface_value = jnp.asarray(interface_value, dtype=values.dtype)
+    level_set = jnp.asarray(polarity, dtype=values.dtype) * (interface_value - values)
+    finite_fit = jnp.isfinite(interface_value) & jnp.all(jnp.isfinite(values))
+    spline = fit_split_spline(
+        radial,
+        vertical,
+        values,
+        level_set,
+        execute=finite_fit,
+    )
+    selected = jnp.stack((selected_extremum, selected_saddle))
+    valid = jnp.all(jnp.isfinite(selected[:, :3]), axis=-1)
+    radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
+    coordinate_span = jnp.maximum(
+        jnp.max(radial_grid) - jnp.min(radial_grid),
+        jnp.max(vertical_grid) - jnp.min(vertical_grid),
+    )
+    field_scale = jnp.maximum(
+        jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
+    )
+    seed_evaluation = spline.evaluate(selected[:, 0], selected[:, 1])
+    (
+        seed_active_count,
+        _seed_value_basis_norm,
+        seed_derivative_basis_norm,
+    ) = spline.scaled_basis_receipt(selected[:, 0], selected[:, 1])
+    normalized_cell_pitch = _minimum_cell_pitch(radial, vertical) / coordinate_span
+    representation_floor = (
+        spline.sample_rms_residual / field_scale / normalized_cell_pitch
+    )
+    seed_roundoff_floor = (
+        seed_active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps
+        * seed_derivative_basis_norm
+        * coordinate_span
+    )
+    seed_stationarity_tolerance = jnp.maximum(seed_roundoff_floor, representation_floor)
+    seed_gradient = jnp.stack(
+        (seed_evaluation.radial_derivative, seed_evaluation.vertical_derivative),
+        axis=-1,
+    )
+    seed_gradient_norm = jnp.linalg.norm(seed_gradient, axis=-1)
+    seed_normalized_gradient = seed_gradient_norm * coordinate_span / field_scale
+    seed_stationary = (
+        valid
+        & jnp.isfinite(seed_normalized_gradient)
+        & (seed_normalized_gradient <= seed_stationarity_tolerance)
+    )
+    attempted = polish_stationary_points(
+        spline,
+        selected[:, :2],
+        valid & ~seed_stationary,
+        stationary_steps=1,
+    )
+    seed_hessian = jnp.stack(
+        (
+            jnp.stack(
+                (
+                    seed_evaluation.radial_second_derivative,
+                    seed_evaluation.mixed_derivative,
+                ),
+                axis=-1,
+            ),
+            jnp.stack(
+                (
+                    seed_evaluation.mixed_derivative,
+                    seed_evaluation.vertical_second_derivative,
+                ),
+                axis=-1,
+            ),
+        ),
+        axis=-2,
+    )
+    seed_determinant = (
+        seed_hessian[..., 0, 0] * seed_hessian[..., 1, 1]
+        - seed_hessian[..., 0, 1] * seed_hessian[..., 1, 0]
+    )
+    attempted = attempted | {
+        "position_rz": jnp.where(
+            seed_stationary[:, None], selected[:, :2], attempted["position_rz"]
+        ),
+        "value": jnp.where(seed_stationary, seed_evaluation.value, attempted["value"]),
+        "gradient": jnp.where(
+            seed_stationary[:, None], seed_gradient, attempted["gradient"]
+        ),
+        "gradient_norm": jnp.where(
+            seed_stationary, seed_gradient_norm, attempted["gradient_norm"]
+        ),
+        "hessian": jnp.where(
+            seed_stationary[:, None, None], seed_hessian, attempted["hessian"]
+        ),
+        "hessian_type": jnp.where(
+            seed_stationary,
+            jnp.sign(seed_determinant).astype(jnp.int8),
+            attempted["hessian_type"],
+        ),
+        "in_domain": jnp.where(seed_stationary, valid, attempted["in_domain"]),
+    }
+    normalized_gradient = attempted["gradient_norm"] * coordinate_span / field_scale
+    active_count, value_basis_norm, derivative_basis_norm = spline.scaled_basis_receipt(
+        attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
+    )
+    roundoff_floor = (
+        active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps
+        * derivative_basis_norm
+        * coordinate_span
+    )
+    stationarity_tolerance = jnp.maximum(roundoff_floor, representation_floor)
+    normalized_value_change = jnp.abs(attempted["value"] - selected[:, 2]) / field_scale
+    value_consistency_tolerance = jnp.maximum(
+        spline.sample_rms_residual / field_scale,
+        active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps
+        * value_basis_norm,
+    )
+    expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)
+    converged = (
+        spline.solve_converged
+        & valid
+        & attempted["in_domain"]
+        & jnp.isfinite(attempted["value"])
+        & jnp.all(jnp.isfinite(attempted["gradient"]), axis=-1)
+        & jnp.all(jnp.isfinite(attempted["hessian"]), axis=(-2, -1))
+        & (attempted["hessian_type"] == expected_hessian_type)
+        & (normalized_gradient <= stationarity_tolerance)
+        & (normalized_value_change <= value_consistency_tolerance)
+    )
+    polished = selected.at[:, :2].set(attempted["position_rz"])
+    polished = polished.at[:, 2].set(attempted["value"])
+    retained = jnp.where(converged[:, None], polished, selected)
+    receipt = attempted | {
+        "converged": converged,
+        "fit_converged": jnp.broadcast_to(spline.solve_converged, valid.shape),
+        "fit_iterations": jnp.broadcast_to(spline.solve_iterations, valid.shape),
+        "fit_residual": jnp.broadcast_to(spline.solve_residual, valid.shape),
+        "interface_value": jnp.broadcast_to(interface_value, valid.shape),
+        "stationarity_tolerance": jnp.broadcast_to(stationarity_tolerance, valid.shape),
+        "roundoff_floor": roundoff_floor,
+        "representation_floor": jnp.broadcast_to(representation_floor, valid.shape),
+        "active_derivative_basis_count": active_count,
+        "derivative_basis_norm": derivative_basis_norm,
+        "value_basis_norm": value_basis_norm,
+        "sample_rms_residual": jnp.broadcast_to(
+            spline.sample_rms_residual, valid.shape
+        ),
+        "seed_normalized_gradient": seed_normalized_gradient,
+        "normalized_gradient": normalized_gradient,
+        "normalized_value_change": normalized_value_change,
+        "value_consistency_tolerance": value_consistency_tolerance,
+        "seed_stationary": seed_stationary,
+        "census_position_rz": selected[:, :2],
+        "selected_position_rz": retained[:, :2],
+        "selected_value": retained[:, 2],
+    }
+    return retained[0], retained[1], receipt
 
 
 @partial(jax.jit, static_argnums=(4, 5))

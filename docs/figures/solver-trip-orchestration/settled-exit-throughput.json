@@ -1,0 +1,341 @@
+{
+  "configuration": {
+    "gmres_iterations": 4,
+    "newton_steps_per_trip": 1,
+    "steady_samples_per_arm": 1,
+    "trip_limit": 16,
+    "warmup_sweeps": 1,
+    "width": 1024
+  },
+  "device": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax_enable_x64": true,
+    "jax_version": "0.11.0",
+    "kind": "NVIDIA H200 NVL",
+    "platform": "gpu"
+  },
+  "driver": {
+    "path": "benchmarks/settled_exit_throughput.py",
+    "sha256": "c40b52a9f5c5b049c540a4d66dc53a7429cbf6b823f583df1bf1dba99b38e450"
+  },
+  "evidence_inputs": {
+    "diiid_bank": {
+      "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+      "sha256": "298f36f1093fdaca4e3430e569af061d97475f9c14922857c88d831563a0288b"
+    },
+    "mast_bank": {
+      "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "sha256": "f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053"
+    },
+    "settlement_histogram": {
+      "path": "docs/figures/solver-trip-orchestration/settlement-histogram.json",
+      "sha256": "30e20c08252c4ec1e777d28229fd32664dab8381250a98236e4e387bb99c94ef"
+    }
+  },
+  "h200_width_1024": {
+    "comparison_normalized_achieved_ms_per_slice": 1.7554624267888352,
+    "comparison_normalized_achieved_within_projected_band": false,
+    "compile_seconds": 63.867629061453044,
+    "direct_settled_ms_per_member": 416.90514779020305,
+    "flux_bit_identical_member_count": 1024,
+    "flux_member_count": 1024,
+    "full_trip_control": {
+      "active_set_iterations": {
+        "maximum": 16,
+        "mean": 16.0,
+        "median": 16.0,
+        "minimum": 16
+      },
+      "first_execute_batch_seconds": 428.77097719628364,
+      "steady": {
+        "maximum_batch_seconds": 425.58246387913823,
+        "median_batch_seconds": 425.58246387913823,
+        "median_ms_per_member": 415.60787488197093,
+        "minimum_batch_seconds": 425.58246387913823,
+        "sample_count": 1,
+        "samples_batch_seconds": [
+          425.58246387913823
+        ]
+      }
+    },
+    "maximum_absolute_flux_difference": 0.0,
+    "measured_speedup_x": 0.9968883260014699,
+    "projected_bank_band_ms_per_slice": [
+      0.21875,
+      0.45937500000000003
+    ],
+    "settled_exit": {
+      "active_set_iterations": {
+        "maximum": 16,
+        "mean": 16.0,
+        "median": 16.0,
+        "minimum": 16
+      },
+      "first_execute_batch_seconds": 426.85170548036695,
+      "steady": {
+        "maximum_batch_seconds": 426.9108713371679,
+        "median_batch_seconds": 426.9108713371679,
+        "median_ms_per_member": 416.90514779020305,
+        "minimum_batch_seconds": 426.9108713371679,
+        "sample_count": 1,
+        "samples_batch_seconds": [
+          426.9108713371679
+        ]
+      }
+    },
+    "trip_count_projected_ms_per_slice": 1.75
+  },
+  "measurement_state": "complete",
+  "paired_committed_bank_comparison": {
+    "method": "paired replay of each committed bank's recorded full terminal residual against the residual at the censused final all-zero mask suffix; only bit-identical recorded no-op suffixes establish the acceptance qualification because promotion telemetry was not banked; no equilibrium bank is regenerated",
+    "rows": [
+      {
+        "absolute_residual_difference": 0.0,
+        "acceptance_qualification": "retained result is a recorded no-op",
+        "classification": "qualified_recorded_noop_suffix",
+        "executed_trips_after_policy": 6,
+        "exit_relative_residual": 0.04485116727666494,
+        "full_relative_residual": 0.04485116727666494,
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "identity_gate_passed": true,
+        "identity_required": true,
+        "machine": "DIII-D",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": true,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": true
+      },
+      {
+        "absolute_residual_difference": 0.0,
+        "acceptance_qualification": "retained result is a recorded no-op",
+        "classification": "qualified_recorded_noop_suffix",
+        "executed_trips_after_policy": 3,
+        "exit_relative_residual": 0.08117000452284782,
+        "full_relative_residual": 0.08117000452284782,
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "identity_gate_passed": true,
+        "identity_required": true,
+        "machine": "DIII-D",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": true,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": true
+      },
+      {
+        "absolute_residual_difference": 0.0,
+        "acceptance_qualification": "retained result is a recorded no-op",
+        "classification": "qualified_recorded_noop_suffix",
+        "executed_trips_after_policy": 4,
+        "exit_relative_residual": 0.08696589356667041,
+        "full_relative_residual": 0.08696589356667041,
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "identity_gate_passed": true,
+        "identity_required": true,
+        "machine": "DIII-D",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": true,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": true
+      },
+      {
+        "absolute_residual_difference": 0.0,
+        "acceptance_qualification": "retained result is a recorded no-op",
+        "classification": "qualified_recorded_noop_suffix",
+        "executed_trips_after_policy": 5,
+        "exit_relative_residual": 0.058516982970557435,
+        "full_relative_residual": 0.058516982970557435,
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "identity_gate_passed": true,
+        "identity_required": true,
+        "machine": "DIII-D",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": true,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": true
+      },
+      {
+        "absolute_residual_difference": 0.0,
+        "acceptance_qualification": "retained result is a recorded no-op",
+        "classification": "qualified_recorded_noop_suffix",
+        "executed_trips_after_policy": 3,
+        "exit_relative_residual": 0.047568328864646785,
+        "full_relative_residual": 0.047568328864646785,
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "identity_gate_passed": true,
+        "identity_required": true,
+        "machine": "DIII-D",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": true,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": true
+      },
+      {
+        "classification": "non_settling_full_trip_fallback",
+        "executed_trips_after_policy": 16,
+        "identity": "21978/35 pure",
+        "machine": "MAST",
+        "recorded_trips": 4
+      },
+      {
+        "absolute_residual_difference": 0.004988385990751226,
+        "acceptance_qualification": "not established because the recorded residual improves",
+        "classification": "qualification_unproven_residual_progress",
+        "executed_trips_after_policy": 16,
+        "exit_relative_residual": 0.006589467341993111,
+        "full_relative_residual": 0.0016010813512418846,
+        "identity": "21983/35 pure",
+        "identity_gate_passed": true,
+        "identity_required": false,
+        "machine": "MAST",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": false,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": false
+      },
+      {
+        "absolute_residual_difference": 0.00016245738297636055,
+        "acceptance_qualification": "not established because the recorded residual improves",
+        "classification": "qualification_unproven_residual_progress",
+        "executed_trips_after_policy": 7,
+        "exit_relative_residual": 0.0008469065159928224,
+        "full_relative_residual": 0.0006844491330164618,
+        "identity": "21985/51 pure",
+        "identity_gate_passed": true,
+        "identity_required": false,
+        "machine": "MAST",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": false,
+        "recorded_trips": 7,
+        "terminal_relative_residual_bit_identical": false
+      },
+      {
+        "absolute_residual_difference": 0.001431478816926195,
+        "acceptance_qualification": "not established because the recorded residual improves",
+        "classification": "qualification_unproven_residual_progress",
+        "executed_trips_after_policy": 16,
+        "exit_relative_residual": 0.007319118647204026,
+        "full_relative_residual": 0.005887639830277831,
+        "identity": "21986/46 pure",
+        "identity_gate_passed": true,
+        "identity_required": false,
+        "machine": "MAST",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": false,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": false
+      },
+      {
+        "absolute_residual_difference": 0.002067748887657307,
+        "acceptance_qualification": "not established because the recorded residual improves",
+        "classification": "qualification_unproven_residual_progress",
+        "executed_trips_after_policy": 16,
+        "exit_relative_residual": 0.004924486881829031,
+        "full_relative_residual": 0.0028567379941717244,
+        "identity": "21989/55 pure",
+        "identity_gate_passed": true,
+        "identity_required": false,
+        "machine": "MAST",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": false,
+        "recorded_trips": 16,
+        "terminal_relative_residual_bit_identical": false
+      },
+      {
+        "absolute_residual_difference": 0.0014710368311757636,
+        "acceptance_qualification": "not established because the recorded residual improves",
+        "classification": "qualification_unproven_residual_progress",
+        "executed_trips_after_policy": 7,
+        "exit_relative_residual": 0.001951270366567566,
+        "full_relative_residual": 0.00048023353539180234,
+        "identity": "22086/43 pure",
+        "identity_gate_passed": true,
+        "identity_required": false,
+        "machine": "MAST",
+        "mask_suffix_all_zero": true,
+        "post_settlement_recorded_residual_is_noop": false,
+        "recorded_trips": 7,
+        "terminal_relative_residual_bit_identical": false
+      }
+    ],
+    "summary": {
+      "identity_gate_passed": true,
+      "mask_settling_rows": 10,
+      "maximum_absolute_residual_difference": 0.004988385990751226,
+      "non_settling_rows": 1,
+      "qualification_unproven_rows": 5,
+      "qualified_recorded_noop_suffix_bit_identical_rows": 5,
+      "qualified_recorded_noop_suffix_rows": 5,
+      "rows": 11
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "scheduler": {
+    "accepted_time_limit": "02:00:00",
+    "cpus_per_task": "4",
+    "job_gpus": "4",
+    "job_id": "1260936",
+    "job_name": "sto-settled-exit",
+    "memory_per_node_mb": "49152",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.settled_exit_throughput",
+  "source_revision": "c8cd79bf7691a487778fc92da334aa84b1fc8890",
+  "verdict": {
+    "bank_identity_gate_passed": true,
+    "projection_statement": "the achieved comparison-normalized H200 time is reported beside the committed 0.22-0.47 ms/slice bank projection; direct wall time remains separately labelled per member"
+  }
+}

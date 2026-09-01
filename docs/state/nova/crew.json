@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:55:49",
+  "updated": "2026-09-01T13:10:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -66159,9 +66159,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T105735670812-ssb-conditioning",
+        "plan": "split-spline-production-basis",
+        "section": "\u00a73",
+        "node": "ssb-conditioning",
+        "node_definition": {
+          "done_when": "docs/figures/hex-cell-single-grid/conditioning-report.json records per-lattice per-machine condition numbers for the split coefficient system with the demanded estimate bound stated, plus boundary-band advantage factors across the dof sweep on the jump-bearing field, and uv run pytest tests/test_split_spline.py stays green",
+          "estimated_hours": 6.0,
+          "goal": "The \u00a73 conditioning verdict: measured fit conditioning of the production split basis (nova/linalg/split_spline.py) on the production lattices \u2014 33x33 and 65x65, both machines (MAST and DIII-D solve geometries) \u2014 reported as numbers a reader can check against the cutover estimate bounds, where the 80-hour lower bound excludes a conditioning redesign and the 140-hour upper bound includes one, stating which bound the measurement demands, and including a matched-capacity dof sweep (at least 16, 25 and 36 coefficients per fit) on the jump-bearing Solovev forward field so the thin 1.0115x boundary-band advantage recorded on hex-grid-derisk-gates s2 is re-read at production capacity",
+          "id": "ssb-conditioning",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105735670812-ssb-conditioning/manifest.md",
+          "plan": "split-spline-production-basis",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/split_fit_conditioning.py",
+            "docs/figures/hex-cell-single-grid/conditioning-report.json",
+            "docs/figures/hex-cell-single-grid/conditioning-report.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "ssb-basis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:57:42Z",
+        "completed_at": "2026-09-01T11:09:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 734,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 734,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "94ea3cc73e640b39a383d2e8e3b4b08f1a9af335",
+        "commits": [
+          "3c4ab48226086833fa0ec43d67d6fd90587e69b1"
+        ],
+        "changed_lines": {
+          "added": 760,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run python benchmarks/split_fit_conditioning.py + strict receipt assertions + pytest tests/test_split_spline.py (both lanes)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105735670812-ssb-conditioning/logs/conditioning-benchmark.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105735670812-ssb-conditioning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c04-501c-76e2-8ed2-95d1d01bd032",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 464896,
+            "cached_input_tokens_cumulative": 3633152,
+            "input_tokens": 603068,
+            "input_tokens_cumulative": 3948829,
+            "output_tokens": 14381,
+            "output_tokens_cumulative": 20654,
+            "reasoning_output_tokens": 5306,
+            "reasoning_output_tokens_cumulative": 6985
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/test_split_spline.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1215
+    "_version": 1216
   }
 }

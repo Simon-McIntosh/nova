@@ -23,9 +23,9 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="9">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -67,6 +67,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T102230182888-ssb-parity-gpu-tolerance" data-who="ssb-basis" data-when="2026-09-01T10:27:55Z">
     <div class="r-comment-body"><p>Cross-backend parity bound 1e-9 with stated rationale (8.55x margin over the observed 1.17e-10 CUDA reduction-order delta); 4/4 green on both pinned CPU and unpinned CUDA lanes</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T105735670812-ssb-conditioning" data-who="ssb-basis" data-when="2026-09-01T11:09:56Z">
+    <div class="r-comment-body"><p>S3 conditioning answered: worst production condition number 2.411e6 (MAST 65x65), kappa*eps64 5.35e-10, 18.7x under the 1e-8 allowance - no conditioning redesign, the 80-hour lower bound stands. ADVERSE capacity finding recorded: the 16-dof jump-field advantage 1.0115x reverses at 25 dof (0.981x) and 36 dof (0.217x); adjudication folded into s4 validation</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T1112-conditioning" data-who="reckon-ship-s18" data-when="2026-09-01T11:12:00+00:00">
+    <div class="r-comment-body">ssb-conditioning landed — commit 3c4ab482; gate s3-conditioning PASSED. Production regularized normal-system condition numbers: MAST 2.166e6 (33x33) / 2.411e6 (65x65), DIII-D 5.14e4 / 5.83e4; worst kappa*eps64 = 5.35e-10, 18.7x below the authored 1e-8 numerical allowance. VERDICT: no conditioning redesign is demanded — the cutover estimate takes the 80-hour LOWER bound. Receipt docs/figures/hex-cell-single-grid/conditioning-report.json + .png. ADVERSE CAPACITY FINDING carried to s4, not absorbed: on the jump-bearing Solovev forward field the matched-capacity boundary-band advantage is 1.0115x at 16 coefficients (reproducing the gates s2 number to 1.5e-11), 0.981x at 25, and 0.217x at 36 — the split advantage exists only at starved capacity in the patch comparison, and the global fit wins nearly 5x at 36 dof. Whether this survives at TRUE production capacity (the full tensor Bernstein lattice basis, hundreds of locally-supported coefficients, not a 16-36 dof window patch) is exactly what s4 validation must now measure before any design re-adjudication.</div>
 </div>
 </section>
 </main>

@@ -1,0 +1,124 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-measured-map/docs/figures/hex-cell-single-grid/measured-map-advantage.png",
+    "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-measured-map/docs/figures/hex-cell-single-grid/measured-map-advantage.json"
+  },
+  "boundary_band_pitches": 2.0,
+  "degrees_of_freedom_each": 16,
+  "falsifier": "fires if boundary_split second-derivative RMS is not lower than global_c2 on either measured map",
+  "falsifier_fired": true,
+  "measurement": "boundary-band second-derivative advantage of an LCFS-split fit against a matched-capacity single global C2 fit",
+  "method": {
+    "boundary_band": "Euclidean distance at most two RMS nearest-neighbour cell pitches from the released LCFS",
+    "fit": "least squares over all 65 by 65 measured samples; 15 shared degree-at-most-four monomials plus one exterior squared-LCFS coordinate for the split fit, versus the same 15 monomials plus one global fifth-degree term",
+    "hessian_rms": "RMS over boundary-band cells and all four Hessian entries",
+    "interface": "each released LCFS polygon; the exterior squared normalised-flux coordinate is value-and-gradient continuous at that interface",
+    "reference_second_derivative": "centred finite differences of the measured normalised flux map; outermost grid cells excluded"
+  },
+  "per_map": {
+    "DIII-D efit_psirz": {
+      "axis_flux": 0.343039493506025,
+      "boundary_band_cell_count": 617,
+      "boundary_band_cell_pitch_scaled_second_derivative_rms": {
+        "boundary_split": 0.003174259254336542,
+        "global_c2": 0.001943406853426385,
+        "units": "normalised_flux"
+      },
+      "boundary_band_half_width_m": 0.08006955065267325,
+      "boundary_band_second_derivative_improvement_factor": 0.6122394857229708,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 1.9804669678145481,
+        "global_c2": 1.2125200778661103,
+        "units": "normalised_flux_per_m2"
+      },
+      "boundary_flux": -1.4390170301857559,
+      "cell_pitch_m": 0.040034775326336626,
+      "degrees_of_freedom_each": 16,
+      "design_condition_number": {
+        "boundary_split": 22.772040822205213,
+        "global_c2": 44.68777448563363
+      },
+      "design_rank": {
+        "boundary_split": 16,
+        "global_c2": 16
+      },
+      "falsifier_fired": true,
+      "fit_sample_count": 4225,
+      "fit_value_rms": {
+        "boundary_split": 0.117531193525678,
+        "global_c2": 0.13950078145690828,
+        "units": "normalised_flux"
+      },
+      "grid_shape": [
+        65,
+        65
+      ],
+      "lcfs_vertex_count": 84,
+      "radial_pitch_m": 0.026562499813735485,
+      "source": {
+        "flux_crossing": "corpus_flux_to_nova_total exactly once",
+        "frame": 179,
+        "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+        "reader": "benchmarks.diiid_forward_gs_match._read and canonical_axes",
+        "sha256": "400d1f791ab5ca332b3a51b4d8a25d4f2a9fb4ade3c66766d4672ea57e8896c9",
+        "time_ms": 3740.0
+      },
+      "verdict": "FAIL",
+      "vertical_pitch_m": 0.05000000074505806
+    },
+    "MAST efm": {
+      "axis_flux": 0.3423115953376666,
+      "boundary_band_cell_count": 571,
+      "boundary_band_cell_pitch_scaled_second_derivative_rms": {
+        "boundary_split": 0.010113773119122295,
+        "global_c2": 0.00632686505752079,
+        "units": "normalised_flux"
+      },
+      "boundary_band_half_width_m": 0.09823540764429475,
+      "boundary_band_second_derivative_improvement_factor": 0.6255692097302907,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 4.192152713576273,
+        "global_c2": 2.6224816601006027,
+        "units": "normalised_flux_per_m2"
+      },
+      "boundary_flux": -0.1292985047045701,
+      "cell_pitch_m": 0.04911770382214738,
+      "degrees_of_freedom_each": 16,
+      "design_condition_number": {
+        "boundary_split": 26.814296678674587,
+        "global_c2": 44.6877748870878
+      },
+      "design_rank": {
+        "boundary_split": 16,
+        "global_c2": 16
+      },
+      "falsifier_fired": true,
+      "fit_sample_count": 4225,
+      "fit_value_rms": {
+        "boundary_split": 0.17438668149143194,
+        "global_c2": 0.2513819058758518,
+        "units": "normalised_flux"
+      },
+      "grid_shape": [
+        65,
+        65
+      ],
+      "lcfs_vertex_count": 151,
+      "radial_pitch_m": 0.030312500020954758,
+      "source": {
+        "efm_frame": 43,
+        "firewall": "evaluator_context",
+        "flux_crossing": "Wb/radian to total Wb in the Ambix reader",
+        "launcher": "/home/ITER/mcintos/Code/imas-ambix/.venv/bin/python",
+        "reader": "imas-ambix scripts.patch_flux_map_report.read_efit_slice",
+        "shot": 22086,
+        "snap_delta_s": 0.0,
+        "store": "/work/projects/imas_gpu/mast/level1/shots/22086.zarr",
+        "time_s": 0.23000000417232513
+      },
+      "verdict": "FAIL",
+      "vertical_pitch_m": 0.0625
+    }
+  },
+  "verdict": "FAIL"
+}

@@ -18,7 +18,10 @@ from nova.equilibrium.domain import (
     axis_connected_component,
     classify_domains,
 )
-from nova.equilibrium.flux_surface_connectivity import hex_edge_admissibility
+from nova.equilibrium.flux_surface_connectivity import (
+    hex_edge_admissibility,
+    polish_census_stationary_points,
+)
 from nova.jax.tree_util import Pytree
 
 
@@ -85,6 +88,7 @@ class TopologyQualification(NamedTuple):
     state: TopologyState
     connected: jax.Array
     axis_admitted: jax.Array
+    polish_receipt: dict[str, jax.Array]
 
 
 def require_qualified_axis(admitted: jax.Array) -> None:
@@ -517,6 +521,19 @@ class Topology(Pytree):
             boundary_is_xpoint = jnp.asarray(requested_class) == int(
                 TopologyClass.DIVERTED
             )
+        radial_count = self.connectivity_radius.shape[0]
+        vertical_count = self.connectivity_height.shape[0]
+        flux = psi_grid.reshape((radial_count, vertical_count)).T
+        data_o, data_x, polish_receipt = polish_census_stationary_points(
+            flux,
+            self.connectivity_radius,
+            self.connectivity_height,
+            data_b[2],
+            polarity,
+            data_o,
+            data_x,
+        )
+        data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])
         connected = self.axis_component(
@@ -544,7 +561,13 @@ class Topology(Pytree):
             wall_point_flux=data_w[2],
             diverted=boundary_is_xpoint,
         )
-        return TopologyQualification(masks, state, connected, selection.admitted)
+        return TopologyQualification(
+            masks,
+            state,
+            connected,
+            selection.admitted,
+            polish_receipt,
+        )
 
     def read_with_connectivity(
         self, psi, polarity, inside_material, requested_class=None

@@ -120,7 +120,7 @@ def _conditioned_fit(
     values: jax.Array,
     weights: jax.Array,
     regularization: jax.Array,
-) -> tuple[jax.Array, jax.Array]:
+) -> tuple[jax.Array, jax.Array, jax.Array]:
     """Column-scale a fixed design before solving its normal equations."""
     squared_norm = jnp.sum(weights[:, None] * design**2, axis=0)
     scale = jnp.sqrt(squared_norm)
@@ -132,7 +132,16 @@ def _conditioned_fit(
     scaled_coefficient = _implicit_normal_solve(
         scaled_design, values, weights, regularization
     )
-    return scaled_coefficient / scale, condition_number
+    normal_right_hand_side = scaled_design.T @ (weights * values)
+    normal_residual = normal @ scaled_coefficient - normal_right_hand_side
+    residual_scale = jnp.maximum(
+        jnp.linalg.norm(normal_right_hand_side), jnp.finfo(design.dtype).tiny
+    )
+    return (
+        scaled_coefficient / scale,
+        condition_number,
+        jnp.linalg.norm(normal_residual) / residual_scale,
+    )
 
 
 @dataclass
@@ -147,6 +156,9 @@ class SplitTensorBSpline(Pytree):
     condition_number: jax.Array
     fit_executed: jax.Array
     sample_count: jax.Array
+    solve_iterations: jax.Array
+    solve_residual: jax.Array
+    solve_converged: jax.Array
 
     @property
     def interior_coefficients(self) -> jax.Array:
@@ -278,6 +290,9 @@ class SplitTensorBSpline(Pytree):
             self.condition_number,
             self.fit_executed,
             self.sample_count,
+            self.solve_iterations,
+            self.solve_residual,
+            self.solve_converged,
         ), {}
 
 
@@ -333,7 +348,7 @@ def fit_split_spline(
         vertical_bounds,
         order,
     )
-    level_coefficient, level_condition = _conditioned_fit(
+    level_coefficient, level_condition, level_residual = _conditioned_fit(
         base_design,
         level_set.reshape(-1),
         weights,
@@ -346,7 +361,7 @@ def fit_split_spline(
     split_design = jnp.concatenate(
         (base_design, exterior_weight[:, None] * base_design), axis=1
     )
-    field_coefficient, field_condition = _conditioned_fit(
+    field_coefficient, field_condition, field_residual = _conditioned_fit(
         split_design,
         values.reshape(-1),
         weights,
@@ -358,6 +373,16 @@ def fit_split_spline(
     condition_number = jnp.where(
         execute, jnp.maximum(level_condition, field_condition), 1.0
     )
+    solve_residual = jnp.where(
+        execute, jnp.maximum(level_residual, field_residual), 0.0
+    )
+    solve_tolerance = 64.0 * jnp.sqrt(jnp.finfo(values.dtype).eps)
+    solve_converged = (
+        execute
+        & jnp.isfinite(condition_number)
+        & jnp.isfinite(solve_residual)
+        & (solve_residual <= solve_tolerance)
+    )
     return SplitTensorBSpline(
         radial_bounds,
         vertical_bounds,
@@ -366,6 +391,9 @@ def fit_split_spline(
         condition_number,
         execute,
         jnp.sum(weights, dtype=jnp.int32),
+        jnp.where(execute, 1, 0).astype(jnp.int32),
+        solve_residual,
+        solve_converged,
     )
 
 

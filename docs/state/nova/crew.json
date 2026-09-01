@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:37:52",
+  "updated": "2026-09-01T22:44:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -69294,9 +69294,111 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T200325049710-scr-true-pin-reproduction",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-true-pin-reproduction",
+        "node_definition": {
+          "done_when": "docs/figures/solver-convergence-regression/true-pin-reproduction.json states for each of the two arms at d47f7cd1 the terminal residual, termination reason, trip count and selected saddle beside the committed row values with an explicit reproduced true/false and the absolute saddle distance in metres, lists the ten candidate commits with subjects, records the SLURM job id, node, elapsed and exit marker for every solve, the PNG exists with the residual histories on one log axis, and git diff --stat in the assigned worktree shows no change under nova/",
+          "estimated_hours": 1.5,
+          "goal": "The true-revision reproduction receipt docs/figures/solver-convergence-regression/true-pin-reproduction.json (with driver benchmarks/bank_revision_reproduction.py, figure true-pin-reproduction.png) that re-solves the 22086/43 pure arm together with the 21978/35 pure arm at the revision that actually produced the converged committed bank row - d47f7cd1 (2026-08-28, the commit of docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json whose 22086/43 pure row reads converged, terminal residual 6.079771712859504e-12, selected saddle (0.5904799259797128, 1.2250633080352826) m, while 21978/35 pure reads active_set_cycle_detected at 2.450860011177843e-3) - from a detached shadow worktree of the repository checked out at d47f7cd1 beside the assigned worktree, sharing the root .venv with --no-sync, using the same frozen carrier (file sha256 1da2b7bd..., semantic identity 1d2c4a2b...) on one reserved H200 (4 CPUs, JAX_PLATFORMS=cuda,cpu, reservation gpu_0003_grpA, hardened sbatch pattern with heartbeat log), recording per arm the terminal residual, termination reason, trip count, selected saddle, per-trip residual history where the revision exposes it, the full comparison to the committed row values, a reproduced-or-not verdict per arm, a verbatim listing of the ten-commit candidate window from git log d47f7cd1..a4bec44f -- nova/equilibrium, together with a figure plotting the d47f7cd1 residual histories beside the a4bec44f histories from backend-divergence.json with the committed converged residual marked, with no solver source modified in the assigned worktree",
+          "id": "scr-true-pin-reproduction",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T200325049710-scr-true-pin-reproduction/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/bank_revision_reproduction.py",
+            "docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+            "docs/figures/solver-convergence-regression/true-pin-reproduction.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:03:44Z",
+        "completed_at": "2026-09-01T20:44:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2422,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2422,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "997cc97ce326427586e9d81d85ae70c19d131a57",
+        "commits": [
+          "0e79227d0bf20c857f60654fd04f68f0e18c384a"
+        ],
+        "changed_lines": {
+          "added": 845,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/bank_revision_reproduction.py check (see check.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T200325049710-scr-true-pin-reproduction/logs/check.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T200325049710-scr-true-pin-reproduction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19409920,
+            "cached_input_tokens_cumulative": 22300928,
+            "input_tokens": 19496416,
+            "input_tokens_cumulative": 22502606,
+            "output_tokens": 17878,
+            "output_tokens_cumulative": 35033,
+            "reasoning_output_tokens": 7875,
+            "reasoning_output_tokens_cumulative": 11219
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1267
+    "_version": 1268
   }
 }

@@ -1,0 +1,243 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/ssb-validation/docs/figures/hex-cell-single-grid/production-validation.png",
+    "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/ssb-validation/docs/figures/hex-cell-single-grid/production-validation.json"
+  },
+  "capacity_adjudication": {
+    "full_lattice_advantage_factors": [
+      1.8486654128616837,
+      2.1095030938046118
+    ],
+    "interpretation": "the full-lattice measurement, not the coefficient-starved window patch sweep, decides whether boundary splitting retains an edge-curvature advantage at production capacity",
+    "minimum_full_lattice_advantage_factor": 1.8486654128616837,
+    "split_retains_advantage_on_any_production_lattice": true,
+    "split_retains_advantage_on_every_production_lattice": true,
+    "verdict": "PASS",
+    "window_patch_factors_at_16_25_36_coefficients": [
+      1.0114893857,
+      0.9809008386,
+      0.217389017
+    ]
+  },
+  "fixture": {
+    "analytic_fixture": "jump-bearing diverted Solovev forward field",
+    "axis_flux_per_radian_wb": 0.0010851700426205747,
+    "continuation": {
+      "continuation_collocation_count": 316,
+      "continuation_design_condition_number": 2.4142437516961446e+17,
+      "continuation_design_rank": 37,
+      "continuation_effective_rank": 9,
+      "continuation_gradient_mismatch_rms": 0.0010709539938602514,
+      "continuation_svd_relative_cutoff": 0.001,
+      "continuation_value_mismatch_rms": 1.4696927962337388e-05,
+      "edge_current_density_a_per_m2": {
+        "maximum": 458261.4255893825,
+        "minimum": 405285.70642406755
+      },
+      "external_ring_count": 64,
+      "maximum_external_ring_current_a": 1438811.4872037428,
+      "plasma_cell_count": 4037,
+      "plasma_current_a": 27494.465236917466,
+      "source_lattice_shape": [
+        257,
+        257
+      ],
+      "source_support": "plasma-cell centres strictly inside the analytic LCFS only"
+    },
+    "lcfs_vertex_count": 640
+  },
+  "full_lattice_results": [
+    {
+      "basis": {
+        "coefficient_axis_count": 16,
+        "global_local_coefficients": 256,
+        "global_solve": {
+          "active_column_count": 256,
+          "authored_column_count": 256,
+          "coefficient_norm": 169.58601780722182,
+          "condition_estimate": 365.5086325320519,
+          "iterations": 127,
+          "normal_residual_norm": 6.882081269108959e-08,
+          "regularized_residual_norm": 0.5739701725144482,
+          "residual_norm": 0.5739701725144482,
+          "ridge": 1e-12,
+          "row_count": 1089,
+          "stopping_tolerance": 1e-08,
+          "termination_code": 2
+        },
+        "local_polynomial_order": 3,
+        "maximum_nonzero_basis_functions_per_sample_and_patch": 16,
+        "sample_axis_count": 33,
+        "split_base_local_coefficients": 256,
+        "split_exterior_active_local_coefficients": 256,
+        "split_solve": {
+          "active_column_count": 512,
+          "authored_column_count": 512,
+          "coefficient_norm": 203.0317465973955,
+          "condition_estimate": 1277298.2696426697,
+          "iterations": 10000,
+          "normal_residual_norm": 0.0009197390897345611,
+          "regularized_residual_norm": 0.15403048019895593,
+          "residual_norm": 0.15403048019895593,
+          "ridge": 1e-12,
+          "row_count": 1089,
+          "stopping_tolerance": 1e-08,
+          "termination_code": 7
+        },
+        "split_total_local_coefficients": 512
+      },
+      "boundary_band_cell_count": 194,
+      "boundary_band_second_derivative_advantage_factor": 1.8486654128616837,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 52.18557230294907,
+        "global_c2": 96.47366256685459,
+        "units": "normalised_flux_per_m2"
+      },
+      "cell_pitch_m": 0.03240370349203928,
+      "exterior_sample_count": 1026,
+      "fit_sample_count": 1089,
+      "fit_value_rms": {
+        "boundary_split": 0.00466758625426986,
+        "global_c2": 0.0173930347715572
+      },
+      "interface_c1_projection": {
+        "maximum_gradient_gap_per_m": 9.54068113401263e-09,
+        "maximum_value_gap": 2.640620482691203e-10,
+        "projection_displacement_m": 1e-06
+      },
+      "interior_sample_count": 63,
+      "lattice_shape": [
+        33,
+        33
+      ],
+      "radial_pitch_m": 0.03499999999999992,
+      "vertical_pitch_m": 0.030000000000000027
+    },
+    {
+      "basis": {
+        "coefficient_axis_count": 32,
+        "global_local_coefficients": 1024,
+        "global_solve": {
+          "active_column_count": 1024,
+          "authored_column_count": 1024,
+          "coefficient_norm": 312.6055684287356,
+          "condition_estimate": 452.27811276319,
+          "iterations": 153,
+          "normal_residual_norm": 2.659266277532923e-08,
+          "regularized_residual_norm": 0.1700498769955397,
+          "residual_norm": 0.1700498769955397,
+          "ridge": 1e-12,
+          "row_count": 4225,
+          "stopping_tolerance": 1e-08,
+          "termination_code": 2
+        },
+        "local_polynomial_order": 3,
+        "maximum_nonzero_basis_functions_per_sample_and_patch": 16,
+        "sample_axis_count": 65,
+        "split_base_local_coefficients": 1024,
+        "split_exterior_active_local_coefficients": 1024,
+        "split_solve": {
+          "active_column_count": 2048,
+          "authored_column_count": 2048,
+          "coefficient_norm": 229.51060448620927,
+          "condition_estimate": 636507.9851874734,
+          "iterations": 10000,
+          "normal_residual_norm": 0.00019925522819799125,
+          "regularized_residual_norm": 0.0517637304177868,
+          "residual_norm": 0.0517637304177868,
+          "ridge": 1e-12,
+          "row_count": 4225,
+          "stopping_tolerance": 1e-08,
+          "termination_code": 7
+        },
+        "split_total_local_coefficients": 2048
+      },
+      "boundary_band_cell_count": 461,
+      "boundary_band_second_derivative_advantage_factor": 2.1095030938046118,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 40.272186678992455,
+        "global_c2": 84.95430239361146,
+        "units": "normalised_flux_per_m2"
+      },
+      "cell_pitch_m": 0.01620185174601969,
+      "exterior_sample_count": 3972,
+      "fit_sample_count": 4225,
+      "fit_value_rms": {
+        "boundary_split": 0.0007963572555684702,
+        "global_c2": 0.0026161475332498628
+      },
+      "interface_c1_projection": {
+        "maximum_gradient_gap_per_m": 1.8253214051355826e-08,
+        "maximum_value_gap": 5.331952709214383e-10,
+        "projection_displacement_m": 1e-06
+      },
+      "interior_sample_count": 253,
+      "lattice_shape": [
+        65,
+        65
+      ],
+      "radial_pitch_m": 0.01750000000000007,
+      "vertical_pitch_m": 0.015000000000000013
+    }
+  ],
+  "measurement": "boundary-band curvature accuracy of a full locally supported cubic tensor split basis and exact quartic Solovev reproduction",
+  "method": {
+    "boundary_band": "Euclidean distance at most two cell pitches from LCFS",
+    "capacity": "one cubic local tensor basis coefficient every two sample rows and columns; each sample reaches at most 16 coefficients per patch",
+    "global": "one full local cubic tensor basis on the same lattice",
+    "hessian_rms": "RMS over boundary-band cells and all Hessian entries",
+    "split": "a full local smooth base plus exterior-active local correction columns multiplied by positive_part(level_set)^2",
+    "truth": "analytic Solovev Hessian inside the LCFS and automatic Hessians of the independently current-truncated vacuum continuation outside"
+  },
+  "solovev_reference_validation": {
+    "all_pass": true,
+    "cases": [
+      {
+        "case": "weak-rotation-reactor",
+        "condition_number": 122119.77032337016,
+        "lattice_shape": [
+          33,
+          33
+        ],
+        "normalised_hessian_maximum_absolute_error": 8.767142012366946e-10,
+        "normalised_hessian_rms_error": 1.2256774877062125e-10,
+        "passes": true,
+        "quartic_radial_term_represented": true,
+        "query_count": 395,
+        "static_reference_name": "weak-rotation-reactor-static"
+      },
+      {
+        "case": "moderate-rotation-conventional",
+        "condition_number": 123803.61339147486,
+        "lattice_shape": [
+          33,
+          33
+        ],
+        "normalised_hessian_maximum_absolute_error": 1.1020157675289965e-08,
+        "normalised_hessian_rms_error": 1.5732264353305744e-09,
+        "passes": true,
+        "quartic_radial_term_represented": true,
+        "query_count": 397,
+        "static_reference_name": "moderate-rotation-conventional-static"
+      },
+      {
+        "case": "strong-rotation-compact",
+        "condition_number": 116600.2512565145,
+        "lattice_shape": [
+          33,
+          33
+        ],
+        "normalised_hessian_maximum_absolute_error": 6.99867612752314e-08,
+        "normalised_hessian_rms_error": 9.394963580067251e-09,
+        "passes": true,
+        "quartic_radial_term_represented": true,
+        "query_count": 397,
+        "static_reference_name": "strong-rotation-compact-static"
+      }
+    ],
+    "error_class": "the radial Hessian of the quartic Solovev term, which a ring or finite-difference reconstruction truncates",
+    "hessian_rms_error_tolerance": 2e-08,
+    "source": "tests/rotating_equilibrium_references.py static_limit members"
+  },
+  "verdict": "PASS"
+}

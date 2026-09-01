@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="solver-trip-orchestration-landed">
+  <meta name="plan-title" content="Solver trip orchestration — cumulative execution evidence">
+  <meta name="plan-summary" content="Measured compile cadence, per-trip decomposition, settlement incidence, settled-exit throughput, and the qualified-suffix policy boundary.">
+  <meta name="plan-evidence-for" content="solver-trip-orchestration">
+  <meta name="plan-informs" content="millisecond-converged-solve">
+  <title>Solver trip orchestration — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Solver trip orchestration — cumulative execution evidence</h1>
+    <p class="lede">The five landed measurements separate compilation from steady-state
+    execution, attribute the 25 ms per-trip quantum, test the mask-settlement projection,
+    and leave one explicit policy choice. Receipt values below retain their recorded precision;
+    shorter values in prose are display roundings of the adjacent table entries.</p>
+  </header>
+
+  <section id="s1">
+    <h2>§1 — Compile cadence and persistent-cache wiring</h2>
+    <p><strong>Receipts:</strong>
+    <code>docs/figures/solver-trip-orchestration/compile-cadence.json</code> and
+    <code>docs/figures/solver-trip-orchestration/cache-wiring.json</code>.</p>
+
+    <table>
+      <caption>Compile-cadence verdict recorded by <code>compile-cadence.json</code></caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Receipt value</th><th scope="col">Reading</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Cold total compile</th><td>383.47437310199996 s</td><td>383.5 s at headline precision</td></tr>
+        <tr><th scope="row">Cold trace</th><td>7.214823484 s</td><td>Python tracing is not the dominant cost</td></tr>
+        <tr><th scope="row">JAXPR to MLIR</th><td>1.665171385 s</td><td>Lowering is also small</td></tr>
+        <tr><th scope="row">Cold XLA compile</th><td>374.594378233 s</td><td>The dominant phase</td></tr>
+        <tr><th scope="row">OptimizeHloModule</th><td>263.061108882 s</td><td>Largest recorded nested XLA phase</td></tr>
+        <tr><th scope="row">Fusion / priority fusion</th><td>67.662069574 / 56.515930592000004 s</td><td>Largest named pass families</td></tr>
+        <tr><th scope="row">Warm restart total</th><td>63.720444202 s</td><td>63.7 s; 6.018074385770898× cold-to-warm speedup</td></tr>
+        <tr><th scope="row">Pure-data change</th><td>44 hits; 307.6820968259126 s saved</td><td>StableHLO identical; exact main-program key reused</td></tr>
+        <tr><th scope="row">Traced-code change</th><td>43 incidental hits; main-program hit false</td><td>Changed StableHLO recompiles</td></tr>
+        <tr><th scope="row">Dual-branch compile ratio</th><td>1.6214475945527105× median</td><td>Measured range 1.5630718754671147–1.658322365782477×</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Cache-wiring implementation and H200 fresh-process demonstration</caption>
+      <thead><tr><th scope="col">Item</th><th scope="col">Receipt value</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Selection policy</th><td><code>explicit_per_recipe</code></td><td>Bank regeneration and scheduled tests opt in explicitly</td></tr>
+        <tr><th scope="row">Directory layout</th><td><code>&lt;root&gt;/nova/jax-compilation/&lt;runtime-version-key&gt;</code></td><td>One versioned leaf shared by the named recipes</td></tr>
+        <tr><th scope="row">Cold probe</th><td>2.748434173874557 s; 0 hits</td><td>Populates the selected leaf</td></tr>
+        <tr><th scope="row">Fresh-process warm probe</th><td>0.22962308954447508 s; 1 hit</td><td>11.969328430023673× speedup</td></tr>
+        <tr><th scope="row">Focused cache tests</th><td>5 passed; 0 failed</td><td>Cache contract passed</td></tr>
+        <tr><th scope="row">Broad lane</th><td>exit 137 after 34 visible passes</td><td>Resource termination, with no observed assertion failure; not used as a passing gate</td></tr>
+      </tbody>
+    </table>
+
+    <p>The cold compile is an XLA optimization problem, while repeated fresh-process payment is
+    a cache-cadence problem. The landed wiring addresses the latter first: its directory key
+    includes backend/compiler options, device topology, and the JAX/jaxlib/XLA build; JAX's
+    entry key also covers serialized computation and compile options. Pure data therefore reuses
+    the executable, while traced code or runtime identity changes invalidate it. No raster figure
+    was emitted for these two JSON-only receipts.</p>
+  </section>
+
+  <section id="s2">
+    <h2>§2 — Per-trip quantum decomposition</h2>
+    <p><strong>Receipt:</strong>
+    <code>docs/figures/solver-trip-orchestration/trip-quantum.json</code>.</p>
+
+    <table>
+      <caption>Width-1024 attribution of the 24.99596260986329 ms/member/trip quantum</caption>
+      <thead><tr><th scope="col">Sub-stage</th><th scope="col">ms/member/trip</th><th scope="col">16-trip comparison-normalized ms/slice</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Mask reconciliation</th><td>12.610826489930583</td><td>20.697242340653585</td></tr>
+        <tr><th scope="row">Newton re-linearization</th><td>12.337138526803695</td><td>20.24805797489611</td></tr>
+        <tr><th scope="row">First GMRES synchronization</th><td>0.047997593129012896</td><td>0.07877499682931073</td></tr>
+        <tr><th scope="row">Preconditioner assembly</th><td>0.0</td><td>0.0</td></tr>
+        <tr><th scope="row">Per-trip host launch</th><td>0.0</td><td>0.0</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Restructuring ceilings from the same receipt</caption>
+      <thead><tr><th scope="col">Candidate</th><th scope="col">Ideal remaining ms/slice</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Complete trip-body collapse</th><td>1.7459246876209988</td><td>Only candidate reaching the 1.75 ms floor</td></tr>
+        <tr><th scope="row">Fuse mask reconciliation with Newton setup</th><td>22.07275765934642</td><td>Does not reach the floor</td></tr>
+        <tr><th scope="row">Reuse or hoist linearization</th><td>22.521942025103893</td><td>Does not reach the floor</td></tr>
+        <tr><th scope="row">Measured explicit-program fusion</th><td>42.53374838210701</td><td>1.0057905724068301×; near-nil</td></tr>
+        <tr><th scope="row">Remove per-trip host launches</th><td>42.77</td><td>Zero removable launches; all 16 trips are already in one compiled launch</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/solver-trip-orchestration/trip-quantum.png"
+           alt="Per-trip quantum attribution and ranked restructuring ceilings at width 1024"
+           style="max-width:100%;height:auto">
+      <figcaption>The quantum is almost evenly divided between active-set reconciliation and
+      re-linearization: 25.0 ms/member/trip at headline precision equals 12.61 + 12.34 +
+      0.048 ms. Host orchestration is not the hidden share; reducing trip count is the lever
+      that divides all three compiled sub-stages together.</figcaption>
+    </figure>
+  </section>
+
+  <section id="s3">
+    <h2>§3 — Settlement census and regeneration qualification</h2>
+    <p><strong>Receipt:</strong>
+    <code>docs/figures/solver-trip-orchestration/settlement-histogram.json</code>.
+    MAST provenance additionally binds
+    <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code>
+    at SHA-256 <code>f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053</code>.</p>
+
+    <table>
+      <caption>Settlement and projected cost by machine</caption>
+      <thead><tr><th scope="col">Machine</th><th scope="col">Observed</th><th scope="col">Settled histogram</th><th scope="col">Settled mean trips</th><th scope="col">Projected ms/slice</th><th scope="col">Qualification</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">MAST</th><td>6 pure arms</td><td>{1: 3, 3: 1, 4: 1}</td><td>2.0</td><td>0.21875 settled-only; 0.4739583333333333 with the non-settler charged 16</td><td>5 settled, 1 non-settling (<code>21978/35 pure</code>); 6 mixed arms lack trip telemetry</td></tr>
+        <tr><th scope="row">DIII-D</th><td>5 frames</td><td>{3: 2, 4: 1, 5: 1, 6: 1}</td><td>4.2</td><td>0.45937500000000003</td><td>5 settled, 0 non-settling</td></tr>
+        <tr><th scope="row">Combined observable cohort</th><td>11 records</td><td>10 settled; 1 non-settling</td><td>3.1 settled-only; 4.2727272727272725 with fallback</td><td>0.3390625 settled-only; 0.4673295454545454 with fallback</td><td>Both projections are below 1.0 ms/slice</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>MAST bank-regeneration semantic diff retained with the census</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Receipt value</th><th scope="col">Consequence</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Declared rows regenerated</th><td>12</td><td>12/12 telemetry rows, 66 pure-arm trip records</td></tr>
+        <tr><th scope="row">Changed / unchanged rows</th><td>10 / 2</td><td>The regeneration is not treated as semantically identical to the prior bank</td></tr>
+        <tr><th scope="row">Selected-primary changes</th><td>10 rows</td><td>All changed identities remain visible in the source diff</td></tr>
+        <tr><th scope="row">Failure-class changes</th><td>2 rows</td><td><code>21985/51 pure</code> cycle→stagnated; <code>22086/43 pure</code> converged→stagnated</td></tr>
+        <tr><th scope="row"><code>22086/43 pure</code> saddle delta</th><td>0.005171479237274025 m</td><td>The 5.2 mm shift is retained, not smoothed into the settlement mean</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/solver-trip-orchestration/settlement-histogram.png"
+           alt="MAST and DIII-D mask-settlement trip histograms with projected milliseconds per slice"
+           style="max-width:100%;height:auto">
+      <figcaption>The mask settles early in 10 of 11 observable records: MAST's settled mean is
+      2.0 trips and DIII-D's is 4.2. The figure supports the original 0.22–0.47 ms/slice
+      projection, but the later exit measurement shows that mask settlement alone is not a
+      sufficient semantic exit condition.</figcaption>
+    </figure>
+  </section>
+
+  <section id="s4">
+    <h2>§4 — Settled-exit implementation and the out-of-band H200 measurement</h2>
+    <p><strong>Receipt:</strong>
+    <code>docs/figures/solver-trip-orchestration/settled-exit-throughput.json</code>.</p>
+
+    <table>
+      <caption>Width-1024 paired control and settled-exit verdict</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Control</th><th scope="col">Settled exit</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Mean active-set trips</th><td>16.0</td><td>16.0</td><td>The strict exit did not fire</td></tr>
+        <tr><th scope="row">Steady ms/member</th><td>415.60787488197093</td><td>416.90514779020305</td><td>Measured speedup 0.9968883260014699×</td></tr>
+        <tr><th scope="row">Comparison-normalized achieved ms/slice</th><td colspan="2">1.7554624267888352</td><td>Outside projected [0.21875, 0.45937500000000003] ms/slice band</td></tr>
+        <tr><th scope="row">Flux identity</th><td colspan="2">1024/1024 members; maximum absolute difference 0.0</td><td>Bit-identical</td></tr>
+        <tr><th scope="row">Compiled policy surface</th><td colspan="2">12/12 referee tests in each lane</td><td>Preservation surface passed unmodified</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Paired committed-bank replay verdict</caption>
+      <thead><tr><th scope="col">Cohort</th><th scope="col">Rows</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Strict qualified no-op suffix</th><td>5</td><td>5/5 bit-identical; DIII-D exits at trips 3–6</td></tr>
+        <tr><th scope="row">Mask settles but strict qualification is unproven</th><td>5</td><td>Residuals continue improving; maximum absolute residual difference 0.004988385990751226</td></tr>
+        <tr><th scope="row">Non-settling fallback</th><td>1</td><td>Charged the full policy path</td></tr>
+        <tr><th scope="row">Identity gate</th><td>11 total</td><td>Passed</td></tr>
+      </tbody>
+    </table>
+
+    <p>The implementation is semantically safe where its conjunction qualifies, but the replicated
+    width-1024 state continued accepting Newton promotions after mask settlement and therefore
+    executed all sixteen trips. Its 1.755 ms/slice result is an honest negative against the
+    0.22–0.47 projection, not a throughput win. This JSON-only receipt emitted no raster figure;
+    the later suffix-census figure visualizes why the incidence projection failed.</p>
+  </section>
+
+  <section id="s5">
+    <h2>§5 — Qualified-suffix census and exit-window projections</h2>
+    <p><strong>Receipt:</strong>
+    <code>docs/figures/solver-trip-orchestration/suffix-census.json</code>.</p>
+
+    <table>
+      <caption>Strict qualification census</caption>
+      <thead><tr><th scope="col">Cohort</th><th scope="col">Observable</th><th scope="col">Strict qualified</th><th scope="col">First-qualification histogram</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">MAST</th><td>6 of 12 declared</td><td>0/6</td><td>{}</td></tr>
+        <tr><th scope="row">DIII-D</th><td>5 of 5 declared</td><td>5/5</td><td>{3: 2, 4: 1, 5: 1, 6: 1}</td></tr>
+        <tr><th scope="row">Combined</th><td>11 of 17 declared</td><td>5/11 = 0.45454545454545453</td><td>Confirmed declared-bank lower bound 5/17 = 0.29411764705882354</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Candidate exit projections on the 11-member observable telemetry cohort</caption>
+      <thead><tr><th scope="col">Criterion</th><th scope="col">Mean charged trips</th><th scope="col">Projected ms/slice</th><th scope="col">Speedup</th><th scope="col">Admissibility</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Full-trip control</th><td>16.0</td><td>1.75</td><td>1.0×</td><td>Baseline</td></tr>
+        <tr><th scope="row">Strict qualified no-op</th><td>10.636363636363637</td><td>1.1633522727272727</td><td>1.5042735042735043×</td><td>Semantically free; above 1 ms</td></tr>
+        <tr><th scope="row">Mask-only counterfactual</th><td>4.2727272727272725</td><td>0.4673295454545454</td><td>3.7446808510638303×</td><td>Inadmissible: mask settlement does not prove state retention</td></tr>
+        <tr><th scope="row">Exact residual plateau</th><td>8.818181818181818</td><td>0.9644886363636364</td><td>1.8144329896907216×</td><td>Hindsight ceiling, not an online rule</td></tr>
+        <tr><th scope="row">Residual progress, 1%</th><td>8.363636363636363</td><td>0.9147727272727273</td><td>1.9130434782608696×</td><td>Needs a causal window and paired error validation</td></tr>
+        <tr><th scope="row">Residual progress, 5%</th><td>7.090909090909091</td><td>0.7755681818181818</td><td>2.2564102564102564×</td><td>Needs a causal window and larger tolerated error</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/solver-trip-orchestration/suffix-census.png"
+           alt="Strict qualified suffix incidence and projected cost for strict and residual-progress exit criteria"
+           style="max-width:100%;height:auto">
+      <figcaption>DIII-D supplies all five strict qualifications; observable MAST histories keep
+      improving after mask settlement. The strict rule projects 1.163 ms/slice, while the 1%
+      residual-progress hindsight projection reaches 0.915 ms/slice. The latter is not yet a
+      causal policy and cannot inherit the strict rule's bit-identity claim.</figcaption>
+    </figure>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record — residual-progress exit window</h2>
+    <table>
+      <caption>The remaining decision and the two admissible arms</caption>
+      <thead><tr><th scope="col">Choice</th><th scope="col">Projected ms/slice</th><th scope="col">Semantic cost</th><th scope="col">Required action</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Keep strict qualified no-op exit</th><td>1.1633522727272727 observed; 1.3704044117647058 with six telemetry-unavailable MAST arms charged 16 trips</td><td>Semantically free where qualified; bit identity retained</td><td>Accept that the observable projection remains above 1 ms/slice</td></tr>
+        <tr><th scope="row">Authorize a causal 1% residual-progress window</th><td>0.9147727272727273 observed; 1.2095588235294117 with unavailable arms charged 16 trips</td><td>Explicit state/residual error; bit identity is not preserved by construction</td><td>Choose the tolerated error and causal progress window, then run paired semantic validation before implementation</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Decision boundary:</strong> mask-only exit is excluded. The width-1024 timing
+    workload—one synthetic state and one current vector replicated 1024 times—is valid for
+    fixed-shape throughput and bit identity, but not for estimating heterogeneous bank exit
+    incidence. The decision therefore chooses between strict semantics at 1.163 ms/slice and
+    a separately validated residual-progress policy at 0.915 ms/slice; it does not reinterpret
+    the replicated-state run as an incidence census.</p>
+  </section>
+</main>
+</body>
+</html>

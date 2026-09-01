@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title description">
+  <title id="title">Fitted H200 solve-stage costs at batch widths 32 and 1024</title>
+  <desc id="description">Two normalized stacked bars show that the conflated reconciliation, Newton setup, and first Krylov action term accounts for about 93 percent of fitted solve time at both widths. A lower line chart shows the active-set residual falling materially through all sixteen trips.</desc>
+  <rect width="1200" height="720" fill="#f7f8fb"/>
+  <text x="60" y="62" font-family="system-ui, sans-serif" font-size="30" font-weight="700" fill="#172033">The fixed per-step structure dominates at both widths</text>
+  <text x="60" y="96" font-family="system-ui, sans-serif" font-size="17" fill="#526078">Additive fit from all three raw repetitions in each factorial cell; bar lengths are normalized within width.</text>
+
+  <text x="60" y="158" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#172033">Width 32</text>
+  <rect x="210" y="130" width="751" height="58" rx="4" fill="#315b9a"/>
+  <rect x="961" y="130" width="38" height="58" fill="#50a6a0"/>
+  <rect x="999" y="130" width="11" height="58" rx="2" fill="#e0a33a"/>
+  <text x="585" y="166" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="white">35.101 s · 93.87%</text>
+  <text x="1035" y="154" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#172033">37.392 s fitted</text>
+  <text x="1035" y="178" font-family="system-ui, sans-serif" font-size="15" fill="#526078">37.409 s measured median</text>
+
+  <text x="60" y="248" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#172033">Width 1024</text>
+  <rect x="210" y="220" width="744" height="58" rx="4" fill="#315b9a"/>
+  <rect x="954" y="220" width="49" height="58" fill="#50a6a0"/>
+  <rect x="1003" y="220" width="7" height="58" rx="2" fill="#e0a33a"/>
+  <text x="582" y="256" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="white">409.534 s · 92.96%</text>
+  <text x="1035" y="244" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#172033">440.554 s fitted</text>
+  <text x="1035" y="268" font-family="system-ui, sans-serif" font-size="15" fill="#526078">440.524 s measured median</text>
+
+  <rect x="210" y="304" width="20" height="20" rx="3" fill="#315b9a"/>
+  <text x="240" y="320" font-family="system-ui, sans-serif" font-size="15" fill="#27364f">Conflated reconciliation + Newton setup + first Krylov action</text>
+  <rect x="700" y="304" width="20" height="20" rx="3" fill="#50a6a0"/>
+  <text x="730" y="320" font-family="system-ui, sans-serif" font-size="15" fill="#27364f">Two warmup sweeps</text>
+  <rect x="930" y="304" width="20" height="20" rx="3" fill="#e0a33a"/>
+  <text x="960" y="320" font-family="system-ui, sans-serif" font-size="15" fill="#27364f">Three extra GMRES actions</text>
+
+  <rect x="60" y="360" width="1080" height="302" rx="10" fill="white" stroke="#d8deea"/>
+  <text x="90" y="402" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#172033">Why the active-set exit does not fire</text>
+  <text x="90" y="430" font-family="system-ui, sans-serif" font-size="15" fill="#526078">Representative member; all 32 members have the same 16-trip sequence, zero mask differences, and continued-trajectory eligibility true.</text>
+  <line x1="130" y1="470" x2="1080" y2="470" stroke="#e3e7ef"/>
+  <line x1="130" y1="540" x2="1080" y2="540" stroke="#e3e7ef"/>
+  <line x1="130" y1="610" x2="1080" y2="610" stroke="#e3e7ef"/>
+  <text x="86" y="476" font-family="system-ui, sans-serif" font-size="14" fill="#526078">0.30</text>
+  <text x="86" y="546" font-family="system-ui, sans-serif" font-size="14" fill="#526078">0.245</text>
+  <text x="86" y="616" font-family="system-ui, sans-serif" font-size="14" fill="#526078">0.19</text>
+  <polyline points="130,470 193,481 257,492 320,503 383,514 447,525 510,536 573,546 637,555 700,565 763,574 827,583 890,591 953,599 1017,606 1080,610" fill="none" stroke="#a74452" stroke-width="4" stroke-linejoin="round"/>
+  <g fill="#a74452">
+    <circle cx="130" cy="470" r="5"/><circle cx="193" cy="481" r="5"/><circle cx="257" cy="492" r="5"/><circle cx="320" cy="503" r="5"/>
+    <circle cx="383" cy="514" r="5"/><circle cx="447" cy="525" r="5"/><circle cx="510" cy="536" r="5"/><circle cx="573" cy="546" r="5"/>
+    <circle cx="637" cy="555" r="5"/><circle cx="700" cy="565" r="5"/><circle cx="763" cy="574" r="5"/><circle cx="827" cy="583" r="5"/>
+    <circle cx="890" cy="591" r="5"/><circle cx="953" cy="599" r="5"/><circle cx="1017" cy="606" r="5"/><circle cx="1080" cy="610" r="5"/>
+  </g>
+  <text x="130" y="642" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#526078">trip 1</text>
+  <text x="1080" y="642" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#526078">trip 16</text>
+  <text x="785" y="462" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#a74452">Every delta is material: −0.00892 to −0.00556</text>
+  <text x="785" y="485" font-family="system-ui, sans-serif" font-size="14" fill="#526078">No consecutive residuals are bit-equal.</text>
+</svg>

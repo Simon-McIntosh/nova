@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="h200-step-decomposition">
+  <meta name="plan-title" content="H200 batched solve cost decomposition">
+  <meta name="plan-summary" content="Measured factorial stage costs, active-set trip telemetry, and arithmetic from the current H200 solve to 300 slices per second.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="separatrix-spline-extraction">
+  <meta name="plan-recorded-at" content="2026-09-01">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="h200,jax,equilibrium,throughput,active-set,profiling">
+  <title>H200 batched solve cost decomposition | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header class="plan-hero">
+      <p class="eyebrow">Research record &middot; measured H200 decomposition</p>
+      <h1>The 300-slice target is an algorithm problem, not a configuration problem</h1>
+      <p class="lede">
+        The matched width-1024 arm measures <strong>0.430199003 s per member-slice</strong>,
+        about <strong>15.09% slower</strong> than the stale ladder's exact
+        0.373804407 s. The additive fit assigns <strong>409.533851 s</strong> of
+        each batch to the conflated reconciliation, Newton setup and first Krylov
+        action term. That single term consumes <strong>119.98 times</strong> the
+        entire 3.413333-second batch budget implied by 300 slices per second.
+        Removing every fitted configurable contribution still leaves a ceiling
+        of only <strong>2.500404 slices per second</strong>.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Exact qualification.</strong> the operand is a limited_plasma branch
+        under a fixed one-Newton-step budget with the pilot's maximum relative
+        residual of 0.0011089898293892464 and zero stable conditioning receipts,
+        so no figure here is a convergence claim and none of it exercises an
+        X-point or shadow path.
+      </p>
+    </aside>
+
+    <section id="verdicts">
+      <h2>Three decisions from the measurement</h2>
+      <ol>
+        <li>
+          <strong>Current matched cost regresses.</strong> Warmup 2, GMRES 4 at
+          width 1024 measures 440.523780 s per batch, 0.430199003 s per member
+          and 2.324505617 slices/s. The stale committed ladder is
+          0.373804407 s per member, so the matched current program is 15.09%
+          slower, not faster.
+        </li>
+        <li>
+          <strong>Configuration cannot reach 300 slices/s.</strong> At width
+          1024, 300 slices/s permits 1024 / 300 = 3.413333 s for the entire
+          batch. The 409.533851-second intercept alone is 119.9806 times that
+          budget. It requires algorithm or kernel work on the fixed per-step
+          structure.
+        </li>
+        <li>
+          <strong>The configuration-only ceiling is 2.500404 slices/s.</strong>
+          Removing the two fitted warmup sweeps and all three additional GMRES
+          actions leaves 1024 / 409.533851 = 2.500404 slices/s. This is an
+          optimistic fitted counterfactual, not a separately executed program.
+        </li>
+      </ol>
+      <figure>
+        <img
+          src="/nova/figures/h200-step-decomposition/fitted-stage-costs.svg"
+          alt="Normalized fitted stage costs at width 32 and width 1024, followed by the sixteen-trip residual trajectory">
+        <figcaption>
+          The fitted intercept occupies about 93% of both measured programs.
+          The telemetry replay below shows why all sixteen trips execute: the
+          residual decreases materially while continuation remains eligible.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="factorial-fit">
+      <h2>Additive fit from the complete factorial</h2>
+      <p>
+        Each width crosses warmup counts 1 and 2 with GMRES counts 1 and 4 at
+        one Newton step. Every cell was compiled in its own interpreter and then
+        measured three times. The model is
+        <code>T = I + W&middot;warmup + G&middot;(GMRES&minus;1)</code>. The intercept
+        <code>I</code> is deliberately labelled the
+        <strong>conflated reconciliation-plus-Newton-setup-plus-first-Krylov-action
+        term</strong>; without the lost profiler traces it must not be split into
+        kernels. Standard errors and 95% intervals come from the nine residual
+        degrees of freedom at each width.
+      </p>
+      <table>
+        <caption>Fitted coefficients in seconds per batch</caption>
+        <thead>
+          <tr>
+            <th scope="col">Width</th>
+            <th scope="col">Term</th>
+            <th scope="col">Estimate</th>
+            <th scope="col">Standard error</th>
+            <th scope="col">95% interval</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row" rowspan="3">32</th><td>Conflated intercept</td><td>35.101207</td><td>0.058072</td><td>34.969839&ndash;35.232576</td></tr>
+          <tr><td>Per warmup sweep</td><td>0.886806</td><td>0.035019</td><td>0.807587&ndash;0.966024</td></tr>
+          <tr><td>Per additional GMRES iteration</td><td>0.172430</td><td>0.011673</td><td>0.146024&ndash;0.198837</td></tr>
+          <tr><th scope="row" rowspan="3">1024</th><td>Conflated intercept</td><td>409.533851</td><td>0.548633</td><td>408.292758&ndash;410.774945</td></tr>
+          <tr><td>Per warmup sweep</td><td>13.590528</td><td>0.330838</td><td>12.842121&ndash;14.338936</td></tr>
+          <tr><td>Per additional GMRES iteration</td><td>1.279545</td><td>0.110279</td><td>1.030075&ndash;1.529014</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Residual RMSE is 0.052528 s at width 32 and 0.496257 s at width 1024.
+        For the production-shaped warmup-2/GMRES-4 arm, the width-1024 fit is
+        440.553542 s and the measured median is 440.523780 s, a 0.0068%
+        difference. The additive form therefore reconciles the named arm much
+        more closely than the distance to the throughput target.
+      </p>
+    </section>
+
+    <section id="raw-arms">
+      <h2>Raw repetitions and compilation are separate</h2>
+      <table>
+        <caption>Every completed factorial arm</caption>
+        <thead>
+          <tr>
+            <th scope="col">Width</th><th scope="col">Warmup</th><th scope="col">GMRES</th>
+            <th scope="col">Compile + first execute (s)</th><th scope="col">Three steady samples (s)</th><th scope="col">Median (s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>32</td><td>1</td><td>1</td><td>386.457351</td><td>36.002518, 35.954692, 35.937676</td><td>35.954692</td></tr>
+          <tr><td>32</td><td>1</td><td>4</td><td>385.032639</td><td>36.600614, 36.520445, 36.464006</td><td>36.520445</td></tr>
+          <tr><td>32</td><td>2</td><td>1</td><td>395.313436</td><td>36.871702, 36.927233, 36.894674</td><td>36.894674</td></tr>
+          <tr><td>32</td><td>2</td><td>4</td><td>393.168336</td><td>37.409157, 37.423443, 37.274577</td><td>37.409157</td></tr>
+          <tr><td>1024</td><td>1</td><td>1</td><td>798.508926</td><td>422.305732, 423.588951, 422.891010</td><td>422.891010</td></tr>
+          <tr><td>1024</td><td>1</td><td>4</td><td>800.561577</td><td>426.354328, 427.876877, 427.245281</td><td>427.245281</td></tr>
+          <tr><td>1024</td><td>2</td><td>1</td><td>816.108808</td><td>436.569133, 436.849136, 437.313899</td><td>436.849136</td></tr>
+          <tr><td>1024</td><td>2</td><td>4</td><td>821.179003</td><td>440.570514, 440.523780, 439.978886</td><td>440.523780</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Compilation costs 385.033&ndash;395.313 s per width-32 configuration
+        and 798.509&ndash;821.179 s per width-1024 configuration. A policy change
+        therefore pays a six-to-fourteen-minute compile before steady execution;
+        compile cost is not folded into any slices-per-second figure.
+      </p>
+    </section>
+
+    <section id="trip-mechanism">
+      <h2>Sixteen trips are continued work, not a non-firing stagnation exit</h2>
+      <p>
+        The original factorial receipts retained only terminal telemetry, so a
+        telemetry-only replay was run at width 32 without repeating the timing
+        factorial. Job <code>1260689</code> completed 0:0 on one reserved H200
+        in 00:07:22 with an unlimited accepted time limit. It persisted all 16
+        residuals, all 16 mask differences and all 16 reconcile-local continued-
+        trajectory eligibility decisions for each of 32 members. The strict
+        receipt is 76,663 bytes with SHA-256
+        <code>bd5ca0db2447fd81de795e1a5f7f636a202267de93e5bb2341c98d0be80008e9</code>.
+      </p>
+      <table>
+        <caption>Trip predicate evidence across 512 executed member-trips</caption>
+        <tbody>
+          <tr><th scope="row">Active-set trips per member</th><td>16 for all 32 members</td></tr>
+          <tr><th scope="row">Mask difference</th><td>0 at all 512 trip positions</td></tr>
+          <tr><th scope="row">Continued-trajectory eligibility</th><td>true at all 512 trip positions</td></tr>
+          <tr><th scope="row">Consecutive residual comparisons</th><td>480 of 480 are not bit-equal</td></tr>
+          <tr><th scope="row">Consecutive residual deltas</th><td>&minus;0.0089168664 to &minus;0.0055632094; every delta is negative</td></tr>
+          <tr><th scope="row">Representative residual span</th><td>0.2997430342 at trip 1 to 0.1904397574 at trip 16</td></tr>
+          <tr><th scope="row">Terminal reason</th><td>8, active-set iteration budget exhausted, for all 32 members</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The route leaves <code>stop_on_active_set_stagnation=True</code>. The
+        exit requires a finite nonconverged state, no cycle, no continued
+        trajectory, zero mask difference, and a residual bit-identical to the
+        preceding executed trip. The replay establishes that two required
+        clauses fail on every comparison: continuation remains eligible and the
+        residual decreases materially. The changes are orders of magnitude
+        larger than binary64 rounding. The exit is therefore active and behaving
+        as designed; these sixteen trips are progressive Newton continuation,
+        not repeated stagnant work.
+      </p>
+      <p>
+        The observation-only encoding did not perturb the solve receipt: all 32
+        terminal residuals match the corresponding factorial arm bit for bit at
+        0.19043975737494365, and trip count, accepted-promotion count and terminal
+        reason also match exactly.
+      </p>
+    </section>
+
+    <section id="target-arithmetic">
+      <h2>Arithmetic to 300 slices per second</h2>
+      <table>
+        <caption>Width-1024 warmup-2/GMRES-4 fitted cost sheet</caption>
+        <thead>
+          <tr><th scope="col">Contribution</th><th scope="col">Seconds</th><th scope="col">Share</th><th scope="col">Times the entire 3.413333 s target budget</th><th scope="col">Reduction class</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Conflated intercept</th><td>409.533851</td><td>92.96%</td><td>119.9806&times;</td><td>Algorithm or kernel</td></tr>
+          <tr><th scope="row">Two warmup sweeps</th><td>27.181056</td><td>6.17%</td><td>7.9632&times;</td><td>Configuration</td></tr>
+          <tr><th scope="row">Three additional GMRES actions</th><td>3.838634</td><td>0.87%</td><td>1.1246&times;</td><td>Configuration</td></tr>
+          <tr><th scope="row">Total fitted step</th><td>440.553542</td><td>100%</td><td>129.0684&times;</td><td>Mixed; dominated by algorithm/kernel</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The measured matched arm delivers 2.324506 slices/s and is 129.0597
+        times short of 300. Removing both configurable terms leaves the
+        409.533851-second intercept and a ceiling of 1024 / 409.533851 =
+        2.500404 slices/s. Configuration recovers only 7.57% over the matched
+        measurement; it cannot alter the programme's order-of-magnitude position.
+      </p>
+      <h3>Explicit two-trip sensitivity</h3>
+      <p>
+        The replay does <em>not</em> identify a fixable non-firing exit: it shows
+        material progress and continuation eligibility. Nevertheless, the
+        requested upper-bound sensitivity is informative. If an algorithmic
+        change made two trips scientifically sufficient and the entire fitted
+        intercept scaled linearly with trip count, then
+        409.533851 &times; 2 / 16 = <strong>51.191731 s</strong>. After also deleting
+        the configurable terms, the ceiling would be 1024 / 51.191731 =
+        <strong>20.003230 slices/s</strong>. The remaining gap is
+        300 / 20.003230 = <strong>14.9976&times;</strong>. Thus even the optimistic
+        two-trip counterfactual still needs about a fifteen-fold kernel-level,
+        algorithmic or precision reduction. Trip policy alone cannot close the
+        target.
+      </p>
+    </section>
+
+    <section id="conditioning">
+      <h2>The vertical-conditioning diagnostic belongs outside throughput timing</h2>
+      <p>
+        At width 32 the diagnostic itself measures 0.003225&ndash;0.003352 s per
+        batch, about 0.00010 s per member. The independently compiled
+        inside-minus-outside median is &minus;0.199866 s, which is process drift,
+        not a negative diagnostic cost. The production benchmark already stops
+        its solve timer before branch qualification and conditioning. That is the
+        correct boundary: the receipt is diagnostic work, not part of
+        <code>ForwardProfile.solve_batch</code> execution.
+      </p>
+    </section>
+
+    <section id="provenance-and-gaps">
+      <h2>Provenance and bounded gaps</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">Factorial source</th><td><code>d1e99809e2652c63aae326ed9cfbae117d35d31b</code>; the harvest base is <code>5b52ae72d6f7f6848630e3b4146b137af642ae32</code>, with no intervening diff in the benchmark, forward solver or fixed-point solver paths used here</td></tr>
+          <tr><th scope="row">Device</th><td>NVIDIA H200 NVL; JAX 0.11.0; binary64 enabled</td></tr>
+          <tr><th scope="row">Factorial job</th><td><code>1260043</code>; all ten measurement arms complete before the two profiler subprocess failures</td></tr>
+          <tr><th scope="row">Telemetry job</th><td><code>1260689</code>; COMPLETED 0:0 in 00:07:22; 4 CPUs, one H200, reservation <code>gpu_0003_grpA</code>, <code>TimeLimit=UNLIMITED</code></td></tr>
+          <tr><th scope="row">Telemetry receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T102522694527-sse-decomposition-harvest/trip-telemetry-w32.json</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        Kernel-level attribution inside the intercept remains unavailable. The
+        width-32 and width-1024 profiler subprocesses each exited with SIGSEGV
+        139 in a fresh interpreter; their logs are
+        <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/profile-w32.log</code>
+        and
+        <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/profile-w1024.log</code>,
+        with both failures recorded in <code>isolated-slurm-1260043.log</code>.
+        The absent traces also prevent a measured operator-by-operator projection
+        to the 65-by-65 grid; inventing that split would be less honest than
+        leaving the projection unclaimed. Reproducing one trace outside SLURM or
+        on a different JAX build is the bounded follow-on.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

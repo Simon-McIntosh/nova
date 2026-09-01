@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T00:42:34",
+  "updated": "2026-09-02T01:46:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1186,9 +1186,11 @@
         "id": "pta-test",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05f20-23f3-76c3-97eb-562b08815283"
+        },
         "created": "2026-09-01"
       },
       {
@@ -70723,9 +70725,355 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T223849872791-pta-hex-ring-slots-suite",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-hex-ring-slots-suite",
+        "node_definition": {
+          "done_when": "Eight logs exist in /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-hex-ring-slots-suite (create it), named after the test file with a .log suffix: test_plasma_cell_partition.log, test_hexstencil.log, test_stencil_nulls.log, test_hex_flood_geometries.log, test_hex_flood_sn_secondary.log, test_hex_flood_snowflake.log, test_hex_flood_coil_nulls.log, test_equilibrium_forward_reference.log; each produced by running, from the worktree root, JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on exactly that one file under tests/ with stdout and stderr redirected into the log, then appending the line EXIT= followed by the exit status; each log ends with a test-runner summary line and EXIT=0 (skipped tests acceptable, failures and errors not); the manifest lists the eight log paths with each pass count and the total; no source or test file is modified and no commit is made",
+          "estimated_hours": 1.0,
+          "goal": "Produce the complete captured test evidence for commit 990cf0ca (the one-to-one HEX_RING slot assignment) by running the eight required test files as separate fresh-process lanes in this worktree, one log per file, into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-hex-ring-slots-suite",
+          "id": "pta-hex-ring-slots-suite",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T223849872791-pta-hex-ring-slots-suite/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-hex-ring-slots-suite"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:38:56Z",
+        "completed_at": "2026-09-01T23:42:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3840,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3840,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "990cf0caa5071e54e119eb05ec6b72bc4b00c291",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T223849872791-pta-hex-ring-slots-suite/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14662144,
+            "cached_input_tokens_cumulative": 14662144,
+            "input_tokens": 14862399,
+            "input_tokens_cumulative": 14862399,
+            "output_tokens": 20360,
+            "output_tokens_cumulative": 20360,
+            "reasoning_output_tokens": 5410,
+            "reasoning_output_tokens_cumulative": 5410
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 412,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: node time fence expired while the correctly shaped measurement job 1261007 was still queued PENDING Resources behind user-owned efit-reproduction job 1261006; this is a launch-then-harvest park; not a fault; and the live queued job must remain untouched for a resume to harvest",
+              "elapsed_seconds": 4012,
+              "log_age_seconds": 1830,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-krylov-depth",
+              "phase": "working",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T211036140282-scr-remedy-krylov-depth",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1853,
+              "terminal_at": "2026-09-01T22:07:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1671,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the required four-hour launch-then-harvest measurement outlives this worker's 60-minute fence; job 1261003 is still running and must not be cancelled; so terminal residual; trip count; termination; final sstat utilisation; cpu-discriminator.json and cpu-discriminator.png do not yet exist",
+              "elapsed_seconds": 5271,
+              "log_age_seconds": 2564,
+              "log_fresh": false,
+              "manifest_commits": [
+                "20f3f2e12d318dec4801497481732b8835d6e76d"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-cpu-discriminator",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T211049883942-csv-cpu-discriminator",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2586,
+              "terminal_at": "2026-09-01T21:55:46Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-cpu-discriminator"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 880,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 4480,
+              "log_age_seconds": 2096,
+              "log_fresh": false,
+              "manifest_commits": [
+                "873cfba6f9a535a7733d87e4fd5159b35efec517"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212403500167-gaa-efit-reproduction-run/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260901T212403500167-gaa-efit-reproduction-run --advice <answer>",
+              "node": "gaa-efit-reproduction-run",
+              "phase": "starting",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T212403500167-gaa-efit-reproduction-run",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2179,
+              "terminal_at": "2026-09-01T22:02:33Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-efit-reproduction-run"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only node; seven of eight per-file logs delivered",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T220825985780-pta-hex-ring-slots-repair",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-hex-ring-slots-repair",
+        "node_definition": {
+          "done_when": "tests/test_plasma_cell_partition.py gains a distorted-ring regression using the ring centred at (1.68734968, -0.88282491) from the Solovev oracle carrier (reproduce it by building that carrier as tests/test_solovev_recovery_gates.py does, or by an equivalent distorted six-neighbour fixture whose two neighbours share a nearest fixed slot) plus a randomised test perturbing regular-ring neighbours by up to 40 percent of the pitch, both asserting six distinct slots and preserved cyclic order; tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point no longer fails in hex_ring_slots (it may still fail later with the tensor-product connectivity error at topology.py, which the topology-read node owns, and the manifest quotes where it now fails); tests/test_plasma_cell_partition.py tests/test_hexstencil.py tests/test_stencil_nulls.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_equilibrium_forward_reference.py are green when run as JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on those files, captured whole to a log the manifest cites",
+          "estimated_hours": 1.0,
+          "goal": "Make PlasmaGrid.hex_ring_slots a one-to-one HEX_RING slot assignment for distorted six-neighbour rings: sort the present neighbours by polar angle about the centre, preserve that cyclic order, and choose the cyclic placement into the six HEX_RING slots that minimises the summed angular deviation, so wall-trimmed and distorted carriers tessellate without the hex neighbours do not occupy distinct HEX_RING slots error while regular half-offset lattices keep the exact HEX_RING order already tested",
+          "id": "pta-hex-ring-slots-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T220825985780-pta-hex-ring-slots-repair/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "nova/biot/plasmagrid.py",
+            "tests/test_plasma_cell_partition.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:08:31Z",
+        "completed_at": "2026-09-01T22:37:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1730,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1730,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2086424d148d1870becccf6d42d810a12f6a3d15",
+        "commits": [
+          "990cf0caa5071e54e119eb05ec6b72bc4b00c291"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "per-file lanes: JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on each of test_plasma_cell_partition.py test_hexstencil.py test_stencil_nulls.py test_hex_flood_geometries.py test_hex_flood_sn_secondary.py test_hex_flood_snowflake.py test_hex_flood_coil_nulls.py (69 passed, 1 skipped) plus tests/test_equilibrium_forward_reference.py::test_persistent_fixture_machine_cache_builds_once (from-scratch hex machine build, passed) and the Solovev oracle advancing past hex_ring_slots",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-hex-ring-slots-suite/test_equilibrium_forward_reference.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T220825985780-pta-hex-ring-slots-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3102720,
+            "cached_input_tokens_cumulative": 4487424,
+            "input_tokens": 3171678,
+            "input_tokens_cumulative": 4651211,
+            "output_tokens": 8737,
+            "output_tokens_cumulative": 11949,
+            "reasoning_output_tokens": 1014,
+            "reasoning_output_tokens_cumulative": 1976
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the required four-hour launch-then-harvest measurement outlives this worker's 60-minute fence; job 1261003 is still running and must not be cancelled; so terminal residual; trip count; termination; final sstat utilisation; cpu-discriminator.json and cpu-discriminator.png do not yet exist",
+              "elapsed_seconds": 3446,
+              "log_age_seconds": 738,
+              "log_fresh": true,
+              "manifest_commits": [
+                "20f3f2e12d318dec4801497481732b8835d6e76d"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-cpu-discriminator",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T211049883942-csv-cpu-discriminator",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 760,
+              "terminal_at": "2026-09-01T21:55:46Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-cpu-discriminator"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 2655,
+              "log_age_seconds": 271,
+              "log_fresh": true,
+              "manifest_commits": [
+                "873cfba6f9a535a7733d87e4fd5159b35efec517"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212403500167-gaa-efit-reproduction-run/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260901T212403500167-gaa-efit-reproduction-run --advice <answer>",
+              "node": "gaa-efit-reproduction-run",
+              "phase": "starting",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T212403500167-gaa-efit-reproduction-run",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 354,
+              "terminal_at": "2026-09-01T22:02:33Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-efit-reproduction-run"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1285
+    "_version": 1288
   }
 }

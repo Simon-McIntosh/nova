@@ -72,6 +72,21 @@
 </table>
 <p><strong>Findings banked.</strong> (1) The polish executes inside the jitted <code>Topology.read_qualification</code> on every read with two dense normal-equation solves and, until the topology-read node lands, a raster reshape. (2) On every manufactured field examined the polish contributes nothing beyond the Solov'ev axis; whether it earns its per-read cost on production fields is for the parity harness (§4) and the batch measurement in <code>single-grid-solver-cutover</code>. (3) The prototype's 6e-16 m saddle came from a 16-coefficient polynomial fit that represented Solov'ev exactly; the production 50-coefficient basis does not, so its one step moves the saddle 27 µm and is correctly rejected.</p>
 </section>
+
+<section id="s1-ring-slots"><h2 id="s1-ring-slots-h">§1 — Distorted hex ring slot assignment (regression repair)</h2>
+<p>The partition landing (<code>c712c98a</code>) introduced <code>hex_ring_slots</code>, which mapped each neighbour to its nearest fixed <code>HEX_RING</code> angle and raised when two collided. On the Solov'ev oracle's wall-trimmed carrier (ring centred at (1.68734968, −0.88282491) m) two neighbours collide, so <code>PlasmaGrid.tessellate</code> raised before the topology read and the S19 session's oracle test failed one stage earlier than before. Found by the topology-read node's baseline run (stopped, recorded as a pre-existing failure). Repair node <code>pta-hex-ring-slots-repair</code>, commit <code>990cf0ca</code>, merged <code>5dd44f65</code>.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Assignment</td><td>Neighbours sorted by polar angle; every injective cyclic-order-preserving placement into the six slots enumerated (0 to 6 neighbours); the placement minimising summed wrapped angular deviation chosen; a regular half-offset ring stays [0,1,2,3,4,5].</td></tr>
+<tr><td>Fixtures</td><td>The exact distorted Solov'ev ring; 128 deterministic rings perturbed up to 0.4 pitch; all give six distinct slots in preserved cyclic order.</td></tr>
+<tr><td>Lanes</td><td>Seven per-file lanes on CPU: 69 passed, 1 skipped (partition 6, hexstencil 13, stencil nulls 14+1s, flood geometries 12, sn-secondary 6, snowflake 16, coil nulls 2). Logs: <code>~/.config/reckon/crew/reports/nova/pta-hex-ring-slots-suite/</code>.</td></tr>
+<tr><td>Forward reference</td><td><code>test_persistent_fixture_machine_cache_builds_once</code> passed: it rebuilds the hex machine from scratch into a temporary store, exercising the new tessellation end to end. It took 54 minutes on CPU and the 60-minute lane was cut before the remaining 28 cached-machine tests; those run as a GPU-lane evidence node. Finding: this file is effectively a GPU lane and must not be forced to CPU in a worker fence.</td></tr>
+<tr><td>Solov'ev oracle</td><td>No longer fails in <code>hex_ring_slots</code>; now reaches the tensor-product connectivity error at <code>topology.py:396</code>, which the topology-read node owns.</td></tr>
+<tr><td>Review</td><td>PASS; the earlier caller-order audit remains valid (same cyclic orientation, no caller changed).</td></tr>
+</tbody>
+</table>
+</section>
 </main>
 </body>
 </html>

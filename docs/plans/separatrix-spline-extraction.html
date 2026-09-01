@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="106">
+<meta name="plan-version" content="108">
 </head>
 <body>
   <main class="plan-doc">
@@ -443,6 +443,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260901T055135750842" data-who="reckon-d8-s16-landing" data-when="2026-09-01T09:00:00+00:00">
     <div class="r-comment-body"><p><strong>The gate-authority decision reframes the validation experiment, and the decisive version has never been run.</strong> The DIII-D forward-GS harness already fixes EFIT's p-prime and FF-prime through <code>extract_flux_functions</code>, but it solves at grid stride 2 - the source EFIT grid decimated by half - so the committed comparisons judge Nova at a resolution coarser than what the lead's bar measures against. Worse, no committed experiment seeds the solve at EFIT's own psi with everything fixed. That experiment yields two numbers nothing else provides: the GS residual of EFIT's converged solution under Nova's discretised operator at the native grid, which is the measured floor any gate fraction must respect (if our operator disagrees with EFIT's solution at 1e-2, no solver work can pass a 1e-6-flavoured gate against it); and the behaviour of the solver when started AT a solution, which separates the DIII-D stall's path-dependence from its formulation (a seeded solve that stays put and polishes convicts the path; one that walks away convicts the operator or acceptance). Node <code>sse-efit-fixed-input-reproduction</code> is dispatched to measure both on one DIII-D frame and one MAST arm at stride 1.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260901T054025676668-sse-stride-one-boundary-probe" data-who="margin-remeasure" data-when="2026-09-01T06:13:21Z">
+    <div class="r-comment-body"><p>Launch sound, measure pending harvest. The node submitted the stride-1 solve of MAST 22086/43 pure as job 1260037 and handed back when it sat scheduler-pending with zero runtime, exactly as contracted. ORCHESTRATOR RETARGET recorded for the harvest: vega has been admin-drained since 2026-08-25 (reason work mounts, 52 of 72 nodes), so the job was moved by scontrol to rigel unchanged and is RUNNING on 98dci4-clu-2006; sacct will show partition rigel, not the submitted vega</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260901T055212194147-sse-efit-fixed-input-reproduction" data-who="diiid-forward-gs" data-when="2026-09-01T06:14:27Z">
+    <div class="r-comment-body"><p>Launch sound, measure pending harvest. The amended cold-start contract is in the job: zero-iteration GS residual of EFIT psi under the stride-1 and stride-2 operators on both machines (no coil currents needed), the clean MAST fixed-input cold start through efm fcoil_c, the DIII-D cold start qualified as using shipped inference currents because the parquet schema carries no EFIT fitted-current vector, and the quarter-width gate derived from each source grid. ORCHESTRATOR RETARGET recorded for the harvest: moved from drained vega to rigel by scontrol, memory trimmed 128G to 120G because rigel nodes carry 128000 MB; RUNNING on 98dci4-clu-2009; sacct will show rigel</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

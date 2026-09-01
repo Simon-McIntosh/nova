@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T23:55:29",
+  "updated": "2026-09-01T08:16:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64308,9 +64308,209 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T054025676668-sse-stride-one-boundary-probe",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-stride-one-boundary-probe",
+        "node_definition": {
+          "done_when": "The boundary-accuracy effect of the full-resolution grid is measured on the one arm where it can be compared cleanly, deciding how much of the 2.9-centimetre RMS is discretisation and how much is the lower-null binding. The committed stride-2 values for MAST 22086/43 pure, the converged eligible arm, are binding_to_efit_lcfs RMS 0.02891 m, sup 0.16611 m, saddle-to-EFIT-X 0.02396 m, and the committed panel shows the sup living at the LOWER X-point region, where EFIT binds the boundary lower than Nova closes it. (1) Solve exactly MAST 22086/43 pure at grid stride 1, the full 65-by-65 resolution, from the same governed authority operands the corroboration driver uses, with per-trip telemetry enabled, as one SLURM job on an uncapped non-debug lane with the accepted TimeLimit stated and sized generously against a solve that costs several times the stride-2 arm; absolute Nova interpreter, VIRTUAL_ENV unset, no uv wrapper, exact command preflighted on the login node. (2) Report converged or not, the terminal residual against the unchanged 1e-8 criterion, the trip count, and the per-trip trajectory. (3) Extract the closed boundary through the same shared comparator and report RMS, sup and saddle beside the committed stride-2 values, with the deltas stated as numbers. (4) Report specifically whether the lower-X region moved: the distance between the Nova boundary and the EFIT LCFS in the lower-null sector at stride 1 against stride 2, so the discretisation and binding contributions separate. (5) Report the stride-1 solve wall time beside the stride-2 cost so a full sub-centimetre campaign can be sized, and state plainly if stride 1 does not reach sub-centimetre RMS, since that would mean the bar requires more than resolution. (6) Write outputs to the durable run directory, modify no committed bank artifact, and relax no tolerance. If the job cannot reach a terminal state inside the fence, record the job id, the durable log and output paths, and the accepted limit, and hand back for a harvest rather than truncating or guessing.",
+          "estimated_hours": null,
+          "goal": "The measured boundary RMS of the converged MAST arm at the full 65-by-65 grid beside its committed 33-by-33 values, separating discretisation from lower-null binding",
+          "id": "sse-stride-one-boundary-probe",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/stride-one-boundary-probe.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:40:36Z",
+        "completed_at": "2026-09-01T06:13:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1965,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1965,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d1e99809e2652c63aae326ed9cfbae117d35d31b",
+        "commits": [
+          "324d7b9b112b6933f76a8a2fdc3887d7c3a09234"
+        ],
+        "changed_lines": {
+          "added": 132,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": {
+          "command": "one job submitted (1260037); handed back pending-for-priority per contract rather than truncating",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5299584,
+            "cached_input_tokens_cumulative": 7897472,
+            "input_tokens": 5917683,
+            "input_tokens_cumulative": 8563203,
+            "output_tokens": 17770,
+            "output_tokens_cumulative": 28146,
+            "reasoning_output_tokens": 4100,
+            "reasoning_output_tokens_cumulative": 6450
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T055212194147-sse-efit-fixed-input-reproduction",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-efit-fixed-input-reproduction",
+        "node_definition": {
+          "done_when": "The GS residual of EFIT's own converged solution under Nova's discretised operator is measured at the native source grid, together with what a solve seeded at that solution does, for one DIII-D frame and one MAST arm. The lead's rationale is locked in the plan decision boundary-gate-authority: with EFIT's inferred flux functions and corrected coil currents held fixed, EFIT is a converged Grad-Shafranov solution with fixed boundary conditions, so forward reproduction is bounded only by source-grid discretisation. (1) For DIII-D frame d3d_shot_002495e835:146 (the one frame whose panel carries an available closed separatrix) and MAST 22086/43 pure (the converged eligible arm), construct the fixed-input reproduction: EFIT's psi map as the initial state, EFIT's p-prime and FF-prime through the same extract_flux_functions authority the harness already uses, coil currents as EFIT's corrected values, all at grid stride 1, the native source reconstruction grid. State explicitly which coil-current source the harness resolves today and whether it is EFIT's corrected set; if it is not, name what it is and use EFIT's set for this measurement. (2) Report the ZERO-ITERATION number first and separately: the relative GS residual of EFIT's psi under Nova's discretised operator at stride 1, before any solve step. This is the measured floor of the comparison and the number the gate fraction must respect. Report it also at stride 2 beside it, so the cost of the decimation the committed banks used is a measured ratio. (3) Then run the solve from that seed with per-trip and per-iteration telemetry on, and report: whether it stays at the seed and polishes, or walks away; the terminal residual against the unchanged criterion; the trip count; and the final boundary RMS, sup and saddle distance against the EFIT LCFS through the shared comparator. A seeded solve that stays and polishes convicts the earlier stall's path; one that departs convicts the operator or the acceptance, and which of those it is must be stated from the telemetry. (4) Read and report the source EFIT grid dimensions and physical extents from the equilibrium data for both machines, derive the minimum grid width per machine, and state the implied gate at fractions one half, one quarter and one tenth, so the open efit-match-gate-fraction decision is chosen against measured numbers. (5) Report stride-1 wall cost beside stride-2 for the same operand. (6) One durable SLURM job on an uncapped non-debug lane, accepted TimeLimit stated and generous, absolute Nova interpreter with VIRTUAL_ENV unset and no uv wrapper, exact command preflighted on the login node, outputs to the durable run directory, no committed bank artifact modified, no tolerance relaxed. If the job is not terminal inside the fence, record the job id, durable paths and accepted limit and hand back for a harvest rather than truncating. Record findings in docs/research/efit-fixed-input-reproduction.html validated with the reckon doc-check tooling, with a figure showing the zero-iteration residual field spatially so it is visible where the operator disagreement lives.",
+          "estimated_hours": null,
+          "goal": "The zero-iteration GS residual of EFIT's converged solution under Nova's stride-1 operator and the behaviour of a solve seeded at it, measured for one DIII-D frame and one MAST arm with flux functions and coil currents fixed",
+          "id": "sse-efit-fixed-input-reproduction",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T055212194147-sse-efit-fixed-input-reproduction/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/efit-fixed-input-reproduction.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:52:20Z",
+        "completed_at": "2026-09-01T06:14:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1327,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1327,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b97300ff9f53158efbe24d3250cd8aabbd7f30f5",
+        "commits": [
+          "0aa0a4061a064dfea29f9a4bebc41a6b438f69ca"
+        ],
+        "changed_lines": {
+          "added": 199,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": {
+          "command": "one job submitted (1260038) for the two-machine cold-start reproduction; launch-only, no scientific claim",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T055212194147-sse-efit-fixed-input-reproduction/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T055212194147-sse-efit-fixed-input-reproduction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9911040,
+            "cached_input_tokens_cumulative": 9911040,
+            "input_tokens": 10368870,
+            "input_tokens_cumulative": 10368870,
+            "output_tokens": 41231,
+            "output_tokens_cumulative": 41231,
+            "reasoning_output_tokens": 8177,
+            "reasoning_output_tokens_cumulative": 8177
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1188
+    "_version": 1190
   }
 }

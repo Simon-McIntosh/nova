@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="hex-grid-derisk-gates-landed">
+  <meta name="plan-evidence-for" content="hex-grid-derisk-gates">
+  <meta name="plan-informs" content="solver-convergence-regression">
+  <meta name="plan-title" content="Hex-grid de-risk gates — cumulative evidence">
+  <meta name="plan-summary" content="Cumulative evidence for cache-only topology replay, jump-bearing field accuracy, H200 batch throughput, and the backend qualification that still holds integration.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Hex-grid de-risk gates — cumulative evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <h1>Hex-grid de-risk gates — cumulative evidence</h1>
+
+  <p><strong>The three scientific falsifiers are clear; integration is not.</strong> The cache-only
+  topology replay returned a zero-cell mask difference, the re-adjudicated jump-bearing field test
+  retained a thin 1.0115× accuracy advantage, and the H200 ladder retained the preregistered scale
+  gain through width 1,024. The original measured-map field gate did fire before it was judged
+  confounded and replaced. Two facts still hold the cutover: the pure arm stagnates on both pinned
+  and HEAD GPU runs, and the schema-4 cache producer remains in an unmerged worktree because the
+  unchanged focused suite reports six failures.</p>
+
+  <table>
+    <caption>Gate ledger: original observations are retained beside their adjudications</caption>
+    <thead><tr><th scope="col">Question</th><th scope="col">Measured result</th><th scope="col">Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Cache-only private-mask replay</td><td>0 of 42 cells in symmetric difference; 42 of 42 X-candidate selections match; 0 domain-label differences</td><td><strong>PASS</strong></td></tr>
+      <tr><td>Original measured-map field comparison</td><td>Split/global factors 0.626 on MAST and 0.612 on DIII-D at matched 16 degrees of freedom</td><td><strong>FIRED</strong>, then re-adjudicated as confounded by globally smooth source maps</td></tr>
+      <tr><td>Jump-bearing forward-solve comparison</td><td>1.011489×; boundary-split 216.786 versus global 219.277 over 461 boundary-band cells</td><td><strong>PASS</strong>, thin margin</td></tr>
+      <tr><td>H200 batch ladder</td><td>1,988.4 million point-evaluations/s at width 1,024; 8.503× the width-32 rate, above the 1.981× minimum</td><td><strong>PASS</strong></td></tr>
+      <tr><td>Integration readiness</td><td>Pure-arm GPU stagnation and 6 focused-suite failures remain; cache extension is unmerged</td><td><strong>HELD</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="pure-arm-comparison">The pure arm: one geometry, three execution receipts</h2>
+
+  <figure>
+    <img src="/nova/figures/hex-cell-single-grid/pure-arm-comparison.png"
+         alt="Four flux-map panels comparing the committed CPU row, pinned-revision H200 row, HEAD H200 row, and mixed control for MAST 22086 time slice 43.">
+    <figcaption>MAST 22086/43 at matched contour levels. The pinned schema-4 cache is the only receipt
+    that banks per-cell flux. Accordingly, panels A and C use its field only as an explicitly labelled
+    spatial carrier for the CPU and HEAD landmarks; they do not claim an unrecorded CPU or HEAD flux
+    map. The committed CPU row converged. The pinned-revision GPU row stagnated and moved the selected
+    O and X points by 4.47 and 5.17 mm. HEAD also stagnated at a 4.80×10<sup>−4</sup> residual. The mixed
+    control reproduced O and X to 8.53×10<sup>−16</sup> m and 2.48×10<sup>−16</sup> m.</figcaption>
+  </figure>
+
+  <p>The picture separates a stable geometry/control path from the pure-arm convergence failure. The
+  mixed row proves that the pinned GPU execution can reproduce a committed solution essentially to
+  machine precision, while the pure row fails at the pinned source revision as well as at HEAD. That
+  is evidence against treating the HEAD-only solver drift as the whole explanation; backend-sensitive
+  margin remains an open input to the regression investigation.</p>
+
+  <figure>
+    <img src="/nova/figures/hex-cell-single-grid/pure-arm-comparison-residuals.png"
+         alt="Four panels showing pure-minus-mixed flux, domain-label changes, HEAD residual history, and O/X displacement vectors.">
+    <figcaption>The residual view keeps unlike quantities separate. The recorded pure-minus-mixed field
+    reaches 5.189×10<sup>−3</sup> Wb/rad; 28 domain labels differ between the committed and regenerated
+    pure rows; HEAD plateaus at 4.802×10<sup>−4</sup>, 48,023× its 10<sup>−8</sup> tolerance after mask
+    changes have settled; and the pure O/X displacement is millimetric while the mixed displacement
+    is below 8.53×10<sup>−13</sup> mm.</figcaption>
+  </figure>
+
+  <table>
+    <caption>What each 22086/43 receipt actually records</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">Solve outcome</th><th scope="col">Recorded comparison</th><th scope="col">Qualification</th></tr></thead>
+    <tbody>
+      <tr><td>Committed CPU bank, pure</td><td>Converged</td><td>Reference O/X and domain labels</td><td>Per-cell flux was not banked</td></tr>
+      <tr><td>Pinned-revision H200, pure</td><td>Stagnated</td><td>ΔO 4.4666 mm; ΔX 5.1715 mm</td><td>Schema-4 source identity validated</td></tr>
+      <tr><td>HEAD H200, pure</td><td>Stagnated</td><td>Terminal residual 4.802335×10<sup>−4</sup></td><td>Flux grid and O point were not banked</td></tr>
+      <tr><td>Pinned-revision H200, mixed</td><td>Converged</td><td>ΔO 8.53×10<sup>−16</sup> m; ΔX 2.48×10<sup>−16</sup> m</td><td>Positive backend control</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="mask-replay">Cache-only topology replay</h2>
+
+  <p><strong>PASS — 0 of 42 private-mask cells differ.</strong> The replay consumed only the regenerated
+  schema-4 topology operands, including the X-candidate selection step, and invoked the production
+  edge-admissibility, saddle-aware connected-component, and private-flux-mask authorities. All 42
+  candidate selections match and no replayed domain label differs. The receipt records source arrays
+  of 1,089 cell fluxes, 5×1,089 candidate-domain labels, 1,089 four-vertex cell polygons, and 1,156
+  atomic-node signed fluxes. The zero is therefore the flood-on-cells answer, independent of the
+  subsequent focused-suite regression.</p>
+
+  <p>The cache extension and its receipt remain in the isolated
+  <code>hdg-cache-replay</code> worktree rather than in the integrated bank. This is deliberate: the
+  unchanged focused suite reports 6 failed and 5 passed, including partition counts 250/38 versus
+  277/20 and 244/36 versus 244/33 plus a wall-notch mismatch. Those failures do not rewrite the
+  zero-difference replay; they block its promotion.</p>
+
+  <h2 id="jump-field">Field accuracy: the fired gate and its replacement</h2>
+
+  <figure>
+    <img src="/nova/figures/hex-cell-single-grid/jump-field-advantage.png"
+         alt="Boundary-band comparison of a boundary-split field representation with a global smooth representation on a jump-bearing analytic solve.">
+    <figcaption>The replacement test carries an actual curvature jump across the separatrix. At equal
+    16-parameter capacity, the boundary-split representation reduces the boundary-band pitch-scaled
+    second-derivative RMS from 0.057560 to 0.056906, an advantage factor of 1.011489 across 461 cells.
+    The analytic jump RMS is 0.852453 Wb/rad/m².</figcaption>
+  </figure>
+
+  <p>The original test is not retroactively called a pass. It fired at 0.626 on MAST and 0.612 on
+  DIII-D. Lead review found that both fitted EFIT maps were globally smooth, so the test could not
+  exercise the claimed interface mechanism and was re-adjudicated as confounded. The jump-bearing
+  forward solve answers the intended question and passes, but by only 1.15%; this is evidence for
+  admissibility, not a claim of a large accuracy reserve.</p>
+
+  <h2 id="h200-ladder">H200 width ladder</h2>
+
+  <table>
+    <caption>Warm float64 throughput; 512 points per member and 50 timed samples per route and width</caption>
+    <thead><tr><th scope="col">Width</th><th scope="col">Split M point-evals/s</th><th scope="col">Global M point-evals/s</th><th scope="col">Split/global time</th></tr></thead>
+    <tbody>
+      <tr><td>32</td><td>233.8</td><td>229.2</td><td>0.980</td></tr>
+      <tr><td>64</td><td>455.1</td><td>463.9</td><td>1.019</td></tr>
+      <tr><td>128</td><td>921.1</td><td>928.0</td><td>1.008</td></tr>
+      <tr><td>256</td><td>1,177.1</td><td>583.1</td><td>0.495</td></tr>
+      <tr><td>512</td><td>1,963.6</td><td>1,008.3</td><td>0.514</td></tr>
+      <tr><td>1,024</td><td>1,988.4</td><td>2,108.6</td><td>1.060</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>PASS.</strong> The width-1,024 split rate is 8.503× the width-32 rate, comfortably above
+  the 1.981× minimum retained after the 17% overhead allowance. Split/global parity varies with width,
+  so the result is specifically a scale-retention verdict rather than a claim that split beats global
+  at every size. The source receipt is
+  <a href="/nova/figures/hex-cell-single-grid/h200-split-batch.json"><code>h200-split-batch.json</code></a>
+  from H200 job 1260653.</p>
+
+  <h2 id="settlement">Solver settlement and qualified suffixes</h2>
+
+  <figure>
+    <img src="/nova/figures/solver-trip-orchestration/settlement-histogram.png"
+         alt="Histogram of active-set settlement trips across the production trajectory bank.">
+    <figcaption>Ten of eleven observed trajectories settle; one does not. Settled trajectories average
+    3.1 trips, with a projected 0.339 ms orchestration cost under the measured host-control model.</figcaption>
+  </figure>
+
+  <p>Settlement is common enough to support the suffix analysis, but it is not universal. In
+  particular, the MAST rows do not acquire a usable strict qualified suffix merely because their masks
+  stop moving; topology semantics and solver convergence remain separate requirements.</p>
+
+  <figure>
+    <img src="/nova/figures/solver-trip-orchestration/suffix-census.png"
+         alt="Histogram comparing mask-only settlement with strict qualified suffixes for MAST and DIII-D trajectories.">
+    <figcaption>Mask-only settlement exists for 10 of 11 trajectories, but only 5 of 11 have a strict
+    qualified observable suffix: 0 of 6 MAST and 5 of 5 DIII-D. The distinction prevents a stable mask
+    from being promoted as a converged, semantically qualified solve.</figcaption>
+  </figure>
+
+  <p>The suffix census is the bridge to the backend margin. Width-1,024 replication is therefore not
+  representative of every production arm: the performance gate passes while the pure MAST arm still
+  lacks a converged GPU receipt.</p>
+
+  <h2 id="open-record">Open record</h2>
+
+  <table>
+    <caption>What remains after the three de-risk falsifiers</caption>
+    <thead><tr><th scope="col">Open item</th><th scope="col">Evidence</th><th scope="col">Required next action</th></tr></thead>
+    <tbody>
+      <tr><td>Backend/runtime margin</td><td>Pinned and HEAD GPU pure rows stagnate; pinned mixed row reproduces</td><td>Regression work must separate backend-sensitive pure-arm margin from HEAD code drift</td></tr>
+      <tr><td>Unmerged cache producer</td><td>Schema-4 replay passes, focused suite is 6 failed / 5 passed</td><td>Adjudicate the partition-count and wall-notch differences before integration</td></tr>
+      <tr><td>Field-gate reserve</td><td>Replacement advantage is only 1.011489×</td><td>Preserve the thin margin as a qualification in downstream cutover decisions</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Bottom line:</strong> flood-on-cells, jump-bearing representation accuracy, and H200
+  batching survive their intended falsifiers. The earlier field failure remains visible with its
+  re-adjudication. The backend margin and the unmerged worktree remain open, so this record supports
+  lead adjudication rather than an unconditional cutover.</p>
+
+</main></body>
+</html>

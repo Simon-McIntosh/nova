@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:10:52",
+  "updated": "2026-09-01T09:24:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64913,9 +64913,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T070748562066-sse-hex-single-grid-feasibility",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-hex-single-grid-feasibility",
+        "node_definition": {
+          "done_when": "A working prototype decides, with measured numbers on an analytic equilibrium, whether one hex plasma-cell grid can carry the field representation, the null identification and the flood fill, under the lead's stated design: the six-neighbour sign-change count around each cell centroid (nova/biot/fieldnull.py categorize_2d) remains the primary null identifier, the 2D spline fit exists for polish only, and the spline is split at the plasma boundary into an interior patch and an exterior patch, each C2 within its region, with the second derivative allowed to jump across the boundary because the current-density jump at the separatrix makes psi's curvature discontinuous there. The prototype lives in benchmarks/hex_cell_field_feasibility.py with its record in docs/research/hex-cell-single-grid-feasibility.html; no production module is modified. The verdict is the conjunction of four measured criteria, each reported as its number, and the overall answer is infeasible-with-the-failing-item-named unless all four hold. (1) REPRESENTATION: on an analytic Solov'ev equilibrium (the repository carries Solov'ev references in tests/rotating_equilibrium_references.py and the hex-clip defect map used an exact Solov'ev field), fit the boundary-split representation on the half-offset hex lattice - exploiting that the lattice is a structured (n_x, n_z) index array with alternate rows offset half a cell, so fitting and evaluation stay fixed-shape - and report the reconstruction error of psi, grad psi and the second derivatives against the exact field, inside, outside, and in a band within two cell pitches of the boundary, beside the SAME errors from a single global C2 tensor spline at matched degrees of freedom. The split representation must beat the global fit in the boundary band by a stated factor for this criterion to pass; state the interface conditions used (psi and grad psi matched, curvature free) and how the interface follows the curved boundary through cells. (2) NULL IDENTIFICATION: the sign-change count on the hex ring locates the Solov'ev X-point and axis on the hex lattice, and one polish step on the fitted representation refines each to a stated distance from the exact positions; report both distances and the fraction of lattice cells scanned per null. (3) GPU BATCHABILITY: evaluation of the fitted representation at N arbitrary points, and the fit itself, are expressed as fixed-shape operations that compile once and vmap over a batch axis; demonstrate with a measured timing at two batch widths on any available accelerator or, if none is reachable from the node, on CPU with the compiled-program structure reported, and state which operations would not batch and why if any. (4) FLOOD FILL: the saddle-aware flood runs on the same hex cells using the existing hex adjacency and reproduces the private-flux mask of one committed MAST operand (the caches in docs/figures/topology-visual-corroboration hold cell centres and domain labels) within a stated cell-difference count, so consolidation demonstrably does not change the topology answer on real geometry. (5) The record closes with the practicality statement the lead asked for, expressed as numbers: the measured accuracy and timing deltas against the incumbent two-mesh design, the list of production seams the single grid would remove, the list of new work it would create, and a cost estimate in worker-hours for a production cutover, each item falsifiable rather than argued. (6) Focused lane green with the delta stated against base; no committed bank artifact modified; any SLURM use preflighted on the login node with the absolute Nova interpreter and no uv wrapper.",
+          "estimated_hours": null,
+          "goal": "A measured feasibility verdict on one hex plasma-cell grid carrying the boundary-split spline representation, the sign-change null identification and the flood fill",
+          "id": "sse-hex-single-grid-feasibility",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T070748562066-sse-hex-single-grid-feasibility/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/hex_cell_field_feasibility.py",
+            "tests/test_hex_cell_field_feasibility.py",
+            "docs/research/hex-cell-single-grid-feasibility.html",
+            "docs/figures/hex-cell-single-grid"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "xpoint-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:07:59Z",
+        "completed_at": "2026-09-01T07:23:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 938,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 938,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a76c3150e45adcb0f7b758b838bbcb2f83875a69",
+        "commits": [
+          "857c7e94d7af2e0920cca91235c10bb2a224b931"
+        ],
+        "changed_lines": {
+          "added": 899,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "prototype exits 0; focused tests 2/2 (+2 vs base a76c3150); audit-doc OK; ruff clean; metrics.json and figure digests recorded",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T070748562066-sse-hex-single-grid-feasibility/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T070748562066-sse-hex-single-grid-feasibility/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5706752,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6170950,
+            "output_tokens": 1348,
+            "output_tokens_cumulative": 27841,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4879
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1194
+    "_version": 1195
   }
 }

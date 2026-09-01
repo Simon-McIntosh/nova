@@ -1,0 +1,309 @@
+{
+  "banked_quantum": {
+    "batch_seconds_for_sixteen_trips": 409.5338514000002,
+    "batch_seconds_per_trip": 25.59586571250001,
+    "comparison_normalized_ms_per_slice_for_sixteen_trips": 41.024075312379004,
+    "comparison_normalized_ms_per_slice_per_trip": 2.5640047070236878,
+    "measured_ms_per_member_per_trip": 24.99596260986329,
+    "trip_census": {
+      "accepted_newton_promotions": {
+        "maximum": 16,
+        "median": 16.0,
+        "minimum": 16
+      },
+      "active_set_outer_iterations": {
+        "maximum": 16,
+        "median": 16.0,
+        "minimum": 16
+      },
+      "attempted_newton_promotions": {
+        "maximum": 16,
+        "median": 16.0,
+        "minimum": 16
+      },
+      "configured_gmres_inner_iterations": 4,
+      "configured_newton_steps_per_active_set_trip": 1,
+      "configured_warmup_sweeps": 1,
+      "converged_members": 0,
+      "member_count": 1024,
+      "terminal_relative_residual": {
+        "maximum": 0.46579279802678114,
+        "median": 0.46579279802678114,
+        "minimum": 0.46579279802678114
+      }
+    }
+  },
+  "configuration": {
+    "steady_samples_per_probe": 8,
+    "width": 1024
+  },
+  "device": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "id": 0,
+    "jax_enable_x64": true,
+    "jax_version": "0.11.0",
+    "kind": "NVIDIA H200 NVL",
+    "memory_bytes_limit": 112585605120,
+    "peak_device_memory_bytes": 9810348288,
+    "platform": "gpu"
+  },
+  "direct_width_1024_probes": {
+    "fused_reconciliation_and_first_gmres_action": {
+      "compile_seconds": 15.093904965557158,
+      "first_execute_seconds": 1.6264809761196375,
+      "steady": {
+        "iqr_batch_seconds": 0.00044141546823084354,
+        "maximum_batch_seconds": 1.5787412989884615,
+        "median_batch_seconds": 1.5782044380903244,
+        "median_ms_per_member": 1.5412152715725824,
+        "minimum_batch_seconds": 1.577778747305274,
+        "sample_count": 8,
+        "samples_seconds": [
+          1.5787412989884615,
+          1.5786169618368149,
+          1.5783063583076,
+          1.578063402324915,
+          1.5783907733857632,
+          1.5781025178730488,
+          1.577778747305274,
+          1.5778334131464362
+        ]
+      }
+    },
+    "mask_reconciliation_gather_scatter_comparison": {
+      "compile_seconds": 11.530176597647369,
+      "first_execute_seconds": 0.8352386895567179,
+      "steady": {
+        "iqr_batch_seconds": 0.00017416849732398987,
+        "maximum_batch_seconds": 0.8012557420879602,
+        "median_batch_seconds": 0.8008356774225831,
+        "median_ms_per_member": 0.7820660912329913,
+        "minimum_batch_seconds": 0.8006843579933047,
+        "sample_count": 8,
+        "samples_seconds": [
+          0.8007363118231297,
+          0.8008696511387825,
+          0.8006843579933047,
+          0.8007396915927529,
+          0.8008017037063837,
+          0.800894733518362,
+          0.8009678600355983,
+          0.8012557420879602
+        ]
+      }
+    },
+    "newton_relinearization": {
+      "compile_seconds": 6.55439718067646,
+      "first_execute_seconds": 1.02048054151237,
+      "steady": {
+        "iqr_batch_seconds": 0.0001270074862986803,
+        "maximum_batch_seconds": 0.7836385611444712,
+        "median_batch_seconds": 0.7834602859802544,
+        "median_ms_per_member": 0.7650979355275922,
+        "minimum_batch_seconds": 0.7833464378491044,
+        "sample_count": 8,
+        "samples_seconds": [
+          0.7835429841652513,
+          0.7834793189540505,
+          0.7836385611444712,
+          0.783525450155139,
+          0.7834146097302437,
+          0.7834412530064583,
+          0.7833674754947424,
+          0.7833464378491044
+        ]
+      }
+    },
+    "newton_relinearization_and_first_gmres_action": {
+      "compile_seconds": 9.547104089520872,
+      "first_execute_seconds": 0.8795487908646464,
+      "steady": {
+        "iqr_batch_seconds": 0.00038915127515792847,
+        "maximum_batch_seconds": 0.7868442377075553,
+        "median_batch_seconds": 0.786507467739284,
+        "median_ms_per_member": 0.7680736989641446,
+        "minimum_batch_seconds": 0.7861059410497546,
+        "sample_count": 8,
+        "samples_seconds": [
+          0.786748549900949,
+          0.7868442377075553,
+          0.7866925233975053,
+          0.7865083552896976,
+          0.7865065801888704,
+          0.7863544132560492,
+          0.7861059410497546,
+          0.7862062752246857
+        ]
+      }
+    }
+  },
+  "driver": {
+    "path": "benchmarks/trip_quantum_profile.py",
+    "sha256": "40547e715a6f78ccbad9a38e00e032763568977053e393638156394450362f9d"
+  },
+  "evidence_inputs": {
+    "banked_step_decomposition_run": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition",
+    "landed_stage_profile": {
+      "path": "docs/figures/single-grid-solver-cutover/h200-solve-profile.json",
+      "sha256": "82875def9b5e5056bdf0b4616912651b2e02bcc5c98cdc77a39ca075cd85431d"
+    },
+    "reused_without_remeasurement": "sixteen active-set trips, sixteen attempted and accepted Newton promotions, GMRES=4, and the complete factorial intercept"
+  },
+  "fusion_measurement": {
+    "active_set_trips_inside_production_host_launch": 16,
+    "direct_fusion_saving_batch_seconds": 0.00913870707154274,
+    "direct_fusion_speedup_x": 1.0057905724068301,
+    "fused_probe_batch_seconds": 1.5782044380903244,
+    "host_launchs_in_production_solve": 1,
+    "interpretation": "the production solve already places all trips inside one JIT host launch; the measured fusion delta is device-program composition, not removable Python launch latency",
+    "normalized_comparison_ceiling_ms_per_slice": 0.2362516178929973,
+    "removable_host_launches_per_trip": 0,
+    "scalar_compiled_dispatch_upper_bound_batch_seconds": 0.00022302288562059402,
+    "separate_probe_batch_seconds": 1.5873431451618671
+  },
+  "measurement_state": "complete",
+  "ranked_fusion_and_restructuring_candidates": [
+    {
+      "candidate": "fuse the complete reconciliation and Newton trip body",
+      "ideal_remaining_ms_per_slice": 1.7459246876209988,
+      "margin_above_1_75_ms_floor": 0.0,
+      "maximum_removable_ms_per_slice": 41.024075312379004,
+      "measured_ceiling_basis": "structural upper bound: remove the complete banked quantum",
+      "reaches_1_75_ms_floor": true
+    },
+    {
+      "candidate": "fuse mask reconciliation with the Newton setup",
+      "ideal_remaining_ms_per_slice": 22.07275765934642,
+      "margin_above_1_75_ms_floor": 20.32683297172542,
+      "maximum_removable_ms_per_slice": 20.697242340653585,
+      "measured_ceiling_basis": "width-1024 direct gather/scatter/comparison ratio",
+      "reaches_1_75_ms_floor": false
+    },
+    {
+      "candidate": "reuse or hoist the Newton linearization",
+      "ideal_remaining_ms_per_slice": 22.521942025103893,
+      "margin_above_1_75_ms_floor": 20.776017337482894,
+      "maximum_removable_ms_per_slice": 20.24805797489611,
+      "measured_ceiling_basis": "width-1024 direct re-linearization ratio",
+      "reaches_1_75_ms_floor": false
+    },
+    {
+      "candidate": "realize the measured explicit-program fusion",
+      "ideal_remaining_ms_per_slice": 42.53374838210701,
+      "margin_above_1_75_ms_floor": 40.78782369448601,
+      "maximum_removable_ms_per_slice": 0.2362516178929973,
+      "measured_ceiling_basis": "separate versus fused width-1024 probe delta",
+      "reaches_1_75_ms_floor": false
+    },
+    {
+      "candidate": "schedule the first GMRES action with its linearization",
+      "ideal_remaining_ms_per_slice": 42.69122500317069,
+      "margin_above_1_75_ms_floor": 40.945300315549694,
+      "maximum_removable_ms_per_slice": 0.07877499682931073,
+      "measured_ceiling_basis": "width-1024 incremental first-action synchronization ratio",
+      "reaches_1_75_ms_floor": false
+    },
+    {
+      "candidate": "remove per-trip host launches",
+      "ideal_remaining_ms_per_slice": 42.77,
+      "margin_above_1_75_ms_floor": 41.024075312379004,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "all sixteen production trips already execute inside one host launch",
+      "reaches_1_75_ms_floor": false
+    },
+    {
+      "candidate": "remove preconditioner assembly",
+      "ideal_remaining_ms_per_slice": 42.77,
+      "margin_above_1_75_ms_floor": 41.024075312379004,
+      "maximum_removable_ms_per_slice": 0.0,
+      "measured_ceiling_basis": "production GMRES supplies no preconditioner and assembles none",
+      "reaches_1_75_ms_floor": false
+    }
+  ],
+  "scalar_compiled_dispatch_probe": {
+    "compile_seconds": 0.029266010969877243,
+    "first_execute_seconds": 0.0007755514234304428,
+    "steady": {
+      "iqr_batch_seconds": 8.000223897397518e-05,
+      "maximum_batch_seconds": 0.0004288991913199425,
+      "median_batch_seconds": 0.00022302288562059402,
+      "median_ms_per_member": 0.00021779578673886135,
+      "minimum_batch_seconds": 7.285922765731812e-05,
+      "sample_count": 8,
+      "samples_seconds": [
+        0.0004288991913199425,
+        0.0002267397940158844,
+        0.0002358434721827507,
+        0.00027950480580329895,
+        0.00021930597722530365,
+        0.0001977859064936638,
+        7.285922765731812e-05,
+        7.366854697465897e-05
+      ]
+    }
+  },
+  "scheduler": {
+    "accepted_time_limit": "00:45:00",
+    "job_gpus": "4",
+    "job_id": "1260803",
+    "job_name": "sto-trip-quantum",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.solver_trip_quantum_profile",
+  "source_revision": "5228ffb884c6456d00032ece4e1ffc008743610f",
+  "substage_attribution": [
+    {
+      "attributed_comparison_ms_per_slice_across_sixteen_trips": 20.697242340653585,
+      "attributed_measured_ms_per_member_per_trip": 12.610826489930583,
+      "direct_probe_batch_seconds": 0.8006126545369625,
+      "direct_probe_ms_per_member": 0.7818482954462525,
+      "method": "positive direct probe ratio apportioned over the banked factorial intercept",
+      "share_of_positive_direct_probe_latency": 0.5045145364777593,
+      "substage": "mask_reconciliation_gather_scatter_comparison"
+    },
+    {
+      "attributed_comparison_ms_per_slice_across_sixteen_trips": 20.24805797489611,
+      "attributed_measured_ms_per_member_per_trip": 12.337138526803695,
+      "direct_probe_batch_seconds": 0.7832372630946338,
+      "direct_probe_ms_per_member": 0.7648801397408533,
+      "method": "positive direct probe ratio apportioned over the banked factorial intercept",
+      "share_of_positive_direct_probe_latency": 0.4935652496909848,
+      "substage": "newton_relinearization"
+    },
+    {
+      "attributed_comparison_ms_per_slice_across_sixteen_trips": 0.0,
+      "attributed_measured_ms_per_member_per_trip": 0.0,
+      "direct_probe_batch_seconds": 0.0,
+      "direct_probe_ms_per_member": 0.0,
+      "method": "positive direct probe ratio apportioned over the banked factorial intercept",
+      "share_of_positive_direct_probe_latency": 0.0,
+      "substage": "preconditioner_assembly"
+    },
+    {
+      "attributed_comparison_ms_per_slice_across_sixteen_trips": 0.07877499682931073,
+      "attributed_measured_ms_per_member_per_trip": 0.047997593129012896,
+      "direct_probe_batch_seconds": 0.003047181759029627,
+      "direct_probe_ms_per_member": 0.00297576343655237,
+      "method": "positive direct probe ratio apportioned over the banked factorial intercept",
+      "share_of_positive_direct_probe_latency": 0.0019202138312558233,
+      "substage": "first_gmres_action_synchronization"
+    },
+    {
+      "attributed_comparison_ms_per_slice_across_sixteen_trips": 0.0,
+      "attributed_measured_ms_per_member_per_trip": 0.0,
+      "direct_probe_batch_seconds": 0.0,
+      "direct_probe_ms_per_member": 0.0,
+      "method": "positive direct probe ratio apportioned over the banked factorial intercept",
+      "share_of_positive_direct_probe_latency": 0.0,
+      "substage": "fixed_host_launch_overhead_per_trip"
+    }
+  ],
+  "verdict": {
+    "headline": "only complete trip-body collapse reaches the landed 1.75 ms floor; isolated sub-stage changes leave a positive margin",
+    "host_launch_overhead": "zero per trip: all sixteen trips already execute inside one compiled host launch",
+    "preconditioner_assembly": "zero: the production GMRES call supplies no preconditioner",
+    "qualification": "direct probes determine sub-stage ratios; the landed factorial intercept remains the additive solve-time authority"
+  }
+}

@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-sprint" content="S19">
 </head>
 <body>
@@ -58,6 +58,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260901T2310-fresh-evidence" data-who="reckon-ship-s19" data-when="2026-09-01T23:10:00+00:00">
     <div class="r-comment-body">Fresh evidence from the regression forensics (docs/figures/solver-convergence-regression/backend-divergence.json): at revision a4bec44f (30 Aug) the 22086/43 pure arm solved on CPU in 38 minutes on a rigel node with 16 CPUs and JAX_PLATFORMS=cpu (job 1260944, COMPLETED 0:0), i.e. within the historical 25-50 min/arm envelope, with the per-trip telemetry callbacks compiled in. So the &gt;3 h pathology of job 1260726 is either HEAD-side (commits after a4bec44f) or specific to the generate_topology_visuals producer (dual-branch portfolio plus mixed arm), not intrinsic to the telemetry or to the traced program at a4bec44f. That narrows the §2 census: hypothesis (1) telemetry callbacks is weakened on CPU too (not only on GPU), and a HEAD-versus-a4bec44f CPU pair through benchmarks/backend_divergence_forensics.py is the cheapest discriminator, ahead of the thread sweep. A second, distinct CPU issue surfaced today in the EFIT reproduction gate: a cold single-threaded Biot response build (coils plus 103 passive loops to the native grid) ran 47 minutes on one core on the H200 node without reaching a solve, while the banked parity runs load the same response from a persisted carrier in 5 ms. That one is a cache-reuse discipline failure, now covered by the locked h200-build-cache-reuse-default decision, not a solver bug.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T2358-interim-cpu" data-who="reckon-ship-s19" data-when="2026-09-01T23:58:00+00:00">
+    <div class="r-comment-body">csv-cpu-discriminator INTERIM (worker parked on its fence with a harvest brief; job 1261003 still running on rigel 98dci4-clu-2011, 16 CPUs, JAX_PLATFORMS=cpu, 4 h limit, driver commit 20f3f2e1 in its worktree). Persisted carrier and case loaded in 42.5 s with no rebuild. HEAD per-trip wall on CPU: trip 1 = 944.1 s, trip 2 = 1107.9 s, so the 12-trip HEAD trajectory of this arm is a multi-hour course; the a4bec44f CPU leg (job 1260944) did 7 trips in 38 min, about 326 s per trip, on the same lane shape, so HEAD is roughly 3x slower per trip on CPU while being bit-identical to GPU in state. Effective threads 1.49 of 16 allocated at 36 min elapsed (54:22 CPU), max RSS 6.1 GiB. Telemetry callback host time 0.11 to 0.29 ms per callback — hypothesis (1) of the census is REFUTED as a cost; the cost is inside the compiled trip body running on about one and a half cores, pointing at XLA-CPU intra-op threading (hypothesis 3) or a HEAD-side per-trip work increase from the 30 August fixed-point commits. Verdict so far: HEAD-side on this exact bank route, not producer-specific. Final residual, trip count, dominant-cost share and the verdict sentence follow the harvest.</div>
 </div>
 </section>
 </main>

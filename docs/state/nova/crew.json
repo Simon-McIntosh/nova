@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:45:31",
+  "updated": "2026-09-01T17:35:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -67025,9 +67025,162 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T144619558288-sto-cache-wiring",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a71",
+        "node": "sto-cache-wiring",
+        "node_definition": {
+          "done_when": "The named launch recipes enable the cache explicitly, a fresh-process H200 restart through one wired recipe demonstrates the cache-warm compile time against the banked 63.7 s reference, uv run pytest on the touched test recipes stays green, and the receipt records the cache directory layout, its version key and the demonstrated hit",
+          "estimated_hours": 3.0,
+          "goal": "One versioned persistent JAX compilation-cache directory wired into the bank-regeneration and scheduled-test launch recipes your compile census identified, with invalidation scoped to backend/compiler options, device topology, jaxlib/XLA build and serialized computation, honouring the no-global-switches convention (explicit per-recipe opt-in, never an ambient environment default) and the durable-dependency rule (any config lands in tracked files, never an imperative env mutation)",
+          "id": "sto-cache-wiring",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/observable_batch_acceptance.py",
+            "benchmarks/tiled_backend.py",
+            "nova/jax/config.py",
+            "docs/figures/solver-trip-orchestration/cache-wiring.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-compile",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:46:27Z",
+        "completed_at": "2026-09-01T15:35:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2926,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2926,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3e8a0b27fec8bb360a4433556991f59c6a12ab3d",
+        "commits": [
+          "4c615c0347daa0be8c195b8096318d6c6f0a92f6"
+        ],
+        "changed_lines": {
+          "added": 472,
+          "removed": 61,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260811 fresh-process cache recipe + focused pytest lanes",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T144619558288-sto-cache-wiring/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-ae4d-7de3-b417-6dbd8f376dbe",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6255,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 9855,
+              "log_age_seconds": 6505,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 6533,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The committed MAST twelve-arm bank contains no per-trip mask-difference records or retained per-iteration histories; and regenerating that bank requires writes outside this node's fence. Without those 12 trajectories; the required per-machine settlement histogram cannot be produced honestly.",
+              "elapsed_seconds": 2131,
+              "log_age_seconds": 1846,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141038002434-sto-trip-census/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260901T141038002434-sto-trip-census --advice <answer>",
+              "node": "sto-trip-census",
+              "phase": "starting",
+              "plan": "solver-trip-orchestration",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T141038002434-sto-trip-census",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 1873,
+              "terminal_at": "2026-09-01T14:15:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/sto-trip-census"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1229
+    "_version": 1230
   }
 }

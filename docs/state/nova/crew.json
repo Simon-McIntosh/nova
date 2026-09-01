@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:44:39",
+  "updated": "2026-09-01T22:52:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -69396,9 +69396,202 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T202737956093-pta-census-split-polish-repair",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-repair",
+        "node_definition": {
+          "done_when": "tests/test_split_polish_nulls.py gains a regression where a sample-coincident but non-stationary seed is rejected with converged false rather than reported converged, and a limited-mode regression distinguishing wall flux from X flux at the interface; the 1e-4 normalised-gradient threshold is derived and explained in the source or replaced by a derived tolerance; the captured log records per-case acceptance status and normalised-gradient receipts for the six tests/test_hex_flood_sn_secondary.py fields; the focused suite tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py is >= 32 green when run as JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on those four files, captured whole to a log the manifest cites; the Solovev axis error stays <= 0.2 mm and the saddle error <= 1e-12 m reached by a stationary result or an explicit non-converged census fallback, with 33x33 and 65x65 fit receipts retained; the manifest answers each of the review report's five promotion-gate items",
+          "estimated_hours": 2.0,
+          "goal": "Repair commit 83ada1f1 per the independent review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md: exactness is fitted-gradient stationarity below an authored scale-aware tolerance rather than coordinate coincidence, the split interface is pinned at the selected plasma boundary (X flux when diverted, wall-contact flux when limited) by a limited-mode regression, and per-case fit and polish acceptance receipts for all six secondary-null fields are published in the captured log",
+          "id": "pta-census-split-polish-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202737956093-pta-census-split-polish-repair/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/linalg/split_spline.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:27:52Z",
+        "completed_at": "2026-09-01T20:47:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1195,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1195,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "48a22a10389f68ad5196529495415c4b58722642",
+        "commits": [
+          "31daffeefb74927938318769b34c657ba951697c"
+        ],
+        "changed_lines": {
+          "added": 457,
+          "removed": 6,
+          "files": 4
+        },
+        "tests_added": 8,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202737956093-pta-census-split-polish-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3154176,
+            "cached_input_tokens_cumulative": 13339392,
+            "input_tokens": 3060225,
+            "input_tokens_cumulative": 13452373,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 24055,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6937
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T204755386439-pta-census-split-polish-reverify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-reverify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-rereview.md with a PASS or FAIL verdict over: (1) git show --stat 31daffee lists only the four fenced paths; (2) exactness is fitted-gradient stationarity below the derived tolerance sqrt(active coefficient count * condition number * machine epsilon), coordinate coincidence plays no role, and the sample-coincident non-stationary regression records seed_stationary false and converged false while retaining the census row; (3) the interface is the selected plasma boundary, X flux when diverted and wall-contact flux when limited, pinned by the limited-mode regression; (4) the derived tolerance is explained in the source and its derivation is sound as a conditioned backward-error floor, and state whether it is scale-aware in metres and in flux; (5) the captured log in /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202737956093-pta-census-split-polish-repair/logs/ publishes per-case receipts for the six secondary-null fields and records 40 passed, axis error <= 0.2 mm, saddle error <= 1e-12 m reached by a stationary result, and 33x33/65x65 fit receipts; (6) assess the finding that all twelve O/X polish slots on the six secondary-null fields were rejected to census fallback: is the rejection principled and does it mean the split polish adds no value on those fields, quoting the receipts; (7) naming hygiene as before; (8) every defect quoted with file:line. Read-only review of files and logs; do not modify the worktree",
+          "estimated_hours": 0.5,
+          "goal": "Write an independent re-review verdict report on repair commit 31daffee of node pta-census-split-polish-repair (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-census-split-polish-repair, paths nova/equilibrium/topology.py, nova/equilibrium/flux_surface_connectivity.py, nova/linalg/split_spline.py, tests/test_split_polish_nulls.py) against the five promotion-gate items of your earlier report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md and the plan contract",
+          "id": "pta-census-split-polish-reverify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204755386439-pta-census-split-polish-reverify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "15m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-rereview.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T20:48:04Z",
+        "completed_at": "2026-09-01T20:51:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 217,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 217,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "e3269c62ab4be06c3c2286e0c0ba7ef60ed2d00d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "re-review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-census-split-polish-rereview.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-rereview.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204755386439-pta-census-split-polish-reverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1921536,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1978219,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9718,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3980
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only re-review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1268
+    "_version": 1270
   }
 }

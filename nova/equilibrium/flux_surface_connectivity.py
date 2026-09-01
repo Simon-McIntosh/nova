@@ -298,6 +298,7 @@ def hex_edge_admissibility(
     axis_value: jnp.ndarray,
     shared_edge_rz: jnp.ndarray,
     stationary_steps: int = 8,
+    edge_values: jnp.ndarray | None = None,
 ) -> jnp.ndarray:
     """Return a fixed-shape mask for hex links open at ``level``.
 
@@ -319,6 +320,25 @@ def hex_edge_admissibility(
     level = jnp.asarray(level, dtype=values.dtype)
     axis_value = jnp.asarray(axis_value, dtype=values.dtype)
     shared_edge_rz = jnp.asarray(shared_edge_rz, dtype=values.dtype)
+    if edge_values is not None:
+        samples = jnp.asarray(edge_values, dtype=values.dtype)
+        if samples.shape[-1] != 3:
+            raise ValueError("carrier edge values must contain start, midpoint, end")
+        start, midpoint, end = samples[..., 0], samples[..., 1], samples[..., 2]
+        curvature = 2.0 * (start + end - 2.0 * midpoint)
+        slope = end - start - curvature
+        safe_curvature = jnp.where(
+            jnp.abs(curvature) > jnp.finfo(values.dtype).tiny, curvature, 1.0
+        )
+        stationary = jnp.clip(-slope / (2.0 * safe_curvature), 0.0, 1.0)
+        stationary_value = curvature * stationary**2 + slope * stationary + start
+        samples = jnp.concatenate((samples, stationary_value[..., None]), axis=-1)
+        side = jnp.where(axis_value >= level, 1.0, -1.0)
+        field_scale = jnp.maximum(jnp.max(jnp.abs(values - level)), 1.0)
+        strict_tolerance = 128.0 * jnp.finfo(values.dtype).eps * field_scale
+        open_link = jnp.max(side * (samples - level), axis=-1) > strict_tolerance
+        return open_link.at[:, 0].set(True)
+
     spline = fit_tensor_spline(radial, vertical, values)
 
     edge_start = shared_edge_rz[..., 0, :]

@@ -38,6 +38,7 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
     wall_height_shadow_mask,
@@ -376,10 +377,6 @@ class ForwardFluxOperator:
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
         self.prescribed_field = prescribed_current_field
-        self.topology = Topology(self.grid.null, self.wall.null)
-        self._fixed_design_topology = Topology(
-            _FixedDesignNull2D.from_locator(self.grid.null), self.wall.null
-        )
         self.external_current = jnp.asarray(self.external_current)
         self.area = jnp.asarray(self.area)
         if self.cell_average_stencil is not None:
@@ -406,6 +403,39 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        polygons = (
+            self.moment_geometry.polygons
+            if self.moment_geometry is not None
+            else tuple(np.zeros((3, 2)) for _ in range(self.grid.node_number))
+        )
+        partition_rings, partition_edges = cell_partition_geometry(
+            self.grid.coordinate, self.grid.null.stencil, polygons
+        )
+        edge_parameter = np.asarray((0.0, 0.5, 1.0))
+        edge_points = partition_edges[..., :1, :] + edge_parameter[
+            None, None, :, None
+        ] * (partition_edges[..., 1:, :] - partition_edges[..., :1, :])
+        edge_mesh = StencilMesh(
+            np.asarray(self.grid.coordinate),
+            np.asarray(self.grid.null.stencil),
+            np.asarray(self.area),
+        )
+        edge_stencil = edge_mesh.shared_node_flux_stencil(edge_points.reshape((-1, 2)))
+        edge_gather = edge_stencil.gather_index.reshape((*edge_points.shape[:-1], -1))
+        edge_weight = edge_stencil.weight.reshape((*edge_points.shape[:-1], -1))
+        topology_geometry = {
+            "connectivity_rings": jnp.asarray(partition_rings, dtype=jnp.int32),
+            "connectivity_shared_edges": jnp.asarray(partition_edges),
+            "connectivity_coordinate": jnp.asarray(self.grid.coordinate),
+            "connectivity_edge_gather": jnp.asarray(edge_gather, dtype=jnp.int32),
+            "connectivity_edge_weight": jnp.asarray(edge_weight),
+        }
+        self.topology = Topology(self.grid.null, self.wall.null, **topology_geometry)
+        self._fixed_design_topology = Topology(
+            _FixedDesignNull2D.from_locator(self.grid.null),
+            self.wall.null,
+            **topology_geometry,
+        )
         wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
         wall_steps = np.diff(wall_heights)
         positive_steps = wall_steps[wall_steps > 0.0]

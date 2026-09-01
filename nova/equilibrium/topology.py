@@ -204,28 +204,53 @@ class Topology(Pytree):
     wall: Null1D
     connectivity_radius: jax.Array | None = field(default=None, repr=False)
     connectivity_height: jax.Array | None = field(default=None, repr=False)
+    connectivity_rings: jax.Array | None = field(default=None, repr=False)
+    connectivity_shared_edges: jax.Array | None = field(default=None, repr=False)
+    connectivity_coordinate: jax.Array | None = field(default=None, repr=False)
+    connectivity_edge_gather: jax.Array | None = field(default=None, repr=False)
+    connectivity_edge_weight: jax.Array | None = field(default=None, repr=False)
 
     def __post_init__(self):
         """Cache the tensor axes required by the saddle-aware component read."""
-        if (
-            self.connectivity_radius is not None
-            and self.connectivity_height is not None
+        if all(
+            value is not None
+            for value in (
+                self.connectivity_radius,
+                self.connectivity_height,
+                self.connectivity_rings,
+                self.connectivity_shared_edges,
+                self.connectivity_coordinate,
+                self.connectivity_edge_gather,
+                self.connectivity_edge_weight,
+            )
         ):
             return
         coordinate = np.asarray(self.grid.coordinate, dtype=np.float64)
-        radius = np.unique(coordinate[:, 0])
-        height = np.unique(coordinate[:, 1])
-        expected = np.c_[
-            np.repeat(radius, height.size),
-            np.tile(height, radius.size),
-        ]
-        if coordinate.shape != expected.shape or not np.array_equal(
-            coordinate, expected
-        ):
-            radius = np.empty(0, dtype=np.float64)
-            height = np.empty(0, dtype=np.float64)
-        self.connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
-        self.connectivity_height = jnp.asarray(height, dtype=jnp.float64)
+        if self.connectivity_radius is None or self.connectivity_height is None:
+            radius = np.unique(coordinate[:, 0])
+            height = np.unique(coordinate[:, 1])
+            expected = np.c_[
+                np.repeat(radius, height.size),
+                np.tile(height, radius.size),
+            ]
+            if coordinate.shape != expected.shape or not np.array_equal(
+                coordinate, expected
+            ):
+                radius = np.empty(0, dtype=np.float64)
+                height = np.empty(0, dtype=np.float64)
+            self.connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
+            self.connectivity_height = jnp.asarray(height, dtype=jnp.float64)
+        if self.connectivity_coordinate is None:
+            self.connectivity_coordinate = jnp.asarray(coordinate, dtype=jnp.float64)
+        if self.connectivity_rings is None and self.connectivity_radius.size:
+            rings, edges = _raster_hex_partition_geometry(
+                self.connectivity_radius, self.connectivity_height
+            )
+            self.connectivity_rings = rings
+            self.connectivity_shared_edges = edges
+        if self.connectivity_edge_gather is None:
+            self.connectivity_edge_gather = jnp.empty((0,), dtype=jnp.int32)
+            self.connectivity_edge_weight = jnp.empty((0,), dtype=jnp.float64)
 
     @jax.jit
     def x_point_index(self, vmap_x, polarity, o_psi):
@@ -392,33 +417,55 @@ class Topology(Pytree):
     @jax.jit
     def axis_component(self, psi_grid, boundary_flux, axis_flux, axis, closed, inside):
         """Return the closed, in-material hex component containing the axis."""
-        if self.connectivity_radius.size == 0 or self.connectivity_height.size == 0:
-            raise ValueError("topology connectivity requires a tensor-product grid")
-        radial_count = self.connectivity_radius.shape[0]
-        vertical_count = self.connectivity_height.shape[0]
-        shape = (vertical_count, radial_count)
-        flux = psi_grid.reshape((radial_count, vertical_count)).T
-        confined = (closed & inside).reshape((radial_count, vertical_count)).T
-        rings, shared_edges = _raster_hex_partition_geometry(
-            self.connectivity_radius, self.connectivity_height
-        )
-        link_admissible = hex_edge_admissibility(
-            flux,
-            self.connectivity_radius,
-            self.connectivity_height,
-            boundary_flux,
-            axis_flux,
-            shared_edges,
-        )
-        coordinate = jnp.stack(
-            jnp.meshgrid(self.connectivity_radius, self.connectivity_height), axis=-1
-        )
+        rings = self.connectivity_rings
+        shared_edges = self.connectivity_shared_edges
+        structured = self.connectivity_radius.size and self.connectivity_height.size
+        if structured:
+            radial_count = self.connectivity_radius.shape[0]
+            vertical_count = self.connectivity_height.shape[0]
+            flux = psi_grid.reshape((radial_count, vertical_count)).T
+            confined = (closed & inside).reshape((radial_count, vertical_count)).T
+            link_admissible = hex_edge_admissibility(
+                flux,
+                self.connectivity_radius,
+                self.connectivity_height,
+                boundary_flux,
+                axis_flux,
+                shared_edges,
+            )
+            coordinate = self.connectivity_coordinate.reshape(
+                (radial_count, vertical_count, 2)
+            ).transpose((1, 0, 2))
+        else:
+            confined = closed & inside
+            edge_values = jnp.sum(
+                self.connectivity_edge_weight * psi_grid[self.connectivity_edge_gather],
+                axis=-1,
+            )
+            link_admissible = hex_edge_admissibility(
+                psi_grid,
+                self.connectivity_coordinate[:, 0],
+                self.connectivity_coordinate[:, 1],
+                boundary_flux,
+                axis_flux,
+                shared_edges,
+                edge_values=edge_values,
+            )
+            missing = (
+                jnp.zeros(rings.shape, dtype=bool)
+                .at[:, 1:]
+                .set(rings[:, 1:] == rings[:, :1])
+            )
+            link_admissible = link_admissible & ~missing
+            coordinate = self.connectivity_coordinate
         distance2 = jnp.sum((coordinate - axis) ** 2, axis=-1)
         seed_index = jnp.argmin(jnp.where(confined, distance2, jnp.inf))
-        seed = jnp.zeros(shape, dtype=bool).reshape(-1).at[seed_index].set(True)
-        seed = seed.reshape(shape) & jnp.any(confined)
+        seed = (
+            jnp.zeros(confined.shape, dtype=bool).reshape(-1).at[seed_index].set(True)
+        )
+        seed = seed.reshape(confined.shape) & jnp.any(confined)
         component = axis_connected_component(confined, rings, link_admissible, seed)
-        return component.T.reshape(-1)
+        return component.T.reshape(-1) if structured else component.reshape(-1)
 
     @jax.jit
     def qualified_o_candidates(
@@ -521,18 +568,28 @@ class Topology(Pytree):
             boundary_is_xpoint = jnp.asarray(requested_class) == int(
                 TopologyClass.DIVERTED
             )
-        radial_count = self.connectivity_radius.shape[0]
-        vertical_count = self.connectivity_height.shape[0]
-        flux = psi_grid.reshape((radial_count, vertical_count)).T
-        data_o, data_x, polish_receipt = polish_census_stationary_points(
-            flux,
-            self.connectivity_radius,
-            self.connectivity_height,
-            data_b[2],
-            polarity,
-            data_o,
-            data_x,
-        )
+        if self.connectivity_radius.size and self.connectivity_height.size:
+            radial_count = self.connectivity_radius.shape[0]
+            vertical_count = self.connectivity_height.shape[0]
+            flux = psi_grid.reshape((radial_count, vertical_count)).T
+            data_o, data_x, polish_receipt = polish_census_stationary_points(
+                flux,
+                self.connectivity_radius,
+                self.connectivity_height,
+                data_b[2],
+                polarity,
+                data_o,
+                data_x,
+            )
+        else:
+            polish_receipt = {
+                "converged": jnp.all(jnp.isfinite(jnp.stack((data_o, data_x))), axis=1),
+                "census_position_rz": jnp.stack((data_o[:2], data_x[:2])),
+                "selected_position_rz": jnp.stack((data_o[:2], data_x[:2])),
+                "selected_value": jnp.stack((data_o[2], data_x[2])),
+                "interface_value": jnp.broadcast_to(data_b[2], (2,)),
+                "fit_iterations": jnp.ones((2,), dtype=jnp.int32),
+            }
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])
@@ -626,6 +683,11 @@ class Topology(Pytree):
             self.wall,
             self.connectivity_radius,
             self.connectivity_height,
+            self.connectivity_rings,
+            self.connectivity_shared_edges,
+            self.connectivity_coordinate,
+            self.connectivity_edge_gather,
+            self.connectivity_edge_weight,
         )
         aux_data = {}
         return (children, aux_data)

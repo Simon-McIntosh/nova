@@ -210,3 +210,11 @@ def test_jit_eager_and_vmap_keep_fixed_shapes():
     np.testing.assert_allclose(
         batch_values[1], 1.7 * eager_values - 0.2, rtol=0, atol=1e-12
     )
+
+    valid = jnp.asarray((True, False, True))
+    spline = fit_tensor_spline(radial, vertical, values)
+    fixed = jax.jit(spline.evaluate_fixed)(query_radial, query_vertical, valid)
+    assert fixed.executed.tolist() == valid.tolist()
+    assert fixed.value[1] == 0.0
+    assert fixed.radial_derivative[1] == 0.0
+    assert fixed.vertical_derivative[1] == 0.0

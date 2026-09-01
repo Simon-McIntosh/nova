@@ -23,7 +23,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="10">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
 <meta name="plan-impl" content="0.667">
 </head>
@@ -74,6 +74,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260901T1015-s2-fired" data-who="reckon-ship-s18" data-when="2026-09-01T10:15:00+00:00">
     <div class="r-comment-body">hdg-measured-map landed — commit 7a644229; gate s2-measured-map-advantage FAILED, falsifier FIRED ON BOTH MAPS at matched 16-dof full-rank fits with each map's own LCFS as interface and a two-cell-pitch band: MAST 22086/43 boundary-band second-derivative RMS split 0.010114 vs global C2 0.006327 (improvement factor 0.626, 571 cells, pitch 0.0491 m); DIII-D frame 179 split 0.003174 vs global 0.001943 (factor 0.612, 617 cells, pitch 0.0400 m). The MAST split RMS stays within the plan's 0.0116 expected-magnitude bound but the matched global fit is BETTER; no threshold was relaxed. Receipt docs/figures/hex-cell-single-grid/measured-map-advantage.json sha256 29e9e878, figure .png. Under the locked three-falsifiers-must-clear decision this halts the cutover plans and returns the programme to the lead with these numbers. Candidate confound for the lead's adjudication, stated not assumed: an EFIT psi map is itself a globally smooth solution representation, so a measured-map curvature reference may not contain the physical interface jump the split basis exists to carry.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T103323253775-hdg-jump-field-gate" data-who="hdg-measured-map" data-when="2026-09-01T10:55:24Z">
+    <div class="r-comment-body"><p>Re-specified S2 falsifier CLEAR with a finite margin: split 216.786 vs global 219.277 boundary-band Hessian RMS at matched 16-dof on the jump-bearing diverted Solovev forward field (advantage 1.0115x, 461 cells, closed-form jump RMS 0.852 Wb/rad/m2, analytic references only)</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260901T1058-s2-respec-clear" data-who="reckon-ship-s18" data-when="2026-09-01T10:58:00+00:00">
+    <div class="r-comment-body">hdg-jump-field-gate landed — commit ead6db9a; re-specified gate s2-jump-field PASSED, falsifier CLEAR with a FINITE, THIN margin: at matched 16-dof on the jump-bearing diverted Solovev forward field (4037 plasma cells with finite edge density 4.05e5-4.58e5 A/m2, closed-form jump mu0*R*j_phi LCFS RMS 0.852 Wb/rad/m2), boundary-band Hessian RMS split 216.786 vs global C2 219.277 over 461 cells — advantage factor 1.0115x. Curvature truth analytic throughout (Solovev Hessian inside, automatic derivatives of the current-truncated vacuum field outside); continuation value/gradient RMS mismatches 1.47e-5 Wb/rad and 1.07e-3 Wb/rad/m; DeltaStar(psi)+mu0*R*j_phi exactly zero at probes. Receipt docs/figures/hex-cell-single-grid/jump-field-advantage.json + .png. READ HONESTLY: the split representation clears the preregistered falsifier (factor > 1) but the 1.15% advantage at equal capacity is far from the prototype's circular e-15 — the split basis buys a real but small boundary-band gain at 16 dof on a maximal-step field; worth revisiting at production dof budgets during basis s3/s4.</div>
 </div>
 </section>
 </main>

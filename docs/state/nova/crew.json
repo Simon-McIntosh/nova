@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:53:12",
+  "updated": "2026-09-01T12:55:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -66053,9 +66053,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T103323253775-hdg-jump-field-gate",
+        "plan": "hex-grid-derisk-gates",
+        "section": "\u00a72",
+        "node": "hdg-jump-field-gate",
+        "node_definition": {
+          "done_when": "benchmarks/split_fit_jump_field.py runs to completion writing docs/figures/hex-cell-single-grid/jump-field-advantage.json (plus a comparison figure) with split and global boundary-band second-derivative RMS at matched dof, interface on the solve separatrix, band of two cell pitches, the closed-form jump magnitude stated beside the measured advantage factor, and the falsifier verdict (fires on factor <= 1); a finite advantage factor is expected, not the prototype circular e-15",
+          "estimated_hours": 5.0,
+          "goal": "The re-specified \u00a72 gate verdict under the locked s2-firing-adjudication decision: the boundary-band second-derivative advantage of the boundary-split fit over a matched-degrees-of-freedom global C2 fit on a jump-bearing diverted Solovev field whose truncated source (plasma current on plasma cells only, finite j_phi at the separatrix) carries the closed-form curvature step mu0*R*j_phi(LCFS), built through the solovev-exact-recovery machinery and tests/rotating_equilibrium_references.py per the reuse map, with the curvature reference analytic (Solovev Hessian inside, vacuum field outside) and containing no finite differences of a smoothed representation and no term of the split basis itself",
+          "id": "hdg-jump-field-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103323253775-hdg-jump-field-gate/manifest.md",
+          "plan": "hex-grid-derisk-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/split_fit_jump_field.py",
+            "docs/figures/hex-cell-single-grid/jump-field-advantage.json",
+            "docs/figures/hex-cell-single-grid/jump-field-advantage.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hdg-measured-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:33:45Z",
+        "completed_at": "2026-09-01T10:55:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1299,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1299,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "33391cf64c199074d9f18dea2844963cd63fbafb",
+        "commits": [
+          "ead6db9a5abe1ffb3168e70213d98d90ea07454e"
+        ],
+        "changed_lines": {
+          "added": 748,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run python benchmarks/split_fit_jump_field.py + strict receipt assertions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103323253775-hdg-jump-field-gate/benchmark-final-anchored.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103323253775-hdg-jump-field-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c03-7ae9-7241-9472-53efa2683fa7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8505856,
+            "cached_input_tokens_cumulative": 11590400,
+            "input_tokens": 8585419,
+            "input_tokens_cumulative": 11855422,
+            "output_tokens": 34883,
+            "output_tokens_cumulative": 44122,
+            "reasoning_output_tokens": 10764,
+            "reasoning_output_tokens_cumulative": 13175
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1214
+    "_version": 1215
   }
 }

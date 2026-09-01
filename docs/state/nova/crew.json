@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:28:04",
+  "updated": "2026-09-01T12:53:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -65945,9 +65945,117 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T102522694527-sse-decomposition-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-decomposition-harvest",
+        "node_definition": {
+          "done_when": "The banked factorial measurements are audited and the throughput question answered with fitted numbers, honestly bounded by what the two lost trace arms can no longer corroborate. Job 1260043 is terminal FAILED 1:0 after 3:39:23, but the failure is confined: all eight factorial arms (widths 32 and 1024 crossed with warmup 1 and 2 and GMRES 1 and 4) completed exit 0 with atomic JSON in the durable run directory r-20260901T053948341346-sse-h200-step-decomposition, the conditioning-toggle pair was banked earlier, and only the two profiler-trace arms died, each with SIGSEGV exit 139 in its own fresh interpreter. (1) Audit the eight factorial JSONs and the toggle pair: strict JSON, every width and configuration present once, compile and measure times separate. (2) Fit the additive per-stage model the design was built for: per-warmup-sweep cost, per-GMRES-iteration cost, and the intercept labelled as the conflated reconciliation-plus-Newton-setup-plus-first-Krylov-action term, at each width, with uncertainties from the fit residuals. (3) Answer the trip question with the banked telemetry: every member reported 16 active-set trips despite the stagnation exit being in the measured source - establish from the arm JSONs whether the benchmark route disables the exit or whether the exact-equality test never fires because the residual drifts at rounding level per trip, and state which, with the residual deltas between consecutive trips as the evidence. (4) Deliver the matched-arm comparison against the stale committed ladder: the warmup-2 GMRES-4 configuration at width 1024 beside the committed 0.374 s per member-slice, so the current-main regression-or-not question closes with one number. (5) Deliver the arithmetic to 300 slices per second from the fitted stages: the factor each stage must shrink by, configuration versus algorithm for each, and the measured ceiling stated plainly if 300 is unreachable on this operand and architecture. (6) Record the profiler-trace segfault as a named gap with its two log paths - the kernel-level attribution inside the fitted intercept is lost until someone reproduces the trace outside SLURM or on a different JAX build, and that is a follow_on, not this node's debt. (7) Record findings in docs/research/h200-step-decomposition.html validated with the reckon doc-check tooling, with a figure showing fitted stage costs at both widths; no committed bank artifact modified; no scheduler job needed since every input is already banked.",
+          "estimated_hours": null,
+          "goal": "The fitted per-stage cost model from the banked factorial arms, with the trip-count mechanism established and the arithmetic to three hundred slices per second stated from measured slopes",
+          "id": "sse-decomposition-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T102522694527-sse-decomposition-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/h200-step-decomposition.html",
+            "docs/figures/h200-step-decomposition"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:25:53Z",
+        "completed_at": "2026-09-01T10:52:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1626,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1626,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5b52ae72d6f7f6848630e3b4146b137af642ae32",
+        "commits": [
+          "e9faa0173bcb9c8af67e017b1fd910c06b2598a8"
+        ],
+        "changed_lines": {
+          "added": 327,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "telemetry job 1260689 COMPLETED 0:0 in 7:22; 512 trip records and 480 recomputed deltas audited strictly; replay matches the banked factorial arm bit for bit; factorial fit audited; audit-doc, SVG and naming checks pass",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T102522694527-sse-decomposition-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T102522694527-sse-decomposition-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6915328,
+            "cached_input_tokens_cumulative": 196413184,
+            "input_tokens": 7444245,
+            "input_tokens_cumulative": 200858936,
+            "output_tokens": 49509,
+            "output_tokens_cumulative": 418370,
+            "reasoning_output_tokens": 9712,
+            "reasoning_output_tokens_cumulative": 110995
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project nova",
+          "attach_line": "reckon crew follow --project nova --session s16-lead-review --attention",
+          "requested": true,
+          "session_attached": false,
+          "watcher_live": true
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1213
+    "_version": 1214
   }
 }

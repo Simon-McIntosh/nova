@@ -1,0 +1,311 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/ssb-conditioning/docs/figures/hex-cell-single-grid/conditioning-report.png",
+    "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/ssb-conditioning/docs/figures/hex-cell-single-grid/conditioning-report.json"
+  },
+  "boundary_band_capacity_sweep": [
+    {
+      "boundary_band_second_derivative_advantage_factor": 1.0114893856845186,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 216.7861957464878,
+        "global_c2": 219.27693596049878,
+        "units": "normalised_flux_per_m2"
+      },
+      "coefficients_each": 16,
+      "column_scaled_design_condition_number": {
+        "boundary_split": 49.369056357789574,
+        "global_c2": 29.616270888165296
+      },
+      "design_condition_number": {
+        "boundary_split": 350590.81993454415,
+        "global_c2": 44.52840490227105
+      },
+      "design_rank": {
+        "boundary_split": 16,
+        "global_c2": 16
+      },
+      "fit_value_rms": {
+        "boundary_split": 0.6548612562734736,
+        "global_c2": 0.7763763451835044
+      },
+      "global_discriminating_power": [
+        5,
+        0
+      ],
+      "shared_polynomial_coefficients": 15,
+      "split_discriminating_term": "positive_part(level_set)^2"
+    },
+    {
+      "boundary_band_second_derivative_advantage_factor": 0.9809008386368463,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 215.53182151234552,
+        "global_c2": 211.41534447438679,
+        "units": "normalised_flux_per_m2"
+      },
+      "coefficients_each": 25,
+      "column_scaled_design_condition_number": {
+        "boundary_split": 3074.127401469135,
+        "global_c2": 73.8700473504741
+      },
+      "design_condition_number": {
+        "boundary_split": 19860818.77100356,
+        "global_c2": 105.81676318543148
+      },
+      "design_rank": {
+        "boundary_split": 25,
+        "global_c2": 25
+      },
+      "fit_value_rms": {
+        "boundary_split": 0.4623415325488147,
+        "global_c2": 0.506369136304126
+      },
+      "global_discriminating_power": [
+        3,
+        3
+      ],
+      "shared_polynomial_coefficients": 24,
+      "split_discriminating_term": "positive_part(level_set)^2"
+    },
+    {
+      "boundary_band_second_derivative_advantage_factor": 0.21738901704966712,
+      "boundary_band_second_derivative_rms": {
+        "boundary_split": 941.7905057404204,
+        "global_c2": 204.73491230961886,
+        "units": "normalised_flux_per_m2"
+      },
+      "coefficients_each": 36,
+      "column_scaled_design_condition_number": {
+        "boundary_split": 238594.12242605558,
+        "global_c2": 188.21989144013608
+      },
+      "design_condition_number": {
+        "boundary_split": 1360032895.9772627,
+        "global_c2": 250.83654196848875
+      },
+      "design_rank": {
+        "boundary_split": 36,
+        "global_c2": 36
+      },
+      "fit_value_rms": {
+        "boundary_split": 0.3181964697296978,
+        "global_c2": 0.38856100738845617
+      },
+      "global_discriminating_power": [
+        0,
+        7
+      ],
+      "shared_polynomial_coefficients": 35,
+      "split_discriminating_term": "positive_part(level_set)^2"
+    }
+  ],
+  "capacity_sweep_context": {
+    "axis_flux_per_radian_wb": 0.0010851700426205747,
+    "boundary_band_cell_count": 461,
+    "boundary_band_pitches": 2.0,
+    "cell_pitch_m": 0.01620185174601969,
+    "continuation": {
+      "continuation_collocation_count": 316,
+      "continuation_design_condition_number": 2.4142437516961446e+17,
+      "continuation_design_rank": 37,
+      "continuation_effective_rank": 9,
+      "continuation_gradient_mismatch_rms": 0.0010709539938602514,
+      "continuation_svd_relative_cutoff": 0.001,
+      "continuation_value_mismatch_rms": 1.4696927962337388e-05,
+      "edge_current_density_a_per_m2": {
+        "maximum": 458261.4255893825,
+        "minimum": 405285.70642406755
+      },
+      "external_ring_count": 64,
+      "maximum_external_ring_current_a": 1438811.4872037428,
+      "plasma_cell_count": 4037,
+      "plasma_current_a": 27494.465236917466,
+      "source_lattice_shape": [
+        257,
+        257
+      ],
+      "source_support": "plasma-cell centres strictly inside the analytic LCFS only"
+    },
+    "fit_lattice_shape": [
+      65,
+      65
+    ],
+    "fit_sample_count": 4225
+  },
+  "capacity_sweep_method": {
+    "basis_order": "the 16-coefficient row exactly retains the prior 15 shared degree-at-most-four monomials plus radial degree five; subsequent radial-first degree shells make the 25 and 36 rows nested",
+    "boundary_band": "Euclidean distance at most two cell pitches from LCFS",
+    "fit": "global and boundary-split least-squares fits have identical total coefficient counts; the split fit replaces the final nested polynomial with positive_part(level_set)^2",
+    "hessian_rms": "RMS over boundary-band cells and all Hessian entries",
+    "truth": "analytic Solovev Hessian inside the solve LCFS and automatic Hessians of its current-truncated vacuum continuation outside"
+  },
+  "condition_measurements": [
+    {
+      "condition_number": 2166175.804729261,
+      "condition_times_epsilon": 4.809876507592705e-10,
+      "field_coefficients": 50,
+      "float64_epsilon": 2.220446049250313e-16,
+      "lattice_shape": [
+        33,
+        33
+      ],
+      "level_set_coefficients": 25,
+      "machine": "MAST efm",
+      "radial_bounds_m": [
+        0.05999999865889549,
+        2.0303125000209548
+      ],
+      "regional_coefficients": 25,
+      "regularization": 1e-12,
+      "rounding_error_limit": 1e-08,
+      "sample_count": 1089,
+      "source": {
+        "efm_frame": 43,
+        "firewall": "evaluator_context",
+        "flux_crossing": "Wb/radian to total Wb in the Ambix reader",
+        "launcher": "/home/ITER/mcintos/Code/imas-ambix/.venv/bin/python",
+        "reader": "imas-ambix scripts.patch_flux_map_report.read_efit_slice",
+        "shot": 22086,
+        "snap_delta_s": 0.0,
+        "store": "/work/projects/imas_gpu/mast/level1/shots/22086.zarr",
+        "time_s": 0.23000000417232513
+      },
+      "vertical_bounds_m": [
+        -2.0,
+        2.0
+      ],
+      "within_rounding_error_limit": true
+    },
+    {
+      "condition_number": 2410625.067236527,
+      "condition_times_epsilon": 5.352662906769116e-10,
+      "field_coefficients": 50,
+      "float64_epsilon": 2.220446049250313e-16,
+      "lattice_shape": [
+        65,
+        65
+      ],
+      "level_set_coefficients": 25,
+      "machine": "MAST efm",
+      "radial_bounds_m": [
+        0.05999999865889549,
+        2.0151562500104774
+      ],
+      "regional_coefficients": 25,
+      "regularization": 1e-12,
+      "rounding_error_limit": 1e-08,
+      "sample_count": 4225,
+      "source": {
+        "efm_frame": 43,
+        "firewall": "evaluator_context",
+        "flux_crossing": "Wb/radian to total Wb in the Ambix reader",
+        "launcher": "/home/ITER/mcintos/Code/imas-ambix/.venv/bin/python",
+        "reader": "imas-ambix scripts.patch_flux_map_report.read_efit_slice",
+        "shot": 22086,
+        "snap_delta_s": 0.0,
+        "store": "/work/projects/imas_gpu/mast/level1/shots/22086.zarr",
+        "time_s": 0.23000000417232513
+      },
+      "vertical_bounds_m": [
+        -2.0,
+        2.0
+      ],
+      "within_rounding_error_limit": true
+    },
+    {
+      "condition_number": 51415.13501607941,
+      "condition_times_epsilon": 1.1416453341812496e-11,
+      "field_coefficients": 50,
+      "float64_epsilon": 2.220446049250313e-16,
+      "lattice_shape": [
+        33,
+        33
+      ],
+      "level_set_coefficients": 25,
+      "machine": "DIII-D efit_psirz",
+      "radial_bounds_m": [
+        0.8399999737739563,
+        2.566562461666763
+      ],
+      "regional_coefficients": 25,
+      "regularization": 1e-12,
+      "rounding_error_limit": 1e-08,
+      "sample_count": 1089,
+      "source": {
+        "flux_crossing": "corpus_flux_to_nova_total exactly once",
+        "frame": 179,
+        "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+        "reader": "benchmarks.diiid_forward_gs_match._read and canonical_axes",
+        "sha256": "400d1f791ab5ca332b3a51b4d8a25d4f2a9fb4ade3c66766d4672ea57e8896c9",
+        "time_ms": 3740.0
+      },
+      "vertical_bounds_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "within_rounding_error_limit": true
+    },
+    {
+      "condition_number": 58289.691177204564,
+      "condition_times_epsilon": 1.294291144864447e-11,
+      "field_coefficients": 50,
+      "float64_epsilon": 2.220446049250313e-16,
+      "lattice_shape": [
+        65,
+        65
+      ],
+      "level_set_coefficients": 25,
+      "machine": "DIII-D efit_psirz",
+      "radial_bounds_m": [
+        0.8399999737739563,
+        2.553281211759895
+      ],
+      "regional_coefficients": 25,
+      "regularization": 1e-12,
+      "rounding_error_limit": 1e-08,
+      "sample_count": 4225,
+      "source": {
+        "flux_crossing": "corpus_flux_to_nova_total exactly once",
+        "frame": 179,
+        "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+        "reader": "benchmarks.diiid_forward_gs_match._read and canonical_axes",
+        "sha256": "400d1f791ab5ca332b3a51b4d8a25d4f2a9fb4ade3c66766d4672ea57e8896c9",
+        "time_ms": 3740.0
+      },
+      "vertical_bounds_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "within_rounding_error_limit": true
+    }
+  ],
+  "capacity_sweep_verdict": {
+    "advantage_retained_at_all_measured_capacities": false,
+    "advantage_retained_at_production_capacity": false,
+    "interpretation": "the thin 16-coefficient boundary-band advantage is reproduced but does not survive the matched 25-coefficient production-capacity comparison; this is a validation result separate from the well-conditioned production Bernstein coefficient solve",
+    "production_capacity_advantage_factor": 0.9809008386368463,
+    "production_regional_coefficient_count": 25
+  },
+  "conditioning_method": {
+    "cutover_rule": "use the lower estimate only when max(condition_number * float64 epsilon) is below 1e-8; otherwise the coefficient solve can consume the eight-decimal numerical allowance and needs redesign",
+    "lattice": "alternate-row half-offset samples spanning each measured MAST or DIII-D solve geometry",
+    "production_basis": "order-four tensor Bernstein patches: 25 coefficients per region, 50 field coefficients total, plus 25 level-set coefficients",
+    "system": "maximum of the level-set and field column-scaled, regularized normal matrices reported by fit_split_spline"
+  },
+  "conditioning_verdict": {
+    "conditioning_redesign_required": false,
+    "demanded_bound": "lower",
+    "demanded_estimate_hours": 80,
+    "lower_estimate_hours_without_redesign": 80,
+    "maximum_condition_number": 2410625.067236527,
+    "maximum_condition_times_epsilon": 5.352662906769116e-10,
+    "rounding_error_limit": 1e-08,
+    "upper_estimate_hours_with_redesign": 140
+  },
+  "measurement": "production split-basis conditioning on both solve geometries and matched-capacity curvature accuracy on an analytic jump-bearing field",
+  "prior_thin_advantage": {
+    "advantage_factor": 1.0114893857,
+    "coefficients_each": 16,
+    "reproduced": true,
+    "source": "docs/figures/hex-cell-single-grid/jump-field-advantage.json"
+  }
+}

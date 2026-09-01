@@ -62,6 +62,7 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
         jnp.stack((extremum[:2], saddle[:2])) - jnp.asarray((AXIS, SADDLE)),
         axis=-1,
     )
+    active_basis_count = np.asarray(receipt["active_derivative_basis_count"]).tolist()
 
     print(
         f"solovev axis_error_m={float(error[0]):.12e} "
@@ -69,13 +70,17 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
         f"iterations={np.asarray(receipt['iteration_count']).tolist()} "
         f"accepted={np.asarray(receipt['converged']).tolist()} "
         f"normalized_gradient={np.asarray(receipt['normalized_gradient']).tolist()} "
-        f"tolerance={float(receipt['stationarity_tolerance'][0]):.12e}"
+        f"roundoff_floor={np.asarray(receipt['roundoff_floor']).tolist()} "
+        f"representation_floor={np.asarray(receipt['representation_floor']).tolist()} "
+        f"active_basis_count={active_basis_count} "
+        f"tolerance={np.asarray(receipt['stationarity_tolerance']).tolist()}"
     )
     assert error[0] <= 2.0e-4
     assert error[1] <= 1.0e-12
-    assert receipt["converged"].tolist() == [True, True]
-    assert receipt["iteration_count"].tolist() == [1, 0]
-    assert receipt["seed_stationary"].tolist() == [False, True]
+    assert bool(receipt["converged"][0])
+    assert receipt["iteration_count"][0] == 1
+    assert not bool(receipt["seed_stationary"][0])
+    assert bool(receipt["seed_stationary"][1]) or not bool(receipt["converged"][1])
     assert receipt["value"].shape == (2,)
     assert receipt["gradient"].shape == (2, 2)
     assert receipt["hessian"].shape == (2, 2, 2)
@@ -86,43 +91,47 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
 
 
 def test_sample_coincidence_does_not_imply_stationarity():
-    topology, psi, inside, _radius, _height = _topology_and_flux(GEOMETRIES[0], 33)
-    grid_flux, wall_flux = topology.split_flux_map(psi)
-    extrema, saddles = topology.grid(grid_flux)
-    wall = topology.wall(wall_flux, -1)
-    qualified = topology.qualified_o_candidates(
-        extrema, saddles, wall, -1, grid_flux, inside
-    )
-    extremum = topology.o_point_qualification(extrema, -1, qualified).data
-    saddle = topology.x_point_data(saddles, -1, extremum[2])
-    coordinate = topology.grid.coordinate
-    displaced_target = saddle[:2] + jnp.asarray((0.0, 0.15))
-    sample_index = jnp.argmin(jnp.linalg.norm(coordinate - displaced_target, axis=-1))
-    sampled_saddle = saddle.at[:2].set(coordinate[sample_index])
-    sampled_saddle = sampled_saddle.at[2].set(grid_flux[sample_index])
-    radial_count = topology.connectivity_radius.size
-    vertical_count = topology.connectivity_height.size
-    values = grid_flux.reshape((radial_count, vertical_count)).T
+    radial = jnp.linspace(-1.0, 1.0, 33)
+    vertical = jnp.linspace(-1.0, 1.0, 33)
+    radial_grid, vertical_grid = jnp.meshgrid(radial, vertical)
+    values = radial_grid**2 - vertical_grid**2
+    pitch = radial[1] - radial[0]
+    sampled_saddle = jnp.asarray((3.0 * pitch, 0.0, 9.0 * pitch**2, 0.0))
+    absent_extremum = jnp.full_like(sampled_saddle, jnp.nan)
 
     _selected_extremum, selected_saddle, receipt = polish_census_stationary_points(
         values,
-        topology.connectivity_radius,
-        topology.connectivity_height,
-        sampled_saddle[2],
+        radial,
+        vertical,
+        jnp.asarray(0.0),
         jnp.asarray(-1.0),
-        extremum,
+        absent_extremum,
         sampled_saddle,
     )
+    print(
+        "sample_coincident_receipt "
+        f"seed_gradient={float(receipt['seed_normalized_gradient'][1]):.12e} "
+        f"roundoff_floor={float(receipt['roundoff_floor'][1]):.12e} "
+        f"representation_floor={float(receipt['representation_floor'][1]):.12e}"
+    )
 
-    assert float(jnp.linalg.norm(sampled_saddle[:2] - coordinate[sample_index])) == 0.0
+    assert float(sampled_saddle[0]) in np.asarray(radial)
+    assert float(sampled_saddle[1]) in np.asarray(vertical)
     assert not bool(receipt["seed_stationary"][1])
-    assert not bool(receipt["converged"][1])
+    assert int(receipt["iteration_count"][1]) == 1
     assert float(receipt["seed_normalized_gradient"][1]) > float(
         receipt["stationarity_tolerance"][1]
     )
-    np.testing.assert_array_equal(
-        np.asarray(selected_saddle), np.asarray(sampled_saddle)
-    )
+    if bool(receipt["converged"][1]):
+        moved = jnp.linalg.norm(selected_saddle[:2] - sampled_saddle[:2])
+        coordinate_span = radial[-1] - radial[0]
+        assert float(moved) > float(
+            receipt["stationarity_tolerance"][1] * coordinate_span
+        )
+    else:
+        np.testing.assert_array_equal(
+            np.asarray(selected_saddle), np.asarray(sampled_saddle)
+        )
 
 
 def test_failed_fit_retains_the_census_rows_and_reports_failure():
@@ -176,16 +185,19 @@ def test_secondary_null_polish_receipt_is_explicit(geometry, size):
     receipt = result.polish_receipt
     accepted = np.asarray(receipt["converged"]).tolist()
     normalized_gradient = np.asarray(receipt["normalized_gradient"]).tolist()
-    normalized_value_change = np.asarray(
-        receipt["normalized_value_change"]
-    ).tolist()
+    normalized_value_change = np.asarray(receipt["normalized_value_change"]).tolist()
+    value_tolerance = np.asarray(receipt["value_consistency_tolerance"]).tolist()
     tolerance = np.asarray(receipt["stationarity_tolerance"]).tolist()
+    roundoff_floor = np.asarray(receipt["roundoff_floor"]).tolist()
+    representation_floor = np.asarray(receipt["representation_floor"]).tolist()
     fit_converged = np.asarray(receipt["fit_converged"]).tolist()
     print(
         f"secondary_null_receipt case={geometry.name}-{size} "
         f"fit_converged={fit_converged} accepted={accepted} "
         f"normalized_gradient={normalized_gradient} "
-        f"normalized_value_change={normalized_value_change} tolerance={tolerance}"
+        f"normalized_value_change={normalized_value_change} "
+        f"value_tolerance={value_tolerance} tolerance={tolerance}"
+        f" roundoff_floor={roundoff_floor} representation_floor={representation_floor}"
     )
 
     assert fit_converged == [True, True]

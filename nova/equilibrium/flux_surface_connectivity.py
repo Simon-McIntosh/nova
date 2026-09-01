@@ -880,6 +880,18 @@ def _coordinate_grids(
     return jnp.broadcast_arrays(radial, vertical)
 
 
+def _minimum_cell_pitch(radial: jnp.ndarray, vertical: jnp.ndarray) -> jnp.ndarray:
+    """Return the shortest adjacent sample spacing on a structured lattice."""
+    radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
+    horizontal = jnp.hypot(
+        jnp.diff(radial_grid, axis=1), jnp.diff(vertical_grid, axis=1)
+    )
+    vertical_step = jnp.hypot(
+        jnp.diff(radial_grid, axis=0), jnp.diff(vertical_grid, axis=0)
+    )
+    return jnp.minimum(jnp.min(horizontal), jnp.min(vertical_step))
+
+
 @jax.jit
 def polish_census_stationary_points(
     values: jnp.ndarray,
@@ -895,16 +907,23 @@ def polish_census_stationary_points(
     Candidate production, ranking, and count are complete before this function
     receives its two fixed slots.  Stationarity is measured by the fitted
     gradient made dimensionless with the coordinate span and field range.  Its
-    tolerance is the root-sum-square roundoff amplification across the fitted
-    coefficients, ``sqrt(n * condition_number * eps)``.  This is the natural
-    backward-error floor of the conditioned coefficient solve: coordinate
-    coincidence with a sample has no bearing on acceptance.
+    tolerance is the larger of two independently derived floors.  The
+    deterministic coefficient forward-error scale is
+    ``n_active * condition_number * eps * field_range``; multiplying by the
+    evaluated derivative-basis norm and dividing by ``field_range / span``
+    gives the dimensionless roundoff gradient floor.  The representation floor
+    treats the fit's sample RMS residual as unresolved field variation across
+    one cell: ``(rms / field_range) / (cell_pitch / span)``.  Both floors are
+    invariant to coordinate and field units, and the active coefficient count
+    is evaluated separately at each slot.
 
     A seed already below that fitted-gradient floor takes zero active updates.
-    Every other valid seed receives exactly one bounded Newton update.  The
-    fitted value must remain within the same dimensionless backward-error floor
-    of the census value; gradient stationarity cannot admit a representation
-    that materially changes the selected boundary level.  A fit or result
+    Every other valid seed receives exactly one bounded Newton update.  Flux
+    value consistency has its own dimensionless floor: the larger of the
+    normalized sample RMS and ``n_active * condition_number * eps``.  It is not
+    divided by cell pitch because it bounds a value rather than a gradient.
+    Thus gradient stationarity cannot admit a representation that materially
+    changes the selected boundary level.  A fit or result
     outside the finite, Hessian-type, stationarity, and value-consistency gates
     retains the complete census row while preserving the attempted receipt.
     """
@@ -931,11 +950,22 @@ def polish_census_stationary_points(
     field_scale = jnp.maximum(
         jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
     )
-    coefficient_count = jnp.asarray(spline.coefficients.size, dtype=values.dtype)
-    stationarity_tolerance = jnp.sqrt(
-        coefficient_count * spline.condition_number * jnp.finfo(values.dtype).eps
-    )
     seed_evaluation = spline.evaluate(selected[:, 0], selected[:, 1])
+    seed_active_count, seed_derivative_basis_norm = spline.derivative_basis_receipt(
+        selected[:, 0], selected[:, 1]
+    )
+    normalized_cell_pitch = _minimum_cell_pitch(radial, vertical) / coordinate_span
+    representation_floor = (
+        spline.sample_rms_residual / field_scale / normalized_cell_pitch
+    )
+    seed_roundoff_floor = (
+        seed_active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps
+        * seed_derivative_basis_norm
+        * coordinate_span
+    )
+    seed_stationarity_tolerance = jnp.maximum(seed_roundoff_floor, representation_floor)
     seed_gradient = jnp.stack(
         (seed_evaluation.radial_derivative, seed_evaluation.vertical_derivative),
         axis=-1,
@@ -945,7 +975,7 @@ def polish_census_stationary_points(
     seed_stationary = (
         valid
         & jnp.isfinite(seed_normalized_gradient)
-        & (seed_normalized_gradient <= stationarity_tolerance)
+        & (seed_normalized_gradient <= seed_stationarity_tolerance)
     )
     attempted = polish_stationary_points(
         spline,
@@ -998,7 +1028,24 @@ def polish_census_stationary_points(
         "in_domain": jnp.where(seed_stationary, valid, attempted["in_domain"]),
     }
     normalized_gradient = attempted["gradient_norm"] * coordinate_span / field_scale
+    active_count, derivative_basis_norm = spline.derivative_basis_receipt(
+        attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
+    )
+    roundoff_floor = (
+        active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps
+        * derivative_basis_norm
+        * coordinate_span
+    )
+    stationarity_tolerance = jnp.maximum(roundoff_floor, representation_floor)
     normalized_value_change = jnp.abs(attempted["value"] - selected[:, 2]) / field_scale
+    value_consistency_tolerance = jnp.maximum(
+        spline.sample_rms_residual / field_scale,
+        active_count.astype(values.dtype)
+        * spline.condition_number
+        * jnp.finfo(values.dtype).eps,
+    )
     expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)
     converged = (
         spline.solve_converged
@@ -1009,7 +1056,7 @@ def polish_census_stationary_points(
         & jnp.all(jnp.isfinite(attempted["hessian"]), axis=(-2, -1))
         & (attempted["hessian_type"] == expected_hessian_type)
         & (normalized_gradient <= stationarity_tolerance)
-        & (normalized_value_change <= stationarity_tolerance)
+        & (normalized_value_change <= value_consistency_tolerance)
     )
     polished = selected.at[:, :2].set(attempted["position_rz"])
     polished = polished.at[:, 2].set(attempted["value"])
@@ -1021,9 +1068,17 @@ def polish_census_stationary_points(
         "fit_residual": jnp.broadcast_to(spline.solve_residual, valid.shape),
         "interface_value": jnp.broadcast_to(interface_value, valid.shape),
         "stationarity_tolerance": jnp.broadcast_to(stationarity_tolerance, valid.shape),
+        "roundoff_floor": roundoff_floor,
+        "representation_floor": jnp.broadcast_to(representation_floor, valid.shape),
+        "active_derivative_basis_count": active_count,
+        "derivative_basis_norm": derivative_basis_norm,
+        "sample_rms_residual": jnp.broadcast_to(
+            spline.sample_rms_residual, valid.shape
+        ),
         "seed_normalized_gradient": seed_normalized_gradient,
         "normalized_gradient": normalized_gradient,
         "normalized_value_change": normalized_value_change,
+        "value_consistency_tolerance": value_consistency_tolerance,
         "seed_stationary": seed_stationary,
         "census_position_rz": selected[:, :2],
         "selected_position_rz": retained[:, :2],

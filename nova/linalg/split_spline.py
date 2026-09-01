@@ -159,6 +159,7 @@ class SplitTensorBSpline(Pytree):
     solve_iterations: jax.Array
     solve_residual: jax.Array
     solve_converged: jax.Array
+    sample_rms_residual: jax.Array
 
     @property
     def interior_coefficients(self) -> jax.Array:
@@ -280,6 +281,63 @@ class SplitTensorBSpline(Pytree):
         """Evaluate fixed slots with exact-zero inactive padding."""
         return mask_tensor_spline_evaluation(self.evaluate(radial, vertical), valid)
 
+    def derivative_basis_receipt(
+        self, radial: jax.Array, vertical: jax.Array
+    ) -> tuple[jax.Array, jax.Array]:
+        """Return the active coefficient count and gradient-basis norm.
+
+        The level-set coefficients are fixed before the field solve.  The field
+        gradient is therefore linear in the interior and correction
+        coefficients.  This evaluates those derivative columns at each point;
+        correction columns are active only on the positive side of the fitted
+        level set.  Their Euclidean norm maps a coefficient-error norm into a
+        physical gradient-error norm.
+        """
+        radial, vertical = jnp.broadcast_arrays(
+            jnp.asarray(radial, dtype=self.coefficients.dtype),
+            jnp.asarray(vertical, dtype=self.coefficients.dtype),
+        )
+        coefficient_shape = self.interior_coefficients.shape
+        coefficient_count = self.interior_coefficients.size
+        identity = jnp.eye(coefficient_count, dtype=self.coefficients.dtype).reshape(
+            (coefficient_count,) + coefficient_shape
+        )
+        basis = jax.vmap(
+            lambda coefficient: self._patch_evaluation(coefficient, radial, vertical)
+        )(identity)
+        level = self._patch_evaluation(self.level_set_coefficients, radial, vertical)
+        exterior_level = jnp.maximum(level.value, 0.0)
+        weight = exterior_level**2
+        weight_radial = jnp.where(
+            level.value > 0.0,
+            2.0 * level.value * level.radial_derivative,
+            0.0,
+        )
+        weight_vertical = jnp.where(
+            level.value > 0.0,
+            2.0 * level.value * level.vertical_derivative,
+            0.0,
+        )
+        interior_gradient_basis = jnp.stack(
+            (basis.radial_derivative, basis.vertical_derivative), axis=-1
+        )
+        correction_gradient_basis = jnp.stack(
+            (
+                weight_radial * basis.value + weight * basis.radial_derivative,
+                weight_vertical * basis.value + weight * basis.vertical_derivative,
+            ),
+            axis=-1,
+        )
+        active_correction = level.value > 0.0
+        squared_norm = jnp.sum(interior_gradient_basis**2, axis=(0, -1))
+        squared_norm += jnp.where(
+            active_correction,
+            jnp.sum(correction_gradient_basis**2, axis=(0, -1)),
+            0.0,
+        )
+        active_count = coefficient_count * (1 + active_correction.astype(jnp.int32))
+        return active_count, jnp.sqrt(squared_norm)
+
     def tree_flatten(self):
         """Return all fixed-shape arrays for JAX transformations."""
         return (
@@ -293,6 +351,7 @@ class SplitTensorBSpline(Pytree):
             self.solve_iterations,
             self.solve_residual,
             self.solve_converged,
+            self.sample_rms_residual,
         ), {}
 
 
@@ -368,6 +427,11 @@ def fit_split_spline(
         regularization_array,
     )
     field_patch = field_coefficient.reshape((2,) + patch_shape)
+    sample_residual = weights * (split_design @ field_coefficient - values.reshape(-1))
+    sample_rms_residual = jnp.sqrt(
+        jnp.sum(sample_residual**2)
+        / jnp.maximum(jnp.sum(weights), jnp.asarray(1.0, dtype=values.dtype))
+    )
     field_patch = jnp.where(execute, field_patch, 0.0)
     level_patch = jnp.where(execute, level_patch, 0.0)
     condition_number = jnp.where(
@@ -394,6 +458,7 @@ def fit_split_spline(
         jnp.where(execute, 1, 0).astype(jnp.int32),
         solve_residual,
         solve_converged,
+        jnp.where(execute, sample_rms_residual, 0.0),
     )
 
 

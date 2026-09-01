@@ -145,16 +145,48 @@ def _rescaled_quadratic_polish(flux_scale: float, coordinate_scale: float):
 
 
 def _assert_dimensionless_receipts_invariant(unscaled, scaled):
-    dimensionless_receipts = (
+    numerical_receipts = (
         "roundoff_floor",
         "representation_floor",
+        "value_basis_norm",
+        "fit_residual",
         "seed_normalized_gradient",
         "normalized_gradient",
         "normalized_value_change",
         "stationarity_tolerance",
         "value_consistency_tolerance",
     )
-    for name in dimensionless_receipts:
+    exact_receipts = (
+        "active_derivative_basis_count",
+        "iteration_count",
+        "fit_iterations",
+        "hessian_type",
+        "in_domain",
+        "seed_stationary",
+        "converged",  # The exposed convergence qualification is acceptance.
+        "fit_converged",
+    )
+    dimensional_exclusions = {
+        "position_rz": "attempted positions carry coordinate units",
+        "value": "attempted values carry flux units",
+        "gradient_norm": "gradient norms carry flux per coordinate units",
+        "gradient": "gradient components carry flux per coordinate units",
+        "hessian": "Hessian entries carry flux per coordinate squared units",
+        "interface_value": "the selected interface carries flux units",
+        "derivative_basis_norm": (
+            "the derivative operator carries inverse coordinate units"
+        ),
+        "sample_rms_residual": "the sample residual carries flux units",
+        "census_position_rz": "census positions carry coordinate units",
+        "selected_position_rz": "selected positions carry coordinate units",
+        "selected_value": "selected values carry flux units",
+    }
+    compared_keys = set(numerical_receipts) | set(exact_receipts)
+    assert compared_keys.isdisjoint(dimensional_exclusions)
+    assert set(unscaled) == set(scaled)
+    assert compared_keys | set(dimensional_exclusions) == set(unscaled)
+
+    for name in numerical_receipts:
         unscaled_value = np.asarray(unscaled[name])
         scaled_value = np.asarray(scaled[name])
         np.testing.assert_array_equal(np.isnan(scaled_value), np.isnan(unscaled_value))
@@ -165,7 +197,7 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
         assert np.all(
             np.abs(unscaled_value[finite] - scaled_value[finite]) <= allowed[finite]
         ), name
-    for name in ("converged", "seed_stationary"):
+    for name in exact_receipts:
         np.testing.assert_array_equal(
             np.asarray(scaled[name]), np.asarray(unscaled[name])
         )

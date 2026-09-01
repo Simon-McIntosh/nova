@@ -28,20 +28,29 @@
     of scale and the uncut support was bitwise identical to the ordinary interior
     contraction.</p>
 
-    <p><strong>Two source-side mechanisms remain, and both are upstream of
-    coupling.</strong> First, <code>InteriorCurrentMomentStencil.support_moments</code>
-    scatters only onto <code>StencilMesh.centre</code>, the cells with complete
-    neighbour rings. The bank has 447 nonempty plasma supports but only 351 such
-    centres. The other 96 cells therefore receive exactly zero current even though
-    their exact current sums to <code>-0.689027 MA</code>, or 4.592% of the exact
-    <code>-15.005422 MA</code> total. Second, the ring reconstruction is exact for a
-    quadratic flux but not for the quartic radial term of an exact Solov'ev field. On
-    a 0.24 m regular ring the shared-node error was <code>1.464e-3 Wb</code> against a
-    <code>1.448e-3 Wb</code> vertex-to-vertex exact variation. That is truncation, not a
-    sign or polygon-clip failure, and it must be measured on the curved-boundary rung.
-    On the 351 retained fixture cells, the banked current-density attribution has
-    16.080% p95 relative <code>m0</code> error against the exact oracle, or 3.940% p95
-    against the source-normalised oracle.</p>
+    <p><strong>The rim-current availability defect is repaired on current main.</strong>
+    A fresh census against the same immutable 566-cell fixture finds 447 nonempty
+    plasma supports and 447 own-node scatter destinations. Exactly <strong>0 of
+    447</strong> nonempty supports with nonzero exact clipped current receive zero
+    scattered current. Missing current is therefore <code>0.000000 MA</code>, or
+    <code>0.000000%</code> of the exact <code>-15.005421582 MA</code> total. The retired
+    complete-ring restriction still reproduces its original 96-cell rim omission,
+    summing to <code>-0.689027210 MA</code> or <code>4.591855%</code>. Current attribution
+    no longer uses that restriction: <code>StencilMesh.current_moment_stencil</code>
+    receives every per-cell <code>support_centre</code>, and
+    <code>InteriorCurrentMomentStencil.support_flux_moments</code> integrates the
+    cell's own centroid plus direct pre-clip sampling vertices. No neighbour value is
+    invented for a partial ring; complete rings remain necessary only for derivative
+    and shared-node flux reconstruction.</p>
+
+    <p>The per-cell source participation change in <code>15fbcf2f</code> did not by
+    itself establish rim availability. The availability repair is the own-node
+    representation in <code>6282acd5</code>, now pinned by a production-path regression.
+    Complementary material partitions recombine to full-cell current within
+    <code>2.0e-15</code> of scale, and an uncut complete-ring cell is bitwise identical
+    in current and both first moments to the direct interior contraction. The
+    independent curved-boundary and density-accuracy questions remain separate from
+    this closed scatter defect.</p>
 
     <figure>
       <img src="/nova/figures/hex-clip-current-attribution/clip-audit.png"
@@ -66,14 +75,14 @@
       <tbody>
         <tr><td>1</td><td><code>ForwardFluxOperator.cell_current_moments</code><br><code>nova/equilibrium/forward_operator.py</code></td><td>Entry from one trial total-flux vector; selects the moment path when companion coupling blocks exist.</td></tr>
         <tr><td>2</td><td><code>ForwardFluxOperator.read</code> → <code>Topology.read</code><br><code>nova/equilibrium/topology.py</code></td><td>Cell-centred <code>DomainMasks.psi_norm</code>, axis flux, boundary flux and polarity-aware topology state.</td></tr>
-        <tr><td>3</td><td><code>ForwardFluxOperator.shared_node_flux</code> → <code>MomentGeometry.shared_node_flux</code> → <code>SharedNodeFluxStencil.__call__</code><br><code>nova/equilibrium/stencil_mesh.py</code></td><td>Quadratic ring reconstruction of trial flux on every fixed atomic shared node.</td></tr>
+        <tr><td>3</td><td><code>ForwardFluxOperator.shared_node_flux</code> → <code>MomentGeometry.shared_node_flux</code> → <code>SharedNodeFluxStencil.__call__</code><br><code>nova/equilibrium/stencil_mesh.py</code></td><td>Quadratic complete-ring reconstruction of trial flux on every fixed atomic shared node for contour tracing. This reconstruction is not the current scatter target.</td></tr>
         <tr><td>4</td><td><code>ForwardFluxOperator.shared_domain_masks</code></td><td><code>psi_norm = (psi_shared - psi_axis) / flux_span</code>; <code>psi_norm &lt;= 1</code> labels the closed side. The geometric level is the equivalent <code>signed_flux = polarity * (psi_shared - psi_boundary)</code>.</td></tr>
         <tr><td>5</td><td><code>AtomicCellMesh.traced_clip</code> → <code>_traced_clip</code> → <code>_traced_polygon_moments</code><br><code>nova/equilibrium/separatrix_clip.py</code></td><td>Core support from <code>signed_flux &gt; 0</code> and common-SOL support from its negative, including exact edge crossings, area, first area moment and second area tensor about each fixed full-cell centroid.</td></tr>
         <tr><td>6</td><td><code>ForwardSource.current_moments</code> → nested <code>partitioned_moments</code><br><code>nova/equilibrium/source.py</code></td><td>Core density at clipped <code>psi_norm</code> in <code>[0,1]</code>; common-SOL density at <code>psi_norm &gt;= 1</code>. Centroid and shared-node densities are evaluated separately on the same closure.</td></tr>
         <tr><td>7</td><td><code>DomainProfile.current_density</code> → <code>toroidal_current_density</code><br><code>nova/equilibrium/convention.py</code></td><td><code>j_phi = -2*pi*(R*p_prime + ff_prime/(mu0*R))</code> in A/m², preserving the total-poloidal-flux convention.</td></tr>
-        <tr><td>8</td><td><code>ForwardFluxOperator.support_current_moments</code> → <code>InteriorCurrentMomentStencil.support_moments</code></td><td>One cubic interpolant from cell-centre values, full-hex vertex values and fitted first-moment constraints. It is integrated over both clipped supports.</td></tr>
-        <tr><td>9</td><td><code>padded_polynomial_current_moments</code><br><code>nova/equilibrium/separatrix_clip.py</code></td><td>Closed simplex monomial integrals produce net current <code>m0</code> and physical first moments <code>(mR,mZ)</code>. The current centroid is not a stored branch: diagnostically it is exactly <code>cell_centroid + (mR,mZ)/m0</code>.</td></tr>
-        <tr><td>10</td><td><code>InteriorCurrentMomentStencil.support_moments</code> scatter</td><td><code>full_entries + clipped_polynomial - full_polynomial</code> is written only at <code>self.centre</code>. This is the structural zero on 96 nonempty ring-incomplete cells.</td></tr>
+        <tr><td>8</td><td><code>ForwardFluxOperator.support_current_moments</code> → <code>InteriorCurrentMomentStencil.support_flux_moments</code></td><td>For every four- or six-vertex cell, gather its own centroid flux and direct pre-clip vertex flux, fit the local quadratic, evaluate the declared profile, and integrate it only over the actual clipped support.</td></tr>
+        <tr><td>9</td><td><code>fixed_profile_current_moments</code><br><code>nova/equilibrium/stencil_mesh.py</code></td><td>A fixed degree-fifteen Duffy product rule produces net current <code>m0</code> and physical first moments <code>(mR,mZ)</code>. The current centroid is diagnostically <code>cell_centroid + (mR,mZ)/m0</code>.</td></tr>
+        <tr><td>10</td><td><code>InteriorCurrentMomentStencil.support_flux_moments</code> scatter</td><td>The three moment entries are written at <code>ring_centre</code>, which is the complete per-cell <code>support_centre</code> population. A partial-ring rim cell therefore receives its own clipped moments without requiring or synthesising neighbours.</td></tr>
         <tr><td>11</td><td><code>ForwardFluxOperator.coupling_current_moments</code></td><td>The inverse area-normalised second-moment tensor turns physical <code>(mR,mZ)</code> into the fixed linear-basis coefficients expected by the companion Green matrices.</td></tr>
         <tr><td>12</td><td><code>ForwardFluxOperator.internal</code> → <code>FluxTarget.internal</code><br><code>nova/biot/target.py</code></td><td><code>G0@m0 + GR@radial + GZ@vertical</code> gives plasma flux on grid and wall targets.</td></tr>
       </tbody>
@@ -100,26 +109,28 @@
         <tr><td><code>full_entries + clipped - full</code> changes an uncut interior cell</td><td><strong>Refuted</strong></td><td>The production support method and ordinary stencil contraction were bitwise identical in all three moment vectors on an uncut regular hex.</td></tr>
         <tr><td>Physical-first-moment to companion-basis transform</td><td><strong>Refuted</strong></td><td>Inverting the full-hex area-normalised second tensor and reconstructing the physical first moment left <code>2.84e-14 A m</code> absolute residual. On the banked fixture the consistent-source coupling error is only <code>0.01337 Wb</code>, 0.122% of the <code>10.93535 Wb</code> source error; the legacy-source coupling error is <code>0.002185 Wb</code>.</td></tr>
         <tr><td>Shared-node flux reconstruction moves a curved boundary</td><td><strong>Reproduced as coarse-order truncation, not a clip algebra error</strong></td><td>The ring is exact to <code>1.67e-16</code> on a general quadratic. On <code>q=((R²-R0²)²)/(8R0²)+Z²/2</code>, its quartic radial term produced <code>1.464e-3 Wb</code> maximum shared-node error on a 0.24 m ring, 1.011 times the exact six-vertex flux spread. The curved Solov'ev rung must measure convergence and induced intersection displacement.</td></tr>
-        <tr><td>Nonempty cells without complete density stencils silently lose attribution</td><td><strong>Reproduced structural defect</strong></td><td>The immutable fixture contains 447 nonempty supports, 351 complete-ring centres and 96 nonempty cells absent from <code>self.centre</code>. Their returned current is zero; their oracle current sums to <code>-689027.210 A</code>.</td></tr>
+        <tr><td>Nonempty cells without complete derivative rings silently lose attribution</td><td><strong>Repaired; regression pinned</strong></td><td>The fresh immutable-fixture census contains 447 nonempty supports and 447 current scatter destinations. Zero supports with nonzero exact clipped current receive zero scattered current, so missing current is <code>0 A</code>. Applying the retired 351-centre mask to the same fixture still reproduces 96 omitted cells and <code>-689027.210 A</code>, proving the census remains sensitive to the original defect.</td></tr>
         <tr><td>Nonlinear source density is represented at interior accuracy</td><td><strong>Refuted on the fixture</strong></td><td>Among 350 finite relative comparisons on the 351 complete-ring cells, p95 <code>m0</code> error is 16.080% against the exact oracle. Holding the bank's source normalisation fixed reduces p95 to 3.940%, still far above the affine round-off floor. The defect is density/flux reconstruction accuracy, not polygon integration.</td></tr>
       </tbody>
     </table>
 
     <h2 id="s4">§4 — Reproducer and evidence boundaries</h2>
-    <p>The complete reproducer is
+    <p>The historical reproducer is
     <code>scripts/clip_audit/audit_hex_clip.py</code>. It builds one actual
     <code>StencilMesh.current_moment_stencil</code>, obtains the atomised cell topology
     from <code>MomentGeometry.from_cells</code>, evaluates production
-    <code>traced_clip</code> and <code>support_moments</code>, and compares them with
+    <code>traced_clip</code> and the then-current moment contraction, and compares them with
     independently implemented polygon formulae. It writes:</p>
     <ul>
       <li><code>scripts/clip_audit/results/chord-sweep.csv</code> — all 247 cut-level measurements;</li>
       <li><code>scripts/clip_audit/results/clip-audit-results.json</code> — headline metrics and fixture counts;</li>
       <li><code>docs/figures/hex-clip-current-attribution/clip-audit.png</code> — the spatial evidence above.</li>
     </ul>
-    <p>The fixture portion reads, but does not rewrite, the banked arrays under
+    <p>The current regression is <code>tests/test_rim_current_scatter.py</code>. It reads,
+    but does not rewrite, the banked arrays under
     <code>scripts/ring_quadrature/inputs</code>. It therefore preserves the exact same
-    566-cell, 731-target analytic-seed comparison used by the preceding gate. The
+    566-cell, 731-target analytic-seed comparison used by the preceding gate while
+    constructing the current own-node stencil over all 566 cells. The
     straight-chord probe deliberately does not claim that a linearly reconstructed
     contour equals a curved exact contour, or that an affine density represents the
     real profile. Those two un-cleared approximations are the subject of the next two
@@ -183,9 +194,9 @@
     <h3 id="s5-4">Rung 4 — full coarse boundary ring</h3>
     <p>Run the exact curved-support oracle from rung 3 on every nonempty cell of the
     immutable 566-cell fixture. Compare in priority order: <code>m0</code>, current
-    centroid <code>c+m1/m0</code>, then physical <code>m1</code>. The repair must return
-    values for all 96 currently unavailable nonempty cells while leaving all 351
-    complete-ring cells bitwise unchanged. Define the interior error scale exactly as
+    centroid <code>c+m1/m0</code>, then physical <code>m1</code>. Availability is now
+    closed: all 447 nonempty cells are attributed and the regression pins zero lost
+    cells. Define the interior error scale exactly as
     the bank does: p95 of finite absolute relative <code>m0</code> error on retained
     cells, currently <code>0.1607953241</code>. The repaired ring p95 must be no larger;
     for <code>|I_ref|&lt;1 A</code>, report absolute amperes separately rather than letting
@@ -207,9 +218,15 @@
     source result does not pass by cancellation with a coupling error.</p>
 
     <h2 id="s6">§6 — Consequence for the implementation order</h2>
-    <p>The evidence fixes the next implementation order without choosing a new
-    production policy. First remove the complete-ring availability zero while
-    preserving the 351 existing cells bitwise. Then validate net-current density
+    <p>The complete-ring availability zero is closed without a new production change.
+    Relative to the retired restriction, restoring the rim changes the converged MAST
+    fixture operand by <code>-0.689027210 MA</code>. Its current centroid moves from
+    <code>(6.18318439, 0.52028488) m</code> to
+    <code>(6.21006817, 0.51025319) m</code>: <code>+26.883779 mm</code> radially and
+    <code>-10.031682 mm</code> vertically. These are operand-sizing numbers, not a
+    regenerated bank score. Bank regeneration and gate re-scoring belong to a
+    follow-on node.</p>
+    <p>Next validate net-current density
     attribution on the curved analytic oracle. Only after <code>m0</code> is inside the
     interior scale should centroid and first-moment accuracy be promoted. The coupling
     basis and companion matrices remain unchanged unless the separated quadrant

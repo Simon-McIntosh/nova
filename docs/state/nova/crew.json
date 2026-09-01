@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T08:24:15",
+  "updated": "2026-09-01T08:55:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64609,9 +64609,211 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T062947707320-sse-efit-reproduction-completion",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-efit-reproduction-completion",
+        "node_definition": {
+          "done_when": "The zero-iteration residual maps and gate derivations land first, and the cold-start solves follow in cost order, completing the measurement whose job banked MAST zero-iteration residuals of 2.079719532091e-02 at stride 2 and 1.161470339399e-02 at stride 1 before dying in _passive_inclusive_case with 'the cached prescribed response inputs changed', because the memoized prescribed-response carrier is shaped for the stride-2 production grid and a stride-1 solve presents different response inputs. The prior run directory r-20260901T055212194147-sse-efit-fixed-input-reproduction holds the script and log. (1) FIRST, needing no response carrier: the DIII-D zero-iteration residuals at stride 1 and stride 2 for d3d_shot_002495e835:146, and the SPATIAL residual-field figures for both machines at both strides. The map of where GS(psi_EFIT) disagreement lives is the decisive artifact: interpolation and representation error of the source map concentrates at the boundary, X-points and edge cells, while a formulation defect such as a units, sign, mu0-R-squared or COCOS inconsistency shows as a coherent residual through the core; state which pattern each machine shows. Note in the write-up that MAST improved only by the factor 0.56 from stride 2 to stride 1, closer to first order than the operator's second order on smooth fields, and state what bounds it; if the source psi enters by bilinear interpolation, say so, since that alone explains first-order scaling. (2) Derive the source-grid minimum widths for both machines from the equilibrium data and state the locked quarter-width gate values in metres. (3) The MAST 22086/43 cold-start solve at STRIDE 2 runs against the existing carrier: report converged or not against the unchanged criterion, terminal residual, trips, and boundary RMS, sup and saddle versus the EFIT LCFS through the shared comparator, judged against the quarter-width gate. (4) For stride 1, rebuilding the prescribed-response carrier for the finer grid is authorised: build it once, cache it durably beside the run with its digest recorded, report the build cost separately from the solve cost, and if the rebuild dominates the node, record it and hand the stride-1 solve to a follow-on rather than truncating the earlier deliverables. (5) The DIII-D cold start runs with the shipped 24-conductor inference currents, named as such with the qualification that they are not EFIT's fitted set, and the receipt records the absent DIII-D fitted-current vector as a named data gap. (6) Cold start throughout; no solve is seeded with the source psi. One durable SLURM job on rigel (vega is admin-drained; rigel nodes carry 128000 MB so request at most 120G), absolute Nova interpreter with VIRTUAL_ENV unset and no uv wrapper, exact command preflighted on the login node, per-trip and per-iteration telemetry on for every solve, outputs and checkpoints to the durable run directory, no committed bank artifact modified, no tolerance relaxed, and a handback with job id and durable paths if the job is not terminal inside the fence. Record findings in docs/research/efit-fixed-input-reproduction.html validated with the reckon doc-check tooling.",
+          "estimated_hours": null,
+          "goal": "The fixed-input reproduction completed in cost order: zero-iteration GS residual maps and quarter-width gates for both machines ahead of the carrier-gated MAST cold-start solves",
+          "id": "sse-efit-reproduction-completion",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/efit-fixed-input-reproduction.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T06:29:57Z",
+        "completed_at": "2026-09-01T06:55:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1530,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1530,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c2672fc5687fed117a92932524711a45c4c1b999",
+        "commits": [
+          "85648523e17573d744b1e28bb15bf52c9aa032f5",
+          "7d15eac017f3830b5f09ff515599e51759570411"
+        ],
+        "changed_lines": {
+          "added": 180,
+          "removed": 127,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "zero-iteration receipt strict with four rows; residual-field figure rendered; moment-geometry preflight non-null with finite second moments on 1089 and 4225 cells; audit-doc passes",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5421312,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5611242,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 18782,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4114
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T064602052039-sse-panel-grid-semantics",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-panel-grid-semantics",
+        "node_definition": {
+          "done_when": "The topology panels stop presenting flood-fill components as cell types and gain the layer the lead actually asked for: the hexagonal plasma current mesh with its true clip polygons. Two corrections and one addition, all renderable without an equilibrium solve. (1) RELABEL: the current legend names blue core, green common SOL, purple private-flux shadow and grey excluded material as if the solver categorised cells by type. It does not: current in every cell is resolved by evaluating the flux functions at the cell's normalised flux with the private mask, SOL current enters through declared continuations of p-prime and FF-prime past the boundary (nova/equilibrium/source.py OPEN_DOMAINS and gradient_tail), and the flood-fill labels are the domain partition that selects where continuations apply and forms the private exclusion. Retitle the legend to flood-fill connectivity components and state in the caption strip and the evidence page, in mechanism terms, that the solve consumes the private mask and the continuation domains, never a per-cell type, and that the raster drawn is the FLUX grid: a plain tensor product whose hex adjacency is an index interpretation, per _raster_hex_partition_geometry. (2) ADD THE PLASMA CURRENT MESH: Nova's current-carrying cells are genuinely hexagonal - rows offset by half a cell per nova/geometry/hexstencil.py - and are clipped by straight edges with closed-polygon moments through the same AtomicCellMesh.traced_clip authority the forward solve uses, as exercised by the 247-case sweep in docs/research/hex-clip-current-attribution.html. Render, for each machine, one panel layer or inset showing the hexagonal plasma mesh with its actual traced_clip polygons at the boundary, built from the production symbols on the machine geometry with no solve; name AtomicCellMesh.traced_clip and the mesh-construction authority in the manifest. If constructing the mesh genuinely requires a solve artifact the caches lack, name the missing input and deliver the relabelling alone rather than substituting invented geometry. (3) The evidence page distinguishes the two grids explicitly: the flux raster that carries the flood fill and the hexagonal filament mesh that carries current, so no reader again mistakes one for the other. Containment records stay byte-identical, no scheduler job, audit-doc passes, focused generator lane green with the delta stated against base, and one corrected panel visually inspected at original resolution with the inspection stated in the manifest.",
+          "estimated_hours": null,
+          "goal": "Topology panels relabelled to the true domain-partition semantics and extended with the hexagonal plasma current mesh and its traced clip polygons from the production authorities",
+          "id": "sse-panel-grid-semantics",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T064602052039-sse-panel-grid-semantics/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration",
+            "docs/evidence/topology-visual-corroboration.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T06:46:12Z",
+        "completed_at": "2026-09-01T06:53:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 467,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 467,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c2672fc5687fed117a92932524711a45c4c1b999",
+        "commits": [
+          "be152e51f84a358d7f31d32209fd4c1ee8a43766"
+        ],
+        "changed_lines": {
+          "added": 39,
+          "removed": 35,
+          "files": 21
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "17 panels regenerated with corrected legends from committed caches; original-resolution inspection of panel 11; containment JSONs byte-unchanged; audit-doc passes",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T064602052039-sse-panel-grid-semantics/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T064602052039-sse-panel-grid-semantics/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2849024,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3217784,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 14673,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3376
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1191
+    "_version": 1193
   }
 }

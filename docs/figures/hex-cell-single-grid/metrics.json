@@ -1,0 +1,157 @@
+{
+  "analytic_equilibrium": {
+    "cell_count": 2009,
+    "family": "diverted polynomial Solov'ev manufactured field",
+    "grid_shape": [
+      41,
+      49
+    ],
+    "interface": "psi and grad psi continuous; curvature free across exact curved level set through cells"
+  },
+  "criteria": {
+    "flood_fill": true,
+    "gpu_batchability": true,
+    "null_identification": true,
+    "representation": true
+  },
+  "flood_fill": {
+    "cache_limitation": "per-cell flux and per-candidate labels are absent; the selected-saddle cut is replayed, not candidate selection",
+    "committed_private_cells": 42,
+    "differing_cells": 0,
+    "grid_shape": [
+      33,
+      33
+    ],
+    "operand": "MAST 22086/43 mixed",
+    "passes": true,
+    "selected_axis_rz_m": [
+      0.9016135226490093,
+      0.024617984126866627
+    ],
+    "selected_saddle_rz_m": [
+      0.5853011730723612,
+      1.2333806492436519
+    ],
+    "single_grid_private_cells": 42
+  },
+  "gpu_batchability": {
+    "backend": "cpu",
+    "compilations_per_evaluator": 1,
+    "evaluation_rows": [
+      {
+        "batch_width": 1,
+        "fixed_batch_capacity": 32,
+        "global": {
+          "first_call_s": 0.09744271310046315,
+          "million_point_evaluations_per_s": 0.7732339598907146,
+          "warm_run_s": 0.0006621540524065495
+        },
+        "points_per_member": 512,
+        "split": {
+          "first_call_s": 0.10386298201046884,
+          "million_point_evaluations_per_s": 0.6608174142485032,
+          "warm_run_s": 0.0007747979834675789
+        },
+        "split_to_global_warm_time_ratio": 1.170117407953079
+      },
+      {
+        "batch_width": 32,
+        "fixed_batch_capacity": 32,
+        "global": {
+          "first_call_s": 0.00062533188611269,
+          "million_point_evaluations_per_s": 28.087155226776396,
+          "warm_run_s": 0.000583327142521739
+        },
+        "points_per_member": 512,
+        "split": {
+          "first_call_s": 0.0006923621986061335,
+          "million_point_evaluations_per_s": 25.02856771142048,
+          "warm_run_s": 0.0006546119693666697
+        },
+        "split_to_global_warm_time_ratio": 1.1222038572331203
+      }
+    ],
+    "fit_batch_width": 4,
+    "fit_compile_and_run_s": 0.20874815084971488,
+    "fit_shape_per_member": [
+      2009,
+      16
+    ],
+    "fixed_batch_capacity": 32,
+    "passes": true,
+    "unbatchable_operations": []
+  },
+  "null_identification": {
+    "axis_candidate_count": 2,
+    "axis_lattice_error_m": 0.0050000000000000044,
+    "axis_polished_error_m": 0.00010089789873274357,
+    "cells_scanned_per_null_fraction": 1.0,
+    "passes": true,
+    "saddle_candidate_count": 1,
+    "saddle_lattice_error_m": 0.0,
+    "saddle_polished_error_m": 6.063904629434053e-16
+  },
+  "overall_verdict": "feasible",
+  "practicality": {
+    "cutover_worker_hours_high": 140,
+    "cutover_worker_hours_low": 80,
+    "incumbent_two_mesh_accuracy_note": "the incumbent global C2 carrier is the matched-DOF global result in the boundary band",
+    "incumbent_two_mesh_timing_note": "no end-to-end incumbent solve was rerun; only fixed-shape carrier fit/evaluation is timed",
+    "new_work": [
+      "production-grade curved-interface basis and conditioning study",
+      "per-cell flux cache extension for independent MAST saddle-edge replay",
+      "operator and source cutover with bank regeneration",
+      "accelerator measurement at production batch widths"
+    ],
+    "production_seams_removed": [
+      "raster-to-current-cell private-mask transfer",
+      "rectangular-null candidate to plasma-cell mapping",
+      "duplicate field interpolation for source and topology consumers"
+    ]
+  },
+  "representation": {
+    "boundary_band": {
+      "cell_count": 1528,
+      "global": {
+        "gradient_rms": 0.031475037840403904,
+        "psi_rms": 0.0076748294885536,
+        "second_derivative_rms": 0.26716700244325015
+      },
+      "split": {
+        "gradient_rms": 5.176367268534404e-16,
+        "psi_rms": 1.4805352627885396e-16,
+        "second_derivative_rms": 1.8725268020817983e-15
+      }
+    },
+    "boundary_band_second_derivative_improvement_factor": 142677264830722.25,
+    "degrees_of_freedom_each": 16,
+    "inside": {
+      "cell_count": 1332,
+      "global": {
+        "gradient_rms": 0.038117299739479034,
+        "psi_rms": 0.006692176396105506,
+        "second_derivative_rms": 0.21527472723768534
+      },
+      "split": {
+        "gradient_rms": 4.773040484784967e-16,
+        "psi_rms": 1.24046695540596e-16,
+        "second_derivative_rms": 1.5286088920489852e-15
+      }
+    },
+    "outside": {
+      "cell_count": 6212,
+      "global": {
+        "gradient_rms": 0.06795773803205635,
+        "psi_rms": 0.006237595986812023,
+        "second_derivative_rms": 0.8107694407333956
+      },
+      "split": {
+        "gradient_rms": 1.2562361686568856e-15,
+        "psi_rms": 2.717019785721949e-16,
+        "second_derivative_rms": 4.3287528836598084e-15
+      }
+    },
+    "passes": true
+  },
+  "schema": "nova.hex-cell-single-grid-feasibility"
+}

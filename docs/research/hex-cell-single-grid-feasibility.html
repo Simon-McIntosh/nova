@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="hex-cell-single-grid-feasibility">
+  <meta name="plan-title" content="Hex-cell single-grid feasibility">
+  <meta name="plan-summary" content="Measured analytic representation, null, batchability and MAST flood-fill prototype on one half-offset cell grid">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="separatrix-spline-extraction">
+  <meta name="plan-recorded-at" content="2026-09-01">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="hex-grid,solovev,spline,nulls,flood-fill,jax">
+  <title>Hex-cell single-grid feasibility | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; analytic and committed-operand measurement</p>
+      <h1>One fixed-shape hex-cell carrier is feasible as a prototype</h1>
+      <p class="lead">
+        All four prototype criteria pass. At equal 16-coefficient capacity, the
+        boundary-split carrier lowers boundary-band curvature RMS from
+        <strong>0.267167</strong> to <strong>1.87e-15</strong>, the primary
+        six-neighbour scan plus one polish step places the axis within
+        <strong>0.101 mm</strong> and the X-point within roundoff, fixed-shape CPU
+        evaluation compiles and batches at widths 1 and 32, and the same-cell
+        flood reproduces all <strong>42</strong> private cells in committed MAST
+        22086/43 mixed with <strong>zero differing cells</strong>.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Verdict: FEASIBLE for a production-grade prototype, not a cutover
+        authorization.</strong> The result establishes that the representation,
+        null scan, compiled evaluation and selected-saddle flood can share one
+        structured half-offset carrier. It does not establish end-to-end solve
+        speed or candidate-selection parity because the committed MAST cache has
+        no per-cell flux or per-candidate domain labels.
+      </p>
+    </aside>
+
+    <section id="design">
+      <h2>Carrier and interface</h2>
+      <p>
+        The analytic target is a diverted polynomial Solov'ev manufactured field
+        with exact axis at (1.0, 0.36) m, saddle at (1.0, 0.0) m, and a curved
+        Cassini separatrix. It is sampled at 2,009 centroids in a 41 by 49
+        structured index array. Alternate rows are offset by half a radial cell,
+        while the axial index ring remains the six-neighbour stencil used by
+        <code>nova/biot/fieldnull.py</code> <code>FieldNull.categorize_2d</code>.
+      </p>
+      <p>
+        Both representations have 16 fitted coefficients. The global carrier is
+        one C2 polynomial spline patch. The split carrier has a shared polynomial
+        trace plus an exterior-only squared level-set term. Because that term and
+        its first derivative vanish at the interface, psi and grad psi match
+        exactly while curvature is free to jump. The zero level set follows the
+        curved boundary continuously through cells; it is not snapped to a row,
+        column, centroid, or straight cut.
+      </p>
+      <figure>
+        <img src="/nova/figures/hex-cell-single-grid/single-grid-feasibility.png"
+             alt="Global and split representation error maps beside the committed MAST private-flux mask comparison">
+        <figcaption>
+          Left and centre: matched-capacity absolute flux errors with the curved
+          interface in cyan, exact axis as a circle and X-point as a cross. Right:
+          committed MAST private cells; yellow rings would mark disagreements and
+          none are present.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="representation">
+      <h2>Representation criterion: pass</h2>
+      <table>
+        <caption>RMS error against the exact field; global / boundary-split</caption>
+        <thead>
+          <tr><th scope="col">Region</th><th scope="col">Cells</th><th scope="col">psi</th><th scope="col">grad psi</th><th scope="col">second derivatives</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Inside</th><td>1,332</td><td>6.692e-3 / 1.240e-16</td><td>3.812e-2 / 4.773e-16</td><td>2.153e-1 / 1.529e-15</td></tr>
+          <tr><th scope="row">Outside</th><td>6,212</td><td>6.238e-3 / 2.717e-16</td><td>6.796e-2 / 1.256e-15</td><td>8.108e-1 / 4.329e-15</td></tr>
+          <tr><th scope="row">Within two pitches</th><td>1,528</td><td>7.675e-3 / 1.481e-16</td><td>3.148e-2 / 5.176e-16</td><td>2.672e-1 / 1.873e-15</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The preregistered pass condition is improvement in the two-pitch boundary
+        band. The curvature improvement is <strong>1.43e14-fold</strong>. This very
+        large factor is expected for the manufactured target: the split basis
+        contains its exact C1 interface mechanism, while a matched-capacity global
+        C2 patch must smooth the curvature jump. It is a feasibility result, not
+        an expected production error ratio.
+      </p>
+    </section>
+
+    <section id="nulls">
+      <h2>Null-identification criterion: pass</h2>
+      <p>
+        The primary identifier is unchanged in mechanism: compare each centroid's
+        flux with the angle-ordered six-cell ring and count sign transitions. Zero
+        transitions identifies extrema; four identifies saddles. The full interior
+        lattice is scanned, so the scanned fraction is <strong>1.0 per null</strong>.
+        The scan finds two extrema and one saddle. The upper-axis lattice seed is
+        5.000 mm from truth and one Newton step on the split fit reduces that to
+        0.1009 mm. The X seed lies at the exact lattice coordinate and polish leaves
+        a 6.06e-16 m error. The spline therefore polishes candidates; it does not
+        replace the sign-change census.
+      </p>
+    </section>
+
+    <section id="batchability">
+      <h2>Compiled batchability criterion: pass on CPU</h2>
+      <p>
+        No accelerator is used. JAX reports the CPU backend. Fit is one fixed
+        2,009 by 16 least-squares program vmapped over four fields; evaluation is
+        one fixed 512-point program vmapped over a 32-member capacity. Width 1
+        masks 31 slots and width 32 admits all slots, so both measurements reuse
+        one executable rather than recompiling a dynamic batch shape. There are no
+        compacted gathers, data-dependent arrays, host callbacks, or operations
+        excluded from batching. The durable JSON records compile-plus-first-run,
+        warm timings, and the split/global warm-time ratio at widths 1 and 32.
+        These are carrier timings, not a claim about a complete equilibrium solve.
+      </p>
+      <table>
+        <caption>Compiled CPU evaluation of 512 points per member</caption>
+        <thead>
+          <tr><th scope="col">Batch width</th><th scope="col">Global warm</th><th scope="col">Split warm</th><th scope="col">Split/global time</th><th scope="col">Split rate</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">1 active of 32</th><td>0.6622 ms</td><td>0.7748 ms</td><td>1.1701</td><td>0.661 million active points/s</td></tr>
+          <tr><th scope="row">32 active of 32</th><td>0.5833 ms</td><td>0.6546 ms</td><td>1.1222</td><td>25.029 million active points/s</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The four-member fixed-shape fit compiles and runs in 0.2087 s. The split
+        evaluator is 17.0% slower than the matched global carrier with one active
+        member and 12.2% slower with all 32 active. The fixed-capacity width-1
+        measurement deliberately pays for its padding; production bucketing can
+        trade executable reuse against that underfilled-batch cost.
+      </p>
+    </section>
+
+    <section id="flood">
+      <h2>Flood-fill criterion: pass with a named cache boundary</h2>
+      <p>
+        The real-geometry operand is committed MAST 22086/43 mixed, row 11 of
+        <code>mast-topology-operands.npz</code>. Its 1,089 centres are interpreted
+        as 33 by 33 structured hex indices, and the selected O-point seeds the
+        existing saddle-aware label propagation. Links crossing the selected
+        X-point's horizontal cut are closed. The committed mask contains 42
+        private cells; the single-grid result contains 42; the symmetric
+        difference is <strong>0 cells</strong>.
+      </p>
+      <p>
+        The cache carries centres, final domain labels and selected O/X points,
+        but not per-cell flux or per-candidate domain labels. Consequently this
+        replay proves that moving the selected-saddle flood onto the structured
+        cell graph preserves this topology answer. It cannot independently prove
+        the upstream X-candidate choice or reproduce spline-derived shared-edge
+        admissibility. Those missing fields are production-cutover work, not
+        silently reconstructed evidence.
+      </p>
+    </section>
+
+    <section id="practicality">
+      <h2>Practicality and falsifiable cutover estimate</h2>
+      <p>
+        Against the matched-capacity incumbent global carrier, the split carrier's
+        measured accuracy delta is the 1.43e14 boundary-curvature factor above;
+        its exact value is manufacture-specific. The timing delta is recorded at
+        both batch widths in <code>metrics.json</code>, rather than inferred from
+        FLOPs. No end-to-end incumbent two-mesh solve was rerun, so this record
+        makes no 300-slice/s or hardware claim.
+      </p>
+      <table>
+        <caption>Production change surface and estimate</caption>
+        <thead><tr><th scope="col">Class</th><th scope="col">Falsifiable item</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Seam removed</th><td>Raster-to-current-cell private-mask transfer</td></tr>
+          <tr><th scope="row">Seam removed</th><td>Rectangular-null candidate to plasma-cell mapping</td></tr>
+          <tr><th scope="row">Seam removed</th><td>Duplicate field interpolation for source and topology consumers</td></tr>
+          <tr><th scope="row">Work created</th><td>Condition and validate a production curved-interface spline basis</td></tr>
+          <tr><th scope="row">Work created</th><td>Add per-cell flux operands and independently replay saddle-edge admissibility</td></tr>
+          <tr><th scope="row">Work created</th><td>Cut over operator/source consumers and regenerate affected banks</td></tr>
+          <tr><th scope="row">Work created</th><td>Measure production batch widths on the target accelerator</td></tr>
+          <tr><th scope="row">Estimate</th><td>80&ndash;140 worker-hours; lower bound excludes a conditioning redesign, upper bound includes one</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The estimate is overturned if an independent replay with cached per-cell
+        flux produces any MAST mask difference, if the split fit loses its
+        boundary-band advantage on a non-manufactured map, or if accelerator
+        measurement shows a material batch regression. Until those three checks,
+        the practical decision is <strong>build the production-grade prototype,
+        but do not cut over the solver</strong>.
+      </p>
+    </section>
+
+    <footer>
+      <p>
+        Machine-readable evidence:
+        <code>/nova/figures/hex-cell-single-grid/metrics.json</code>.
+        Prototype: <code>benchmarks/hex_cell_field_feasibility.py</code>.
+      </p>
+    </footer>
+  </main>
+</body>
+</html>

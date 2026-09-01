@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html">
 </head>
 <body>
@@ -60,6 +60,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260901T2212-oracle-gate-red" data-who="reckon-ship-s19" data-when="2026-09-01T22:12:00+00:00">
     <div class="r-comment-body">gaa-solovev-certificate PARKED (worker commit bf6dcdf9 in its worktree: the certificate driver benchmarks/solovev_certificate.py, 4 cases x 4 resolutions, no nova/ change, no receipt fabricated). BLOCKER FOUND, pre-existing on main: the shipped default-lane recovery gate tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point FAILS before its single map application with ValueError 'topology connectivity requires a tensor-product grid' at nova/equilibrium/topology.py:392 (axis_component). The requirement was introduced by 9ccd8165 'derive domains from axis connectivity' on 2026-08-26, so the closed-form oracle (an unstructured hex carrier) has been unsolvable, and its locked 14-bound gate red, for six days without anyone reading the default lane. The certificate cannot run until the hex-carrier topology path is restored; nova/equilibrium/topology.py is fenced to the plasma-cell-topology-authority session (node pta-cell-partition-geometry in flight), which has been asked whether its repair restores this path. Resume the same member once that lands on main.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T195519540142-gaa-solovev-certificate" data-who="solovev-certificate" data-when="2026-09-01T20:08:38Z">
+    <div class="r-comment-body"><p>parked on a pre-existing main failure: the default-lane Solovev recovery gate raises &#x27;topology connectivity requires a tensor-product grid&#x27; at topology.py:392 since 9ccd8165 (26 Aug); certificate driver landed, no receipt produced; redispatch the node once the plasma-cell topology-read commit lands</p></div>
 </div>
 </section>
 </main>

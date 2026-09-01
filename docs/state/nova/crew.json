@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:18:44",
+  "updated": "2026-09-01T22:21:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -68735,9 +68735,106 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T195519540142-gaa-solovev-certificate",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-solovev-certificate",
+        "node_definition": {
+          "done_when": "docs/figures/gs-absolute-accuracy/solovev-certificate.json validates against a schema stated inside it, carries at least 4 cases x 3 resolutions x the named norm set each with qualification, records a fitted order with uncertainty per norm per case beside the theoretical order, the figures under docs/figures/gs-absolute-accuracy/solovev/ plot the error fields at every resolution for every case, the reduced-oracle row reproduces the 14 LOCKED_RECOVERY_BOUNDS within their registry values, tests/test_solovev_recovery_gates.py stays green in the default lane, and git diff --stat shows no change under nova/",
+          "estimated_hours": 3.0,
+          "goal": "The preregistered Solovev certificate receipt docs/figures/gs-absolute-accuracy/solovev-certificate.json (with its driver benchmarks/solovev_certificate.py, error-field figures under docs/figures/gs-absolute-accuracy/solovev/ at project-absolute src paths) measuring full converged production forward solves against the exact closed-form family - the static references from tests/rotating_equilibrium_references.py reference_cases() together with the diverted jump-bearing target constructed as in benchmarks/split_fit_jump_field.py - through the shipped analytic-oracle path (scripts/analytic_oracle_fixtures/measure.py, scripts/analytic_oracle_fixtures/reduced_oracle.py, the LOCKED_RECOVERY_BOUNDS registry in tests/test_solovev_recovery_gates.py) at no fewer than three resolutions (the reduced oracle, coarse -500, fine -1000 requested cells or a ladder of equal span), banking for every case at every resolution the psi, gradient, Hessian sup-and-RMS norms over the whole domain plus the two-pitch boundary band, the magnetic-axis position error, the X-point position error where the case has one, the boundary flux error, the terminal fixed-point residual with its convergence qualification (qualified or unqualified against the 1e-12 registry bound, never averaged across qualifications), the per-norm log-space convergence-order fit with uncertainty reusing benchmarks/analytic_operator_ladder.py _fit_order and _regional_norms beside the theoretical order of the discrete operator, the cited reuse-map rows from docs/research/forward-accuracy-reuse-map.html, the lane (H200 reservation gpu_0003_grpA with JAX_PLATFORMS=cuda,cpu for the fine solves, the CPU lane only where the recovery gates already run there), compile-warm wall seconds per solve, with no solver source modified",
+          "id": "gaa-solovev-certificate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195519540142-gaa-solovev-certificate/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "docs/figures/gs-absolute-accuracy/solovev/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solovev-certificate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T19:55:26Z",
+        "completed_at": "2026-09-01T20:08:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 792,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 792,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6d1dd89a9ab82c25d677c277457766d25c8a1ccd",
+        "commits": [
+          "bf6dcdf9ec2d532d6bebbd01cfbd74103552ef54"
+        ],
+        "changed_lines": {
+          "added": 748,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195519540142-gaa-solovev-certificate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e8a-7185-7a41-bb5a-cfe8b92a0d07",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6460416,
+            "cached_input_tokens_cumulative": 6460416,
+            "input_tokens": 6797059,
+            "input_tokens_cumulative": 6797059,
+            "output_tokens": 25836,
+            "output_tokens_cumulative": 25836,
+            "reasoning_output_tokens": 8391,
+            "reasoning_output_tokens_cumulative": 8391
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1260
+    "_version": 1261
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:24:19",
+  "updated": "2026-09-01T10:07:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -702,11 +702,49 @@
         "created": "2026-08-12"
       },
       {
+        "id": "hdg-cache-replay",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "hdg-h200-batch",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "hdg-measured-map",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "hex-stencil",
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff707-8995-7c20-8341-70011e4a236e",
         "created": "2026-08-12"
+      },
+      {
+        "id": "hexgrid-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05bfb-d640-7052-8957-0773d21bae81",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05bfb-d640-7052-8957-0773d21bae81"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "imas-guidance",
@@ -1335,6 +1373,15 @@
           "gpt-5.6-sol": "01a03c37-4cb2-7b41-8bdb-2393c4505680"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "ssb-basis",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "sse-verify",
@@ -65016,9 +65063,204 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T072308540098-sse-ring-restriction-retirement",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-ring-restriction-retirement",
+        "node_definition": {
+          "done_when": "No production path can reimpose the complete-ring scatter restriction, and the sensitivity control cannot drift with production semantics. (1) Verify by exhaustive search of nova/biot that no production symbol restricts a moment scatter or current attribution to complete-neighbour-ring cells; name every candidate inspected, including whether any symbol whose NAME still says interior-only carries all-cells semantics after 6282acd5, since a name asserting a retired restriction invites its reintroduction. If a production path retains the restriction, delete it - git is the version store - and if a symbol's name contradicts its semantics, rename it to what it does, provided every consumer lies within nova/biot; if consumers reach outside nova/biot, record the rename as a follow_on naming the consumers rather than widening scope. (2) The sensitivity control in tests/test_rim_current_scatter.py must construct the retired complete-ring set LOCALLY, from the hex stencil interior definition inside the test, not through any production attribute, so a later production change cannot silently blunt the control; prove it still reproduces the recorded 96 of 447 omission on the fixture. (3) Focused lane green with the delta stated against the base revision; no committed bank artifact modified; no scheduler job.",
+          "estimated_hours": null,
+          "goal": "Production provably free of the complete-ring scatter restriction, with the test-side sensitivity control made self-contained so it cannot drift",
+          "id": "sse-ring-restriction-retirement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072308540098-sse-ring-restriction-retirement/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/biot",
+            "tests/test_rim_current_scatter.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bound-repair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:23:18Z",
+        "completed_at": "2026-09-01T07:32:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 550,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 550,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9ebbc9dace8a286685e7fb270fea9d029f3743b4",
+        "commits": [
+          "5e3fe259783798de5728b007343011f0a93f8754"
+        ],
+        "changed_lines": {
+          "added": 75,
+          "removed": 4,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "exhaustive nova/biot sweep with every candidate symbol named; focused lane green; control reproduces the recorded 96/447 from a test-local ring definition",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072308540098-sse-ring-restriction-retirement/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T072308540098-sse-ring-restriction-retirement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e58-fd02-7182-a10d-371bc8889f0f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1139712,
+            "cached_input_tokens_cumulative": 6925312,
+            "input_tokens": 946863,
+            "input_tokens_cumulative": 7090736,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 17009,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4973
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T053948341346-sse-h200-step-decomposition",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-h200-step-decomposition",
+        "node_definition": {
+          "done_when": "One batched forward-solve step is decomposed into measured per-stage wall time on the H200, so the 112-fold gap to the 300 slices-per-second target becomes arithmetic instead of hope. The committed ladder in docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json measured 0.0998 to 2.6751 slices per second at widths 1 to 1024 (10.0 s per step at width 1, 382.8 s at width 1024, saturating at 0.374 s per member-slice), but its source b9585c1f contains neither the stagnation exit 420feb23 nor own-mask acceptance a2e65fda, and on the limited_plasma operand the mask settles immediately, so roughly 15 of its 16 outer trips were stagnant work the current solver no longer performs. (1) On current main, with the commit stated, run the benchmark route ForwardProfile.solve_batch at width 32 and at width 1024 on one reserved H200 (partition betelgeuse, --reservation=gpu_0003_grpA, only the GPUs the run needs, absolute Nova interpreter with VIRTUAL_ENV unset and no uv wrapper, exact command preflighted on the login node) and report the measured outer trip count with the stagnation exit active and the new seconds per step and per member-slice beside the committed stale figures. (2) Decompose one step at each width into measured stages: the active-set outer trips, the warmup sweeps, the Newton stage, the Krylov iterations, the Green's-function and response-carrier work, and the per-slice vertical_conditioning_receipt call, using the JAX profiler trace or explicitly timed sub-programs; report seconds and percentage per stage, and name the single largest consumer. State explicitly whether the conditioning receipt runs on host per slice, because a host-synchronising call per slice would dominate at exactly the shape the ladder shows. (3) Deliver the arithmetic to 300 slices per second: for each stage, the factor it must shrink by, and whether that reduction is configuration (trip count, warmup count, precision) or requires kernel or algorithm work; if the arithmetic shows 300 is not reachable on this operand and architecture, state the measured ceiling and what bounds it, plainly and without softening. (4) State the projected cost of the same solve at grid stride 1, the 65-by-65 production resolution the sub-centimetre boundary bar likely requires, using the measured stage scalings rather than a guess where the profile supports it, so the lead can see both directives on one cost sheet. (5) Write every output to the durable run directory, modify no committed artifact, carry the limited_plasma fixed-budget qualification verbatim so no figure reads as a convergence claim, and keep the run inside its fence by profiling exactly the two named widths rather than a ladder.",
+          "estimated_hours": null,
+          "goal": "A measured per-stage decomposition of one batched solve step on the H200 at two widths on current main, with the factor-by-factor arithmetic from the measured cost to the 300 slices-per-second target",
+          "id": "sse-h200-step-decomposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/h200-step-decomposition.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:39:58Z",
+        "completed_at": "2026-09-01T07:33:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6828,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6828,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d1e99809e2652c63aae326ed9cfbae117d35d31b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "durable job 1260043 verified RUNNING on the reserved H200 with six of twelve arms landed as atomic per-arm JSON in fresh interpreters; launch-only, harvest separately owned",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053948341346-sse-h200-step-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 44380160,
+            "cached_input_tokens_cumulative": 189497856,
+            "input_tokens": 45268457,
+            "input_tokens_cumulative": 193414691,
+            "output_tokens": 83464,
+            "output_tokens_cumulative": 368861,
+            "reasoning_output_tokens": 21810,
+            "reasoning_output_tokens_cumulative": 101283
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1195
+    "_version": 1203
   }
 }

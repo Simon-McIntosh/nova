@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T21:28:48",
+  "updated": "2026-09-01T21:35:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1106,6 +1106,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "pta-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "publish",
         "harness": "codex",
         "role": "implement",
@@ -1488,6 +1497,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05d4e-ae4d-7de3-b417-6dbd8f376dbe"
         },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "sto-evidence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-01"
       },
       {
@@ -68064,6 +68082,6 @@
       }
     ],
     "holds": [],
-    "_version": 1241
+    "_version": 1243
   }
 }

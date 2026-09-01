@@ -31,6 +31,12 @@ DEFAULT_SHADOW_ROOT = ROOT.parent / "scr-true-pin-reproduction-shadow"
 DEFAULT_COMPARISON = (
     ROOT / "docs/figures/solver-convergence-regression/backend-divergence.json"
 )
+DEFAULT_TRUE_PIN = (
+    ROOT / "docs/figures/solver-convergence-regression/true-pin-reproduction.json"
+)
+TRAJECTORY_REVISION = "4ee90ece25ad47cc655dc4531249da24d13763e1"
+MODEL_TRUST_REVISION = "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed"
+OWN_MASK_REVISION = "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b"
 
 
 def _sha256(path: Path) -> str:
@@ -47,11 +53,14 @@ def _git(root: Path, *arguments: str) -> str:
     ).strip()
 
 
-def _validate_shadow(shadow_root: Path) -> dict[str, Any]:
+def _validate_shadow(
+    shadow_root: Path, expected_revision: str = TRUE_REVISION
+) -> dict[str, Any]:
     head = _git(shadow_root, "rev-parse", "HEAD")
-    if head != TRUE_REVISION:
+    if head != expected_revision:
         raise RuntimeError(
-            f"shadow revision {head} does not equal bank revision {TRUE_REVISION}"
+            f"shadow revision {head} does not equal expected revision "
+            f"{expected_revision}"
         )
     solver_changed = subprocess.run(
         ["git", "-C", str(shadow_root), "diff", "--quiet", head, "--", "nova"],
@@ -211,8 +220,13 @@ def _solve_pure_arm(
     }
 
 
-def capture(shadow_root: Path) -> dict[str, Any]:
-    source = _validate_shadow(shadow_root)
+def capture(
+    shadow_root: Path,
+    *,
+    expected_revision: str = TRUE_REVISION,
+    targets: tuple[tuple[int, int], ...] = TARGETS,
+) -> dict[str, Any]:
+    source = _validate_shadow(shadow_root, expected_revision)
     _configure_shadow_import(shadow_root)
     os.chdir(shadow_root)
 
@@ -265,11 +279,11 @@ def capture(shadow_root: Path) -> dict[str, Any]:
         }
         for row in bank["rows"]
         if row.get("arm") == "pure"
-        and (int(row["shot"]), int(row["slice_index"])) in TARGETS
+        and (int(row["shot"]), int(row["slice_index"])) in targets
     }
     corroboration = _corroboration_module(shadow_root)
     arms = {}
-    for target in TARGETS:
+    for target in targets:
         row, qualification = selected[target]
         case, context = _mast_case_from_selection(SHOT_STORE, row, qualification)
         passive_case, profile, policy = _passive_inclusive_case(
@@ -310,8 +324,19 @@ def capture(shadow_root: Path) -> dict[str, Any]:
                 "passive-inclusive case plus the production solve_portfolio pure arm"
             ),
             "solver_source_modified": False,
+            "targets": [list(target) for target in targets],
         },
     }
+
+
+def _target(value: str) -> tuple[int, int]:
+    try:
+        shot, slice_index = value.split("/", 1)
+        return int(shot), int(slice_index)
+    except (TypeError, ValueError) as error:
+        raise argparse.ArgumentTypeError(
+            f"target must use SHOT/SLICE integers, received {value!r}"
+        ) from error
 
 
 def _candidate_window() -> dict[str, Any]:
@@ -336,6 +361,467 @@ def _candidate_window() -> dict[str, Any]:
             for line in lines
         ],
     }
+
+
+def _verified_hunk(commit: str, function: str, quote: str) -> dict[str, str]:
+    command = [
+        "git",
+        "show",
+        "--format=",
+        commit,
+        "--",
+        "nova/equilibrium/fixed_point.py",
+    ]
+    diff = subprocess.check_output(command, cwd=ROOT, text=True)
+    source_lines = "\n".join(
+        line[1:] for line in diff.splitlines() if line.startswith(("+", " "))
+    )
+    if quote not in source_lines:
+        raise RuntimeError(f"quoted hunk is absent from {commit} in {function}")
+    return {
+        "commit": commit,
+        "function": function,
+        "command": " ".join(command),
+        "quote": quote,
+    }
+
+
+def _root_cause_reading() -> list[dict[str, Any]]:
+    classifications = {
+        "6f08fb19fa4790449d9ff2b652ea488f6ccf9d53": (
+            "telemetry only; disabled by default and outside solver decisions",
+            ["_active_set_newton_krylov", "newton_krylov"],
+        ),
+        "ce686206627a20b2797b70145859a6a42350c90c": (
+            "no fixed_point.py hunk; wall-height eligibility only",
+            [],
+        ),
+        "ebb658bd0d6679bba604cef1e554c08d6a3a38ab": (
+            "no fixed_point.py hunk; wall-height reporting only",
+            [],
+        ),
+        "420feb23dc040ae1d0a2f874cff4e93c8f023030": (
+            "terminal stop only; detects the repeated settled residual but cannot "
+            "cause the earlier trip-2 state difference",
+            ["_active_set_newton_krylov", "newton_krylov"],
+        ),
+        "7fc24f01064d37633ed3424f9850aa763ad38f1b": (
+            "inner diagnostics plus an explicit GMRES tolerance equal to the prior "
+            "library default; excluded by the later trajectory-boundary capture",
+            ["_newton_krylov_inner", "_qualified_krylov_step"],
+        ),
+        "736e2553ffe18f0e146809ca984a1cf3e4647714": (
+            "retains an incoming state only when selected_difference is zero, so it "
+            "cannot itself reject the banked trip-4 one-cell reopening",
+            ["_active_set_newton_krylov"],
+        ),
+        TRAJECTORY_REVISION: (
+            "resumes the terminal Newton trajectory after an unchanged mask instead "
+            "of restarting from the reported best fallback",
+            ["_active_set_newton_krylov", "_newton_krylov_inner"],
+        ),
+        "9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8": (
+            "continues merit and recovery state only after the trajectory continuation "
+            "is already eligible; cannot affect trip 2",
+            ["_active_set_newton_krylov", "_newton_krylov_inner"],
+        ),
+        MODEL_TRUST_REVISION: (
+            "requires realized merit decrease to substantiate the frozen local model "
+            "before selecting a promotion family",
+            ["_backtracked_promotion", "_newton_krylov_inner"],
+        ),
+        OWN_MASK_REVISION: (
+            "scores candidates and incumbents on their induced masks and requires a "
+            "strict own-mask residual improvement",
+            ["_backtracked_promotion", "_newton_krylov_inner"],
+        ),
+    }
+    records = []
+    for commit in reversed(_candidate_window()["commits"]):
+        sha = commit["sha"]
+        changed = _git(ROOT, "show", "--format=", "--name-only", sha).splitlines()
+        classification, functions = classifications[sha]
+        records.append(
+            {
+                **commit,
+                "fixed_point_touched": "nova/equilibrium/fixed_point.py" in changed,
+                "functions": functions,
+                "reading": classification,
+            }
+        )
+    return records
+
+
+def _captured_arm(raw: dict[str, Any]) -> dict[str, Any]:
+    arm = raw["arms"]["22086/43 pure"]
+    return {
+        "revision": raw["source"]["revision"],
+        "shadow_root": raw["source"]["shadow_root"],
+        "solve": arm["solve"],
+        "allocation": raw["allocation"],
+    }
+
+
+def _plot_root_cause(receipt: dict[str, Any], figure: Path) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, axis = plt.subplots(figsize=(11.5, 6.8), constrained_layout=True)
+    styles = (
+        ("banked_old", "d47f7cd1 banked convergence", "o", "-", 2.4),
+        ("after_trajectory", "4ee90ece trajectory continuation", "s", "--", 1.8),
+        ("after_model_trust", "565a8c8e model-trust selection", "D", "--", 1.8),
+        ("banked_new", "a4bec44f own-mask policy", "^", "-", 2.4),
+    )
+    for key, label, marker, linestyle, linewidth in styles:
+        history = receipt["histories"][key]["active_set_residuals"]
+        axis.semilogy(
+            range(1, len(history) + 1),
+            history,
+            marker=marker,
+            linestyle=linestyle,
+            linewidth=linewidth,
+            label=label,
+        )
+    axis.axhline(
+        receipt["histories"]["banked_old"]["terminal_residual"],
+        color="black",
+        linewidth=1.1,
+        linestyle=":",
+        label="committed converged residual",
+    )
+    axis.axvline(2, color="0.75", linewidth=1.0, linestyle=":")
+    axis.axvline(4, color="0.75", linewidth=1.0, linestyle=":")
+    axis.text(2.05, 1.7e-3, "promotion paths separate", fontsize=8)
+    axis.text(4.05, 1.1e-5, "banked mask re-opens", fontsize=8)
+    axis.set_xlabel("active-set trip")
+    axis.set_ylabel("relative sup residual")
+    axis.set_title("22086/43 pure: policy changes across the localized commit window")
+    axis.grid(True, which="both", alpha=0.25)
+    axis.legend(fontsize=8)
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure, dpi=180)
+    plt.close(fig)
+
+
+def compile_root_cause(
+    trajectory_raw_path: Path,
+    model_trust_raw_path: Path,
+    true_pin_path: Path,
+    later_path: Path,
+    output: Path,
+    figure: Path,
+    job_elapsed: str,
+    exit_marker: int,
+) -> dict[str, Any]:
+    trajectory_raw = json.loads(trajectory_raw_path.read_text())
+    model_trust_raw = json.loads(model_trust_raw_path.read_text())
+    true_pin = json.loads(true_pin_path.read_text())
+    later = json.loads(later_path.read_text())
+    trajectory = _captured_arm(trajectory_raw)
+    model_trust = _captured_arm(model_trust_raw)
+    banked_old = true_pin["arms"]["22086/43 pure"]["solve"]
+    banked_new = later["backends"]["gpu"]
+
+    old_trip_two = float(banked_old["active_set_residuals"][1])
+    new_trip_two = float(banked_new["active_set_residuals"][1])
+    trajectory_trip_two = float(trajectory["solve"]["active_set_residuals"][1])
+    trust_trip_two = float(model_trust["solve"]["active_set_residuals"][1])
+    trajectory_preserves_early_path = math.isclose(
+        trajectory_trip_two, old_trip_two, rel_tol=1.0e-12, abs_tol=1.0e-14
+    )
+    trust_matches_new_path = math.isclose(
+        trust_trip_two, new_trip_two, rel_tol=1.0e-12, abs_tol=1.0e-14
+    )
+    trust_matches_old_path = math.isclose(
+        trust_trip_two, old_trip_two, rel_tol=1.0e-12, abs_tol=1.0e-14
+    )
+    if trust_matches_new_path:
+        promotion_commit = MODEL_TRUST_REVISION
+        promotion_function = "_backtracked_promotion"
+        promotion_mechanism = (
+            "model-trust selection refuses a candidate family when realized merit "
+            "decrease is more than tenfold weaker than its frozen local prediction"
+        )
+        promotion_quote = (
+            "ladder_accepted = jnp.any(sufficient) & (\n"
+            "        ~jnp.asarray(model_trust_selection) | ladder_trusted\n"
+            "    )"
+        )
+    elif trust_matches_old_path:
+        promotion_commit = OWN_MASK_REVISION
+        promotion_function = "_backtracked_promotion"
+        promotion_mechanism = (
+            "own-mask acceptance refuses the banked promotion because its residual "
+            "does not strictly improve when candidate and incumbent are each scored "
+            "on the mask they induce"
+        )
+        promotion_quote = (
+            "sufficient &= ~jnp.asarray(own_mask_acceptance) | "
+            "(residuals < incumbent_residual)"
+        )
+    else:
+        raise RuntimeError("model-trust capture matches neither banked trip-2 path")
+
+    trajectory_masks = trajectory["solve"]["active_set_mask_differences"]
+    trust_masks = model_trust["solve"]["active_set_mask_differences"]
+    trajectory_preserves_reopening = trajectory_masks[3:5] == [1, 22]
+    trust_preserves_reopening = trust_masks[3:5] == [1, 22]
+    own_mask_blocks_reopening = banked_new["active_set_mask_differences"][3:5] == [
+        0,
+        0,
+    ]
+    if not (
+        trajectory_preserves_reopening
+        and trust_preserves_reopening
+        and own_mask_blocks_reopening
+    ):
+        raise RuntimeError("intermediate captures do not isolate mask reopening")
+    acceptance_map_quote = (
+        "def acceptance_map(candidate):\n"
+        "            if acceptance_shadow_mask_fn is None or not "
+        "own_mask_acceptance:\n"
+        "                return frozen_map(candidate)\n"
+        "            candidate_shadow = jnp.ravel(\n"
+        "                acceptance_shadow_mask_fn(candidate, carry.shadow_mask)\n"
+        "            )\n"
+        "            return acceptance_shadowed_map_fn(candidate, candidate_shadow)"
+    )
+    job_id = trajectory["allocation"]["job_id"]
+    if model_trust["allocation"]["job_id"] != job_id:
+        raise RuntimeError("intermediate captures did not share one H200 allocation")
+
+    scheduler = {
+        "job_id": job_id,
+        "node": trajectory["allocation"]["node"],
+        "elapsed": job_elapsed,
+        "exit_marker": exit_marker,
+        "partition": trajectory["allocation"]["partition"],
+        "reservation": trajectory["allocation"]["reservation"],
+    }
+    histories = {
+        "banked_old": {
+            "revision": TRUE_REVISION,
+            "active_set_residuals": banked_old["active_set_residuals"],
+            "active_set_mask_differences": banked_old["active_set_mask_differences"],
+            "terminal_residual": banked_old["terminal_residual"],
+            "termination_reason": banked_old["termination_reason"],
+            "trip_count": banked_old["trip_count"],
+        },
+        "after_trajectory": {
+            "revision": TRAJECTORY_REVISION,
+            **trajectory["solve"],
+            "scheduler": scheduler,
+            "raw_capture": str(trajectory_raw_path),
+            "raw_capture_sha256": _sha256(trajectory_raw_path),
+        },
+        "after_model_trust": {
+            "revision": MODEL_TRUST_REVISION,
+            **model_trust["solve"],
+            "scheduler": scheduler,
+            "raw_capture": str(model_trust_raw_path),
+            "raw_capture_sha256": _sha256(model_trust_raw_path),
+        },
+        "banked_new": {
+            "revision": WINDOW_END,
+            "active_set_residuals": banked_new["active_set_residuals"],
+            "active_set_mask_differences": banked_new["active_set_mask_differences"],
+            "terminal_residual": banked_new["terminal_residual"],
+            "termination_reason": banked_new["termination_reason"],
+            "trip_count": banked_new["active_set_iterations"],
+        },
+    }
+    receipt = {
+        "receipt": "fixed-point root-cause reading",
+        "arm": "22086/43 pure",
+        "sources": {
+            "true_pin_reproduction": str(true_pin_path),
+            "true_pin_reproduction_sha256": _sha256(true_pin_path),
+            "later_backend_receipt": str(later_path),
+            "later_backend_receipt_sha256": _sha256(later_path),
+        },
+        "candidate_window": _candidate_window(),
+        "targeted_reading": _root_cause_reading(),
+        "histories": histories,
+        "behavioral_differences": {
+            "trip_2_newton_promotion": {
+                "banked_old_residual": old_trip_two,
+                "banked_new_residual": new_trip_two,
+                "absolute_difference": abs(new_trip_two - old_trip_two),
+                "trajectory_revision_residual": trajectory_trip_two,
+                "model_trust_revision_residual": trust_trip_two,
+                "trajectory_revision_preserves_banked_path": (
+                    trajectory_preserves_early_path
+                ),
+                "model_trust_revision_matches_banked_new_path": (
+                    trust_matches_new_path
+                ),
+                "model_trust_revision_matches_banked_old_path": (
+                    trust_matches_old_path
+                ),
+                "mechanism": promotion_mechanism,
+                "responsible_hunks": [
+                    _verified_hunk(
+                        promotion_commit, promotion_function, promotion_quote
+                    )
+                ],
+            },
+            "trip_4_to_5_mask_reopening": {
+                "banked_old_mask_differences_trip_4_to_5": banked_old[
+                    "active_set_mask_differences"
+                ][3:5],
+                "trajectory_revision_mask_differences_trip_4_to_5": (
+                    trajectory_masks[3:5]
+                ),
+                "model_trust_revision_mask_differences_trip_4_to_5": (trust_masks[3:5]),
+                "banked_new_mask_differences_trip_4_to_5": banked_new[
+                    "active_set_mask_differences"
+                ][3:5],
+                "trajectory_revision_preserves_banked_reopening": (
+                    trajectory_preserves_reopening
+                ),
+                "model_trust_revision_preserves_banked_reopening": (
+                    trust_preserves_reopening
+                ),
+                "own_mask_revision_blocks_reopening": (own_mask_blocks_reopening),
+                "mechanism": (
+                    "the induced-mask acceptance map and strict residual-improvement "
+                    "guard reject the banked trip-2 promotion; the resulting state "
+                    "reaches trip 3 on a path whose candidate-induced mask stays "
+                    "fixed, instead of later reopening one cell and then twenty-two"
+                ),
+                "responsible_hunks": [
+                    _verified_hunk(
+                        OWN_MASK_REVISION,
+                        "_newton_krylov_inner",
+                        acceptance_map_quote,
+                    ),
+                    _verified_hunk(
+                        OWN_MASK_REVISION,
+                        "_backtracked_promotion",
+                        (
+                            "sufficient &= ~jnp.asarray(own_mask_acceptance) | "
+                            "(residuals < incumbent_residual)"
+                        ),
+                    ),
+                ],
+            },
+        },
+        "defect_or_policy": {
+            "classification": "deliberate_policy_consequence",
+            "sentence": (
+                "The new behavior is a deliberate policy consequence, not a solver "
+                "defect: it refuses a promotion the banked code accepted without the "
+                "current induced-mask evidence, and that policy-selected path keeps "
+                "the mask settled until honest stagnation."
+            ),
+        },
+        "remedy_ranking": [
+            {
+                "rank": 1,
+                "rung": "adaptive Krylov depth",
+                "reason": (
+                    "the accepted policy exposes a near-neutral direction that a "
+                    "twelve-action inner solve still fails to contract, so allocate "
+                    "additional actions only after measured contraction stalls"
+                ),
+            },
+            {
+                "rank": 2,
+                "rung": "deflation or recycling",
+                "reason": (
+                    "the repeated settled-mask residual supplies a stable mode "
+                    "estimate "
+                    "that can augment or deflate the next Krylov solve"
+                ),
+            },
+            {
+                "rank": 3,
+                "rung": "Anderson acceleration",
+                "reason": (
+                    "the post-policy map has the fixed-mask, near-unit-eigenvalue "
+                    "shape "
+                    "for which a short outer history is directly useful"
+                ),
+            },
+            {
+                "rank": 4,
+                "rung": "mode-aware step handling",
+                "reason": (
+                    "it becomes justified only if the inner trace shows that the "
+                    "near-neutral direction is repeatedly clipped or refused"
+                ),
+            },
+            {
+                "rank": 5,
+                "rung": "vertical-mode regularization",
+                "reason": (
+                    "it is physics-shaped and the mixed arm supports it, but it "
+                    "changes "
+                    "the objective more than the numerical remedies above"
+                ),
+            },
+        ],
+        "execution_contract": {
+            "at_most_two_re_solves": 2,
+            "actual_re_solves": 2,
+            "one_reserved_h200": True,
+            "allocated_cpus": trajectory["allocation"]["allocated_cpus"],
+            "jax_platforms": trajectory["allocation"]["jax_platforms"],
+            "solver_source_modified": False,
+            "assigned_worktree_nova_diff_stat": subprocess.check_output(
+                ["git", "diff", "--stat", "--", "nova"], cwd=ROOT, text=True
+            ).strip(),
+        },
+        "figure": str(figure),
+    }
+    _check_root_cause(receipt, require_figure=False)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    _plot_root_cause(receipt, figure)
+    _check_root_cause(receipt, require_figure=True)
+    return receipt
+
+
+def _check_root_cause(receipt: dict[str, Any], *, require_figure: bool = True) -> None:
+    if receipt["candidate_window"]["count"] != 10:
+        raise RuntimeError("root-cause receipt omits the ten-commit window")
+    if len(receipt["targeted_reading"]) != 10:
+        raise RuntimeError("root-cause receipt omits targeted commit readings")
+    if receipt["execution_contract"]["actual_re_solves"] > 2:
+        raise RuntimeError("root-cause receipt exceeds the re-solve limit")
+    if receipt["execution_contract"]["assigned_worktree_nova_diff_stat"]:
+        raise RuntimeError("assigned worktree contains a change under nova")
+    if receipt["execution_contract"]["solver_source_modified"]:
+        raise RuntimeError("root-cause receipt reports modified solver source")
+    for key in ("after_trajectory", "after_model_trust"):
+        history = receipt["histories"][key]
+        for field in (
+            "active_set_residuals",
+            "active_set_mask_differences",
+            "terminal_residual",
+            "termination_reason",
+            "trip_count",
+            "selected_saddle_m",
+            "scheduler",
+        ):
+            if history.get(field) is None:
+                raise RuntimeError(f"{key} omits {field}")
+        if history["scheduler"]["exit_marker"] != 0:
+            raise RuntimeError(f"{key} did not exit cleanly")
+    for difference in receipt["behavioral_differences"].values():
+        if not difference["responsible_hunks"]:
+            raise RuntimeError("behavioral difference omits a responsible hunk")
+    if not receipt["defect_or_policy"]["sentence"]:
+        raise RuntimeError("root-cause receipt omits the policy verdict")
+    if [row["rank"] for row in receipt["remedy_ranking"]] != [1, 2, 3, 4, 5]:
+        raise RuntimeError("root-cause remedy ranking is incomplete")
+    if require_figure:
+        figure = Path(receipt["figure"])
+        if not figure.exists() or figure.stat().st_size == 0:
+            raise RuntimeError("root-cause figure is absent")
 
 
 def _comparison(solve: dict[str, Any], committed: dict[str, Any]) -> dict[str, Any]:
@@ -517,6 +1003,8 @@ def _parse_args() -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     capture_parser = subparsers.add_parser("capture")
     capture_parser.add_argument("--shadow-root", type=Path, default=DEFAULT_SHADOW_ROOT)
+    capture_parser.add_argument("--expected-revision", default=TRUE_REVISION)
+    capture_parser.add_argument("--target", type=_target, action="append")
     capture_parser.add_argument("--output", type=Path, required=True)
     compile_parser = subparsers.add_parser("compile")
     compile_parser.add_argument("--raw", type=Path, required=True)
@@ -527,13 +1015,28 @@ def _parse_args() -> argparse.Namespace:
     compile_parser.add_argument("--exit-marker", type=int, required=True)
     check_parser = subparsers.add_parser("check")
     check_parser.add_argument("--receipt", type=Path, required=True)
+    root_parser = subparsers.add_parser("root-cause-compile")
+    root_parser.add_argument("--trajectory-raw", type=Path, required=True)
+    root_parser.add_argument("--model-trust-raw", type=Path, required=True)
+    root_parser.add_argument("--true-pin", type=Path, default=DEFAULT_TRUE_PIN)
+    root_parser.add_argument("--later", type=Path, default=DEFAULT_COMPARISON)
+    root_parser.add_argument("--output", type=Path, required=True)
+    root_parser.add_argument("--figure", type=Path, required=True)
+    root_parser.add_argument("--job-elapsed", required=True)
+    root_parser.add_argument("--exit-marker", type=int, required=True)
+    root_check_parser = subparsers.add_parser("root-cause-check")
+    root_check_parser.add_argument("--receipt", type=Path, required=True)
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     if args.command == "capture":
-        payload = capture(args.shadow_root)
+        payload = capture(
+            args.shadow_root,
+            expected_revision=args.expected_revision,
+            targets=tuple(args.target) if args.target else TARGETS,
+        )
         _write_json(args.output, payload)
         print(
             "BANK_REVISION_CAPTURE PASS "
@@ -561,10 +1064,34 @@ def main() -> None:
             ),
             flush=True,
         )
-    else:
+    elif args.command == "check":
         receipt = json.loads(args.receipt.read_text())
         _check(receipt)
         print("BANK_REVISION_REPRODUCTION_CHECK PASS", flush=True)
+    elif args.command == "root-cause-compile":
+        receipt = compile_root_cause(
+            args.trajectory_raw,
+            args.model_trust_raw,
+            args.true_pin,
+            args.later,
+            args.output,
+            args.figure,
+            args.job_elapsed,
+            args.exit_marker,
+        )
+        promotion = receipt["behavioral_differences"]["trip_2_newton_promotion"]
+        reopening = receipt["behavioral_differences"]["trip_4_to_5_mask_reopening"]
+        print(
+            "ROOT_CAUSE_COMPILE PASS "
+            f"promotion_commit={promotion['responsible_hunks'][0]['commit'][:8]} "
+            "own_mask_blocks_reopening="
+            f"{reopening['own_mask_revision_blocks_reopening']}",
+            flush=True,
+        )
+    else:
+        receipt = json.loads(args.receipt.read_text())
+        _check_root_cause(receipt)
+        print("ROOT_CAUSE_CHECK PASS", flush=True)
 
 
 if __name__ == "__main__":

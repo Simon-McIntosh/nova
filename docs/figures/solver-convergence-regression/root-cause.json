@@ -1,0 +1,429 @@
+{
+  "arm": "22086/43 pure",
+  "behavioral_differences": {
+    "trip_2_newton_promotion": {
+      "absolute_difference": 0.0003610965201268639,
+      "banked_new_residual": 0.0031314746103240005,
+      "banked_old_residual": 0.0034925711304508644,
+      "mechanism": "own-mask acceptance refuses the banked promotion because its residual does not strictly improve when candidate and incumbent are each scored on the mask they induce",
+      "model_trust_revision_matches_banked_new_path": false,
+      "model_trust_revision_matches_banked_old_path": true,
+      "model_trust_revision_residual": 0.0034925711304508423,
+      "responsible_hunks": [
+        {
+          "command": "git show --format= a2e65fda4c860edd261fee6a0c7af8f7083e4a7b -- nova/equilibrium/fixed_point.py",
+          "commit": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+          "function": "_backtracked_promotion",
+          "quote": "sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)"
+        }
+      ],
+      "trajectory_revision_preserves_banked_path": true,
+      "trajectory_revision_residual": 0.003492571130450865
+    },
+    "trip_4_to_5_mask_reopening": {
+      "banked_new_mask_differences_trip_4_to_5": [
+        0,
+        0
+      ],
+      "banked_old_mask_differences_trip_4_to_5": [
+        1,
+        22
+      ],
+      "mechanism": "the induced-mask acceptance map and strict residual-improvement guard reject the banked trip-2 promotion; the resulting state reaches trip 3 on a path whose candidate-induced mask stays fixed, instead of later reopening one cell and then twenty-two",
+      "model_trust_revision_mask_differences_trip_4_to_5": [
+        1,
+        22
+      ],
+      "model_trust_revision_preserves_banked_reopening": true,
+      "own_mask_revision_blocks_reopening": true,
+      "responsible_hunks": [
+        {
+          "command": "git show --format= a2e65fda4c860edd261fee6a0c7af8f7083e4a7b -- nova/equilibrium/fixed_point.py",
+          "commit": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+          "function": "_newton_krylov_inner",
+          "quote": "def acceptance_map(candidate):\n            if acceptance_shadow_mask_fn is None or not own_mask_acceptance:\n                return frozen_map(candidate)\n            candidate_shadow = jnp.ravel(\n                acceptance_shadow_mask_fn(candidate, carry.shadow_mask)\n            )\n            return acceptance_shadowed_map_fn(candidate, candidate_shadow)"
+        },
+        {
+          "command": "git show --format= a2e65fda4c860edd261fee6a0c7af8f7083e4a7b -- nova/equilibrium/fixed_point.py",
+          "commit": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+          "function": "_backtracked_promotion",
+          "quote": "sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)"
+        }
+      ],
+      "trajectory_revision_mask_differences_trip_4_to_5": [
+        1,
+        22
+      ],
+      "trajectory_revision_preserves_banked_reopening": true
+    }
+  },
+  "candidate_window": {
+    "command": "git log --format=%H%x09%s d47f7cd1ce1c72138b6691c559bbf1be0bcd465e..a4bec44f5cbf80ad5e210c01c984ac8d02a89de9 -- nova/equilibrium",
+    "commits": [
+      {
+        "sha": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+        "subject": "fix(equilibrium): evaluate candidates on induced masks"
+      },
+      {
+        "sha": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+        "subject": "fix(equilibrium): select candidates by model trust"
+      },
+      {
+        "sha": "9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8",
+        "subject": "fix(equilibrium): continue globalization across settled masks"
+      },
+      {
+        "sha": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+        "subject": "fix(equilibrium): continue Newton states across settled masks"
+      },
+      {
+        "sha": "736e2553ffe18f0e146809ca984a1cf3e4647714",
+        "subject": "fix(equilibrium): retain settled active-set best states"
+      },
+      {
+        "sha": "7fc24f01064d37633ed3424f9850aa763ad38f1b",
+        "subject": "feat(equilibrium): record inner solve iterations"
+      },
+      {
+        "sha": "420feb23dc040ae1d0a2f874cff4e93c8f023030",
+        "subject": "feat(equilibrium): stop stagnant active sets"
+      },
+      {
+        "sha": "ebb658bd0d6679bba604cef1e554c08d6a3a38ab",
+        "subject": "feat(equilibrium): report height reference eligibility"
+      },
+      {
+        "sha": "ce686206627a20b2797b70145859a6a42350c90c",
+        "subject": "fix(equilibrium): guard wall height references"
+      },
+      {
+        "sha": "6f08fb19fa4790449d9ff2b652ea488f6ccf9d53",
+        "subject": "feat(equilibrium): expose active-set trip telemetry"
+      }
+    ],
+    "count": 10,
+    "verbatim": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b\tfix(equilibrium): evaluate candidates on induced masks\n565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed\tfix(equilibrium): select candidates by model trust\n9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8\tfix(equilibrium): continue globalization across settled masks\n4ee90ece25ad47cc655dc4531249da24d13763e1\tfix(equilibrium): continue Newton states across settled masks\n736e2553ffe18f0e146809ca984a1cf3e4647714\tfix(equilibrium): retain settled active-set best states\n7fc24f01064d37633ed3424f9850aa763ad38f1b\tfeat(equilibrium): record inner solve iterations\n420feb23dc040ae1d0a2f874cff4e93c8f023030\tfeat(equilibrium): stop stagnant active sets\nebb658bd0d6679bba604cef1e554c08d6a3a38ab\tfeat(equilibrium): report height reference eligibility\nce686206627a20b2797b70145859a6a42350c90c\tfix(equilibrium): guard wall height references\n6f08fb19fa4790449d9ff2b652ea488f6ccf9d53\tfeat(equilibrium): expose active-set trip telemetry"
+  },
+  "defect_or_policy": {
+    "classification": "deliberate_policy_consequence",
+    "sentence": "The new behavior is a deliberate policy consequence, not a solver defect: it refuses a promotion the banked code accepted without the current induced-mask evidence, and that policy-selected path keeps the mask settled until honest stagnation."
+  },
+  "execution_contract": {
+    "actual_re_solves": 2,
+    "allocated_cpus": 4,
+    "assigned_worktree_nova_diff_stat": "",
+    "at_most_two_re_solves": 2,
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "one_reserved_h200": true,
+    "solver_source_modified": false
+  },
+  "figure": "docs/figures/solver-convergence-regression/root-cause.png",
+  "histories": {
+    "after_model_trust": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.00497645568973448,
+        0.0034925711304508423,
+        0.0022267868462637,
+        0.0028245881800609447,
+        0.001768700503481402,
+        0.0011202690991536923,
+        0.0007158357172522378,
+        0.0004622759187821485,
+        0.00029900485325314616,
+        0.0001933140977580932,
+        0.0001252591717767685,
+        6.0793459961952516e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/565a8c8e-h200.json",
+      "raw_capture_sha256": "18e2b6ee9de0d80c90114aefa96d672e87fef2e0ba44361e5e0d5b303a32e700",
+      "revision": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904800001716353,
+        1.2250631849800084
+      ],
+      "solve_wall_seconds_including_compilation": 134.6643641628325,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0793459961952516e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "after_trajectory": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.003492571130450865,
+        0.0022267868462637224,
+        0.002824543671089126,
+        0.0017686695998069722,
+        0.0011202504574495536,
+        0.0007158519978677916,
+        0.0004622842344470893,
+        0.0002989857079383364,
+        0.00019330286566941873,
+        0.0001252525215443233,
+        6.0797044944388355e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/4ee90ece-h200.json",
+      "raw_capture_sha256": "f2b7835d06bdc2c95b286b302d8d5d0d71db8e571fef3d276e5a6f33db807a32",
+      "revision": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904799259797138,
+        1.2250633080352822
+      ],
+      "solve_wall_seconds_including_compilation": 135.05865284334868,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0797044944388355e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "banked_new": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ],
+      "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+      "terminal_residual": 0.000480233535391836,
+      "termination_reason": "active_set_stagnated",
+      "trip_count": 7
+    },
+    "banked_old": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+      "terminal_residual": 6.079614869877941e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    }
+  },
+  "receipt": "fixed-point root-cause reading",
+  "remedy_ranking": [
+    {
+      "rank": 1,
+      "reason": "the accepted policy exposes a near-neutral direction that a twelve-action inner solve still fails to contract, so allocate additional actions only after measured contraction stalls",
+      "rung": "adaptive Krylov depth"
+    },
+    {
+      "rank": 2,
+      "reason": "the repeated settled-mask residual supplies a stable mode estimate that can augment or deflate the next Krylov solve",
+      "rung": "deflation or recycling"
+    },
+    {
+      "rank": 3,
+      "reason": "the post-policy map has the fixed-mask, near-unit-eigenvalue shape for which a short outer history is directly useful",
+      "rung": "Anderson acceleration"
+    },
+    {
+      "rank": 4,
+      "reason": "it becomes justified only if the inner trace shows that the near-neutral direction is repeatedly clipped or refused",
+      "rung": "mode-aware step handling"
+    },
+    {
+      "rank": 5,
+      "reason": "it is physics-shaped and the mixed arm supports it, but it changes the objective more than the numerical remedies above",
+      "rung": "vertical-mode regularization"
+    }
+  ],
+  "sources": {
+    "later_backend_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-root-cause-reading/docs/figures/solver-convergence-regression/backend-divergence.json",
+    "later_backend_receipt_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd",
+    "true_pin_reproduction": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-root-cause-reading/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin_reproduction_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78"
+  },
+  "targeted_reading": [
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_active_set_newton_krylov",
+        "newton_krylov"
+      ],
+      "reading": "telemetry only; disabled by default and outside solver decisions",
+      "sha": "6f08fb19fa4790449d9ff2b652ea488f6ccf9d53",
+      "subject": "feat(equilibrium): expose active-set trip telemetry"
+    },
+    {
+      "fixed_point_touched": false,
+      "functions": [],
+      "reading": "no fixed_point.py hunk; wall-height eligibility only",
+      "sha": "ce686206627a20b2797b70145859a6a42350c90c",
+      "subject": "fix(equilibrium): guard wall height references"
+    },
+    {
+      "fixed_point_touched": false,
+      "functions": [],
+      "reading": "no fixed_point.py hunk; wall-height reporting only",
+      "sha": "ebb658bd0d6679bba604cef1e554c08d6a3a38ab",
+      "subject": "feat(equilibrium): report height reference eligibility"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_active_set_newton_krylov",
+        "newton_krylov"
+      ],
+      "reading": "terminal stop only; detects the repeated settled residual but cannot cause the earlier trip-2 state difference",
+      "sha": "420feb23dc040ae1d0a2f874cff4e93c8f023030",
+      "subject": "feat(equilibrium): stop stagnant active sets"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_newton_krylov_inner",
+        "_qualified_krylov_step"
+      ],
+      "reading": "inner diagnostics plus an explicit GMRES tolerance equal to the prior library default; excluded by the later trajectory-boundary capture",
+      "sha": "7fc24f01064d37633ed3424f9850aa763ad38f1b",
+      "subject": "feat(equilibrium): record inner solve iterations"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_active_set_newton_krylov"
+      ],
+      "reading": "retains an incoming state only when selected_difference is zero, so it cannot itself reject the banked trip-4 one-cell reopening",
+      "sha": "736e2553ffe18f0e146809ca984a1cf3e4647714",
+      "subject": "fix(equilibrium): retain settled active-set best states"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_active_set_newton_krylov",
+        "_newton_krylov_inner"
+      ],
+      "reading": "resumes the terminal Newton trajectory after an unchanged mask instead of restarting from the reported best fallback",
+      "sha": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+      "subject": "fix(equilibrium): continue Newton states across settled masks"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_active_set_newton_krylov",
+        "_newton_krylov_inner"
+      ],
+      "reading": "continues merit and recovery state only after the trajectory continuation is already eligible; cannot affect trip 2",
+      "sha": "9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8",
+      "subject": "fix(equilibrium): continue globalization across settled masks"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_backtracked_promotion",
+        "_newton_krylov_inner"
+      ],
+      "reading": "requires realized merit decrease to substantiate the frozen local model before selecting a promotion family",
+      "sha": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+      "subject": "fix(equilibrium): select candidates by model trust"
+    },
+    {
+      "fixed_point_touched": true,
+      "functions": [
+        "_backtracked_promotion",
+        "_newton_krylov_inner"
+      ],
+      "reading": "scores candidates and incumbents on their induced masks and requires a strict own-mask residual improvement",
+      "sha": "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b",
+      "subject": "fix(equilibrium): evaluate candidates on induced masks"
+    }
+  ]
+}

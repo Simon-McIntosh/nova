@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:49:12",
+  "updated": "2026-09-02T00:02:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -70201,9 +70201,206 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T214913091693-pta-census-split-polish-regression",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-regression",
+        "node_definition": {
+          "done_when": "The regression helper enumerates the receipt fields it compares against the full receipt dictionary so an added receipt cannot be silently omitted (assert the compared key set plus the deliberately excluded dimensional keys equals the receipt's keys, listing the excluded dimensional keys with a one-line reason each); the focused suite tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py is 41 or more green when run as JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -s on those four files, captured whole to a log the manifest cites; no source file changes",
+          "estimated_hours": 0.5,
+          "goal": "Extend the rescaling-invariance regression in tests/test_split_polish_nulls.py so it compares every dimensionless receipt the polish exposes: value_basis_norm and fit_residual numerically under the mixed tolerance abs(a-b) <= 1e-10*max(|a|,|b|) + 1e-13, and every count and qualification receipt (active basis counts, iteration counts, seed_stationary, converged, accepted, fit converged) exactly",
+          "id": "pta-census-split-polish-regression",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214913091693-pta-census-split-polish-regression/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:49:18Z",
+        "completed_at": "2026-09-01T21:59:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 602,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 602,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "6878350dcc4e2724052dbd257b51fef012249225",
+        "commits": [
+          "4b244ce673b9fb460054fc132969f89f272be0ed"
+        ],
+        "changed_lines": {
+          "added": 35,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -s tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214913091693-pta-census-split-polish-regression/logs/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214913091693-pta-census-split-polish-regression/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3645440,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3764415,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 8003,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1625
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -s",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T215937566883-pta-census-split-polish-regression-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-regression-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-regression-review.md with a PASS or FAIL verdict over: (1) git show --stat 4b244ce6 lists only tests/test_split_polish_nulls.py; (2) the rescaling regression now compares value_basis_norm and fit_residual under the mixed tolerance and every count and qualification receipt exactly, and asserts that the compared keys plus the listed excluded dimensional keys equal the receipt's key set, with a one-line reason per excluded key; (3) the captured log in the run directory of node pta-census-split-polish-regression records 41 passed; (4) naming hygiene; (5) any defect quoted with file:line. Read-only review of files and logs",
+          "estimated_hours": 0.25,
+          "goal": "Write an independent verdict report on commit 4b244ce6 (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-census-split-polish-regression, path tests/test_split_polish_nulls.py) closing the completeness gap named in your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-chain-review.md",
+          "id": "pta-census-split-polish-regression-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T215937566883-pta-census-split-polish-regression-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "10m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-regression-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pta-review-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T21:59:43Z",
+        "completed_at": "2026-09-01T22:01:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 119,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 119,
+        "stalled": false,
+        "time_budget": "10m",
+        "base_sha": "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-census-split-polish-regression-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-regression-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T215937566883-pta-census-split-polish-regression-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1048832,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1073690,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 5267,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 918
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1280
+    "_version": 1282
   }
 }

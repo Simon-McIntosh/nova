@@ -53,6 +53,25 @@
 </table>
 <p><strong>Finding banked.</strong> The hexstencil docstring's claim that <code>tessellate</code> packs rings "identically" to <code>hex_stencil</code> was false before this landing; it is true now.</p>
 </section>
+
+<section id="s2-polish"><h2 id="s2-polish-h">§2 — Census primary, split-spline polish</h2>
+<p>Nodes <code>pta-census-split-polish</code> (<code>83ada1f1</code>, rejected), <code>-repair</code> (<code>31daffee</code>, rejected), <code>-tolerance</code> (<code>b9b81430</code>, rejected), <code>-scaling</code> (<code>6878350d</code>, rejected on test completeness), <code>-regression</code> (<code>4b244ce6</code>, passed); merged to <code>main</code> as <code>aecea6a7</code>. Four independent reviews, each narrowing the prior blocker: coordinate-coincidence exactness → an unsound <code>sqrt(nκε)</code> tolerance → mismatched coefficient coordinates and exterior-branch units → an incomplete invariance regression.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Selector</td><td><code>Null2D</code> six-neighbour census remains the sole producer and ranker; the polish receives only the selected O and X rows and never adds, drops or re-ranks.</td></tr>
+<tr><td>Interface</td><td>Selected plasma boundary: X flux when diverted, wall-contact flux when limited (limited-mode regression pins exact wall-flux equality and inequality from the census X flux).</td></tr>
+<tr><td>Stationarity bound</td><td>max(roundoff floor, representation floor). Roundoff: <em>n_active·κ·ε·field_range</em> propagated through the slot-local <em>B′D⁻¹</em> derivative-basis norm in the solver's column-scaled coordinates, normalised by field_range/span (<em>n_active</em> = 25 interior, 50 with the exterior correction; exterior design nondimensionalised by the squared field range). Representation: global fitted-sample RMS / field range / normalised cell pitch. Value gate: separate, max(RMS/field range, <em>n_active·κ·ε</em>·value-basis norm).</td></tr>
+<tr><td>Solov'ev (41×49 half-offset)</td><td>Axis 5.000 mm seed → 0.0657 mm after one accepted step (gradient 6.0e-5; floors 1.7e-9 roundoff, 1.07e-3 representation). Saddle: seed gradient 2.4e-5, one step rejected → explicit non-converged fallback, error 0 m from the census-exact seed.</td></tr>
+<tr><td>Exact quadratic</td><td>Sample-coincident seed three pitches from the saddle: gradient 0.375 against floors 1.4e-9 / 1.2e-10, zero-step path not taken — coordinate coincidence never implies stationarity.</td></tr>
+<tr><td>Six secondary-null fields</td><td>All fits converge; all twelve O/X slots rejected on the value gate (changes 2.1e-3 to 2.5e-3 against ≈1.3e-3); census rows retained; receipts published per case.</td></tr>
+<tr><td>Rescaling invariance</td><td>Flux ×1e3, coordinates ×1e-2: 9 continuous receipts agree to |a−b| ≤ 1e-10·max + 1e-13, 8 count/qualification receipts exact, 11 dimensional receipts excluded with reasons, key-set union asserted.</td></tr>
+<tr><td>Production fits</td><td>33×33: one conditioned direct solve, residual 2.29e-16; 65×65: 3.30e-16. These are direct-solve receipts, not sparse iterations.</td></tr>
+<tr><td>Tests</td><td>41 passed in 165 s over <code>test_split_polish_nulls.py</code>, <code>test_hex_flood_sn_secondary.py</code>, <code>test_flux_surface_connectivity.py</code>, <code>test_split_spline.py</code>. Log: <code>~/.config/reckon/crew/runs/r-20260901T214913091693-pta-census-split-polish-regression/logs/after-suite.log</code>.</td></tr>
+</tbody>
+</table>
+<p><strong>Findings banked.</strong> (1) The polish executes inside the jitted <code>Topology.read_qualification</code> on every read with two dense normal-equation solves and, until the topology-read node lands, a raster reshape. (2) On every manufactured field examined the polish contributes nothing beyond the Solov'ev axis; whether it earns its per-read cost on production fields is for the parity harness (§4) and the batch measurement in <code>single-grid-solver-cutover</code>. (3) The prototype's 6e-16 m saddle came from a 16-coefficient polynomial fit that represented Solov'ev exactly; the production 50-coefficient basis does not, so its one step moves the saddle 27 µm and is correctly rejected.</p>
+</section>
 </main>
 </body>
 </html>

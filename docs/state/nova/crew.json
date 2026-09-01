@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T18:08:44",
+  "updated": "2026-09-01T18:17:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -67341,9 +67341,145 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T141038002434-sto-trip-census",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a73",
+        "node": "sto-trip-census",
+        "node_definition": {
+          "done_when": "docs/figures/solver-trip-orchestration/settlement-histogram.json records the per-machine trip-settlement histogram from committed telemetry with the projected mean-trip ms/slice, and a companion figure shows the histogram; no solver source is modified",
+          "estimated_hours": 4.0,
+          "goal": "The \u00a73 settlement histogram: mine the committed MAST twelve-arm and DIII-D five-frame bank telemetry (per-trip mask-difference records and retained per-iteration histories) for how many outer trips the active set needs before it settles, per machine, and project the mean-trip ms/slice a masked no-op settled-early exit would reach against the 1 ms target, naming the semantic-preservation test surface (own-mask acceptance, best-iterate retention, the paired bit-identity tests where the mask does not move) a settled-exit policy must keep green \u2014 numbers and test plan only, the policy itself is an open lead decision (settled-exit-policy)",
+          "id": "sto-trip-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141038002434-sto-trip-census/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/trip_settlement_census.py",
+            "docs/figures/solver-trip-orchestration/settlement-histogram.json",
+            "docs/figures/solver-trip-orchestration/settlement-histogram.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-trips",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:10:52Z",
+        "completed_at": "2026-09-01T16:16:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7542,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+        "commits": [
+          "09754128638542977276877e56a658c303d5dcdc"
+        ],
+        "changed_lines": {
+          "added": 1257,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run python benchmarks/trip_settlement_census.py + strict artifact audit",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141038002434-sto-trip-census/artifact-audit.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141038002434-sto-trip-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-fe16-7e62-b7ce-b05a1c69266d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3579136,
+            "cached_input_tokens_cumulative": 3579136,
+            "input_tokens": 3762005,
+            "input_tokens_cumulative": 3762005,
+            "output_tokens": 22083,
+            "output_tokens_cumulative": 22083,
+            "reasoning_output_tokens": 5451,
+            "reasoning_output_tokens_cumulative": 5451
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4118,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 7718,
+              "log_age_seconds": 4368,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 4396,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1232
+    "_version": 1233
   }
 }

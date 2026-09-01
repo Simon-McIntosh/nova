@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.667">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -61,6 +61,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T143942750055-sto-mast-bank-telemetry-relaunch" data-who="sto-bank" data-when="2026-09-01T16:08:10Z">
     <div class="r-comment-body"><p>Twelve-arm bank regenerated on the H200 with 12/12 telemetry rows (66 pure-arm trip records), 13/13 focused tests green, honest per-row semantic diff delivered: 10/12 rows changed selected primaries vs the committed bank, 22086/43 pure flipped converged-&gt;active_set_stagnated (saddle delta 5.2 mm), 21985/51 pure reclassified cycle-&gt;stagnated; nova_achieved_class unchanged everywhere. Findings retained, never smoothed</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T141038002434-sto-trip-census" data-who="sto-trips" data-when="2026-09-01T16:16:34Z">
+    <div class="r-comment-body"><p>Two-machine settlement histogram banked: MAST pure 5/6 settle (histogram {1:3,3:1,4:1}, settled mean 2.0 trips -&gt; 0.219 ms/slice; 0.474 even charging the cycle-detected non-settler full 16), DIII-D 5/5 settle (mean 4.2 -&gt; 0.459 ms/slice) - both well under the 1 ms target; non-settler 21978/35 and stagnated 22086/43 fenced out of settled statistics, seven semantic-preservation tests named. Manifest SHA tail was confabulated; promoted at the rev-parsed worktree tip</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T1620-census" data-who="reckon-ship-s18" data-when="2026-09-01T16:20:00+00:00">
+    <div class="r-comment-body">sto-trip-census landed — commit 09754128 (merged 66b2d0f1); gate PASSED. TWO-MACHINE SETTLEMENT HISTOGRAM: MAST pure arms 5/6 settle, histogram {1:3, 3:1, 4:1}, settled mean 2.0 trips → 0.219 ms/slice projected (0.474 even charging the non-settler the full 16 trips); DIII-D 5/5 settle, mean 4.2 → 0.459 ms/slice. BOTH MACHINES LAND WELL UNDER THE 1 MS TARGET under a settled-early masked no-op exit. Honestly fenced: 21978/35 pure is non-settling (active_set_cycle_detected) and 22086/43 pure is retained as active_set_stagnated (zero-mask suffix from trip 3) — both excluded from settled statistics; MAST telemetry provenance is the regenerated bank whose semantic diff vs the committed bank is a standing finding. Seven semantic-preservation tests named in the receipt as the surface a settled-exit policy must keep green. The settled-exit-policy decision is now FULLY FED and open for the lead. Receipt docs/figures/solver-trip-orchestration/settlement-histogram.json + .png. All three sections of this plan have landed their receipts; the plan stays active pending the decision.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T141031246939-sto-quantum-decomposition" data-who="sto-quantum" data-when="2026-09-01T14:43:24Z">
     <div class="r-comment-body"><p>Per-trip quantum attributed at width 1024: 25.0 ms/member/trip = mask reconciliation 12.61 + Newton re-linearization 12.34 + first-GMRES sync 0.048 + host launch 0 + preconditioner 0 (none exists; all 16 trips already in one compiled launch). Explicit fusion measured near-nil (1.006x); ranked ceilings put trip-body collapse at the 1.746 ms floor and mask/linearization restructuring at ~22 ms each alone</p></div>

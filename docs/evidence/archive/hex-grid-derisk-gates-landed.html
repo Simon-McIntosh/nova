@@ -9,7 +9,7 @@
   <meta name="plan-evidence-for" content="hex-grid-derisk-gates">
   <meta name="plan-informs" content="solver-convergence-regression,gs-absolute-accuracy-gates">
   <meta name="plan-title" content="Hex-grid de-risk gates — cumulative evidence">
-  <meta name="plan-summary" content="Cumulative evidence for cache-only topology replay, jump-bearing field accuracy, H200 batch throughput, and the backend qualification that still holds integration.">
+  <meta name="plan-summary" content="Cumulative evidence for cache-only topology replay, jump-bearing field accuracy, H200 batch throughput, and the code-drift qualification that still holds integration.">
   <meta name="plan-owner" content="Simon McIntosh">
   <title>Hex-grid de-risk gates — cumulative evidence | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -54,9 +54,14 @@
 
   <p>The picture separates a stable geometry/control path from the pure-arm convergence failure. The
   mixed row proves that the pinned GPU execution can reproduce a committed solution essentially to
-  machine precision, while the pure row fails at the pinned source revision as well as at HEAD. That
-  is evidence against treating the HEAD-only solver drift as the whole explanation; backend-sensitive
-  margin remains an open input to the regression investigation.</p>
+  machine precision, while the pure row fails at the pinned cache revision as well as at HEAD.
+  Corrected 2026-09-01 by the regression forensics: the shadow's pin (a4bec44f) is the topology-operands
+  cache revision, not the revision that produced the converged row (d47f7cd1, two days earlier) — ten
+  nova/equilibrium commits including a stagnation-exit change sit between them, so both “pinned” legs
+  ran post-drift code. Paired CPU/GPU sub-stage states agree inside float64 reduction-order noise
+  (1.09e-14 against a 4.25e-10 floor), excluding backend numerics directly: the margin is CODE DRIFT in
+  the d47f7cd1..a4bec44f window, owned by solver-convergence-regression, which is re-solving at the true
+  bank revision.</p>
 
   <figure>
     <img src="/nova/figures/hex-cell-single-grid/pure-arm-comparison-residuals.png"
@@ -155,7 +160,7 @@
     from being promoted as a converged, semantically qualified solve.</figcaption>
   </figure>
 
-  <p>The suffix census is the bridge to the backend margin. Width-1,024 replication is therefore not
+  <p>The suffix census is the bridge to the drift margin. Width-1,024 replication is therefore not
   representative of every production arm: the performance gate passes while the pure MAST arm still
   lacks a converged GPU receipt.</p>
 
@@ -165,7 +170,7 @@
     <caption>What remains after the three de-risk falsifiers</caption>
     <thead><tr><th scope="col">Open item</th><th scope="col">Evidence</th><th scope="col">Required next action</th></tr></thead>
     <tbody>
-      <tr><td>Backend/runtime margin</td><td>Pinned and HEAD GPU pure rows stagnate; pinned mixed row reproduces</td><td>Regression work must separate backend-sensitive pure-arm margin from HEAD code drift</td></tr>
+      <tr><td>Code-drift margin (corrected)</td><td>Both “pinned” legs ran post-drift code (cache revision a4bec44f, true row revision d47f7cd1); paired CPU/GPU states agree inside float64 noise, excluding backend numerics</td><td>solver-convergence-regression re-solves at the true bank revision d47f7cd1 and names the responsible change in the ten-commit window</td></tr>
       <tr><td>Unmerged cache producer</td><td>Schema-4 replay passes, focused suite is 6 failed / 5 passed</td><td>Adjudicate the partition-count and wall-notch differences before integration</td></tr>
       <tr><td>Field-gate reserve</td><td>Replacement advantage is only 1.011489×</td><td>Preserve the thin margin as a qualification in downstream cutover decisions</td></tr>
     </tbody>
@@ -173,7 +178,7 @@
 
   <p><strong>Bottom line:</strong> flood-on-cells, jump-bearing representation accuracy, and H200
   batching survive their intended falsifiers. The earlier field failure remains visible with its
-  re-adjudication. The backend margin and the unmerged worktree remain open, so this record supports
+  re-adjudication. The code-drift margin and the unmerged worktree remain open, so this record supports
   lead adjudication rather than an unconditional cutover.</p>
 
 </main></body>

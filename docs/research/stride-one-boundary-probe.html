@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="stride-one-boundary-probe">
+  <meta name="plan-title" content="Full-grid MAST boundary probe">
+  <meta name="plan-summary" content="A controlled 65-by-65 re-solve of one converged MAST arm to separate grid discretisation from lower-null binding">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="separatrix-spline-extraction">
+  <meta name="plan-verifies" content="separatrix-spline-extraction#s4">
+  <meta name="plan-recorded-at" content="2026-09-01">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="mast,equilibrium,topology,slurm,telemetry,timing">
+  <title>Full-grid MAST boundary probe | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; controlled resolution contrast</p>
+      <h1>The full-grid MAST boundary probe is queued</h1>
+      <p class="lead">
+        MAST 22086/43 pure is the one committed arm that is both converged and
+        eligible for a clean resolution comparison. Its 33-by-33 boundary has
+        <strong>0.0289113 m symmetric RMS</strong>, while the largest separation
+        sits at the lower EFIT X-point region. Job <code>1260037</code> will
+        repeat that arm on the full 65-by-65 grid without changing the solver,
+        criterion, masks, anchor, or comparator.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>State at handoff.</strong> The exact command passed its login-node
+        preflight and the one authorized job is pending for Vega capacity. No
+        stride-one solve result is claimed here. The job has a 12-hour accepted
+        limit and must be harvested from the durable paths below rather than
+        truncated to fit an interactive worker fence.
+      </p>
+    </aside>
+
+    <section id="baseline">
+      <h2>Committed comparison point</h2>
+      <p>
+        The committed corroboration panel is the scientific baseline. It shows
+        Nova following the upper and outboard EFIT boundary before closing above
+        the lower EFIT null, which is also where the symmetric sup is attained.
+      </p>
+      <figure>
+        <img
+          src="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          alt="Twelve-panel MAST corroboration bank including the 22086/43 pure boundary comparison">
+        <figcaption>
+          The tracked corroboration bank. The 22086/43 pure panel supplies the
+          fixed 33-by-33 values in the table; the new run does not modify this bank.
+        </figcaption>
+      </figure>
+      <table>
+        <caption>33-by-33 committed geometry and lower-null operands</caption>
+        <thead>
+          <tr><th scope="col">Measure</th><th scope="col">Committed value</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Symmetric boundary RMS</th><td>0.02891128908081361 m</td></tr>
+          <tr><th scope="row">Symmetric boundary sup</th><td>0.16610684834559725 m</td></tr>
+          <tr><th scope="row">Nova saddle to nearest EFIT X-point</th><td>0.02396426750340677 m</td></tr>
+          <tr><th scope="row">Lower-null sector symmetric RMS</th><td>0.04335127830199057 m</td></tr>
+          <tr><th scope="row">Lower-null sector symmetric sup</th><td>0.16610684834559725 m</td></tr>
+          <tr><th scope="row">Lower EFIT X-point to Nova boundary</th><td>0.16625530761395624 m</td></tr>
+          <tr><th scope="row">Solve wall time</th><td>59.287223 s</td></tr>
+          <tr><th scope="row">Streamed callback intervals</th><td>44.857482 s over 12 trips</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="method">
+      <h2>Controlled method</h2>
+      <p>
+        The probe selects the governed 22086/43 row from the same decomposition
+        bank as the corroboration driver and asks its case builder for all 65
+        stored radial and vertical points. The all-circuit prescribed response is
+        computed fresh for those 4,225 grid targets because the committed response
+        matrix is dimensioned for the 33-by-33 target set. The pure diverted branch
+        retains the production Newton&ndash;Krylov settings: criterion
+        <code>1e-8</code>, 12 Newton steps, 12 GMRES iterations, relaxation 0.5,
+        step cap 10, and no warm-up sweeps. No tolerance is relaxed.
+      </p>
+      <p>
+        The global RMS and sup use <code>compare_closed_boundaries</code> with its
+        fixed 2,000-point symmetric populations. The local statistic introduces
+        no plotting window: each sampled boundary point is assigned to its nearest
+        EFIT X-point, and the lower-null population is the Voronoi region belonging
+        to the lower EFIT X-point at (0.5856547355651855 m,
+        &minus;1.196423053741455 m). The direct distance from that X-point to the
+        Nova closed boundary is reported separately.
+      </p>
+    </section>
+
+    <section id="execution">
+      <h2>Execution receipt and harvest contract</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">SLURM job</th><td><code>1260037</code></td></tr>
+          <tr><th scope="row">Partition</th><td><code>vega</code>, uncapped non-debug CPU lane</td></tr>
+          <tr><th scope="row">Accepted limit</th><td>12:00:00</td></tr>
+          <tr><th scope="row">Resources</th><td>16 CPUs; 64 GiB</td></tr>
+          <tr><th scope="row">Code revision</th><td><code>d1e99809e2652c63aae326ed9cfbae117d35d31b</code></td></tr>
+          <tr><th scope="row">Interpreter</th><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code></td></tr>
+          <tr><th scope="row">Runtime environment</th><td><code>VIRTUAL_ENV</code> unset; CPU JAX; binary64 enabled; no uv wrapper</td></tr>
+          <tr><th scope="row">Login preflight</th><td>passed; 65 by 65; 4,225 nodes; criterion unchanged</td></tr>
+          <tr><th scope="row">Durable log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/logs/slurm-1260037.log</code></td></tr>
+          <tr><th scope="row">Result JSON</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-probe.json</code></td></tr>
+          <tr><th scope="row">Geometry arrays</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-geometry.npz</code></td></tr>
+          <tr><th scope="row">Comparison plot</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-comparison.png</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        A harvest must require terminal scheduler state, <code>ExitCode 0:0</code>,
+        a log ending <code>EXIT_MARKER=0</code>, strict finite JSON, and matching
+        per-trip array lengths. It must then replace this pending state with the
+        measured convergence, terminal residual, trip trajectory, global and
+        lower-null deltas, wall time, and an explicit sub-centimetre verdict.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

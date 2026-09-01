@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T13:39:12",
+  "updated": "2026-09-01T14:43:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -66371,9 +66371,99 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T123527271704-sse-stride-one-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-stride-one-harvest",
+        "node_definition": {
+          "done_when": "The completed stride-one probe is audited and published, with the unification finding stated as the headline rather than buried. Job 1260037 COMPLETED 0:0 in 06:17:57; durable outputs are stride-one-boundary-probe.json, stride-one-boundary-geometry.npz and stride-one-boundary-comparison.png under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output, with the complete per-trip telemetry in logs/slurm-1260037.log. (1) Audit before publishing: strict JSON with finite-or-null leaves, the scheduler receipt terminal COMPLETED 0:0 with EXIT_MARKER=0, the per-trip trajectory in the JSON matching the log lines, and the PNG decodable at its stated size. (2) Publish docs/research/stride-one-boundary-probe.html carrying the measured story in this order. THE STALL UNIFIES: the solve terminated active_set_stagnated at terminal residual 0.0009001840977909396 after 9 of 16 trips, with trips 7 and 8 bit-identical on a settled mask - the same signature as the DIII-D stall, now on MAST at native resolution, with own-mask acceptance in the measured source - so the descent-model direction recorded on separatrix-spline-extraction is the convergence blocker for the quarter-width programme on both machines, not a DIII-D oddity. THE NULL IMPROVES WITH RESOLUTION: selected saddle to EFIT X falls from 0.02396426750340677 m at stride 2 to 0.008463463498677284 m at stride 1, three-fold better and 0.9 mm outside the locked 0.007578 m quarter-width gate. THE BOUNDARY NUMBERS ARE STALL ARTIFACTS, NOT RESOLUTION VERDICTS: binding RMS 0.18888046534076347 m and sup 0.46288669662867227 m against stride-2's converged 0.02891128908081361 and 0.16610684834559725 m, with the lower-null sector carrying it (nova boundary 0.4630516093028299 m from the lower EFIT X against 0.16625530761395624 m at stride 2); state plainly that comparing a 9e-4-residual state's boundary against a 2.6e-16 state's boundary measures convergence, not discretisation, and that the discretisation question stays open until a converged stride-one solve exists. (3) Record the operational facts the cutover programme needs: the full-grid case-plus-profile-plus-response construction cost 5767.985074 s through the exact polygon route on a rigel CPU node with response shape 4262 by 101; per-trip solve costs ran 809 to 4487 s with no warm speedup; the stagnation exit fired in production for the first time, saving seven budgeted trips. (4) Embed the comparison figure with a project-absolute src, validate with the reckon doc-check tooling, and commit the probe JSON, NPZ, PNG and the research page together. (5) The mask trajectory 970, 1055, 0, 0, 0, 0, 0, 0, 0 is stated with the caveat that stride-2's false zero at trip 2 makes three consecutive zeros the minimum confirmation, which this trajectory exceeds.",
+          "estimated_hours": null,
+          "goal": "The stride-one probe audited and published with the stall unification as its headline and the boundary numbers qualified as convergence artifacts",
+          "id": "sse-stride-one-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T123527271704-sse-stride-one-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/research/stride-one-boundary-probe.html",
+            "docs/figures/stride-one-boundary"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T12:35:35Z",
+        "completed_at": "2026-09-01T12:43:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 482,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 482,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "bfbc435fbb83cb32a4e71a63ccdca24ef22e0abe",
+        "commits": [
+          "41d9e96002ea18e86980578dba9f5eb5a04468a8"
+        ],
+        "changed_lines": {
+          "added": 456,
+          "removed": 73,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "scheduler COMPLETED 0:0; strict JSON 188 finite leaves plus 1 null; 9/9 JSON trips equal to log rows; NPZ finite; PNG 1170x1440 inspected; audit-doc 0 errors; copies hash-identical to durable source",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T123527271704-sse-stride-one-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T123527271704-sse-stride-one-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1217
+    "_version": 1218
   }
 }

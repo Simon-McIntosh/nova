@@ -15,5 +15,5 @@ PANEL_PUBLISHED 14 DIII-D d3d_shot_0003ff34e7:44 shadow_inside_lcfs=None total_s
 PANEL_PUBLISHED 15 DIII-D d3d_shot_001554e054:144 shadow_inside_lcfs=None total_shadow=5 retained_failure=None
 PANEL_PUBLISHED 16 DIII-D d3d_shot_002495e835:146 shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
 PANEL_PUBLISHED 17 DIII-D d3d_shot_0040ca9bdc:137 shadow_inside_lcfs=None total_shadow=0 retained_failure=None
-{"diiid": 5, "evidence_sha256": "52a1b0df327244d7a4a35f9ced78ba57ead62f59317a510283073054f1ee9815", "mast": 12, "output_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-lead-review/sse-hex-cell-clipped-rendering/docs/figures/topology-visual-corroboration", "rows": 17}
+{"diiid": 5, "evidence_sha256": "8f67cebc9996d73367f7068335b7c2d27845c78c402ff39c291ef4b6dab61536", "mast": 12, "output_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-lead-review/sse-panel-grid-semantics/docs/figures/topology-visual-corroboration", "rows": 17}
 EXIT_MARKER=0

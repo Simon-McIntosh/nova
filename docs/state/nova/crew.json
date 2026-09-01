@@ -1,9 +1,18 @@
 {
-  "updated": "2026-09-01T20:48:14",
+  "updated": "2026-09-01T21:28:48",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "accuracy-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
       {
         "id": "adapter-seams",
         "harness": "codex",
@@ -67945,9 +67954,116 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T185601702987-hdg-evidence-doc",
+        "plan": "hex-grid-derisk-gates",
+        "section": "\u00a71",
+        "node": "hdg-evidence-doc",
+        "node_definition": {
+          "done_when": "reckon audit-doc reports no ERRORs on the evidence document, the new comparison figures live under docs/figures/hex-cell-single-grid/ with project-absolute src paths, every panel is legible per the figure mandate, and the document states plainly per gate what passed, what fired and was re-adjudicated, and what remains open (the backend margin and the unmerged worktree)",
+          "estimated_hours": 5.0,
+          "goal": "The figure-heavy cumulative evidence document for the S18 gate campaign at docs/evidence/archive/hex-grid-derisk-gates-landed.html (reckon-type=evidence, plan-evidence-for=hex-grid-derisk-gates, plan-informs=solver-convergence-regression), whose centrepiece is a NEW multi-panel comparison the lead asked for because plotted solutions make errors visible: the 22086/43 pure arm side by side across the committed CPU bank row, the pinned-revision GPU row (from the unmerged run worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay, cache sha fa286c13...) and the HEAD GPU row - flux maps at matched levels, difference/residual fields, selected O/X positions with the 4.5-5.2 mm deltas annotated, and the mixed arm beside them showing its 8.5e-16 reproduction - plus embedded existing receipts (mask-replay zero-diff, jump-field panels, H200 ladder, settlement and suffix histograms) each with a one-paragraph reading, following the Tufte figure rules (light ground, direct labels, semantic colour, erase test) and HTML tables for tabular verdicts",
+          "id": "hdg-evidence-doc",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185601702987-hdg-evidence-doc/manifest.md",
+          "plan": "hex-grid-derisk-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/archive/hex-grid-derisk-gates-landed.html",
+            "docs/figures/hex-cell-single-grid/pure-arm-comparison.png",
+            "docs/figures/hex-cell-single-grid/pure-arm-comparison-residuals.png",
+            "benchmarks/pure_arm_comparison_figure.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hdg-cache-replay",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:56:08Z",
+        "completed_at": "2026-09-01T19:09:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 794,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 794,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "852f8c5c3e8d829f2979d772921b0c73c205b245",
+        "commits": [
+          "87b735e6f67d2c41158d7f8241ad240c31254c7a"
+        ],
+        "changed_lines": {
+          "added": 607,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc + pure_arm_comparison_figure.py generation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185601702987-hdg-evidence-doc/audit-doc.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185601702987-hdg-evidence-doc/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c03-523a-71e2-bdbe-7d45af9b89b8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7470720,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7720448,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 32073,
+            "reasoning_output_tokens": 1334,
+            "reasoning_output_tokens_cumulative": 7838
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1239
+    "_version": 1241
   }
 }

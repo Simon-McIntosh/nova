@@ -23,7 +23,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
 <meta name="plan-impl" content="1.0">
 </head>
@@ -91,6 +91,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260901T1850-s1-clear" data-who="reckon-ship-s18" data-when="2026-09-01T18:50:00+00:00">
     <div class="r-comment-body">hdg-cache-replay landed — commits 33e55954/605cd720/20a377a7 (worktree, integration pending lead adjudication below); gate s1-mask-replay PASSED under the locked s1-scoring-route: the cache-only replay of MAST 22086/43 mixed from pinned-revision schema-4 operands reproduces the committed private mask EXACTLY — symmetric difference 0 of 42 cells, selected X-candidate index matched, zero per-candidate label differences — with per_cell_flux_values [1089], per_candidate_domain_labels [5,1089], current_cell_polygons [1089,4,2] and atomic_node_signed_flux [1156] banked and staleness-validated (receipt mask-replay-gate.json sha 049b4cf8, in the run worktree). ALL THREE FALSIFIERS ARE NOW CLEAR (s1 zero-diff, s2 jump-field 1.0115x, s3 H200 ladder sustained). TWO ITEMS AWAIT LEAD ADJUDICATION BEFORE THE PLAN SHIPS: (1) the pinned-revision GPU solve did NOT reproduce committed pure-arm convergence (stagnated, O/X residuals 4.5-5.2 mm) while the mixed arm reproduced to 8.5e-16 m — the nonreproduction is backend/runtime, not HEAD code, feeding solver-convergence-regression s1; (2) the worker's refreshed operand bank rows leave the focused suite red (partition counts 250/38 vs expected 277/20), so the worktree is NOT merged — the integration choice (merge harness and receipt while restoring the committed bank rows, versus adjudicating the bank refresh) is with the lead.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T185601702987-hdg-evidence-doc" data-who="hdg-cache-replay" data-when="2026-09-01T19:09:22Z">
+    <div class="r-comment-body"><p>Figure-heavy gate evidence record landed with the pure-arm solution comparison the lead asked for: committed-CPU vs pinned-GPU vs HEAD-GPU flux and residual panels with O/X displacements annotated (pure 4.47/5.17 mm vs mixed 8.5e-16/2.5e-16 m), 28 committed-to-pinned label-changed cells, pinned pure-minus-mixed flux sup 5.19e-3 Wb/rad; every gate receipt embedded with a reading; audit-doc 0 ERRORs</p></div>
 </div>
 </section>
 </main>

@@ -1,4 +1,2 @@
-docs/evidence/topology-visual-corroboration.html: warn (0 error, 2 warn, 0 info)
-  ! [dangling-slug-ref] <meta name="plan-evidence-for"> references unknown slug "efit-baseline-demonstration"
-  ! [dangling-slug-ref] <meta name="plan-verifies"> references unknown slug "efit-baseline-demonstration#s2"
+docs/evidence/topology-visual-corroboration.html: OK
 EXIT_MARKER=0

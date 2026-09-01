@@ -7,11 +7,11 @@
   "converged": false,
   "converged_inside_lcfs_gate_pass": null,
   "identity": "21985/51 pure",
-  "json_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/05-mast-21985-51-pure.json",
+  "json_path": "/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.json",
   "machine": "MAST",
   "other_qualified_x_point_count": 5,
   "panel_index": 5,
-  "png_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/05-mast-21985-51-pure.png",
+  "png_path": "/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.png",
   "qualification": "ValueError",
   "retained_failure_exception_class": "ValueError",
   "retained_failure_message": "closed separatrix is not an N-by-2 array",
@@ -25,6 +25,6 @@
   ],
   "shadow_cells_inside_closed_separatrix": null,
   "shadow_cells_inside_lcfs": null,
-  "source_qualification": "active_set_cycle_detected",
+  "source_qualification": "ValueError",
   "total_shadow_cells": 0
 }

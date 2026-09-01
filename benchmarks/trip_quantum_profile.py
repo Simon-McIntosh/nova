@@ -28,6 +28,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from benchmarks.diiid_batched_throughput import build_workload
+from nova.equilibrium.fixed_point import _qualified_krylov_step
 from nova.jax.config import configure_dtypes
 
 
@@ -222,6 +223,24 @@ def _programs(profile: Any, state: jax.Array, initial_mask: jax.Array | None = N
         image = source_flux + operator.internal(candidate)
         return jnp.where(shadow, candidate, image)
 
+    def qualified_first_action(mapped, tangent, state_row):
+        residual = mapped - state_row
+
+        def linear_action(vector):
+            return vector - tangent(vector)
+
+        nonlinear_residual = jnp.max(jnp.abs(residual)) / jnp.maximum(
+            jnp.max(jnp.abs(mapped)), 1.0e-30
+        )
+        return _qualified_krylov_step(
+            linear_action,
+            residual,
+            nonlinear_residual,
+            gmres_iterations=1,
+            condition_ratio_limit=math.e,
+            preceding_condition_baseline=jnp.asarray(jnp.nan, dtype=state_row.dtype),
+        ).step
+
     def mask_reconciliation(candidate, shadow, _source_flux):
         return jax.vmap(one_mask)(candidate, shadow)
 
@@ -239,8 +258,7 @@ def _programs(profile: Any, state: jax.Array, initial_mask: jax.Array | None = N
             mapped, tangent = jax.linearize(
                 lambda value: frozen_map(value, mask_row, external_row), state_row
             )
-            residual = mapped - state_row
-            return residual - tangent(residual)
+            return qualified_first_action(mapped, tangent, state_row)
 
         return jax.vmap(one)(candidate, shadow, source_flux)
 
@@ -250,9 +268,7 @@ def _programs(profile: Any, state: jax.Array, initial_mask: jax.Array | None = N
             mapped, tangent = jax.linearize(
                 lambda value: frozen_map(value, observed, external_row), state_row
             )
-            residual = mapped - state_row
-            action = residual - tangent(residual)
-            return action, difference
+            return qualified_first_action(mapped, tangent, state_row), difference
 
         return jax.vmap(one)(candidate, shadow, source_flux)
 

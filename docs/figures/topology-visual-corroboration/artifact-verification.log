@@ -1,6 +1,5 @@
-strict_json=17/17; panel_indices=17/17; containment_unchanged=17/17; stable_json_png_identities=17/17; png_open_nonempty=17/17
-voronoi_rows=16/17; rectangular_cells=17424; unique_vertices_per_cell=4
-wall_admissible_adjacency_counts=[["21978/35 pure", 1879], ["21978/35 mixed", 1879], ["21983/35 pure", 1879], ["21983/35 mixed", 1879], ["21985/51 pure", 1879], ["21985/51 mixed", 1879], ["21986/46 pure", 1879], ["21989/55 pure", 1879], ["21989/55 mixed", 1879], ["22086/43 pure", 1879], ["22086/43 mixed", 1879], ["d3d_shot_00000c4a7b:179", 1486], ["d3d_shot_0003ff34e7:44", 1486], ["d3d_shot_001554e054:144", 1486], ["d3d_shot_002495e835:146", 1486], ["d3d_shot_0040ca9bdc:137", 1486]]
-wall_membership_exact=14/16; retained_failure_mismatches=[["21985/51 pure", 1], ["21985/51 mixed", 1]]
-caches_modified=0; solves=0; scheduler_jobs=0; generation_EXIT_MARKER=0; panels=17; project_absolute_src=17/17; corrected_premise=true
+strict_json=17/17; panel_indices=17/17; png_open_nonempty=17/17
+project_absolute_src=17/17; connectivity_semantics=present; current_mesh_deferral_inputs=2/2
+strong_containment_gate=4/4; containment_json_byte_identity=17/17
+solves=0; scheduler_jobs=0; generation_EXIT_MARKER=0
 EXIT_MARKER=0

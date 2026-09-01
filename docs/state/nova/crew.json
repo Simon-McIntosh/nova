@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:21:18",
+  "updated": "2026-09-01T22:26:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1120,9 +1120,11 @@
         "id": "pta-census",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e89-3bc1-7c21-9a13-5a2126f275d3"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1151,9 +1153,11 @@
         "id": "pta-review-b",
         "harness": "codex",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ea1-0a59-7140-9ef4-83bc9c54a807"
+        },
         "created": "2026-09-01"
       },
       {
@@ -68832,9 +68836,236 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T195359824044-pta-census-split-polish",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish",
+        "node_definition": {
+          "done_when": "tests/test_split_polish_nulls.py passes: on the prototype's Solov'ev carrier (benchmarks/hex_cell_field_feasibility.py solovev_flux on a 41x49 half-offset lattice, used as an oracle only; production code must not import the benchmark) the polished axis error is <= 0.2 mm from the 5.000 mm lattice seed and the polished saddle error is <= 1e-12 m from the lattice-exact seed; the polish receipts (converged flag, iteration count, value, gradient, Hessian) are preserved and a non-converged fit or polish leaves the census position standing with the receipt saying so; the split fit's sparse-solve convergence (iterations, residual) is recorded on 33x33 and 65x65 production-sized grids, and a fit that cannot converge inside the read budget is reported as a NEEDS-HELP brief rather than absorbed; the census never adds, drops or re-ranks a candidate; existing null and topology tests stay green. Run the tests through the main checkout environment as UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py, capture the run whole to a log file, and cite the log path and pass counts in the manifest",
+          "estimated_hours": 4.0,
+          "goal": "Add exactly one polish_stationary_points Newton step on a SplitTensorBSpline fitted to the cell flux with its interface at the census-selected boundary level, refining the selected O and X positions and flux values before normalisation while the six-neighbour census remains the sole selector",
+          "id": "pta-census-split-polish",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195359824044-pta-census-split-polish/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/linalg/split_spline.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T19:54:06Z",
+        "completed_at": "2026-09-01T20:17:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1399,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1399,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6d1dd89a9ab82c25d677c277457766d25c8a1ccd",
+        "commits": [
+          "83ada1f1ccca44fd51d0ff3cf0be8bd6b648daa7"
+        ],
+        "changed_lines": {
+          "added": 336,
+          "removed": 8,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195359824044-pta-census-split-polish/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10185216,
+            "cached_input_tokens_cumulative": 10185216,
+            "input_tokens": 10392148,
+            "input_tokens_cumulative": 10392148,
+            "output_tokens": 27840,
+            "output_tokens_cumulative": 27840,
+            "reasoning_output_tokens": 8274,
+            "reasoning_output_tokens_cumulative": 8274
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "Run the tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T202000865917-pta-census-split-polish-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-census-split-polish-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md (create parent dirs) with a PASS or FAIL verdict over these checked items: (1) git show --stat 83ada1f1 lists only the four fenced paths; (2) the six-neighbour Null2D census remains the sole producer and ranker of candidates and the polish touches only the already-selected O and X rows, never adding, dropping or re-ranking; (3) exactly one bounded Newton update per non-exact selected slot on a SplitTensorBSpline whose interface sits at the census-selected boundary level, with the fixed-slot receipts (converged, iterations, value, gradient, Hessian) preserved and a rejected fit or polish leaving the census row standing; (4) the captured logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195359824044-pta-census-split-polish/logs/ record 32 passed and the metrics file records axis error <= 0.2 mm, saddle error <= 1e-12 m, and fit convergence receipts on 33x33 and 65x65; (5) state where the polish executes on the production path (inside Topology.read_qualification per read, or elsewhere) and what that implies for per-read cost, JIT tracing and the raster reshape it currently performs, quoting file:line; (6) explain why the six secondary-null acceptance cases rejected the polish and whether that rejection rule is principled or masks a defect; (7) naming hygiene: no plan labels, node ids, sprint tags or changelog prose in the changed source or tests; (8) every defect quoted with file:line. Read-only review of files and logs; do not modify the worktree",
+          "estimated_hours": 0.5,
+          "goal": "Write an independent verdict report on commit 83ada1f1 of node pta-census-split-polish (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-census-split-polish, paths nova/equilibrium/topology.py, nova/equilibrium/flux_surface_connectivity.py, nova/linalg/split_spline.py, tests/test_split_polish_nulls.py) against its plan contract",
+          "id": "pta-census-split-polish-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202000865917-pta-census-split-polish-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "15m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T20:20:06Z",
+        "completed_at": "2026-09-01T20:26:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 392,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 392,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "b1c831469008ef3f8272b81b211bfc4f3ffdf2a7",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-census-split-polish-review.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202000865917-pta-census-split-polish-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2674944,
+            "cached_input_tokens_cumulative": 2674944,
+            "input_tokens": 2846264,
+            "input_tokens_cumulative": 2846264,
+            "output_tokens": 17276,
+            "output_tokens_cumulative": 17276,
+            "reasoning_output_tokens": 7923,
+            "reasoning_output_tokens_cumulative": 7923
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: tried: ran the new reduced static rung and independently ran the existing reduced-oracle regression; both fail at the identical unstructured-carrier topology qualification boundary. options: (1) integrate the pta-cell-partition-geometry repair and resume this node; (2) grant a scope extension for nova/equilibrium/topology.py plus its tests; or (3) abandon the shipped production path and weaken the certificate to stored receipts; which would violate the goal. leaning: option 1 because that repair is already concurrently owned and preserves the required shipped-oracle path. cost-if-wrong: if the partition repair does not restore the oracle; the derivative and aggregation driver remains reusable but the 16 production rungs; figures; JSON receipt; and full gate validation must still be executed after a topology fix.",
+              "elapsed_seconds": 1477,
+              "log_age_seconds": 685,
+              "log_fresh": true,
+              "manifest_commits": [
+                "bf6dcdf9"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195519540142-gaa-solovev-certificate/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T195519540142-gaa-solovev-certificate/manifest.md; resolve the blocker before resuming the run",
+              "node": "gaa-solovev-certificate",
+              "phase": "starting",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T195519540142-gaa-solovev-certificate",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 701,
+              "terminal_at": "2026-09-01T20:08:22Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-solovev-certificate"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1261
+    "_version": 1265
   }
 }

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="plasma-cell-topology-authority">
+<meta name="reckon-type" content="plan">
+<title>plasma-cell-topology-authority</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Plasma-cell topology authority — flood fill, null census and private mask on the current mesh">
+<meta name="plan-summary" content="Move the saddle-aware flood, the sign-change null census and the private mask onto the plasma cells, removing the raster-to-cell transfer seam.">
+<meta name="plan-status" content="pending">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-effort-hours" content="28.0">
+<meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis">
+<meta name="plan-blocks" content="single-grid-solver-cutover">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-version" content="3">
+<meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Plasma-cell topology authority</h1>
+<p class="lede">The flood fill, the sign-change null census and the private mask move onto the plasma current cells, removing the raster-to-cell transfer seam. Two measured symptoms motivate this: one-cell label mismatches on both retained-failure 21985/51 panels, and the historical rim-current scatter defect (−0.689 MA, 4.6%, closed by the own-node moment unification and now pinned by regression tests). The prototype proved parity is achievable: zero differing private cells on MAST 22086/43 mixed.</p></header>
+<section id="s1"><h2>§1 Flood on the plasma cells</h2>
+<p>Re-derive the saddle-aware flood cut on the plasma-cell hex adjacency (structured half-offset lattice; the unstructured counterpart recovers the same six-neighbour rings from <code>PlasmaGrid.tessellate</code>). The cut semantics — saddle-aware component labelling, private-flux separation past each X-point — must carry over exactly; the geometry tests (SN up/down with near secondary, snowflake ±, coil nulls) are the acceptance surface and run unchanged.</p></section>
+<section id="s2"><h2>§2 Census primary, spline polish</h2>
+<p>The six-neighbour sign-change census (<code>nova/biot/fieldnull.py categorize_2d</code>) is the primary null identifier on the same cells; one polish step on the split basis refines positions (prototype: axis 5.0 mm → 0.101 mm, saddle → 6e-16 m). The spline is polish-only by locked lead decision.</p></section>
+<section id="s3"><h2>§3 Masks and telemetry migrate together</h2>
+<p>The private mask, wall machinery, per-trip mask-difference telemetry, stagnation exit and non-converged checkpointing move with the authority. Selection semantics honour the SOL-label retirement: open-field-line support by ψ_norm at evaluation plus the topological private mask, never a frozen per-cell category.</p></section>
+<section id="s4"><h2>§4 The parity harness is the gate</h2>
+<p>Against the incumbent raster authority on every committed operand: identical private masks, identical selected primaries, identical retained-failure classifications. Any difference is quantified per cell and adjudicated in the record — never absorbed. The de-risk caches (per-cell flux, per-candidate labels) are the replay substrate; this plan does not start its cutover section until <code>hex-grid-derisk-gates</code> reports all three falsifiers clear.</p></section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship plasma-cell-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the topology authority over to the plasma cells behind a parity harness</h4>
+    <div class="r-fu-body">Re-derive the saddle-aware flood cut on the plasma-cell hex adjacency, run the sign-change census as the primary null identifier with one split-spline polish step, and produce the private mask and wall machinery on the same cells. The cutover is gated by a parity harness against the incumbent raster authority on every committed operand: identical private masks (the prototype measured zero differing cells on MAST 22086/43 mixed), identical selected primaries, and identical retained-failure classifications, with any difference quantified per cell and adjudicated rather than absorbed. The two measured seam symptoms this plan removes are recorded on separatrix-spline-extraction: the one-cell label mismatches on the 21985/51 panels and the historical rim-current scatter defect. Telemetry surfaces (per-trip mask differences, stagnation exit, checkpointing) migrate with the mask.</div>
+    <pre class="r-fu-prompt">/reckon-ship plasma-cell-topology-authority</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

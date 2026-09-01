@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="single-grid-solver-cutover">
+<meta name="reckon-type" content="plan">
+<title>single-grid-solver-cutover</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Single-grid solver cutover — one hex plasma-cell support for field, topology and current">
+<meta name="plan-summary" content="Cut the forward solver over to the single hex-cell support, regenerate both EFIT banks cold-start, and re-score the quarter-width boundary gates.">
+<meta name="plan-status" content="pending">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-graph-handle" content="hexgrid">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-effort-hours" content="44.0">
+<meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis,plasma-cell-topology-authority">
+<meta name="plan-blocks" content="efit-baseline-demonstration">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="critical">
+<meta name="plan-version" content="3">
+<meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Single-grid solver cutover</h1>
+<p class="lede">The endpoint: the forward solver runs on one hex plasma-cell support for field, topology and current, both EFIT banks regenerate cold-start, and the locked quarter-width boundary gates are scored. Graph handle <code>hexgrid</code> — a parallel session ships the whole closure with <code>/reckon-ship hexgrid</code>. Locked authorities honoured throughout: gates at one quarter of the source grid's minimum width (MAST 0.007578125005 m, DIII-D 0.006640624953 m), cold start with no warm seeding, sign-change census primary with the spline as polish, boundary-split representation with free curvature at the interface.</p></header>
+<section id="s1"><h2>§1 Consumer cutover</h2>
+<p><code>forward_operator</code>, <code>source</code> and <code>fixed_point</code> consumers move onto the single-grid representation. Solver semantics carry across unchanged and are proven, not asserted: the stagnation exit, own-mask acceptance, best-iterate retention, per-trip and per-iteration telemetry and non-converged checkpointing each keep their paired bit-identity tests on fixtures where the mask does not move.</p></section>
+<section id="s2"><h2>§2 Response carrier rebuild</h2>
+<p>The memoized prescribed-response carrier is rebuilt on the new support, built once and cached durably with its digest and build cost recorded separately from solve cost — the stride-1 carrier guard incident ("the cached prescribed response inputs changed") is the failure mode this section exists to not repeat.</p></section>
+<section id="s3"><h2>§3 Cold-start bank regeneration</h2>
+<p>MAST twelve-arm and DIII-D five-frame banks regenerate cold-start at native resolution through the shared comparator, with per-frame atomic checkpoints, per-trip telemetry, retained named failures, and the launch-plus-harvest split for anything outliving a worker fence. Lane sizing honours the measured trip arithmetic — the four-hour truncation of job 1259047 is the recorded counter-example.</p></section>
+<section id="s4"><h2>§4 Gate scoring, and what a failure means</h2>
+<p>The quarter-width gates are scored per machine from each bank. A MAST failure indicts this cutover. A DIII-D failure with the core-coherent signature does not: the zero-iteration record shows EFIT's own solution scoring 0.083 under our operator at stride 1 (worse than stride 2, 98.5% interior-bulk energy) — an input-side inconsistency this cutover is not expected to fix. That failure routes to the DIII-D input investigation on <code>separatrix-spline-extraction</code>, not back into this plan, and the receipt must say which signature it carries.</p></section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sgc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship single-grid-solver-cutover" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the solver over and re-score the gates</h4>
+    <div class="r-fu-body">With the three de-risk gates clear, the basis landed and the topology authority at parity: cut forward_operator, source and fixed_point consumers onto the single-grid representation; rebuild the prescribed-response carrier on the new support with its build cost recorded; carry the stagnation exit, own-mask acceptance, best-iterate retention and all telemetry semantics across unchanged (bit-identical where the mask does not move, proven); regenerate the MAST twelve-arm and DIII-D five-frame banks COLD-START (locked: no warm seeding) at native resolution; and re-score the locked quarter-width gates, MAST 0.007578125005 m and DIII-D 0.006640624953 m worst eligible boundary RMS. Report honestly against the standing caveats: the DIII-D core-coherent input inconsistency (zero-iteration residual 0.083 at stride 1, worse than stride 2) is input-side and is NOT expected to be fixed by this cutover — a DIII-D gate failure with that signature routes to the input investigation, not back into this plan.</div>
+    <pre class="r-fu-prompt">/reckon-ship single-grid-solver-cutover</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

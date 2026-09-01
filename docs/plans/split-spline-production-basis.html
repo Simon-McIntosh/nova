@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="split-spline-production-basis">
+<meta name="reckon-type" content="plan">
+<title>split-spline-production-basis</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Split-spline production basis — interior/exterior C2 with a free curvature jump at the boundary">
+<meta name="plan-summary" content="Harden the prototype&#x27;s boundary-split field representation into a conditioned, tested production module with implicit derivatives and fixed-shape batching.">
+<meta name="plan-status" content="pending">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-effort-hours" content="24.0">
+<meta name="plan-blocks" content="plasma-cell-topology-authority,single-grid-solver-cutover">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-version" content="3">
+<meta name="plan-informs" content="hex-cell-single-grid-feasibility">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Split-spline production basis</h1>
+<p class="lede">Harden the prototype's boundary-split representation into a production module. The physics: the current-density step at the separatrix makes ψ's curvature discontinuous there, so the field is represented as an interior patch and an exterior patch, each C2 within its region, ψ and ∇ψ continuous at the interface, second derivative free to jump. A single global C2 fit smooths across that jump — the error class MAST's edge-concentrated zero-iteration residual exhibits (0.0116 at stride 1, peak 6.7 cm from the LCFS, halving with resolution).</p></header>
+<section id="s1"><h2>§1 The basis module</h2>
+<p>Promote the representation from <code>benchmarks/hex_cell_field_feasibility.py</code> into <code>nova/</code>: fitting on the half-offset structured lattice (a rectangular (n_x, n_z) index array with alternate rows offset half a cell — fitting and evaluation stay fixed-shape), the curved interface following the boundary through cells via the level set, evaluation serving null polish and contour extraction. The prototype's interface mechanism — continuous ψ and gradient enforced via a squared level-set exterior term — is the starting point, not a constraint; if a constrained formulation conditions better, take it and record why.</p></section>
+<section id="s2"><h2>§2 Differentiability</h2>
+<p>Implicit differentiation of fitted coefficients at the normal equations — never reverse-mode through the fit loop — matching the standing polish-termination constraint on separatrix-spline-extraction. Eager/JIT/vmap parity proven, skipped-slot padding distinguishable from executed work, exactly as the solver telemetry contracts require.</p></section>
+<section id="s3"><h2>§3 Conditioning</h2>
+<p>The cutover estimate's 80-hour lower bound excludes a conditioning redesign and its 140-hour upper bound includes one. Measure the fit conditioning on the production lattices (33×33 and 65×65, both machines) and report which bound the measurement demands, as a number a reader can check.</p></section>
+<section id="s4"><h2>§4 Validation</h2>
+<p>Green against the Solov'ev references (<code>tests/rotating_equilibrium_references.py</code>) — noting the recorded ring-reconstruction truncation for quartic radial terms is exactly the error class this representation must beat — and against at least one committed measured map with the boundary-band advantage stated. Focused lane delta against base, no committed bank artifact modified.</p></section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="single-grid-design" data-choice="sign-change-primary-spline-polish-boundary-split" data-by="Simon McIntosh" data-when="2026-09-01T00:00:00+00:00">
+    <p class="r-dec-q">The locked design constraints for the single-grid representation</p>
+    <p class="r-dec-ctx">Stated by the lead on 2026-09-01 with the feasibility order, and proven by the prototype benchmarks/hex_cell_field_feasibility.py at 4 of 4 criteria: boundary-band second-derivative RMS 0.267 for a single global C2 fit against 1.87e-15 for the split fit at equal 16-coefficient budgets; axis polish 5.0 mm to 0.101 mm in one step; saddle to 6.06e-16 m; zero private-mask cell differences against the committed MAST operand.</p>
+    <p class="r-dec-rat">Lead decision: the six-neighbour sign-change census around each cell centroid (nova/biot/fieldnull.py categorize_2d) is the primary null identifier and the spline exists for polish only; the field representation is split in two at the plasma boundary with an interior spline separated from an exterior spline, each C2 within its region, psi and gradient continuous at the interface, and the second derivative free to jump, because the current-density step at the separatrix makes the curvature discontinuous and a single global C2 fit smooths across it — the error class MAST&#x27;s edge-concentrated zero-iteration residual exhibits.</p>
+    </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ssb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship split-spline-production-basis" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the production basis from the prototype</h4>
+    <div class="r-fu-body">Promote benchmarks/hex_cell_field_feasibility.py's split representation into a production module under nova/: conditioned fitting on the half-offset structured lattice, the curved interface following the boundary through cells with psi and gradient matched and curvature free, implicit differentiation of fitted coefficients (never through the fit loop), fixed-shape evaluation and fitting that compile once and vmap, an evaluation API serving null polish and contour extraction, and validation on the Solov'ev references plus at least one committed measured map. Conditioning is in scope: the 80-hour lower bound of the cutover estimate excludes a conditioning redesign and the 140-hour upper bound includes one, so this plan reports which bound the measured conditioning demands.</div>
+    <pre class="r-fu-prompt">/reckon-ship split-spline-production-basis</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

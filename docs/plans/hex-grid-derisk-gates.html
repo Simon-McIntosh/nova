@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="hex-grid-derisk-gates">
+<meta name="reckon-type" content="plan">
+<title>hex-grid-derisk-gates</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Hex single-grid de-risk gates — the three falsifiers that clear the cutover">
+<meta name="plan-summary" content="Measure the three falsifiers the feasibility record names: mask replay from cached per-cell flux, split-fit advantage on measured maps, H200 batch behaviour.">
+<meta name="plan-status" content="pending">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-effort-hours" content="16.0">
+<meta name="plan-blocks" content="plasma-cell-topology-authority,single-grid-solver-cutover">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-version" content="3">
+<meta name="plan-informs" content="hex-cell-single-grid-feasibility">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Hex single-grid de-risk gates</h1>
+<p class="lede">The feasibility prototype (<code>benchmarks/hex_cell_field_feasibility.py</code>, 4/4 criteria) names three conditions that overturn its 80–140 worker-hour cutover estimate. This plan measures all three. Any one firing halts the cutover plans and returns the programme to the lead with the number.</p></header>
+<section id="s1"><h2>§1 Cache regeneration and independent mask replay</h2>
+<p>The committed topology operand caches carry cell centres, domain labels and walls but lack <code>per_cell_flux_values</code>, <code>per_candidate_domain_labels</code>, <code>current_cell_polygons</code> and <code>atomic_node_signed_flux</code> — the four fields two figure campaigns and the prototype each named as missing. Regenerate the caches with those fields through the production authorities, then replay saddle-edge admissibility and the MAST 22086/43 private mask independently from the cached flux, on the plasma-cell adjacency.</p>
+<p><strong>Falsifier:</strong> any differing private-mask cell against the committed operand. The prototype measured zero of 42 on the mixed arm; the replay must reproduce that from cache alone, including the X-candidate selection — the step the current caches cannot support.</p></section>
+<section id="s2"><h2>§2 Split-fit advantage on measured maps</h2>
+<p>The prototype's boundary-band second-derivative RMS of 1.87e-15 (split) against 0.267 (global C2) at equal 16-coefficient budgets is a manufactured-field property. Fit both representations on the committed measured EFIT ψ maps — MAST efm 65×65 and DIII-D efit_psirz 65×65 — at matched degrees of freedom, interface on each map's own LCFS, and report the boundary-band advantage with the band defined as two cell pitches around the boundary.</p>
+<p><strong>Falsifier:</strong> the split fit loses its boundary-band advantage on either measured map. The expected magnitude is bounded by the MAST zero-iteration edge residual (0.0116 at stride 1, peak 6.7 cm from the LCFS), not by e-15.</p></section>
+<section id="s3"><h2>§3 Accelerator batch behaviour</h2>
+<p>Measure the fixed-slot split carrier at production batch widths on one reserved H200 (betelgeuse, <code>--reservation=gpu_0003_grpA</code>), against the committed throughput ladder (26.797× saturation at width 1024, out-of-memory at 2048, receipt <code>docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json</code>). CPU reference from the prototype: split costs 12–17% over global, 25.0M active point evaluations per second at width 32.</p>
+<p><strong>Falsifier:</strong> a material batch regression — the split carrier failing to sustain the committed ladder's saturation shape within the stated overhead band.</p></section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="cutover-gating" data-choice="three-falsifiers-must-clear" data-by="Simon McIntosh" data-when="2026-09-01T00:00:00+00:00">
+    <p class="r-dec-q">What clears the solver cutover?</p>
+    <p class="r-dec-ctx">The feasibility record docs/research/hex-cell-single-grid-feasibility.html states its own falsifiers: the estimate is overturned if an independent replay with cached per-cell flux produces any MAST mask difference, if the split fit loses its boundary-band advantage on a non-manufactured map, or if accelerator measurement shows a material batch regression.</p>
+    <p class="r-dec-rat">Lead decision 2026-09-01, encoding the feasibility record&#x27;s own recommendation: build the production-grade basis, but do not cut the solver over until all three checks pass. Any one falsifier firing halts the cutover plans and returns the programme to the lead with the measured number.</p>
+    </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-hdg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hex-grid-derisk-gates" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the three de-risk gates in parallel nodes</h4>
+    <div class="r-fu-body">Three independent measurements, one node each: the cache-regeneration-and-replay gate (adds per-cell flux, per-candidate domain labels, current_cell_polygons and atomic_node_signed_flux to the topology operand caches, and independently replays saddle-edge admissibility and the MAST 22086/43 private mask, where ANY differing cell fires the falsifier); the measured-map gate (fits the boundary-split representation on committed MAST and DIII-D EFIT psi maps at matched degrees of freedom and reports the boundary-band second-derivative advantage against a single global C2 fit, where losing the advantage fires the falsifier); and the accelerator gate (measures the fixed-slot split carrier at production batch widths on one reserved H200, where a material regression against the committed 26.797x saturation ladder fires the falsifier). Each gate reports its number to this plan whether it passes or fires.</div>
+    <pre class="r-fu-prompt">/reckon-ship hex-grid-derisk-gates</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

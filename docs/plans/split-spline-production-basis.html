@@ -23,7 +23,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
 </head>
 <body>
@@ -53,6 +53,11 @@
     <div class="r-fu-body">Promote benchmarks/hex_cell_field_feasibility.py's split representation into a production module under nova/: conditioned fitting on the half-offset structured lattice, the curved interface following the boundary through cells with psi and gradient matched and curvature free, implicit differentiation of fitted coefficients (never through the fit loop), fixed-shape evaluation and fitting that compile once and vmap, an evaluation API serving null polish and contour extraction, and validation on the Solov'ev references plus at least one committed measured map. Conditioning is in scope: the 80-hour lower bound of the cutover estimate excludes a conditioning redesign and the 140-hour upper bound includes one, so this plan reports which bound the measured conditioning demands.</div>
     <pre class="r-fu-prompt">/reckon-ship split-spline-production-basis</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T080015214739-hexgrid-reuse-scout" data-who="hexgrid-scout" data-when="2026-09-01T08:05:46Z">
+    <div class="r-comment-body"><p>Reuse map delivered: 9/9 capability groups, 45 fitness entries, 2 repos; missing seam identified as the conditioned split coefficient fit + implicit normal-equation derivative</p></div>
+</div>
 </section>
 </main>
 </body>

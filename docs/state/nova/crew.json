@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T18:17:14",
+  "updated": "2026-09-01T19:46:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1305,6 +1305,17 @@
           "gpt-5.6-sol": "01a03e2e-1bad-7df0-93f5-49418c4cb7df"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "scr-mechanism",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "seam-scout",
@@ -67477,9 +67488,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T163037816333-scr-mechanism",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a72",
+        "node": "scr-mechanism",
+        "node_definition": {
+          "done_when": "docs/figures/solver-convergence-regression/head-mechanism.json names the refusing criterion with residual numbers from the banked histories, states whether telemetry-out restores convergence, and records the perturbed-seed outcomes, with no solver source modified",
+          "estimated_hours": 5.0,
+          "goal": "The \u00a72 mechanism receipt for the 22086/43 pure stagnation at HEAD, covering three measurements: attribution of the convergence refusal to its specific criterion (residual threshold, own-mask acceptance, or the qualification seam) with the retained residual numbers from the banked telemetry in docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json whose trip history shows the mask difference reaching zero by trip 3 while the run terminates active_set_stagnated without qualification, a telemetry-compiled-out-versus-in solve of the same arm on one reserved H200 (4 CPUs, JAX_PLATFORMS=cuda,cpu, hardened pattern), and perturbed-seed re-solves of the two anomalous arms (22086/43 pure and 21978/35 pure) for basin sensitivity",
+          "id": "scr-mechanism",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T163037816333-scr-mechanism/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/stagnation_mechanism_probe.py",
+            "docs/figures/solver-convergence-regression/head-mechanism.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T16:30:44Z",
+        "completed_at": "2026-09-01T17:46:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4521,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4521,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e5e7d2823d6175b8a3dba416965ee0ddfea001b0",
+        "commits": [
+          "7bbb86c3d8d8f03e9cb76ae6e6208478da3aaeee"
+        ],
+        "changed_lines": {
+          "added": 1254,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260917 stagnation_mechanism_probe (48m57s, exit 0) + check mode revalidation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T163037816333-scr-mechanism/logs/h200-mechanism.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T163037816333-scr-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 24758272,
+            "cached_input_tokens_cumulative": 24758272,
+            "input_tokens": 25056137,
+            "input_tokens_cumulative": 25056137,
+            "output_tokens": 35196,
+            "output_tokens_cumulative": 35196,
+            "reasoning_output_tokens": 9907,
+            "reasoning_output_tokens_cumulative": 9907
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1233
+    "_version": 1236
   }
 }

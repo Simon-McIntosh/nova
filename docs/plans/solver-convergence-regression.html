@@ -21,6 +21,9 @@
 <title>Solver convergence regression | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.333">
 </head>
 <body>
 <main class="plan-doc">
@@ -36,17 +39,20 @@
 <h2 id="s3">§3 — Root cause and repair</h2>
 <p>With §1's revision verdict and §2's mechanism, identify the responsible change by targeted reading of the named subsystem's history — never a git-bisect workflow — and repair it or, if the new behaviour is judged correct (the old convergence was spurious), re-adjudicate the committed bank with the lead. Acceptance either way: 22086/43 pure and 21978/35 pure reach an explained terminal state, the twelve-arm bank regenerates reproducibly, and the paired preservation tests stay green. A repair that touches solver semantics returns to the lead before merging.</p>
 
-<section data-reckon="decisions" id="decisions" class="r-decisions">
-<h2><span class="sec">§</span> Decisions</h2>
-</section>
+
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-scr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="" data-resolved-by="">
-<h4 class="r-fu-title">Run the mechanism characterisation, then root-cause</h4>
-<div class="r-fu-body">§2 dispatches now (mechanism from banked telemetry plus HEAD discriminators); §1 consumes the shadow-score receipt when the gates plan lands it; §3 follows both.</div>
-<pre class="r-fu-prompt">/reckon-ship solver-convergence-regression</pre>
-</article>
+    <h4 class="r-fu-title">Run the mechanism characterisation, then root-cause</h4>
+    <div class="r-fu-body">§2 dispatches now (mechanism from banked telemetry plus HEAD discriminators); §1 consumes the shadow-score receipt when the gates plan lands it; §3 follows both.</div>
+    <pre class="r-fu-prompt">/reckon-ship solver-convergence-regression</pre>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T163037816333-scr-mechanism" data-who="scr-mechanism" data-when="2026-09-01T17:46:05Z">
+    <div class="r-comment-body"><p>Mechanism attributed: the refusal is the fixed-point residual threshold - 22086/43 pure mask settles at trip 3 but the residual plateaus at 4.8e-4, 48023x over the 1e-8 tolerance. Telemetry EXONERATED on GPU (compiled-out vs in bit-identical terminal states). Robust, not knife-edge: 5/5 perturbed seeds stagnate in a tight band; 21978/35 is basin-sensitive (4 cycles, 1 stagnation). HEAD genuinely cannot converge this arm; the pinned-revision discriminator now decides code-vs-backend</p></div>
+</div>
 </section>
 </main>
 </body>

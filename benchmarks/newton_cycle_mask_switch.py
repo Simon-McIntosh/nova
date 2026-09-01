@@ -227,10 +227,9 @@ def _topology_snapshot(
             labels.reshape((radial_count, vertical_count)).T
             == int(PlasmaDomain.PRIVATE_FLUX)
         ),
-        "production_common_sol": (
-            labels.reshape((radial_count, vertical_count)).T
-            == int(PlasmaDomain.COMMON_SOL)
-        ),
+        "production_open_field_line": np.asarray(pinned_masks.open_field_line)
+        .reshape((radial_count, vertical_count))
+        .T,
     }
     record = {
         "state_sha256": _array_sha256(np.asarray(state, dtype=np.float64)),

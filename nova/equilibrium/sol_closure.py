@@ -18,11 +18,10 @@ midplane. Nova carries total poloidal flux, so
 The resulting exponential continues the confined pressure and diamagnetic
 gradients with their value and first derivative intact. Consequently their
 toroidal current density has the same value and first derivative at fixed
-major radius. Domain selection remains topological: every common-SOL point
-inside the material boundary is evaluated, private flux is exactly zero, and
-no normalised-flux cutoff is part of the closure. A reported support extent is
-therefore a measurement of where the current becomes insignificant, never an
-input to the source.
+major radius. Evaluation selects points with normalised flux above one inside
+the material boundary, while the topological private mask remains an explicit
+veto. A reported support extent is a measurement of where the current becomes
+insignificant, never an input to the source.
 """
 
 from __future__ import annotations
@@ -36,7 +35,7 @@ import numpy as np
 
 from nova.equilibrium.continuation import ContinuedDomainProfile, SeparatrixContinuation
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
-from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.source import (
     ContinuationForm,
     DomainProfile,
@@ -165,7 +164,7 @@ class EichSolClosure:
         self, confined: DomainProfile, variant: SolDecayVariant
     ) -> ContinuedDomainProfile:
         """Continue a confined source onto the material-bounded common SOL."""
-        return self.policy(variant).extend(confined, PlasmaDomain.COMMON_SOL)
+        return self.policy(variant).extend_open_field_line(confined)
 
     def current_density(
         self,
@@ -174,9 +173,9 @@ class EichSolClosure:
         masks: DomainMasks,
         variant: SolDecayVariant,
     ):
-        """Return SOL toroidal current selected solely by topology labels."""
+        """Return SOL toroidal current selected by live flux and topology."""
         profile = self.domain_profile(confined, variant)
-        selection = masks.common_sol
+        selection = masks.open_field_line
         safe_flux = jnp.where(selection, masks.psi_norm, 1.0)
         return jnp.where(
             selection,

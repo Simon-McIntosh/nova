@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.333">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
 <main class="plan-doc">
@@ -64,6 +64,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260901T1445-quantum" data-who="reckon-ship-s18" data-when="2026-09-01T14:45:00+00:00">
     <div class="r-comment-body">sto-quantum-decomposition landed — commits fefab63f/5228ffb8/b0bf0575, merged a9183ade; gate PASSED (SLURM 1260803, 2m10s). The per-trip quantum is COMPILED COMPUTATION, not host overhead: 25.0 ms/member/trip = mask reconciliation 12.61 + Newton re-linearization 12.34 + first-GMRES sync 0.048, with host launches 0 (all sixteen trips already inside one compiled launch) and preconditioner 0 (none exists). Explicit fusion measured near-nil (1.006x, 0.236 ms/slice ceiling). Ranked ceilings: complete trip-body collapse reaches the 1.746 ms floor; mask-reconciliation restructuring alone → 22.07 ms/slice; linearization reuse/hoist alone → 22.52. Consequence for s3: trip-count reduction divides the whole 25 ms quantum and is the only multiplicative lever — the DIII-D partial census (mean 4.2 of 16 trips) projects ~0.46 ms/slice if MAST agrees. Receipt docs/figures/solver-trip-orchestration/trip-quantum.json + .png.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T141023513818-sto-compile-cadence" data-who="sto-compile" data-when="2026-09-01T14:45:02Z">
+    <div class="r-comment-body"><p>Compile decomposed: bare cold compile 383.5 s (374.6 s XLA, dominated by fusion+simplification passes; the historic 800.6 s included first-execute and 65.7 s profiler export; dual-branch stacking is 1.62x). Persistent cache gives 6.02x fresh-process restart (63.7 s), pure-data changes hit the exact key, code changes miss. No launch recipe enables jax_compilation_cache_dir today; every fresh-process lane repays per program-shape key. Recommendation: persistent cache first, then width bucketing, then executable splitting</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260901T1450-compile" data-who="reckon-ship-s18" data-when="2026-09-01T14:50:00+00:00">
+    <div class="r-comment-body">sto-compile-cadence landed — commit 5b04815a; gate PASSED (SLURM 1260790, exit 0). DECOMPOSITION: bare cold compile 383.5 s = trace 7.2 + MLIR 1.7 + XLA 374.6 (OptimizeHloModule 263.1, dominated by fusion 67.7 + priority-fusion 56.5 + simplification 84.7); the historic 800.6 s included first-execute and 65.7 s of profiler export; dual-branch stacking contributes 1.62x. CADENCE: every nova forward-solve lane is fresh-process and NO launch recipe enables jax_compilation_cache_dir, so each lane repays each program-shape key per invocation today. With the persistent cache on: fresh-process restart 63.7 s (6.02x), a pure-data change hits the exact key (jit_solve-ba3376e2...), a traced code change misses and recompiles in 343.5 s. RECOMMENDATION (numbered in the receipt): persistent cache first, then width bucketing/residency, then executable splitting. Follow-on folded as a node: wire one versioned persistent compilation-cache directory into the bank-regeneration and scheduled-test launch recipes with invalidation scoped to backend/compiler options, device topology, jaxlib/XLA build and serialized computation. Receipt docs/figures/solver-trip-orchestration/compile-cadence.json.</div>
 </div>
 </section>
 </main>

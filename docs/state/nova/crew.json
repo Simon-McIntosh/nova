@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:43:42",
+  "updated": "2026-09-01T16:45:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1463,9 +1463,11 @@
         "id": "sto-compile",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05d4e-ae4d-7de3-b417-6dbd8f376dbe",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d4e-ae4d-7de3-b417-6dbd8f376dbe"
+        },
         "created": "2026-09-01"
       },
       {
@@ -66899,9 +66901,133 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T141023513818-sto-compile-cadence",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a71",
+        "node": "sto-compile-cadence",
+        "node_definition": {
+          "done_when": "docs/figures/solver-trip-orchestration/compile-cadence.json records cold and cache-warm compile seconds on one reserved H200 (betelgeuse --reservation=gpu_0003_grpA, explicit --job-name, python -u, merged stderr, heartbeat, TMPDIR=/tmp), the pass breakdown, the per-lane payment cadence for bank regeneration versus small lanes versus tests, and a numbered recommendation",
+          "estimated_hours": 5.0,
+          "goal": "The \u00a71 compile receipt: where the 800.6 s H200 solve compile goes (trace time versus XLA pass breakdown via JAX_LOG_COMPILES and the XLA compilation-time report, dual-branch stacking contribution) and how often it is paid per lane \u2014 which nova launch recipes are fresh-process, whether jax_compilation_cache_dir persistent caching is enabled anywhere, the measured cache-warm restart compile time on the reserved H200, and cache-key stability across a pure-data change versus a code change",
+          "id": "sto-compile-cadence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/solve_compile_cadence.py",
+            "docs/figures/solver-trip-orchestration/compile-cadence.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-compile",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:10:31Z",
+        "completed_at": "2026-09-01T14:45:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2071,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2071,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+        "commits": [
+          "5b04815a53f7eec893efba8132c3e38514c26431"
+        ],
+        "changed_lines": {
+          "added": 1217,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260790 solve_compile_cadence (exit 0) + quantitative artifact assertions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-ae4d-7de3-b417-6dbd8f376dbe",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4100,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 7700,
+              "log_age_seconds": 4349,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 4377,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1227
+    "_version": 1229
   }
 }

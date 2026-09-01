@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="stride-one-boundary-probe">
   <meta name="plan-title" content="Full-grid MAST boundary probe">
-  <meta name="plan-summary" content="A controlled 65-by-65 re-solve of one converged MAST arm to separate grid discretisation from lower-null binding">
+  <meta name="plan-summary" content="Native-grid MAST reproduces the DIII-D active-set stall; null location improves, while unconverged boundary distances cannot score resolution">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-verifies" content="separatrix-spline-extraction#s4">
@@ -22,110 +22,180 @@
 <body>
   <main class="plan-doc">
     <header>
-      <p class="eyebrow">Research record &middot; controlled resolution contrast</p>
-      <h1>The full-grid MAST boundary probe is queued</h1>
+      <p class="eyebrow">Research record &middot; native-resolution production solve</p>
+      <h1>The active-set stall is now a two-machine result</h1>
       <p class="lead">
-        MAST 22086/43 pure is the one committed arm that is both converged and
-        eligible for a clean resolution comparison. Its 33-by-33 boundary has
-        <strong>0.0289113 m symmetric RMS</strong>, while the largest separation
-        sits at the lower EFIT X-point region. Job <code>1260037</code> will
-        repeat that arm on the full 65-by-65 grid without changing the solver,
-        criterion, masks, anchor, or comparator.
+        MAST 22086/43 pure terminated <strong>active-set stagnated</strong> at a
+        relative-sup residual of
+        <strong>9.001840977909396&times;10<sup>&minus;4</sup></strong> after 9 of
+        16 allowed trips. Trips 7 and 8 carried the same settled mask and the
+        same residual bit for bit. This is the DIII-D stall signature reproduced
+        on MAST at the native 65-by-65 resolution, through a source revision that
+        includes own-mask acceptance. The own-mask-aware adaptive descent model
+        is therefore the convergence blocker for the quarter-width programme on
+        both machines, not a DIII-D oddity.
       </p>
     </header>
 
     <aside>
       <p>
-        <strong>State at handoff.</strong> The exact command passed its login-node
-        preflight and the one authorized job is pending for Vega capacity. No
-        stride-one solve result is claimed here. The job has a 12-hour accepted
-        limit and must be harvested from the durable paths below rather than
-        truncated to fit an interactive worker fence.
+        <strong>Scientific verdict.</strong> Resolution improves the selected
+        null position by a factor of 2.83, to 8.463 mm, but this run does not
+        measure boundary discretisation. Its <code>9.0018e-4</code> relative-sup
+        residual is roughly five orders above the unchanged <code>1e-8</code>
+        convergence criterion. The
+        large boundary distances below are convergence artifacts and must not be
+        used to accept or reject the quarter-width boundary gate.
       </p>
     </aside>
 
-    <section id="baseline">
-      <h2>Committed comparison point</h2>
+    <section id="stall-unification">
+      <h2>The stall unifies MAST and DIII-D</h2>
       <p>
-        The committed corroboration panel is the scientific baseline. It shows
-        Nova following the upper and outboard EFIT boundary before closing above
-        the lower EFIT null, which is also where the symmetric sup is attained.
+        The first two trips changed 970 and 1,055 active-set cells. Trip 2 then
+        reached zero mask difference, and every remaining trip retained zero.
+        Residual descent continued through trip 7, after which trip 8 repeated
+        both the settled mask and
+        <code>0.0009001840977909396</code> exactly. This is the first measured
+        activation of the production <code>active_set_stagnated</code> exit; it
+        avoided spending the seven remaining budgeted trips.
       </p>
-      <figure>
-        <img
-          src="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
-          alt="Twelve-panel MAST corroboration bank including the 22086/43 pure boundary comparison">
-        <figcaption>
-          The tracked corroboration bank. The 22086/43 pure panel supplies the
-          fixed 33-by-33 values in the table; the new run does not modify this bank.
-        </figcaption>
-      </figure>
+      <p>
+        A zero mask difference is not itself evidence of settlement. The
+        committed 33-by-33 solve reached a false zero at trip 2 before changing
+        again, so three consecutive zero-difference trips are the minimum useful
+        confirmation. This trajectory supplies seven consecutive zeros before
+        the repeated-residual exit. The mask trajectory is
+        <code>970, 1055, 0, 0, 0, 0, 0, 0, 0</code>.
+      </p>
       <table>
-        <caption>33-by-33 committed geometry and lower-null operands</caption>
+        <caption>Complete streamed active-set trajectory</caption>
         <thead>
-          <tr><th scope="col">Measure</th><th scope="col">Committed value</th></tr>
+          <tr>
+            <th scope="col">Trip</th>
+            <th scope="col">Changed mask cells</th>
+            <th scope="col">Live residual</th>
+            <th scope="col">Newton iterations</th>
+            <th scope="col">Trip interval (s)</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><th scope="row">Symmetric boundary RMS</th><td>0.02891128908081361 m</td></tr>
-          <tr><th scope="row">Symmetric boundary sup</th><td>0.16610684834559725 m</td></tr>
-          <tr><th scope="row">Nova saddle to nearest EFIT X-point</th><td>0.02396426750340677 m</td></tr>
-          <tr><th scope="row">Lower-null sector symmetric RMS</th><td>0.04335127830199057 m</td></tr>
-          <tr><th scope="row">Lower-null sector symmetric sup</th><td>0.16610684834559725 m</td></tr>
-          <tr><th scope="row">Lower EFIT X-point to Nova boundary</th><td>0.16625530761395624 m</td></tr>
-          <tr><th scope="row">Solve wall time</th><td>59.287223 s</td></tr>
-          <tr><th scope="row">Streamed callback intervals</th><td>44.857482 s over 12 trips</td></tr>
+          <tr><th scope="row">0</th><td>970</td><td>0.0053825698059968745</td><td>12</td><td>808.683114</td></tr>
+          <tr><th scope="row">1</th><td>1055</td><td>0.0024769307957134435</td><td>12</td><td>2457.583007</td></tr>
+          <tr><th scope="row">2</th><td>0</td><td>0.0014548956619104523</td><td>12</td><td>1220.210401</td></tr>
+          <tr><th scope="row">3</th><td>0</td><td>0.0012067715391843173</td><td>12</td><td>1558.588252</td></tr>
+          <tr><th scope="row">4</th><td>0</td><td>0.0010400638921162972</td><td>12</td><td>1558.368845</td></tr>
+          <tr><th scope="row">5</th><td>0</td><td>0.0009384401413289169</td><td>12</td><td>2151.448743</td></tr>
+          <tr><th scope="row">6</th><td>0</td><td>0.0009068496561247288</td><td>12</td><td>2158.669347</td></tr>
+          <tr><th scope="row">7</th><td>0</td><td>0.0009001840977909396</td><td>12</td><td>2458.775202</td></tr>
+          <tr><th scope="row">8</th><td>0</td><td>0.0009001840977909396</td><td>12</td><td>2442.241881</td></tr>
         </tbody>
       </table>
     </section>
 
-    <section id="method">
-      <h2>Controlled method</h2>
+    <section id="null-resolution">
+      <h2>The null improves with resolution</h2>
       <p>
-        The probe selects the governed 22086/43 row from the same decomposition
-        bank as the corroboration driver and asks its case builder for all 65
-        stored radial and vertical points. The all-circuit prescribed response is
-        computed fresh for those 4,225 grid targets because the committed response
-        matrix is dimensioned for the 33-by-33 target set. The pure diverted branch
-        retains the production Newton&ndash;Krylov settings: criterion
-        <code>1e-8</code>, 12 Newton steps, 12 GMRES iterations, relaxation 0.5,
-        step cap 10, and no warm-up sweeps. No tolerance is relaxed.
-      </p>
-      <p>
-        The global RMS and sup use <code>compare_closed_boundaries</code> with its
-        fixed 2,000-point symmetric populations. The local statistic introduces
-        no plotting window: each sampled boundary point is assigned to its nearest
-        EFIT X-point, and the lower-null population is the Voronoi region belonging
-        to the lower EFIT X-point at (0.5856547355651855 m,
-        &minus;1.196423053741455 m). The direct distance from that X-point to the
-        Nova closed boundary is reported separately.
+        The selected Nova saddle moves from 0.02396426750340677 m from the
+        nearest EFIT X-point on the 33-by-33 solve to
+        0.008463463498677284 m on the 65-by-65 solve. The distance falls by
+        0.015500804004729484 m, a 2.8315-fold improvement. The native-grid result
+        is only 0.000885463498677285 m, or 0.885 mm, outside the locked
+        0.007578 m quarter-width gate. Null localisation therefore responds in
+        the expected direction even though the equilibrium has not converged.
       </p>
     </section>
 
-    <section id="execution">
-      <h2>Execution receipt and harvest contract</h2>
+    <section id="boundary-qualification">
+      <h2>The boundary numbers are stall artifacts</h2>
+      <figure>
+        <img
+          src="/nova/figures/stride-one-boundary/stride-one-boundary-comparison.png"
+          alt="EFIT boundary and converged 33-by-33 Nova boundary surrounding a much smaller non-converged 65-by-65 Nova boundary">
+        <figcaption>
+          The 65-by-65 curve is visibly an unconverged interior state, not a
+          refined version of the converged 33-by-33 boundary. Geometry is drawn
+          from the audited NPZ; the closed branches alone enter the comparator.
+        </figcaption>
+      </figure>
+      <p>
+        Binding RMS rises from 0.02891128908081361 m to
+        0.18888046534076347 m, and sup from 0.16610684834559725 m to
+        0.46288669662867227 m. The lower-null sector carries the separation: the
+        lower EFIT X-point lies 0.4630516093028299 m from the native-grid Nova
+        boundary, against 0.16625530761395624 m on the converged 33-by-33 state.
+      </p>
+      <p>
+        Comparing a state stalled at roughly <code>9e-4</code> against a settled
+        state at roughly <code>2.6e-16</code> measures convergence, not
+        discretisation. The committed 33-by-33 bank row is independently marked
+        converged against the same <code>1e-8</code> criterion. Consequently the
+        native-grid <strong>0.18888 m RMS is not a resolution verdict</strong>,
+        and the discretisation question stays open until a converged 65-by-65
+        solve exists.
+      </p>
       <table>
+        <caption>Geometry contrast, with unconverged native-grid values qualified</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">33 by 33, converged</th>
+            <th scope="col">65 by 65, stalled</th>
+            <th scope="col">Native minus coarse</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><th scope="row">SLURM job</th><td><code>1260037</code></td></tr>
-          <tr><th scope="row">Partition</th><td><code>vega</code>, uncapped non-debug CPU lane</td></tr>
-          <tr><th scope="row">Accepted limit</th><td>12:00:00</td></tr>
-          <tr><th scope="row">Resources</th><td>16 CPUs; 64 GiB</td></tr>
-          <tr><th scope="row">Code revision</th><td><code>d1e99809e2652c63aae326ed9cfbae117d35d31b</code></td></tr>
-          <tr><th scope="row">Interpreter</th><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code></td></tr>
-          <tr><th scope="row">Runtime environment</th><td><code>VIRTUAL_ENV</code> unset; CPU JAX; binary64 enabled; no uv wrapper</td></tr>
-          <tr><th scope="row">Login preflight</th><td>passed; 65 by 65; 4,225 nodes; criterion unchanged</td></tr>
-          <tr><th scope="row">Durable log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/logs/slurm-1260037.log</code></td></tr>
-          <tr><th scope="row">Result JSON</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-probe.json</code></td></tr>
-          <tr><th scope="row">Geometry arrays</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-geometry.npz</code></td></tr>
-          <tr><th scope="row">Comparison plot</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T054025676668-sse-stride-one-boundary-probe/output/stride-one-boundary-comparison.png</code></td></tr>
+          <tr><th scope="row">Saddle to nearest EFIT X (m)</th><td>0.02396426750340677</td><td>0.008463463498677284</td><td>&minus;0.015500804004729484</td></tr>
+          <tr><th scope="row">Symmetric boundary RMS (m)</th><td>0.02891128908081361</td><td>0.18888046534076347</td><td>+0.15996917625994986</td></tr>
+          <tr><th scope="row">Symmetric boundary sup (m)</th><td>0.16610684834559725</td><td>0.46288669662867227</td><td>+0.296779848283075</td></tr>
+          <tr><th scope="row">Lower-null sector RMS (m)</th><td>0.04335127830199057</td><td>0.1988745633400983</td><td>+0.15552328503810772</td></tr>
+          <tr><th scope="row">Lower EFIT X to Nova boundary (m)</th><td>0.16625530761395624</td><td>0.4630516093028299</td><td>+0.29679630168887366</td></tr>
         </tbody>
       </table>
+    </section>
+
+    <section id="operational-cost">
+      <h2>Native-grid operational cost</h2>
       <p>
-        A harvest must require terminal scheduler state, <code>ExitCode 0:0</code>,
-        a log ending <code>EXIT_MARKER=0</code>, strict finite JSON, and matching
-        per-trip array lengths. It must then replace this pending state with the
-        measured convergence, terminal residual, trip trajectory, global and
-        lower-null deltas, wall time, and an explicit sub-centimetre verdict.
+        Exact polygon construction of the full-grid case, profile, and prescribed
+        response took 5767.985074 s on Rigel CPU node
+        <code>98dci4-clu-2006</code>. The response has shape 4262 by 101: 4,225
+        grid targets plus 37 wall targets, across all 101 fitted circuits. The
+        solve then took 16848.899298 s. Its first three callbacks arrived 809,
+        3266, and 4486 s into the solve; individual callback intervals over all
+        nine trips ranged from 808.683 to 2458.775 s. Unlike the compiled
+        33-by-33 arm, the full-grid trajectory shows no warm-trip speedup.
       </p>
+      <table>
+        <caption>Scheduler and runtime receipt</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1260037</code></td></tr>
+          <tr><th scope="row">Terminal scheduler state</th><td><code>COMPLETED</code>, <code>ExitCode 0:0</code></td></tr>
+          <tr><th scope="row">Elapsed / accepted limit</th><td>06:17:57 / 12:00:00</td></tr>
+          <tr><th scope="row">Allocation</th><td>16 CPUs, 64 GiB on <code>rigel</code>; peak batch RSS 5,936,412 KiB</td></tr>
+          <tr><th scope="row">Measured revision</th><td><code>324d7b9b112b6933f76a8a2fdc3887d7c3a09234</code></td></tr>
+          <tr><th scope="row">Response build</th><td>5767.985074 s; 4262 by 101</td></tr>
+          <tr><th scope="row">Solve</th><td>16848.899298 s; 9 of 16 trips</td></tr>
+          <tr><th scope="row">Saved active-set budget</th><td>7 trips, stopped by exact repeated-mask and repeated-residual stagnation</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="audit">
+      <h2>Publication audit</h2>
+      <p>
+        The scheduler receipt is terminal-success and the complete SLURM log ends
+        <code>EXIT_MARKER=0</code>. Strict parsing found 188 finite JSON leaves
+        and one intentional null, with no NaN or infinity. All nine timed trip
+        dictionaries match their log lines exactly, and the three active-set
+        arrays each have length nine. Every NPZ array is finite. The publication
+        PNG decodes as 1170 by 1440 RGBA and was inspected at original resolution.
+      </p>
+      <ul>
+        <li><a href="/nova/figures/stride-one-boundary/stride-one-boundary-probe.json">Strict probe receipt</a></li>
+        <li><a href="/nova/figures/stride-one-boundary/stride-one-boundary-geometry.npz">Closed-boundary geometry arrays</a></li>
+        <li><a href="/nova/figures/stride-one-boundary/stride-one-boundary-comparison.png">Boundary comparison figure</a></li>
+      </ul>
     </section>
   </main>
 </body>

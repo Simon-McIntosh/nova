@@ -23,8 +23,9 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="6">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
 <main class="plan-doc">
@@ -54,6 +55,20 @@
     <div class="r-fu-body">Three independent measurements, one node each: the cache-regeneration-and-replay gate (adds per-cell flux, per-candidate domain labels, current_cell_polygons and atomic_node_signed_flux to the topology operand caches, and independently replays saddle-edge admissibility and the MAST 22086/43 private mask, where ANY differing cell fires the falsifier); the measured-map gate (fits the boundary-split representation on committed MAST and DIII-D EFIT psi maps at matched degrees of freedom and reports the boundary-band second-derivative advantage against a single global C2 fit, where losing the advantage fires the falsifier); and the accelerator gate (measures the fixed-slot split carrier at production batch widths on one reserved H200, where a material regression against the committed 26.797x saturation ladder fires the falsifier). Each gate reports its number to this plan whether it passes or fires.</div>
     <pre class="r-fu-prompt">/reckon-ship hex-grid-derisk-gates</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T080839891357-hdg-h200-batch" data-who="hdg-h200-batch" data-when="2026-09-01T09:19:18Z">
+    <div class="r-comment-body"><p>S3 falsifier CLEAR at 50 samples/route/width: all six widths sustain the committed ladder shape; width-1024 split gain 8.503x vs required 1.981x; split rate 1988M point-evals/s; H200 job 1260653, 9 s, exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T1015-s3-clear" data-who="reckon-ship-s18" data-when="2026-09-01T10:15:00+00:00">
+    <div class="r-comment-body">hdg-h200-batch landed — commits d4f21da2, 608b94ee, 79ced276; gate s3-accelerator-batch PASSED at 50 samples/route/width on one reserved H200 NVL (job 1260653, 9 s, exit 0, float64): all six widths 32-1024 sustain the committed ladder saturation shape; width-1024 split gain from width 32 is 8.503x against the required minimum 1.981x; split throughput 233.8 to 1988.4 million point-evals/s across the ladder; mid-ladder split/global medians 0.495-0.513 at widths 256/512 (split FASTER than global there), 1.060 [0.921,1.244] at 1024. First five-sample receipt superseded and preserved; independent strict-JSON revalidation recomputed 600/600 samples and the verdict. Receipt docs/figures/hex-cell-single-grid/h200-split-batch.json.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T080833514773-hdg-measured-map" data-who="hdg-measured-map" data-when="2026-09-01T10:12:32Z">
+    <div class="r-comment-body"><p>S2 falsifier FIRED on both maps at matched 16-dof full-rank fits: boundary-band d2 RMS split/global improvement factor 0.626 on MAST 22086/43 (split 0.010114 vs global 0.006327, 571 cells) and 0.612 on DIII-D frame 179 (split 0.003174 vs global 0.001943, 617 cells); no threshold relaxed</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260901T1015-s2-fired" data-who="reckon-ship-s18" data-when="2026-09-01T10:15:00+00:00">
+    <div class="r-comment-body">hdg-measured-map landed — commit 7a644229; gate s2-measured-map-advantage FAILED, falsifier FIRED ON BOTH MAPS at matched 16-dof full-rank fits with each map's own LCFS as interface and a two-cell-pitch band: MAST 22086/43 boundary-band second-derivative RMS split 0.010114 vs global C2 0.006327 (improvement factor 0.626, 571 cells, pitch 0.0491 m); DIII-D frame 179 split 0.003174 vs global 0.001943 (factor 0.612, 617 cells, pitch 0.0400 m). The MAST split RMS stays within the plan's 0.0116 expected-magnitude bound but the matched global fit is BETTER; no threshold was relaxed. Receipt docs/figures/hex-cell-single-grid/measured-map-advantage.json sha256 29e9e878, figure .png. Under the locked three-falsifiers-must-clear decision this halts the cutover plans and returns the programme to the lead with these numbers. Candidate confound for the lead's adjudication, stated not assumed: an EFIT psi map is itself a globally smooth solution representation, so a measured-map curvature reference may not contain the physical interface jump the split basis exists to carry.</div>
+</div>
 </section>
 </main>
 </body>

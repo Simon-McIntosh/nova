@@ -23,8 +23,9 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,6 +58,12 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260901T080015214739-hexgrid-reuse-scout" data-who="hexgrid-scout" data-when="2026-09-01T08:05:46Z">
     <div class="r-comment-body"><p>Reuse map delivered: 9/9 capability groups, 45 fitness entries, 2 repos; missing seam identified as the conditioned split coefficient fit + implicit normal-equation derivative</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260901T080930279235-ssb-basis-module" data-who="ssb-basis" data-when="2026-09-01T08:26:57Z">
+    <div class="r-comment-body"><p>Production split-spline module landed: conditioned interior/exterior fit (cond 8.93e5), custom normal-equation VJP within 3e-6 of finite differences with no fit-loop differentiation, eager/JIT/vmap parity with exact-zero padding, boundary-band Hessian RMS 6.30e-9 vs frozen global 2.67e-1 (4.24e7 advantage)</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260901T1015-basis-landed" data-who="reckon-ship-s18" data-when="2026-09-01T10:15:00+00:00">
+    <div class="r-comment-body">ssb-basis-module landed — commit dc45408f; gate focused-suite PASSED (10 passed, 54.85 s: tests/test_split_spline.py + tests/test_tensor_spline.py). nova/linalg/split_spline.py: conditioned interior/exterior coefficient system (prototype-lattice condition number 8.93e5), curved level-set interface with value/gradient gaps below 1e-8 and minimum normal-curvature jump above 1.0, custom normal-equation VJP within 3e-6 of central finite differences with no fit-loop differentiation, eager/JIT/vmap parity at fixed shapes with exact-zero inactive padding (fit_executed=false, sample_count=0), boundary-band Hessian RMS 6.30e-9 vs frozen global 2.67e-1 on the prototype Solovev field (4.24e7 advantage; docs/figures/hex-cell-single-grid/metrics.json untouched). Sections s1+s2 delivered; s3 production-lattice conditioning (33x33/65x65 both machines) and s4 measured-map validation remain — NOTE the hex-grid-derisk-gates s2 falsifier has FIRED on both measured maps, which bears directly on what s4 must now adjudicate.</div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T10:12:44",
+  "updated": "2026-09-01T12:14:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -714,18 +714,22 @@
         "id": "hdg-h200-batch",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c03-9966-71a2-b044-c91fbc1633f1",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c03-9966-71a2-b044-c91fbc1633f1"
+        },
         "created": "2026-09-01"
       },
       {
         "id": "hdg-measured-map",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c03-7ae9-7241-9472-53efa2683fa7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c03-7ae9-7241-9472-53efa2683fa7"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1378,9 +1382,11 @@
         "id": "ssb-basis",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c04-501c-76e2-8ed2-95d1d01bd032",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c04-501c-76e2-8ed2-95d1d01bd032"
+        },
         "created": "2026-09-01"
       },
       {
@@ -65518,9 +65524,324 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T080930279235-ssb-basis-module",
+        "plan": "split-spline-production-basis",
+        "section": "\u00a71",
+        "node": "ssb-basis-module",
+        "node_definition": {
+          "done_when": "uv run pytest tests/test_split_spline.py tests/test_tensor_spline.py passes, with new tests proving: C2 within each region and psi/gradient continuity at the interface with a positively demonstrated second-derivative jump; eager/JIT/vmap parity at fixed shapes with inactive-slot padding distinguishable from executed work; the implicit coefficient derivative matching finite differences without differentiating through any fit iteration; and the prototype Solovev field reproduced with the split-over-global boundary-band advantage retained (docs/figures/hex-cell-single-grid/metrics.json is read-only baseline, never overwritten)",
+          "estimated_hours": 10.0,
+          "goal": "The production boundary-split field module at nova/linalg/split_spline.py, promoted from benchmarks/hex_cell_field_feasibility.py by extending the TensorBSpline/fit_tensor_spline evaluation contract exactly as the reuse map at /home/ITER/mcintos/.config/reckon/crew/reports/nova/single-grid-reuse-map.md prescribes (conditioned interior/exterior coefficient system, curved interface via the level set, implicit normal-equation derivative following the implicit_window_state custom_vjp pattern rather than reverse-mode through the fit, fixed-shape fitting plus evaluation that compile once and vmap, evaluation API serving polish_stationary_points and contour extraction)",
+          "id": "ssb-basis-module",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080930279235-ssb-basis-module/manifest.md",
+          "plan": "split-spline-production-basis",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/linalg/split_spline.py",
+            "tests/test_split_spline.py",
+            "nova/linalg/tensor_spline.py",
+            "tests/test_tensor_spline.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "ssb-basis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T08:09:41Z",
+        "completed_at": "2026-09-01T08:26:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1036,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1036,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "10e3748d8d5888fb54778d1e8ab6053c55f2cd54",
+        "commits": [
+          "dc45408fcd5bbb2fd3ff58c1d227e8452b301d4c"
+        ],
+        "changed_lines": {
+          "added": 764,
+          "removed": 29,
+          "files": 4
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/test_split_spline.py tests/test_tensor_spline.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080930279235-ssb-basis-module/focused-pytest-after-fix.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080930279235-ssb-basis-module/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c04-501c-76e2-8ed2-95d1d01bd032",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4448768,
+            "cached_input_tokens_cumulative": 4448768,
+            "input_tokens": 4618370,
+            "input_tokens_cumulative": 4618370,
+            "output_tokens": 32108,
+            "output_tokens_cumulative": 32108,
+            "reasoning_output_tokens": 12878,
+            "reasoning_output_tokens_cumulative": 12878
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/test_split_spline.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T080839891357-hdg-h200-batch",
+        "plan": "hex-grid-derisk-gates",
+        "section": "\u00a73",
+        "node": "hdg-h200-batch",
+        "node_definition": {
+          "done_when": "docs/figures/hex-cell-single-grid/h200-split-batch.json records warm split-carrier throughput at widths spanning at least 32 to 1024 with compile separated from steady state plus scheduler and device identity, and states the verdict against the committed ladder receipt docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json (26.797x saturation at width 1024, out-of-memory at 2048): the falsifier fires on a material regression, meaning the split carrier fails to sustain the ladder saturation shape within the prototype 12-17 percent overhead band",
+          "estimated_hours": 5.0,
+          "goal": "The \u00a73 de-risk gate verdict: fixed-slot split-carrier throughput at production batch widths on one reserved H200 (SLURM partition betelgeuse, --reservation=gpu_0003_grpA, request hours not the debug 1h cap, export TMPDIR=/tmp on the node), measured by adding the split fit/evaluator as a route to the existing benchmarks/fieldnull_gpu_throughput.py harness per the reuse map at /home/ITER/mcintos/.config/reckon/crew/reports/nova/single-grid-reuse-map.md rather than authoring a new timing framework",
+          "id": "hdg-h200-batch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080839891357-hdg-h200-batch/manifest.md",
+          "plan": "hex-grid-derisk-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/fieldnull_gpu_throughput.py",
+            "docs/figures/hex-cell-single-grid/h200-split-batch.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hdg-h200-batch",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T08:08:54Z",
+        "completed_at": "2026-09-01T09:19:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4224,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4224,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "196588dd8f3130bc3e4261fa2348a0faf16a35b1",
+        "commits": [
+          "d4f21da2bfd24fdc1f57e4628ce47a3557e1703d",
+          "608b94ee0536d94468cbbb5fb6329f09cf36a800",
+          "79ced276b8f1a56b90dfe5ab4cef3f59a09fdcbc"
+        ],
+        "changed_lines": {
+          "added": 1457,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260653 fieldnull_gpu_throughput measure-split-batch + independent strict-JSON revalidation of 600/600 samples",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080839891357-hdg-h200-batch/h200-split-batch-remeasure-1260653.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080839891357-hdg-h200-batch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c03-9966-71a2-b044-c91fbc1633f1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2475008,
+            "cached_input_tokens_cumulative": 2475008,
+            "input_tokens": 2645815,
+            "input_tokens_cumulative": 2645815,
+            "output_tokens": 12407,
+            "output_tokens_cumulative": 12407,
+            "reasoning_output_tokens": 2769,
+            "reasoning_output_tokens_cumulative": 2769
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T080833514773-hdg-measured-map",
+        "plan": "hex-grid-derisk-gates",
+        "section": "\u00a72",
+        "node": "hdg-measured-map",
+        "node_definition": {
+          "done_when": "benchmarks/split_fit_measured_maps.py runs to completion writing docs/figures/hex-cell-single-grid/measured-map-advantage.json with per-map boundary-band second-derivative RMS for split versus global at matched degrees of freedom, the band defined as two cell pitches around the boundary, and the falsifier verdict stated per map (fires if the split fit loses its boundary-band advantage on either map; expected magnitude is bounded by the MAST 0.0116 zero-iteration edge residual, not by e-15)",
+          "estimated_hours": 4.0,
+          "goal": "The \u00a72 de-risk gate verdict: the boundary-band second-derivative advantage of the boundary-split fit over a matched-degrees-of-freedom single global C2 fit on both committed measured EFIT psi maps \u2014 MAST efm 65x65 through the evaluator-only imas-ambix patch_flux_map_report.read_efit_slice harness plus DIII-D efit_psirz 65x65 through benchmarks.diiid_forward_gs_match _read/canonical_axes \u2014 interface on each map own LCFS, per the reuse map at /home/ITER/mcintos/.config/reckon/crew/reports/nova/single-grid-reuse-map.md",
+          "id": "hdg-measured-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080833514773-hdg-measured-map/manifest.md",
+          "plan": "hex-grid-derisk-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/split_fit_measured_maps.py",
+            "docs/figures/hex-cell-single-grid/measured-map-advantage.json",
+            "docs/figures/hex-cell-single-grid/measured-map-advantage.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hdg-measured-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T08:08:46Z",
+        "completed_at": "2026-09-01T10:12:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7426,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "196588dd8f3130bc3e4261fa2348a0faf16a35b1",
+        "commits": [
+          "7a644229a5ae1f284d6dd3eb18e651b9164bff2e"
+        ],
+        "changed_lines": {
+          "added": 690,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080833514773-hdg-measured-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c03-7ae9-7241-9472-53efa2683fa7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3084544,
+            "cached_input_tokens_cumulative": 3084544,
+            "input_tokens": 3270003,
+            "input_tokens_cumulative": 3270003,
+            "output_tokens": 9239,
+            "output_tokens_cumulative": 9239,
+            "reasoning_output_tokens": 2411,
+            "reasoning_output_tokens_cumulative": 2411
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1205
+    "_version": 1211
   }
 }

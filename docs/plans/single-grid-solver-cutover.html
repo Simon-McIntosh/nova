@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
 </head>
 <body>
@@ -52,6 +52,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260901T0830-carrier-cost" data-who="reckon-ship-s18" data-when="2026-09-01T08:30:00+00:00">
     <div class="r-comment-body">Measured input for the carrier rebuild budget, reported by the S16 measurement session: the prescribed-response carrier rebuild at native 65x65 costs 5768 s on CPU (shape 4262x101). The durable cache with a recorded digest is mandatory on first build, and the rebuild belongs in a launch-plus-harvest lane, not inside a worker fence.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260901T0905-carrier-cost-decomposed" data-who="reckon-ship-s18" data-when="2026-09-01T09:05:00+00:00">
+    <div class="r-comment-body">SUPERSEDES c-20260901T0830-carrier-cost, decomposed with the S16 measurement session from the probe's own script: 5768 s was one timer around the FULL cold case construction at native 65x65 on a rigel CPU node (JAX_PLATFORMS=cpu, 16 CPUs) — shot-store load, mesh and operand construction, profile assembly AND the prescribed-response build together (receipt key response_and_profile_build_seconds), with the response assembled host-side per circuit through the exact analytic polygon route (polygon_greens over 101 circuits at 4262 targets, NumPy column_stack), NOT the optimized conductor-coupling kernels, never on a GPU. Treat it strictly as the measured cold-CPU-exact upper bound. The optimized-kernel H200 build at this shape is UNMEASURED and is a number this section owes before budgeting. Unchanged: the durable digest-pinned cache is mandatory on first build, and any cold rebuild runs in a launch-plus-harvest lane, not inside a worker fence.</div>
 </div>
 </section>
 </main>

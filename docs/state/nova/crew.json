@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T19:46:12",
+  "updated": "2026-09-01T20:30:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -67593,9 +67593,147 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T162954085724-sto-settled-exit",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a74",
+        "node": "sto-settled-exit",
+        "node_definition": {
+          "done_when": "uv run pytest over the seven named referee tests (unmodified) plus a new tests/test_settled_exit.py passes on pinned CPU and unpinned CUDA lanes, a paired before/after comparison on the committed banks shows bit-identical results wherever the mask history settles identically with any difference reported per arm, and an H200 width-1024 receipt at docs/figures/solver-trip-orchestration/settled-exit-throughput.json states the achieved ms/slice beside the projected 0.22-0.47 band",
+          "estimated_hours": 8.0,
+          "goal": "The settled-early trip exit implemented as a masked no-op continuation in the fixed-point trip loop under the locked settled-exit-policy decision: once a member active-set mask difference has been zero for the qualifying suffix and its acceptance criteria hold, later trips execute as masked no-ops for that member, fixed shapes preserved, no dynamic trip count, telemetry padding distinguishable from executed work exactly as today, and the seven referee tests named in docs/figures/solver-trip-orchestration/settlement-histogram.json running UNMODIFIED",
+          "id": "sto-settled-exit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T162954085724-sto-settled-exit/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_settled_exit.py",
+            "benchmarks/settled_exit_throughput.py",
+            "docs/figures/solver-trip-orchestration/settled-exit-throughput.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sto-quantum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T16:29:59Z",
+        "completed_at": "2026-09-01T18:30:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7213,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "e5e7d2823d6175b8a3dba416965ee0ddfea001b0",
+        "commits": [
+          "c8cd79bf7691a487778fc92da334aa84b1fc8890",
+          "365aaf817a7632bd108a429f390f7ac21594f7f9"
+        ],
+        "changed_lines": {
+          "added": 936,
+          "removed": 4,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest referees+test_settled_exit (CPU and CUDA lanes) + SLURM 1260936 paired measurement + strict receipt validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T162954085724-sto-settled-exit/h200-receipt-validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T162954085724-sto-settled-exit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d4e-dadf-7532-8d74-0d95eb74480f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2038784,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2066515,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9305,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2203
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12467,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 16067,
+              "log_age_seconds": 12717,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 12745,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            }
+          ]
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1236
+    "_version": 1237
   }
 }

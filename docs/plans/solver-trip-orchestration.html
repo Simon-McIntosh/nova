@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="14">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
 <main class="plan-doc">
@@ -41,6 +41,9 @@
 
 <h2 id="s4">§4 — The settled-exit implementation</h2>
 <p><em>Added 2026-09-01 under the locked <code>settled-exit-policy</code> decision.</em> Implement the settled-early trip exit as a masked no-op continuation in the fixed-point trip loop: once a member's active-set mask difference has been zero for the qualifying suffix and its acceptance criteria hold, subsequent trips execute as masked no-ops for that member — fixed shapes preserved, no dynamic trip count, telemetry padding distinguishable from executed work exactly as today. The referee surface is untouchable: the seven preservation tests named in <code>settlement-histogram.json</code> (own-mask acceptance inertness and refusal, best-iterate retention, settled-mask retention, constant-mask smooth-solve bit identity, continuation on/off and eager/JIT bit identity) run unmodified and stay green. Acceptance beyond the referees: a paired before/after comparison on the committed banks — bit-identical results wherever the mask history settles identically, and the measured width-1024 ms/slice against the projected 0.22–0.47 band. Done-when: tests green (referees unmodified), the paired bank comparison banked, and the H200 throughput receipt states the achieved ms/slice beside the projection.</p>
+
+<h2 id="s5">§5 — Why the exit never fires at production width</h2>
+<p><em>Added 2026-09-01 from the §4 receipt's follow-on.</em> The implementation is proven safe (referees green both lanes, 1024/1024 members bit-identical against the full-trip control, the five committed DIII-D qualified no-op suffixes replayed exactly) yet the width-1024 production measurement executed all sixteen trips on every member — speedup 0.997×, achieved 1.755 ms/slice against the 0.22–0.47 projection. The conjunction tells us why mechanically: members keep <em>accepting Newton promotions</em> after the mask settles, so the strict no-op qualification never holds mid-solve on that workload, while some committed bank histories do carry genuinely qualified suffixes. Open questions this section owns: whether the width-1024 measurement workload (a replicated-member batch) is representative of bank regeneration's member diversity; what fraction of committed-bank members ever reach a qualified no-op suffix before trip 16 (the settlement census counted <em>mask</em> settlement, which this receipt proves is not the same thing); and whether a residual-progress-aware relaxation of the exit (stop when the retained best iterate stops improving beyond tolerance, not only on strict no-ops) could fire earlier without touching the referee semantics — that last is a policy question that returns to the lead with numbers before any implementation. Done-when: a receipt states the qualified-suffix fraction across both committed banks, the workload-representativeness verdict for the width-1024 measurement, and the projected speedup under each candidate exit criterion, dispatching no implementation.</p>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -85,6 +88,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260901T144619558288-sto-cache-wiring" data-who="sto-compile" data-when="2026-09-01T15:35:13Z">
     <div class="r-comment-body"><p>Persistent compilation cache wired as explicit per-recipe opt-in (bank-regeneration + scheduled-test), versioned layout keyed on backend/topology/jaxlib/CUDA, 11.97x cold/warm demonstrated on a fresh-process H200 recipe (2.75 s to 0.23 s), focused test lanes green (12+12+10 and 5/5 cache tests); the broad login-node aggregate was resource-killed at exit 137 with zero assertion failures and is not required by any gate</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T162954085724-sto-settled-exit" data-who="sto-quantum" data-when="2026-09-01T18:30:12Z">
+    <div class="r-comment-body"><p>Settled-exit implemented and proven safe (referees 12/12 both lanes, 1024/1024 bit-identical vs control, qualified no-op suffixes exact) but the production width-1024 workload never fires it: both arms ran mean 16.0 trips, speedup 0.997x, achieved 1.755 ms/slice vs the 0.22-0.47 projection - OUTSIDE BAND, stated honestly. Cause visible in the conjunction: members keep accepting Newton promotions after mask settlement on this workload; five DIII-D bank histories do carry qualified no-op suffixes. Follow-on folded as plan s5</p></div>
 </div>
 </section>
 </main>

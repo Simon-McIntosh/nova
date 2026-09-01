@@ -28,6 +28,18 @@ class TensorSplineEvaluation(NamedTuple):
     vertical_second_derivative: jax.Array
 
 
+class FixedTensorSplineEvaluation(NamedTuple):
+    """A spline evaluation plus the fixed-slot execution mask."""
+
+    value: jax.Array
+    radial_derivative: jax.Array
+    vertical_derivative: jax.Array
+    radial_second_derivative: jax.Array
+    mixed_derivative: jax.Array
+    vertical_second_derivative: jax.Array
+    executed: jax.Array
+
+
 def _solve_tridiagonal(
     lower: jax.Array,
     diagonal: jax.Array,
@@ -169,6 +181,84 @@ def _tensor_bernstein(
     return jnp.einsum("...i,...ij,...j->...", vertical_basis, coefficient, radial_basis)
 
 
+def evaluate_tensor_bernstein(
+    coefficient: jax.Array,
+    radial_local: jax.Array,
+    vertical_local: jax.Array,
+    radial_spacing: jax.Array,
+    vertical_spacing: jax.Array,
+) -> TensorSplineEvaluation:
+    """Evaluate one tensor Bernstein patch in physical coordinates."""
+    radial_order = coefficient.shape[-1] - 1
+    vertical_order = coefficient.shape[-2] - 1
+    radial_coefficient = radial_order * jnp.diff(coefficient, axis=-1)
+    vertical_coefficient = vertical_order * jnp.diff(coefficient, axis=-2)
+    radial_second = (radial_order - 1) * jnp.diff(radial_coefficient, axis=-1)
+    vertical_second = (vertical_order - 1) * jnp.diff(vertical_coefficient, axis=-2)
+    mixed = radial_order * jnp.diff(vertical_coefficient, axis=-1)
+
+    return TensorSplineEvaluation(
+        value=_tensor_bernstein(
+            coefficient,
+            radial_local,
+            vertical_local,
+            radial_order,
+            vertical_order,
+        ),
+        radial_derivative=_tensor_bernstein(
+            radial_coefficient,
+            radial_local,
+            vertical_local,
+            radial_order - 1,
+            vertical_order,
+        )
+        / radial_spacing,
+        vertical_derivative=_tensor_bernstein(
+            vertical_coefficient,
+            radial_local,
+            vertical_local,
+            radial_order,
+            vertical_order - 1,
+        )
+        / vertical_spacing,
+        radial_second_derivative=_tensor_bernstein(
+            radial_second,
+            radial_local,
+            vertical_local,
+            radial_order - 2,
+            vertical_order,
+        )
+        / radial_spacing**2,
+        mixed_derivative=_tensor_bernstein(
+            mixed,
+            radial_local,
+            vertical_local,
+            radial_order - 1,
+            vertical_order - 1,
+        )
+        / (radial_spacing * vertical_spacing),
+        vertical_second_derivative=_tensor_bernstein(
+            vertical_second,
+            radial_local,
+            vertical_local,
+            radial_order,
+            vertical_order - 2,
+        )
+        / vertical_spacing**2,
+    )
+
+
+def mask_tensor_spline_evaluation(
+    evaluation: TensorSplineEvaluation, executed: jax.Array
+) -> FixedTensorSplineEvaluation:
+    """Zero inactive fixed slots and retain their execution state."""
+    executed = jnp.asarray(executed, dtype=bool)
+    return FixedTensorSplineEvaluation(
+        *(jnp.where(executed, value, 0.0) for value in evaluation),
+        executed=executed,
+    )
+
+
 @dataclass
 @jax.tree_util.register_pytree_node_class
 class TensorBSpline(Pytree):
@@ -213,35 +303,19 @@ class TensorBSpline(Pytree):
         vertical_local = (vertical - self.vertical[vertical_cell]) / vertical_spacing
         coefficient = self.coefficients[vertical_cell, radial_cell]
 
-        radial_coefficient = 3.0 * jnp.diff(coefficient, axis=-1)
-        vertical_coefficient = 3.0 * jnp.diff(coefficient, axis=-2)
-        radial_second = 2.0 * jnp.diff(radial_coefficient, axis=-1)
-        vertical_second = 2.0 * jnp.diff(vertical_coefficient, axis=-2)
-        mixed = 3.0 * jnp.diff(vertical_coefficient, axis=-1)
-
-        return TensorSplineEvaluation(
-            value=_tensor_bernstein(coefficient, radial_local, vertical_local, 3, 3),
-            radial_derivative=_tensor_bernstein(
-                radial_coefficient, radial_local, vertical_local, 2, 3
-            )
-            / radial_spacing,
-            vertical_derivative=_tensor_bernstein(
-                vertical_coefficient, radial_local, vertical_local, 3, 2
-            )
-            / vertical_spacing,
-            radial_second_derivative=_tensor_bernstein(
-                radial_second, radial_local, vertical_local, 1, 3
-            )
-            / radial_spacing**2,
-            mixed_derivative=_tensor_bernstein(
-                mixed, radial_local, vertical_local, 2, 2
-            )
-            / (radial_spacing * vertical_spacing),
-            vertical_second_derivative=_tensor_bernstein(
-                vertical_second, radial_local, vertical_local, 3, 1
-            )
-            / vertical_spacing**2,
+        return evaluate_tensor_bernstein(
+            coefficient,
+            radial_local,
+            vertical_local,
+            radial_spacing,
+            vertical_spacing,
         )
+
+    def evaluate_fixed(
+        self, radial: jax.Array, vertical: jax.Array, valid: jax.Array
+    ) -> FixedTensorSplineEvaluation:
+        """Evaluate fixed slots with exact-zero inactive padding."""
+        return mask_tensor_spline_evaluation(self.evaluate(radial, vertical), valid)
 
     def tree_flatten(self):
         """Return traced arrays and static metadata for JAX transformations."""
@@ -271,4 +345,11 @@ def fit_tensor_spline(
     return TensorBSpline(radial, vertical, coefficients)
 
 
-__all__ = ["TensorBSpline", "TensorSplineEvaluation", "fit_tensor_spline"]
+__all__ = [
+    "FixedTensorSplineEvaluation",
+    "TensorBSpline",
+    "TensorSplineEvaluation",
+    "evaluate_tensor_bernstein",
+    "fit_tensor_spline",
+    "mask_tensor_spline_evaluation",
+]

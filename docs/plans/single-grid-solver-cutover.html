@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
 </head>
 <body>
@@ -48,6 +48,11 @@
     <div class="r-fu-body">With the three de-risk gates clear, the basis landed and the topology authority at parity: cut forward_operator, source and fixed_point consumers onto the single-grid representation; rebuild the prescribed-response carrier on the new support with its build cost recorded; carry the stagnation exit, own-mask acceptance, best-iterate retention and all telemetry semantics across unchanged (bit-identical where the mask does not move, proven); regenerate the MAST twelve-arm and DIII-D five-frame banks COLD-START (locked: no warm seeding) at native resolution; and re-score the locked quarter-width gates, MAST 0.007578125005 m and DIII-D 0.006640624953 m worst eligible boundary RMS. Report honestly against the standing caveats: the DIII-D core-coherent input inconsistency (zero-iteration residual 0.083 at stride 1, worse than stride 2) is input-side and is NOT expected to be fixed by this cutover — a DIII-D gate failure with that signature routes to the input investigation, not back into this plan.</div>
     <pre class="r-fu-prompt">/reckon-ship single-grid-solver-cutover</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260901T0830-carrier-cost" data-who="reckon-ship-s18" data-when="2026-09-01T08:30:00+00:00">
+    <div class="r-comment-body">Measured input for the carrier rebuild budget, reported by the S16 measurement session: the prescribed-response carrier rebuild at native 65x65 costs 5768 s on CPU (shape 4262x101). The durable cache with a recorded digest is mandatory on first build, and the rebuild belongs in a launch-plus-harvest lane, not inside a worker fence.</div>
+</div>
 </section>
 </main>
 </body>

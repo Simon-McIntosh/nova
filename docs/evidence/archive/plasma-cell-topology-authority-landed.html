@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="plasma-cell-topology-authority-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="plasma-cell-topology-authority">
+<meta name="plan-title" content="Plasma-cell topology authority — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the plasma-cell-topology-authority plan: the reuse and seam map, the cell partition geometry, the cell topology read, the census polish and the mask/telemetry migration, each with commits, receipts and gate outcomes">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-01">
+<title>plasma-cell-topology-authority — landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Plasma-cell topology authority — cumulative execution evidence</h1>
+<p class="lede">One anchor per material result of <a href="/nova/plans/plasma-cell-topology-authority">plasma-cell-topology-authority</a>. Sections §1–§3 run under the lead's prerequisite override of 2026-09-01; §4 is held until the de-risk caches land on <code>main</code>.</p></header>
+
+<section id="reuse-map"><h2 id="reuse-map-h">Reuse map and the raster-to-cell seam</h2>
+<p>Node <code>pta-reuse-scout</code> (run <code>r-20260901T193557248406-pta-reuse-scout</code>, gate passed, report-only, no commit). Report: <code>~/.config/reckon/crew/reports/nova/plasma-cell-topology-reuse-map.md</code> (142 lines, 43 verdict-bearing entries).</p>
+<table>
+<thead><tr><th>Capability</th><th>Reuse verdict</th></tr></thead>
+<tbody>
+<tr><td>Six-neighbour carrier</td><td><code>hexstencil.HEX_RING</code>/<code>hex_stencil</code> (complete lattices), <code>PlasmaGrid.tessellate</code>/<code>loop_neighbour_vertices</code> (wall-trimmed carrier), <code>StencilMesh</code> as the carrier contract — reuse directly. <code>_raster_hex_partition_geometry</code> retires from production authority, retained for raster replay and tests.</td></tr>
+<tr><td>Saddle-aware flood and partition</td><td><code>label_saddle_aware_hex_connected_components</code>, <code>private_flux_mask</code>, <code>axis_connected_component</code>, <code>classify_domains</code>, <code>DomainMasks</code> — reuse unchanged. <code>hex_edge_admissibility</code> keeps its semantics with real shared edges as input. <code>Topology.axis_component</code>: replace only its raster adapter.</td></tr>
+<tr><td>Null census and polish</td><td><code>Null2D.from_coordinates</code>/<code>categorize</code> as the primary census on arbitrary centroids; <code>polish_stationary_points</code> keeps the fixed-slot Newton protocol; <code>SplitTensorBSpline.evaluate</code>/<code>evaluate_fixed</code>/<code>fit_split_spline</code> reuse directly with a sparse-solve convergence watch. <code>Null2D.interpolate</code> is not the final position authority.</td></tr>
+<tr><td>Wall machinery</td><td><code>WallUnit</code>, <code>build_wall_mask</code>, <code>densify_units</code>, <code>wall_height_shadow_mask</code> — reuse unchanged; <code>supercover_raster</code> for raster diagnostics only.</td></tr>
+<tr><td>Telemetry</td><td><code>FixedPointResult.active_set_mask_differences</code>, <code>_print_active_set_trip</code>, the stagnation/settling tests, checkpoint write/load, <code>newton_krylov</code>, <code>ForwardProfile._solve_accelerated</code>/<code>_receipt</code> — reuse unchanged.</td></tr>
+<tr><td>Coupled repository</td><td>imas-ambix carries no competing topology kernel; Nova owns the deterministic read.</td></tr>
+</tbody>
+</table>
+<p><strong>Seam.</strong> Labels are produced on the raster at nine points: <code>_structured_grid_axes</code> (the tensor-product gate), <code>connectivity_grid_axes</code>, <code>_fixed_design_read</code> (two <code>read_qualification</code> calls), <code>Topology.read_qualification</code>, <code>Topology.axis_component</code> (reshape + <code>_raster_hex_partition_geometry</code>), <code>_connectivity_read</code> (independent reshape into <code>traced_boundary_read</code>), <code>_connectivity_class_margin</code>/<code>residual_shadow_components</code>, and the public <code>read</code>/<code>current_domain_masks</code>. They reach the clipped cells at seven: <code>_support_partition</code> (the principal hand-off, <code>traced_clip(...).qualify(masks.profile_participation)</code>), <code>MomentGeometry.from_cells</code>, <code>AtomicCellMesh.from_cells</code>/<code>traced_clip</code>, <code>_partitioned_current_moments</code>, <code>ForwardSource.declared_support</code>/<code>current_density</code>/<code>cell_current</code>/<code>current_moments</code>, <code>cell_current_moments</code> (non-linear-moment route), and <code>ForwardProfile.__post_init__</code>/<code>_receipt</code>.</p>
+<p><strong>Carrier verdict.</strong> Same physical carrier and vector order: yes — <code>machine.node</code> feeds <code>FluxTarget</code>, <code>Null2D</code>, <code>StencilMesh</code> and <code>MomentGeometry</code> alike. Same tensor-product structured lattice: no — the production hex tiling is half-offset and wall-trimmed, so the raster adapter is a second interpretation that happens to return labels in the same order.</p>
+<p><strong>Schema-4 operand cache (read-only, unmerged worktree <code>hdg-cache-replay</code> at 20a377a7).</strong> MAST 22086/43 mixed: 1,089 cells, 5 X candidates (selected index 1, position residual 2.88 mm, private counts [0, 42, 0, 0, 0]), 42 private cells, symmetric difference 0, 1,156 atomic nodes; polygon-centroid mean equals cached <code>cell_rz</code> to 0.0. This row is a 33×33 rectangular replay carrier with four-vertex cells: bitwise parity evidence for the incumbent labels, not evidence that the hex carrier is tensor-product.</p>
+</section>
+</main>
+</body>
+</html>

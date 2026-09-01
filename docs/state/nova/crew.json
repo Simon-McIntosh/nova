@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T21:53:04",
+  "updated": "2026-09-01T21:56:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -68416,9 +68416,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T185542209981-scr-backend-forensics",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-backend-forensics",
+        "node_definition": {
+          "done_when": "docs/figures/solver-convergence-regression/backend-divergence.json records per-trip CPU and GPU state-difference norms with the first-divergence trip and the amplifying sub-stage named, the pinned-CPU convergence outcome stated (completing committed-CPU converged / pinned-GPU stagnated / HEAD-GPU stagnated), and backend-divergence.png plots the growth curve and paired residual histories; GPU leg on one reserved H200 (4 CPUs, JAX_PLATFORMS=cuda,cpu, hardened pattern), CPU leg on a rigel lane with a generous limit since pinned-revision CPU cost is unmeasured, and no solver source modified anywhere merged",
+          "estimated_hours": 6.0,
+          "goal": "The forensics receipt the locked forensics-first decision demands: paired per-trip state capture of the 22086/43 pure solve at the committed bank revision on BOTH backends (the pinned shadow worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow holds the never-merged pinned scaffolding to build on, and the pinned-revision CPU leg completes the 2x2 convergence matrix), locating the first trip where the two backends diverge beyond float64 reduction-order noise, the operation that amplifies the divergence (from staged intermediate dumps of the trip sub-stages: mask reconciliation, re-linearization, Krylov action), and the divergence growth curve per trip plotted alongside both residual histories",
+          "id": "scr-backend-forensics",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185542209981-scr-backend-forensics/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/backend_divergence_forensics.py",
+            "docs/figures/solver-convergence-regression/backend-divergence.json",
+            "docs/figures/solver-convergence-regression/backend-divergence.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:55:49Z",
+        "completed_at": "2026-09-01T19:55:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3583,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3583,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "852f8c5c3e8d829f2979d772921b0c73c205b245",
+        "commits": [
+          "4e0d9588eea7a7332e287ec7eb05b663438ff4f5"
+        ],
+        "changed_lines": {
+          "added": 1678,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/backend_divergence_forensics.py retained-receipt check (see retained-check.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185542209981-scr-backend-forensics/logs/retained-check.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185542209981-scr-backend-forensics/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2891008,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3006190,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 17155,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3344
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1253
+    "_version": 1254
   }
 }

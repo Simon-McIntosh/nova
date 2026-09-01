@@ -20,7 +20,7 @@
 <body>
   <main class="plan-doc">
     <header>
-      <p class="eyebrow">Formulation measurement complete &middot; cold-start continuation blocked</p>
+      <p class="eyebrow">Formulation measurement complete &middot; cold-start continuation preflighted</p>
       <h1>DIII-D carries a core residual; MAST is edge-dominated</h1>
       <p class="lead">
         The carrier-free measurement survived the first job and now fixes the
@@ -165,7 +165,7 @@
     </section>
 
     <section id="continuation">
-      <h2>Cold-start continuation failed before iteration</h2>
+      <h2>Cold-start continuation now carries production moment geometry</h2>
       <p>
         The first job banked all four zero-iteration rows and then failed closed
         before any solve when a stride-1 MAST operand met the stride-2 response
@@ -177,27 +177,43 @@
         <code>cold_seed_portfolio</code> with <code>moment_geometry=None</code>;
         <code>coupling_current_moments</code> then cannot read
         <code>second_moment</code>. No carrier was rebuilt and no cold-start row
-        was emitted. This is an operand-construction blocker, not evidence about
+        was emitted. This was an operand-construction blocker, not evidence about
         convergence or the fixed-input physics.
+      </p>
+      <p>
+        The repaired operand takes its moment geometry from
+        <code>nova.equilibrium.forward.ForwardProfile.from_lattice</code>, the
+        production authority that constructs <code>MomentGeometry.from_cells</code>
+        directly from a <code>FluxLattice</code>. Only that geometry is attached
+        to the stride-selected fixed-input operator: the source, response
+        operators, prescribed-current policy and 33 &times; 33 or 65 &times; 65
+        lattice remain unchanged. Login preflight constructed both profiles,
+        asserted non-null geometry, and evaluated
+        <code>coupling_current_moments</code> finitely across all 1,089 stride-2
+        and 4,225 stride-1 cells. Their minimum second-moment determinants were
+        3.9880540691 &times; 10<sup>&minus;7</sup> and
+        2.4925337932 &times; 10<sup>&minus;8</sup>, respectively.
       </p>
       <table>
         <caption>Accepted allocation and reproducible identity</caption>
         <tbody>
-          <tr><th scope="row">Job result</th><td><code>1260042</code>; FAILED <code>1:0</code> after 00:00:50 on <code>98dci4-clu-2013</code>; log ends <code>EXIT_MARKER=1</code></td></tr>
+          <tr><th scope="row">Rejected attempt</th><td><code>1260042</code>; FAILED <code>1:0</code> after 00:00:50 on <code>98dci4-clu-2013</code>; log ends <code>EXIT_MARKER=1</code></td></tr>
+          <tr><th scope="row">Preflighted continuation</th><td><code>1260050</code>; PENDING on Priority at handoff</td></tr>
           <tr><th scope="row">Partition and allocation</th><td><code>rigel</code>, 1 node, 16 CPUs, 120 GiB</td></tr>
           <tr><th scope="row">Accepted limit</th><td><code>2-00:00:00</code>; rigel <code>MaxTime=UNLIMITED</code></td></tr>
           <tr><th scope="row">Source</th><td><code>c2672fc5687fed117a92932524711a45c4c1b999</code>; clean snapshot of current <code>origin/main</code></td></tr>
-          <tr><th scope="row">Batch SHA-256</th><td><code>4b51e8a8fb88efc971d4fdfd0b86084f4566a5c05b78933afec350e1df80b249</code></td></tr>
-          <tr><th scope="row">Continuation wrapper SHA-256</th><td><code>7223ef04ff172ed4e5bf623613cb40a4b081750568160d02ccc163df15399d1c</code></td></tr>
+          <tr><th scope="row">Batch SHA-256</th><td><code>da256ec77dd2afff631d22c11e5a822fe62654e53eb1d936f009c9bbb17261d1</code></td></tr>
+          <tr><th scope="row">Continuation wrapper SHA-256</th><td><code>c9ac91d48171417f71ecf0b93a5574a5fd6546fd3c3c127170aebaa186ffb299</code></td></tr>
+          <tr><th scope="row">Moment preflight SHA-256</th><td><code>a70155f47c1a47bdf7a2754969e93656e643b2dab18e17cbc557b6cf80db4ade</code></td></tr>
           <tr><th scope="row">Interpreter</th><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>, invoked directly with <code>VIRTUAL_ENV</code> unset and no uv wrapper</td></tr>
         </tbody>
       </table>
       <p>
         This document makes no cold-start convergence, residual, trip, boundary
-        or saddle claim. A follow-on must construct the stride-selected MAST
-        operand with non-null linear moment geometry, prove that invariant before
-        submission, and then perform the same cost-ordered solve sequence. Any
-        later nonconverged or exception result remains a named scientific row.
+        or saddle claim while job 1260050 is active. Harvest must retain any
+        nonconverged or exception result as a named scientific row and preserve
+        the cost order: MAST stride 2, one durable stride-1 carrier build, MAST
+        stride 1, then the qualified DIII-D cold start.
       </p>
     </section>
 
@@ -211,6 +227,7 @@
           <tr><th scope="row">Zero receipt</th><td><code>job-output/zero_iteration_receipt.json</code>, SHA-256 <code>7d8cf5d005b510fe2708767f078ad73528295083ea9327b97fbe2fe9ba42122f</code></td></tr>
           <tr><th scope="row">Residual arrays</th><td><code>job-output/zero_iteration_residual_fields.npz</code>, SHA-256 <code>26f090510fb8c0abbc91df53270557073a1a7b3e55ec7fb851ce67c669846ebe</code></td></tr>
           <tr><th scope="row">Residual figure</th><td><code>job-output/zero_iteration_residual_fields.png</code>, SHA-256 <code>3867bdb8f5ebcf17df71b79723811c9dbb98ec432a2a70f9bb36c42b5c4a3fa2</code></td></tr>
+          <tr><th scope="row">Moment invariant</th><td><code>job-output/moment_geometry_preflight.json</code>, SHA-256 <code>a70155f47c1a47bdf7a2754969e93656e643b2dab18e17cbc557b6cf80db4ade</code></td></tr>
           <tr><th scope="row">Stride-1 carrier</th><td><code>job-output/mast_stride_one_prescribed_response.npz</code> plus <code>mast_stride_one_carrier_receipt.json</code></td></tr>
           <tr><th scope="row">Progress receipt</th><td><code>job-output/cold_start_partial_receipt.json</code>, atomically updated after each completed solve</td></tr>
           <tr><th scope="row">Terminal receipts</th><td><code>mast_stride_2_cold_solve_receipt.json</code>, <code>mast_stride_1_cold_solve_receipt.json</code>, <code>diiid_cold_solve_receipt.json</code> and <code>fixed_input_reproduction_receipt.json</code></td></tr>

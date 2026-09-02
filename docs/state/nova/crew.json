@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:44:22",
+  "updated": "2026-09-02T06:51:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73104,9 +73104,109 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T044516127602-pta-carrier-census-final",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-carrier-census-final",
+        "node_definition": {
+          "done_when": "The manifest reports, for the 2214-cell reference machine at 696f437a using the published flux map at centroids: the carrier core count, the count of published-current-carrying cells excluded from profile_participation (expected 0), and for each of cells 1287, 1289, 1294, 1317, 1319, 2119 its label and psi_norm under the census saddle normalisation; the census script and its captured output live under the run directory and are cited; if any cell carrying published current is excluded or any of 1287, 1289, 1294, 1317 reads core while its psi_norm exceeds one, stop with a NEEDS-HELP brief naming the mechanism rather than changing code; otherwise no code change and no commit",
+          "estimated_hours": 0.75,
+          "goal": "Recompute on commit 696f437a (your worktree base) the two reference-machine censuses your earlier attribution run produced \u2014 the carrier core labels against the published map's own level set under the census-selected saddle authority, and profile_participation against the published nonzero-current support \u2014 and report whether the saddle cut now localised to three pitches lets any of the previously closed cells (indices 1287, 1289, 1294, 1317, which sat 1.9 to 3.6 pitches from the selected X-point) leak back",
+          "id": "pta-carrier-census-final",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T044516127602-pta-carrier-census-final/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-carrier-census-final.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T04:45:20Z",
+        "completed_at": "2026-09-02T04:51:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 387,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 387,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "696f437adf63c66e245c2274de607b13abe23615",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python carrier_census.py on the 2214-cell reference machine at 696f437a",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T044516127602-pta-carrier-census-final/logs/carrier-census.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T044516127602-pta-carrier-census-final/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3409664,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3630259,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12667,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2818
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "diagnostic census only; report and script written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1305
+    "_version": 1306
   }
 }

@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -164,6 +164,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260902T041731765625-pta-topology-read-final-lanes" data-who="pta-test" data-when="2026-09-02T04:43:29Z">
     <div class="r-comment-body"><p>CPU lanes on 696f437a: 34 passed, 0 failed (geometries 12, snowflake 16, coil nulls 2, rim scatter 4); the GPU forward-reference lane was SIGKILLed (EXIT=137) after 1182 s with one test passed and no summary — no test failure, the process was killed; rerun as a fresh lane once memory pressure is understood; logs under ~/.config/reckon/crew/reports/nova/pta-topology-read-final-lanes/</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260902T044516127602-pta-carrier-census-final" data-who="pta-partition" data-when="2026-09-02T04:51:47Z">
+    <div class="r-comment-body"><p>Final census at 696f437a: 1602 core cells, 0 core cells with psi_norm above one under the census saddle authority, 39 closed-but-private lobe cells, 0 of 1721 published-current cells excluded from participation; the three-pitch localisation restores only cell 1317 (psi_norm 0.99998, closed side) and 1287/1289/1294 stay private</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195359824044-pta-census-split-polish" data-who="pta-census" data-when="2026-09-01T20:17:25Z">
     <div class="r-comment-body"><p>Polish built, 32/32 green, axis 0.066 mm, but independent review FAILED: lattice-coordinate coincidence suppresses the Newton attempt and satisfies stationarity unconditionally (the 0 m saddle result is the untouched seed; the real one-step moved it 2.77e-5 m), and the split interface follows the selected boundary (wall flux on limited reads) which the contract wording left ambiguous; repair routed to the same member</p></div>

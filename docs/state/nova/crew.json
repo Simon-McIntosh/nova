@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T07:07:32",
+  "updated": "2026-09-02T07:11:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73299,9 +73299,146 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T034905309111-scr-null-polish-attribution",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-null-polish-attribution",
+        "node_definition": {
+          "done_when": "null-polish-attribution.json records for both revisions and both arms the terminal residual, trip count, termination, mask differences, selected saddle with distance to the committed row, states with an explicit true/false whether current main converges 22086/43 pure below 1e-8, records the X and O polish_receipt fields for the main-HEAD solves, states the attribution verdict sentence, lists the intervening nova/ commits, records SLURM job id, node, CPU count, elapsed and exit marker, null-polish-attribution.png plots the four residual histories on one log axis beside the banked old and own-mask histories, and git diff --stat in the assigned worktree shows no change under nova/",
+          "estimated_hours": 2.0,
+          "goal": "The attribution receipt docs/figures/solver-convergence-regression/null-polish-attribution.json (figure null-polish-attribution.png, driver benchmarks/bank_revision_reproduction.py extended as needed) that re-solves the 22086/43 pure arm together with the 21978/35 pure arm through the exact bank route, with no worktree solver changes, at two revisions from detached shadow worktrees beside the assigned one: current main HEAD as the clean control, and the first parent of merge aecea6a7 (the last main state before the census-selected null polish), on one reserved H200 with one CPU (reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, 3-hour SLURM limit, hardened sbatch with heartbeat and flushed stage timings, persisted carrier reused, launch-then-harvest inside the fence), recording per revision per arm the per-trip residual history, mask differences, termination, trip count, terminal residual against 1e-8, the selected saddle position and its distance from the committed row's saddle (0.5904799259797128, 1.2250633080352826) m for 22086/43, and for the main-HEAD solves the TopologyQualification polish_receipt for the X and O slots (accepted flag, seed and polished position, seed and polished value, normalised gradient, the two floors) which the topology-authority session states is the mechanism that can move the selected X flux since 31daffee, so the receipt attributes the convergence flip to the null polish if the X slot reports accepted true with a nonzero value change, or otherwise to the remaining candidate 990cf0ca ring order, with a listing of the nova/ commits between the two revisions and a one-sentence attribution verdict",
+          "id": "scr-null-polish-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/bank_revision_reproduction.py",
+            "docs/figures/solver-convergence-regression/null-polish-attribution.json",
+            "docs/figures/solver-convergence-regression/null-polish-attribution.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T03:49:10Z",
+        "completed_at": "2026-09-02T05:11:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4912,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4912,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4da60e9fc1f4af442942608c4c13c05a8017a183",
+        "commits": [
+          "9e7c76b4dda35d3d17a48e9b2d709e6e4626cf90"
+        ],
+        "changed_lines": {
+          "added": 960,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/bank_revision_reproduction.py null-polish check (SLURM 1261024 COMPLETED 0:0, EXIT_MARKER=0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/logs/check.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3114496,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3156519,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13858,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3669
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6563,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the three-hour launch-then-harvest measurement outlives the 60-minute worker fence; job 1261014 is still running in baseline trip 2; the threaded step has not started; and terminal per-trip walls; sampled threaded effective cores; paired compile seconds; same-HEAD residual agreement and the one-sentence verdict therefore do not yet exist",
+              "elapsed_seconds": 10163,
+              "log_age_seconds": 6588,
+              "log_fresh": false,
+              "manifest_commits": [
+                "6564951b6936f8102648f9e416892701f3d3ddf7"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-thread-configuration",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T005936006858-csv-thread-configuration",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 6624,
+              "terminal_at": "2026-09-02T01:58:42Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1307
+    "_version": 1308
   }
 }

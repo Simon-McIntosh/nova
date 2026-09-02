@@ -932,10 +932,13 @@ def compile_thread_configuration(
         float(row["live_residual"])
         for row in banked_head["per_trip"][:THREAD_CONFIGURATION_TRIPS]
     ]
-    baseline_differences = _relative_differences(
+    same_head_differences = _relative_differences(
+        threaded["per_trip_residuals"], baseline["per_trip_residuals"]
+    )
+    baseline_to_banked_differences = _relative_differences(
         baseline["per_trip_residuals"], banked_residuals
     )
-    threaded_differences = _relative_differences(
+    threaded_to_banked_differences = _relative_differences(
         threaded["per_trip_residuals"], banked_residuals
     )
     pinned = _reference()
@@ -962,12 +965,31 @@ def compile_thread_configuration(
             "per_trip_wall_seconds": [reference_seconds] * THREAD_CONFIGURATION_TRIPS,
         },
         "residual_agreement": {
+            "gate_basis": "fresh threaded capture versus fresh same-HEAD baseline",
             "relative_tolerance": 1.0e-9,
-            "baseline_relative_differences": baseline_differences,
-            "threaded_relative_differences": threaded_differences,
-            "maximum_relative_difference": max(
-                baseline_differences + threaded_differences
+            "threaded_to_same_head_baseline_relative_differences": (
+                same_head_differences
             ),
+            "maximum_relative_difference": max(same_head_differences),
+            "banked_revision_context": {
+                "reason": (
+                    "The banked HEAD capture predates stationary-point polishing "
+                    "inside Topology.read, so its residual difference is revision "
+                    "context rather than a threading semantic gate."
+                ),
+                "baseline_to_banked_relative_differences": (
+                    baseline_to_banked_differences
+                ),
+                "threaded_to_banked_relative_differences": (
+                    threaded_to_banked_differences
+                ),
+                "maximum_baseline_to_banked_relative_difference": max(
+                    baseline_to_banked_differences
+                ),
+                "maximum_threaded_to_banked_relative_difference": max(
+                    threaded_to_banked_differences
+                ),
+            },
         },
         "verdict": _thread_verdict(
             threaded["per_trip_wall_seconds"], reference_seconds

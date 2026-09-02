@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="convergence-stall-handoff">
+  <meta name="plan-title" content="Convergence stall handoff — hypothesis, state and next steps for the forward-accuracy north star">
+  <meta name="plan-summary" content="Where the trip-loop stalls come from, what has been excluded, what is filed, and the one decision the next session needs before it can dispatch.">
+  <meta name="plan-informs" content="solver-convergence-regression,gs-absolute-accuracy-gates,millisecond-converged-solve,forward-solve-api,solve-default-wiring,batched-operator-boundary">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,active-set,convergence,handoff">
+  <title>Convergence stall handoff | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Convergence stall handoff</h1>
+    <p class="lede">Written 2026-09-02 at the end of the S19 coordination session so a fresh session can pick the
+    work up without re-deriving it. Everything stated here is banked in a plan comment or an evidence record;
+    the links are the authority, this page is the map.</p>
+  </header>
+
+  <section id="hypothesis">
+    <h2>Working hypothesis for the stalls</h2>
+    <p><strong>The stall is an acceptance-policy consequence, not a discretisation or backend defect.</strong>
+    Commit <code>a2e65fda</code> ("evaluate candidates on induced masks") scores a Newton candidate and the
+    incumbent each on the active-set mask they themselves induce, and refuses the promotion unless the residual
+    strictly decreases under that scoring. On marginal arms the candidate that the old code accepted at trip 2
+    is refused (3.13e-3 versus 3.49e-3 on the induced masks), the mask settles from trip 3 and never re-opens,
+    and the fixed-mask Newton–Krylov map then contracts along a near-neutral mode too slowly to reach tolerance
+    before the stagnation stop fires. The old code took that promotion, re-opened one cell then twenty-two at
+    trips 4 and 5, rose transiently, and converged to 6e-12 in twelve trips.</p>
+    <p>Evidence for the hypothesis, in order of strength:</p>
+    <ul>
+      <li>Per-trip trajectory capture with each candidate commit re-enacted locates the first divergence at
+      exactly that hunk (<a href="/nova/evidence/archive/solver-convergence-regression-landed#root-cause">root cause</a>).</li>
+      <li>Re-solving at the bank's true revision reproduces the committed rows to 2e-16
+      (<a href="/nova/evidence/archive/solver-convergence-regression-landed#true-pin">true pin</a>).</li>
+      <li>Every step-side remedy that leaves the policy in place produces a bit-identical trajectory, because its
+      candidate is refused by the same guard
+      (<a href="/nova/evidence/archive/solver-convergence-regression-landed#remedy-ladder">remedy ladder</a>).</li>
+      <li>The corrected Solov'ev certificate shows the same signature on exact solutions with no noise and no seed
+      ambiguity: fourteen of sixteen rows settle at 1e-3 to 3e-2 after ten Newton steps, while the two rows whose
+      loop converges reach 2e-16 and 5e-16
+      (<a href="/nova/evidence/archive/gs-absolute-accuracy-gates-landed#corrected-certificate">corrected certificate</a>).</li>
+      <li>Paired CPU and GPU solves stay inside float64 noise, so the backend is excluded
+      (<a href="/nova/evidence/archive/solver-convergence-regression-landed#backend-forensics">backend forensics</a>).</li>
+    </ul>
+    <p><strong>What remains unproven:</strong> that re-admitting the pre-settlement promotion recovers convergence
+    on the Solov'ev rows as well as on the MAST arm. The bank reproduction proves it for 22086/43 pure at the old
+    revision; the Solov'ev production route has never been run with the old acceptance.</p>
+  </section>
+
+  <section id="current-pin">
+    <h2>Plasma current is pinned in every S19 solve</h2>
+    <table>
+      <caption>Where the net plasma current constraint (the lambda normalisation via <code>target_current</code>) enters</caption>
+      <thead><tr><th scope="col">Route</th><th scope="col">Pin</th><th scope="col">Where</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Solov'ev production certificate</th><td>closed-form Ip per case (0.81 MA to 16.3 MA), every row</td><td><code>solver.target_current_a</code>, <code>target_current_argument = Ip_closed_form</code> in the receipt</td></tr>
+        <tr><th scope="row">MAST bank producer</th><td>absolute EFIT plasma current per row</td><td><code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, line 495</td></tr>
+        <tr><th scope="row">Sequential strict-exit timing</th><td>absolute bank reference plasma current</td><td><code>benchmarks/strict_exit_incidence.py</code></td></tr>
+        <tr><th scope="row">EFIT reproduction gate</th><td>EFIT plasma current per frame</td><td><code>benchmarks/efit_reproduction_gate.py</code></td></tr>
+        <tr><th scope="row"><code>ForwardProfile.solve</code> default</th><td><strong>none</strong>: <code>target_current=None</code> is opt-in</td><td><code>nova/equilibrium/forward.py</code>; closing this is <a href="/nova/plans/solve-default-wiring">solve-default-wiring</a> §1(1)</td></tr>
+      </tbody>
+    </table>
+    <p>So the stalls are not an unpinned-current artefact: every measurement in this sprint passed the pin
+    explicitly. The default remains opt-in on the bare entry point, which is a wiring gap, not a measurement gap.</p>
+  </section>
+
+  <section id="precision">
+    <h2>What "we used to reach ULP precision" actually refers to</h2>
+    <ul>
+      <li><strong>Mixed arms still do.</strong> 21985/51 mixed 2.8e-16, 22086/43 mixed 1.7e-14, 21978/35 mixed
+      7.5e-12 at HEAD. These arms are unaffected by the policy because their mask never sits on the margin.</li>
+      <li><strong>Solov'ev rows that converge still do.</strong> 2.1e-16 and 5.0e-16 psi rms against the exact
+      polynomial flux, so the discretisation is exact when the loop converges.</li>
+      <li><strong>The pure marginal arm reached tolerance, not ULP.</strong> The committed 22086/43 pure row was
+      6.08e-12 in twelve trips at revision <code>d47f7cd1</code>; HEAD stagnates at 4.80e-4 after seven. That is
+      the regression, and it is located.</li>
+    </ul>
+  </section>
+
+  <section id="state">
+    <h2>State of the S19 plans</h2>
+    <table>
+      <thead><tr><th scope="col">Plan</th><th scope="col">Status</th><th scope="col">Landed</th><th scope="col">Open</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><a href="/nova/plans/solver-convergence-regression">solver-convergence-regression</a></th><td>active, impl 0.95</td><td>forensics, true pin, root cause, null-polish fix, five negative remedies, honest bank re-baseline with the marginal-basin flag, flux overlays against EFIT</td><td>the last remedy needs a lead decision (below); then re-baseline or close with honest stagnation as final</td></tr>
+        <tr><th scope="row"><a href="/nova/plans/gs-absolute-accuracy-gates">gs-absolute-accuracy-gates</a></th><td>active, impl 0.8</td><td>norms preregistered, fixture derivative fixed, sixteen-row certificate finite (2 qualified), EFIT gate 0/11 on convergence, oracle registry 14/14</td><td>§3 per-machine evidence waits on convergence; EFIT gate rerun after a remedy</td></tr>
+        <tr><th scope="row"><a href="/nova/plans/solver-trip-orchestration">solver-trip-orchestration</a></th><td>shipped</td><td>strict no-op exit locked and landed</td><td>none</td></tr>
+        <tr><th scope="row"><a href="/nova/plans/cpu-solve-viability">cpu-solve-viability</a></th><td>shipped</td><td>program growth root-caused; build-on-H200-then-reuse-caches locked as default</td><td>none</td></tr>
+        <tr><th scope="row"><a href="/nova/plans/millisecond-converged-solve">millisecond-converged-solve</a></th><td>active, impl 0.3</td><td>sequential strict-exit timing: a real member solves in 16 to 316 s at width 1, exit saves 1 to 20 %; batched measurement cannot compile (heterogeneous members are trace constants)</td><td>§2 per-trip quantum, §3 certified measurement; both wait on convergence and on the operator boundary</td></tr>
+      </tbody>
+    </table>
+    <p>Landed on S20 plans while S19 ran: <a href="/nova/plans/forward-solve-api">forward-solve-api</a> §5 nodes A
+    (traced prescribed-current vector, <code>e464be9d</code>) and C (labelled terminal flux receipt,
+    <code>6fb07a40</code>); the coil-edit latency node with the solve-level <code>prescribed_current</code>
+    keyword was in flight at handoff. <a href="/nova/plans/solve-default-wiring">solve-default-wiring</a> is
+    dispatchable now with no prerequisite; <a href="/nova/plans/batched-operator-boundary">batched-operator-boundary</a>
+    has its motivating rows (DIII-D frames recompile for about 1500 s each at 67 GB).</p>
+  </section>
+
+  <section id="decision">
+    <h2>The decision the next session needs</h2>
+    <p>All five remedies that respect the locked acceptance policy are negative. The plan's remaining move is to
+    test the policy itself, scoped so the referees stay green:</p>
+    <ol>
+      <li><strong>Score pre-settlement candidates on the incumbent partition</strong> (recommended). Keep
+      induced-mask scoring once the mask has settled; before settlement, compare candidate and incumbent on the
+      incumbent's mask, which is what the banked code did. Test: 22086/43 pure must return to 6e-12, the
+      Solov'ev fourteen must move, and the seven referees plus the hex-reference gates must stay green. This is
+      the only remedy with a positive precedent (the committed bank).</li>
+      <li><strong>Accept honest stagnation as final</strong> and re-baseline the banks under it, treating the
+      marginal-basin rows as a known limitation. The north star's accuracy half then stands at two Solov'ev
+      rows and three MAST mixed arms.</li>
+      <li><strong>Reopen <code>a2e65fda</code> wholesale.</strong> Not recommended: the induced-mask scoring
+      fixed a real defect on non-marginal arms and the referees encode it.</li>
+    </ol>
+    <p>Whichever branch is chosen should be measured first on the Solov'ev fourteen (exact answer known, no seed
+    ambiguity, 150 to 850 s per row on the H200) and only then on the MAST bank.</p>
+  </section>
+
+  <section id="next-steps">
+    <h2>Next concrete steps, in order</h2>
+    <ol>
+      <li>Lead locks the decision above on <code>solver-convergence-regression</code>; dispatch the prototype as a
+      worktree node measured on the Solov'ev fourteen plus the two marginal MAST arms, referees green, merge
+      returned to the lead.</li>
+      <li>If positive: regenerate the MAST bank and the Solov'ev certificate, rerun the EFIT reproduction gate,
+      collapse the three S19 plans, close S19. If negative: close S19 with honest stagnation, record the
+      limitation on the north star page.</li>
+      <li>Harvest the coil-edit latency node (run <code>fsa-coil-edit-latency</code>, member
+      <code>fsa-traced-current</code>), send the SHA to the imas-ambix demonstrator session, then dispatch the
+      warm-start (B) and raster-receipt (C2) nodes of forward-solve-api §5.</li>
+      <li>Review the topology session's schema-4 bank regeneration cache identity when its manifest lands
+      (run <code>pta-schema4-bank-regeneration</code>), then let that session merge it.</li>
+      <li>Start S20 with <code>solve-default-wiring</code> (no prerequisite): the current pin becomes the default
+      on the bare entry point.</li>
+    </ol>
+  </section>
+
+  <section id="filing">
+    <h2>Where everything is filed</h2>
+    <ul>
+      <li>Convergence evidence record: <a href="/nova/evidence/archive/solver-convergence-regression-landed">solver-convergence-regression-landed</a> (this session's work, including the five remedy receipts as data).</li>
+      <li>Accuracy evidence record: <a href="/nova/evidence/archive/gs-absolute-accuracy-gates-landed">gs-absolute-accuracy-gates-landed</a>.</li>
+      <li>Throughput evidence record: <a href="/nova/evidence/archive/millisecond-converged-solve-landed">millisecond-converged-solve-landed</a>.</li>
+      <li>Shipped records: <a href="/nova/evidence/archive/solver-trip-orchestration-landed">solver-trip-orchestration-landed</a>, <a href="/nova/evidence/archive/cpu-solve-viability-landed">cpu-solve-viability-landed</a>.</li>
+      <li>Flux overlays: <a href="/nova/evidence/mast-bank-efit-overlays">mast-bank-efit-overlays</a>.</li>
+      <li>Reuse map for the north star: <a href="/nova/research/forward-accuracy-reuse-map">forward-accuracy-reuse-map</a>; north star page: <a href="/nova/research/forward-accuracy-northstar">forward-accuracy-northstar</a>.</li>
+      <li>Off-repo reports: <code>~/.config/reckon/crew/reports/nova/capability-wiring-audit.md</code>,
+      <code>minor-radius-pin-design.md</code>, and the secured regeneration operands under
+      <code>~/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/</code>.</li>
+      <li>Held worktrees (prototype code, unmerged by instruction): <code>s19-northstar/scr-remedy-*</code>,
+      <code>scr-stagnation-*</code> shadows, <code>gaa-certificate-production-route</code>, <code>mcs-strict-exit-incidence</code>.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,766 @@
+{
+  "allocation": {
+    "allocated_cpus": 1,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3",
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1261119,
+    "job_name": "remedy-anderson",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/jax-compilation-cache",
+    "python": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/bin/python3.14",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "21978/35 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          29,
+          27,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554597364631363,
+          0.003346029663154957,
+          0.002674354078263495,
+          0.0024506488565449003
+        ],
+        "converged": false,
+        "mixed_candidate_applied_factors_by_trip": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidate_residuals_by_trip": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidates_admitted": 0,
+        "mixed_candidates_admitted_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_offered": 0,
+        "mixed_candidates_offered_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_refused": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.7330455664816806,
+            0.8169860843940798,
+            0.8964601156806636
+          ],
+          "projected_residual_amplitudes": [
+            -0.0034419980992120977,
+            -0.0025231414464658,
+            -0.002061371450720509,
+            -0.001847937289173725
+          ],
+          "successive_residual_difference_projections": [
+            0.0009188566527462972,
+            0.0004617699957452903,
+            0.0002134341615467848
+          ],
+          "terminal_contraction_ratio": 0.8964601156806636
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "settled_mask_anderson": true,
+          "settled_mask_anderson_depth": 3,
+          "settled_mask_anderson_relaxation": 0.5,
+          "settled_mask_anderson_ridge": 1e-10,
+          "settled_mask_anderson_stall_ratio": 0.95,
+          "settled_mask_anderson_step_cap": 2.0,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.0024506488565449003,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 751.6747852992266
+      },
+      "before": {
+        "active_set_mask_differences": [
+          29,
+          27,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554597364631363,
+          0.003346029663154957,
+          0.002674354078263495,
+          0.0024506488565449003
+        ],
+        "converged": false,
+        "mixed_candidate_applied_factors_by_trip": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidate_residuals_by_trip": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidates_admitted": 0,
+        "mixed_candidates_admitted_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_offered": 0,
+        "mixed_candidates_offered_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_refused": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.7330455664816806,
+            0.8169860843940798,
+            0.8964601156806636
+          ],
+          "projected_residual_amplitudes": [
+            -0.0034419980992120977,
+            -0.0025231414464658,
+            -0.002061371450720509,
+            -0.001847937289173725
+          ],
+          "successive_residual_difference_projections": [
+            0.0009188566527462972,
+            0.0004617699957452903,
+            0.0002134341615467848
+          ],
+          "terminal_contraction_ratio": 0.8964601156806636
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "settled_mask_anderson": false,
+          "settled_mask_anderson_depth": 3,
+          "settled_mask_anderson_relaxation": 0.5,
+          "settled_mask_anderson_ridge": 1e-10,
+          "settled_mask_anderson_stall_ratio": 0.95,
+          "settled_mask_anderson_step_cap": 2.0,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.0024506488565449003,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 880.6030481662601
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      }
+    },
+    "22086/43 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976402498594305,
+          0.003131688886067914,
+          0.0019503833095738032,
+          0.0006655722453716048,
+          0.0004808602435076804,
+          0.00048001875929249403,
+          0.00048001875929249403
+        ],
+        "converged": false,
+        "mixed_candidate_applied_factors_by_trip": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidate_residuals_by_trip": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidates_admitted": 0,
+        "mixed_candidates_admitted_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_offered": 0,
+        "mixed_candidates_offered_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_refused": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            3.4988949705241628,
+            0.619982367703864,
+            1.1883875578202403,
+            1.2605551958710026,
+            0.9976771711731437,
+            1.0000000000000018
+          ],
+          "projected_residual_amplitudes": [
+            -0.00142726953068681,
+            -0.0049938661825024615,
+            -0.0030961089798241326,
+            -0.0036793773892785163,
+            -0.004638058285625318,
+            -0.004627284870138828,
+            -0.004627284870138837
+          ],
+          "successive_residual_difference_projections": [
+            -0.00356659665181565,
+            0.00189775720267833,
+            -0.0005832684094543855,
+            -0.0009586808963467994,
+            1.077341548648186e-05,
+            0.0
+          ],
+          "terminal_contraction_ratio": 1.0000000000000018
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "settled_mask_anderson": true,
+          "settled_mask_anderson_depth": 3,
+          "settled_mask_anderson_relaxation": 0.5,
+          "settled_mask_anderson_ridge": 1e-10,
+          "settled_mask_anderson_stall_ratio": 0.95,
+          "settled_mask_anderson_step_cap": 2.0,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.00048001875929249403,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 735.8328263042495
+      },
+      "before": {
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976402498594305,
+          0.003131688886067914,
+          0.0019503833095738032,
+          0.0006655722453716048,
+          0.0004808602435076804,
+          0.00048001875929249403,
+          0.00048001875929249403
+        ],
+        "converged": false,
+        "mixed_candidate_applied_factors_by_trip": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidate_residuals_by_trip": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "mixed_candidates_admitted": 0,
+        "mixed_candidates_admitted_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_offered": 0,
+        "mixed_candidates_offered_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "mixed_candidates_refused": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            3.4988949705241628,
+            0.619982367703864,
+            1.1883875578202403,
+            1.2605551958710026,
+            0.9976771711731437,
+            1.0000000000000018
+          ],
+          "projected_residual_amplitudes": [
+            -0.00142726953068681,
+            -0.0049938661825024615,
+            -0.0030961089798241326,
+            -0.0036793773892785163,
+            -0.004638058285625318,
+            -0.004627284870138828,
+            -0.004627284870138837
+          ],
+          "successive_residual_difference_projections": [
+            -0.00356659665181565,
+            0.00189775720267833,
+            -0.0005832684094543855,
+            -0.0009586808963467994,
+            1.077341548648186e-05,
+            0.0
+          ],
+          "terminal_contraction_ratio": 1.0000000000000018
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "settled_mask_anderson": false,
+          "settled_mask_anderson_depth": 3,
+          "settled_mask_anderson_relaxation": 0.5,
+          "settled_mask_anderson_ridge": 1e-10,
+          "settled_mask_anderson_stall_ratio": 0.95,
+          "settled_mask_anderson_step_cap": 2.0,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.00048001875929249403,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 989.4059811346233
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      }
+    }
+  },
+  "banked_old_21978": {
+    "active_set_mask_differences": [
+      31,
+      29,
+      0,
+      2
+    ],
+    "active_set_residuals": [
+      0.004554852568868313,
+      0.0033463831584596617,
+      0.002674636272346104,
+      0.0024508600111780637
+    ],
+    "converged": false,
+    "selected_saddle_m": [
+      0.5628646606371923,
+      1.2634878586583964
+    ],
+    "solve_wall_seconds_including_compilation": 131.34186801686883,
+    "solver": {
+      "fixed_point_tolerance": 1e-08,
+      "gmres_iterations": 12,
+      "newton_steps": 12,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "warmup_sweeps": 0
+    },
+    "terminal_residual": 0.0024508600111780637,
+    "termination_reason": "active_set_cycle_detected",
+    "trip_count": 4
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.004473443143069744
+  },
+  "comparison_histories": {
+    "after_model_trust": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.00497645568973448,
+        0.0034925711304508423,
+        0.0022267868462637,
+        0.0028245881800609447,
+        0.001768700503481402,
+        0.0011202690991536923,
+        0.0007158357172522378,
+        0.0004622759187821485,
+        0.00029900485325314616,
+        0.0001933140977580932,
+        0.0001252591717767685,
+        6.0793459961952516e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/565a8c8e-h200.json",
+      "raw_capture_sha256": "18e2b6ee9de0d80c90114aefa96d672e87fef2e0ba44361e5e0d5b303a32e700",
+      "revision": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904800001716353,
+        1.2250631849800084
+      ],
+      "solve_wall_seconds_including_compilation": 134.6643641628325,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0793459961952516e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "after_trajectory": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.003492571130450865,
+        0.0022267868462637224,
+        0.002824543671089126,
+        0.0017686695998069722,
+        0.0011202504574495536,
+        0.0007158519978677916,
+        0.0004622842344470893,
+        0.0002989857079383364,
+        0.00019330286566941873,
+        0.0001252525215443233,
+        6.0797044944388355e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/4ee90ece-h200.json",
+      "raw_capture_sha256": "f2b7835d06bdc2c95b286b302d8d5d0d71db8e571fef3d276e5a6f33db807a32",
+      "revision": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904799259797138,
+        1.2250633080352822
+      ],
+      "solve_wall_seconds_including_compilation": 135.05865284334868,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0797044944388355e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "banked_new": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ],
+      "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+      "terminal_residual": 0.000480233535391836,
+      "termination_reason": "active_set_stagnated",
+      "trip_count": 7
+    },
+    "banked_old": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+      "terminal_residual": 6.079614869877941e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    }
+  },
+  "execution_contract": {
+    "allocated_cpus": 1,
+    "one_reserved_h200": true,
+    "persisted_carrier_reused": true,
+    "persistent_compilation_cache": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/jax-compilation-cache",
+    "same_bank_generation_route": "bank_revision_reproduction persisted carrier, passive-inclusive case construction, and production solve_portfolio pure arm",
+    "targets": [
+      [
+        22086,
+        43
+      ],
+      [
+        21978,
+        35
+      ]
+    ]
+  },
+  "figure": "docs/figures/solver-convergence-regression/remedy-anderson.png",
+  "mode": {
+    "description": "unit-normalized successive residual difference from the final two settled-mask 22086/43 pure baseline trips",
+    "projection_definition": "dot each residual and each successive residual difference with the unit mode; contraction is the absolute amplitude ratio",
+    "source_arm": "22086/43 pure",
+    "source_trip_pair_end": 6,
+    "source_vector_l2_norm": 1.0773415486481859e-05
+  },
+  "receipt": "settled-mask Anderson remedy",
+  "remedy_histories": {
+    "deflation": {
+      "21978/35 pure": [
+        0.004554852568867979,
+        0.0033463831584595507,
+        0.0026746362723459936,
+        0.002450918725802159
+      ],
+      "22086/43 pure": [
+        0.004976455689734301,
+        0.003131474610324068,
+        0.0019512703665675324,
+        0.0006652842022510339,
+        0.00048085211160409433,
+        0.0004802335353920043,
+        0.0004802335353920043
+      ]
+    },
+    "krylov_depth": {
+      "21978/35 pure": [
+        0.0045548525688682015,
+        0.0033463831584597736,
+        0.0026746362723462157,
+        0.002450918725802159
+      ],
+      "22086/43 pure": [
+        0.0049764556897343,
+        0.003131474610324023,
+        0.0019512703665674985,
+        0.000665284202251,
+        0.00048085211160393707,
+        0.00048023353539184706,
+        0.00048023353539184706
+      ]
+    },
+    "vertical_pin": {
+      "21978/35 pure": [
+        0.0034704980647736728,
+        0.0016757934899982623,
+        0.000787910521245969,
+        0.0007878428366219165,
+        0.0005812967865021982,
+        0.000544641708464648,
+        0.000486602605236231,
+        0.0004855467491524179,
+        0.0004045451469403552,
+        0.0003475050349665,
+        0.0003473079064852166,
+        0.0003473079064852166
+      ],
+      "22086/43 pure": [
+        0.00327424919771739,
+        0.0022181315157397824,
+        0.001531995421565678,
+        0.001504223189823502,
+        0.0009720969832963209,
+        0.0009348609293247929,
+        0.0009335354127929885,
+        0.0009335354127929885
+      ]
+    }
+  },
+  "scheduler": {
+    "elapsed": "00:57:22",
+    "exit_marker": 0,
+    "job_id": 1261119,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "source": {
+    "nova_diff_names": "nova/equilibrium/fixed_point.py",
+    "revision": "bc5e798210f772f6bf2e8c0097ef75e59be89326",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+  },
+  "sources": {
+    "deflation": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-deflation/docs/figures/solver-convergence-regression/remedy-deflation.json",
+    "deflation_sha256": "15bb96d42d49ca6debc1eaee26642402659c9b6aed95e434a50b34c37c05a153",
+    "krylov_depth": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/remedy-krylov-depth.json",
+    "krylov_depth_sha256": "c73a8c7e5921f85619e61a570e5037736289a90c53572c61321cf165998d15ae",
+    "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/raw/remedy-anderson-h200.json",
+    "raw_capture_sha256": "2fc3ca24bee9e0db7c8be77c58ebaa67baf6b4a1b72f6b64059b9e4be13c8c33",
+    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821",
+    "true_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78",
+    "vertical_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin/docs/figures/solver-convergence-regression/remedy-vertical-pin.json",
+    "vertical_pin_sha256": "ec2a6be867e60d610c07a5cc8eb57a5638424ea61291449c20ae6a7ee4638cda"
+  },
+  "tests": {
+    "settled_mask_anderson": {
+      "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_settled_mask_anderson.py",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/logs/targeted-final.log",
+      "passed_count": 10
+    },
+    "seven_referees_unmodified": {
+      "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_own_mask_acceptance.py::test_own_mask_acceptance_is_inert_when_candidates_keep_the_mask tests/test_own_mask_acceptance.py::test_candidate_worsening_by_measured_own_mask_ratio_is_refused tests/test_fixed_point.py::test_newton_returns_the_best_observed_relative_sup_iterate tests/test_fixed_point.py::test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask tests/test_fixed_point.py::test_newton_with_a_constant_active_set_preserves_the_smooth_solve tests/test_newton_trajectory_continuation.py::test_monotone_solve_is_bit_identical_with_continuation_on_and_off tests/test_globalization_state_continuation.py::test_monotone_solve_is_bit_identical_eager_and_jit",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/logs/referees-final.log",
+      "passed_count": 9
+    }
+  }
+}

@@ -1,0 +1,749 @@
+{
+  "allocation": {
+    "allocated_cpus": 1,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae",
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1261017,
+    "job_name": "remedy-vertical-pin",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "python": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/bin/python3.14",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "21978/35 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0034704980647736728,
+          0.0016757934899982623,
+          0.000787910521245969,
+          0.0007878428366219165,
+          0.0005812967865021982,
+          0.000544641708464648,
+          0.000486602605236231,
+          0.0004855467491524179,
+          0.0004045451469403552,
+          0.0003475050349665,
+          0.0003473079064852166,
+          0.0003473079064852166
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.27248821082150393,
+            0.5712761983051525,
+            1.0000774500331553,
+            1.2371617650666737,
+            0.22511572763569201,
+            0.8945315169024488,
+            0.9995205535234385,
+            1.0503879834985033,
+            1.0758290275463493,
+            0.9999775100892714,
+            1.0
+          ],
+          "projected_residual_amplitudes": [
+            0.028532124054750883,
+            0.007774667434616263,
+            0.004441482455134452,
+            0.004441826448097861,
+            0.0054952578486485845,
+            0.0012370689691442735,
+            0.0011065971814815756,
+            0.0011060666273619414,
+            0.0011617990943297001,
+            0.0012498971898569507,
+            0.0012498690797807309,
+            0.0012498690797807309
+          ],
+          "successive_residual_difference_projections": [
+            -0.020757456620134628,
+            -0.0033331849794818146,
+            3.439929634114999e-07,
+            0.0010534314005507244,
+            -0.004258188879504312,
+            -0.00013047178766269774,
+            -5.305541196348397e-07,
+            5.573246696775892e-05,
+            8.809809552725102e-05,
+            -2.8110076220697395e-08,
+            0.0
+          ],
+          "terminal_contraction_ratio": 1.0
+        },
+        "pin_weight_schedule": [
+          1.0,
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_inner_step_audit": {
+          "acceptance_decisions": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "accepted": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "attempted_promotions": 12,
+          "bounded_mode_components": [
+            -0.0009401417944945827,
+            -0.0009401417860313854,
+            -0.0009401417817997871,
+            -0.0009401417796839875,
+            -0.0009401417786260882,
+            -0.0009401417780971383,
+            -0.0009401417778326635,
+            -0.0009401417777004256,
+            -0.0009401417776343073,
+            -0.0009401417776012475,
+            -0.0009401417775847182,
+            -0.0009401417775764533
+          ],
+          "step_cap_clipped": false,
+          "step_component_magnitude": 0.0009401417944945827,
+          "strict_decrease_refused": true,
+          "unbounded_mode_components": [
+            -0.0009401417944945827,
+            -0.0009401417860313854,
+            -0.0009401417817997871,
+            -0.0009401417796839875,
+            -0.0009401417786260882,
+            -0.0009401417780971383,
+            -0.0009401417778326635,
+            -0.0009401417777004256,
+            -0.0009401417776343073,
+            -0.0009401417776012475,
+            -0.0009401417775847182,
+            -0.0009401417775764533
+          ],
+          "verdict": "refused"
+        },
+        "terminal_residual": 0.0003473079064852166,
+        "termination_reason": "active_set_settled",
+        "trip_count": 12,
+        "vertical_pin": {
+          "support": "all_domain",
+          "target_centroid_z_m": -0.004119301153260602,
+          "uncertainty_m": 0.001
+        },
+        "wall_seconds_including_compilation": 1000.3854728834704
+      },
+      "before": {
+        "active_set_mask_differences": [
+          8,
+          8,
+          0,
+          1,
+          0,
+          1
+        ],
+        "active_set_residuals": [
+          0.004550716241711782,
+          0.0033393685659339114,
+          0.0026697885416939703,
+          0.0022254169337926066,
+          0.001902012896465049,
+          0.001761918520215658
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.7374192602035333,
+            0.8043140353074889,
+            0.8359478806641129,
+            0.8552942522361534,
+            0.9266807907313912
+          ],
+          "projected_residual_amplitudes": [
+            0.010246388426074666,
+            0.0075558841729140265,
+            0.006077303689432469,
+            0.005080309139333266,
+            0.004345159206454542,
+            0.00402657556929108
+          ],
+          "successive_residual_difference_projections": [
+            -0.002690504253160637,
+            -0.0014785804834815618,
+            -0.0009969945500991981,
+            -0.0007351499328787318,
+            -0.0003185836371634572
+          ],
+          "terminal_contraction_ratio": 0.9266807907313912
+        },
+        "pin_weight_schedule": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_inner_step_audit": {
+          "acceptance_decisions": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "accepted": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "attempted_promotions": 12,
+          "bounded_mode_components": [
+            -0.0013656757067508202,
+            -0.0013494876228277739,
+            -0.0013324706919742124,
+            -0.0013139275342490854,
+            -0.0012961921094676383,
+            -0.001279168276416401,
+            -0.0012635925225403294,
+            -0.0012462819255573705,
+            -0.0012311922297558414,
+            -0.001214311779198223,
+            -0.0011970541469582556,
+            -0.0011817535898188901
+          ],
+          "step_cap_clipped": false,
+          "step_component_magnitude": 0.0013656757067508202,
+          "strict_decrease_refused": false,
+          "unbounded_mode_components": [
+            -0.0013656757067508202,
+            -0.0013494876228277739,
+            -0.0013324706919742124,
+            -0.0013139275342490854,
+            -0.0012961921094676383,
+            -0.001279168276416401,
+            -0.0012635925225403294,
+            -0.0012462819255573705,
+            -0.0012311922297558414,
+            -0.001214311779198223,
+            -0.0011970541469582556,
+            -0.0011817535898188901
+          ],
+          "verdict": "computed-and-cancelled"
+        },
+        "terminal_residual": 0.001761918520215658,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 6,
+        "vertical_pin": {
+          "support": "all_domain",
+          "target_centroid_z_m": -0.004119301153260602,
+          "uncertainty_m": 0.001
+        },
+        "wall_seconds_including_compilation": 1120.2460808390751
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      }
+    },
+    "22086/43 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          7,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.00327424919771739,
+          0.0022181315157397824,
+          0.001531995421565678,
+          0.001504223189823502,
+          0.0009720969832963209,
+          0.0009348609293247929,
+          0.0009335354127929885,
+          0.0009335354127929885
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.18702172036735237,
+            0.6319519266972188,
+            0.9830504686510321,
+            0.7645521389451511,
+            0.5318358479563821,
+            0.9902512567501952,
+            1.0
+          ],
+          "projected_residual_amplitudes": [
+            0.03709442195257667,
+            0.006937462609603371,
+            0.004384142862528766,
+            0.0043098336956419805,
+            0.0032950925705009615,
+            0.0017524483513271533,
+            0.0017353641822915212,
+            0.0017353641822915212
+          ],
+          "successive_residual_difference_projections": [
+            -0.030156959342973282,
+            -0.002553319747074609,
+            -7.430916688678499e-05,
+            -0.0010147411251410182,
+            -0.001542644219173806,
+            -1.708416903563346e-05,
+            0.0
+          ],
+          "terminal_contraction_ratio": 1.0
+        },
+        "pin_weight_schedule": [
+          1.0,
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.0,
+          0.0
+        ],
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_inner_step_audit": {
+          "acceptance_decisions": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "accepted": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "attempted_promotions": 12,
+          "bounded_mode_components": [
+            -0.004450869674372748,
+            -0.004450869682818803,
+            -0.004450869687041831,
+            -0.004450869689153345,
+            -0.004450869690209102,
+            -0.004450869690736984,
+            -0.004450869691000923,
+            -0.004450869691132892,
+            -0.004450869691198876,
+            -0.004450869691231867,
+            -0.0044508696912483655,
+            -0.004450869691256612
+          ],
+          "step_cap_clipped": false,
+          "step_component_magnitude": 0.004450869691256612,
+          "strict_decrease_refused": true,
+          "unbounded_mode_components": [
+            -0.004450869674372748,
+            -0.004450869682818803,
+            -0.004450869687041831,
+            -0.004450869689153345,
+            -0.004450869690209102,
+            -0.004450869690736984,
+            -0.004450869691000923,
+            -0.004450869691132892,
+            -0.004450869691198876,
+            -0.004450869691231867,
+            -0.0044508696912483655,
+            -0.004450869691256612
+          ],
+          "verdict": "refused"
+        },
+        "terminal_residual": 0.0009335354127929885,
+        "termination_reason": "active_set_settled",
+        "trip_count": 8,
+        "vertical_pin": {
+          "support": "all_domain",
+          "target_centroid_z_m": 0.0026074364392189675,
+          "uncertainty_m": 0.001
+        },
+        "wall_seconds_including_compilation": 992.223680187948
+      },
+      "before": {
+        "active_set_mask_differences": [
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976378315113681,
+          0.0031685638994362352,
+          0.002019314631491959,
+          0.0012743582491016436,
+          0.0007982753653239939,
+          0.0005054860589130223,
+          0.0003232245563564855,
+          0.00020886301116973522,
+          0.0001351695652747091,
+          3.176823223152776e-11
+        ],
+        "converged": true,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.6367995889195641,
+            0.6368715883989268,
+            0.6308236267432782,
+            0.6273180485767282,
+            0.6340736440302213,
+            0.6397412264134309,
+            0.6463755262267157,
+            0.6473461366999432,
+            6.756586850764044e-07
+          ],
+          "projected_residual_amplitudes": [
+            0.013603020702997763,
+            0.008662397991733295,
+            0.005516835168338857,
+            0.003480149969036381,
+            0.002183160887330264,
+            0.0013842847793337518,
+            0.00088558404243642,
+            0.0005724198514478231,
+            0.00037055377940510364,
+            2.5036787934294433e-10
+          ],
+          "successive_residual_difference_projections": [
+            -0.0049406227112644635,
+            -0.0031455628233944366,
+            -0.0020366851993024763,
+            -0.0012969890817061177,
+            -0.0007988761079965114,
+            -0.0004987007368973318,
+            -0.0003131641909885972,
+            -0.00020186607204271924,
+            -0.00037055352903722465
+          ],
+          "terminal_contraction_ratio": 6.756586850764044e-07
+        },
+        "pin_weight_schedule": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reaches_tolerance": true,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_inner_step_audit": {
+          "acceptance_decisions": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "accepted": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "attempted_promotions": 5,
+          "bounded_mode_components": [
+            -0.00014496844955898445,
+            -0.0001397712522785943,
+            -0.00013476364889055688,
+            -0.003637736125388286,
+            -3.139319730457346e-05
+          ],
+          "step_cap_clipped": false,
+          "step_component_magnitude": 0.003637736125388286,
+          "strict_decrease_refused": false,
+          "unbounded_mode_components": [
+            -0.00014496844955898445,
+            -0.0001397712522785943,
+            -0.00013476364889055688,
+            -0.003637736125388286,
+            -3.139319730457346e-05
+          ],
+          "verdict": "computed-and-cancelled"
+        },
+        "terminal_residual": 3.176823223152776e-11,
+        "termination_reason": "converged",
+        "trip_count": 10,
+        "vertical_pin": {
+          "support": "all_domain",
+          "target_centroid_z_m": 0.0026074364392189675,
+          "uncertainty_m": 0.001
+        },
+        "wall_seconds_including_compilation": 987.7248649634421
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      }
+    }
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.005041902884840965
+  },
+  "comparison_histories": {
+    "21978/35 pure": {
+      "banked_old": [
+        0.004554852568868313,
+        0.0033463831584596617,
+        0.002674636272346104,
+        0.0024508600111780637
+      ],
+      "krylov_depth": [
+        0.0045548525688682015,
+        0.0033463831584597736,
+        0.0026746362723462157,
+        0.002450918725802159
+      ],
+      "own_mask": [
+        0.0045548525688682015,
+        0.0033463831584597736,
+        0.0026746362723462157,
+        0.002450918725802159
+      ]
+    },
+    "22086/43 pure": {
+      "banked_old": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "krylov_depth": [
+        0.0049764556897343,
+        0.003131474610324023,
+        0.0019512703665674985,
+        0.000665284202251,
+        0.00048085211160393707,
+        0.00048023353539184706,
+        0.00048023353539184706
+      ],
+      "own_mask": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ]
+    }
+  },
+  "execution_contract": {
+    "allocated_cpus": 1,
+    "one_reserved_h200": true,
+    "persisted_carrier_reused": true,
+    "same_bank_generation_route": "bank_revision_reproduction persisted carrier, passive-inclusive case construction, and production solve_portfolio pure arm",
+    "targets": [
+      [
+        22086,
+        43
+      ],
+      [
+        21978,
+        35
+      ]
+    ]
+  },
+  "figure": "docs/figures/solver-convergence-regression/remedy-vertical-pin.png",
+  "mode": {
+    "description": "unit-normalized repeated settled-mask residual from the 22086/43 pure baseline, identified by the root-cause receipt as the up-down antisymmetric mode",
+    "projection_definition": "dot each residual and each successive residual difference with the unit mode; contraction is the absolute amplitude ratio",
+    "source_arm": "22086/43 pure",
+    "source_trip": 10,
+    "source_vector_l2_norm": 2.5036787934294444e-10
+  },
+  "receipt": "vertical-moment pin continuation remedy",
+  "scheduler": {
+    "elapsed": "01:10:45",
+    "exit_marker": 0,
+    "job_id": 1261017,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "source": {
+    "nova_diff_names": "nova/equilibrium/fixed_point.py\nnova/equilibrium/forward.py",
+    "revision": "70b4e3583fa2e9ea44237502b78d8e6c4414d18a",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin"
+  },
+  "sources": {
+    "krylov_depth": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/remedy-krylov-depth.json",
+    "krylov_depth_sha256": "c73a8c7e5921f85619e61a570e5037736289a90c53572c61321cf165998d15ae",
+    "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/raw/remedy-vertical-pin-h200.json",
+    "raw_capture_sha256": "6e9d4bb032022ecb463198741c3baf748c0ec8af606c5ee63c9946e613000255",
+    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821",
+    "true_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78"
+  },
+  "tests": {
+    "seven_referees_unmodified": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_own_mask_acceptance.py::test_own_mask_acceptance_is_inert_when_candidates_keep_the_mask tests/test_own_mask_acceptance.py::test_candidate_worsening_by_measured_own_mask_ratio_is_refused tests/test_fixed_point.py::test_newton_returns_the_best_observed_relative_sup_iterate tests/test_fixed_point.py::test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask tests/test_fixed_point.py::test_newton_with_a_constant_active_set_preserves_the_smooth_solve tests/test_newton_trajectory_continuation.py::test_monotone_solve_is_bit_identical_with_continuation_on_and_off tests/test_globalization_state_continuation.py::test_monotone_solve_is_bit_identical_eager_and_jit",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/after-referees-jacrev.log",
+      "passed_count": 9
+    },
+    "vertical_pin_continuation": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_observation_kernels.py::test_typed_pins_qualify_the_public_solve_without_statistical_state tests/test_vertical_pin_continuation.py",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/vertical-pin-jacobian-targeted-final.log",
+      "passed_count": 9
+    }
+  }
+}

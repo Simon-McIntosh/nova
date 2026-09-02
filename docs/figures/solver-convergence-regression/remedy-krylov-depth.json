@@ -1,0 +1,582 @@
+{
+  "allocation": {
+    "allocated_cpus": 1,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae",
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1261011,
+    "job_name": "scr-remedy-krylov-depth",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "python": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/bin/python3.14",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "21978/35 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          31,
+          29,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.0045548525688682015,
+          0.0033463831584597736,
+          0.0026746362723462157,
+          0.002450918725802159
+        ],
+        "adaptive_krylov_actions_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "extra_krylov_actions": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.7411927288742169,
+            0.8029565060966567,
+            0.9269889852738169
+          ],
+          "projected_residual_amplitudes": [
+            0.012078136346195667,
+            0.00895222683815163,
+            0.007188248783746953,
+            0.006663427445941336
+          ],
+          "successive_residual_difference_projections": [
+            -0.00312590950804404,
+            -0.001763978054404677,
+            -0.0005248213378056135
+          ],
+          "terminal_contraction_ratio": 0.9269889852738169
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "adaptive_gmres_iterations": 24,
+          "adaptive_krylov_stall_ratio": 0.95,
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.002450918725802159,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 684.2885453123599
+      },
+      "before": {
+        "active_set_mask_differences": [
+          31,
+          29,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.0045548525688682015,
+          0.0033463831584597736,
+          0.0026746362723462157,
+          0.002450918725802159
+        ],
+        "adaptive_krylov_actions_by_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "extra_krylov_actions": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.7411927288742169,
+            0.8029565060966567,
+            0.9269889852738169
+          ],
+          "projected_residual_amplitudes": [
+            0.012078136346195667,
+            0.00895222683815163,
+            0.007188248783746953,
+            0.006663427445941336
+          ],
+          "successive_residual_difference_projections": [
+            -0.00312590950804404,
+            -0.001763978054404677,
+            -0.0005248213378056135
+          ],
+          "terminal_contraction_ratio": 0.9269889852738169
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "adaptive_gmres_iterations": null,
+          "adaptive_krylov_stall_ratio": 0.95,
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.002450918725802159,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 784.4356211945415
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      }
+    },
+    "22086/43 pure": {
+      "after": {
+        "active_set_mask_differences": [
+          38,
+          23,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764556897343,
+          0.003131474610324023,
+          0.0019512703665674985,
+          0.000665284202251,
+          0.00048085211160393707,
+          0.00048023353539184706,
+          0.00048023353539184706
+        ],
+        "adaptive_krylov_actions_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          144
+        ],
+        "converged": false,
+        "extra_krylov_actions": 144,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.9386527378779093,
+            0.6233389526757016,
+            0.7566619765861307,
+            0.9191879904400623,
+            0.9992590849816643,
+            0.9999999999999993
+          ],
+          "projected_residual_amplitudes": [
+            0.01728905318264274,
+            0.01622841710520439,
+            0.010115804521942546,
+            0.007654244644331965,
+            0.007035689752960108,
+            0.007030476904757789,
+            0.007030476904757784
+          ],
+          "successive_residual_difference_projections": [
+            -0.0010606360774383398,
+            -0.006112612583261848,
+            -0.0024615598776105765,
+            -0.0006185548913718568,
+            -5.212848202326749e-06,
+            0.0
+          ],
+          "terminal_contraction_ratio": 0.9999999999999993
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "adaptive_gmres_iterations": 24,
+          "adaptive_krylov_stall_ratio": 0.95,
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.00048023353539184706,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 692.1848708977923
+      },
+      "before": {
+        "active_set_mask_differences": [
+          38,
+          23,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764556897343,
+          0.003131474610324023,
+          0.0019512703665674985,
+          0.000665284202251,
+          0.00048085211160393707,
+          0.00048023353539184706,
+          0.00048023353539184706
+        ],
+        "adaptive_krylov_actions_by_trip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "extra_krylov_actions": 0,
+        "mode_contraction": {
+          "per_trip_contraction_ratios": [
+            0.9386527378779093,
+            0.6233389526757016,
+            0.7566619765861307,
+            0.9191879904400623,
+            0.9992590849816643,
+            0.9999999999999993
+          ],
+          "projected_residual_amplitudes": [
+            0.01728905318264274,
+            0.01622841710520439,
+            0.010115804521942546,
+            0.007654244644331965,
+            0.007035689752960108,
+            0.007030476904757789,
+            0.007030476904757784
+          ],
+          "successive_residual_difference_projections": [
+            -0.0010606360774383398,
+            -0.006112612583261848,
+            -0.0024615598776105765,
+            -0.0006185548913718568,
+            -5.212848202326749e-06,
+            0.0
+          ],
+          "terminal_contraction_ratio": 0.9999999999999993
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "adaptive_gmres_iterations": null,
+          "adaptive_krylov_stall_ratio": 0.95,
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_residual": 0.00048023353539184706,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 816.5470498939976
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      }
+    }
+  },
+  "banked_old_21978": {
+    "active_set_mask_differences": [
+      31,
+      29,
+      0,
+      2
+    ],
+    "active_set_residuals": [
+      0.004554852568868313,
+      0.0033463831584596617,
+      0.002674636272346104,
+      0.0024508600111780637
+    ],
+    "converged": false,
+    "selected_saddle_m": [
+      0.5628646606371923,
+      1.2634878586583964
+    ],
+    "solve_wall_seconds_including_compilation": 131.34186801686883,
+    "solver": {
+      "fixed_point_tolerance": 1e-08,
+      "gmres_iterations": 12,
+      "newton_steps": 12,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "warmup_sweeps": 0
+    },
+    "terminal_residual": 0.0024508600111780637,
+    "termination_reason": "active_set_cycle_detected",
+    "trip_count": 4
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.004654766991734505
+  },
+  "comparison_histories": {
+    "after_model_trust": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.00497645568973448,
+        0.0034925711304508423,
+        0.0022267868462637,
+        0.0028245881800609447,
+        0.001768700503481402,
+        0.0011202690991536923,
+        0.0007158357172522378,
+        0.0004622759187821485,
+        0.00029900485325314616,
+        0.0001933140977580932,
+        0.0001252591717767685,
+        6.0793459961952516e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/565a8c8e-h200.json",
+      "raw_capture_sha256": "18e2b6ee9de0d80c90114aefa96d672e87fef2e0ba44361e5e0d5b303a32e700",
+      "revision": "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904800001716353,
+        1.2250631849800084
+      ],
+      "solve_wall_seconds_including_compilation": 134.6643641628325,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0793459961952516e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "after_trajectory": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.003492571130450865,
+        0.0022267868462637224,
+        0.002824543671089126,
+        0.0017686695998069722,
+        0.0011202504574495536,
+        0.0007158519978677916,
+        0.0004622842344470893,
+        0.0002989857079383364,
+        0.00019330286566941873,
+        0.0001252525215443233,
+        6.0797044944388355e-12
+      ],
+      "converged": true,
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204709093064-scr-root-cause-reading/raw/4ee90ece-h200.json",
+      "raw_capture_sha256": "f2b7835d06bdc2c95b286b302d8d5d0d71db8e571fef3d276e5a6f33db807a32",
+      "revision": "4ee90ece25ad47cc655dc4531249da24d13763e1",
+      "scheduler": {
+        "elapsed": "00:06:32",
+        "exit_marker": 0,
+        "job_id": 1260995,
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "selected_saddle_m": [
+        0.5904799259797138,
+        1.2250633080352822
+      ],
+      "solve_wall_seconds_including_compilation": 135.05865284334868,
+      "solver": {
+        "fixed_point_tolerance": 1e-08,
+        "gmres_iterations": 12,
+        "newton_steps": 12,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "warmup_sweeps": 0
+      },
+      "terminal_residual": 6.0797044944388355e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "banked_new": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ],
+      "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+      "terminal_residual": 0.000480233535391836,
+      "termination_reason": "active_set_stagnated",
+      "trip_count": 7
+    },
+    "banked_old": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+      "terminal_residual": 6.079614869877941e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    }
+  },
+  "execution_contract": {
+    "allocated_cpus": 1,
+    "one_reserved_h200": true,
+    "persisted_carrier_reused": true,
+    "same_bank_generation_route": "bank_revision_reproduction persisted carrier, passive-inclusive case construction, and production solve_portfolio pure arm",
+    "targets": [
+      [
+        22086,
+        43
+      ],
+      [
+        21978,
+        35
+      ]
+    ]
+  },
+  "figure": "docs/figures/solver-convergence-regression/remedy-krylov-depth.png",
+  "mode": {
+    "description": "unit-normalized repeated settled-mask residual from the 22086/43 pure baseline, identified by the root-cause receipt as the up-down antisymmetric mode",
+    "projection_definition": "dot each residual and each successive residual difference with the unit mode; contraction is the absolute amplitude ratio",
+    "source_arm": "22086/43 pure",
+    "source_trip": 7,
+    "source_vector_l2_norm": 0.007030476904757783
+  },
+  "receipt": "adaptive Krylov depth remedy",
+  "scheduler": {
+    "elapsed": "00:50:52",
+    "exit_marker": 0,
+    "job_id": 1261011,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "source": {
+    "nova_diff_names": "nova/equilibrium/fixed_point.py",
+    "revision": "777a582321a5e45cd7666ffc37d8e6e3dc7b060a",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth"
+  },
+  "sources": {
+    "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/raw/remedy-krylov-h200.json",
+    "raw_capture_sha256": "68c5d6e43cfcaa0ad87b09bc68fd94b298cb1220338f9e731040a80b1cfb61e2",
+    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821",
+    "true_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78"
+  },
+  "tests": {
+    "adaptive_krylov_depth": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_adaptive_krylov_depth.py",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/adaptive-krylov-targeted-final.log",
+      "passed_count": 6
+    },
+    "seven_referees_unmodified": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider <seven referee node IDs>",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/after-referees.log",
+      "passed_count": 9
+    }
+  }
+}

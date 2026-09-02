@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="solver-convergence-regression-landed">
+  <meta name="plan-title" content="Solver convergence regression — cumulative execution evidence">
+  <meta name="plan-summary" content="Backend forensics, the pinned-revision reproduction, the root-cause commit, the five negative remedies, the honest bank re-baseline and the flux overlays against EFIT.">
+  <meta name="plan-evidence-for" content="solver-convergence-regression">
+  <meta name="plan-informs" content="gs-absolute-accuracy-gates,millisecond-converged-solve,forward-solve-api">
+  <title>Solver convergence regression — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Solver convergence regression — cumulative execution evidence</h1>
+    <p class="lede">Every receipt below lives under <code>docs/figures/solver-convergence-regression/</code>.
+    Receipt values keep their recorded precision; prose values are display roundings. The five remedy
+    receipts are filed here as data; the prototype code that produced them stays in its held worktrees
+    by lead instruction and is not on <code>main</code>.</p>
+  </header>
+
+  <section id="backend-forensics">
+    <h2>Backend forensics — the backend is excluded</h2>
+    <p><strong>Receipt:</strong> <code>backend-divergence.json</code>, <code>backend-divergence.png</code>;
+    driver <code>benchmarks/backend_divergence_forensics.py</code>; commit <code>4e0d9588</code>.</p>
+    <p>Paired CPU and GPU solves of the same arm at the same revision, per-trip state captured, stay inside
+    float64 noise of each other at every trip. The divergence between the committed bank and HEAD is not a
+    backend effect. The pinned-revision CPU leg also completed the two-by-two matrix and showed the CPU
+    slowdown to be HEAD-side program growth (owned by <code>cpu-solve-viability</code>, shipped).</p>
+  </section>
+
+  <section id="true-pin">
+    <h2>Pinned-revision reproduction — the committed bank is reproducible</h2>
+    <p><strong>Receipt:</strong> <code>true-pin-reproduction.json</code>, <code>true-pin-reproduction.png</code>;
+    driver <code>benchmarks/bank_revision_reproduction.py</code>; commit <code>0e79227d</code>.</p>
+    <table>
+      <caption>Re-solve at the bank's true code revision <code>d47f7cd1</code> against the committed rows</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Committed residual</th><th scope="col">Re-solved residual</th><th scope="col">Difference</th><th scope="col">Termination</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">22086/43 pure</th><td>6.079771712859504e-12</td><td>6.079614869877941e-12</td><td>1.6e-16</td><td>converged, both</td></tr>
+        <tr><th scope="row">21978/35 pure</th><td>0.002450860011177843</td><td>0.0024508600111780637</td><td>2.2e-16</td><td>active_set_cycle_detected, both</td></tr>
+      </tbody>
+    </table>
+    <p>An earlier shadow had been pinned to <code>a4bec44f</code>, the cache revision rather than the bank
+    row's code revision, and its reading was withdrawn. At the true pin the old code converges 22086/43 pure
+    to 6.08e-12 in twelve trips, so the lead's conditional ruling applies: the stagnation-stop family changed
+    the verdict.</p>
+  </section>
+
+  <section id="root-cause">
+    <h2>Root cause — a deliberate acceptance policy, commit <code>a2e65fda</code></h2>
+    <p><strong>Receipt:</strong> <code>root-cause.json</code>, <code>root-cause.png</code>, <code>head-mechanism.json</code>;
+    commit <code>1926a170</code>.</p>
+    <p>The candidate window is the ten <code>nova/equilibrium</code> commits between <code>d47f7cd1</code> and
+    <code>a4bec44f</code>. Per-trip trajectory capture with each commit's behaviour re-enacted locates the first
+    divergence at trip 2 of 22086/43 pure: the own-induced-mask acceptance
+    (<code>_backtracked_promotion</code>, <code>sufficient &amp;= ~own_mask_acceptance | (residuals &lt; incumbent_residual)</code>)
+    refuses the Newton promotion the banked code accepted, because candidate and incumbent are each scored on
+    the mask they induce and the candidate's residual (3.13e-3) does not strictly beat the incumbent's
+    (3.49e-3) under that scoring. The banked path then re-opened the mask at trips 4 and 5 ([1, 22] cells), rose
+    from 2.23e-3 to 2.83e-3, and converged to 6e-12 in twelve trips; the HEAD path keeps the mask settled from
+    trip 3 and stagnates honestly at 4.80e-4 after seven trips. Classification in the receipt:
+    <em>deliberate policy consequence, not a solver defect</em>. The later commits in the window (model-trust
+    selection, continuation across settled masks, best-state retention, the stagnation stop, telemetry) are
+    each read and excluded as the cause.</p>
+  </section>
+
+  <section id="null-polish">
+    <h2>Null-polish attribution — a value swap, fixed</h2>
+    <p><strong>Receipt:</strong> <code>null-polish-attribution.json</code>, <code>null-polish-attribution.png</code>;
+    commit <code>9e7c76b4</code>; fix <code>588578a0</code>.</p>
+    <p>The census null polish that entered the jitted topology read at merge <code>aecea6a7</code> swapped a
+    boundary flux value at an unmoved X position (28 % of the X flux on MAST) and made 22086/43 converge for the
+    wrong reason. Positions are polished; values come from the map. Every measurement below runs at or after
+    <code>588578a0</code>.</p>
+  </section>
+
+  <section id="remedy-ladder">
+    <h2>Remedy ladder — five prototypes, five negatives</h2>
+    <p><strong>Receipts:</strong> <code>remedy-krylov-depth.json</code>, <code>remedy-deflation.json</code>,
+    <code>remedy-anderson.json</code>, <code>remedy-vertical-pin.json</code>, <code>remedy-nonmonotone.json</code>
+    with their PNGs. Prototype code held unmerged in the
+    <code>s19-northstar/scr-remedy-*</code> worktrees; the seven referee tests stayed green in each.</p>
+    <table>
+      <caption>Terminal residual on the two marginal arms, before and after each remedy, on <code>main</code> after <code>588578a0</code></caption>
+      <thead><tr><th scope="col">Remedy</th><th scope="col">21978/35 pure before → after</th><th scope="col">22086/43 pure before → after</th><th scope="col">Reading</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Adaptive Krylov depth</th><td>2.4509e-3 → 2.4509e-3 (cycle, 4 trips)</td><td>4.8023e-4 → 4.8023e-4 (settled, 7)</td><td>Extra inner actions are never taken: the mode step is refused before depth matters.</td></tr>
+        <tr><th scope="row">Residual-mode deflation</th><td>2.4509e-3 → 2.4509e-3</td><td>4.8023e-4 → 4.8023e-4</td><td>Deflating the repeated settled-mask residual mode changes nothing the acceptance lets through.</td></tr>
+        <tr><th scope="row">Anderson on the settled-mask outer map</th><td>2.4506e-3 → 2.4506e-3</td><td>4.8002e-4 → 4.8002e-4</td><td>Identical trajectories: the accelerated step is refused by the same guard.</td></tr>
+        <tr><th scope="row">Vertical-moment pin with weight-to-zero continuation</th><td>1.7619e-3 → 3.4731e-4 (settled, 12)</td><td>3.18e-11 (converged, 10) → 9.3354e-4 (settled, 8)</td><td>Measured before the null-polish fix, so its baseline converged for the wrong reason; the pin lowers one arm and breaks the other. Inner step audit: <em>refused</em>.</td></tr>
+        <tr><th scope="row">Nonmonotone acceptance window</th><td>2.4506e-3 → 2.4506e-3</td><td>4.8002e-4 → 4.8002e-4 (settled, 12 trips)</td><td>Allowing a bounded transient increase along a settled mask spends five more trips and reaches the same plateau.</td></tr>
+      </tbody>
+    </table>
+    <p>Common thread: every step-side remedy produces a candidate that the induced-mask strict-decrease
+    acceptance refuses, so the trajectories are bit-identical to the baseline. The one remedy that changed the
+    trajectory (the vertical pin) changed the objective and did not converge either.</p>
+  </section>
+
+  <section id="bank-rebaseline">
+    <h2>Bank re-baseline at HEAD — honest stagnated rows</h2>
+    <p><strong>Receipts:</strong> <code>bank-rebaseline.json</code> (triage), <code>bank-rebaseline-regen.json</code>;
+    regenerated bank <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code>;
+    worker commit <code>61286b57</code>, merged <code>8678047a</code>; H200 job 1261370, 1 h 15 m.</p>
+    <table>
+      <caption>Twelve rows at HEAD, every solve with the EFIT plasma current as <code>target_current</code></caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Residual</th><th scope="col">Trips</th><th scope="col">Termination</th><th scope="col">Class</th><th scope="col">Marginal basin</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure</th><td>2.4506e-3</td><td>4</td><td>active_set_cycle_detected</td><td>diverted</td><td>true</td></tr>
+        <tr><th scope="row">21978/35 mixed</th><td>7.5078e-12</td><td>0</td><td>converged</td><td>diverted</td><td>false</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>1.6011e-3</td><td>16</td><td>active_set_iteration_budget_exhausted</td><td>diverted</td><td>false</td></tr>
+        <tr><th scope="row">21983/35 mixed</th><td>1.3323e-3</td><td>0</td><td>iteration_budget_exhausted</td><td>diverted</td><td>false</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td>6.8445e-4</td><td>7</td><td>active_set_settled</td><td>diverted</td><td>false</td></tr>
+        <tr><th scope="row">21985/51 mixed</th><td>2.7990e-16</td><td>0</td><td>converged</td><td>diverted</td><td>false</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>5.8876e-3</td><td>16</td><td>active_set_iteration_budget_exhausted</td><td>limited</td><td>false</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td>unavailable</td><td>0</td><td>NoQualifiedAxisError</td><td>unavailable</td><td>false</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td>2.8567e-3</td><td>16</td><td>active_set_iteration_budget_exhausted</td><td>limited</td><td>false</td></tr>
+        <tr><th scope="row">21989/55 mixed</th><td>2.9538e-3</td><td>0</td><td>iteration_budget_exhausted</td><td>limited</td><td>false</td></tr>
+        <tr><th scope="row">22086/43 pure</th><td>4.8002e-4</td><td>7</td><td>active_set_settled</td><td>diverted</td><td>true</td></tr>
+        <tr><th scope="row">22086/43 mixed</th><td>1.7365e-14</td><td>0</td><td>converged</td><td>diverted</td><td>false</td></tr>
+      </tbody>
+    </table>
+    <p>The same merge widened the terminal X-point class-margin guard to a roundoff bound (rtol 1e-12,
+    atol 2.22e-16) and rewrote the three focused-suite constants that follow the bank. Focused suite 15 passed.</p>
+  </section>
+
+  <section id="efit-overlays">
+    <h2>Flux overlays against EFIT — where the stagnated rows sit</h2>
+    <p><strong>Evidence document:</strong> <a href="/nova/evidence/mast-bank-efit-overlays">mast-bank-efit-overlays</a>;
+    renderer <code>benchmarks/bank_efit_overlay.py</code>; merged <code>e8318020</code>.</p>
+    <figure>
+      <img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-bank-efit-overlays.png"
+           alt="Twelve panels of Nova terminal poloidal flux contours overlaid on EFIT flux contours, LCFS and X points for the regenerated MAST bank">
+      <figcaption>Nova terminal flux (solid, binding contour heavy) against EFIT (dashed, LCFS heavy) for all twelve rows.</figcaption>
+    </figure>
+    <p>The converged mixed arms interleave with EFIT through the core and keep the diverted class (LCFS rms
+    33.7 mm and 29.2 mm where a closed boundary assembles). The settled pure arms keep coherent nested flux
+    but no closed Nova boundary. The budget-exhausted rows in the wrong limited class (21986/46 pure, both
+    21989/55 arms) are the real geometry failures at 182 to 236 mm rms.</p>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record</h2>
+    <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave
+    the policy in place are negative; the bank is honestly re-baselined. The corrected Solov'ev certificate
+    (<a href="/nova/evidence/archive/gs-absolute-accuracy-gates-landed#corrected-certificate">gs-absolute-accuracy-gates</a>)
+    shows the same settled-above-tolerance signature on fourteen of sixteen exact-solution rows, so the
+    remaining remedy has an exact test bed. The one untested remedy is the policy itself: score pre-settlement
+    candidates on the incumbent partition (a scoped re-opening of <code>a2e65fda</code>), which the lead has so
+    far declined; see the handoff at <a href="/nova/research/convergence-stall-handoff">convergence-stall-handoff</a>.</p>
+  </section>
+</main>
+</body>
+</html>

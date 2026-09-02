@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:15:32",
+  "updated": "2026-09-02T06:17:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -72738,9 +72738,180 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T033925175779-pta-carrier-polish-and-oracle",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-carrier-polish-and-oracle",
+        "node_definition": {
+          "done_when": "tests/test_plasma_cell_topology_read.py asserts exact label equality between the carrier-capable read and an oracle that does not call Topology.read_qualification or Topology.axis_component, on every raster fixture, and reports the compared cell count (expected 646, 0 differing); tests/test_split_polish_nulls.py or tests/test_plasma_cell_topology_read.py asserts on a half-offset hex carrier (the Solovev oracle carrier or the 41x49 lattice) that the polish receipt records an attempted fit with a real fit residual and iteration count and that the receipt for an unstructured carrier that cannot form the fit reports zero fit iterations and not-attempted; topology.py no longer synthesises fit_iterations; the CPU lanes tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_solovev_recovery_gates.py tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_plasma_cell_partition.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; the GPU forward-reference lane run once WITHOUT JAX_PLATFORMS with -k 'not test_persistent_fixture_machine_cache_builds_once' still reports 21 or more passed with the same seven or fewer solver-convergence failures and no new failure; commit in your worktree with a conventional subject and body",
+          "estimated_hours": 3.0,
+          "goal": "Repair the two defects of the review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md: make the raster parity test independent by building its expected labels from the retained raster primitives directly (_raster_hex_partition_geometry, hex_edge_admissibility, label_saddle_aware_hex_connected_components, classify_domains applied to the fixture flux, as tests/test_hex_flood_geometries.py does) rather than through the modified read, and make the census polish carrier-native by fitting the split spline through fit_split_spline's half-offset and valid-mask support on the carrier centroids and running the same one-step stationary protocol with truthful receipts (a carrier that cannot form the fit reports polish not attempted with zero fit iterations and the census standing, never a synthesised iteration count)",
+          "id": "pta-carrier-polish-and-oracle",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033925175779-pta-carrier-polish-and-oracle/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/linalg/split_spline.py",
+            "tests/test_plasma_cell_topology_read.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T03:39:30Z",
+        "completed_at": "2026-09-02T04:17:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2264,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2264,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e9f93f73183af91464310baad83864d16236987b",
+        "commits": [
+          "fa8b63f743af553b4ef2d4905cf9b8abde3bbdf3",
+          "696f437adf63c66e245c2274de607b13abe23615"
+        ],
+        "changed_lines": {
+          "added": 388,
+          "removed": 83,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six fresh-process CPU lanes: JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -s on test_plasma_cell_topology_read.py test_plasma_cell_flood_families.py test_solovev_recovery_gates.py test_split_polish_nulls.py test_hex_flood_sn_secondary.py test_plasma_cell_partition.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033925175779-pta-carrier-polish-and-oracle/logs/final-cpu-test_hex_flood_sn_secondary.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033925175779-pta-carrier-polish-and-oracle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6153472,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6350211,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 19639,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4932
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5983,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the three-hour launch-then-harvest measurement outlives the 60-minute worker fence; job 1261014 is still running in baseline trip 2; the threaded step has not started; and terminal per-trip walls; sampled threaded effective cores; paired compile seconds; same-HEAD residual agreement and the one-sentence verdict therefore do not yet exist",
+              "elapsed_seconds": 9583,
+              "log_age_seconds": 6008,
+              "log_fresh": false,
+              "manifest_commits": [
+                "6564951b6936f8102648f9e416892701f3d3ddf7"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-thread-configuration",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T005936006858-csv-thread-configuration",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 6044,
+              "terminal_at": "2026-09-02T01:58:42Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2799,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires while owned job 1261017 is running. Do not cancel or resubmit it. Harvest /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/h200-remedy-vertical-pin.log until the remaining three solve-finish lines (22086/43 vertical-pin and both 21978/35 variants) and EXIT_MARKER=0 appear; verify /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/raw/remedy-vertical-pin-h200.json exists; obtain scheduler elapsed with sacct; run the benchmark compile command using after-referees-jacrev.log and vertical-pin-jacobian-targeted-final.log to create docs/figures/solver-convergence-regression/remedy-vertical-pin.json and remedy-vertical-pin.png; capture compile and check logs; run the benchmark check; inspect quantitative outcomes; rerun final path-scoped checks only if files changed; explicitly stage the six assigned paths; make the required local conventional commit with body; replace this manifest with status complete; commit SHA; receipt metrics; compile/check logs; and blockers none",
+              "elapsed_seconds": 6399,
+              "log_age_seconds": 3072,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; the measurement reads the uncommitted nova diff at capture completion",
+                "so committing before harvest would invalidate its source-scope evidence"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-vertical-pin",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T015239972905-scr-remedy-vertical-pin",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 3105,
+              "terminal_at": "2026-09-02T02:47:40Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1302
+    "_version": 1303
   }
 }

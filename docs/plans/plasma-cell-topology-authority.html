@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -155,6 +155,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260902T033246328784-pta-topology-read-cpu-lanes" data-who="pta-test" data-when="2026-09-02T03:47:01Z">
     <div class="r-comment-body"><p>CPU lanes on e9f93f73: 74 passed, 6 failed — tests/test_hex_flood_sn_secondary.py fails all six cases (manufactured LCFS interior lost to a private-flux shadow) while it passed 6/6 at 2c60cfae, so the saddle-neck closure 3efe9194 or the class route e9f93f73 regressed the raster path; the other nine lanes (parity 3/3, flood families 11/11, oracle 8/8, geometries 12, snowflake 16, coil nulls 2, partition 6, polish 12, rim scatter 4) are green; logs under ~/.config/reckon/crew/reports/nova/pta-topology-read-lanes/</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260902T033925175779-pta-carrier-polish-and-oracle" data-who="pta-partition" data-when="2026-09-02T04:17:14Z">
+    <div class="r-comment-body"><p>Independent raster oracle (retained primitives, no read_qualification) 646 compared / 0 differing; carrier-native split polish via fit_split_spline half-offset support with truthful receipts (fit attempted on the 41x49 carrier, not-attempted with zero iterations on a sparse unstructured support); forward-mode differentiation defect repaired with the implicit JVP of the regularised normal equations; saddle cut localised to links within three pitches of a census X candidate, recovering the secondary-null lane 0/6 to 6/6; CPU 46/46; GPU lane deferred to a lane node</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195359824044-pta-census-split-polish" data-who="pta-census" data-when="2026-09-01T20:17:25Z">
     <div class="r-comment-body"><p>Polish built, 32/32 green, axis 0.066 mm, but independent review FAILED: lattice-coordinate coincidence suppresses the Newton attempt and satisfies stationarity unconditionally (the 0 m saddle result is the untouched seed; the real one-step moved it 2.77e-5 m), and the split interface follows the selected boundary (wall flux on limited reads) which the contract wording left ambiguous; repair routed to the same member</p></div>

@@ -77,6 +77,9 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
     )
     assert error[0] <= 2.0e-4
     assert error[1] <= 1.0e-12
+    assert receipt["fit_attempted"].tolist() == [True, True]
+    assert receipt["fit_iterations"].tolist() == [1, 1]
+    assert np.all(np.isfinite(np.asarray(receipt["fit_residual"])))
     assert bool(receipt["converged"][0])
     assert receipt["iteration_count"][0] == 1
     assert not bool(receipt["seed_stationary"][0])
@@ -159,6 +162,7 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
     exact_receipts = (
         "active_derivative_basis_count",
         "iteration_count",
+        "fit_attempted",
         "fit_iterations",
         "hessian_type",
         "in_domain",
@@ -306,6 +310,33 @@ def test_failed_fit_retains_the_census_rows_and_reports_failure():
     np.testing.assert_array_equal(np.asarray(saddle), np.asarray(saddle_seed))
     assert receipt["fit_converged"].tolist() == [False, False]
     assert receipt["converged"].tolist() == [False, False]
+
+
+def test_unstructured_support_reports_polish_not_attempted():
+    """Sparse carrier support retains the census with a truthful zero receipt."""
+    radial, vertical, values, _level_set = _carrier((13, 15))
+    sample_valid = jnp.zeros(values.shape, dtype=bool).at[::3, ::3].set(True)
+    sparse_values = jnp.where(sample_valid, values, jnp.nan)
+    extremum_seed = _selected_row(AXIS + (0.005, 0.0))
+    saddle_seed = _selected_row(SADDLE)
+
+    extremum, saddle, receipt = polish_census_stationary_points(
+        sparse_values,
+        radial,
+        vertical,
+        solovev_flux(jnp.asarray(SADDLE)),
+        jnp.asarray(-1.0),
+        extremum_seed,
+        saddle_seed,
+        sample_valid,
+    )
+
+    np.testing.assert_array_equal(np.asarray(extremum), np.asarray(extremum_seed))
+    np.testing.assert_array_equal(np.asarray(saddle), np.asarray(saddle_seed))
+    assert receipt["fit_attempted"].tolist() == [False, False]
+    assert receipt["fit_iterations"].tolist() == [0, 0]
+    assert receipt["iteration_count"].tolist() == [0, 0]
+    np.testing.assert_array_equal(np.asarray(receipt["fit_residual"]), 0.0)
 
 
 def test_limited_read_fits_at_the_wall_contact_level():

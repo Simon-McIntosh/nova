@@ -38,6 +38,7 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
     wall_height_shadow_mask,
@@ -376,10 +377,6 @@ class ForwardFluxOperator:
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
         self.prescribed_field = prescribed_current_field
-        self.topology = Topology(self.grid.null, self.wall.null)
-        self._fixed_design_topology = Topology(
-            _FixedDesignNull2D.from_locator(self.grid.null), self.wall.null
-        )
         self.external_current = jnp.asarray(self.external_current)
         self.area = jnp.asarray(self.area)
         if self.cell_average_stencil is not None:
@@ -406,6 +403,50 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        polygons = (
+            self.moment_geometry.polygons
+            if self.moment_geometry is not None
+            else tuple(np.zeros((3, 2)) for _ in range(self.grid.node_number))
+        )
+        partition_rings, partition_edges = cell_partition_geometry(
+            self.grid.coordinate, self.grid.null.stencil, polygons
+        )
+        edge_parameter = np.asarray((0.0, 0.5, 1.0))
+        edge_points = partition_edges[..., :1, :] + edge_parameter[
+            None, None, :, None
+        ] * (partition_edges[..., 1:, :] - partition_edges[..., :1, :])
+        edge_mesh = StencilMesh(
+            np.asarray(self.grid.coordinate),
+            np.asarray(self.grid.null.stencil),
+            np.asarray(self.area),
+        )
+        edge_stencil = edge_mesh.shared_node_flux_stencil(edge_points.reshape((-1, 2)))
+        edge_gather = edge_stencil.gather_index.reshape((*edge_points.shape[:-1], -1))
+        edge_weight = edge_stencil.weight.reshape((*edge_points.shape[:-1], -1))
+        topology_geometry = {
+            "connectivity_rings": jnp.asarray(partition_rings, dtype=jnp.int32),
+            "connectivity_shared_edges": jnp.asarray(partition_edges),
+            "connectivity_coordinate": jnp.asarray(self.grid.coordinate),
+            "connectivity_edge_gather": jnp.asarray(edge_gather, dtype=jnp.int32),
+            "connectivity_edge_weight": jnp.asarray(edge_weight),
+        }
+        self.topology = Topology(self.grid.null, self.wall.null, **topology_geometry)
+        self._fixed_design_topology = Topology(
+            _FixedDesignNull2D.from_locator(self.grid.null),
+            self.wall.null,
+            **topology_geometry,
+        )
+        wall_to_cell_distance = np.sum(
+            (
+                np.asarray(self.wall.coordinate)[:, None, :]
+                - np.asarray(self.grid.coordinate)[None, :, :]
+            )
+            ** 2,
+            axis=-1,
+        )
+        self._wall_carrier_index = jnp.asarray(
+            np.argmin(wall_to_cell_distance, axis=1), dtype=jnp.int32
+        )
         wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
         wall_steps = np.diff(wall_heights)
         positive_steps = wall_steps[wall_steps > 0.0]
@@ -554,6 +595,12 @@ class ForwardFluxOperator:
         self, physical, topology: TopologyState
     ) -> jax.Array:
         """Read the signed reachable-wall minus X-point flux margin."""
+        if (
+            self.moment_geometry is not None
+            and not self._fixed_design_topology.connectivity_radius.size
+        ):
+            emergent = self._fixed_design_read(physical)[1]
+            return jnp.where(emergent.diverted, jnp.inf, -jnp.inf)
         return self._connectivity_read(physical, topology, classify=True)[
             "class_margin"
         ]
@@ -595,6 +642,17 @@ class ForwardFluxOperator:
             wall_flux,
             **options,
         )
+
+    def _carrier_shadow_read(self, physical, masks: DomainMasks):
+        """Return wall-shadow operands from the carrier's own topology read."""
+        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
+        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        return {
+            "xset": vmap_x[:, :2],
+            "private_wall_node_mask": masks.private_flux[
+                self._wall_carrier_index
+            ],
+        }
 
     def topology_margin(self, psi) -> jax.Array:
         """Return the emergent continuous topology margin of one flux map.
@@ -923,7 +981,10 @@ class ForwardFluxOperator:
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
-        reading = self._connectivity_read(physical, topology, classify=False)
+        if self._fixed_design_topology.connectivity_radius.size:
+            reading = self._connectivity_read(physical, topology, classify=False)
+        else:
+            reading = self._carrier_shadow_read(physical, masks)
         if previous_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
         else:

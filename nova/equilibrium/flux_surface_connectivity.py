@@ -298,6 +298,7 @@ def hex_edge_admissibility(
     axis_value: jnp.ndarray,
     shared_edge_rz: jnp.ndarray,
     stationary_steps: int = 8,
+    edge_values: jnp.ndarray | None = None,
 ) -> jnp.ndarray:
     """Return a fixed-shape mask for hex links open at ``level``.
 
@@ -319,6 +320,25 @@ def hex_edge_admissibility(
     level = jnp.asarray(level, dtype=values.dtype)
     axis_value = jnp.asarray(axis_value, dtype=values.dtype)
     shared_edge_rz = jnp.asarray(shared_edge_rz, dtype=values.dtype)
+    if edge_values is not None:
+        samples = jnp.asarray(edge_values, dtype=values.dtype)
+        if samples.shape[-1] != 3:
+            raise ValueError("carrier edge values must contain start, midpoint, end")
+        start, midpoint, end = samples[..., 0], samples[..., 1], samples[..., 2]
+        curvature = 2.0 * (start + end - 2.0 * midpoint)
+        slope = end - start - curvature
+        safe_curvature = jnp.where(
+            jnp.abs(curvature) > jnp.finfo(values.dtype).tiny, curvature, 1.0
+        )
+        stationary = jnp.clip(-slope / (2.0 * safe_curvature), 0.0, 1.0)
+        stationary_value = curvature * stationary**2 + slope * stationary + start
+        samples = jnp.concatenate((samples, stationary_value[..., None]), axis=-1)
+        side = jnp.where(axis_value >= level, 1.0, -1.0)
+        field_scale = jnp.maximum(jnp.max(jnp.abs(values - level)), 1.0)
+        strict_tolerance = 128.0 * jnp.finfo(values.dtype).eps * field_scale
+        open_link = jnp.max(side * (samples - level), axis=-1) > strict_tolerance
+        return open_link.at[:, 0].set(True)
+
     spline = fit_tensor_spline(radial, vertical, values)
 
     edge_start = shared_edge_rz[..., 0, :]
@@ -880,16 +900,21 @@ def _coordinate_grids(
     return jnp.broadcast_arrays(radial, vertical)
 
 
-def _minimum_cell_pitch(radial: jnp.ndarray, vertical: jnp.ndarray) -> jnp.ndarray:
+def _minimum_cell_pitch(
+    radial: jnp.ndarray, vertical: jnp.ndarray, valid: jnp.ndarray
+) -> jnp.ndarray:
     """Return the shortest adjacent sample spacing on a structured lattice."""
     radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
     horizontal = jnp.hypot(
         jnp.diff(radial_grid, axis=1), jnp.diff(vertical_grid, axis=1)
     )
+    horizontal = jnp.where(valid[:, 1:] & valid[:, :-1], horizontal, jnp.inf)
     vertical_step = jnp.hypot(
         jnp.diff(radial_grid, axis=0), jnp.diff(vertical_grid, axis=0)
     )
-    return jnp.minimum(jnp.min(horizontal), jnp.min(vertical_step))
+    vertical_step = jnp.where(valid[1:] & valid[:-1], vertical_step, jnp.inf)
+    pitch = jnp.minimum(jnp.min(horizontal), jnp.min(vertical_step))
+    return jnp.where(jnp.isfinite(pitch), pitch, 1.0)
 
 
 @jax.jit
@@ -901,6 +926,8 @@ def polish_census_stationary_points(
     polarity: jnp.ndarray,
     selected_extremum: jnp.ndarray,
     selected_saddle: jnp.ndarray,
+    sample_valid: jnp.ndarray | None = None,
+    execute: jnp.ndarray = True,
 ) -> tuple[jnp.ndarray, jnp.ndarray, dict[str, jnp.ndarray]]:
     """Apply one fit-qualified Newton step to census-selected nulls.
 
@@ -935,32 +962,51 @@ def polish_census_stationary_points(
     radial = jnp.asarray(radial, dtype=values.dtype)
     vertical = jnp.asarray(vertical, dtype=values.dtype)
     interface_value = jnp.asarray(interface_value, dtype=values.dtype)
+    if sample_valid is None:
+        sample_valid = jnp.ones(values.shape, dtype=bool)
+    else:
+        sample_valid = jnp.asarray(sample_valid, dtype=bool)
+        if sample_valid.shape != values.shape:
+            raise ValueError("sample_valid must have the values shape")
     level_set = jnp.asarray(polarity, dtype=values.dtype) * (interface_value - values)
-    finite_fit = jnp.isfinite(interface_value) & jnp.all(jnp.isfinite(values))
+    finite_fit = (
+        jnp.asarray(execute, dtype=bool)
+        & jnp.isfinite(interface_value)
+        & jnp.all(jnp.where(sample_valid, jnp.isfinite(values), True))
+    )
     spline = fit_split_spline(
         radial,
         vertical,
         values,
         level_set,
+        valid=sample_valid,
         execute=finite_fit,
     )
     selected = jnp.stack((selected_extremum, selected_saddle))
-    valid = jnp.all(jnp.isfinite(selected[:, :3]), axis=-1)
+    valid = spline.fit_executed & jnp.all(jnp.isfinite(selected[:, :3]), axis=-1)
     radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
+    radial_min = jnp.min(jnp.where(sample_valid, radial_grid, jnp.inf))
+    radial_max = jnp.max(jnp.where(sample_valid, radial_grid, -jnp.inf))
+    vertical_min = jnp.min(jnp.where(sample_valid, vertical_grid, jnp.inf))
+    vertical_max = jnp.max(jnp.where(sample_valid, vertical_grid, -jnp.inf))
     coordinate_span = jnp.maximum(
-        jnp.max(radial_grid) - jnp.min(radial_grid),
-        jnp.max(vertical_grid) - jnp.min(vertical_grid),
+        radial_max - radial_min,
+        vertical_max - vertical_min,
     )
-    field_scale = jnp.maximum(
-        jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
-    )
+    coordinate_span = jnp.where(spline.fit_executed, coordinate_span, 1.0)
+    field_min = jnp.min(jnp.where(sample_valid, values, jnp.inf))
+    field_max = jnp.max(jnp.where(sample_valid, values, -jnp.inf))
+    field_scale = jnp.maximum(field_max - field_min, jnp.finfo(values.dtype).tiny)
+    field_scale = jnp.where(spline.fit_executed, field_scale, 1.0)
     seed_evaluation = spline.evaluate(selected[:, 0], selected[:, 1])
     (
         seed_active_count,
         _seed_value_basis_norm,
         seed_derivative_basis_norm,
     ) = spline.scaled_basis_receipt(selected[:, 0], selected[:, 1])
-    normalized_cell_pitch = _minimum_cell_pitch(radial, vertical) / coordinate_span
+    normalized_cell_pitch = (
+        _minimum_cell_pitch(radial, vertical, sample_valid) / coordinate_span
+    )
     representation_floor = (
         spline.sample_rms_residual / field_scale / normalized_cell_pitch
     )
@@ -1070,6 +1116,7 @@ def polish_census_stationary_points(
     retained = jnp.where(converged[:, None], polished, selected)
     receipt = attempted | {
         "converged": converged,
+        "fit_attempted": jnp.broadcast_to(spline.fit_executed, valid.shape),
         "fit_converged": jnp.broadcast_to(spline.solve_converged, valid.shape),
         "fit_iterations": jnp.broadcast_to(spline.solve_iterations, valid.shape),
         "fit_residual": jnp.broadcast_to(spline.solve_residual, valid.shape),

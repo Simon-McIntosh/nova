@@ -140,7 +140,12 @@ Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 
 from __future__ import annotations
 
+from concurrent.futures import Executor, ProcessPoolExecutor
+from contextlib import contextmanager
 from functools import lru_cache
+from multiprocessing import get_context
+import os
+from typing import Iterator
 
 import numpy as np
 
@@ -183,7 +188,9 @@ __all__ = [
     "packed_analytic_moments",
     "polygon_analytic_field_moments",
     "polygon_analytic_flux",
+    "polygon_analytic_flux_moment_executor",
     "polygon_analytic_flux_moments",
+    "polygon_analytic_flux_moments_batched",
     "polygon_analytic_greens",
 ]
 
@@ -201,6 +208,10 @@ _HARMONICS = 9
 # section deviation is 2.3e-10 at 64 and saturates at 6e-12 from 128 on, the gap
 # being the most slender section's near-contour targets.
 _NODES = 128
+
+# Each worker holds one full target-by-quadrature lane.  Sixteen fills the
+# measured CPU allocation while keeping concurrent lane storage bounded.
+_MAX_FLUX_MOMENT_WORKERS = 16
 
 # Both panels span one end of the quarter range to the other: over a full turn every
 # amplitude is the same right angle, so neither panel stops short of its own end.
@@ -1857,6 +1868,107 @@ def polygon_analytic_flux_moments(
         (radial_central - displacement[0] * uniform).reshape(shape),
         (vertical_central - displacement[1] * uniform).reshape(shape),
     )
+
+
+def _one_flux_moment_source(arguments):
+    """Evaluate one independent source lane for a process batch."""
+    target_r, target_z, section, expansion_point, nodes = arguments
+    return polygon_analytic_flux_moments(
+        target_r,
+        target_z,
+        section,
+        expansion_point=expansion_point,
+        nodes=nodes,
+    )
+
+
+def _available_cpu_count() -> int:
+    """Return the CPUs granted to this process, including scheduler limits."""
+    scheduler_count = os.environ.get("SLURM_CPUS_PER_TASK")
+    if scheduler_count is not None:
+        return max(1, int(scheduler_count))
+    try:
+        return max(1, len(os.sched_getaffinity(0)))
+    except AttributeError:
+        return max(1, os.cpu_count() or 1)
+
+
+@contextmanager
+def polygon_analytic_flux_moment_executor(
+    workers: int | None = None,
+) -> Iterator[ProcessPoolExecutor]:
+    """Yield one reusable process batch sized to the granted CPU set."""
+    worker_count = (
+        min(_available_cpu_count(), _MAX_FLUX_MOMENT_WORKERS)
+        if workers is None
+        else workers
+    )
+    if worker_count < 1:
+        raise ValueError("workers must be positive")
+    with ProcessPoolExecutor(
+        max_workers=worker_count,
+        mp_context=get_context("spawn"),
+    ) as executor:
+        yield executor
+
+
+def polygon_analytic_flux_moments_batched(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    sections: list[np.ndarray] | tuple[np.ndarray, ...],
+    *,
+    expansion_points: np.ndarray | None = None,
+    workers: int | None = None,
+    executor: Executor | None = None,
+    nodes: int = _NODES,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return exact flux-moment blocks for many polygon sections.
+
+    The final axis indexes ``sections``.  Independent source lanes run across the
+    CPUs granted to the process, and each lane calls
+    :func:`polygon_analytic_flux_moments` unchanged.  This preserves the scalar
+    kernel's exact edge order, conditioning branches, and binary64 reductions.
+    """
+    section_list = [np.asarray(section, dtype=np.float64) for section in sections]
+    if not section_list:
+        raise ValueError("at least one polygon section is required")
+    centroids = np.stack([_section_centroid(section) for section in section_list])
+    requested = (
+        centroids
+        if expansion_points is None
+        else np.asarray(expansion_points, dtype=np.float64)
+    )
+    if requested.shape != (len(section_list), 2) or not np.all(np.isfinite(requested)):
+        raise ValueError(
+            "expansion_points must contain one finite (R, Z) pair per section"
+        )
+    arguments = [
+        (target_r, target_z, section, centre, nodes)
+        for section, centre in zip(section_list, requested, strict=True)
+    ]
+    if executor is not None:
+        if workers is not None:
+            raise ValueError("workers cannot be combined with an executor")
+        values = list(executor.map(_one_flux_moment_source, arguments, chunksize=1))
+        return tuple(np.stack(row, axis=-1) for row in zip(*values, strict=True))
+
+    worker_count = min(
+        len(section_list),
+        min(_available_cpu_count(), _MAX_FLUX_MOMENT_WORKERS)
+        if workers is None
+        else workers,
+    )
+    if worker_count < 1:
+        raise ValueError("workers must be positive")
+    if worker_count == 1:
+        values = map(_one_flux_moment_source, arguments)
+    else:
+        with ProcessPoolExecutor(
+            max_workers=worker_count,
+            mp_context=get_context("spawn"),
+        ) as pool:
+            values = list(pool.map(_one_flux_moment_source, arguments, chunksize=1))
+    return tuple(np.stack(row, axis=-1) for row in zip(*values, strict=True))
 
 
 @lru_cache(maxsize=8)

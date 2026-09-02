@@ -1,0 +1,146 @@
+{
+  "schema": "nova.oracle_fixture_assembly_receipt",
+  "recorded_at": "2026-09-02T09:38:00+02:00",
+  "measurement_contract": {
+    "partition": "rigel",
+    "node": "98dci4-clu-2055",
+    "cpus_per_task": 16,
+    "memory": "32G",
+    "jax_platforms": "cpu",
+    "tmpdir": "/tmp",
+    "launch_mode": "sbatch_launch_then_harvest",
+    "cold_process_per_measurement": true
+  },
+  "source": {
+    "base_revision": "1dabd9564cc5c5b71b196ff3e747237e08878db5",
+    "working_tree_measured": true,
+    "content_sha256": {
+      "nova/biot/polygonanalytic.py": "a4a56fb170ba41fdcfa031f0bef5a9b9f636f7e953ab7decce781211235b6127",
+      "scripts/analytic_oracle_fixtures/measure.py": "b0768609a09e8567175df8b24b50d10a23e699e52a79cccb69e31cbbcfa083c3",
+      "tests/test_polygon_analytic_batched_moments.py": "9206d94ba35cdfbc86a5e63f98b16b73d2b5956fd9a89700e16e1925e7b6249f"
+    }
+  },
+  "before": {
+    "slurm_job_id": 1261064,
+    "node": "98dci4-clu-2055",
+    "allocated_cpus": 16,
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "revision": "8e4eae84b80f8dc13499ccc5be8b964acc2cf1e8",
+    "build_machine_seconds": 58.17809939500876,
+    "phase_seconds": {
+      "flux_blocks": 53.99016788206063,
+      "moment_geometry": 0.1522747848648578,
+      "loop_neighbour_vertices": 0.015866172965615988,
+      "hex_ring_slots": 0.014043854316696525,
+      "delaunay": 0.0009059030562639236,
+      "remainder": 4.004840797744691
+    },
+    "phase_counts": {
+      "flux_blocks": 3,
+      "moment_geometry": 1,
+      "loop_neighbour_vertices": 1,
+      "hex_ring_slots": 89,
+      "delaunay": 1
+    },
+    "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-build-machine-cost/main-1261064.log"
+  },
+  "after": {
+    "slurm_job_id": 1261077,
+    "node": "98dci4-clu-2055",
+    "allocated_cpus": 16,
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "exit_marker": 0,
+    "build_machine_seconds": 16.56210749410093,
+    "phase_seconds": {
+      "flux_blocks": 11.467956601874903,
+      "moment_geometry": 0.16962966811843216,
+      "loop_neighbour_vertices": 0.01872988697141409,
+      "hex_ring_slots": 0.016668360913172364,
+      "delaunay": 0.0009083880577236414,
+      "remainder": 4.888214588165283
+    },
+    "phase_counts": {
+      "flux_blocks": 3,
+      "moment_geometry": 1,
+      "loop_neighbour_vertices": 1,
+      "hex_ring_slots": 89,
+      "delaunay": 1
+    },
+    "speedup": {
+      "build_machine": 3.5127232096356433,
+      "flux_blocks": 4.707915259570632,
+      "build_machine_reduction_percent": 71.53205816908857,
+      "flux_blocks_reduction_percent": 78.7591758800858
+    },
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/logs/build-final-1261077.log"
+  },
+  "paired_block_comparison": {
+    "source_values_compared": 275400,
+    "reference": "one polygon_analytic_flux_moments call per source and target family",
+    "maximum_absolute_difference": 0.0,
+    "maximum_relative_difference": 0.0,
+    "float64_roundoff_floor_relative": 1.4210854715202004e-14,
+    "roundoff_rule": "abs(actual-reference) <= 64*float64_epsilon*max(abs(actual),abs(reference)), with exact zero accepted",
+    "passed": true,
+    "comparison_wall_seconds": 51.78278083517216,
+    "slurm_job_id": 1261077
+  },
+  "recovery_gate": {
+    "node_id": "tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point",
+    "bound_seconds": 60.0,
+    "wall_seconds": 38.860744862118736,
+    "headroom_seconds": 21.139255137881264,
+    "passed": true,
+    "pytest": {
+      "slurm_job_id": 1261084,
+      "node": "98dci4-clu-2055",
+      "allocated_cpus": 16,
+      "state": "COMPLETED",
+      "exit_code": "0:0",
+      "exit_marker": 0,
+      "pytest_elapsed_seconds": 40.78,
+      "process_wall_seconds": 51.51,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/logs/gate-receipt-1261084.log"
+    },
+    "receipt_measurement": {
+      "slurm_job_id": 1261085,
+      "node": "98dci4-clu-2055",
+      "state": "COMPLETED",
+      "exit_code": "0:0",
+      "exit_marker": 0,
+      "process_wall_seconds": 48.78,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/logs/recovery-receipt-1261085.log"
+    },
+    "result": {
+      "fixed_point_residual": 2.65744538298329e-15,
+      "forcing_sup_wb": 3.6637359812630166e-15,
+      "grid_forcing_fraction_of_span": 2.652546337406916e-15,
+      "map_evaluations": 1,
+      "realised_cells": 136
+    }
+  },
+  "verification": {
+    "paired_test": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -q tests/test_polygon_analytic_batched_moments.py",
+      "result": "1 passed in 5.05s",
+      "passed": true
+    },
+    "focused_polygon_tests": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -q tests/test_biotpolygonmoments.py tests/biot/test_traced_section_moments.py tests/test_polygon_analytic_batched_moments.py",
+      "result": "10 passed in 36.28s",
+      "passed": true,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/logs/polygon-tests.log"
+    },
+    "recovery_gate_source": {
+      "modified": false,
+      "sha256": "61461bcb43d34628afc6fc9279bb9fc789639611ea5174635d36d404b6109ee0"
+    },
+    "roundoff_assertions_unchanged": true,
+    "wall_bound_unchanged": true,
+    "nova_diff_paths": [
+      "nova/biot/polygonanalytic.py"
+    ]
+  }
+}

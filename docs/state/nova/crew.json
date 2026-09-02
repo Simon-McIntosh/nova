@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:53:41",
+  "updated": "2026-09-02T08:59:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -74494,9 +74494,214 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T065610775466-pta-shadow-census-coverage-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-shadow-census-coverage-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-coverage-review.md with a PASS or FAIL verdict over: (1) git show --stat ec845223 lists only tests/test_plasma_cell_shadow_telemetry.py; (2) the single-null wall now passes through the private lobe and the test asserts a nonzero count of wall nodes owned by PRIVATE_FLUX cells, with the limited fixture's axis pinned within one cell spacing; (3) the three differing wall nodes (indices 69, 70, 71 at height -0.31 m) are adjudicated from independent flux comparisons (two binding-level, one touch-dilation) and the census would fail on a contradiction; judge whether that agreement is now meaningful evidence that the carrier private wall mask matches the retained mask up to the two authorities; (4) the captured lanes in the run directory record 28 passed across four files; (5) naming hygiene; (6) any defect quoted with file:line. Read-only review of files and logs",
+          "estimated_hours": 0.3,
+          "goal": "Write an independent re-review verdict report on commit ec845223 of node pta-shadow-census-coverage (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-shadow-census-coverage, path tests/test_plasma_cell_shadow_telemetry.py) against the two failing checks of your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md",
+          "id": "pta-shadow-census-coverage-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065610775466-pta-shadow-census-coverage-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "12m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-coverage-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T06:56:15Z",
+        "completed_at": "2026-09-02T06:59:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 177,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 177,
+        "stalled": false,
+        "time_budget": "12m",
+        "base_sha": "8e4eae84b80f8dc13499ccc5be8b964acc2cf1e8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "re-review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-shadow-census-coverage-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-coverage-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065610775466-pta-shadow-census-coverage-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 647168,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 676362,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 5023,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 907
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only re-review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T064511547064-pta-shadow-census-coverage",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-shadow-census-coverage",
+        "node_definition": {
+          "done_when": "tests/test_plasma_cell_shadow_telemetry.py asserts a nonzero count of wall nodes owned by PRIVATE_FLUX cells on the single-null fixture and pins the limited axis; the carrier versus retained wall-mask census still reports its counts with independent per-row adjudication and fails only on a contradiction, and the manifest quotes for both fixtures the private-owned node count, the difference count and the classification tally; the CPU lanes tests/test_plasma_cell_shadow_telemetry.py tests/test_wall_height_exclusion.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; no production file changes",
+          "estimated_hours": 1.0,
+          "goal": "Make the shadow census in tests/test_plasma_cell_shadow_telemetry.py non-vacuous per the re-review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md: reshape or add a wall on the single-null fixture so that at least one wall node's nearest confined cell carries PRIVATE_FLUX (a wall segment running through the private lobe below the X-point), assert that count is nonzero, and pin the limited fixture's selected axis to its analytic position within one cell spacing",
+          "id": "pta-shadow-census-coverage",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064511547064-pta-shadow-census-coverage/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_plasma_cell_shadow_telemetry.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:45:18Z",
+        "completed_at": "2026-09-02T06:55:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 625,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 625,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "8ce682f4a26c64fd00d18174cfb67f61cc3d7aab",
+        "commits": [
+          "ec845223348a22e7161429637f2463d14ac55f8c"
+        ],
+        "changed_lines": {
+          "added": 34,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "four fresh-process CPU lanes: JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on test_plasma_cell_shadow_telemetry.py test_wall_height_exclusion.py test_plasma_cell_topology_read.py test_solovev_recovery_gates.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064511547064-pta-shadow-census-coverage/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064511547064-pta-shadow-census-coverage/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 70400,
+            "cached_input_tokens_cumulative": 5270016,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5383417,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 8765,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2381
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1322
+    "_version": 1324
   }
 }

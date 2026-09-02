@@ -121,6 +121,21 @@
 </table>
 <p><strong>Lesson banked.</strong> A gate whose tolerance is built from the fit's own residual accepts precisely the fits that are wrong; four reviews of the derivation on manufactured fields never saw it because every manufactured field had a small floor. Every polish validation must include one production map.</p>
 </section>
+
+<section id="s3-masks"><h2 id="s3-masks-h">§3 — Masks, wall shadow and telemetry on the cell authority</h2>
+<p>Merged <code>260a8b44</code>: <code>f944f6d3</code> (production routing), <code>8ce682f4</code> and <code>ec845223</code> (census test fixture polarity, independent adjudication, private-lobe coverage). Three reviews: FAIL (fixture polarity inherited +1 for a field whose lobes are minima, so every closed cell read private and the census explained differences by the label under review), FAIL (agreement vacuous — no wall node owned by a private cell; limited axis unpinned), PASS.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Routing</td><td><code>residual_shadow_components</code> reads <code>private_wall_node_mask = masks.private_flux[_wall_carrier_index]</code> and the census X candidates from the carrier for every constructed operator; <code>_structured_grid_axes</code> is needed only by the retained raster <code>_connectivity_read</code>.</td></tr>
+<tr><td>Semantics</td><td>The retained raster mask is the private_star rule at the LCFS-push binding level; the cell authority applies the same rule at the census saddle. Exact equality across the two authorities is not a gate (first fixtures: 17/96 and 27/96 differing on that account); the census records each difference with an independent classification and fails only on a contradiction.</td></tr>
+<tr><td>Telemetry</td><td>Per-trip <code>mask_differences</code> from a short fixed-point run equal the trip-by-trip symmetric differences of the cell labels, eager and JIT ([1, 1]).</td></tr>
+<tr><td>Reference machine</td><td>Runs without the tensor-product guard; wall-shadow count 44, matching the attribution census.</td></tr>
+<tr><td>Fixtures</td><td>Single null (polarity −1): axis (1.7031, 0.2978) m within one 0.08125 m spacing of (1.7, 0.31); saddle at the centre; CORE 13, PRIVATE 13, COMMON_SOL 297; wall through the lower private lobe; differing nodes 69, 71 binding-level, 70 touch-dilation. Limited: axis (1.7, ≈0) m pinned.</td></tr>
+<tr><td>Lanes</td><td>28 passed across shadow telemetry 3, wall-height exclusion 15, topology read 2, Solov'ev gates 8 (plus rim scatter 4 and the stagnation file 1/2 in the first round). <code>test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts</code> fails on <code>main</code> at 85dac172 with one active-set trip instead of two — pre-existing, recheck now that the polish value is map-owned.</td></tr>
+</tbody>
+</table>
+</section>
 </main>
 </body>
 </html>

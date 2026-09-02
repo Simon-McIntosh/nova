@@ -1,0 +1,1035 @@
+{
+  "comparison_baselines": {
+    "comparison_qualification": "the 1.163 ms/slice census projection is batched throughput and is not directly comparable to width-1 latency",
+    "full_trip_baseline_ms_per_member": 415.60787488197093,
+    "strict_census_projection_ms_per_slice": 1.163
+  },
+  "completion": {
+    "declared_member_count": 17,
+    "incomplete_attempts": [
+      {
+        "compile_start_rss_mib": 67459.191,
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "machine": "DIII-D",
+        "member_number": 3,
+        "missing_stages": [
+          "compile",
+          "without_exit",
+          "with_exit",
+          "released"
+        ]
+      }
+    ],
+    "missing_member_count": 3,
+    "missing_members": [
+      {
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "member_number": 3,
+        "reason": "compile interrupted by scheduler timeout"
+      },
+      {
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "member_number": 4,
+        "reason": "not reached before scheduler timeout"
+      },
+      {
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "member_number": 5,
+        "reason": "not reached before scheduler timeout"
+      }
+    ],
+    "paired_timing_complete_member_count": 14,
+    "semantic_result_limitation": "the driver assembled trip counts, terminal residuals, termination, state hashes, and bit-identity in memory but wrote them only after all members; the scheduler timeout prevented the atomic receipt write, and those values are absent from the flushed stage log",
+    "semantic_result_member_count": 0
+  },
+  "configuration": {
+    "execution_width": 1,
+    "latency_qualification": "width-1 compile-warm solve_ms is per-member latency, not batched milliseconds per slice; batched throughput awaits the boundary that separates shared geometry from member-varying operator data",
+    "member_counts": {
+      "DIII-D": 5,
+      "MAST": 12
+    },
+    "memory_lifecycle": "members were compiled and measured sequentially; each member's compiled host and device buffers were released before the next",
+    "paired_control": "one width-1 compiled program per member received stop_on_active_set_settlement as a runtime boolean and was reused first with the exit disabled and then with the exit enabled",
+    "solve_ms_scope": "wall time from invoking the compiled top-level solve through jax.block_until_ready(result.flux); it includes the complete trip loop, per-trip host reconciliation, any retrace or compilation triggered beneath the top-level boundary, and final device sync",
+    "trip_limit": 16
+  },
+  "evidence_inputs": {
+    "DIII-D": {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "298f36f1093fdaca4e3430e569af061d97475f9c14922857c88d831563a0288b"
+      },
+      "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+    },
+    "MAST": {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053"
+      },
+      "bank_route": {
+        "current_pin": "current revision production bank route",
+        "path": "benchmarks/bank_revision_reproduction.py",
+        "sha256": "1723d39e542ea1de62b6ec30fae76c8887eafc494606d801b8a094509a87dd6f"
+      }
+    },
+    "settlement_census": {
+      "path": "docs/figures/solver-trip-orchestration/settlement-histogram.json",
+      "sha256": "30e20c08252c4ec1e777d28229fd32664dab8381250a98236e4e387bb99c94ef"
+    }
+  },
+  "execution": {
+    "allocation_exit_code": "0:0",
+    "batch_exit_code": "0:9",
+    "batch_max_rss": "70053020K",
+    "batch_max_rss_mib": 68411.15234375,
+    "batch_state": "CANCELLED",
+    "cpu_count": 1,
+    "device": "NVIDIA H200",
+    "elapsed": "03:00:10",
+    "elapsed_seconds": 10810,
+    "exit_marker": null,
+    "gpu_count": 1,
+    "heartbeats_flushed": true,
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1261213,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": true,
+    "requested_memory": "128G",
+    "requested_time_limit": "03:00:00",
+    "reservation": "gpu_0003_grpA",
+    "scheduler_state": "TIMEOUT",
+    "stage_timings_flushed": true,
+    "tmpdir": "/tmp"
+  },
+  "head_per_trip_quantum_ms": {
+    "reason": "executed trip counts were not persisted before timeout",
+    "supersedes_banked_ms": 25.0,
+    "value": null
+  },
+  "machines": {
+    "DIII-D": {
+      "execution_contract": {
+        "additional_repetitions_after_first_compiled_solve": 0,
+        "arm_order_per_member": [
+          "without_exit",
+          "with_exit"
+        ],
+        "declared_member_count": 5,
+        "harvested_member_count": 2,
+        "one_compiled_program_per_member": true,
+        "same_program_reused_for_both_arms": true,
+        "settlement_flag_is_runtime_argument": true,
+        "width": 1
+      },
+      "members": [
+        {
+          "compile_seconds": 1467.140033,
+          "exit_saving_fraction": 0.021479919263228276,
+          "exit_saving_ms": 6788.97424999997,
+          "host_memory": {
+            "member_peak_rss_mib": 66856.012,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 65904.422,
+            "rss_after_compile_mib": 63128.105
+          },
+          "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 66856.012,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 309272.467453,
+              "compile_warm_solve_ms": 309272.467453,
+              "first_compiled_solve_ms": 309272.467453,
+              "samples_compile_warm_ms": [
+                309272.467453
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 66855.973,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 316061.441703,
+              "compile_warm_solve_ms": 316061.441703,
+              "first_compiled_solve_ms": 316061.441703,
+              "samples_compile_warm_ms": [
+                316061.441703
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 1507.062442,
+          "exit_saving_fraction": 0.10670238347269273,
+          "exit_saving_ms": 10047.58883400001,
+          "host_memory": {
+            "member_peak_rss_mib": 68373.922,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 67459.191,
+            "rss_after_compile_mib": 67019.914
+          },
+          "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 68373.922,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 84117.025929,
+              "compile_warm_solve_ms": 84117.025929,
+              "first_compiled_solve_ms": 84117.025929,
+              "samples_compile_warm_ms": [
+                84117.025929
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 68373.922,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 94164.614763,
+              "compile_warm_solve_ms": 94164.614763,
+              "first_compiled_solve_ms": 94164.614763,
+              "samples_compile_warm_ms": [
+                94164.614763
+              ]
+            }
+          }
+        }
+      ],
+      "missing_members": [
+        {
+          "identity": "d3d_shot_001554e054.parquet frame 144",
+          "member_number": 3,
+          "reason": "compile interrupted by scheduler timeout"
+        },
+        {
+          "identity": "d3d_shot_002495e835.parquet frame 146",
+          "member_number": 4,
+          "reason": "not reached before scheduler timeout"
+        },
+        {
+          "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+          "member_number": 5,
+          "reason": "not reached before scheduler timeout"
+        }
+      ],
+      "summary": {
+        "bit_identical_fired_members": null,
+        "declared_members": 5,
+        "harvested_paired_timing_members": 2,
+        "semantic_result_members": 0,
+        "strict_exit_fired_members": null,
+        "strict_exit_never_members": null,
+        "timing": {
+          "compile_seconds": {
+            "maximum": 1507.062442,
+            "mean": 1487.1012375,
+            "median": 1487.1012375,
+            "p95": 1505.0663215499999,
+            "sample_count": 2,
+            "values": [
+              1467.140033,
+              1507.062442
+            ]
+          },
+          "exit_saving_fraction": {
+            "maximum": 0.10670238347269273,
+            "mean": 0.06409115136796051,
+            "median": 0.06409115136796051,
+            "p95": 0.1024412602622195,
+            "sample_count": 2,
+            "values": [
+              0.021479919263228276,
+              0.10670238347269273
+            ]
+          },
+          "with_exit_ms": {
+            "maximum": 309272.467453,
+            "mean": 196694.746691,
+            "median": 196694.746691,
+            "p95": 298014.6953768,
+            "sample_count": 2,
+            "values": [
+              309272.467453,
+              84117.025929
+            ]
+          },
+          "without_exit_ms": {
+            "maximum": 316061.441703,
+            "mean": 205113.028233,
+            "median": 205113.028233,
+            "p95": 304966.60035599995,
+            "sample_count": 2,
+            "values": [
+              316061.441703,
+              94164.614763
+            ]
+          }
+        }
+      }
+    },
+    "MAST": {
+      "execution_contract": {
+        "additional_repetitions_after_first_compiled_solve": 0,
+        "arm_order_per_member": [
+          "without_exit",
+          "with_exit"
+        ],
+        "declared_member_count": 12,
+        "harvested_member_count": 12,
+        "one_compiled_program_per_member": true,
+        "same_program_reused_for_both_arms": true,
+        "settlement_flag_is_runtime_argument": true,
+        "width": 1
+      },
+      "members": [
+        {
+          "compile_seconds": 132.35771,
+          "exit_saving_fraction": 0.01392631722631889,
+          "exit_saving_ms": 1551.0567699999956,
+          "host_memory": {
+            "member_peak_rss_mib": 7017.383,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 6456.875,
+            "rss_after_compile_mib": 6549.316
+          },
+          "identity": "21978/35 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 6565.875,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 109824.89028,
+              "compile_warm_solve_ms": 109824.89028,
+              "first_compiled_solve_ms": 109824.89028,
+              "samples_compile_warm_ms": [
+                109824.89028
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 6565.77,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 111375.94705,
+              "compile_warm_solve_ms": 111375.94705,
+              "first_compiled_solve_ms": 111375.94705,
+              "samples_compile_warm_ms": [
+                111375.94705
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 132.691204,
+          "exit_saving_fraction": 0.023393809414563784,
+          "exit_saving_ms": 1667.371775000007,
+          "host_memory": {
+            "member_peak_rss_mib": 7047.707,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 6889.801,
+            "rss_after_compile_mib": 7019.703
+          },
+          "identity": "21978/35 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 7026.68,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 69606.688189,
+              "compile_warm_solve_ms": 69606.688189,
+              "first_compiled_solve_ms": 69606.688189,
+              "samples_compile_warm_ms": [
+                69606.688189
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 7026.633,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 71274.059964,
+              "compile_warm_solve_ms": 71274.059964,
+              "first_compiled_solve_ms": 71274.059964,
+              "samples_compile_warm_ms": [
+                71274.059964
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 649.538616,
+          "exit_saving_fraction": 0.09183718041142286,
+          "exit_saving_ms": 7078.164358000009,
+          "host_memory": {
+            "member_peak_rss_mib": 26661.156,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 26078.016,
+            "rss_after_compile_mib": 26367.898
+          },
+          "identity": "21983/35 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 26374.914,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 69994.80681,
+              "compile_warm_solve_ms": 69994.80681,
+              "first_compiled_solve_ms": 69994.80681,
+              "samples_compile_warm_ms": [
+                69994.80681
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 26374.898,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 77072.971168,
+              "compile_warm_solve_ms": 77072.971168,
+              "first_compiled_solve_ms": 77072.971168,
+              "samples_compile_warm_ms": [
+                77072.971168
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 132.564001,
+          "exit_saving_fraction": 0.036363701369261,
+          "exit_saving_ms": 2612.1015900000057,
+          "host_memory": {
+            "member_peak_rss_mib": 27022.59,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 26080.629,
+            "rss_after_compile_mib": 26225.5
+          },
+          "identity": "21983/35 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 26233.531,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 69220.563723,
+              "compile_warm_solve_ms": 69220.563723,
+              "first_compiled_solve_ms": 69220.563723,
+              "samples_compile_warm_ms": [
+                69220.563723
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 26233.531,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 71832.665313,
+              "compile_warm_solve_ms": 71832.665313,
+              "first_compiled_solve_ms": 71832.665313,
+              "samples_compile_warm_ms": [
+                71832.665313
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 644.969354,
+          "exit_saving_fraction": 0.20402389140196808,
+          "exit_saving_ms": 5988.317813999998,
+          "host_memory": {
+            "member_peak_rss_mib": 27328.367,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27031.461,
+            "rss_after_compile_mib": 26468.594
+          },
+          "identity": "21985/51 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27328.367,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 23362.743833,
+              "compile_warm_solve_ms": 23362.743833,
+              "first_compiled_solve_ms": 23362.743833,
+              "samples_compile_warm_ms": [
+                23362.743833
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27325.57,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 29351.061647,
+              "compile_warm_solve_ms": 29351.061647,
+              "first_compiled_solve_ms": 29351.061647,
+              "samples_compile_warm_ms": [
+                29351.061647
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 132.583765,
+          "exit_saving_fraction": 0.13121821261995234,
+          "exit_saving_ms": 2493.269328999999,
+          "host_memory": {
+            "member_peak_rss_mib": 27975.648,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27058.801,
+            "rss_after_compile_mib": 27177.594
+          },
+          "identity": "21985/51 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27211.703,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 16507.670245,
+              "compile_warm_solve_ms": 16507.670245,
+              "first_compiled_solve_ms": 16507.670245,
+              "samples_compile_warm_ms": [
+                16507.670245
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27211.703,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 19000.939574,
+              "compile_warm_solve_ms": 19000.939574,
+              "first_compiled_solve_ms": 19000.939574,
+              "samples_compile_warm_ms": [
+                19000.939574
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 651.187288,
+          "exit_saving_fraction": 0.06261022604342502,
+          "exit_saving_ms": 4762.6211579999945,
+          "host_memory": {
+            "member_peak_rss_mib": 28013.891,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27107.008,
+            "rss_after_compile_mib": 27397.0
+          },
+          "identity": "21986/46 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27403.914,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 71305.162956,
+              "compile_warm_solve_ms": 71305.162956,
+              "first_compiled_solve_ms": 71305.162956,
+              "samples_compile_warm_ms": [
+                71305.162956
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27403.902,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 76067.784114,
+              "compile_warm_solve_ms": 76067.784114,
+              "first_compiled_solve_ms": 76067.784114,
+              "samples_compile_warm_ms": [
+                76067.784114
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 144.486685,
+          "exit_saving_fraction": 0.06020010225336977,
+          "exit_saving_ms": 4408.431552000009,
+          "host_memory": {
+            "member_peak_rss_mib": 28051.195,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27107.008,
+            "rss_after_compile_mib": 27253.012
+          },
+          "identity": "21986/46 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27259.91,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 68821.204063,
+              "compile_warm_solve_ms": 68821.204063,
+              "first_compiled_solve_ms": 68821.204063,
+              "samples_compile_warm_ms": [
+                68821.204063
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27259.91,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 73229.635615,
+              "compile_warm_solve_ms": 73229.635615,
+              "first_compiled_solve_ms": 73229.635615,
+              "samples_compile_warm_ms": [
+                73229.635615
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 662.668027,
+          "exit_saving_fraction": 0.06286190625392785,
+          "exit_saving_ms": 4805.355899000002,
+          "host_memory": {
+            "member_peak_rss_mib": 28009.895,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27282.551,
+            "rss_after_compile_mib": 27397.125
+          },
+          "identity": "21989/55 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27579.457,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 71637.694994,
+              "compile_warm_solve_ms": 71637.694994,
+              "first_compiled_solve_ms": 71637.694994,
+              "samples_compile_warm_ms": [
+                71637.694994
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27579.457,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 76443.050893,
+              "compile_warm_solve_ms": 76443.050893,
+              "first_compiled_solve_ms": 76443.050893,
+              "samples_compile_warm_ms": [
+                76443.050893
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 139.386527,
+          "exit_saving_fraction": 0.06784945106596921,
+          "exit_saving_ms": 5174.714771999992,
+          "host_memory": {
+            "member_peak_rss_mib": 28226.738,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 27282.551,
+            "rss_after_compile_mib": 27428.555
+          },
+          "identity": "21989/55 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27435.453,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 71092.884902,
+              "compile_warm_solve_ms": 71092.884902,
+              "first_compiled_solve_ms": 71092.884902,
+              "samples_compile_warm_ms": [
+                71092.884902
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 27435.453,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 76267.599674,
+              "compile_warm_solve_ms": 76267.599674,
+              "first_compiled_solve_ms": 76267.599674,
+              "samples_compile_warm_ms": [
+                76267.599674
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 680.689683,
+          "exit_saving_fraction": 0.09550708934610487,
+          "exit_saving_ms": 4629.408468000001,
+          "host_memory": {
+            "member_peak_rss_mib": 28840.867,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 28543.961,
+            "rss_after_compile_mib": 27752.059
+          },
+          "identity": "22086/43 pure",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 28840.867,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 43842.474611,
+              "compile_warm_solve_ms": 43842.474611,
+              "first_compiled_solve_ms": 43842.474611,
+              "samples_compile_warm_ms": [
+                43842.474611
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 28838.07,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 48471.883079,
+              "compile_warm_solve_ms": 48471.883079,
+              "first_compiled_solve_ms": 48471.883079,
+              "samples_compile_warm_ms": [
+                48471.883079
+              ]
+            }
+          }
+        },
+        {
+          "compile_seconds": 139.39013,
+          "exit_saving_fraction": 0.11526362657090129,
+          "exit_saving_ms": 4826.264092999998,
+          "host_memory": {
+            "member_peak_rss_mib": 29488.148,
+            "qualification": "the stage log persisted RSS after each pass and the sampler's whole-member peak; it did not persist an independent peak for each solve pass",
+            "released_rss_mib": 28543.961,
+            "rss_after_compile_mib": 28689.965
+          },
+          "identity": "22086/43 mixed",
+          "measurement_state": "paired_timing_complete_semantics_not_persisted",
+          "strict_qualification": "not_persisted",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 28696.863,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 37045.263262,
+              "compile_warm_solve_ms": 37045.263262,
+              "first_compiled_solve_ms": 37045.263262,
+              "samples_compile_warm_ms": [
+                37045.263262
+              ]
+            }
+          },
+          "without_exit": {
+            "executed_trips": null,
+            "no_op_trips": null,
+            "result_availability": "not persisted before scheduler timeout",
+            "rss_after_synchronized_solve_mib": 28696.863,
+            "terminal_residual": null,
+            "terminal_state_sha256": null,
+            "termination": null,
+            "timing": {
+              "compile_warm_p95_ms": 41871.527355,
+              "compile_warm_solve_ms": 41871.527355,
+              "first_compiled_solve_ms": 41871.527355,
+              "samples_compile_warm_ms": [
+                41871.527355
+              ]
+            }
+          }
+        }
+      ],
+      "summary": {
+        "bit_identical_fired_members": null,
+        "declared_members": 12,
+        "harvested_paired_timing_members": 12,
+        "semantic_result_members": 0,
+        "strict_exit_fired_members": null,
+        "strict_exit_never_members": null,
+        "timing": {
+          "compile_seconds": {
+            "maximum": 680.689683,
+            "mean": 353.5427491666666,
+            "median": 141.93840749999998,
+            "p95": 670.7777722,
+            "sample_count": 12,
+            "values": [
+              132.35771,
+              132.691204,
+              649.538616,
+              132.564001,
+              644.969354,
+              132.583765,
+              651.187288,
+              144.486685,
+              662.668027,
+              139.386527,
+              680.689683,
+              139.39013
+            ]
+          },
+          "exit_saving_fraction": {
+            "maximum": 0.20402389140196808,
+            "mean": 0.08042129283143208,
+            "median": 0.06535567865994853,
+            "p95": 0.16398076807185938,
+            "sample_count": 12,
+            "values": [
+              0.01392631722631889,
+              0.023393809414563784,
+              0.09183718041142286,
+              0.036363701369261,
+              0.20402389140196808,
+              0.13121821261995234,
+              0.06261022604342502,
+              0.06020010225336977,
+              0.06286190625392785,
+              0.06784945106596921,
+              0.09550708934610487,
+              0.11526362657090129
+            ]
+          },
+          "with_exit_ms": {
+            "maximum": 109824.89028,
+            "mean": 60188.503989,
+            "median": 69413.625956,
+            "p95": 88821.93287269998,
+            "sample_count": 12,
+            "values": [
+              109824.89028,
+              69606.688189,
+              69994.80681,
+              69220.563723,
+              23362.743833,
+              16507.670245,
+              71305.162956,
+              68821.204063,
+              71637.694994,
+              71092.884902,
+              43842.474611,
+              37045.263262
+            ]
+          },
+          "without_exit_ms": {
+            "maximum": 111375.94705,
+            "mean": 64354.927120500004,
+            "median": 72531.150464,
+            "p95": 92509.31031489998,
+            "sample_count": 12,
+            "values": [
+              111375.94705,
+              71274.059964,
+              77072.971168,
+              71832.665313,
+              29351.061647,
+              19000.939574,
+              76067.784114,
+              73229.635615,
+              76443.050893,
+              76267.599674,
+              48471.883079,
+              41871.527355
+            ]
+          }
+        }
+      }
+    }
+  },
+  "measurement_state": "partial_scheduler_timeout",
+  "observations": {
+    "exit_saving": "the paired exit effect is reported per member as (without_exit_ms - with_exit_ms) / without_exit_ms; it is not converted into a per-trip quantum because trip counts were not persisted",
+    "heterogeneous_frame_compile": "the two completed DIII-D members compiled in 1467.1 s and 1507.1 s; stage RSS reached 68373.9 MiB and the batch MaxRSS reached 68411.2 MiB. This is direct evidence of the heterogeneous-frame recompile cost named by the batched operator-boundary work.",
+    "width_one_latency": "MAST paired warm solves span 16.5 to 111.4 s per member; the two completed DIII-D members span 84.1 to 316.1 s. These are seconds-scale width-1 latencies, not millisecond-scale batched throughput."
+  },
+  "project_absolute_figure_src": "/nova/figures/millisecond-converged-solve/strict-exit-incidence.png",
+  "recorded_at": "2026-09-02T13:59:56.586990+00:00",
+  "schema": "nova.strict-exit-incidence/1",
+  "source": {
+    "driver": "benchmarks/strict_exit_incidence.py",
+    "harvest_driver_sha256": "83e9ef270c6f42e1db1f9de8668e865b55cfc855d522ab33457d321b573e618d",
+    "measurement_driver_sha256": "bd6b29794697d771357e0103d7ddc7d079a887684c8304d374aa766b2125a6c1",
+    "measurement_revision": "4f8426295e9039ba4c82da325a2d560d1196d1f1",
+    "nova_diff_stat": [],
+    "required_ancestor": "588578a0",
+    "solver_source_modified": false,
+    "stage_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/logs/slurm-1261213.log",
+    "stage_log_sha256": "3073ba8ab1a29cddde248aa2663bf2b188850e804d8af773d092ffcaba9c5f6b"
+  }
+}

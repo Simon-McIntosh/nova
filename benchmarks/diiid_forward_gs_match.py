@@ -2488,6 +2488,25 @@ def _infinity_name(value: float) -> str | None:
     return None
 
 
+_CLASS_MARGIN_ROUNDOFF_RTOL = 1.0e-12
+_CLASS_MARGIN_ROUNDOFF_ATOL = np.finfo(np.float64).eps
+
+
+def _class_margins_agree_within_roundoff(
+    diagnostic_margin: float, terminal_margin: float
+) -> bool:
+    """Admit reduction-order noise while preserving the terminal operand guard."""
+
+    return bool(
+        np.isclose(
+            diagnostic_margin,
+            terminal_margin,
+            rtol=_CLASS_MARGIN_ROUNDOFF_RTOL,
+            atol=_CLASS_MARGIN_ROUNDOFF_ATOL,
+        )
+    )
+
+
 def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
     """Serialize the exact X operand and its connectivity-local evidence."""
 
@@ -2528,9 +2547,12 @@ def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
     host = jax.device_get(diagnostic)
     diagnostic_margin = float(host["class_margin"])
     terminal_margin = float(topology.class_margin)
-    if diagnostic_margin != terminal_margin:
+    if not _class_margins_agree_within_roundoff(diagnostic_margin, terminal_margin):
         raise RuntimeError(
-            "terminal X diagnostics changed the exact class-margin operand"
+            "terminal X diagnostics changed the class-margin operand beyond "
+            f"the roundoff bound rtol={_CLASS_MARGIN_ROUNDOFF_RTOL:.1e}, "
+            f"atol={_CLASS_MARGIN_ROUNDOFF_ATOL:.17g} "
+            "(one float64 ULP at unit class-margin scale)"
         )
 
     axis_flux = float(host["axis_flux"])

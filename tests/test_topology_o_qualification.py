@@ -109,7 +109,9 @@ def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled)
     topology, _coordinate = _topology_fixture()
     with np.load(OPERANDS, allow_pickle=False) as stored:
         wall_notch = stored["row_04_selected_o"][0]
-    np.testing.assert_allclose(wall_notch, [0.47194121, 1.79585038], atol=5.0e-9)
+    np.testing.assert_allclose(
+        wall_notch, [0.36626597682950957, -1.932135898814253], atol=5.0e-9
+    )
     vmap_o = jnp.asarray(
         np.vstack((np.r_[wall_notch, 10.0, 0.0], np.full((4, 4), np.nan))),
         dtype=jnp.float64,

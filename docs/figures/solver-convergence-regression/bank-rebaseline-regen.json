@@ -1,0 +1,1478 @@
+{
+  "artifact": "current MAST bank regeneration comparison",
+  "cohort": {
+    "arm_count": 12,
+    "converged_count_before": 2,
+    "converged_count_regenerated": 3,
+    "marginal_solver_basin_count": 2
+  },
+  "diagnostic_margin_guard": {
+    "absolute_floor": 2.220446049250313e-16,
+    "absolute_floor_basis": "one float64 ULP at unit class-margin scale",
+    "formatted_source_sha256": "9ef46b11f698927b6818a6123a71df3a19931bdb004dffad6e8c53896500cd10",
+    "launched_source_sha256": "d1546f88c097ce02d28a69a4d4f73ce9796be5c16196db10bfc49c53fb08757a",
+    "relative_tolerance": 1e-12,
+    "semantic_difference_between_sources": false
+  },
+  "focused_suite_constants": {
+    "domain_partition": [
+      {
+        "before_core_private_counts": [
+          277,
+          20
+        ],
+        "pytest_param_id": "21978-35-pure",
+        "regenerated_core_private_counts": [
+          250,
+          38
+        ]
+      },
+      {
+        "before_core_private_counts": [
+          244,
+          33
+        ],
+        "pytest_param_id": "21978-35-mixed",
+        "regenerated_core_private_counts": [
+          244,
+          36
+        ]
+      }
+    ],
+    "wall_notch_primary": {
+      "absolute_tolerance_m": 5e-09,
+      "before_rz_m": [
+        0.47194121,
+        1.79585038
+      ],
+      "regenerated_rz_m": [
+        0.36626597682950957,
+        -1.932135898814253
+      ]
+    }
+  },
+  "measurement_revision": "acce6b3cf0832c9340c722c50dafb525c16954d7",
+  "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+  "producer_schema_revision": 4,
+  "rows": [
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          31,
+          29,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554852568867868,
+          0.0033463831584595507,
+          0.0026746362723459927,
+          0.002450918725801937
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.562864784448253,
+          1.2634871866690023
+        ],
+        "terminal_residual": 0.002450918725801937,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_cycle_detected",
+        "trip_1_mask_difference": 31,
+        "trip_count": 4
+      },
+      "identity": "21978/35",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          29,
+          27,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554597364631252,
+          0.0033460296631549562,
+          0.0026743540782636055,
+          0.0024506488565450104
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5628642390682692,
+          1.2634901482388117
+        ],
+        "terminal_residual": 0.0024506488565450104,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_cycle_detected",
+        "trip_1_mask_difference": 29,
+        "trip_count": 4
+      },
+      "selected_saddle_displacement_m": 3.0113676399044424e-06,
+      "shot": 21978,
+      "slice_index": 35,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": {
+          "all_common_trip_differences_inside_float64_noise": true,
+          "first_backend_divergence": null,
+          "paired_arm": "22086/43 pure",
+          "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+          "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+          "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+        },
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.0024506488565450104,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": true,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.574572804319522,
+          1.2639235024258277
+        ],
+        "terminal_residual": 1.0159176149428138e-08,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "iteration_budget_exhausted",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "21978/35",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": true,
+        "selected_saddle_m": [
+          0.5745728038817767,
+          1.2639235916546951
+        ],
+        "terminal_residual": 7.50780096762432e-12,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "converged",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": 8.92299411603393e-08,
+      "shot": 21978,
+      "slice_index": 35,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": true,
+        "finite": true,
+        "fixed_point_residual": 7.50780096762432e-12,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.006589467341993111,
+          0.005173112984011107,
+          0.004112488033015127,
+          0.0033069890444064774,
+          0.0027132182921498055,
+          0.0022710248532247174,
+          0.0019121747127899033,
+          0.0016908509978309863,
+          0.0016316290669693596,
+          0.0016272168556376039,
+          0.0016228109004278904,
+          0.00161841187446401,
+          0.0016140197203843175,
+          0.0016101642717525663,
+          0.001605618640025296,
+          0.0016010813512418846
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5519882544121086,
+          1.272313868980611
+        ],
+        "terminal_residual": 0.0016010813512418846,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "identity": "21983/35",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0065894673419929,
+          0.0051731129840111075,
+          0.004112488033015337,
+          0.003306989044406373,
+          0.0027132182921497006,
+          0.002271024853224613,
+          0.0019121747127899033,
+          0.0016908509978307777,
+          0.0016316290669694704,
+          0.001627216855637715,
+          0.0016228109004278004,
+          0.0016184118744640217,
+          0.001614019720384541,
+          0.0016101642717528965,
+          0.0016056186400255227,
+          0.0016010813512420008
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5519882544121029,
+          1.272313868980589
+        ],
+        "terminal_residual": 0.0016010813512420008,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "selected_saddle_displacement_m": 2.2727867948842755e-14,
+      "shot": 21983,
+      "slice_index": 35,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.0016010813512420008,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5526865426840634,
+          1.2743472087241114
+        ],
+        "terminal_residual": 0.0013323492051528925,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "iteration_budget_exhausted",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "21983/35",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5526865426840635,
+          1.2743472087241114
+        ],
+        "terminal_residual": 0.0013323492051528015,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "iteration_budget_exhausted",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": 1.1102230246251565e-16,
+      "shot": 21983,
+      "slice_index": 35,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.0013323492051528015,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          0,
+          105,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.005130774300911727,
+          0.004170505492579789,
+          0.001963875591377341,
+          0.0008469065159928224,
+          0.0007024507066039361,
+          0.0006844491330164618,
+          0.0006844491330164618
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5554440365321777,
+          -1.118850456586214
+        ],
+        "terminal_residual": 0.0006844491330164618,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_stagnated",
+        "trip_1_mask_difference": 0,
+        "trip_count": 7
+      },
+      "identity": "21985/51",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          0,
+          105,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.005130774300911727,
+          0.004170505492579789,
+          0.0019638755913774916,
+          0.0008469065159929729,
+          0.0007024507066039361,
+          0.0006844491330166124,
+          0.0006844491330166124
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5554440365321776,
+          -1.1188504565862138
+        ],
+        "terminal_residual": 0.0006844491330166124,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_settled",
+        "trip_1_mask_difference": 0,
+        "trip_count": 7
+      },
+      "selected_saddle_displacement_m": 2.482534153247273e-16,
+      "shot": 21985,
+      "slice_index": 51,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.0006844491330166124,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": true,
+        "selected_saddle_m": [
+          0.5424844830714624,
+          -1.0975066858069535
+        ],
+        "terminal_residual": 1.4928084733669643e-16,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "converged",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "21985/51",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": true,
+        "selected_saddle_m": [
+          0.5424844830714627,
+          -1.0975066858069535
+        ],
+        "terminal_residual": 2.799015887563058e-16,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "converged",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": 3.3306690738754696e-16,
+      "shot": 21985,
+      "slice_index": 51,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": true,
+        "finite": true,
+        "fixed_point_residual": 2.799015887563058e-16,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.007319118647204026,
+          0.006465895707286026,
+          0.006367666736861088,
+          0.00632689234139558,
+          0.006287618441680615,
+          0.0062501328371671605,
+          0.006213716092319548,
+          0.0061777560069193275,
+          0.006142287872153278,
+          0.006107342493127524,
+          0.006072947263352843,
+          0.006038630389850981,
+          0.006003926724604074,
+          0.005969960286799173,
+          0.005934136051849336,
+          0.005887639830277831
+        ],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.6192157086902288,
+          1.1744537586834003
+        ],
+        "terminal_residual": 0.005887639830277831,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "identity": "21986/46",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0073191186472041985,
+          0.006465895707286199,
+          0.006367666736863106,
+          0.006326892341399566,
+          0.006287618441687812,
+          0.006250132837176481,
+          0.006213716092330043,
+          0.006177756006930896,
+          0.006142287872168385,
+          0.0061073424931453015,
+          0.006072947263374818,
+          0.0060386303898754285,
+          0.006003926724630899,
+          0.005969960286826777,
+          0.0059341360518766146,
+          0.005887639830302741
+        ],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.6192157086901403,
+          1.174453758683143
+        ],
+        "terminal_residual": 0.005887639830302741,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "selected_saddle_displacement_m": 2.7213677079645073e-13,
+      "shot": 21986,
+      "slice_index": 46,
+      "solver_qualification": {
+        "achieved_class": "limited",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.005887639830302741,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": false
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": null,
+          "failure_exception_class": "NoQualifiedAxisError",
+          "label_agreement": null,
+          "requested_class": "diverted",
+          "verdict": "unavailable"
+        },
+        "converged": false,
+        "selected_saddle_m": null,
+        "terminal_residual": null,
+        "terminal_residual_evidence": {
+          "cause": "exception",
+          "exception_class": "NoQualifiedAxisError",
+          "explanation": "NoQualifiedAxisError was raised before a finite terminal residual or achieved topology class could be serialized",
+          "status": "unavailable"
+        },
+        "termination_reason": "NoQualifiedAxisError",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "21986/46",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": null,
+          "failure_exception_class": "NoQualifiedAxisError",
+          "label_agreement": null,
+          "requested_class": "diverted",
+          "verdict": "unavailable"
+        },
+        "converged": false,
+        "selected_saddle_m": null,
+        "terminal_residual": null,
+        "terminal_residual_evidence": {
+          "cause": "exception",
+          "exception_class": "NoQualifiedAxisError",
+          "explanation": "NoQualifiedAxisError was raised before a finite terminal residual or achieved topology class could be serialized",
+          "status": "unavailable"
+        },
+        "termination_reason": "NoQualifiedAxisError",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": null,
+      "shot": 21986,
+      "slice_index": 46,
+      "solver_qualification": {
+        "achieved_class": null,
+        "basin_evidence": null,
+        "converged": false,
+        "finite": false,
+        "fixed_point_residual": null,
+        "fixed_point_residual_evidence": {
+          "cause": "exception",
+          "exception_class": "NoQualifiedAxisError",
+          "explanation": "NoQualifiedAxisError was raised before a finite terminal residual or achieved topology class could be serialized",
+          "status": "unavailable"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": null
+      }
+    },
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004924486881829031,
+          0.004191803643433001,
+          0.0039719169589080595,
+          0.0036350967189940167,
+          0.0034974629400877357,
+          0.003432720858616558,
+          0.0033683392606676512,
+          0.003305568297749823,
+          0.0032510597450807416,
+          0.0031900615570557333,
+          0.0031302974201839417,
+          0.0030717377611544842,
+          0.0030200946956665145,
+          0.00296480767171513,
+          0.0029103457339680642,
+          0.0028567379941717244
+        ],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5880968559376042,
+          1.1589439080042057
+        ],
+        "terminal_residual": 0.0028567379941717244,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "identity": "21989/55",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 16,
+        "active_set_mask_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004924486881829031,
+          0.004191803643433002,
+          0.0039719169589080595,
+          0.003635096718994016,
+          0.0034974629400876603,
+          0.003432720858616403,
+          0.0033683392606668806,
+          0.0033055682977495156,
+          0.003251059745080208,
+          0.003190061557055272,
+          0.0031302974201834117,
+          0.003071737761153725,
+          0.0030200946956656753,
+          0.0029648076717142145,
+          0.002910345733966847,
+          0.002856737994170132
+        ],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5880968559376076,
+          1.1589439080042145
+        ],
+        "terminal_residual": 0.002856737994170132,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_iteration_budget_exhausted",
+        "trip_1_mask_difference": 0,
+        "trip_count": 16
+      },
+      "selected_saddle_displacement_m": 9.52529947309062e-15,
+      "shot": 21989,
+      "slice_index": 55,
+      "solver_qualification": {
+        "achieved_class": "limited",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.002856737994170132,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": false
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5897718401840845,
+          1.1624392892547322
+        ],
+        "terminal_residual": 0.00295379213589794,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "iteration_budget_exhausted",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "21989/55",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "limited",
+          "failure_exception_class": null,
+          "label_agreement": false,
+          "requested_class": "diverted",
+          "verdict": "disagree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5897718401840847,
+          1.1624392892547324
+        ],
+        "terminal_residual": 0.0029537921358981085,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "iteration_budget_exhausted",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": 3.1401849173675503e-16,
+      "shot": 21989,
+      "slice_index": 55,
+      "solver_qualification": {
+        "achieved_class": "limited",
+        "basin_evidence": null,
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.0029537921358981085,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": false
+      }
+    },
+    {
+      "arm": "pure",
+      "before": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          38,
+          23,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976455689734301,
+          0.003131474610324068,
+          0.001951270366567566,
+          0.0006652842022510338,
+          0.0004808521116038811,
+          0.00048023353539180234,
+          0.00048023353539180234
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5923829262398882,
+          1.2202546920689854
+        ],
+        "terminal_residual": 0.00048023353539180234,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_stagnated",
+        "trip_1_mask_difference": 38,
+        "trip_count": 7
+      },
+      "identity": "22086/43",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764024985941265,
+          0.003131688886067959,
+          0.0019503833095738026,
+          0.0006655722453715935,
+          0.00048086024350746707,
+          0.00048001875929238176,
+          0.00048001875929238176
+        ],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": false,
+        "selected_saddle_m": [
+          0.5923840472283124,
+          1.2202558665995356
+        ],
+        "terminal_residual": 0.00048001875929238176,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "active_set_settled",
+        "trip_1_mask_difference": 29,
+        "trip_count": 7
+      },
+      "selected_saddle_displacement_m": 1.623618508278348e-06,
+      "shot": 22086,
+      "slice_index": 43,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": {
+          "all_common_trip_differences_inside_float64_noise": true,
+          "first_backend_divergence": null,
+          "paired_arm": "22086/43 pure",
+          "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+          "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+          "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+        },
+        "converged": false,
+        "finite": true,
+        "fixed_point_residual": 0.00048001875929238176,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": true,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    },
+    {
+      "arm": "mixed",
+      "before": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": true,
+        "selected_saddle_m": [
+          0.5853011730723612,
+          1.2333806492436514
+        ],
+        "terminal_residual": 1.73647586731676e-14,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "converged",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "identity": "22086/43",
+      "regenerated": {
+        "active_set_cycle_damping_activations": [],
+        "active_set_iterations": 0,
+        "active_set_mask_differences": [],
+        "active_set_residuals": [],
+        "class_verdict": {
+          "achieved_class": "diverted",
+          "failure_exception_class": null,
+          "label_agreement": true,
+          "requested_class": "diverted",
+          "verdict": "agree"
+        },
+        "converged": true,
+        "selected_saddle_m": [
+          0.5853011730723614,
+          1.2333806492436519
+        ],
+        "terminal_residual": 1.7364758673167596e-14,
+        "terminal_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "termination_reason": "converged",
+        "trip_1_mask_difference": null,
+        "trip_count": 0
+      },
+      "selected_saddle_displacement_m": 4.965068306494546e-16,
+      "shot": 22086,
+      "slice_index": 43,
+      "solver_qualification": {
+        "achieved_class": "diverted",
+        "basin_evidence": null,
+        "converged": true,
+        "finite": true,
+        "fixed_point_residual": 1.7364758673167596e-14,
+        "fixed_point_residual_evidence": {
+          "cause": "solver_terminal_state",
+          "explanation": "the solver serialized its terminal fixed-point residual",
+          "status": "finite"
+        },
+        "fixed_point_tolerance": 1e-08,
+        "marginal_solver_basin": false,
+        "requested_class": "diverted",
+        "topology_consistent": true
+      }
+    }
+  ],
+  "ruling": "marginal-arm-convergence-semantics",
+  "runtime": {
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "jaxlib": "0.11.0",
+    "omp_num_threads": 1,
+    "openblas_num_threads": 1,
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    },
+    "python": "3.14.2",
+    "tmpdir": "/tmp"
+  },
+  "scheduler": {
+    "accelerator": "NVIDIA H200 NVL",
+    "allocated_cpus": 1,
+    "allocated_gpus": 1,
+    "elapsed": "01:15:01",
+    "exit_code": "0:0",
+    "exit_marker": 0,
+    "finished_at": "2026-09-02T15:57:13+02:00",
+    "heartbeat_seconds": 30,
+    "job_id": 1261370,
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/logs/h200-bank-regeneration.log",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "started_at": "2026-09-02T14:42:12+02:00",
+    "state": "COMPLETED",
+    "time_limit": "03:00:00"
+  },
+  "source_artifacts": {
+    "bank_before": {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/raw/bank-before.json",
+      "sha256": "f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053"
+    },
+    "raw_regeneration": {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/raw/current-bank.json",
+      "sha256": "8e3ab989b884aba9e5b2a679a2e1fa7f5f604824cb5880327ae1e92c58bf8165"
+    },
+    "topology_operand_cache": {
+      "path": "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+      "sha256": "fa286c1354e1875136e0026a4672de9534abe200f928e78083fc9cbebc34f372"
+    }
+  },
+  "topology_operand_producer": "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+  "verdict": "The twelve-arm bank is re-baselined without suppressing failed qualification or non-convergence; the two known basin-sensitive pure arms are explicitly marked marginal."
+}

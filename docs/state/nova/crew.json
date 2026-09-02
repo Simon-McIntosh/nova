@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:09:38",
+  "updated": "2026-09-02T09:19:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -74910,9 +74910,110 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T070110541689-scr-stagnation-test-triage",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-stagnation-test-triage",
+        "node_definition": {
+          "done_when": "stagnation-exit-test-triage.json records pass/fail, assertion message and trip count for the four revisions, names the first failing revision and the intervening nova/ commits with subjects, states the loop-side or read-side verdict in one sentence with the evidence line from the test, proposes the fix in one sentence, and git diff --stat in the assigned worktree shows no change under nova/ or tests/",
+          "estimated_hours": 1.0,
+          "goal": "A triage receipt docs/figures/solver-convergence-regression/stagnation-exit-test-triage.json for the red test tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts, reported by the topology-authority session as failing on main with one active-set trip instead of two independently of its changes, that runs the single test (CPU, default lane, JAX_PLATFORMS=cpu) at current main, at 588578a0, at 85dac172, and at the parent of the first plasma-cell-topology-authority merge aecea6a7 (detached shadow worktrees beside the assigned one, sharing the root .venv with --no-sync), records pass or fail with the assertion message and the observed trip count at each revision, names the first failing revision and the nova/ commits between the last passing and first failing revision, reads the test's synthetic case to state whether the expectation of two trips is a property of the fixed-point loop (a fixed_point.py-side regression) or of the topology read the synthetic case exercises (a changed mask history from the carrier read), and proposes the one-line fix as text only, with no solver source and no test modified because nova/equilibrium/fixed_point.py is held by the in-flight deflation prototype",
+          "id": "scr-stagnation-test-triage",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/solver-convergence-regression/stagnation-exit-test-triage.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:01:18Z",
+        "completed_at": "2026-09-02T07:19:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1067,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1067,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "eb297a48dce558b3c713ae6b079c4e3f0053f740",
+        "commits": [
+          "6b3f9768013bc5758346370d6fb0f5d8610e9a91"
+        ],
+        "changed_lines": {
+          "added": 181,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "single-test matrix at four revisions plus proposed-fix probe (see proposed-fix-probe.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/proposed-fix-probe.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 587648,
+            "cached_input_tokens_cumulative": 3702144,
+            "input_tokens": 888003,
+            "input_tokens_cumulative": 4044522,
+            "output_tokens": 6851,
+            "output_tokens_cumulative": 20709,
+            "reasoning_output_tokens": 3772,
+            "reasoning_output_tokens_cumulative": 7441
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1327
+    "_version": 1328
   }
 }

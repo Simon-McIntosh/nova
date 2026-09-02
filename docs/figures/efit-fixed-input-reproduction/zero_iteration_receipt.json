@@ -1,0 +1,294 @@
+[
+  {
+    "absolute_grad_shafranov_sup_wb_per_m2": 2.3138594552927856,
+    "checked_interior_cells": 228,
+    "definition": "Nova conservation_ledger relative_grad_shafranov: interior sup of Delta-star(psi_EFIT) minus the extracted p-prime/FF-prime drive, divided by the interior drive sup; no coil-current term",
+    "drive_sup_wb_per_m2": 32.46581664358634,
+    "grid": {
+      "minimum_width_m": 0.05312499962747097,
+      "quarter_width_gate_m": 0.013281249906867743,
+      "radial_extent_m": [
+        0.8399999737739563,
+        2.5399999618530273
+      ],
+      "radial_width_m": 0.05312499962747097,
+      "shape": [
+        33,
+        33
+      ],
+      "vertical_extent_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "vertical_width_m": 0.10000000149011612
+    },
+    "location": {
+      "absolute_peak": {
+        "coordinate_m": [
+          1.6899999678134918,
+          0.0
+        ],
+        "distance_to_axis_m": 0.02805509975322806,
+        "distance_to_boundary_m": 0.5811440434418074,
+        "distance_to_nearest_x_point_m": 1.2555290483769856,
+        "signed_relative_residual": -0.07127063768931534
+      },
+      "largest_region_by_l2_energy_fraction": "axis_neighbourhood",
+      "largest_region_by_relative_sup": "axis_neighbourhood",
+      "neighbourhood_radius_m": 0.10624999925494194,
+      "regions": {
+        "axis_neighbourhood": {
+          "l2_energy_fraction": 0.8573907366140009,
+          "relative_rms": 0.04238835911255089,
+          "relative_sup": 0.07127063768931534,
+          "sample_count": 8
+        },
+        "boundary_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        },
+        "interior_bulk": {
+          "l2_energy_fraction": 0.14260926338599908,
+          "relative_rms": 0.0032965884516279386,
+          "relative_sup": 0.01228143643161753,
+          "sample_count": 220
+        },
+        "x_point_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        }
+      }
+    },
+    "machine": "DIII-D",
+    "relative_grad_shafranov_sup": 0.07127063768931534,
+    "stride": 2,
+    "wall_cost": {
+      "combined_seconds": 50.82074609596748,
+      "profile_build_seconds": 43.86946501699276,
+      "residual_evaluation_seconds": 6.951281078974716
+    }
+  },
+  {
+    "absolute_grad_shafranov_sup_wb_per_m2": 2.702343761818959,
+    "checked_interior_cells": 817,
+    "definition": "Nova conservation_ledger relative_grad_shafranov: interior sup of Delta-star(psi_EFIT) minus the extracted p-prime/FF-prime drive, divided by the interior drive sup; no coil-current term",
+    "drive_sup_wb_per_m2": 32.46581664358634,
+    "grid": {
+      "minimum_width_m": 0.026562499813735485,
+      "quarter_width_gate_m": 0.006640624953433871,
+      "radial_extent_m": [
+        0.8399999737739563,
+        2.5399999618530273
+      ],
+      "radial_width_m": 0.026562499813735485,
+      "shape": [
+        65,
+        65
+      ],
+      "vertical_extent_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "vertical_width_m": 0.05000000074505806
+    },
+    "location": {
+      "absolute_peak": {
+        "coordinate_m": [
+          1.7165624676272273,
+          0.0
+        ],
+        "distance_to_axis_m": 0.0019739550375234807,
+        "distance_to_boundary_m": 0.5546847473369461,
+        "distance_to_nearest_x_point_m": 1.264179429019341,
+        "signed_relative_residual": -0.08323658669934646
+      },
+      "largest_region_by_l2_energy_fraction": "interior_bulk",
+      "largest_region_by_relative_sup": "axis_neighbourhood",
+      "neighbourhood_radius_m": 0.05312499962747097,
+      "regions": {
+        "axis_neighbourhood": {
+          "l2_energy_fraction": 0.014632058867323782,
+          "relative_rms": 0.07398283581947614,
+          "relative_sup": 0.08323658669934646,
+          "sample_count": 6
+        },
+        "boundary_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        },
+        "interior_bulk": {
+          "l2_energy_fraction": 0.9853679411326761,
+          "relative_rms": 0.05222069729433757,
+          "relative_sup": 0.067393573557263,
+          "sample_count": 811
+        },
+        "x_point_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        }
+      }
+    },
+    "machine": "DIII-D",
+    "relative_grad_shafranov_sup": 0.08323658669934644,
+    "stride": 1,
+    "wall_cost": {
+      "combined_seconds": 194.2130450050172,
+      "profile_build_seconds": 181.7944741070096,
+      "residual_evaluation_seconds": 12.418570898007601
+    }
+  },
+  {
+    "absolute_grad_shafranov_sup_wb_per_m2": 0.12930242940810466,
+    "checked_interior_cells": 152,
+    "definition": "Nova conservation_ledger relative_grad_shafranov: interior sup of Delta-star(psi_EFIT) minus the extracted p-prime/FF-prime drive, divided by the interior drive sup; no coil-current term",
+    "drive_sup_wb_per_m2": 6.217301295337928,
+    "grid": {
+      "minimum_width_m": 0.060625000041909516,
+      "quarter_width_gate_m": 0.015156250010477379,
+      "radial_extent_m": [
+        0.05999999865889549,
+        2.0
+      ],
+      "radial_width_m": 0.060625000041909516,
+      "shape": [
+        33,
+        33
+      ],
+      "vertical_extent_m": [
+        -2.0,
+        2.0
+      ],
+      "vertical_width_m": 0.125
+    },
+    "location": {
+      "absolute_peak": {
+        "coordinate_m": [
+          1.2118749994551763,
+          -0.25
+        ],
+        "distance_to_axis_m": 0.39780101876086327,
+        "distance_to_boundary_m": 0.12165529376141843,
+        "distance_to_nearest_x_point_m": 1.1348429034715557,
+        "signed_relative_residual": 0.020797195320912416
+      },
+      "largest_region_by_l2_energy_fraction": "interior_bulk",
+      "largest_region_by_relative_sup": "interior_bulk",
+      "neighbourhood_radius_m": 0.12125000008381903,
+      "regions": {
+        "axis_neighbourhood": {
+          "l2_energy_fraction": 0.000903806991984962,
+          "relative_rms": 0.0009016933102140246,
+          "relative_sup": 0.0013162081232717155,
+          "sample_count": 4
+        },
+        "boundary_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        },
+        "interior_bulk": {
+          "l2_energy_fraction": 0.9990961930080149,
+          "relative_rms": 0.004928602457372266,
+          "relative_sup": 0.020797195320912416,
+          "sample_count": 148
+        },
+        "x_point_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        }
+      }
+    },
+    "machine": "MAST",
+    "relative_grad_shafranov_sup": 0.020797195320912416,
+    "stride": 2,
+    "wall_cost": {
+      "combined_seconds": 48.125356857985025,
+      "profile_build_seconds": 40.581283415987855,
+      "residual_evaluation_seconds": 7.5440734419971704
+    }
+  },
+  {
+    "absolute_grad_shafranov_sup_wb_per_m2": 0.07242093453090526,
+    "checked_interior_cells": 777,
+    "definition": "Nova conservation_ledger relative_grad_shafranov: interior sup of Delta-star(psi_EFIT) minus the extracted p-prime/FF-prime drive, divided by the interior drive sup; no coil-current term",
+    "drive_sup_wb_per_m2": 6.23528058137008,
+    "grid": {
+      "minimum_width_m": 0.030312500020954758,
+      "quarter_width_gate_m": 0.0075781250052386895,
+      "radial_extent_m": [
+        0.05999999865889549,
+        2.0
+      ],
+      "radial_width_m": 0.030312500020954758,
+      "shape": [
+        65,
+        65
+      ],
+      "vertical_extent_m": [
+        -2.0,
+        2.0
+      ],
+      "vertical_width_m": 0.0625
+    },
+    "location": {
+      "absolute_peak": {
+        "coordinate_m": [
+          1.1512499994132668,
+          0.5
+        ],
+        "distance_to_axis_m": 0.5541523538033485,
+        "distance_to_boundary_m": 0.0665099640916266,
+        "distance_to_nearest_x_point_m": 0.904177309349627,
+        "signed_relative_residual": -0.011614703393987796
+      },
+      "largest_region_by_l2_energy_fraction": "interior_bulk",
+      "largest_region_by_relative_sup": "interior_bulk",
+      "neighbourhood_radius_m": 0.060625000041909516,
+      "regions": {
+        "axis_neighbourhood": {
+          "l2_energy_fraction": 4.284633027695322e-05,
+          "relative_rms": 0.00025520372368621606,
+          "relative_sup": 0.0005009733047208721,
+          "sample_count": 5
+        },
+        "boundary_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        },
+        "interior_bulk": {
+          "l2_energy_fraction": 0.999957153669723,
+          "relative_rms": 0.0031375975640180204,
+          "relative_sup": 0.011614703393987796,
+          "sample_count": 772
+        },
+        "x_point_neighbourhood": {
+          "l2_energy_fraction": 0.0,
+          "relative_rms": null,
+          "relative_sup": null,
+          "sample_count": 0
+        }
+      }
+    },
+    "machine": "MAST",
+    "relative_grad_shafranov_sup": 0.011614703393987796,
+    "stride": 1,
+    "wall_cost": {
+      "combined_seconds": 173.8717194609926,
+      "profile_build_seconds": 159.87907657699543,
+      "residual_evaluation_seconds": 13.992642883997178
+    }
+  }
+]

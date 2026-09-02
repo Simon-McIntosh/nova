@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:32:46",
+  "updated": "2026-09-02T11:23:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1022,9 +1022,11 @@
         "id": "mcs-exit-incidence",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060e0-f4b6-79c3-8096-2ec4bbb9b475",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060e0-f4b6-79c3-8096-2ec4bbb9b475"
+        },
         "created": "2026-09-02"
       },
       {
@@ -75312,9 +75314,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T055253904678-gaa-solovev-certificate-run",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-solovev-certificate-run",
+        "node_definition": {
+          "done_when": "docs/figures/gs-absolute-accuracy/solovev-certificate.json validates against the schema stated inside it, carries at least 4 cases x 3 resolutions x the named norm set each with qualification, records a fitted order with uncertainty per norm per case beside the theoretical order, the figures under docs/figures/gs-absolute-accuracy/solovev/ plot the error fields at every resolution for every case, the reduced-oracle row reproduces the 14 LOCKED_RECOVERY_BOUNDS within their registry values, tests/test_solovev_recovery_gates.py stays green in the default lane, SLURM job ids, nodes, elapsed and exit markers are recorded, and git diff --stat shows no change under nova/",
+          "estimated_hours": 3.0,
+          "goal": "The preregistered Solovev certificate receipt docs/figures/gs-absolute-accuracy/solovev-certificate.json with its error-field figures under docs/figures/gs-absolute-accuracy/solovev/, produced by running the merged driver benchmarks/solovev_certificate.py (edited only where the now-restored hex-carrier topology read at main 32f16b3b or a defect the run exposes requires it) on the shipped analytic-oracle path whose default-lane gate tests/test_solovev_recovery_gates.py is green again on main, over the four cases at the four resolutions the driver defines, with the reduced and coarse rungs on a rigel CPU node where the recovery gates already run and the fine rungs on one reserved H200 with one CPU (reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, 3-hour SLURM limit, hardened sbatch, heartbeat, flushed stage timings, persistent compilation cache enabled through nova.jax.config.configure_persistent_compilation_cache, launch-then-harvest inside the fence), never a from-scratch CPU machine build in a lane fence (tests/test_equilibrium_forward_reference.py's cold build takes 54 minutes on CPU), banking every norm with its convergence qualification (qualified or unqualified against the 1e-12 registry bound, never averaged across qualifications), the per-norm log-space order fits with uncertainty beside the theoretical order, the reduced-oracle row reproducing the 14 LOCKED_RECOVERY_BOUNDS within their registry values, the lane and compile-warm wall seconds per solve, with no solver source modified",
+          "id": "gaa-solovev-certificate-run",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T055253904678-gaa-solovev-certificate-run/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "docs/figures/gs-absolute-accuracy/solovev/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solovev-certificate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T05:52:59Z",
+        "completed_at": "2026-09-02T09:23:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 12642,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "0412879818be3ecc8b0ff14ccd8360c655729e84",
+        "commits": [
+          "f76e9142659f1cecac0a1744f9bf96f703b11397"
+        ],
+        "changed_lines": {
+          "added": 6086,
+          "removed": 0,
+          "files": 17
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "aggregate/validate SLURM 1261083 (COMPLETED 0:0, EXIT_MARKER=0) over 16 rows from jobs 1261040-1261081",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T055253904678-gaa-solovev-certificate-run/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T055253904678-gaa-solovev-certificate-run/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060ad-86f4-79b0-9e85-39020a3b9924",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19549696,
+            "cached_input_tokens_cumulative": 19549696,
+            "input_tokens": 19683004,
+            "input_tokens_cumulative": 19683004,
+            "output_tokens": 30071,
+            "output_tokens_cumulative": 30071,
+            "reasoning_output_tokens": 6324,
+            "reasoning_output_tokens_cumulative": 6324
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1332
+    "_version": 1334
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:28:45",
+  "updated": "2026-09-02T08:36:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1152,6 +1152,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "pta-perf",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "pta-review-a",
         "harness": "codex",
         "role": "review",
@@ -1473,9 +1482,11 @@
         "id": "solovev-certificate",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060ad-86f4-79b0-9e85-39020a3b9924",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060ad-86f4-79b0-9e85-39020a3b9924"
+        },
         "created": "2026-09-01"
       },
       {
@@ -73911,6 +73922,6 @@
       }
     ],
     "holds": [],
-    "_version": 1313
+    "_version": 1315
   }
 }

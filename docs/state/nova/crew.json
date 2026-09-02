@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T05:32:07",
+  "updated": "2026-09-02T05:38:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -72109,9 +72109,169 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T033259549895-pta-cell-topology-read-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-cell-topology-read-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md with a PASS or FAIL verdict over: (1) git diff --name-only 84cb6c33^ e9f93f73 lists only the seven fenced paths; (2) the domain-label path consumes carrier rings and physical shared edges built once at operator construction, closes self-padded links through missing_link_mask, evaluates admissibility on the carrier (state how the edge flux is reconstructed and judge whether three quadratic samples per edge are adequate near a saddle), and no longer reshapes to a raster; _structured_grid_axes survives only in the retained raster connectivity comparator; quote file:line; (3) the saddle-neck closure (admissibility level 2e-4 of the in-material flux range inside the selected saddle, reciprocal link canonicalisation) is principled and its constant is explained in the source, not tuned to the reference machine; (4) DomainMasks type and vector order are unchanged and the retained raster path is bitwise preserved (the parity test's construction is independent of the new path); (5) the _support_partition consumers now unpack four entries and the commit body of 95fad275 records why the stale unpack survived; (6) the carrier boundary-class route in e9f93f73 selects the class without raster axes only for physical-carrier operators and does not change the structured-carrier result; (7) the census polish executes on the carrier without a raster reshape, or the report states where a reshape remains; (8) naming hygiene across the chain; (9) every defect quoted with file:line. Read-only review of files, the attribution logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T024407435231-pta-carrier-label-attribution/logs/ and the plan",
+          "estimated_hours": 0.75,
+          "goal": "Write an independent verdict report on the carrier topology-read chain 84cb6c33, 95fad275, 2c60cfae, 3efe9194, e9f93f73 (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-carrier-label-attribution, paths nova/equilibrium/topology.py, nova/equilibrium/forward_operator.py, nova/equilibrium/flux_surface_connectivity.py, tests/test_plasma_cell_topology_read.py, tests/test_plasma_cell_flood_families.py, scripts/analytic_oracle_fixtures/measure.py, scripts/moment_branch_integration/measure.py) against the plan's topology-read contract and its locked decisions",
+          "id": "pta-cell-topology-read-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033259549895-pta-cell-topology-read-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T03:33:06Z",
+        "completed_at": "2026-09-02T03:38:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 300,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 300,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "dc2e2b4431ab1591cd6a463f983cf4cbb1829a01",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033259549895-pta-cell-topology-read-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 476672,
+            "cached_input_tokens_cumulative": 1989632,
+            "input_tokens": 606155,
+            "input_tokens_cumulative": 2305620,
+            "output_tokens": 2079,
+            "output_tokens_cumulative": 10939,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2107
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5598,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the three-hour launch-then-harvest measurement outlives the 60-minute worker fence; job 1261014 is still running in baseline trip 2; the threaded step has not started; and terminal per-trip walls; sampled threaded effective cores; paired compile seconds; same-HEAD residual agreement and the one-sentence verdict therefore do not yet exist",
+              "elapsed_seconds": 9198,
+              "log_age_seconds": 5622,
+              "log_fresh": false,
+              "manifest_commits": [
+                "6564951b6936f8102648f9e416892701f3d3ddf7"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-thread-configuration",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T005936006858-csv-thread-configuration",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5659,
+              "terminal_at": "2026-09-02T01:58:42Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2414,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires while owned job 1261017 is running. Do not cancel or resubmit it. Harvest /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/h200-remedy-vertical-pin.log until the remaining three solve-finish lines (22086/43 vertical-pin and both 21978/35 variants) and EXIT_MARKER=0 appear; verify /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/raw/remedy-vertical-pin-h200.json exists; obtain scheduler elapsed with sacct; run the benchmark compile command using after-referees-jacrev.log and vertical-pin-jacobian-targeted-final.log to create docs/figures/solver-convergence-regression/remedy-vertical-pin.json and remedy-vertical-pin.png; capture compile and check logs; run the benchmark check; inspect quantitative outcomes; rerun final path-scoped checks only if files changed; explicitly stage the six assigned paths; make the required local conventional commit with body; replace this manifest with status complete; commit SHA; receipt metrics; compile/check logs; and blockers none",
+              "elapsed_seconds": 6014,
+              "log_age_seconds": 2686,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; the measurement reads the uncommitted nova diff at capture completion",
+                "so committing before harvest would invalidate its source-scope evidence"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-vertical-pin",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T015239972905-scr-remedy-vertical-pin",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2720,
+              "terminal_at": "2026-09-02T02:47:40Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1297
+    "_version": 1298
   }
 }

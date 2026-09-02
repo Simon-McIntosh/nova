@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:46:46",
+  "updated": "2026-09-02T02:51:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -347,9 +347,11 @@
         "id": "cpu-viability",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ecf-a972-7d52-9922-e960373fcf46",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ecf-a972-7d52-9922-e960373fcf46"
+        },
         "created": "2026-09-01"
       },
       {
@@ -71074,6 +71076,6 @@
       }
     ],
     "holds": [],
-    "_version": 1288
+    "_version": 1289
   }
 }

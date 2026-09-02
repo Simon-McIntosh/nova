@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:45:30",
+  "updated": "2026-09-02T18:29:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78960,9 +78960,182 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T151655477529-fsa-coil-edit-latency",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-coil-edit-latency",
+        "node_definition": {
+          "done_when": "The prescribed_current keyword on ForwardProfile.solve and solve_branch reaches operator.flux_map with replacement semantics, a test proves the traced vector changes the terminal flux while a None keyword reproduces the stored vector bit-identically, the seven referee tests pass, and docs/figures/forward-solve-api/coil-edit-latency.json from one H200 job records for MAST 21989/55 the warm-start solve wall in ms per coil-current edit over at least 20 successive edits of one PF circuit at 5 percent steps with compile count 1 across all edits, terminal residual per edit, and the boundary displacement per edit, committed with the PNG in the worktree as one commit with a body.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the coil-edit re-solve latency of the traced prescribed-current path on MAST 21989/55, which requires the one-keyword solve-level pass-through it has been waiting for: node A (merge e464be9d) made PrescribedCurrentField.flux(current) replace the stored circuit vector and let ForwardFluxOperator.flux_map and flux_map_with_shadow take it as traced data, so ForwardProfile.solve and solve_branch in nova/equilibrium/forward.py gain a prescribed_current keyword passed to operator.flux_map unchanged (None keeps the stored vector), letting a consumer edit a coil current and re-solve without rebuilding the operator or recompiling. The measurement itself runs the prepared benchmark benchmarks/coil_edit_latency.py on the persisted frozen-six MAST carrier for shot 21989 slice 55 as one launch-then-harvest H200 job (reservation gpu_0003_grpA, one CPU, JAX_PLATFORMS=cuda,cpu set inside the sbatch body, TMPDIR=/tmp, persistent compilation cache, heartbeats flushed to a log), warm-starting each solve from the previous terminal flux, sweeping one PF circuit in 5 percent steps for at least 20 edits, recording per edit the solve wall in ms, the compile count, the terminal residual and the LCFS or binding-contour displacement, writing the receipt JSON with a PNG of latency and displacement against edit index. The receipt states honestly whether the per-edit latency is in the millisecond or the second regime, because the sequential strict-exit measurement found width-1 warm solves of this member cost about 71 to 76 s from a cold seed while the warm-start regime is what this node measures. Park with a harvest brief if the job outlives the fence.",
+          "id": "fsa-coil-edit-latency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151655477529-fsa-coil-edit-latency/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "benchmarks/coil_edit_latency.py",
+            "tests/test_prescribed_current_solve.py",
+            "docs/figures/forward-solve-api/coil-edit-latency.json",
+            "docs/figures/forward-solve-api/coil-edit-latency.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-traced-current",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T15:17:03Z",
+        "completed_at": "2026-09-02T16:26:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4195,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4195,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "582a573a8f59379aac1345de3daf2e2458cbe496",
+        "commits": [
+          "31e27272ff923c97f0b3e3cbf95ab67b55004049"
+        ],
+        "changed_lines": {
+          "added": 912,
+          "removed": 66,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_prescribed_current_traced.py tests/test_prescribed_current_solve.py plus the seven referee node IDs (15 passed); H200 job 1261545 receipt assertions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151655477529-fsa-coil-edit-latency/logs/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151655477529-fsa-coil-edit-latency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06236-1e9e-7b10-8ad0-d2ce93e5c352",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2806144,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2835036,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 11764,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4076
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4488,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The 60-minute worker fence expires before the launch-then-harvest production jobs can complete. The acceptance artifact is not yet produced: only 5 of 16 corrected rows are durable; jobs 1261437_0/_1/_2; 1261438 and 1261467_3 are still running; and aggregate/validate job 1261468 is waiting on them.",
+              "elapsed_seconds": 8088,
+              "log_age_seconds": 4731,
+              "log_fresh": false,
+              "manifest_commits": [
+                "8f8ef64ecb61440e0ee89ee1d2925066669aa790",
+                "cac9bd1b5ace86af07d7abe7122534bec3c39fe6",
+                "bb4f158e6b9f127943df5e21d8be59fa83468e02"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md; resolve the blocker before resuming the run",
+              "node": "gaa-fixture-derivative-fix",
+              "phase": "starting",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T130200757161-gaa-fixture-derivative-fix",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 4793,
+              "terminal_at": "2026-09-02T13:57:05Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-fixture-derivative-fix"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 657,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4257,
+              "log_age_seconds": 3048,
+              "log_fresh": false,
+              "manifest_commits": [
+                "825a2cd95117a3b37660b4d47f8bca7d933345e7"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T140545356101-scr-bank-efit-overlays/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T140545356101-scr-bank-efit-overlays --gate <verdict> --commit 825a2cd95117a3b37660b4d47f8bca7d933345e7",
+              "node": "scr-bank-efit-overlays",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T140545356101-scr-bank-efit-overlays",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 3103,
+              "terminal_at": "2026-09-02T14:25:16Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-bank-efit-overlays"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1377
+    "_version": 1378
   }
 }

@@ -15,13 +15,15 @@
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-sprint" content="S20">
+<meta name="plan-sprint" content="S19">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="equilibrium,jax,h200,throughput,fixed-point">
 <meta name="plan-depends-on" content="forward-solve-api">
 <title>Batched operator boundary | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -34,9 +36,7 @@
 <h2 id="s2">§2 — The measurement that failed, repeated</h2>
 <p>Rerun the strict-exit incidence measurement on the real MAST and DIII-D bank mixes as one width-12 and one width-5 program on the H200 (one CPU, one H200, persistent compilation cache), the exit enabled and disabled as two passes over the same arguments, recording compile seconds, peak host memory at every stage, per-member firing trip, and the per-machine ms per member beside the sequential width-1 measurement <code>millisecond-converged-solve</code> §1 banked. Then rerun the EFIT reproduction gate's eleven frames with frame data as arguments and show the compilation cache hitting from the second frame of each machine. Done-when: the width-12 batch compiles once under 16 GB host memory, the exit incidence receipt states the batched ms per member per machine, and the EFIT gate's compile-cache column reads hit on at least nine of eleven frames.</p>
 
-<section data-reckon="decisions" id="decisions" class="r-decisions">
-<h2><span class="sec">§</span> Decisions</h2>
-</section>
+
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>

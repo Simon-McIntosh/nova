@@ -6,22 +6,24 @@
 <meta name="docs-project" content="nova">
 <meta name="reckon-type" content="plan">
 <meta name="plan-slug" content="solve-default-wiring">
-<meta name="plan-title" content="Solve default wiring — close the audit gaps on today's routes and pin them">
-<meta name="plan-summary" content="Apply the capability-wiring audit's one-line fixes so every production route runs the landed defaults, and land a default-wiring test that fails when one regresses to opt-in.">
-<meta name="plan-status" content="draft">
+<meta name="plan-title" content="Solve default wiring — close the audit gaps on today&#x27;s routes and pin them">
+<meta name="plan-summary" content="Apply the capability-wiring audit&#x27;s one-line fixes so every production route runs the landed defaults, and land a default-wiring test that fails when one regresses to opt-in.">
+<meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-sprint" content="S20">
+<meta name="plan-sprint" content="S19">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="equilibrium,fixed-point,reuse,jax">
 <meta name="plan-blocks" content="forward-solve-api">
 <title>Solve default wiring | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -34,9 +36,7 @@
 <h2 id="s2">§2 — The default-wiring test</h2>
 <p>One test module in the default pytest lane that, for each production entry point the audit named, constructs the route with no options and asserts every declared default resolved on: current pin, settled exit, own-mask acceptance, continuation, best-iterate retention, stagnation stop, exact kernels, cached machine, compilation cache. The assertions read the route's own receipt fields, not internal state, so the test survives the later migration onto the request contract. Done-when: the test is green in the default lane on main, the wiring audit rerun against main reads DEFAULT-ON in every production cell except the two intentional opt-ins, and a deliberate regression (removing one default in a scratch branch) makes the test fail.</p>
 
-<section data-reckon="decisions" id="decisions" class="r-decisions">
-<h2><span class="sec">§</span> Decisions</h2>
-</section>
+
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>

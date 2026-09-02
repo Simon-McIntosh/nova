@@ -15,7 +15,7 @@
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-sprint" content="S20">
+<meta name="plan-sprint" content="S19">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="equilibrium,fixed-point,provenance,jax,reuse">
 <meta name="plan-depends-on" content="solver-convergence-regression,solve-default-wiring">
@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="11">
 </head>
 <body>
 <main class="plan-doc">
@@ -81,6 +81,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260902T151453821105" data-who="reckon-ship-s19" data-when="2026-09-02T17:16:00+02:00">
     <div class="r-comment-body">LANDED node C (receipt topology): worker commit 7eebe4c9 merged at 6fb07a40. ForwardEquilibrium gains an optional typed labelled_flux leaf (ForwardLabelledFlux) populated by every production receipt from the same terminal topology state: psi, psi_norm, o_point, primary and secondary X points, a fixed-capacity LCFS polyline with lcfs_vertex_count, strike points, and per-cell ForwardDomainLabel with exactly core=0, private_flux=1, wall_shadow=2, open=3 and no SOL member. The hex path interpolates the shared atomic edges at psi_N=1; the persisted MAST 33x33 raster publishes psi, psi_N and labels on all 1089 nodes by scattering the 961 interior-ring labels through the ring index into an open-initialised array, and reports zero raster LCFS vertices honestly because the existing separatrix read requests zero rays (the consumer's raster psi arrives in node C2 regardless). Receipt docs/figures/forward-solve-api/receipt-topology.json from H200 job 1261465: compile calls 1 and 1, launch count 6 and 6 with and without the leaf, median solve wall 6.11 s versus 6.05 s (delta 60 ms inside the 302 ms noise allowance), existing receipt fields bit-identical, six-way verdict all true. Tests: tests/test_solve_receipt_topology.py 2 passed (converged frozen-MAST arm observes all four labels), seven referees 9 passed. Diff under nova confined to nova/equilibrium/forward.py. Two earlier H200 captures failed on a 1089-versus-961 shape mismatch, resolved by producing labels on the full grid. NOT in this node: the solve-level prescribed_current keyword; it lands with the coil-edit latency benchmark (next dispatch) so the keyword and its measured latency arrive in one SHA for the imas-ambix consumer.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260902T151655477529-fsa-coil-edit-latency" data-who="fsa-traced-current" data-when="2026-09-02T16:26:58Z">
+    <div class="r-comment-body"><p>Solve-level prescribed_current keyword merged at 6af77248 with receipt docs/figures/forward-solve-api/coil-edit-latency.json: compile count 1 and constant executable identity across 21 P6-upper edits (no recompile per edit), warm re-solve 21 to 68 s per edit, 0 of 21 converged (18 settled, 3 budget), binding-point displacement under 1 mm for a 400 A edit with no LCFS vertices on the raster path; omitted versus explicit stored vector receipts differ bitwise, recorded as a finding</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260902T163011487781" data-who="reckon-ship-s19" data-when="2026-09-02T18:30:00+02:00">
+    <div class="r-comment-body">LANDED node A second half (fsa-coil-edit-latency): worker commit 31e27272 merged at 6af77248. ForwardProfile.solve and solve_branch take prescribed_current and pass it to operator.flux_map unchanged (None keeps the stored vector); tests/test_prescribed_current_solve.py 2 passed, referees 9 passed. RECEIPT docs/figures/forward-solve-api/coil-edit-latency.json (H200 job 1261545, MAST 21989/55, P6 upper edited in 5 percent steps to plus or minus 20 percent, 21 edits, warm-started from the previous terminal state). THE PART THAT IS RIGHT: a coil-current edit never recompiles. Compile count 1, StableHLO digest and executable identity constant across all 21 edits, 20 of 20 subsequent edits are jit cache hits; the current enters the solve as traced data through the response matmul exactly as the plasma-cell current does. THE PART THAT IS WRONG, and it is the trip loop, not the API: a warm re-solve costs 21 to 68 s per edit (the first edit 705 s including the process's one compile), because every edit re-enters the active-set loop for 2 to 16 trips at roughly 10 s per trip at width 1, and 0 of 21 edits converge (18 settled, 3 budget exhausted). 21989/55 is a stagnating limited row in the regenerated bank, so the demonstrator case was itself a stagnating arm. The boundary measure is also confounded: the raster path publishes zero LCFS vertices (known, receipt-topology), so displacement fell back to the selected binding point, which moved under 1 mm for a 400 A edit of a 1983 A coil; that proxy is insensitive and says nothing about P6 coupling. FINDING to carry: omitting prescribed_current (stored vector closed into the trace as a constant) versus passing the same vector as traced data produces bitwise-different full receipts (digests d0d4fac5 versus ef8b86a4); XLA constant folding versus runtime operand is the likely mechanism, magnitude not yet quantified, must be measured (expect roundoff, treat anything larger as a defect) before the API declares the traced path the default. NEXT for the demonstrator: rerun on a converging arm (22086/43 mixed or 21985/51 mixed) with a boundary-coupled circuit (P4 or P5) once the convergence decision lands; warm start (node B) should then be a single Newton correction in one trip, which is the millisecond regime the API is for.</div>
 </div>
 </section>
 </main>

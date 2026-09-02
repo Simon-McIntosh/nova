@@ -1,0 +1,556 @@
+{
+  "attribution": {
+    "commit": "aecea6a7d8913b105b5ab15317280f167d818cf2",
+    "head_22086_x_polished_minus_seed_value_wb": 0.03381428323180058,
+    "head_22086_x_slot_accepted": true,
+    "mechanism": "census_selected_null_polish",
+    "verdict": "The convergence flip is attributed to the census-selected null polish: the main-HEAD 22086/43 X slot accepted a polish with a nonzero flux-value change, so the boundary flux entering the exact bank route moved.",
+    "x_slot_accepted_with_nonzero_value_change": true
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.005113065242767334
+  },
+  "current_main_22086_43_converges_below_1e-8": true,
+  "execution_contract": {
+    "assigned_worktree_nova_diff_stat": "",
+    "one_reserved_h200": true,
+    "same_bank_generation_route": "passive-inclusive case plus the production solve_portfolio pure arm",
+    "solver_source_modified": false
+  },
+  "figure": "docs/figures/solver-convergence-regression/null-polish-attribution.png",
+  "intervening_nova_commits": {
+    "command": "git log --reverse --format=%H%x09%P%x09%s 69fc5e3ea38cf7e550efee13a5c55dc9f14250d3..4da60e9fc1f4af442942608c4c13c05a8017a183 -- nova/",
+    "commits": [
+      {
+        "parents": [
+          "48a22a10389f68ad5196529495415c4b58722642"
+        ],
+        "sha": "31daffeefb74927938318769b34c657ba951697c",
+        "subject": "fix(equilibrium): qualify spline-polished nulls"
+      },
+      {
+        "parents": [
+          "31daffeefb74927938318769b34c657ba951697c"
+        ],
+        "sha": "b9b8143076c7f5667391d379658518822a017120",
+        "subject": "fix(equilibrium): derive split polish error floors"
+      },
+      {
+        "parents": [
+          "b9b8143076c7f5667391d379658518822a017120"
+        ],
+        "sha": "6878350dcc4e2724052dbd257b51fef012249225",
+        "subject": "fix(equilibrium): scale polish basis receipts"
+      },
+      {
+        "parents": [
+          "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3",
+          "4b244ce673b9fb460054fc132969f89f272be0ed"
+        ],
+        "sha": "aecea6a7d8913b105b5ab15317280f167d818cf2",
+        "subject": "Merge the census-selected null polish"
+      },
+      {
+        "parents": [
+          "2086424d148d1870becccf6d42d810a12f6a3d15"
+        ],
+        "sha": "990cf0caa5071e54e119eb05ec6b72bc4b00c291",
+        "subject": "fix(biot): preserve distorted hex ring order"
+      }
+    ],
+    "count": 5,
+    "verbatim": "31daffeefb74927938318769b34c657ba951697c\t48a22a10389f68ad5196529495415c4b58722642\tfix(equilibrium): qualify spline-polished nulls\nb9b8143076c7f5667391d379658518822a017120\t31daffeefb74927938318769b34c657ba951697c\tfix(equilibrium): derive split polish error floors\n6878350dcc4e2724052dbd257b51fef012249225\tb9b8143076c7f5667391d379658518822a017120\tfix(equilibrium): scale polish basis receipts\naecea6a7d8913b105b5ab15317280f167d818cf2\t69fc5e3ea38cf7e550efee13a5c55dc9f14250d3 4b244ce673b9fb460054fc132969f89f272be0ed\tMerge the census-selected null polish\n990cf0caa5071e54e119eb05ec6b72bc4b00c291\t2086424d148d1870becccf6d42d810a12f6a3d15\tfix(biot): preserve distorted hex ring order"
+  },
+  "receipt": "census null-polish convergence attribution",
+  "reference_histories": {
+    "banked_old": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+      "terminal_residual": 6.079614869877941e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    },
+    "own_mask": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ],
+      "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+      "terminal_residual": 0.000480233535391836,
+      "termination_reason": "active_set_stagnated",
+      "trip_count": 7
+    },
+    "source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-attribution/docs/figures/solver-convergence-regression/root-cause.json",
+    "source_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821"
+  },
+  "revisions": {
+    "before_null_polish": {
+      "allocation": {
+        "allocated_cpus": 1,
+        "allocated_gpus": 1,
+        "gpu": "NVIDIA H200 NVL, GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae",
+        "jax_backend": "gpu",
+        "jax_devices": [
+          "cuda:0"
+        ],
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1261024,
+        "job_name": "null-polish-attribution",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "reservation": "gpu_0003_grpA",
+        "tmpdir": "/tmp"
+      },
+      "arms": {
+        "21978/35 pure": {
+          "committed_row": {
+            "converged": false,
+            "selected_saddle_m": [
+              0.562864784448253,
+              1.2634871866690023
+            ],
+            "terminal_residual": 0.002450918725801937,
+            "termination_reason": "active_set_cycle_detected"
+          },
+          "reference": {
+            "shot": 21978,
+            "slice_index": 35,
+            "time_s": 0.1899999976158142
+          },
+          "scheduler": {
+            "cpu_count": 1,
+            "elapsed": "01:08:52",
+            "exit_marker": 0,
+            "job_id": 1261024,
+            "node": "98dci4-gpu-0003"
+          },
+          "selected_saddle_distance_from_committed_m": 6.833000258437876e-07,
+          "solve": {
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              2
+            ],
+            "active_set_residuals": [
+              0.0045548525688682015,
+              0.0033463831584596626,
+              0.002674636272346105,
+              0.0024509187258021595
+            ],
+            "converged": false,
+            "selected_saddle_m": [
+              0.5628647844482534,
+              1.2634871866690027
+            ],
+            "solve_wall_seconds_including_compilation": 780.2455085217953,
+            "solver": {
+              "fixed_point_tolerance": 1e-08,
+              "gmres_iterations": 12,
+              "newton_steps": 12,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "warmup_sweeps": 0
+            },
+            "terminal_residual": 0.0024509187258021595,
+            "termination_reason": "active_set_cycle_detected",
+            "topology_qualification_polish_receipt": null,
+            "trip_count": 4
+          },
+          "terminal_residual_below_1e-8": false
+        },
+        "22086/43 pure": {
+          "committed_row": {
+            "converged": false,
+            "selected_saddle_m": [
+              0.5923829262398882,
+              1.2202546920689854
+            ],
+            "terminal_residual": 0.00048023353539180234,
+            "termination_reason": "active_set_stagnated"
+          },
+          "reference": {
+            "shot": 22086,
+            "slice_index": 43,
+            "time_s": 0.22999998927116394
+          },
+          "scheduler": {
+            "cpu_count": 1,
+            "elapsed": "01:08:52",
+            "exit_marker": 0,
+            "job_id": 1261024,
+            "node": "98dci4-gpu-0003"
+          },
+          "selected_saddle_distance_from_committed_m": 0.005171479237273657,
+          "solve": {
+            "active_set_mask_differences": [
+              38,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.0049764556897343,
+              0.0031314746103240456,
+              0.0019512703665674985,
+              0.0006652842022510339,
+              0.0004808521116039596,
+              0.000480233535391791,
+              0.000480233535391791
+            ],
+            "converged": false,
+            "selected_saddle_m": [
+              0.5923829262398872,
+              1.2202546920689854
+            ],
+            "solve_wall_seconds_including_compilation": 813.8604786386713,
+            "solver": {
+              "fixed_point_tolerance": 1e-08,
+              "gmres_iterations": 12,
+              "newton_steps": 12,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "warmup_sweeps": 0
+            },
+            "terminal_residual": 0.000480233535391791,
+            "termination_reason": "active_set_settled",
+            "topology_qualification_polish_receipt": null,
+            "trip_count": 7
+          },
+          "terminal_residual_below_1e-8": false
+        }
+      },
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/raw/before-null-polish.json",
+      "raw_capture_sha256": "d74d7874da52ff6abd49e7c49618f7986c378ae5adfd01bbe6190afe7e926be2",
+      "revision": "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3",
+      "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-before-shadow"
+    },
+    "main_head": {
+      "allocation": {
+        "allocated_cpus": 1,
+        "allocated_gpus": 1,
+        "gpu": "NVIDIA H200 NVL, GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae",
+        "jax_backend": "gpu",
+        "jax_devices": [
+          "cuda:0"
+        ],
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1261024,
+        "job_name": "null-polish-attribution",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "reservation": "gpu_0003_grpA",
+        "tmpdir": "/tmp"
+      },
+      "arms": {
+        "21978/35 pure": {
+          "committed_row": {
+            "converged": false,
+            "selected_saddle_m": [
+              0.562864784448253,
+              1.2634871866690023
+            ],
+            "terminal_residual": 0.002450918725801937,
+            "termination_reason": "active_set_cycle_detected"
+          },
+          "reference": {
+            "shot": 21978,
+            "slice_index": 35,
+            "time_s": 0.1899999976158142
+          },
+          "scheduler": {
+            "cpu_count": 1,
+            "elapsed": "01:08:52",
+            "exit_marker": 0,
+            "job_id": 1261024,
+            "node": "98dci4-gpu-0003"
+          },
+          "selected_saddle_distance_from_committed_m": 0.011956787161283525,
+          "solve": {
+            "active_set_mask_differences": [
+              8,
+              8,
+              0,
+              1,
+              0,
+              1
+            ],
+            "active_set_residuals": [
+              0.00455071624171167,
+              0.0033393685659339114,
+              0.0026697885416938592,
+              0.002225416933792496,
+              0.001902012896465049,
+              0.0017619185202158794
+            ],
+            "converged": false,
+            "selected_saddle_m": [
+              0.5721472168874867,
+              1.2559513535877196
+            ],
+            "solve_wall_seconds_including_compilation": 1107.9498095037416,
+            "solver": {
+              "fixed_point_tolerance": 1e-08,
+              "gmres_iterations": 12,
+              "newton_steps": 12,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "warmup_sweeps": 0
+            },
+            "terminal_residual": 0.0017619185202158794,
+            "termination_reason": "active_set_cycle_detected",
+            "topology_qualification_polish_receipt": {
+              "slot_order": [
+                "o",
+                "x"
+              ],
+              "slots": {
+                "o": {
+                  "accepted": true,
+                  "normalized_gradient": 0.03457232989226741,
+                  "polished_minus_seed_value_wb": -0.018469862757065747,
+                  "polished_position_rz_m": [
+                    0.9033027754223196,
+                    0.019408620601347053
+                  ],
+                  "polished_value_wb": 0.29600942897517685,
+                  "representation_floor": 2.1189234017665233,
+                  "roundoff_floor": 7.763980998706149e-09,
+                  "seed_position_rz_m": [
+                    0.9033027754223196,
+                    0.019408620601347053
+                  ],
+                  "seed_value_wb": 0.3144792917322426,
+                  "selected_position_rz_m": [
+                    0.9033027754223196,
+                    0.019408620601347053
+                  ],
+                  "selected_value_wb": 0.29600942897517685
+                },
+                "x": {
+                  "accepted": true,
+                  "normalized_gradient": 0.481817197746795,
+                  "polished_minus_seed_value_wb": 0.02301834020789789,
+                  "polished_position_rz_m": [
+                    0.5721472168874867,
+                    1.2559513535877196
+                  ],
+                  "polished_value_wb": -0.044534864773852365,
+                  "representation_floor": 2.1189234017665233,
+                  "roundoff_floor": 9.09837064321742e-09,
+                  "seed_position_rz_m": [
+                    0.5721472168874867,
+                    1.2559513535877196
+                  ],
+                  "seed_value_wb": -0.06755320498175026,
+                  "selected_position_rz_m": [
+                    0.5721472168874867,
+                    1.2559513535877196
+                  ],
+                  "selected_value_wb": -0.044534864773852365
+                }
+              }
+            },
+            "trip_count": 6
+          },
+          "terminal_residual_below_1e-8": false
+        },
+        "22086/43 pure": {
+          "committed_row": {
+            "converged": false,
+            "selected_saddle_m": [
+              0.5923829262398882,
+              1.2202546920689854
+            ],
+            "terminal_residual": 0.00048023353539180234,
+            "termination_reason": "active_set_stagnated"
+          },
+          "reference": {
+            "shot": 22086,
+            "slice_index": 43,
+            "time_s": 0.22999998927116394
+          },
+          "scheduler": {
+            "cpu_count": 1,
+            "elapsed": "01:08:52",
+            "exit_marker": 0,
+            "job_id": 1261024,
+            "node": "98dci4-gpu-0003"
+          },
+          "selected_saddle_distance_from_committed_m": 0.0026253382070674154,
+          "solve": {
+            "active_set_mask_differences": [
+              15,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.004976378315113681,
+              0.0031685638994362352,
+              0.002019314631491959,
+              0.0012743582491016436,
+              0.0007982753653239939,
+              0.0005054860589130223,
+              0.0003232245563564855,
+              0.00020886301116955586,
+              0.0001351695652745298,
+              3.176841148064956e-11
+            ],
+            "converged": true,
+            "selected_saddle_m": [
+              0.5918242040899664,
+              1.2228082432770593
+            ],
+            "solve_wall_seconds_including_compilation": 992.0309342481196,
+            "solver": {
+              "fixed_point_tolerance": 1e-08,
+              "gmres_iterations": 12,
+              "newton_steps": 12,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "warmup_sweeps": 0
+            },
+            "terminal_residual": 3.176841148064956e-11,
+            "termination_reason": "converged",
+            "topology_qualification_polish_receipt": {
+              "slot_order": [
+                "o",
+                "x"
+              ],
+              "slots": {
+                "o": {
+                  "accepted": true,
+                  "normalized_gradient": 0.004532222931586931,
+                  "polished_minus_seed_value_wb": -0.03538098587273869,
+                  "polished_position_rz_m": [
+                    0.9016135226482141,
+                    0.024617983994891308
+                  ],
+                  "polished_value_wb": 0.30630840528110204,
+                  "representation_floor": 2.223052042494619,
+                  "roundoff_floor": 8.048598729910074e-09,
+                  "seed_position_rz_m": [
+                    0.9016135226482141,
+                    0.024617983994891308
+                  ],
+                  "seed_value_wb": 0.3416893911538407,
+                  "selected_position_rz_m": [
+                    0.9016135226482141,
+                    0.024617983994891308
+                  ],
+                  "selected_value_wb": 0.30630840528110204
+                },
+                "x": {
+                  "accepted": true,
+                  "normalized_gradient": 0.4992902284286708,
+                  "polished_minus_seed_value_wb": 0.03381428323180058,
+                  "polished_position_rz_m": [
+                    0.5918242040899664,
+                    1.2228082432770593
+                  ],
+                  "polished_value_wb": -0.08890167142156871,
+                  "representation_floor": 2.223052042494619,
+                  "roundoff_floor": 9.251861751567504e-09,
+                  "seed_position_rz_m": [
+                    0.5918242040899664,
+                    1.2228082432770593
+                  ],
+                  "seed_value_wb": -0.12271595465336929,
+                  "selected_position_rz_m": [
+                    0.5918242040899664,
+                    1.2228082432770593
+                  ],
+                  "selected_value_wb": -0.08890167142156871
+                }
+              }
+            },
+            "trip_count": 10
+          },
+          "terminal_residual_below_1e-8": true
+        }
+      },
+      "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/raw/main-head.json",
+      "raw_capture_sha256": "505e4436259076ef71e93b3cbddff4102712d37c7056f10099f64f20303f601e",
+      "revision": "4da60e9fc1f4af442942608c4c13c05a8017a183",
+      "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-main-shadow"
+    }
+  },
+  "scheduler": {
+    "cpu_count": 1,
+    "elapsed": "01:08:52",
+    "exit_marker": 0,
+    "job_id": 1261024,
+    "node": "98dci4-gpu-0003"
+  }
+}

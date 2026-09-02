@@ -29,6 +29,7 @@ def _stagnating_solve(stop_on_stagnation: bool):
         shadowed_map_fn=shadowed_map,
         active_set_steps=6,
         stop_on_active_set_stagnation=stop_on_stagnation,
+        stop_on_active_set_settlement=False,
     )
 
 

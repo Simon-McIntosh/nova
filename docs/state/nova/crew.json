@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T07:11:15",
+  "updated": "2026-09-02T08:21:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73436,9 +73436,98 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T061708423251-pta-stagnation-baseline",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-stagnation-baseline",
+        "node_definition": {
+          "done_when": "The log /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-baseline/test_active_set_stagnation_main.log exists, produced from the worktree root by JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_active_set_stagnation.py with stdout and stderr redirected into it and the line EXIT= plus the exit status appended; the manifest states the base commit, the pass and fail counts, and for any failure the assertion line (for example active_set_iterations observed versus expected); no source or test file is modified and no commit is made",
+          "estimated_hours": 0.25,
+          "goal": "Establish whether tests/test_active_set_stagnation.py fails on current main (your worktree base) independently of the mask migration, by running it once as a fresh-process lane into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-baseline",
+          "id": "pta-stagnation-baseline",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T061708423251-pta-stagnation-baseline/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-baseline"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:17:13Z",
+        "completed_at": "2026-09-02T06:21:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 264,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 264,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "85dac1726459f3838017dc476a620cee67405f28",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_active_set_stagnation.py on main 85dac172",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-baseline/test_active_set_stagnation_main.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T061708423251-pta-stagnation-baseline/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_active_set_stagnation.py",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1308
+    "_version": 1309
   }
 }

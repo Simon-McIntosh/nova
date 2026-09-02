@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -99,9 +99,9 @@
     <p class="r-dec-rat">Deduced from the locked census-primary semantics (§2) and the connectivity definition of the boundary (§1, §3): the label authority is the saddle-aware read of the map itself, so the census-selected saddle flux normalises the labels and a stored boundary scalar is a reference datum, never the yardstick for a label-parity census. The raster path agrees bitwise (0/646), so this is not a carrier effect. Reopen through dissent if the lead wants the published scalar to bind.</p>
     </div>
 <div class="r-dec" data-key="polish-value-authority" data-choice="map-value-at-polished-position" data-by="reckon-ship s18-pta" data-when="2026-09-02T07:10:00+00:00">
-    <p class="r-dec-q">May the split polish replace the selected null's flux value with the fit's value?</p>
+    <p class="r-dec-q">May the split polish replace the selected null&#x27;s flux value with the fit&#x27;s value?</p>
     <p class="r-dec-ctx">On MAST 22086/43 the accepted X polish left the position unmoved and changed the boundary flux by 28% (−0.12272 → −0.08890 Wb) under a representation floor of 2.22, flipping a stagnating pure arm to convergence.</p>
-    <p class="r-dec-rat">No: the locked rule is spline polish-only and §2 says the step refines positions. The value at the polished position comes from the map through the census interpolation; the fit's value is diagnostic only. Reopen through dissent if the lead wants the fit to own values where it demonstrably represents the map.</p>
+    <p class="r-dec-rat">No: the locked rule is spline polish-only and §2 says the step refines positions. The value at the polished position comes from the map through the census interpolation; the fit&#x27;s value is diagnostic only. Reopen through dissent if the lead wants the fit to own values where it demonstrably represents the map.</p>
     </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
@@ -210,6 +210,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T215937566883-pta-census-split-polish-regression-verify" data-who="pta-review-b" data-when="2026-09-01T22:01:42Z">
     <div class="r-comment-body"><p>Review PASS: completeness gap closed, scope test-only, 41/41 log confirmed, hygiene clean</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T061708423251-pta-stagnation-baseline" data-who="pta-test" data-when="2026-09-02T06:21:37Z">
+    <div class="r-comment-body"><p>On main 85dac172 tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts already fails with active_set_iterations 1 == 2 (1 passed, 1 failed), so the failure is pre-existing and not caused by the mask migration; recheck after the polish-value fix merges</p></div>
 </div>
 </section>
 </main>

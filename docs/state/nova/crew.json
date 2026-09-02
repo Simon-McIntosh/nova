@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:29:06",
+  "updated": "2026-09-02T18:32:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1543,6 +1543,15 @@
           "gpt-5.6-sol": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "sdw-efit-parity-default",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "seam-scout",
@@ -79133,9 +79142,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T154619171050-pta-schema4-bank-regeneration-2",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-schema4-bank-regeneration-2",
+        "node_definition": {
+          "done_when": "The regenerated mast-topology-operands.npz and mast-topology-operands.metadata.json are committed in the worktree with a body naming the producer commit, the base revision, the carrier semantic identity and the SLURM job id; a census in the manifest lists per row the cell count, per_cell_flux_values length, current_cell_polygons shape and atomic_node_signed_flux length (11 rows populated, 21986/46 mixed recorded unavailable with the exception name); the metadata carries the cache identity and staleness fields the producer writes, and solver_qualification.marginal_solver_basin stays consistent with docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json (true for 21978/35 pure and 22086/43 pure only); JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_mask_replay.py on the regenerated bank still reports 0 of 42 differing cells on 22086/43 mixed with the log cited; the per-row domain-label difference count against the current bank is stated (expected 0 for the two schema-4 rows, reported as a finding for any row whose labels moved under the re-baselined solver); no other file is modified; if the H200 queue does not start the job within 20 minutes, hand off with the job id in the manifest rather than cancel; keep host-side work light because the login node is under memory pressure",
+          "estimated_hours": 3.0,
+          "goal": "Regenerate the twelve-row MAST operand bank docs/figures/topology-visual-corroboration/mast-topology-operands.npz with the schema-4 fields (per_cell_flux_values, per_candidate_domain_labels, current_cell_polygons, atomic_node_signed_flux) populated for every row that has cells, using the merged schema-4 producer docs/figures/topology-visual-corroboration/generate_topology_visuals.py (its refresh-rows mode) and the pinned regeneration recipe docs/figures/topology-visual-corroboration/mast-22086-pinned-regeneration.sbatch adapted to current main on the H200 (sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --mem=64G --time=04:00:00, export TMPDIR=/tmp), against the persisted frozen-six response carrier with semantic identity 1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994, recording 21986/46 mixed (NoQualifiedAxisError before any residual) as an unavailable zero-cell row rather than failing the bank",
+          "id": "pta-schema4-bank-regeneration-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T154619171050-pta-schema4-bank-regeneration-2/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "150m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-perf",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T15:46:29Z",
+        "completed_at": "2026-09-02T16:29:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2582,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2582,
+        "stalled": false,
+        "time_budget": "150m",
+        "base_sha": "a9f1bbf1d5aad3c8e46ecc16276ca0fa9fd91ea4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T154619171050-pta-schema4-bank-regeneration-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3419904,
+            "cached_input_tokens_cumulative": 3419904,
+            "input_tokens": 3643645,
+            "input_tokens_cumulative": 3643645,
+            "output_tokens": 5881,
+            "output_tokens_cumulative": 5881,
+            "reasoning_output_tokens": 1460,
+            "reasoning_output_tokens_cumulative": 1460
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "the producer itself needs a repair outside the node's write scope; both bank artifacts unchanged at their baseline hashes",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1378
+    "_version": 1380
   }
 }

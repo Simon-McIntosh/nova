@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T19:53:56",
+  "updated": "2026-09-02T20:16:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -715,6 +715,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "fsa-raster-receipt",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "fsa-receipt-topology",
         "harness": "codex",
         "role": "implement",
@@ -723,6 +732,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a06236-445f-7111-8241-f26a7af6d1ea"
         },
+        "created": "2026-09-02"
+      },
+      {
+        "id": "fsa-traced-bitwise",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-02"
       },
       {
@@ -1534,6 +1552,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "scr-cache-review",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "scr-mechanism",
         "harness": "codex",
         "role": "implement",
@@ -1543,6 +1570,15 @@
           "gpt-5.6-sol": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "scr-presettlement",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "sdw-compile-cache",
@@ -1575,6 +1611,15 @@
         "id": "sdw-parity-current",
         "harness": "codex",
         "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-review-a",
+        "harness": "codex",
+        "role": "review",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -79279,6 +79324,6 @@
       }
     ],
     "holds": [],
-    "_version": 1384
+    "_version": 1389
   }
 }

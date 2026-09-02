@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:21:41",
+  "updated": "2026-09-02T08:24:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73525,9 +73525,200 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T061729992822-pta-cell-mask-shadow-telemetry-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-cell-mask-shadow-telemetry-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md with a PASS or FAIL verdict over: (1) git show --stat f944f6d3 lists only the two fenced paths and connectivity_boundary.py, fixed_point.py and forward.py are untouched; (2) residual_shadow_components obtains private_wall_node_mask and the X-candidate set from the carrier labels and census (nearest confined cell carrying PRIVATE_FLUX) for every constructed operator, the mask vector keeps its length and order, and the retained _connectivity_read is bitwise unchanged; quote file:line; (3) explain, with the fixture geometry and the labels, why the single-null fixture reports every one of its 96 wall nodes private under the carrier rule (every nearest cell PRIVATE_FLUX) while the retained raster mask marks none \u2014 decide whether this is the documented authority difference, a fixture whose wall lies entirely in a private lobe, or a defect in the wall-node-to-cell mapping (_wall_carrier_index) or in the fixture's axis selection that makes every closed cell private; this item decides the verdict; (4) the telemetry regression compares per-trip mask_differences from a short fixed-point run against trip-by-trip symmetric differences of the cell labels and passes eager and JIT; (5) the manifest's claim that the 2214-cell reference machine reproduces the recorded 44 wall-shadow nodes is supported by a cited log; (6) the failing tests/test_active_set_stagnation.py case (active_set_iterations 1 versus 2) is analysed: state whether the mask migration could change the trip count or whether the merged census polish (boundary flux change) is the likelier cause; (7) naming hygiene; (8) every defect quoted with file:line. Read-only review of files and the logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054306674283-pta-cell-mask-shadow-telemetry/logs/",
+          "estimated_hours": 0.75,
+          "goal": "Write an independent verdict report on commit f944f6d3 of node pta-cell-mask-shadow-telemetry (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-cell-mask-shadow-telemetry, paths nova/equilibrium/forward_operator.py, tests/test_plasma_cell_shadow_telemetry.py) against the plan's mask-and-telemetry section",
+          "id": "pta-cell-mask-shadow-telemetry-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T061729992822-pta-cell-mask-shadow-telemetry-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T06:17:35Z",
+        "completed_at": "2026-09-02T06:24:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 409,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 409,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "85dac1726459f3838017dc476a620cee67405f28",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T061729992822-pta-cell-mask-shadow-telemetry-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T054306674283-pta-cell-mask-shadow-telemetry",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-cell-mask-shadow-telemetry",
+        "node_definition": {
+          "done_when": "tests/test_wall_height_exclusion.py and tests/test_active_set_stagnation.py are green unchanged; a new tests/test_plasma_cell_shadow_telemetry.py asserts on a raster fixture that the cell-derived private_wall_node_mask equals the retained raster read's mask (every differing node quantified in the manifest if any) and that the per-trip mask_differences reported by a short fixed-point run equal the trip-by-trip symmetric differences of the cell labels; the hex reference machine's residual_shadow_components runs without the tensor-product guard and its wall-shadow count is reported against the 44 the attribution census recorded; _structured_grid_axes is no longer required by residual_shadow_components (state where it remains); the CPU lanes tests/test_plasma_cell_shadow_telemetry.py tests/test_wall_height_exclusion.py tests/test_active_set_stagnation.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py tests/test_rim_current_scatter.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; if fixed_point.py or forward.py must change, stop with a NEEDS-HELP brief instead",
+          "estimated_hours": 4.0,
+          "goal": "Make ForwardFluxOperator.residual_shadow_components derive the private wall-node mask and the X-candidate set for wall_height_shadow_mask from the cell authority (carrier labels and census candidates, a wall node being private when the confined cell owning it carries the private label) instead of the raster _connectivity_read, returning the cell authority's private mask, with the mask vector length and order unchanged so the fixed-point trip telemetry, stagnation exit and checkpointing consume it without any change to nova/equilibrium/fixed_point.py or forward.py",
+          "id": "pta-cell-mask-shadow-telemetry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054306674283-pta-cell-mask-shadow-telemetry/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_plasma_cell_shadow_telemetry.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T05:43:12Z",
+        "completed_at": "2026-09-02T06:16:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1971,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1971,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6768880dcbd5588cc48efd3a55a4079d8332772e",
+        "commits": [
+          "f944f6d3c66889c3c61ea1ee0b12624166066725"
+        ],
+        "changed_lines": {
+          "added": 208,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054306674283-pta-cell-mask-shadow-telemetry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1486848,
+            "cached_input_tokens_cumulative": 4896512,
+            "input_tokens": 1337319,
+            "input_tokens_cumulative": 4967578,
+            "output_tokens": 3470,
+            "output_tokens_cumulative": 16137,
+            "reasoning_output_tokens": 865,
+            "reasoning_output_tokens_cumulative": 3683
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1309
+    "_version": 1311
   }
 }

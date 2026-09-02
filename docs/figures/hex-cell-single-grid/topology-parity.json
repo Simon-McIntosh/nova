@@ -1,0 +1,302 @@
+{
+  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache_source_identity": "sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae",
+  "exact_non_marginal_pass_count": 0,
+  "exact_non_marginal_row_count": 0,
+  "marginal_rule": "only solver_qualification.marginal_solver_basin is authoritative; a missing flag is marginal-unknown and pending",
+  "marginal_unknown_row_count": 6,
+  "not_replayable_row_count": 10,
+  "passes": true,
+  "pending_replayable_row_count": 1,
+  "production_replay": "ForwardFluxOperator._fixed_design_read with MomentGeometry built from the row's committed cell polygons",
+  "qualification_metadata": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+  "replayable_row_count": 2,
+  "row_count": 12,
+  "rows": [
+    {
+      "arm": "pure",
+      "disposition": "not replayable",
+      "frame": 35,
+      "identity": "21978/35 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21978
+    },
+    {
+      "arm": "mixed",
+      "disposition": "not replayable",
+      "frame": 35,
+      "identity": "21978/35 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21978
+    },
+    {
+      "arm": "pure",
+      "disposition": "not replayable",
+      "frame": 35,
+      "identity": "21983/35 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21983
+    },
+    {
+      "arm": "mixed",
+      "disposition": "not replayable",
+      "frame": 35,
+      "identity": "21983/35 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21983
+    },
+    {
+      "arm": "pure",
+      "disposition": "not replayable",
+      "frame": 51,
+      "identity": "21985/51 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21985
+    },
+    {
+      "arm": "mixed",
+      "disposition": "not replayable",
+      "frame": 51,
+      "identity": "21985/51 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21985
+    },
+    {
+      "arm": "pure",
+      "disposition": "not replayable",
+      "frame": 46,
+      "identity": "21986/46 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21986
+    },
+    {
+      "arm": "mixed",
+      "disposition": "not replayable",
+      "frame": 46,
+      "identity": "21986/46 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21986
+    },
+    {
+      "arm": "pure",
+      "disposition": "not replayable",
+      "frame": 55,
+      "identity": "21989/55 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21989
+    },
+    {
+      "arm": "mixed",
+      "disposition": "not replayable",
+      "frame": 55,
+      "identity": "21989/55 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21989
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3415261910819879,
+      "census_saddle_flux": -0.12422231793209579,
+      "classification": {
+        "adjudication": "production cell authority is diverted at boundary flux -0.12422231793209579 with class margin +Infinity; retained raster is limited at binding flux -0.12439126215921249 with class margin -0.13505893912935463",
+        "cell_boundary_flux": -0.12422231793209579,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": false,
+        "committed": "diverted",
+        "finding": true,
+        "gate": "marginal finding",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "limited",
+        "retained_raster_boundary_flux": -0.12439126215921249,
+        "retained_raster_class_margin": -0.13505893912935463
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "marginal finding",
+      "frame": 43,
+      "identity": "22086/43 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": true,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.12439126215921249,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.214306433183765e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3416893911447206,
+      "census_saddle_flux": -0.12239191397875913,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.12239191397875913,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.12236728180376087,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 43,
+      "identity": "22086/43 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.12236728180376087,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.280617143682994e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 2.482534153247273e-16,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      }
+    }
+  ],
+  "schema": "nova.topology-cell-parity",
+  "status": "pending",
+  "validation_errors": []
+}

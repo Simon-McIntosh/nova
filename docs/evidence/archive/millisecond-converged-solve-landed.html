@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="millisecond-converged-solve-landed">
+  <meta name="plan-title" content="Millisecond converged solve — cumulative execution evidence">
+  <meta name="plan-summary" content="Measured width-1 latency and strict-exit saving of real MAST and DIII-D bank members, one compiled program per member, on the H200.">
+  <meta name="plan-evidence-for" content="millisecond-converged-solve">
+  <meta name="plan-informs" content="batched-operator-boundary,forward-solve-api">
+  <title>Millisecond converged solve — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Millisecond converged solve — cumulative execution evidence</h1>
+    <p class="lede">One measurement has landed: the strict settled exit's effect on real bank
+    members, timed sequentially because the member-batched program could not be compiled.
+    Receipt values retain their recorded precision; prose values are display roundings of the
+    adjacent table entries.</p>
+  </header>
+
+  <section id="strict-exit-sequential">
+    <h2>Sequential strict-exit timing on the real bank mixes (partial, fourteen of seventeen rows)</h2>
+    <p><strong>Receipt:</strong>
+    <code>docs/figures/millisecond-converged-solve/strict-exit-incidence.json</code>;
+    figure below. Driver <code>benchmarks/strict_exit_incidence.py</code>, merged at
+    <code>16faceb7</code>. SLURM job 1261213 on 98dci4-gpu-0003 (reservation
+    <code>gpu_0003_grpA</code>, one CPU, one H200, 128 GB, persistent compilation cache,
+    <code>JAX_PLATFORMS=cuda,cpu</code>) ended by its three-hour limit while compiling DIII-D
+    frame 144; frames 144, 146 and 137 are therefore absent and named in the receipt.</p>
+
+    <figure>
+      <img src="/nova/figures/millisecond-converged-solve/strict-exit-incidence.png"
+           alt="Paired warm solve times with and without the strict settled exit for twelve MAST members and two DIII-D frames, with compile seconds per member">
+      <figcaption>Paired width-1 warm solves with and without the strict settled exit, one compiled
+      program per member.</figcaption>
+    </figure>
+
+    <table>
+      <caption>Paired warm solves per member (compile-warm, seconds) and the exit's saving</caption>
+      <thead><tr><th scope="col">Member</th><th scope="col">Compile (s)</th><th scope="col">Without exit (s)</th><th scope="col">With exit (s)</th><th scope="col">Saving</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">MAST 21978/35 pure</th><td>132</td><td>111.4</td><td>109.8</td><td>1.4 %</td></tr>
+        <tr><th scope="row">MAST 21978/35 mixed</th><td>133</td><td>71.3</td><td>69.6</td><td>2.3 %</td></tr>
+        <tr><th scope="row">MAST 21983/35 pure</th><td>650</td><td>77.1</td><td>70.0</td><td>9.2 %</td></tr>
+        <tr><th scope="row">MAST 21983/35 mixed</th><td>133</td><td>71.8</td><td>69.2</td><td>3.6 %</td></tr>
+        <tr><th scope="row">MAST 21985/51 pure</th><td>645</td><td>29.4</td><td>23.4</td><td>20.4 %</td></tr>
+        <tr><th scope="row">MAST 21985/51 mixed</th><td>133</td><td>19.0</td><td>16.5</td><td>13.1 %</td></tr>
+        <tr><th scope="row">MAST 21986/46 pure</th><td>651</td><td>76.1</td><td>71.3</td><td>6.3 %</td></tr>
+        <tr><th scope="row">MAST 21986/46 mixed</th><td>144</td><td>73.2</td><td>68.8</td><td>6.0 %</td></tr>
+        <tr><th scope="row">MAST 21989/55 pure</th><td>663</td><td>76.4</td><td>71.6</td><td>6.3 %</td></tr>
+        <tr><th scope="row">MAST 21989/55 mixed</th><td>139</td><td>76.3</td><td>71.1</td><td>6.8 %</td></tr>
+        <tr><th scope="row">MAST 22086/43 pure</th><td>681</td><td>48.5</td><td>43.8</td><td>9.6 %</td></tr>
+        <tr><th scope="row">MAST 22086/43 mixed</th><td>139</td><td>41.9</td><td>37.0</td><td>11.5 %</td></tr>
+        <tr><th scope="row">DIII-D 00000c4a7b frame 179</th><td>1467</td><td>316.1</td><td>309.3</td><td>2.1 %</td></tr>
+        <tr><th scope="row">DIII-D 0003ff34e7 frame 44</th><td>1507</td><td>94.2</td><td>84.1</td><td>10.7 %</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Reading</h3>
+    <ul>
+      <li><strong>A single real member solves in seconds, not milliseconds.</strong> The recorded
+      solve time is the whole trip loop: per-trip host reconciliation, any retrace below the
+      top-level compiled boundary, and the final device synchronisation. The banked 0.784 ms per
+      member and 1.163 ms per slice are batched-throughput figures over a replicated operator and
+      are not comparable to this width-1 latency.</li>
+      <li><strong>The strict settled exit is a modest saving.</strong> Between 1.4 % and 20.4 % per
+      MAST member, 2.1 % and 10.7 % on the two DIII-D frames; the members that converge quickly
+      (21985/51, 22086/43) gain the most, the stagnating members the least.</li>
+      <li><strong>Heterogeneous frames recompile.</strong> Each DIII-D frame compiled for about
+      1470 to 1510 s with resident memory reaching 67 to 68 GiB; MAST pure arms compiled for 645 to
+      681 s against 133 to 144 s for the mixed arms of the same members. This is the member-data-as-
+      trace-constant cost the batched-operator-boundary plan exists to remove.</li>
+      <li><strong>Not persisted.</strong> Executed and no-op trip counts, terminal residuals, state
+      hashes, bit-identity where the exit fired, and the per-trip quantum at HEAD are recorded as
+      null: the driver's atomic receipt write came after the scheduler timeout and the flushed stage
+      log did not carry them.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

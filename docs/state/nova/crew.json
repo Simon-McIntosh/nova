@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:35:21",
+  "updated": "2026-09-02T16:08:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54,9 +54,11 @@
         "id": "bank-rebaseline",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0621d-7007-7062-9840-123f4e7760b7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0621d-7007-7062-9840-123f4e7760b7"
+        },
         "created": "2026-09-02"
       },
       {
@@ -714,9 +716,11 @@
         "id": "fsa-receipt-topology",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06236-445f-7111-8241-f26a7af6d1ea",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06236-445f-7111-8241-f26a7af6d1ea"
+        },
         "created": "2026-09-02"
       },
       {
@@ -1517,6 +1521,15 @@
           "gpt-5.6-sol": "01a03e2e-1bad-7df0-93f5-49418c4cb7df"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "scr-bank-efit-overlays",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "scr-mechanism",
@@ -77900,9 +77913,147 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a71",
+        "node": "mcs-strict-exit-sequential",
+        "node_definition": {
+          "done_when": "strict-exit-incidence.json records for every one of the 17 members the firing trip or never, executed and no-op trip counts, terminal residual and termination for both arms with the bit-identity flag, compile seconds and compile-warm solve ms with and without the exit, per-machine mean and tail, SLURM job id, node, elapsed and exit marker, strict-exit-incidence.png plots per-member firing trips and per-member ms for both machines, and git diff --stat shows no change under nova/",
+          "estimated_hours": 2.0,
+          "goal": "The strict-exit incidence receipt docs/figures/millisecond-converged-solve/strict-exit-incidence.json (driver benchmarks/strict_exit_incidence.py rewritten for sequential execution, figure strict-exit-incidence.png) measured on main at or after 588578a0 with no solver source modified: the twelve MAST bank arms (docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, exact bank route benchmarks/bank_revision_reproduction.py with the current pin) and the five DIII-D frames (docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json) solved ONE MEMBER AT A TIME at width 1 through ForwardProfile.solve, each member's compiled program reused for its paired exit-enabled and exit-disabled solves, on one H200 (one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, 128 GB, persistent compilation cache, heartbeats, flushed stage timings and RSS per stage, 3-hour limit, launch-then-harvest), recording per member the trip at which the strict qualification fires (or never), executed versus no-op trips, terminal residual and termination for both arms with a bit-identity flag on the terminal state, per-member compile seconds and compile-warm solve ms with and without the exit, and per machine the mean and tail of those beside the census projection 1.163 ms/slice, noting explicitly that width-1 solve ms is not the batched ms/slice, which awaits the member-batching boundary",
+          "id": "mcs-strict-exit-sequential",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+            "docs/figures/millisecond-converged-solve/strict-exit-incidence.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "mcs-exit-incidence",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:12:05Z",
+        "completed_at": "2026-09-02T14:04:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 13971,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "f54b147220f73ac94c1ab59aeaf2e8f5f2847054",
+        "commits": [
+          "131c55a25791d7979d83a0b264b91eff625b556c"
+        ],
+        "changed_lines": {
+          "added": 1465,
+          "removed": 3,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync python benchmarks/strict_exit_incidence.py --harvest-log logs/slurm-1261213.log (strict JSON validation, receipt hash assertions) plus ruff check and py_compile on the driver",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/logs/harvest-1261213.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060e0-f4b6-79c3-8096-2ec4bbb9b475",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 446720,
+            "cached_input_tokens_cumulative": 2253056,
+            "input_tokens": 703241,
+            "input_tokens_cumulative": 2591475,
+            "output_tokens": 13030,
+            "output_tokens_cumulative": 27779,
+            "reasoning_output_tokens": 580,
+            "reasoning_output_tokens_cumulative": 4703
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2271,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 5871,
+              "log_age_seconds": 4014,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 4042,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1366
+    "_version": 1370
   }
 }

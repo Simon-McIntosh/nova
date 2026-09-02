@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T05:38:35",
+  "updated": "2026-09-02T05:47:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -72269,9 +72269,270 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T015239972905-scr-remedy-vertical-pin",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-remedy-vertical-pin",
+        "node_definition": {
+          "done_when": "remedy-vertical-pin.json states for both arms the terminal residual against 1e-8, trip count, pin weight schedule, mode contraction before versus after, the rung-4 audit verdict (computed-and-cancelled, clipped, or refused) with the step component magnitude, records the seven referee tests passing unmodified plus tests/test_vertical_pin_continuation.py passing (command, exit status, log path), remedy-vertical-pin.png exists, SLURM job id, node, elapsed and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/fixed_point.py plus nova/equilibrium/forward.py",
+          "estimated_hours": 3.0,
+          "goal": "A worktree prototype of stall-remedy rung 5, a vertical-moment pin with weight-to-zero continuation, for the pure diverted arm whose accepted outer map has a neutral up-down antisymmetric direction (terminal mode contraction 0.9999999999999993 in docs/figures/solver-convergence-regression/remedy-krylov-depth.json): reuse the trusted constraint machinery the reuse map names (ConstraintPinSet, constraint_residual, constraint_jacobian, the continuation ledger in nova/equilibrium/forward.py, the vertical-centroid current moment) to pin the vertical moment during the early trips while the mask settles, continuing the pin weight to zero so the terminal state solves the unconstrained problem, fixed-shape and opt-in, own-induced-mask acceptance untouched, with a test file tests/test_vertical_pin_continuation.py, a benchmark benchmarks/stall_remedy_vertical_pin.py re-solving 22086/43 pure together with 21978/35 pure through benchmarks/bank_revision_reproduction.py's exact bank route on the H200 (one CPU, one H200, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, hardened sbatch, heartbeat, flushed stage timings, persisted carrier reused, 3-hour SLURM limit, launch-then-harvest), a receipt docs/figures/solver-convergence-regression/remedy-vertical-pin.json recording per arm the per-trip residual history, mask differences, termination, trip count, pin weight schedule, the antisymmetric-mode per-trip contraction before versus after, the terminal residual against the 1e-8 tolerance, wall seconds, plus the rung-4 audit from the inner trace of the unremedied solve at its terminal trip (the Newton step's component along the mode as computed, whether step_cap clipped it, whether the strict-decrease acceptance refused it), the seven referee tests run unmodified, and a figure remedy-vertical-pin.png plotting both histories against the banked old, own-mask and rung-1 histories, the whole prototype committed in the worktree only, never merged",
+          "id": "scr-remedy-vertical-pin",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_vertical_pin_continuation.py",
+            "benchmarks/stall_remedy_vertical_pin.py",
+            "docs/figures/solver-convergence-regression/remedy-vertical-pin.json",
+            "docs/figures/solver-convergence-regression/remedy-vertical-pin.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "stall-remedy-krylov",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T01:52:47Z",
+        "completed_at": "2026-09-02T03:46:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6850,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6850,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "70b4e3583fa2e9ea44237502b78d8e6c4414d18a",
+        "commits": [
+          "5e2f9beb6511e9598860e9575501fd77572184f4"
+        ],
+        "changed_lines": {
+          "added": 1802,
+          "removed": 7,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/stall_remedy_vertical_pin.py check plus the seven referee tests (SLURM 1261017 COMPLETED 0:0, EXIT_MARKER=0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/check-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ecf-6ce6-7ec0-ab50-6636eae50b33",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4044288,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4111987,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15051,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4226
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T033246328784-pta-topology-read-cpu-lanes",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-topology-read-cpu-lanes",
+        "node_definition": {
+          "done_when": "Ten logs exist in /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-lanes (create it), named after the test file with a .log suffix, for tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_solovev_recovery_gates.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_plasma_cell_partition.py tests/test_split_polish_nulls.py tests/test_rim_current_scatter.py, each produced from the worktree root by JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on exactly that one file with stdout and stderr redirected into the log and the line EXIT= plus the exit status appended; each log ends with a test-runner summary and EXIT=0; the manifest lists the ten log paths with pass counts and the total and quotes the topology-read parity line (differing labels over compared cells); no source or test file is modified and no commit is made",
+          "estimated_hours": 0.75,
+          "goal": "Produce the CPU lane evidence for the carrier topology read at commit e9f93f73 by running ten test files as separate fresh-process lanes in this worktree, one log per file, into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-lanes",
+          "id": "pta-topology-read-cpu-lanes",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033246328784-pta-topology-read-cpu-lanes/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-lanes"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T03:32:52Z",
+        "completed_at": "2026-09-02T03:47:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 849,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 849,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e9f93f73183af91464310baad83864d16236987b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033246328784-pta-topology-read-cpu-lanes/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3366144,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3738130,
+            "output_tokens": 1209,
+            "output_tokens_cumulative": 10329,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2257
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5584,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the three-hour launch-then-harvest measurement outlives the 60-minute worker fence; job 1261014 is still running in baseline trip 2; the threaded step has not started; and terminal per-trip walls; sampled threaded effective cores; paired compile seconds; same-HEAD residual agreement and the one-sentence verdict therefore do not yet exist",
+              "elapsed_seconds": 9184,
+              "log_age_seconds": 5608,
+              "log_fresh": false,
+              "manifest_commits": [
+                "6564951b6936f8102648f9e416892701f3d3ddf7"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-thread-configuration",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T005936006858-csv-thread-configuration",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5645,
+              "terminal_at": "2026-09-02T01:58:42Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2400,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires while owned job 1261017 is running. Do not cancel or resubmit it. Harvest /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/h200-remedy-vertical-pin.log until the remaining three solve-finish lines (22086/43 vertical-pin and both 21978/35 variants) and EXIT_MARKER=0 appear; verify /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/raw/remedy-vertical-pin-h200.json exists; obtain scheduler elapsed with sacct; run the benchmark compile command using after-referees-jacrev.log and vertical-pin-jacobian-targeted-final.log to create docs/figures/solver-convergence-regression/remedy-vertical-pin.json and remedy-vertical-pin.png; capture compile and check logs; run the benchmark check; inspect quantitative outcomes; rerun final path-scoped checks only if files changed; explicitly stage the six assigned paths; make the required local conventional commit with body; replace this manifest with status complete; commit SHA; receipt metrics; compile/check logs; and blockers none",
+              "elapsed_seconds": 6000,
+              "log_age_seconds": 2672,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; the measurement reads the uncommitted nova diff at capture completion",
+                "so committing before harvest would invalidate its source-scope evidence"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T015239972905-scr-remedy-vertical-pin/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-vertical-pin",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T015239972905-scr-remedy-vertical-pin",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2706,
+              "terminal_at": "2026-09-02T02:47:40Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane node",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1298
+    "_version": 1300
   }
 }

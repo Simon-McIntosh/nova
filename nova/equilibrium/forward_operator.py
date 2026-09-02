@@ -645,13 +645,15 @@ class ForwardFluxOperator:
 
     def _carrier_shadow_read(self, physical, masks: DomainMasks):
         """Return wall-shadow operands from the carrier's own topology read."""
+        if not hasattr(self, "_wall_carrier_index"):
+            # Lightweight composition fixtures supply the operands directly
+            # without constructing carrier geometry.
+            return self._connectivity_read(physical, None, classify=False)
         grid_flux, _wall_flux = self.topology.split_flux_map(physical)
         _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
         return {
             "xset": vmap_x[:, :2],
-            "private_wall_node_mask": masks.private_flux[
-                self._wall_carrier_index
-            ],
+            "private_wall_node_mask": masks.private_flux[self._wall_carrier_index],
         }
 
     def topology_margin(self, psi) -> jax.Array:
@@ -981,10 +983,7 @@ class ForwardFluxOperator:
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
-        if self._fixed_design_topology.connectivity_radius.size:
-            reading = self._connectivity_read(physical, topology, classify=False)
-        else:
-            reading = self._carrier_shadow_read(physical, masks)
+        reading = self._carrier_shadow_read(physical, masks)
         if previous_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
         else:

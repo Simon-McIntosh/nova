@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:17:21",
+  "updated": "2026-09-02T06:21:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -72909,9 +72909,109 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T041744315663-pta-cell-topology-read-reverify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-cell-topology-read-reverify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-rereview.md with a PASS or FAIL verdict over: (1) git diff --name-only e9f93f73 696f437a lists only the five fenced paths; (2) the parity oracle in tests/test_plasma_cell_topology_read.py builds expected labels from _raster_hex_partition_geometry, hex_edge_admissibility, label_saddle_aware_hex_connected_components and classify_domains without calling Topology.read_qualification or Topology.axis_component, and asserts exact equality over 646 cells; (3) the carrier polish fits the split spline through fit_split_spline's half-offset and valid-mask support on the carrier centroids and runs the same one-step protocol, the receipt reports a real fit residual and iteration count when attempted and zero iterations with not-attempted when the carrier cannot form the fit, and no fit_iterations value is synthesised; (4) the forward-mode differentiation repair (implicit JVP of the regularised normal equations in split_spline.py) is mathematically consistent with the existing custom VJP, quoting file:line; (5) the saddle cut is now local \u2014 link admissibility is exact everywhere and the inward level applies only to links whose midpoint lies within three pitches of a census X candidate \u2014 with the three-pitch scale explained in the source, and judge whether the localisation can still leak through a saddle neck wider than three pitches or cut a legitimate core link; (6) the logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T033925175779-pta-carrier-polish-and-oracle/logs/ (files prefixed final-cpu-) record 46 passed across six files including test_hex_flood_sn_secondary.py 6/6 and raster_oracle_compared=646 differing=0; (7) naming hygiene; (8) every defect quoted with file:line. Read-only review of files and logs",
+          "estimated_hours": 0.75,
+          "goal": "Write an independent re-review verdict report on repair commits fa8b63f7 and 696f437a of the carrier topology-read chain (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-carrier-polish-and-oracle, paths nova/equilibrium/topology.py, nova/equilibrium/flux_surface_connectivity.py, nova/linalg/split_spline.py, tests/test_plasma_cell_topology_read.py, tests/test_split_polish_nulls.py) against the two defects of your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-review.md",
+          "id": "pta-cell-topology-read-reverify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T041744315663-pta-cell-topology-read-reverify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-rereview.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T04:17:49Z",
+        "completed_at": "2026-09-02T04:21:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 224,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 224,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "745f1cd7f7db6ce924af57c8c4f97e41097b6ad9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "re-review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-cell-topology-read-rereview.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-topology-read-rereview.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T041744315663-pta-cell-topology-read-reverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 31744,
+            "cached_input_tokens_cumulative": 2021376,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2101325,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10228,
+            "reasoning_output_tokens": 831,
+            "reasoning_output_tokens_cumulative": 2938
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only re-review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1303
+    "_version": 1304
   }
 }

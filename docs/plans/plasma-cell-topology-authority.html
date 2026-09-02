@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -158,6 +158,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260902T033925175779-pta-carrier-polish-and-oracle" data-who="pta-partition" data-when="2026-09-02T04:17:14Z">
     <div class="r-comment-body"><p>Independent raster oracle (retained primitives, no read_qualification) 646 compared / 0 differing; carrier-native split polish via fit_split_spline half-offset support with truthful receipts (fit attempted on the 41x49 carrier, not-attempted with zero iterations on a sparse unstructured support); forward-mode differentiation defect repaired with the implicit JVP of the regularised normal equations; saddle cut localised to links within three pitches of a census X candidate, recovering the secondary-null lane 0/6 to 6/6; CPU 46/46; GPU lane deferred to a lane node</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260902T041744315663-pta-cell-topology-read-reverify" data-who="pta-review-a" data-when="2026-09-02T04:21:33Z">
+    <div class="r-comment-body"><p>Re-review PASS 8/8: independent raster oracle, carrier-native polish with truthful receipts, implicit-JVP repair consistent with the custom VJP, saddle cut localised to three pitches of a census X candidate; 46/46 CPU evidence confirmed; GPU lane pending</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195359824044-pta-census-split-polish" data-who="pta-census" data-when="2026-09-01T20:17:25Z">
     <div class="r-comment-body"><p>Polish built, 32/32 green, axis 0.066 mm, but independent review FAILED: lattice-coordinate coincidence suppresses the Newton attempt and satisfies stationarity unconditionally (the 0 m saddle result is the untouched seed; the real one-step moved it 2.77e-5 m), and the split interface follows the selected boundary (wall flux on limited reads) which the contract wording left ambiguous; repair routed to the same member</p></div>

@@ -503,26 +503,29 @@ class Topology(Pytree):
         closed,
         inside,
         saddle_cut=False,
+        saddle=None,
     ):
         """Return the closed, in-material hex component containing the axis.
 
         A selected saddle is read immediately on its axis side, using the same
-        scale-relative inward offset as the raster connectivity boundary. The
-        published ``closed`` mask remains cut at the exact boundary flux; only
-        graph propagation moves inward, so the disconnected lobe is labelled
-        private flux rather than open flux.
+        scale-relative inward offset as the raster connectivity boundary. That
+        stronger cut is restricted to edges within three local cell pitches of
+        the saddle, where the two separatrix branches are within one ring of
+        each other. Elsewhere, exact-boundary links preserve the closed surface.
         """
         rings = self.connectivity_rings
         shared_edges = self.connectivity_shared_edges
-        inside_flux = jnp.where(inside, psi_grid, jnp.nan)
+        if saddle is None:
+            saddle = jnp.full((2,), jnp.nan, dtype=psi_grid.dtype)
+        inside_flux = jnp.where(closed & inside, psi_grid, jnp.nan)
         inward = _PRE_SADDLE_OFFSET_FRACTION * (
             jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
         )
         direction = jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
         component_flux = boundary_flux + direction * inward
-        component_closed = direction * (psi_grid - component_flux) >= 0.0
         component_flux = jnp.where(saddle_cut, component_flux, boundary_flux)
-        component_closed = jnp.where(saddle_cut, component_closed, closed)
+        component_closed = closed
+        edge_midpoint = jnp.mean(shared_edges, axis=-2)
         structured = self.connectivity_radius.size and self.connectivity_height.size
         if structured:
             radial_count = self.connectivity_radius.shape[0]
@@ -531,7 +534,15 @@ class Topology(Pytree):
             confined = (
                 (component_closed & inside).reshape((radial_count, vertical_count)).T
             )
-            link_admissible = hex_edge_admissibility(
+            exact_link = hex_edge_admissibility(
+                flux,
+                self.connectivity_radius,
+                self.connectivity_height,
+                boundary_flux,
+                axis_flux,
+                shared_edges,
+            )
+            inward_link = hex_edge_admissibility(
                 flux,
                 self.connectivity_radius,
                 self.connectivity_height,
@@ -548,7 +559,16 @@ class Topology(Pytree):
                 self.connectivity_edge_weight * psi_grid[self.connectivity_edge_gather],
                 axis=-1,
             )
-            link_admissible = hex_edge_admissibility(
+            exact_link = hex_edge_admissibility(
+                psi_grid,
+                self.connectivity_coordinate[:, 0],
+                self.connectivity_coordinate[:, 1],
+                boundary_flux,
+                axis_flux,
+                shared_edges,
+                edge_values=edge_values,
+            )
+            inward_link = hex_edge_admissibility(
                 psi_grid,
                 self.connectivity_coordinate[:, 0],
                 self.connectivity_coordinate[:, 1],
@@ -562,8 +582,16 @@ class Topology(Pytree):
                 .at[:, 1:]
                 .set(rings[:, 1:] == rings[:, :1])
             )
-            link_admissible = link_admissible & ~missing
+            exact_link = exact_link & ~missing
+            inward_link = inward_link & ~missing
             coordinate = self.connectivity_coordinate
+        flat_coordinate = coordinate.reshape((-1, 2))
+        centre = flat_coordinate[rings[:, :1]]
+        neighbour = flat_coordinate[rings]
+        edge_pitch = jnp.linalg.norm(neighbour - centre, axis=-1)
+        saddle_distance = jnp.linalg.norm(edge_midpoint - saddle, axis=-1)
+        saddle_neighbourhood = saddle_cut & (saddle_distance <= 3.0 * edge_pitch)
+        link_admissible = exact_link & (inward_link | ~saddle_neighbourhood)
         link_admissible = _canonicalize_reciprocal_hex_edges(rings, link_admissible)
         distance2 = jnp.sum((coordinate - axis) ** 2, axis=-1)
         seed_index = jnp.argmin(jnp.where(confined, distance2, jnp.inf))
@@ -597,6 +625,7 @@ class Topology(Pytree):
                 closed,
                 admitted_material,
                 jnp.equal(data_b[2], data_x[2]),
+                data_x[:2],
             )
             component_size = jnp.sum(component)
             governed_connection = jnp.any(component & inside_material)
@@ -713,6 +742,7 @@ class Topology(Pytree):
             closed,
             inside_material,
             boundary_is_xpoint,
+            data_x[:2],
         )
         masks = classify_domains(
             psi_norm,

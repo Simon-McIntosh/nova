@@ -82,19 +82,25 @@ def _raster_label_oracle(operator, physical, state):
     closed = (
         flux >= state.boundary_flux if polarity > 0.0 else flux < state.boundary_flux
     )
-    inside_flux = jnp.where(inside, flux, jnp.nan)
+    inside_flux = jnp.where(closed & inside, flux, jnp.nan)
     inward = _PRE_SADDLE_OFFSET_FRACTION * (
         jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
     )
     direction = jnp.where(state.axis_flux >= state.boundary_flux, 1.0, -1.0)
     component_flux = state.boundary_flux + direction * inward
-    component_closed = direction * (flux - component_flux) >= 0.0
     component_flux = jnp.where(
         state.boundary_is_xpoint, component_flux, state.boundary_flux
     )
-    component_closed = jnp.where(state.boundary_is_xpoint, component_closed, closed)
-    confined = component_closed & inside
-    links = hex_edge_admissibility(
+    confined = closed & inside
+    exact_links = hex_edge_admissibility(
+        flux,
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        state.boundary_flux,
+        state.axis_flux,
+        shared_edges,
+    )
+    inward_links = hex_edge_admissibility(
         flux,
         jnp.asarray(radial),
         jnp.asarray(vertical),
@@ -102,6 +108,21 @@ def _raster_label_oracle(operator, physical, state):
         state.axis_flux,
         shared_edges,
     )
+    coordinate = (
+        jnp.asarray(operator.grid.coordinate)
+        .reshape(shape + (2,))
+        .transpose((1, 0, 2))
+        .reshape((-1, 2))
+    )
+    centre = coordinate[rings[:, :1]]
+    neighbour = coordinate[rings]
+    edge_pitch = jnp.linalg.norm(neighbour - centre, axis=-1)
+    edge_midpoint = jnp.mean(shared_edges, axis=-2)
+    saddle_distance = jnp.linalg.norm(edge_midpoint - state.x_point, axis=-1)
+    saddle_neighbourhood = state.boundary_is_xpoint & (
+        saddle_distance <= 3.0 * edge_pitch
+    )
+    links = exact_links & (inward_links | ~saddle_neighbourhood)
     labels = label_saddle_aware_hex_connected_components(
         confined, rings, links, confined.size
     )

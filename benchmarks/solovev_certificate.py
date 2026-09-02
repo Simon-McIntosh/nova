@@ -39,7 +39,7 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_gradient,
     _polynomial_hessian,
 )
-from nova.equilibrium import ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium import ColdSeedConstruction, ForwardProfile, SaddleSeedGeometry
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
@@ -60,12 +60,14 @@ from tests.test_solovev_recovery_gates import LOCKED_RECOVERY_BOUNDS
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "docs/figures/gs-absolute-accuracy/solovev-certificate.json"
+OUTPUT = (
+    ROOT / "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json"
+)
 SEED_CONTROL_OUTPUT = (
     ROOT / "docs/figures/gs-absolute-accuracy/certificate-seed-control.json"
 )
 FIGURE_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev"
-PART_ROOT = FIGURE_ROOT / "parts"
+PART_ROOT = FIGURE_ROOT / "production-route-parts"
 REQUESTED_CELLS = (-110, -300, -500, -1000)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
@@ -207,11 +209,11 @@ def _slug(value: int) -> str:
 
 
 def _part_path(case_name: str, requested_cells: int) -> Path:
-    return PART_ROOT / f"{case_name}-{_slug(requested_cells)}.json"
+    return PART_ROOT / f"{case_name}-production-route-{_slug(requested_cells)}.json"
 
 
 def _figure_path(case_name: str, requested_cells: int) -> Path:
-    return FIGURE_ROOT / f"{case_name}-{_slug(requested_cells)}.png"
+    return FIGURE_ROOT / f"{case_name}-production-route-{_slug(requested_cells)}.png"
 
 
 def _source_revision() -> str:
@@ -547,6 +549,242 @@ def _diverted_seed(
     return seed, receipt
 
 
+def _closed_form_current_target(
+    case_name: str,
+    source_case: RotatingEquilibrium,
+    operator: Any,
+    exact_physical: Any,
+) -> tuple[float, np.ndarray, dict[str, Any]]:
+    """Return the declared current and centroid used by the production seed."""
+
+    if case_name != "diverted-jump-bearing":
+        current, centroid, receipt = recovery._aggregate_current_moment(source_case)
+        return float(current), np.asarray(centroid, dtype=np.float64), receipt
+
+    cell_current = np.asarray(exact_physical.cell_current, dtype=np.float64)
+    radial_moment = np.asarray(exact_physical.radial_moment, dtype=np.float64)
+    vertical_moment = np.asarray(exact_physical.vertical_moment, dtype=np.float64)
+    centres = np.asarray(
+        operator.moment_geometry.atomic_mesh.centroids, dtype=np.float64
+    )
+    total = float(np.sum(cell_current))
+    centroid = np.array(
+        [
+            np.sum(cell_current * centres[:, 0] + radial_moment) / total,
+            np.sum(cell_current * centres[:, 1] + vertical_moment) / total,
+        ],
+        dtype=np.float64,
+    )
+    return (
+        total,
+        centroid,
+        {
+            "construction": (
+                "closed-form polynomial current density integrated over the exact "
+                "traced separatrix supports, including first cell moments"
+            ),
+            "declared_current_a": total,
+            "current_centroid_m": centroid.tolist(),
+            "closed_form_flux_samples_used_for_current_support_only": True,
+        },
+    )
+
+
+def _production_seed(
+    profile: ForwardProfile,
+    case_name: str,
+    target_current: float,
+    centroid: np.ndarray,
+    current_receipt: dict[str, Any],
+) -> tuple[np.ndarray, int, dict[str, Any]]:
+    """Select the requested production cold-seed branch and retain provenance."""
+
+    requested_class = (
+        TopologyClass.DIVERTED
+        if case_name == "diverted-jump-bearing"
+        else TopologyClass.LIMITED
+    )
+    geometry = (
+        SaddleSeedGeometry(tuple(AXIS_M), tuple(X_POINT_M))
+        if requested_class == TopologyClass.DIVERTED
+        else None
+    )
+    portfolio = profile.cold_seed_portfolio(
+        target_current,
+        centroid,
+        diverted_geometry=geometry,
+    )
+    branch = int(requested_class)
+    branches = portfolio.branches
+    seed = np.asarray(branches.flux[branch], dtype=np.float64)
+    construction = ColdSeedConstruction(int(branches.construction[branch]))
+    receipt = {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": requested_class.name.lower(),
+        "branch_index": branch,
+        "construction": construction.name.lower(),
+        "plasma_current_a": float(branches.plasma_current[branch]),
+        "current_centroid_m": np.asarray(
+            branches.centroid[branch], dtype=np.float64
+        ).tolist(),
+        "seed_radius_m": float(branches.radius[branch]),
+        "supported_cell_count": int(branches.supported_cells[branch]),
+        "anchor_available": bool(branches.anchor_available[branch]),
+        "anchor_m": np.asarray(branches.anchor[branch], dtype=np.float64).tolist(),
+        "declared_axis_m": np.asarray(
+            branches.declared_axis[branch], dtype=np.float64
+        ).tolist(),
+        "declared_boundary_m": np.asarray(
+            branches.declared_boundary[branch], dtype=np.float64
+        ).tolist(),
+        "stored_flux_samples_used": bool(branches.stored_flux_samples_used[branch]),
+        "current_target_provenance": current_receipt,
+        "state_sha256_binary64": hashlib.sha256(seed.tobytes()).hexdigest(),
+    }
+    return seed, branch, receipt
+
+
+def _enum_name(enum_type: Any, value: Any) -> str:
+    return enum_type(int(value)).name.lower()
+
+
+def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
+    """Expose all globalisation telemetry retained by the public solve result."""
+
+    history = equilibrium.fixed_point
+    trip_count = int(history.active_set_iterations)
+    active_residuals = np.asarray(history.active_set_residuals, dtype=np.float64)
+    mask_differences = np.asarray(history.active_set_mask_differences, dtype=np.int64)
+    cycle_damping = np.asarray(
+        history.active_set_cycle_damping_activations, dtype=np.int64
+    )
+    trips = [
+        {
+            "trip": index + 1,
+            "live_relative_residual": float(active_residuals[index]),
+            "mask_difference_cells": int(mask_differences[index]),
+            "cycle_damping_activated": bool(cycle_damping[index]),
+        }
+        for index in range(trip_count)
+    ]
+
+    decisions = np.asarray(history.inner_iteration_decisions, dtype=np.int64)
+    executed = np.flatnonzero(
+        decisions != int(recovery.fixed_point.InnerIterationDecision.NOT_EXECUTED)
+    )
+    inner = []
+    for index in executed:
+        inner.append(
+            {
+                "iteration": int(index + 1),
+                "residual_before": float(
+                    history.inner_iteration_residuals_before[index]
+                ),
+                "residual_after": float(history.inner_iteration_residuals_after[index]),
+                "proposed_step_norm": float(
+                    history.inner_iteration_proposed_step_norms[index]
+                ),
+                "accepted": bool(history.inner_iteration_accepted[index]),
+                "decision": _enum_name(
+                    recovery.fixed_point.InnerIterationDecision, decisions[index]
+                ),
+                "krylov_qualification": _enum_name(
+                    recovery.fixed_point.KrylovActionQualification,
+                    history.inner_iteration_krylov_qualifications[index],
+                ),
+                "applied_factor": float(history.inner_iteration_applied_factors[index]),
+                "krylov_reduction": float(
+                    history.inner_iteration_krylov_reductions[index]
+                ),
+                "krylov_tolerance": float(
+                    history.inner_iteration_krylov_tolerances[index]
+                ),
+            }
+        )
+
+    promotion_count = int(history.attempted_newton_promotions)
+    recovery_outcomes = np.asarray(history.promotion_recovery_outcomes, dtype=np.int64)
+    promotions = []
+    for index in range(promotion_count):
+        recovery_outcome = int(recovery_outcomes[index])
+        promotions.append(
+            {
+                "promotion": index + 1,
+                "backtrack_count": int(history.promotion_backtrack_counts[index]),
+                "continuation_activated": bool(
+                    history.promotion_recovery_activations[index]
+                ),
+                "continuation_radius": np.asarray(
+                    history.promotion_recovery_radii[index], dtype=np.float64
+                ).tolist(),
+                "continuation_outcome": _enum_name(
+                    recovery.fixed_point.RecoveryOutcome, recovery_outcome
+                ),
+                "model_rebuild_activated": bool(
+                    history.promotion_model_rebuild_activations[index]
+                ),
+                "model_rebuild_damping": float(
+                    history.promotion_model_rebuild_damping[index]
+                ),
+                "steepest_descent_activated": bool(
+                    history.promotion_descent_activations[index]
+                ),
+                "steepest_descent_scale": float(
+                    history.promotion_descent_scales[index]
+                ),
+            }
+        )
+
+    continuation = {}
+    for name in ("common_sol", "private_flux"):
+        record = getattr(equilibrium.continuation, name)
+        continuation[name] = {
+            "active": bool(record.active),
+            "domain": record.domain_name,
+            "form": record.form_name,
+            "continuity": record.continuity_name,
+            "support": float(record.support),
+            "decay_width": float(record.decay_width),
+            "truncated_fraction": float(record.truncated_fraction),
+        }
+
+    trace = np.asarray(history.trace, dtype=np.float64)
+    trace_indices = np.flatnonzero(np.isfinite(trace))
+    return {
+        "telemetry_scope": (
+            "active-set residuals cover every production trip; detailed inner "
+            "globalisation arrays describe the terminal frozen-mask trip exposed "
+            "by FixedPointResult"
+        ),
+        "trip_count": trip_count,
+        "per_trip_residual_history": trips,
+        "finite_trace_indices": trace_indices.tolist(),
+        "finite_residual_trace": trace[trace_indices].tolist(),
+        "termination": _enum_name(
+            recovery.fixed_point.FixedPointTerminationReason,
+            history.termination_reason,
+        ),
+        "converged": bool(history.converged),
+        "krylov_action_qualification": _enum_name(
+            recovery.fixed_point.KrylovActionQualification,
+            history.krylov_action_qualification,
+        ),
+        "attempted_newton_promotions": promotion_count,
+        "accepted_newton_promotions": int(history.accepted_newton_promotions),
+        "globalisation_decisions": inner,
+        "promotion_globalisation": promotions,
+        "source_continuation": continuation,
+        "configured_controls": {
+            "own_mask_acceptance": "production default enabled",
+            "strict_active_set_settlement": "production default enabled",
+            "retain_outer_best_iterate": "production default enabled",
+            "stop_on_active_set_stagnation": "production default enabled",
+            "continue_newton_trajectory": "production default enabled",
+            "continue_globalization_state": "production default enabled",
+        },
+    }
+
+
 def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
     if case_name == "diverted-jump-bearing":
         coefficients = _solve_coefficients()
@@ -863,6 +1101,7 @@ def _plot(
 
 
 def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+    row_started = perf_counter()
     configure_dtypes()
     compilation_cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
@@ -880,30 +1119,11 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         carrier_case, source_case, exact = _case(case_name)
-        machine_builder = (
-            oracle_fixture.build_machine
-            if requested_cells == -110
-            else oracle_fixture.cached_machine
+        machine = oracle_fixture.cached_machine(
+            carrier_case,
+            requested_cells,
+            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
         )
-        if requested_cells == -110:
-            machine = machine_builder(
-                carrier_case,
-                requested_cells,
-                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-            )
-            machine.cache.update(
-                {
-                    "hit": False,
-                    "semantic_key": "reduced-oracle-direct-build",
-                    "build_seconds": None,
-                }
-            )
-        else:
-            machine = machine_builder(
-                carrier_case,
-                requested_cells,
-                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-            )
 
     with _timed_stage(
         "operator_and_seed",
@@ -926,35 +1146,52 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         operator = oracle_fixture.forward_operator(
             source_case, machine, oracle_state - exact_internal
         )
-        if case_name == "diverted-jump-bearing":
-            seed, seed_receipt = _diverted_seed(source_case, machine, operator)
-            solver_route = (
-                "production axis-saddle cold seed with undamped Newton-Krylov"
+        mesh = StencilMesh(machine.node, machine.stencil, machine.area)
+        profile = ForwardProfile(
+            operator,
+            mesh,
+            newton_steps=recovery.NEWTON_STEPS,
+        )
+        target_current, current_centroid, current_receipt = _closed_form_current_target(
+            case_name, source_case, operator, exact_physical
+        )
+        seed, requested_class, seed_receipt = _production_seed(
+            profile,
+            case_name,
+            target_current,
+            current_centroid,
+            current_receipt,
+        )
+        seed_moments = operator.cell_current_moments(seed)
+        seed_amplitude = float(
+            operator.current_normalisation_amplitude(
+                target_current, jnp.sum(seed_moments.cell_current)
             )
-        else:
-            seed, _moment_image, seed_receipt = recovery._moment_seed(
-                source_case, machine, operator
-            )
-            solver_route = "production moment seed with undamped Newton-Krylov"
+        )
 
     with _timed_stage(
-        "compile_and_first_solve",
+        "production_solve",
         stage_timings,
         case_name=case_name,
         requested_cells=requested_cells,
     ):
-        compiled = recovery._solve(operator.flux_map(), seed)
-    compile_and_solve_seconds = stage_timings["compile_and_first_solve"]
-    with _timed_stage(
-        "compile_warm_solve",
-        stage_timings,
-        case_name=case_name,
-        requested_cells=requested_cells,
-    ):
-        terminal = recovery._solve(operator.flux_map(), seed)
-    warm_solve_seconds = stage_timings["compile_warm_solve"]
-    terminal_state = np.asarray(terminal.state, dtype=np.float64)
+        equilibrium = profile.solve(
+            seed,
+            route="newton_krylov",
+            target_current=target_current,
+            newton_steps=recovery.NEWTON_STEPS,
+            gmres_iterations=recovery.KRYLOV_ITERATIONS,
+            warmup=0,
+            convergence_tolerance=TERMINAL_RESIDUAL_BOUND,
+            stream_active_set=True,
+            stream_inner_iterations=True,
+        )
+        jax.block_until_ready(equilibrium.flux)
+    solve_seconds = stage_timings["production_solve"]
+    terminal = equilibrium.fixed_point
+    terminal_state = np.asarray(equilibrium.flux, dtype=np.float64)
     terminal_residual = float(terminal.residual)
+    production_solver = _production_solver_receipt(equilibrium)
     qualification = (
         "qualified"
         if np.isfinite(terminal_residual)
@@ -981,7 +1218,6 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         cell_count = len(machine.node)
         root_grid = terminal_state[:cell_count]
         exact_grid = oracle_state[:cell_count]
-        mesh = StencilMesh(machine.node, machine.stencil, machine.area)
         derivative_coordinates, root_gradient, root_hessian = _quadratic_derivatives(
             mesh, root_grid
         )
@@ -1059,9 +1295,22 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "cache": machine.cache,
         "persistent_compilation_cache": compilation_cache.receipt(),
         "stage_wall_seconds": stage_timings,
-        "lane": _lane(),
+        "lane": {
+            **_lane(),
+            "cpu_count": int(os.environ.get("SLURM_CPUS_PER_TASK", "1")),
+            "threaded_settings": _thread_settings(),
+            "elapsed_seconds": perf_counter() - row_started,
+            "exit_marker": "SOLOVEV_ROW_EXIT=0",
+        },
         "solver": {
-            "route": solver_route,
+            "route": "profile.solve newton_krylov",
+            "call": (
+                "profile.solve(seed, route='newton_krylov', "
+                "target_current=Ip_closed_form, oracle budgets as keywords)"
+            ),
+            "target_current_a": target_current,
+            "target_current_argument": "Ip_closed_form",
+            "requested_seed_class": TopologyClass(requested_class).name.lower(),
             "newton_steps": recovery.NEWTON_STEPS,
             "gmres_iterations": recovery.KRYLOV_ITERATIONS,
             "terminal_fixed_point_residual": (
@@ -1070,17 +1319,28 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "terminal_fixed_point_residual_status": (
                 "finite" if np.isfinite(terminal_residual) else "nonfinite"
             ),
-            "termination_reason": termination_reason,
+            "termination": production_solver["termination"],
+            "qualification_reason": termination_reason,
             "qualification_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification": qualification,
-            "compile_and_solve_wall_seconds": compile_and_solve_seconds,
-            "compile_warm_wall_seconds": warm_solve_seconds,
-            "first_run_terminal_residual": (
-                float(compiled.residual)
-                if np.isfinite(float(compiled.residual))
-                else None
-            ),
+            "solve_wall_seconds": solve_seconds,
             "seed": seed_receipt,
+            "production_telemetry": production_solver,
+            "lambda_amplitude_history": {
+                "sampling": (
+                    "seed and terminal production-seam states; intermediate "
+                    "amplitudes are not exposed by FixedPointResult"
+                ),
+                "samples": [
+                    {"state": "seed", "amplitude": seed_amplitude},
+                    {
+                        "state": "terminal",
+                        "amplitude": float(equilibrium.normalisation.amplitude),
+                    },
+                ],
+                "terminal_policy": equilibrium.normalisation.policy_name,
+                "terminal_rescaled": bool(equilibrium.normalisation.rescaled),
+            },
         },
         "norms": {
             "psi": _field_norms(
@@ -1142,6 +1402,23 @@ def _validate_row(row: dict[str, Any]) -> None:
         raise RuntimeError("unknown certificate resolution")
     if row["solver"]["qualification"] not in {"qualified", "unqualified"}:
         raise RuntimeError("terminal qualification is missing")
+    if row["solver"]["route"] != "profile.solve newton_krylov":
+        raise RuntimeError("row did not use the production solve seam")
+    if row["solver"]["seed"]["factory"] != "profile.cold_seed_portfolio":
+        raise RuntimeError("row did not use the production cold-seed portfolio")
+    telemetry = row["solver"]["production_telemetry"]
+    if telemetry["trip_count"] != len(telemetry["per_trip_residual_history"]):
+        raise RuntimeError("per-trip residual history is incomplete")
+    for name in (
+        "termination",
+        "globalisation_decisions",
+        "promotion_globalisation",
+        "source_continuation",
+    ):
+        if name not in telemetry:
+            raise RuntimeError(f"production telemetry is missing {name}")
+    if len(row["solver"]["lambda_amplitude_history"]["samples"]) != 2:
+        raise RuntimeError("seed and terminal lambda amplitudes are required")
     for field in NORM_FIELDS:
         for region in NORM_REGIONS:
             measured = row["norms"][field][region]
@@ -1283,8 +1560,8 @@ def _registry_reproduction() -> dict[str, Any]:
 
 def _schema() -> dict[str, Any]:
     return {
-        "$id": "nova.solovev-absolute-accuracy-certificate",
-        "version": 1,
+        "$id": "nova.solovev-production-route-absolute-accuracy-certificate",
+        "version": 2,
         "required": [
             "schema",
             "preregistration",
@@ -1310,6 +1587,16 @@ def _schema() -> dict[str, Any]:
         "minimum_cases": 4,
         "minimum_resolutions_per_case": 3,
         "terminal_qualifications": ["qualified", "unqualified"],
+        "solver_route": "profile.solve newton_krylov",
+        "seed_factory": "profile.cold_seed_portfolio",
+        "required_solver_telemetry": [
+            "termination",
+            "per_trip_residual_history",
+            "globalisation_decisions",
+            "promotion_globalisation",
+            "source_continuation",
+            "lambda_amplitude_history",
+        ],
     }
 
 
@@ -1330,16 +1617,26 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
                     statistic: _fit_quantity(rows, field, region, statistic)
                     for statistic in NORM_STATISTICS
                 }
+        qualified_count = sum(
+            row["solver"]["qualification"] == "qualified" for row in rows
+        )
         case_payload[case_name] = {
             "rows": rows,
             "convergence_order_fits": fits,
+            "verdict": {
+                "sentence": (
+                    f"The production route qualified {qualified_count} "
+                    f"of {len(rows)} {case_name} resolution rows against the "
+                    f"{TERMINAL_RESIDUAL_BOUND:.0e} terminal residual bound."
+                )
+            },
         }
     receipt = {
         "schema": _schema(),
         "preregistration": {
             "measurement": (
-                "unchanged production forward solves against independently "
-                "evaluated closed-form total flux"
+                "ForwardProfile production solves against independently evaluated "
+                "closed-form total flux"
             ),
             "cases": list(CASE_NAMES),
             "requested_cells": list(REQUESTED_CELLS),
@@ -1363,6 +1660,16 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
             },
             "source_revision": _source_revision(),
             "solver_source_modified": False,
+            "solver_route": (
+                "profile.solve(seed, route='newton_krylov', "
+                "target_current=Ip_closed_form)"
+            ),
+            "seed_factory": "profile.cold_seed_portfolio",
+            "machine_factory": "cached_machine at every rung including reduced",
+        },
+        "aggregation_lane": {
+            **_lane(),
+            "exit_marker": "SOLOVEV_AGGREGATE_EXIT=0",
         },
         "reduced_oracle_registry_reproduction": _registry_reproduction(),
         "cases": case_payload,

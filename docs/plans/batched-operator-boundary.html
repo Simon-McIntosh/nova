@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="batched-operator-boundary">
+<meta name="plan-title" content="Batched operator boundary — host geometry and member data as separate pytree leaves">
+<meta name="plan-summary" content="Separate never-traced host geometry from stacked member data so a heterogeneous member batch compiles once, in bounded memory, and hits the compilation cache.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="16.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S20">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,jax,h200,throughput,fixed-point">
+<meta name="plan-depends-on" content="forward-solve-api">
+<title>Batched operator boundary | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Batched operator boundary</h1>
+<p class="lede">Two S19 measurements failed for one reason. The strict-exit incidence measurement on the real bank mixes could not be compiled: with twelve heterogeneous MAST members in one width-12 program the member operators are closed into the trace as constants, and XLA compile memory passed 100 GB and then 267 GB while solve-time memory stayed under 4 GB (jobs 1261068 and 1261110); the first attempt to pass operators as traced arguments then traced shared host geometry and failed at <code>RectilinearMesh.radial_step</code> on a traced scalar. The EFIT reproduction gate paid a full compile on all eleven frames for the same reason: each frame's data is baked into its trace, so the persistent compilation cache can never hit. Every batched throughput number Nova has banked (0.784 ms per member, the 25.0 ms trip quantum) was possible only because those batches replicated one operator. This plan gives the request contract from <code>forward-solve-api</code> the boundary the operator needs so heterogeneous batches become ordinary.</p></header>
+
+<h2 id="s1">§1 — The boundary</h2>
+<p>Classify every array the forward operator holds into <strong>host geometry</strong> (lattice coordinates, connectivity axes, wall nodes, cell polygons, hex stencil, material mask, mesh steps: NumPy, identical across the members of a batch, never traced) and <strong>member data</strong> (coupling blocks, responses, profile tables, boundary and axis flux anchors, target current, seed state: stacked along a leading member axis and passed as traced arguments), and make the operator a pytree whose geometry leaves are static and whose member leaves are dynamic, with the host-side reads (<code>_structured_grid_axes</code>, <code>RectilinearMesh.radial_step</code>, the mesh-step scalars) taking geometry only. An assertion at batch construction proves geometry identity across members and falls back to sequential per-member solves sharing one compiled program where it does not hold (the DIII-D frames may differ). Done-when: a unit test constructs a width-12 heterogeneous MAST batch and shows the jitted solve traces with no member-specific constant in the HLO, and the per-member results are bit-identical to the width-1 solves.</p>
+
+<h2 id="s2">§2 — The measurement that failed, repeated</h2>
+<p>Rerun the strict-exit incidence measurement on the real MAST and DIII-D bank mixes as one width-12 and one width-5 program on the H200 (one CPU, one H200, persistent compilation cache), the exit enabled and disabled as two passes over the same arguments, recording compile seconds, peak host memory at every stage, per-member firing trip, and the per-machine ms per member beside the sequential width-1 measurement <code>millisecond-converged-solve</code> §1 banked. Then rerun the EFIT reproduction gate's eleven frames with frame data as arguments and show the compilation cache hitting from the second frame of each machine. Done-when: the width-12 batch compiles once under 16 GB host memory, the exit incidence receipt states the batched ms per member per machine, and the EFIT gate's compile-cache column reads hit on at least nine of eleven frames.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-bob-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship batched-operator-boundary" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Draw the boundary, then repeat the two failed measurements</h4>
+    <div class="r-fu-body">Classify the operator's arrays and make geometry static and member data dynamic (§1), then rerun the strict-exit incidence batch and the EFIT gate with the compilation cache hitting (§2). Waits on the request contract from forward-solve-api.</div>
+    <pre class="r-fu-prompt">/reckon-ship batched-operator-boundary</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

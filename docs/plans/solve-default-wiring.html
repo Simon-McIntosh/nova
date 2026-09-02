@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="solve-default-wiring">
+<meta name="plan-title" content="Solve default wiring — close the audit gaps on today's routes and pin them">
+<meta name="plan-summary" content="Apply the capability-wiring audit's one-line fixes so every production route runs the landed defaults, and land a default-wiring test that fails when one regresses to opt-in.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="10.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S20">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,fixed-point,reuse,jax">
+<meta name="plan-blocks" content="forward-solve-api">
+<title>Solve default wiring | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Solve default wiring</h1>
+<p class="lede">The capability-wiring audit of 2026-09-02 (<code>~/.config/reckon/crew/reports/nova/capability-wiring-audit.md</code>) found that the production Newton–Krylov route carries the landed active-set safeguards by default while several drivers around it do not: the Solov'ev oracle and certificate call the bare fixed-point routine, the default EFIT parity command runs an absolute-source one-branch solve with the current-constrained seam behind a flag, the bank and MAST visual routes copy a reference seed into both portfolio branches, only one launcher enables the persistent compilation cache, and the EFIT parity run and the reduced certificate rung rebuild the machine instead of loading it. Each fix is one line on an existing route and needs no new type, so this plan ships them first, on today's call signatures, and pins them with a test; the contract that formalises the seam follows on <code>forward-solve-api</code>.</p></header>
+
+<h2 id="s1">§1 — The one-line fixes</h2>
+<p>Six wiring changes, each its own node with the route's existing receipt and the seven referee tests as the gate. (1) Solov'ev oracle and certificate: replace the bare <code>fixed_point.newton_krylov(operator.flux_map(), seed)</code> with <code>profile.solve_branch(seed, requested_class, route="newton_krylov", target_current=...)</code>, keeping the oracle budgets as keyword arguments; also in the non-pure topology-visual solves. (2) Compilation cache: call <code>configure_persistent_compilation_cache(default_persistent_compilation_cache_root())</code> immediately after <code>configure_dtypes()</code> at every launcher's executable boundary. (3) EFIT parity: make the current-constrained solve the no-flag path and keep the absolute-source replay behind a named diagnostic flag. (4) Solov'ev seeds through <code>profile.cold_seed_portfolio</code> rather than the private moment-seed copies in the rebaseline and certificate scripts. (5) Exact-bank and MAST visual routes seed both portfolio branches from <code>cold_seed_portfolio</code> so the two-class portfolio tests independent basin entry, with the reference-seeded path retained behind a flag for the bank's own reproduction. (6) Cached machine: the default EFIT parity run loads the persisted response carrier and every certificate rung, including the reduced one, goes through <code>cached_machine</code>. Constraint pins and Anderson are recorded as intentionally opt-in and are not changed here. Done-when: each node's receipt shows the route producing the same terminal states as before where semantics are unchanged (bit-identical for (2) and (6), qualified change stated for (1), (3), (4), (5)), referees green.</p>
+
+<h2 id="s2">§2 — The default-wiring test</h2>
+<p>One test module in the default pytest lane that, for each production entry point the audit named, constructs the route with no options and asserts every declared default resolved on: current pin, settled exit, own-mask acceptance, continuation, best-iterate retention, stagnation stop, exact kernels, cached machine, compilation cache. The assertions read the route's own receipt fields, not internal state, so the test survives the later migration onto the request contract. Done-when: the test is green in the default lane on main, the wiring audit rerun against main reads DEFAULT-ON in every production cell except the two intentional opt-ins, and a deliberate regression (removing one default in a scratch branch) makes the test fail.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sdw-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship solve-default-wiring" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wire the six defaults, then pin them</h4>
+    <div class="r-fu-body">Six one-line wiring nodes on the existing routes (§1), then the default-wiring test and the audit rerun (§2). Dispatchable now; no prerequisite.</div>
+    <pre class="r-fu-prompt">/reckon-ship solve-default-wiring</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

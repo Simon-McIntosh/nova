@@ -89,7 +89,9 @@ from nova.equilibrium.conservation import (
     poloidal_field,
 )
 from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
+from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.moment import (
     CurrentIntegralSupport,
     CurrentCells,
@@ -138,7 +140,9 @@ __all__ = [
     "ForwardBranchReceipt",
     "ForwardColdSeedPortfolio",
     "ForwardColdSeedReceipt",
+    "ForwardDomainLabel",
     "ForwardEquilibrium",
+    "ForwardLabelledFlux",
     "ForwardPerturbedSeedReceipt",
     "ForwardPortfolio",
     "ForwardProfile",
@@ -205,6 +209,34 @@ class FiniteCheck(NamedTuple):
         return self.flux & self.cell_current & self.moments & self.conservation
 
 
+class ForwardDomainLabel(IntEnum):
+    """Consumer-facing domain of one hex-mesh cell.
+
+    The mesh resolves the closed core, private-flux pockets and cells outside
+    the material boundary.  Every other cell is open: a separate scrape-off
+    layer label would claim spatial resolution this mesh does not carry.
+    """
+
+    CORE = 0
+    PRIVATE_FLUX = 1
+    WALL_SHADOW = 2
+    OPEN = 3
+
+
+class ForwardLabelledFlux(NamedTuple):
+    """Fixed-shape labelled flux map read from one terminal solve state."""
+
+    psi: jax.Array
+    psi_norm: jax.Array
+    o_point: jax.Array
+    primary_x_point: jax.Array
+    secondary_x_point: jax.Array
+    lcfs: jax.Array
+    lcfs_vertex_count: jax.Array
+    strike_points: jax.Array
+    domain_label: jax.Array
+
+
 class ForwardEquilibrium(NamedTuple):
     """Converged equilibrium and the receipts that qualify it."""
 
@@ -220,6 +252,7 @@ class ForwardEquilibrium(NamedTuple):
     rotation: RotationRecord
     continuation: ContinuationLedger
     finite: FiniteCheck
+    labelled_flux: ForwardLabelledFlux | None = None
 
 
 class ForwardBranchReceipt(NamedTuple):
@@ -967,6 +1000,174 @@ class ForwardProfile:
             support_integrals = support_integrals.with_current_amplitude(amplitude)
         return current_moments, support_integrals, masks, topology, amplitude
 
+    def _secondary_x_point(
+        self, flux: jax.Array, topology: ForwardTopologyState
+    ) -> jax.Array:
+        """Return the next-qualified saddle after the selected primary one."""
+
+        physical = jnp.asarray(flux)[: self.operator.physical_node_number]
+        grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)
+        _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(
+            grid_flux
+        )
+        score = self.operator.polarity * (x_candidates[:, 2] - topology.axis_flux)
+        finite = jnp.all(jnp.isfinite(x_candidates), axis=1)
+        primary_distance = jnp.linalg.norm(
+            x_candidates[:, :2] - topology.x_point, axis=1
+        )
+        distinct = primary_distance > self.operator._x_qualification_distance
+        qualified_score = jnp.where(finite & distinct, score, -jnp.inf)
+        index = jnp.argmax(qualified_score)
+        available = jnp.any(finite & distinct)
+        return jnp.where(available, x_candidates[index, :2], jnp.nan)
+
+    def _lcfs_polyline(
+        self, flux: jax.Array, masks: DomainMasks, topology: ForwardTopologyState
+    ) -> tuple[jax.Array, jax.Array]:
+        """Pack separatrix crossings from the operator's atomic hex mesh."""
+
+        geometry = self.operator.moment_geometry
+        if geometry is None:
+            physical = jnp.asarray(flux)[: self.operator.physical_node_number]
+            reading = self.operator._connectivity_read(
+                physical, topology, classify=False
+            )
+            radii = reading["radii"]
+            capacity = radii.shape[0]
+            angles = jnp.asarray(LCFS_ANGLES[:capacity], dtype=flux.dtype)
+            points = topology.axis + radii[:, jnp.newaxis] * jnp.stack(
+                (jnp.cos(angles), jnp.sin(angles)), axis=1
+            )
+            point_valid = jnp.isfinite(radii) & reading["found"]
+            source = jnp.nonzero(point_valid, size=capacity, fill_value=0)[0]
+            packed = points[source]
+            vertex_count = jnp.sum(point_valid, dtype=jnp.int32)
+            valid = jnp.arange(capacity) < vertex_count
+            return (
+                jnp.where(valid[:, jnp.newaxis], packed, jnp.nan),
+                vertex_count,
+            )
+
+        atomic = geometry.atomic_mesh
+        coordinates = jnp.asarray(atomic.node_coordinates, dtype=flux.dtype)
+        nodes = jnp.asarray(atomic.cell_nodes)
+        counts = jnp.asarray(atomic.cell_vertex_count)
+        width = nodes.shape[1]
+        slots = jnp.arange(width)
+        valid_edge = slots[jnp.newaxis, :] < counts[:, jnp.newaxis]
+        following_slot = jnp.where(
+            slots[jnp.newaxis, :] + 1 < counts[:, jnp.newaxis],
+            slots[jnp.newaxis, :] + 1,
+            0,
+        )
+        following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
+        node_flux = self.operator.shared_node_flux(flux)
+        node_psi_norm = (node_flux - topology.axis_flux) / topology.flux_span
+        start_level = node_psi_norm[nodes] - 1.0
+        end_level = node_psi_norm[following_nodes] - 1.0
+        crossing = valid_edge & ((start_level <= 0.0) != (end_level <= 0.0))
+        crossing &= masks.core[:, jnp.newaxis]
+        denominator = start_level - end_level
+        fraction = jnp.where(crossing, start_level / denominator, 0.0)
+        start = coordinates[nodes]
+        end = coordinates[following_nodes]
+        point = start + fraction[..., jnp.newaxis] * (end - start)
+
+        flat_point = point.reshape((-1, 2))
+        flat_valid = crossing.reshape((-1,))
+        capacity = atomic.contour_capacity
+        source = jnp.nonzero(flat_valid, size=capacity, fill_value=0)[0]
+        packed = flat_point[source]
+        vertex_count = jnp.minimum(jnp.sum(flat_valid), capacity).astype(jnp.int32)
+        valid = jnp.arange(capacity) < vertex_count
+        angle = jnp.arctan2(
+            packed[:, 1] - topology.axis[1], packed[:, 0] - topology.axis[0]
+        )
+        ordering = jnp.argsort(jnp.where(valid, angle, jnp.inf))
+        packed = packed[ordering]
+        return jnp.where(valid[:, jnp.newaxis], packed, jnp.nan), vertex_count
+
+    def _strike_points(
+        self, flux: jax.Array, topology: ForwardTopologyState
+    ) -> jax.Array:
+        """Return the inboard and outboard wall intersections of the separatrix."""
+
+        physical = jnp.asarray(flux)[: self.operator.physical_node_number]
+        _grid_flux, wall_flux = self.operator.topology.split_flux_map(physical)
+        wall = jnp.asarray(self.operator.wall.coordinate, dtype=flux.dtype)
+        wall_psi_norm = (wall_flux - topology.axis_flux) / topology.flux_span
+        same_side = (wall[:, 1] - topology.axis[1]) * (
+            topology.x_point[1] - topology.axis[1]
+        ) >= 0.0
+        finite = jnp.isfinite(wall_psi_norm) & jnp.all(jnp.isfinite(wall), axis=1)
+        residual = jnp.abs(wall_psi_norm - 1.0)
+
+        def select(radial_mask):
+            qualified = same_side & finite & radial_mask
+            index = jnp.argmin(jnp.where(qualified, residual, jnp.inf))
+            return jnp.where(jnp.any(qualified), wall[index], jnp.nan)
+
+        return jnp.stack(
+            [
+                select(wall[:, 0] < topology.x_point[0]),
+                select(wall[:, 0] >= topology.x_point[0]),
+            ]
+        )
+
+    def _labelled_flux(
+        self, flux: jax.Array, masks: DomainMasks, topology: ForwardTopologyState
+    ) -> ForwardLabelledFlux:
+        """Return the complete consumer map from the terminal topology read."""
+
+        def map_domain(domain):
+            labels = jnp.full(domain.shape, int(ForwardDomainLabel.OPEN), jnp.int8)
+            labels = jnp.where(
+                domain == int(PlasmaDomain.CORE),
+                int(ForwardDomainLabel.CORE),
+                labels,
+            )
+            labels = jnp.where(
+                domain == int(PlasmaDomain.PRIVATE_FLUX),
+                int(ForwardDomainLabel.PRIVATE_FLUX),
+                labels,
+            )
+            return jnp.where(
+                domain == int(PlasmaDomain.EXCLUDED_MATERIAL),
+                int(ForwardDomainLabel.WALL_SHADOW),
+                labels,
+            )
+
+        if self.operator.moment_geometry is None:
+            rings = jnp.asarray(self.operator.topology.connectivity_rings)
+            centre = rings[:, 0]
+            interior = map_domain(masks.label[centre])
+            labels = (
+                jnp.full(
+                    (self.lattice.node_count,), int(ForwardDomainLabel.OPEN), jnp.int8
+                )
+                .at[centre]
+                .set(interior)
+            )
+        else:
+            labels = map_domain(masks.label)
+        psi = jnp.asarray(flux)[: self.lattice.node_count]
+        if psi.shape != masks.psi_norm.shape or psi.shape != labels.shape:
+            raise ValueError(
+                "psi, psi_norm and domain labels must span the same mesh cells"
+            )
+        lcfs, lcfs_vertex_count = self._lcfs_polyline(flux, masks, topology)
+        return ForwardLabelledFlux(
+            psi=psi,
+            psi_norm=masks.psi_norm,
+            o_point=topology.axis,
+            primary_x_point=topology.x_point,
+            secondary_x_point=self._secondary_x_point(flux, topology),
+            lcfs=lcfs,
+            lcfs_vertex_count=lcfs_vertex_count,
+            strike_points=self._strike_points(flux, topology),
+            domain_label=labels,
+        )
+
     def _receipt(
         self,
         flux: jax.Array,
@@ -1009,6 +1210,7 @@ class ForwardProfile:
                 moments=jnp.all(jnp.isfinite(moments.stack())),
                 conservation=jnp.all(jnp.isfinite(jnp.stack([*conservation[:-1]]))),
             ),
+            labelled_flux=self._labelled_flux(flux, masks, topology),
         )
 
     def _host_history(

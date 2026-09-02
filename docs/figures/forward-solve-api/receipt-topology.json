@@ -1,0 +1,376 @@
+{
+  "cached_carrier": {
+    "carrier": {
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "size_bytes": 645864,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.0051851943135261536
+    },
+    "loaded_from_persisted_carrier": true,
+    "named_cache_only_check": {
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/fsa-receipt-topology/benchmarks/mast_response_carrier_warm.py",
+        "check",
+        "--carrier",
+        "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "--receipt",
+        "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+      ],
+      "direct_green_operator_builder_entries": 0,
+      "passes": true,
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.020631 direct_builders=0 verdict=PASS"
+    }
+  },
+  "execution": {
+    "cpu_count": 1,
+    "device": "cuda:0",
+    "exit_marker": "EXIT_MARKER=0",
+    "exit_status": 0,
+    "job_id": "1261465",
+    "launch_then_harvest": true,
+    "node": "98dci4-gpu-0003.iter.org",
+    "persistent_compilation_cache": "/work/projects/imas_gpu/sophelio/jax-cache/receipt-topology",
+    "scheduler_node": "98dci4-gpu-0003",
+    "scheduler_state": "COMPLETED"
+  },
+  "field_policy": {
+    "active_circuit_count": 13,
+    "active_mapping": [
+      {
+        "centroid_separation_m": 3.020663818271642e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 46439.97860318469,
+        "family": "p2_inner_lower",
+        "filament_turn_multiplier_sum": 0.9999960064888,
+        "raw_current_a": 46440.1640625,
+        "stored_circuit": 4
+      },
+      {
+        "centroid_separation_m": 4.610138552976278e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 46534.59541282989,
+        "family": "p2_inner_upper",
+        "filament_turn_multiplier_sum": 0.9999960064888,
+        "raw_current_a": 46534.78125,
+        "stored_circuit": 2
+      },
+      {
+        "centroid_separation_m": 3.794706373301994e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 30965.73828125,
+        "family": "p2_outer_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 30965.73828125,
+        "stored_circuit": 5
+      },
+      {
+        "centroid_separation_m": 3.882122250270243e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 30812.666015625,
+        "family": "p2_outer_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 30812.666015625,
+        "stored_circuit": 3
+      },
+      {
+        "centroid_separation_m": 1.2310483904636694e-07,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 2.3242006301879883,
+        "family": "p3_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 2.3242006301879883,
+        "stored_circuit": 7
+      },
+      {
+        "centroid_separation_m": 1.1378064254653142e-07,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -12.723005294799805,
+        "family": "p3_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": -12.723005294799805,
+        "stored_circuit": 6
+      },
+      {
+        "centroid_separation_m": 0.002284428762164253,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -204031.75674306176,
+        "family": "p4_lower",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -204031.578125,
+        "stored_circuit": 9
+      },
+      {
+        "centroid_separation_m": 0.003039636783399228,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -204217.35065553855,
+        "family": "p4_upper",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -204217.171875,
+        "stored_circuit": 8
+      },
+      {
+        "centroid_separation_m": 0.0022829440191137885,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -151151.2573242276,
+        "family": "p5_lower",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -151151.125,
+        "stored_circuit": 11
+      },
+      {
+        "centroid_separation_m": 0.0022872695201792835,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -151391.5231595665,
+        "family": "p5_upper",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -151391.390625,
+        "stored_circuit": 10
+      },
+      {
+        "centroid_separation_m": 5.527338696549878e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 1191.72412109375,
+        "family": "p6_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 1191.72412109375,
+        "stored_circuit": 13
+      },
+      {
+        "centroid_separation_m": 1.4493967305635352e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -2071.07421875,
+        "family": "p6_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": -2071.07421875,
+        "stored_circuit": 12
+      },
+      {
+        "centroid_separation_m": 2.5307005105576235e-06,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -11405011.0,
+        "family": "sol",
+        "filament_turn_multiplier_sum": 328.0,
+        "raw_current_a": -34771.375,
+        "stored_circuit": 1
+      }
+    ],
+    "active_mapping_recomputed_for_shot": true,
+    "all_currents_prescribed": true,
+    "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+    "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+    "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+    "passive_or_vessel_circuit_count": 88,
+    "passive_registry_maximum_separation_m": 0.0,
+    "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+    "policy": "explicit prescribed-current response matrix",
+    "response_input_digests": {
+      "algorithm": "sha256",
+      "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "inputs": {
+        "fcoil_ang1": {
+          "dtype": "<f4",
+          "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_ang2": {
+          "dtype": "<f4",
+          "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_circ": {
+          "dtype": "<f8",
+          "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_height": {
+          "dtype": "<f4",
+          "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_n": {
+          "dtype": "<f4",
+          "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+          "shape": [
+            101
+          ]
+        },
+        "fcoil_r": {
+          "dtype": "<f4",
+          "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_turns": {
+          "dtype": "<f4",
+          "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_width": {
+          "dtype": "<f4",
+          "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_xmult": {
+          "dtype": "<f4",
+          "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_z": {
+          "dtype": "<f4",
+          "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+          "shape": [
+            938
+          ]
+        },
+        "gridr": {
+          "dtype": "<f4",
+          "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+          "shape": [
+            65
+          ]
+        },
+        "gridz": {
+          "dtype": "<f4",
+          "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+          "shape": [
+            65
+          ]
+        },
+        "limiterr": {
+          "dtype": "<f4",
+          "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+          "shape": [
+            37
+          ]
+        },
+        "limiterz": {
+          "dtype": "<f4",
+          "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+          "shape": [
+            37
+          ]
+        },
+        "resolved_response_targets": {
+          "dtype": "<f8",
+          "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "shape": [
+            1126,
+            2
+          ]
+        }
+      }
+    },
+    "response_matrix_reused": true,
+    "response_shape": [
+      1126,
+      101
+    ],
+    "section_kernel_evaluations": 938,
+    "section_kernel_evaluations_this_shot": 0,
+    "stored_circuit_count": 101,
+    "stored_field_closure_rms_wb": 1.6444420806124064e-16,
+    "stored_field_closure_sup_wb": 8.881784197001252e-16
+  },
+  "measurement": {
+    "median_wall_delta_s": 0.06002778094261885,
+    "noise_allowance_s": 0.3024842020124197,
+    "with_labelled_flux": {
+      "compile_calls": 1,
+      "compile_wall_s": 666.88978030812,
+      "launch_count": 6,
+      "measured_solve_wall_s": [
+        6.112607439979911,
+        6.0645481729879975,
+        6.109711821191013,
+        6.0881427731364965,
+        6.137329769320786
+      ],
+      "median_solve_wall_s": 6.109711821191013
+    },
+    "without_labelled_flux": {
+      "compile_calls": 1,
+      "compile_wall_s": 638.3745564259589,
+      "launch_count": 6,
+      "measured_solve_wall_s": [
+        6.059364854358137,
+        6.11586033180356,
+        6.049684040248394,
+        6.02382303122431,
+        6.008602956309915
+      ],
+      "median_solve_wall_s": 6.049684040248394
+    }
+  },
+  "receipt": {
+    "domain_label_names": [
+      "core",
+      "wall_shadow",
+      "open"
+    ],
+    "domain_label_values": [
+      0,
+      2,
+      3
+    ],
+    "existing_fields_bit_identical": true,
+    "lcfs_vertex_count": 0
+  },
+  "reference": {
+    "machine": "MAST",
+    "plasma_current_a": 934383.875,
+    "qualification_before_attribution": {
+      "declared_boundary_to_map_saddle_limit": 0.01,
+      "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+      "passes": true,
+      "stored_lcfs_contour_limit": 0.006,
+      "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+      "typed_saddle_candidate_count": 2,
+      "typed_saddle_resolved": true
+    },
+    "shot": 21985,
+    "slice_index": 51,
+    "source_coordinate": {
+      "axis_wb": 0.33908170628553735,
+      "boundary_wb": -0.2193531903351262,
+      "support_nodes": 227
+    },
+    "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+    "span_wb": 1.823353801798901,
+    "time_s": 0.2750000059604645
+  },
+  "schema": "nova.receipt_topology_benchmark",
+  "schema_version": 1,
+  "verdict": {
+    "domain_labels_within_contract": true,
+    "equal_compile_counts": true,
+    "equal_launch_counts": true,
+    "existing_receipt_fields_bit_identical": true,
+    "no_scrape_off_layer_class": true,
+    "solve_wall_within_noise": true
+  }
+}

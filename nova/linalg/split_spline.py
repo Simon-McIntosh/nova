@@ -7,9 +7,9 @@ level while allowing the normal curvature to jump.  Both patches and the level
 set use normalized tensor Bernstein coordinates, keeping their coefficient
 systems small and independent of the number of fixed-shape samples.
 
-The coefficient solve carries an authored implicit reverse rule at the normal
-equations.  Reverse mode therefore differentiates the solved system rather
-than the linear algebra used to obtain its primal coefficients.
+The coefficient solve carries authored implicit forward and reverse rules at
+the normal equations. Automatic differentiation therefore differentiates the
+solved system rather than the linear algebra used to obtain its coefficients.
 """
 
 from dataclasses import dataclass
@@ -73,6 +73,37 @@ def _normal_solve_reverse(saved, coefficient_cotangent):
 _implicit_normal_solve.defvjp(_normal_solve_forward, _normal_solve_reverse)
 
 
+@jax.custom_jvp
+def _differentiable_normal_solve(design, values, weights, regularization):
+    """Expose the normal-equation solve to both differentiation modes."""
+    return _implicit_normal_solve(design, values, weights, regularization)
+
+
+@_differentiable_normal_solve.defjvp
+def _differentiable_normal_solve_jvp(primals, tangents):
+    design, values, weights, regularization = primals
+    design_dot, values_dot, weights_dot, regularization_dot = tangents
+    coefficient = _differentiable_normal_solve(*primals)
+
+    weighted_design = weights[:, None] * design
+    weighted_design_dot = weights_dot[:, None] * design + weights[:, None] * design_dot
+    normal = design.T @ weighted_design
+    identity = jnp.eye(normal.shape[0], dtype=normal.dtype)
+    normal = normal + regularization * identity
+    normal_dot = design_dot.T @ weighted_design + design.T @ weighted_design_dot
+    normal_dot = normal_dot + regularization_dot * identity
+
+    weighted_values = weights * values
+    weighted_values_dot = weights_dot * values + weights * values_dot
+    right_hand_side_dot = (
+        design_dot.T @ weighted_values + design.T @ weighted_values_dot
+    )
+    coefficient_dot = jnp.linalg.solve(
+        normal, right_hand_side_dot - normal_dot @ coefficient
+    )
+    return coefficient, coefficient_dot
+
+
 def _coordinate_grids(
     radial: jax.Array, vertical: jax.Array, values: jax.Array
 ) -> tuple[jax.Array, jax.Array]:
@@ -129,7 +160,7 @@ def _conditioned_fit(
     normal = scaled_design.T @ (weights[:, None] * scaled_design)
     normal = normal + regularization * jnp.eye(normal.shape[0], dtype=normal.dtype)
     condition_number = jnp.linalg.cond(normal)
-    scaled_coefficient = _implicit_normal_solve(
+    scaled_coefficient = _differentiable_normal_solve(
         scaled_design, values, weights, regularization
     )
     normal_right_hand_side = scaled_design.T @ (weights * values)
@@ -411,9 +442,6 @@ def fit_split_spline(
         raise TypeError("split spline values must have a floating-point dtype")
     if order < 2:
         raise ValueError("split spline order must be at least two")
-    radial_grid, vertical_grid = _coordinate_grids(radial, vertical, values)
-    radial_bounds = jnp.stack((jnp.min(radial_grid), jnp.max(radial_grid)))
-    vertical_bounds = jnp.stack((jnp.min(vertical_grid), jnp.max(vertical_grid)))
     if valid is None:
         valid = jnp.ones(values.shape, dtype=bool)
     else:
@@ -421,7 +449,35 @@ def fit_split_spline(
         if valid.shape != values.shape:
             raise ValueError("valid must have the values shape")
     execute = jnp.asarray(execute, dtype=bool)
-    weights = (valid & execute).reshape(-1).astype(values.dtype)
+    radial_grid, vertical_grid = _coordinate_grids(radial, vertical, values)
+    sample_count = jnp.sum(valid, dtype=jnp.int32)
+    radial_min = jnp.min(jnp.where(valid, radial_grid, jnp.inf))
+    radial_max = jnp.max(jnp.where(valid, radial_grid, -jnp.inf))
+    vertical_min = jnp.min(jnp.where(valid, vertical_grid, jnp.inf))
+    vertical_max = jnp.max(jnp.where(valid, vertical_grid, -jnp.inf))
+    coordinate_support = (
+        jnp.isfinite(radial_min)
+        & jnp.isfinite(radial_max)
+        & jnp.isfinite(vertical_min)
+        & jnp.isfinite(vertical_max)
+        & (radial_max > radial_min)
+        & (vertical_max > vertical_min)
+    )
+    coefficient_count = 2 * (order + 1) ** 2
+    fit_executed = execute & coordinate_support & (sample_count >= coefficient_count)
+    radial_bounds = jnp.where(
+        coordinate_support,
+        jnp.stack((radial_min, radial_max)),
+        jnp.asarray((0.0, 1.0), dtype=values.dtype),
+    )
+    vertical_bounds = jnp.where(
+        coordinate_support,
+        jnp.stack((vertical_min, vertical_max)),
+        jnp.asarray((0.0, 1.0), dtype=values.dtype),
+    )
+    safe_values = jnp.where(valid, values, 0.0)
+    safe_level_set = jnp.where(valid, level_set, 0.0)
+    weights = (valid & fit_executed).reshape(-1).astype(values.dtype)
     if regularization is None:
         regularization = 1.0e-12
     regularization_array = jnp.asarray(regularization, dtype=values.dtype)
@@ -436,7 +492,7 @@ def fit_split_spline(
     level_coefficient, _level_condition, level_residual, _level_scale = (
         _conditioned_fit(
             base_design,
-            level_set.reshape(-1),
+            safe_level_set.reshape(-1),
             weights,
             regularization_array,
         )
@@ -444,9 +500,10 @@ def fit_split_spline(
     patch_shape = (order + 1, order + 1)
     level_patch = level_coefficient.reshape(patch_shape)
     level_at_samples = base_design @ level_coefficient
-    field_scale = jnp.maximum(
-        jnp.max(values) - jnp.min(values), jnp.finfo(values.dtype).tiny
-    )
+    field_min = jnp.min(jnp.where(valid, values, jnp.inf))
+    field_max = jnp.max(jnp.where(valid, values, -jnp.inf))
+    field_scale = jnp.maximum(field_max - field_min, jnp.finfo(values.dtype).tiny)
+    field_scale = jnp.where(coordinate_support, field_scale, 1.0)
     exterior_weight = (jnp.maximum(level_at_samples, 0.0) / field_scale) ** 2
     split_design = jnp.concatenate(
         (base_design, exterior_weight[:, None] * base_design), axis=1
@@ -454,27 +511,29 @@ def fit_split_spline(
     field_coefficient, field_condition, field_residual, field_column_scale = (
         _conditioned_fit(
             split_design,
-            values.reshape(-1),
+            safe_values.reshape(-1),
             weights,
             regularization_array,
         )
     )
     field_patch = field_coefficient.reshape((2,) + patch_shape)
     field_patch = field_patch.at[1].divide(field_scale**2)
-    sample_residual = weights * (split_design @ field_coefficient - values.reshape(-1))
+    sample_residual = weights * (
+        split_design @ field_coefficient - safe_values.reshape(-1)
+    )
     sample_rms_residual = jnp.sqrt(
         jnp.sum(sample_residual**2)
         / jnp.maximum(jnp.sum(weights), jnp.asarray(1.0, dtype=values.dtype))
     )
-    field_patch = jnp.where(execute, field_patch, 0.0)
-    level_patch = jnp.where(execute, level_patch, 0.0)
-    condition_number = jnp.where(execute, field_condition, 1.0)
+    field_patch = jnp.where(fit_executed, field_patch, 0.0)
+    level_patch = jnp.where(fit_executed, level_patch, 0.0)
+    condition_number = jnp.where(fit_executed, field_condition, 1.0)
     solve_residual = jnp.where(
-        execute, jnp.maximum(level_residual, field_residual), 0.0
+        fit_executed, jnp.maximum(level_residual, field_residual), 0.0
     )
     solve_tolerance = 64.0 * jnp.sqrt(jnp.finfo(values.dtype).eps)
     solve_converged = (
-        execute
+        fit_executed
         & jnp.isfinite(condition_number)
         & jnp.isfinite(solve_residual)
         & (solve_residual <= solve_tolerance)
@@ -485,12 +544,12 @@ def fit_split_spline(
         field_patch,
         level_patch,
         condition_number,
-        execute,
-        jnp.sum(weights, dtype=jnp.int32),
-        jnp.where(execute, 1, 0).astype(jnp.int32),
+        fit_executed,
+        sample_count,
+        jnp.where(fit_executed, 1, 0).astype(jnp.int32),
         solve_residual,
         solve_converged,
-        jnp.where(execute, sample_rms_residual, 0.0),
+        jnp.where(fit_executed, sample_rms_residual, 0.0),
         field_column_scale.reshape((2,) + patch_shape),
         field_scale,
     )

@@ -26,6 +26,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     hex_edge_admissibility,
     polish_census_stationary_points,
 )
+from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
 
 
@@ -93,6 +94,64 @@ class TopologyQualification(NamedTuple):
     connected: jax.Array
     axis_admitted: jax.Array
     polish_receipt: dict[str, jax.Array]
+
+
+def _carrier_polish_layout(coordinate, rings):
+    """Embed one connected hex carrier in its half-offset axial lattice."""
+    points = np.asarray(coordinate, dtype=np.float64)
+    neighbours = np.asarray(rings, dtype=np.intp)
+    unavailable = (
+        np.zeros((2, 2), dtype=np.float64),
+        np.zeros((2, 2), dtype=np.float64),
+        np.zeros((2, 2), dtype=np.int32),
+        np.zeros((2, 2), dtype=bool),
+    )
+    if points.ndim != 2 or points.shape[1] != 2 or neighbours.size == 0:
+        return unavailable
+
+    ring_by_centre = {int(row[0]): row for row in neighbours}
+    first = int(neighbours[0, 0])
+    axial = {first: (0, 0)}
+    pending = [first]
+    while pending:
+        centre = pending.pop()
+        row = ring_by_centre.get(centre)
+        if row is None:
+            continue
+        origin = np.asarray(axial[centre])
+        for slot, neighbour in enumerate(row[1:]):
+            neighbour = int(neighbour)
+            if neighbour == centre:
+                continue
+            position = tuple(origin + HEX_RING[slot])
+            if neighbour in axial:
+                if axial[neighbour] != position:
+                    return unavailable
+                continue
+            axial[neighbour] = position
+            pending.append(neighbour)
+
+    if len(axial) < 50 or len(set(axial.values())) != len(axial):
+        return unavailable
+    indices = np.asarray(sorted(axial), dtype=np.int32)
+    positions = np.asarray([axial[index] for index in indices])
+    lower = positions.min(axis=0)
+    positions -= lower
+    radial_count, vertical_count = positions.max(axis=0) + 1
+    if radial_count * vertical_count > 4 * len(points):
+        return unavailable
+
+    shape = (int(vertical_count), int(radial_count))
+    radial = np.zeros(shape, dtype=np.float64)
+    vertical = np.zeros(shape, dtype=np.float64)
+    gather = np.zeros(shape, dtype=np.int32)
+    valid = np.zeros(shape, dtype=bool)
+    for index, (radial_index, vertical_index) in zip(indices, positions, strict=True):
+        radial[vertical_index, radial_index] = points[index, 0]
+        vertical[vertical_index, radial_index] = points[index, 1]
+        gather[vertical_index, radial_index] = index
+        valid[vertical_index, radial_index] = True
+    return radial, vertical, gather, valid
 
 
 def require_qualified_axis(admitted: jax.Array) -> None:
@@ -213,6 +272,10 @@ class Topology(Pytree):
     connectivity_coordinate: jax.Array | None = field(default=None, repr=False)
     connectivity_edge_gather: jax.Array | None = field(default=None, repr=False)
     connectivity_edge_weight: jax.Array | None = field(default=None, repr=False)
+    polish_radial: jax.Array | None = field(default=None, repr=False)
+    polish_vertical: jax.Array | None = field(default=None, repr=False)
+    polish_gather: jax.Array | None = field(default=None, repr=False)
+    polish_valid: jax.Array | None = field(default=None, repr=False)
 
     def __post_init__(self):
         """Cache the tensor axes required by the saddle-aware component read."""
@@ -226,6 +289,10 @@ class Topology(Pytree):
                 self.connectivity_coordinate,
                 self.connectivity_edge_gather,
                 self.connectivity_edge_weight,
+                self.polish_radial,
+                self.polish_vertical,
+                self.polish_gather,
+                self.polish_valid,
             )
         ):
             return
@@ -255,6 +322,14 @@ class Topology(Pytree):
         if self.connectivity_edge_gather is None:
             self.connectivity_edge_gather = jnp.empty((0,), dtype=jnp.int32)
             self.connectivity_edge_weight = jnp.empty((0,), dtype=jnp.float64)
+        if self.polish_radial is None:
+            radial, vertical, gather, valid = _carrier_polish_layout(
+                coordinate, self.connectivity_rings
+            )
+            self.polish_radial = jnp.asarray(radial, dtype=jnp.float64)
+            self.polish_vertical = jnp.asarray(vertical, dtype=jnp.float64)
+            self.polish_gather = jnp.asarray(gather, dtype=jnp.int32)
+            self.polish_valid = jnp.asarray(valid, dtype=bool)
 
     @jax.jit
     def x_point_index(self, vmap_x, polarity, o_psi):
@@ -616,14 +691,17 @@ class Topology(Pytree):
                 data_x,
             )
         else:
-            polish_receipt = {
-                "converged": jnp.all(jnp.isfinite(jnp.stack((data_o, data_x))), axis=1),
-                "census_position_rz": jnp.stack((data_o[:2], data_x[:2])),
-                "selected_position_rz": jnp.stack((data_o[:2], data_x[:2])),
-                "selected_value": jnp.stack((data_o[2], data_x[2])),
-                "interface_value": jnp.broadcast_to(data_b[2], (2,)),
-                "fit_iterations": jnp.ones((2,), dtype=jnp.int32),
-            }
+            flux = psi_grid[self.polish_gather]
+            data_o, data_x, polish_receipt = polish_census_stationary_points(
+                flux,
+                self.polish_radial,
+                self.polish_vertical,
+                data_b[2],
+                polarity,
+                data_o,
+                data_x,
+                self.polish_valid,
+            )
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])
@@ -723,6 +801,10 @@ class Topology(Pytree):
             self.connectivity_coordinate,
             self.connectivity_edge_gather,
             self.connectivity_edge_weight,
+            self.polish_radial,
+            self.polish_vertical,
+            self.polish_gather,
+            self.polish_valid,
         )
         aux_data = {}
         return (children, aux_data)

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="cpu-solve-viability-landed">
+  <meta name="plan-title" content="CPU solve viability — cumulative execution evidence">
+  <meta name="plan-summary" content="Measured evidence closing the CPU solve regression as HEAD-side traced-program growth: callbacks and thread settings are refuted, while repeated compilation and enlarged per-trip execution remain.">
+  <meta name="plan-evidence-for" content="cpu-solve-viability">
+  <meta name="plan-informs" content="millisecond-converged-solve,solver-trip-orchestration">
+  <title>CPU solve viability — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>CPU solve viability — cumulative execution evidence</h1>
+    <p class="lede">The greater-than-three-hour CPU regression is closed as understood, not accepted as healthy and not repaired here. The exact bank route proves the slowdown is present at HEAD; paired same-HEAD controls refute callbacks and explicit thread-pool configuration as causes; compiler-event timing identifies HEAD-side traced-program growth as the remaining explanation.</p>
+    <p><strong>Headline:</strong> HEAD took 11887 s (3.30 h) against 2200 s (37 min) pinned, with per-trip walls of 944 s, 1108 s, then about 700 s; it used 1.62 effective threads and spent only 3.4 ms in callbacks. The paired thread run stayed at 1.34 effective threads, recorded 396 compiler events taking 2945 s, and averaged 1646.6 s per trip against the 314 s pinned reference.</p>
+  </header>
+
+  <section id="frozen-symptom">
+    <h2>The frozen symptom</h2>
+    <p>SLURM job <code>1260726</code> established the anomaly before any diagnosis was attempted. On a rigel node with 16 CPUs and 64 GiB, <code>generate_topology_visuals.py --cache-only --regenerate-mast-shot 22086</code> reached its three-hour limit before <code>MAST_STATES_READY</code>, still inside the first shot-pair stage. At 1 h 35 min wall it had accumulated 2 h 28 min CPU, or about 1.5 effective cores of 16. That contradicted the producer's committed 25–50 min per-arm history and the approximately 37.5 s width-32 H200 reference, so the non-finish was frozen as a regression rather than normalized as an ordinary CPU/GPU gap.</p>
+
+    <table>
+      <caption>Frozen symptom recorded by the live plan</caption>
+      <thead><tr><th scope="col">Evidence</th><th scope="col">Recorded value</th><th scope="col">Reading</th></tr></thead>
+      <tbody>
+        <tr><td>Job</td><td><code>1260726</code>, rigel, 16 CPUs, 64 GiB</td><td>One bounded compute-node observation</td></tr>
+        <tr><td>Terminal state</td><td>TIMEOUT at 3 h</td><td>No <code>MAST_STATES_READY</code>; first pair incomplete</td></tr>
+        <tr><td>Observed utilization</td><td>2 h 28 min CPU at 1 h 35 min wall</td><td>About 1.5 effective cores of 16</td></tr>
+        <tr><td>Historical producer range</td><td>25–50 min per arm</td><td>The symptom is a regression against the same producer</td></tr>
+        <tr><td>H200 context</td><td>Approximately 37.5 s at width 32</td><td>Acceleration context, not the CPU acceptance threshold</td></tr>
+      </tbody>
+    </table>
+
+    <p>Source: <code>docs/plans/cpu-solve-viability.html</code>. The later exact-route receipt at <a href="/nova/figures/cpu-solve-viability/cpu-discriminator.json"><code>docs/figures/cpu-solve-viability/cpu-discriminator.json</code></a> localizes this frozen symptom without rewriting it.</p>
+  </section>
+
+  <section id="hypothesis-census">
+    <h2>The measured hypothesis census</h2>
+    <p>The census was settled by the exact-route discriminator and the paired same-HEAD thread configuration, rather than by timing a different producer and inferring across routes. The two receipts are <a href="/nova/figures/cpu-solve-viability/cpu-discriminator.json"><code>docs/figures/cpu-solve-viability/cpu-discriminator.json</code></a> and <a href="/nova/figures/cpu-solve-viability/thread-configuration.json"><code>docs/figures/cpu-solve-viability/thread-configuration.json</code></a>.</p>
+
+    <table>
+      <caption>Each original hypothesis and its measured verdict</caption>
+      <thead><tr><th scope="col">Hypothesis</th><th scope="col">Verdict</th><th scope="col">Measured evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Telemetry callbacks serialize the CPU loop</td><td><strong>Refuted</strong></td><td>17 callbacks consumed 0.0034198034554719925 s total, mean 0.0002011649091454113 s; the seven selected-branch callbacks are embedded in a 11887.12065763399 s solve.</td></tr>
+        <tr><td>CPU scan dispatch overhead dominates</td><td><strong>Subsumed by repeated compilation</strong></td><td>The direct compiler census recorded 396 events and 2945.4576093691285 s; two <code>jit_scan</code> events alone consumed 2045.5192452819902 s. The receipt does not support a callback-style per-iteration launch explanation.</td></tr>
+        <tr><td>XLA-CPU intra-op threads are misconfigured</td><td><strong>Refuted as the fix</strong></td><td>Explicit 16-core XLA and four 16-thread pools changed average effective threads from 1.3382185220068306 to 1.3356956818182195 and left the three residuals bit-identical.</td></tr>
+        <tr><td>A float64 CPU kernel pathology is isolated in one sub-stage</td><td><strong>Not supported; superseded by program growth</strong></td><td>The pinned and HEAD exact-route terminal residuals agree at approximately 4.8023e-4, while the measured costs span compilation and the enlarged trip body. No receipt identifies a numerically divergent kernel.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="cpu-discriminator">
+    <h2>The exact-route CPU discriminator</h2>
+    <p>The discriminator ran <code>benchmarks.bank_revision_reproduction._solve_pure_arm</code> for MAST 22086/43 with the persisted carrier reused. HEAD job <code>1261003</code> completed in 03:19:17 on <code>98dci4-clu-2011</code>, with 11887.12065763399 s measured solve wall; the banked <code>a4bec44f</code> reference job <code>1260944</code> solved the same pure arm in 2200.2123870659852 s. Both retained seven trips and the same residual trajectory to floating-point reduction noise, so the greater-than-three-hour pathology is present on the exact bank route at HEAD and is not producer-specific.</p>
+
+    <table>
+      <caption>HEAD and pinned exact-route outcomes from cpu-discriminator.json</caption>
+      <thead><tr><th scope="col">Field</th><th scope="col">HEAD</th><th scope="col">Pinned reference</th></tr></thead>
+      <tbody>
+        <tr><td>Revision</td><td><code>20f3f2e12d318dec4801497481732b8835d6e76d</code></td><td><code>a4bec44f5cbf80ad5e210c01c984ac8d02a89de9</code></td></tr>
+        <tr><td>SLURM job and node</td><td><code>1261003</code>, <code>98dci4-clu-2011</code></td><td><code>1260944</code>, <code>98dci4-clu-2009</code></td></tr>
+        <tr><td>Solve wall seconds</td><td>11887.12065763399</td><td>2200.2123870659852</td></tr>
+        <tr><td>Trip count</td><td>7</td><td>7</td></tr>
+        <tr><td>Terminal residual</td><td>0.0004802335353916338</td><td>0.00048023353539180223</td></tr>
+        <tr><td>Termination</td><td><code>active_set_settled</code></td><td><code>active_set_stagnated</code></td></tr>
+        <tr><td>Effective XLA-CPU threads</td><td>1.6169786149713725 average of 16 allocated</td><td>Not sampled in the banked receipt</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Per-trip timing and residual trajectory</caption>
+      <thead><tr><th scope="col">Trip</th><th scope="col">HEAD wall seconds</th><th scope="col">Pinned amortized seconds</th><th scope="col">HEAD live residual</th><th scope="col">Pinned residual</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>944.115800303407</td><td>314.31605529514076</td><td>0.004976455689734121</td><td>0.004976455689733941</td></tr>
+        <tr><td>2</td><td>1107.9481328977272</td><td>314.31605529514076</td><td>0.0031314746103240448</td><td>0.0031314746103240894</td></tr>
+        <tr><td>3</td><td>699.6709847091697</td><td>314.31605529514076</td><td>0.0019512703665675994</td><td>0.0019512703665675545</td></tr>
+        <tr><td>4</td><td>699.1196589628235</td><td>314.31605529514076</td><td>0.0006652842022510674</td><td>0.0006652842022510561</td></tr>
+        <tr><td>5</td><td>699.9927647802979</td><td>314.31605529514076</td><td>0.000480852111604083</td><td>0.0004808521116040719</td></tr>
+        <tr><td>6</td><td>699.5313813555986</td><td>314.31605529514076</td><td>0.0004802335353916338</td><td>0.00048023353539180223</td></tr>
+        <tr><td>7</td><td>702.7971259942278</td><td>314.31605529514076</td><td>0.0004802335353916338</td><td>0.00048023353539180223</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Cost attribution retained by the discriminator</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th><th scope="col">Interpretation</th></tr></thead>
+      <tbody>
+        <tr><td>Telemetry census</td><td>17 callbacks; 0.0034198034554719925 s total</td><td>Negligible against solve wall</td></tr>
+        <tr><td>Carrier load</td><td>42.456187980715185 s</td><td>Persisted carrier reused; no response rebuild</td></tr>
+        <tr><td>Selected diverted completion</td><td>5553.175849003252 s</td><td>Seven selected-branch trips</td></tr>
+        <tr><td>Limited-branch continuation</td><td>2097.6214218898676 s</td><td>Portfolio work after the selected branch settled</td></tr>
+        <tr><td>Post-final-callback completion</td><td>4236.323386740871 s</td><td>Result completion after the final callback</td></tr>
+        <tr><td>Dominant cost</td><td>6333.944808630738 s; share 0.5328409621688357</td><td>Post-diverted portfolio tail: limited-branch continuation plus result materialization</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/cpu-solve-viability/cpu-discriminator.png" alt="Per-trip CPU wall seconds at HEAD and the pinned revision, with the HEAD portfolio tail and callback census">
+      <figcaption>Exact-route CPU discriminator: HEAD per-trip walls against the banked revision and the extra portfolio tail.</figcaption>
+    </figure>
+    <p>The figure should be read in two layers. First, every HEAD trip is materially slower: the first two cost 944.115800303407 s and 1107.9481328977272 s, followed by approximately 700 s trips against the 314.31605529514076 s amortized reference. Second, the selected diverted branch is not the whole wall: another 6333.944808630738 s, 53.28409621688357 percent of solve wall, sits in the post-diverted portfolio tail. The callback census is visually negligible because its total is only 3.4198034554719925 ms.</p>
+
+    <p>Receipt: <a href="/nova/figures/cpu-solve-viability/cpu-discriminator.json"><code>docs/figures/cpu-solve-viability/cpu-discriminator.json</code></a>. Figure: <code>docs/figures/cpu-solve-viability/cpu-discriminator.png</code>.</p>
+  </section>
+
+  <section id="thread-configuration">
+    <h2>The thread-configuration measurement</h2>
+    <p>Job <code>1261014</code> ran sequential control and threaded steps on the same rigel node, <code>98dci4-clu-2009</code>, with the same persisted carrier and a three-trip cap. The threaded step set <code>XLA_FLAGS=--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16</code> and set <code>OMP_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code>, and <code>NUMEXPR_NUM_THREADS</code> to 16. It did not engage more sustained CPU parallelism, did not materially reduce per-trip wall, and left all three same-HEAD residuals exactly equal.</p>
+
+    <table>
+      <caption>Paired same-HEAD configurations from thread-configuration.json</caption>
+      <thead><tr><th scope="col">Field</th><th scope="col">Control</th><th scope="col">Explicit 16-core configuration</th></tr></thead>
+      <tbody>
+        <tr><td>XLA flags</td><td>Empty</td><td><code>--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16</code></td></tr>
+        <tr><td>Average effective threads</td><td>1.3382185220068306</td><td>1.3356956818182195</td></tr>
+        <tr><td>Median effective threads</td><td>1.0141326782261277</td><td>1.0307742134512763</td></tr>
+        <tr><td>Maximum interval threads</td><td>6.028215518387419</td><td>4.795398664088995</td></tr>
+        <tr><td>Compiler events</td><td>396</td><td>396</td></tr>
+        <tr><td>Compiler wall seconds</td><td>2945.4576093691285</td><td>2878.640045770211</td></tr>
+        <tr><td>Solve wall including compilation</td><td>5068.844247803965</td><td>4990.96230294602</td></tr>
+        <tr><td>Terminal residual</td><td>0.002019314631491959</td><td>0.002019314631491959</td></tr>
+        <tr><td>Termination</td><td><code>active_set_iteration_budget_exhausted</code></td><td><code>active_set_iteration_budget_exhausted</code></td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>Three-trip paired wall and semantic agreement</caption>
+      <thead><tr><th scope="col">Trip</th><th scope="col">Control wall seconds</th><th scope="col">Threaded wall seconds</th><th scope="col">Same-HEAD residual</th><th scope="col">Relative difference</th><th scope="col">Pinned seconds</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>1559.7734260209836</td><td>1533.9522662480013</td><td>0.004976378315113322</td><td>0.0</td><td>314.31605529514076</td></tr>
+        <tr><td>2</td><td>2757.728662648995</td><td>2709.0662039910094</td><td>0.003168563899435875</td><td>0.0</td><td>314.31605529514076</td></tr>
+        <tr><td>3</td><td>698.785695594037</td><td>696.7373925609863</td><td>0.002019314631491959</td><td>0.0</td><td>314.31605529514076</td></tr>
+      </tbody>
+    </table>
+
+    <p>The same-HEAD semantic gate uses a relative tolerance of 1e-09 and observes a maximum difference of 0.0. The historical banked residual comparison is revision context rather than a threading gate: its three baseline-to-banked relative differences are 1.554813819776265e-05, 0.01184403315599359, and 0.03487177691528901 because the banked capture predates stationary-point polishing inside <code>Topology.read</code>.</p>
+
+    <p><strong>Receipt verdict:</strong> with the 16-core XLA-CPU pool engaged, the first three HEAD trips averaged 1646.6 s against the 314 s pinned-revision reference (5.24×); threading alone does not close the gap, so a HEAD-side per-trip work increase remains.</p>
+
+    <table>
+      <caption>Baseline compiler events grouped directly from the 396-event census</caption>
+      <thead><tr><th scope="col">Module group</th><th scope="col">Event count</th><th scope="col">Compiler wall seconds</th></tr></thead>
+      <tbody>
+        <tr><td><code>jit_scan</code></td><td>2</td><td>2045.5192452819902</td></tr>
+        <tr><td><code>jit_while</code></td><td>1</td><td>798.5599727410008</td></tr>
+        <tr><td><code>jit_read_qualification</code></td><td>5</td><td>60.08641640393762</td></tr>
+        <tr><td>All remaining modules</td><td>388</td><td>41.291974942199886</td></tr>
+        <tr><th scope="row">Total</th><th scope="row">396</th><th scope="row">2945.4576093691285</th></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/cpu-solve-viability/thread-configuration.png" alt="Three paired control and explicitly threaded HEAD trip walls beside the pinned 314-second reference">
+      <figcaption>Same-HEAD control and explicit 16-core XLA configuration against the pinned per-trip reference.</figcaption>
+    </figure>
+    <p>The control and threaded bars are effectively coincident: threaded walls of 1533.9522662480013 s, 2709.0662039910094 s, and 696.7373925609863 s average 1646.585287599999 s, or 5.23862927095425 times the 314.31605529514076 s pinned reference. The visually dominant second trip includes the compilation census; the explicit pools save only 77.8819448579452 s across the three-trip solve while sampled effective threads remain about 1.34. Thread configuration therefore does not close the gap.</p>
+
+    <p>Receipt: <a href="/nova/figures/cpu-solve-viability/thread-configuration.json"><code>docs/figures/cpu-solve-viability/thread-configuration.json</code></a>. Figure: <code>docs/figures/cpu-solve-viability/thread-configuration.png</code>.</p>
+  </section>
+
+  <section id="closing-verdict">
+    <h2>Closing verdict and inherited action</h2>
+    <table>
+      <caption>The diagnosis closes; the performance work moves to its owning mechanisms</caption>
+      <thead><tr><th scope="col">Item</th><th scope="col">Locked outcome</th><th scope="col">Evidence-bound meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Verdict</td><td><strong>Closed as understood: HEAD-side program growth</strong></td><td>A larger traced scan body is repeatedly compiled and then executes at about one and a third effective CPU threads. The finding is present on the exact bank route and is not producer-specific.</td></tr>
+        <tr><td>Default compute decision</td><td><strong>Build on H200, then reuse caches</strong></td><td>Build machine geometry, Biot response carriers, topology operands, and the persistent XLA compilation cache once; persisted artifacts are reused by subsequent lanes. CPU is not retained as a cross-backend numerical validation requirement.</td></tr>
+        <tr><td>One-line fix target</td><td><strong>The CPU lane inherits the persistent compilation cache; per-trip program size belongs to the millisecond-converged-solve restructuring.</strong></td><td>This removes the 2945.4576093691285 s fresh-process compile from repeat CPU use without introducing a CPU-specific solver fork, while the enlarged per-trip program is reduced at its architectural owner.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

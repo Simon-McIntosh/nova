@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T13:24:47",
+  "updated": "2026-09-02T13:51:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -76501,9 +76501,140 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T114622676104-pta-mask-replay-on-main",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-mask-replay-on-main",
+        "node_definition": {
+          "done_when": "The log /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-mask-replay-on-main/topology_mask_replay_main.log exists, produced from the worktree root by JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_mask_replay.py with stdout and stderr redirected into it and the line EXIT= plus the exit status appended; the manifest states the base commit, the exit status, the symmetric-difference cell count, the committed and replayed private counts, the selected candidate index match, and the per-candidate label difference count exactly as the harness prints them (the pre-merge receipt docs/figures/hex-cell-single-grid/mask-replay-gate.json recorded 0 of 42, index 1, zero label differences); if the harness writes a receipt file, do not commit it \u2014 report its path and values; no source or test file is modified",
+          "estimated_hours": 0.5,
+          "goal": "Run the merged cache-only mask replay harness once on current main (your worktree base, which carries the carrier topology read and the schema-4 operands) and capture whether it still reproduces the committed MAST 22086/43 mixed private mask, writing the log into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-mask-replay-on-main",
+          "id": "pta-mask-replay-on-main",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T114622676104-pta-mask-replay-on-main/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-mask-replay-on-main"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T11:46:28Z",
+        "completed_at": "2026-09-02T11:51:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 284,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 284,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "33dc0924cf2c1e2f822444a5108ddf8d8789d86a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_mask_replay.py on main 33dc0924",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-mask-replay-on-main/topology_mask_replay_main.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T114622676104-pta-mask-replay-on-main/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1437440,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1793543,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 5304,
+            "reasoning_output_tokens": 268,
+            "reasoning_output_tokens_cumulative": 1274
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2059,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 5659,
+              "log_age_seconds": 2813,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2856,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane; the harness receipt is regenerated, not committed",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1350
+    "_version": 1351
   }
 }

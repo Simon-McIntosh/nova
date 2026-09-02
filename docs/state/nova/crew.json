@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T02:57:52",
+  "updated": "2026-09-02T03:01:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -71553,9 +71553,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T212403500167-gaa-efit-reproduction-run",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a72",
+        "node": "gaa-efit-reproduction-run",
+        "node_definition": {
+          "done_when": "docs/figures/gs-absolute-accuracy/efit-reproduction.json validates against its embedded schema with six MAST plus five DIII-D frame rows each carrying both error terms, band, verdict, qualification, stage timings and compile-cache status, the two floors read 0.0116147034 and 0.0832365867 to the digit, the marginal arms appear as separate qualified rows, all eleven figures exist under docs/figures/gs-absolute-accuracy/efit/ on matched colour scales, the SLURM job id, node, elapsed and exit marker are recorded, and git diff --stat shows no change under nova/",
+          "estimated_hours": 2.0,
+          "goal": "The complete EFIT reproduction gate receipt docs/figures/gs-absolute-accuracy/efit-reproduction.json with all eleven per-frame two-source figures under docs/figures/gs-absolute-accuracy/efit/, produced by the merged driver benchmarks/efit_reproduction_gate.py (full-gate mode, unbuffered, 30-second heartbeats, flushed stage timings) in ONE single-process H200 job (4 CPUs, one H200, 64 GiB, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, a 3-hour SLURM limit, launch-then-harvest inside the fence, parking with a harvest brief naming the job if it outlives the fence) under the locked build-on-H200-then-reuse-caches pattern: the persisted frozen-six MAST response carrier, the GPFS DIII-D machine-artifact cache, and the persistent XLA compilation cache enabled exactly as benchmarks/settled_exit_throughput.py enables it through nova.jax.config.configure_persistent_compilation_cache with its versioned directory, so the second and later same-shape frames pay no cold compile, the receipt recording per frame both error terms, the applicable band, the pass verdict, the convergence qualification, the stage timings, plus the compile-cache hit or miss per frame, with the marginal arms 21978/35 pure and 22086/43 pure as separate solver-basin-qualified rows, the driver edited only if the cache enablement or a defect the run exposes requires it, and no solver source modified",
+          "id": "gaa-efit-reproduction-run",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212403500167-gaa-efit-reproduction-run/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/efit_reproduction_gate.py",
+            "docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+            "docs/figures/gs-absolute-accuracy/efit/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "efit-reproduction",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:24:12Z",
+        "completed_at": "2026-09-02T00:59:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 12936,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "481d9d2dbc5a6081e6e6c5c9019fb3b7fe6467a2",
+        "commits": [
+          "6cecf64efd827bee60db69d9c2de73dcc8e7d643"
+        ],
+        "changed_lines": {
+          "added": 1013,
+          "removed": 0,
+          "files": 12
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/efit_reproduction_gate.py receipt schema validation plus SLURM 1261006 COMPLETED 0:0 EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212403500167-gaa-efit-reproduction-run/slurm-1261006.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212403500167-gaa-efit-reproduction-run/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e8a-a85b-78c0-a254-9f840be8d0b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2473600,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2800829,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21986,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6622
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1292
+    "_version": 1293
   }
 }

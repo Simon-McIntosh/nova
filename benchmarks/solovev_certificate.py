@@ -1925,6 +1925,183 @@ def _schema() -> dict[str, Any]:
     }
 
 
+def _scheduler_receipt(job_ids: list[str]) -> list[dict[str, Any]]:
+    """Return terminal scheduler rows for explicitly named evidence jobs."""
+
+    receipts = []
+    for job_id in job_ids:
+        output = subprocess.check_output(
+            [
+                "sacct",
+                "-X",
+                "-j",
+                job_id,
+                "--format=JobIDRaw,State,Elapsed,ExitCode,NodeList",
+                "-n",
+                "-P",
+            ],
+            text=True,
+        )
+        rows = []
+        for line in output.splitlines():
+            if not line.strip():
+                continue
+            raw_id, state, elapsed, exit_code, node = line.split("|", maxsplit=4)
+            rows.append(
+                {
+                    "job_id": raw_id,
+                    "state": state,
+                    "elapsed": elapsed,
+                    "exit_code": exit_code,
+                    "node": node,
+                }
+            )
+        receipts.append({"requested_job_id": job_id, "rows": rows})
+    return receipts
+
+
+def _aggregate_partial(
+    output: Path = OUTPUT, *, scheduler_job_ids: list[str] | None = None
+) -> dict[str, Any]:
+    """Bank every terminal production row plus the reduced action census."""
+
+    case_payload = {}
+    missing_rows = []
+    for case_name in CASE_NAMES:
+        rows = []
+        for requested in REQUESTED_CELLS:
+            path = _part_path(case_name, requested)
+            if path.exists():
+                row = json.loads(path.read_text(encoding="utf-8"))
+                _validate_row(row)
+                rows.append(row)
+            else:
+                missing_rows.append({"case": case_name, "requested_cells": requested})
+        fits = {}
+        for field in NORM_FIELDS:
+            fits[field] = {}
+            for region in NORM_REGIONS:
+                fits[field][region] = {
+                    statistic: _fit_quantity(rows, field, region, statistic)
+                    for statistic in NORM_STATISTICS
+                }
+        case_payload[case_name] = {
+            "rows": rows,
+            "convergence_order_fits": fits,
+            "verdict": {
+                "sentence": (
+                    f"Banked {len(rows)} terminal production-route rows for "
+                    f"{case_name}; the complete ladder is deferred pending the "
+                    "non-finite linear-action diagnosis."
+                )
+            },
+        }
+
+    diagnostics = {
+        case_name: json.loads(_diagnostic_path(case_name).read_text(encoding="utf-8"))
+        for case_name in CASE_NAMES
+    }
+    production_nonfinite = []
+    near_root_finite = []
+    for case_name, diagnostic in diagnostics.items():
+        arms = {arm["name"]: arm for arm in diagnostic["arms"]}
+        if not arms["production_moment_seed"]["fixed_point_linear_action_finite"]:
+            production_nonfinite.append(case_name)
+        if arms["closed_form_near_root_seed"]["fixed_point_linear_action_finite"]:
+            near_root_finite.append(case_name)
+    headline = (
+        f"The production moment seed has a non-finite first (I-J)v action in "
+        f"{len(production_nonfinite)} of {len(CASE_NAMES)} reduced cases; the "
+        f"closed-form near-root control has a finite action in "
+        f"{len(near_root_finite)} of {len(CASE_NAMES)} cases."
+    )
+    receipt = {
+        "schema": {
+            "$id": "nova.solovev-production-route-partial-certificate",
+            "version": 1,
+            "required": [
+                "schema",
+                "preregistration",
+                "reduced_oracle_registry_reproduction",
+                "cases",
+                "nan_census",
+                "scheduler_evidence",
+                "verdict",
+            ],
+            "terminal_qualifications": ["qualified", "unqualified"],
+            "row_required": _schema()["row_required"],
+            "norm_fields": list(NORM_FIELDS),
+            "norm_regions": list(NORM_REGIONS),
+            "norm_statistics": list(NORM_STATISTICS),
+        },
+        "preregistration": {
+            "measurement": (
+                "ForwardProfile production-route terminal rows and a reduced-rung "
+                "public-intermediate census of the first frozen-mask linear action"
+            ),
+            "cases": list(CASE_NAMES),
+            "requested_cells": list(REQUESTED_CELLS),
+            "terminal_residual_bound": TERMINAL_RESIDUAL_BOUND,
+            "solver_route": (
+                "profile.solve(seed, route='newton_krylov', "
+                "target_current=Ip_closed_form)"
+            ),
+            "seed_factory": "profile.cold_seed_portfolio",
+            "source_revision": _source_revision(),
+            "solver_source_modified": False,
+            "full_ladder_policy": (
+                "deferred until the non-finite first linear action is understood"
+            ),
+        },
+        "reduced_oracle_registry_reproduction": _registry_reproduction(),
+        "cases": case_payload,
+        "nan_census": {
+            "requested_cells": -110,
+            "cases": diagnostics,
+            "headline": headline,
+        },
+        "scheduler_evidence": _scheduler_receipt(scheduler_job_ids or []),
+        "verdict": {
+            "schema_valid": True,
+            "headline": headline,
+            "banked_row_count": sum(
+                len(case["rows"]) for case in case_payload.values()
+            ),
+            "missing_rows": missing_rows,
+            "full_sixteen_row_ladder_complete": not missing_rows,
+            "full_ladder_deferred": True,
+            "production_nonfinite_action_cases": production_nonfinite,
+            "near_root_finite_action_cases": near_root_finite,
+        },
+    }
+    _validate_partial(receipt)
+    _write_json(output, receipt)
+    return receipt
+
+
+def _validate_partial(receipt: dict[str, Any]) -> None:
+    """Validate the banked partial receipt and its complete reduced census."""
+
+    for name in receipt["schema"]["required"]:
+        if name not in receipt:
+            raise RuntimeError(f"partial certificate is missing {name}")
+    row_count = 0
+    for case_name in CASE_NAMES:
+        if case_name not in receipt["cases"]:
+            raise RuntimeError(f"partial certificate is missing case {case_name}")
+        for row in receipt["cases"][case_name]["rows"]:
+            _validate_row(row)
+            row_count += 1
+        diagnostic = receipt["nan_census"]["cases"].get(case_name)
+        if diagnostic is None or len(diagnostic.get("arms", [])) != 2:
+            raise RuntimeError(f"NaN census is incomplete for {case_name}")
+    if row_count != receipt["verdict"]["banked_row_count"]:
+        raise RuntimeError("banked row count does not match the receipt")
+    registry = receipt["reduced_oracle_registry_reproduction"]
+    if registry["registry_entry_count"] != 14 or not registry["all_bounds_reproduced"]:
+        raise RuntimeError("the locked recovery registry was not reproduced")
+
+
 def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
     case_payload = {}
     for case_name in CASE_NAMES:
@@ -2053,10 +2230,13 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--case", choices=CASE_NAMES)
     parser.add_argument("--requested-cells", type=int, choices=REQUESTED_CELLS)
     parser.add_argument("--aggregate", action="store_true")
+    parser.add_argument("--aggregate-partial", action="store_true")
     parser.add_argument("--validate", action="store_true")
+    parser.add_argument("--validate-partial", action="store_true")
     parser.add_argument("--seed-control", action="store_true")
     parser.add_argument("--validate-seed-control", action="store_true")
     parser.add_argument("--nan-census", action="store_true")
+    parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
 
@@ -2084,9 +2264,21 @@ def main() -> None:
         receipt = _aggregate(arguments.output)
         print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
         return
+    if arguments.aggregate_partial:
+        receipt = _aggregate_partial(
+            arguments.output,
+            scheduler_job_ids=arguments.scheduler_job_id,
+        )
+        print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
+        return
     if arguments.validate:
         receipt = json.loads(arguments.output.read_text(encoding="utf-8"))
         _validate(receipt)
+        print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
+        return
+    if arguments.validate_partial:
+        receipt = json.loads(arguments.output.read_text(encoding="utf-8"))
+        _validate_partial(receipt)
         print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
         return
     if arguments.case is None or arguments.requested_cells is None:

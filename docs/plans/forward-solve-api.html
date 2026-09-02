@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="forward-solve-api">
+<meta name="plan-title" content="Forward solve API — one public seam, declared defaults, pinned by tests">
+<meta name="plan-summary" content="One public forward-solve seam whose landed capabilities are declared, versioned defaults pinned by a test, migrated onto every production route.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="28.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S20">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,fixed-point,provenance,jax,reuse">
+<meta name="plan-depends-on" content="solver-convergence-regression">
+<title>Forward solve API | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Forward solve API</h1>
+<p class="lede">Raised by the lead on 2026-09-02 after one night surfaced four landed capabilities that the production routes do not apply by default, each discovered only because a measurement failed: the net-current pin is opt-in and the Solov'ev certificate never passed it; the persistent compilation cache is opt-in and missed on all eleven EFIT frames; the settled exit silently changed a fixture's semantics; the cached machine build is bypassed by the one lane that measures cold cost. The read-only capability-wiring audit (<code>~/.config/reckon/crew/reports/nova/capability-wiring-audit.md</code>, sixteen capabilities against eight entry points with path and line evidence) then showed the pattern: <code>ForwardProfile.solve</code> on the Newton–Krylov route carries the landed active-set safeguards by default, but the Solov'ev oracle and certificate bypass it with a bare fixed-point call, the default EFIT parity command runs an absolute-source one-branch solve with the current-constrained seam behind a flag, the bank and MAST visual routes copy a reference seed into both portfolio branches, and only one launcher enables the compilation cache. The same solver reaches different verdicts depending on which script calls it. This plan makes the interface the authority: one public solve request whose defaults are declared in one place, versioned, consumed by every driver and by imas-ambix, and pinned by a default-wiring test that fails when a capability regresses to opt-in.</p></header>
+
+<h2 id="s1">§1 — The gap list becomes the acceptance list</h2>
+<p>The audit's eight ranked gaps are this plan's acceptance criteria, each closed by a wiring change on the production route and a pinning test. In order: (1) the Solov'ev oracle, certificate and non-pure topology-visual solves go through <code>ForwardProfile.solve_branch</code> or <code>solve</code> on the <code>newton_krylov</code> route, so own-mask acceptance, strict settlement, Newton and globalisation continuation, best-iterate retention and the stagnation stop apply to them; (2) every solve launcher enables the persistent compilation cache at its executable boundary; (3) the default EFIT parity command is the current-constrained solve, with the absolute-source replay behind a named diagnostic flag; (4) the Solov'ev paths take their seed from <code>ForwardProfile.cold_seed_portfolio</code> rather than a private moment-seed copy; (5) the exact-bank and MAST visual routes seed the two portfolio branches cold rather than copying the reference into both; (6) the default EFIT parity run and every certificate rung load the persisted machine through <code>cached_machine</code>; (7) constraint pins stay caller policy but travel as a typed argument from each benchmark's governed inputs, never synthesised inside Nova; (8) Anderson stays absent from defaults until <code>solver-convergence-regression</code> promotes a result. Done-when: a table in the evidence record with one row per gap reading DEFAULT-ON on every production entry point, each cell backed by a test node id.</p>
+
+<h2 id="s2">§2 — The request and receipt contract</h2>
+<p>Define the public seam as two typed objects in the spirit of the shipped <code>coupling-surface-contract</code>: a <strong>solve request</strong> (machine or persisted carrier identity, source profile, seed policy naming a <code>cold_seed_portfolio</code> class or an explicit state, target current, constraint pins, route, budgets, and an <code>api_version</code>) and a <strong>solve receipt</strong> (the terminal state with its qualification, termination reason, per-trip residual and mask history, the globalisation decisions taken, the amplitude history, the topology read with its polish receipt, the compile-cache hit or miss, wall seconds, and the resolved defaults that actually ran). The defaults live in one declared table keyed by <code>api_version</code>, not in call sites: current pin on, settled exit on, exact kernels, cached machine, compilation cache on, Newton–Krylov route with the a2e65fda acceptance and whatever remedy <code>solver-convergence-regression</code> promotes. The receipt must record the resolved defaults so a banked row can never be misread as having run under a policy it did not. Done-when: the two types exist under <code>nova/equilibrium/</code> with a schema test, <code>ForwardProfile.solve</code> accepts a request and returns a receipt, and the resolved-defaults block round-trips through the JSON receipts the benchmarks already write.</p>
+
+<h2 id="s3">§3 — Host geometry and member data are separate pytree leaves</h2>
+<p>The strict-exit incidence measurement on the real bank mixes could not be compiled: with twelve heterogeneous MAST members in one program the member operators are closed into the trace as constants and XLA compile memory passed 100 GB then 267 GB while solve-time memory was under 4 GB, and the first attempt to pass operators as arguments traced shared host geometry and failed at <code>RectilinearMesh.radial_step</code> on a traced scalar. The same closure is why the compilation cache missed on all eleven EFIT frames. The request contract therefore separates <strong>host geometry</strong> (lattice coordinates, connectivity axes, wall nodes, cell polygons, hex stencil, material mask: NumPy, never traced, identical across members of a batch) from <strong>member data</strong> (coupling blocks, responses, profile tables, flux anchors, target current, seed: stacked along a leading member axis and passed as traced arguments), with an explicit pytree boundary the operator honours. Done-when: a width-12 heterogeneous MAST batch compiles once under 16 GB host memory, its per-member results are bit-identical to the width-1 solves, and a pure-data change between frames hits the persistent compilation cache.</p>
+
+<h2 id="s4">§4 — Migrate the production routes and pin the defaults</h2>
+<p>Move the drivers onto the request seam in dependency order, each migration a node with the seven referee tests and the route's own receipts as its gate: the exact bank route and the topology-visuals producer, the EFIT parity slice and the DIII-D GS match, the Solov'ev oracle and certificate, and the imas-ambix consumer (<code>imas_ambix.statespace.nova_ensemble_estimator</code>, which already captures the installed Nova revision). Add one <strong>default-wiring test</strong> in the default pytest lane that constructs a request with no options on each production route and asserts every declared default resolved on, so a capability that regresses to opt-in fires a test rather than a measurement. Done-when: the audit rerun reads DEFAULT-ON in every production cell, the default-wiring test is green in the default lane, imas-ambix's consumer gate stays green against the migrated seam, and the <code>api_version</code> is recorded in every banked receipt produced after the migration.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="api-version-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does a change to a declared default bump <code>api_version</code> (banked receipts stay comparable by version) or is the resolved-defaults block in the receipt sufficient provenance on its own?</p>
+    <p class="r-dec-ctx">A version bump makes bank re-baselines explicit and lets imas-ambix pin; the resolved-defaults block alone is lighter but leaves comparability to the reader.</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fsa-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Define the seam, then migrate the routes</h4>
+    <div class="r-fu-body">Lock the api-version policy, author the request and receipt contract (§2) with the host-geometry boundary (§3), then migrate the production routes in dependency order and land the default-wiring test (§4), closing the eight audit gaps (§1). Waits on solver-convergence-regression only for which acceptance remedy becomes the declared default.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

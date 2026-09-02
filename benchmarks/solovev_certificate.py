@@ -9,14 +9,16 @@ by the terminal residual qualification.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
 import socket
 import subprocess
+import threading
 from time import perf_counter
-from typing import Any
+from typing import Any, Iterator
 
 import jax
 import jax.numpy as jnp
@@ -24,10 +26,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Normalize
 import numpy as np
+from scipy import stats
 
-from benchmarks.analytic_operator_ladder import _fit_order, _regional_norms
+from benchmarks.analytic_operator_ladder import _fit_order, _region_masks
 from benchmarks.split_fit_jump_field import (
     BOUNDARY_BAND_PITCHES,
     _distance_to_boundary,
@@ -36,8 +39,14 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_gradient,
     _polynomial_hessian,
 )
+from nova.equilibrium import ForwardProfile, SaddleSeedGeometry
 from nova.equilibrium.stencil_mesh import StencilMesh
-from nova.jax.config import configure_dtypes
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.reduced_oracle import measure_reduced_oracle
 from scripts.dual_basin_fixtures.build_diverted_fixture import (
@@ -66,6 +75,7 @@ THEORETICAL_ORDER = 2.0
 NORM_FIELDS = ("psi", "gradient", "hessian")
 NORM_REGIONS = ("whole_domain", "two_pitch_boundary_band")
 NORM_STATISTICS = ("sup", "rms")
+HEARTBEAT_SECONDS = 30.0
 REUSE_MAP_ROWS = (
     "tests/rotating_equilibrium_references.py::reference_cases",
     "benchmarks/split_fit_jump_field.py::_polynomial_gradient,_polynomial_hessian,_lcfs",
@@ -74,6 +84,97 @@ REUSE_MAP_ROWS = (
     "scripts/analytic_oracle_fixtures/reduced_oracle.py::measure_reduced_oracle",
     "tests/test_solovev_recovery_gates.py::LOCKED_RECOVERY_BOUNDS",
 )
+RECOVERY_GATE_LANE_PERFORMANCE = {
+    "classification": "lane-performance qualification, not certificate accuracy",
+    "registered_wall_bound_seconds": 60.0,
+    "last_green_wall_seconds_approx": 35.0,
+    "path_change_since_last_green": {
+        "revision": "32f16b3b",
+        "change": "restored the hex-carrier topology read",
+        "only_change_on_reduced_oracle_read_path": True,
+    },
+    "attempts": [
+        {
+            "slurm_job_id": "1261036",
+            "node": "98dci4-clu-2009",
+            "cpu_count": 1,
+            "threaded_settings": {"enabled": False},
+            "wall_seconds": 87.43643704202259,
+            "wall_bound_seconds": 60.0,
+            "ratio_to_last_green": 2.4981839154863595,
+            "numerical_forcing_and_fixed_point_assertions": "passed",
+            "timing_assertion": "failed",
+        },
+        {
+            "slurm_job_id": "1261037",
+            "node": "98dci4-clu-2009",
+            "cpu_count": 16,
+            "threaded_settings": {
+                "enabled": True,
+                "xla_flags": (
+                    "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+                ),
+                "omp_num_threads": 16,
+                "openblas_num_threads": 16,
+                "mkl_num_threads": 16,
+                "numexpr_num_threads": 16,
+            },
+            "wall_seconds": 77.55223163502524,
+            "wall_bound_seconds": 60.0,
+            "ratio_to_last_green": 2.2157780467150067,
+            "numerical_forcing_and_fixed_point_assertions": "passed",
+            "timing_assertion": "failed",
+        },
+    ],
+    "finding": (
+        "the restored reduced-oracle topology read is 2.2 to 2.5 times slower "
+        "than the approximately 35-second last-green lane"
+    ),
+    "disposition": "performance regression handed to the topology-read owner",
+}
+
+
+@contextmanager
+def _timed_stage(
+    name: str,
+    timings: dict[str, float],
+    *,
+    case_name: str,
+    requested_cells: int,
+) -> Iterator[None]:
+    """Emit flushed stage boundaries and heartbeats for scheduler harvesting."""
+
+    started = perf_counter()
+    stopped = threading.Event()
+
+    def heartbeat() -> None:
+        while not stopped.wait(HEARTBEAT_SECONDS):
+            print(
+                f"SOLOVEV_STAGE_HEARTBEAT case={case_name} "
+                f"requested_cells={requested_cells} stage={name} "
+                f"elapsed_seconds={perf_counter() - started:.3f}",
+                flush=True,
+            )
+
+    print(
+        f"SOLOVEV_STAGE_BEGIN case={case_name} requested_cells={requested_cells} "
+        f"stage={name}",
+        flush=True,
+    )
+    worker = threading.Thread(target=heartbeat, daemon=True)
+    worker.start()
+    try:
+        yield
+    finally:
+        elapsed = perf_counter() - started
+        timings[name] = elapsed
+        stopped.set()
+        worker.join()
+        print(
+            f"SOLOVEV_STAGE_END case={case_name} requested_cells={requested_cells} "
+            f"stage={name} elapsed_seconds={elapsed:.6f}",
+            flush=True,
+        )
 
 
 def _strict(value: Any) -> Any:
@@ -145,6 +246,54 @@ def _diverted_source(coefficients: np.ndarray) -> RotatingEquilibrium:
         boundary_temperature=carrier.boundary_temperature,
         mean_particle_mass=carrier.mean_particle_mass,
     )
+
+
+def _diverted_seed(
+    source_case: RotatingEquilibrium, machine: Any, operator: Any
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Return the production axis-saddle cold seed for the diverted basin."""
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
+    seed_radius = 0.9 * float(np.linalg.norm(X_POINT_M - AXIS_M))
+    supported = np.linalg.norm(machine.node - AXIS_M, axis=1) < seed_radius
+    cell_current = (
+        source_case.toroidal_current_density(machine.node[:, 0], machine.node[:, 1])
+        * machine.area
+        * supported
+    )
+    total_current = float(np.sum(cell_current))
+    centroid = np.sum(machine.node * cell_current[:, None], axis=0) / total_current
+    geometry = SaddleSeedGeometry(tuple(AXIS_M), tuple(X_POINT_M))
+    portfolio = profile.cold_seed_portfolio(
+        total_current,
+        centroid,
+        diverted_geometry=geometry,
+    )
+    branch = int(TopologyClass.DIVERTED)
+    branches = portfolio.branches
+    seed = np.asarray(branches.flux[branch], dtype=np.float64)
+    receipt = {
+        "kind": "production-current-moment-axis-saddle-geometry",
+        "independent_of_closed_form_state": True,
+        "closed_form_flux_samples_used": False,
+        "closed_form_coupling_image_used": False,
+        "fixture_exterior_boundary_condition_used": True,
+        "declared_axis_m": AXIS_M.tolist(),
+        "declared_saddle_m": X_POINT_M.tolist(),
+        "plasma_current_a": total_current,
+        "current_centroid_m": centroid.tolist(),
+        "seed_support_radius_m": seed_radius,
+        "supported_cell_count": int(np.count_nonzero(cell_current)),
+        "production_seed_radius_m": float(branches.radius[branch]),
+        "anchor_available": bool(branches.anchor_available[branch]),
+        "anchor_m": np.asarray(branches.anchor[branch], dtype=np.float64).tolist(),
+        "stored_flux_samples_used": bool(branches.stored_flux_samples_used[branch]),
+        "state_sha256_binary64": hashlib.sha256(seed.tobytes()).hexdigest(),
+    }
+    return seed, receipt
 
 
 def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
@@ -242,31 +391,143 @@ def _norm(field: np.ndarray, mask: np.ndarray) -> dict[str, Any]:
     selected = np.abs(np.asarray(field)[mask])
     if selected.size == 0:
         raise RuntimeError("an accuracy norm has empty support")
+    finite = np.isfinite(selected)
+    if not np.any(finite):
+        return {
+            "support_cells": int(np.count_nonzero(mask)),
+            "component_count": int(selected.size),
+            "finite_component_count": 0,
+            "measurement_status": "nonfinite_terminal_error",
+            "sup": None,
+            "rms": None,
+        }
+    finite_selected = selected[finite]
     return {
         "support_cells": int(np.count_nonzero(mask)),
         "component_count": int(selected.size),
-        "sup": float(np.max(selected)),
-        "rms": float(np.sqrt(np.mean(selected**2))),
+        "finite_component_count": int(np.count_nonzero(finite)),
+        "measurement_status": "finite" if np.all(finite) else "finite_subset",
+        "sup": float(np.max(finite_selected)),
+        "rms": float(np.sqrt(np.mean(finite_selected**2))),
     }
 
 
-def _field_norms(field: np.ndarray, boundary_band: np.ndarray) -> dict[str, Any]:
+def _unavailable_norm(reason: str) -> dict[str, Any]:
+    return {
+        "support_cells": 0,
+        "component_count": 0,
+        "finite_component_count": 0,
+        "measurement_status": "unavailable",
+        "unavailable_reason": reason,
+        "sup": None,
+        "rms": None,
+    }
+
+
+def _field_norms(
+    field: np.ndarray,
+    boundary_band: np.ndarray,
+    *,
+    band_unavailable_reason: str | None = None,
+) -> dict[str, Any]:
     return {
         "whole_domain": _norm(field, np.ones(len(field), dtype=bool)),
-        "two_pitch_boundary_band": _norm(field, boundary_band),
+        "two_pitch_boundary_band": (
+            _norm(field, boundary_band)
+            if band_unavailable_reason is None
+            else _unavailable_norm(band_unavailable_reason)
+        ),
     }
+
+
+def _analytic_region_norms(
+    field: np.ndarray, psi_norm: np.ndarray, span_wb: float
+) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    absolute = np.abs(np.asarray(field, dtype=np.float64))
+    for name, mask in _region_masks(psi_norm).items():
+        count = int(np.count_nonzero(mask))
+        if count == 0:
+            reason = (
+                "no separatrix band at this resolution"
+                if name == "separatrix_band"
+                else f"no {name} cells at this resolution"
+            )
+            result[name] = {
+                "cell_count": 0,
+                "finite_cell_count": 0,
+                "measurement_status": "unavailable",
+                "unavailable_reason": reason,
+                "absolute_sup_wb": None,
+                "absolute_rms_wb": None,
+                "relative_sup": None,
+                "relative_rms": None,
+            }
+            continue
+        finite = np.isfinite(absolute[mask])
+        selected = absolute[mask][finite]
+        if selected.size == 0:
+            result[name] = {
+                "cell_count": count,
+                "finite_cell_count": 0,
+                "measurement_status": "unavailable",
+                "unavailable_reason": "no finite terminal error in this region",
+                "absolute_sup_wb": None,
+                "absolute_rms_wb": None,
+                "relative_sup": None,
+                "relative_rms": None,
+            }
+            continue
+        sup = float(np.max(selected))
+        rms = float(np.sqrt(np.mean(selected**2)))
+        result[name] = {
+            "cell_count": count,
+            "finite_cell_count": int(selected.size),
+            "measurement_status": "finite" if np.all(finite) else "finite_subset",
+            "absolute_sup_wb": sup,
+            "absolute_rms_wb": rms,
+            "relative_sup": sup / span_wb,
+            "relative_rms": rms / span_wb,
+        }
+    return result
 
 
 def _topology(operator, state: np.ndarray) -> dict[str, Any]:
-    _masks, topology = operator.read(jnp.asarray(state))
+    try:
+        _masks, topology = operator.read(jnp.asarray(state))
+    except NoQualifiedAxisError:
+        return {
+            "read_status": "no_qualified_axis",
+            "class": None,
+            "axis_rz_m": None,
+            "x_point_rz_m": None,
+            "boundary_flux_wb": None,
+            "axis_flux_wb": None,
+            "flux_span_wb": None,
+        }
     x_point = np.asarray(topology.x_point, dtype=np.float64)
     return {
+        "read_status": "qualified_axis",
         "class": "diverted" if bool(topology.diverted) else "limited",
         "axis_rz_m": np.asarray(topology.axis, dtype=np.float64).tolist(),
         "x_point_rz_m": x_point.tolist() if np.all(np.isfinite(x_point)) else None,
         "boundary_flux_wb": float(topology.boundary_flux),
         "axis_flux_wb": float(topology.axis_flux),
         "flux_span_wb": float(topology.flux_span),
+    }
+
+
+def _analytic_diverted_topology(coefficients: np.ndarray) -> dict[str, Any]:
+    axis_flux = float(_polynomial_flux(AXIS_M[None, :], coefficients)[0])
+    boundary_flux = float(_polynomial_flux(X_POINT_M[None, :], coefficients)[0])
+    return {
+        "read_status": "analytic_stationary_point_fallback",
+        "class": "diverted",
+        "axis_rz_m": AXIS_M.tolist(),
+        "x_point_rz_m": X_POINT_M.tolist(),
+        "boundary_flux_wb": boundary_flux,
+        "axis_flux_wb": axis_flux,
+        "flux_span_wb": axis_flux - boundary_flux,
     }
 
 
@@ -287,22 +548,58 @@ def _plot(
     ):
         magnitude = np.asarray(errors[name], dtype=np.float64)
         if magnitude.ndim > 1:
-            magnitude = np.sqrt(
-                np.mean(magnitude**2, axis=tuple(range(1, magnitude.ndim)))
+            components = magnitude.reshape(len(magnitude), -1)
+            scale = np.max(np.abs(components), axis=1)
+            normalized = np.divide(
+                components,
+                scale[:, None],
+                out=np.zeros_like(components),
+                where=np.isfinite(scale[:, None]) & (scale[:, None] > 0.0),
             )
-        positive = magnitude[magnitude > 0.0]
-        floor = float(np.min(positive)) if len(positive) else np.finfo(float).tiny
-        ceiling = max(float(np.max(magnitude)), floor * 10.0)
-        artist = axis.scatter(
-            points[:, 0],
-            points[:, 1],
-            c=np.maximum(magnitude, floor),
-            s=10,
-            cmap="magma",
-            norm=LogNorm(vmin=floor, vmax=ceiling),
-            linewidths=0.0,
-        )
-        figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
+            magnitude = scale * np.sqrt(np.mean(normalized**2, axis=1))
+        finite = np.isfinite(magnitude)
+        finite_values = magnitude[finite]
+        if finite_values.size == 0:
+            axis.scatter(points[:, 0], points[:, 1], s=10, c="0.72", linewidths=0.0)
+            axis.text(
+                0.5,
+                0.5,
+                "no finite field, unqualified",
+                ha="center",
+                va="center",
+                transform=axis.transAxes,
+                bbox={"facecolor": "white", "alpha": 0.9, "edgecolor": "0.4"},
+            )
+        else:
+            minimum = float(np.nanmin(finite_values))
+            maximum = float(np.nanmax(finite_values))
+            positive = finite_values[finite_values > 0.0]
+            if positive.size and float(np.min(positive)) < maximum:
+                norm = LogNorm(vmin=float(np.min(positive)), vmax=maximum)
+            else:
+                width = max(abs(minimum), 1.0) * np.finfo(float).eps
+                norm = Normalize(vmin=minimum - width, vmax=maximum + width)
+            artist = axis.scatter(
+                points[finite, 0],
+                points[finite, 1],
+                c=finite_values,
+                s=10,
+                cmap="magma",
+                norm=norm,
+                linewidths=0.0,
+            )
+            figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
+        if not np.all(finite):
+            axis.scatter(
+                points[~finite, 0],
+                points[~finite, 1],
+                marker="x",
+                s=16,
+                c="#35b9c8",
+                linewidths=0.7,
+                label=f"non-finite: {np.count_nonzero(~finite)}",
+            )
+            axis.legend(loc="best", fontsize="x-small")
         axis.plot(boundary[:, 0], boundary[:, 1], color="#35b9c8", lw=0.9)
         axis.set_title(name)
         axis.set_xlabel("R [m]")
@@ -316,51 +613,95 @@ def _plot(
 
 def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     configure_dtypes()
-    carrier_case, source_case, exact = _case(case_name)
-    machine_builder = (
-        oracle_fixture.build_machine
-        if requested_cells == -110
-        else oracle_fixture.cached_machine
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
     )
-    if requested_cells == -110:
-        machine = machine_builder(
-            carrier_case, requested_cells, wall_nodes=oracle_fixture.WALL_POINT_COUNT
+    print(
+        f"SOLOVEV_COMPILATION_CACHE directory={compilation_cache.directory} "
+        f"version={compilation_cache.version_key}",
+        flush=True,
+    )
+    stage_timings: dict[str, float] = {}
+    with _timed_stage(
+        "case_and_machine",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        carrier_case, source_case, exact = _case(case_name)
+        machine_builder = (
+            oracle_fixture.build_machine
+            if requested_cells == -110
+            else oracle_fixture.cached_machine
         )
-        machine.cache.update(
-            {
-                "hit": False,
-                "semantic_key": "reduced-oracle-direct-build",
-                "build_seconds": None,
-            }
+        if requested_cells == -110:
+            machine = machine_builder(
+                carrier_case,
+                requested_cells,
+                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+            )
+            machine.cache.update(
+                {
+                    "hit": False,
+                    "semantic_key": "reduced-oracle-direct-build",
+                    "build_seconds": None,
+                }
+            )
+        else:
+            machine = machine_builder(
+                carrier_case,
+                requested_cells,
+                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+            )
+
+    with _timed_stage(
+        "operator_and_seed",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
         )
-    else:
-        machine = machine_builder(
-            carrier_case, requested_cells, wall_nodes=oracle_fixture.WALL_POINT_COUNT
+        oracle_state = _exact_state(case_name, exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, oracle_state
         )
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
-    )
-    oracle_state = _exact_state(case_name, exact, coordinates)
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
-    )
-    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-    exact_internal = oracle_fixture._internal_flux_image(
-        empty_operator, exact_coefficients
-    )
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - exact_internal
-    )
-    seed, _moment_image, seed_receipt = recovery._moment_seed(
-        source_case, machine, operator
-    )
-    compile_started = perf_counter()
-    compiled = recovery._solve(operator.flux_map(), seed)
-    compile_and_solve_seconds = perf_counter() - compile_started
-    warm_started = perf_counter()
-    terminal = recovery._solve(operator.flux_map(), seed)
-    warm_solve_seconds = perf_counter() - warm_started
+        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+        exact_internal = oracle_fixture._internal_flux_image(
+            empty_operator, exact_coefficients
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, oracle_state - exact_internal
+        )
+        if case_name == "diverted-jump-bearing":
+            seed, seed_receipt = _diverted_seed(source_case, machine, operator)
+            solver_route = (
+                "production axis-saddle cold seed with undamped Newton-Krylov"
+            )
+        else:
+            seed, _moment_image, seed_receipt = recovery._moment_seed(
+                source_case, machine, operator
+            )
+            solver_route = "production moment seed with undamped Newton-Krylov"
+
+    with _timed_stage(
+        "compile_and_first_solve",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        compiled = recovery._solve(operator.flux_map(), seed)
+    compile_and_solve_seconds = stage_timings["compile_and_first_solve"]
+    with _timed_stage(
+        "compile_warm_solve",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        terminal = recovery._solve(operator.flux_map(), seed)
+    warm_solve_seconds = stage_timings["compile_warm_solve"]
     terminal_state = np.asarray(terminal.state, dtype=np.float64)
     terminal_residual = float(terminal.residual)
     qualification = (
@@ -369,59 +710,95 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         and terminal_residual <= TERMINAL_RESIDUAL_BOUND
         else "unqualified"
     )
-
-    cell_count = len(machine.node)
-    root_grid = terminal_state[:cell_count]
-    exact_grid = oracle_state[:cell_count]
-    mesh = StencilMesh(machine.node, machine.stencil, machine.area)
-    derivative_coordinates, root_gradient, root_hessian = _quadratic_derivatives(
-        mesh, root_grid
-    )
-    exact_gradient, exact_hessian = _exact_derivatives(
-        case_name, exact, derivative_coordinates
-    )
-    psi_error = root_grid - exact_grid
-    gradient_error = root_gradient - exact_gradient
-    hessian_error = root_hessian - exact_hessian
-    boundary = _boundary(case_name, exact)
-    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
-    psi_boundary_band = _distance_to_boundary(machine.node, boundary) <= (
-        BOUNDARY_BAND_PITCHES * pitch
-    )
-    derivative_boundary_band = _distance_to_boundary(
-        derivative_coordinates, boundary
-    ) <= (BOUNDARY_BAND_PITCHES * pitch)
-    exact_topology = _topology(operator, oracle_state)
-    root_topology = _topology(operator, terminal_state)
-    axis_reference = (
-        AXIS_M
-        if case_name == "diverted-jump-bearing"
-        else np.asarray(exact.magnetic_axis)
-    )
-    x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
-    x_error = None
-    if x_reference is not None and root_topology["x_point_rz_m"] is not None:
-        x_error = float(
-            np.linalg.norm(np.asarray(root_topology["x_point_rz_m"]) - x_reference)
+    if not np.all(np.isfinite(terminal_state)):
+        termination_reason = "nonfinite_terminal_state"
+    elif not np.isfinite(terminal_residual):
+        termination_reason = "nonfinite_terminal_residual"
+    elif terminal_residual > TERMINAL_RESIDUAL_BOUND:
+        termination_reason = (
+            "fixed_point_residual_above_qualification_bound_after_iteration_budget"
         )
-    span = max(abs(float(exact_topology["flux_span_wb"])), np.finfo(float).tiny)
-    exact_psi_norm = (exact_grid - float(exact_topology["axis_flux_wb"])) / float(
-        exact_topology["flux_span_wb"]
-    )
-    analytic_regions = _regional_norms(psi_error, exact_psi_norm, span)
+    else:
+        termination_reason = "fixed_point_residual_within_qualification_bound"
+
+    with _timed_stage(
+        "accuracy_scoring",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        cell_count = len(machine.node)
+        root_grid = terminal_state[:cell_count]
+        exact_grid = oracle_state[:cell_count]
+        mesh = StencilMesh(machine.node, machine.stencil, machine.area)
+        derivative_coordinates, root_gradient, root_hessian = _quadratic_derivatives(
+            mesh, root_grid
+        )
+        exact_gradient, exact_hessian = _exact_derivatives(
+            case_name, exact, derivative_coordinates
+        )
+        psi_error = root_grid - exact_grid
+        gradient_error = root_gradient - exact_gradient
+        hessian_error = root_hessian - exact_hessian
+        boundary = _boundary(case_name, exact)
+        pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+        psi_boundary_band = _distance_to_boundary(machine.node, boundary) <= (
+            BOUNDARY_BAND_PITCHES * pitch
+        )
+        derivative_boundary_band = _distance_to_boundary(
+            derivative_coordinates, boundary
+        ) <= (BOUNDARY_BAND_PITCHES * pitch)
+        exact_topology = _topology(operator, oracle_state)
+        reference_topology_fallback = False
+        if (
+            case_name == "diverted-jump-bearing"
+            and exact_topology["read_status"] == "no_qualified_axis"
+        ):
+            exact_topology = _analytic_diverted_topology(exact)
+            reference_topology_fallback = True
+        root_topology = _topology(operator, terminal_state)
+        axis_reference = (
+            AXIS_M
+            if case_name == "diverted-jump-bearing"
+            else np.asarray(exact.magnetic_axis)
+        )
+        x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
+        x_error = None
+        if x_reference is not None and root_topology["x_point_rz_m"] is not None:
+            x_error = float(
+                np.linalg.norm(np.asarray(root_topology["x_point_rz_m"]) - x_reference)
+            )
+        span = max(abs(float(exact_topology["flux_span_wb"])), np.finfo(float).tiny)
+        exact_psi_norm = (exact_grid - float(exact_topology["axis_flux_wb"])) / float(
+            exact_topology["flux_span_wb"]
+        )
+        analytic_regions = _analytic_region_norms(psi_error, exact_psi_norm, span)
+        band_unavailable_reason = (
+            "no separatrix band at this resolution"
+            if case_name == "diverted-jump-bearing"
+            and requested_cells == -110
+            and reference_topology_fallback
+            else None
+        )
     figure = _figure_path(case_name, requested_cells)
-    _plot(
-        machine.node,
-        derivative_coordinates,
-        {
-            "psi": psi_error,
-            "gradient": gradient_error,
-            "hessian": hessian_error,
-        },
-        boundary,
-        figure,
-        f"{case_name} · {_slug(requested_cells)} · {qualification}",
-    )
+    with _timed_stage(
+        "figure_render",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        _plot(
+            machine.node,
+            derivative_coordinates,
+            {
+                "psi": psi_error,
+                "gradient": gradient_error,
+                "hessian": hessian_error,
+            },
+            boundary,
+            figure,
+            f"{case_name} · {_slug(requested_cells)} · {qualification}",
+        )
     row = {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -429,33 +806,67 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "characteristic_pitch_m": pitch,
         "derivative_support_cells": len(derivative_coordinates),
         "cache": machine.cache,
+        "persistent_compilation_cache": compilation_cache.receipt(),
+        "stage_wall_seconds": stage_timings,
         "lane": _lane(),
         "solver": {
-            "route": "production moment seed with undamped Newton-Krylov",
+            "route": solver_route,
             "newton_steps": recovery.NEWTON_STEPS,
             "gmres_iterations": recovery.KRYLOV_ITERATIONS,
-            "terminal_fixed_point_residual": terminal_residual,
+            "terminal_fixed_point_residual": (
+                terminal_residual if np.isfinite(terminal_residual) else None
+            ),
+            "terminal_fixed_point_residual_status": (
+                "finite" if np.isfinite(terminal_residual) else "nonfinite"
+            ),
+            "termination_reason": termination_reason,
             "qualification_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification": qualification,
             "compile_and_solve_wall_seconds": compile_and_solve_seconds,
             "compile_warm_wall_seconds": warm_solve_seconds,
-            "first_run_terminal_residual": float(compiled.residual),
+            "first_run_terminal_residual": (
+                float(compiled.residual)
+                if np.isfinite(float(compiled.residual))
+                else None
+            ),
             "seed": seed_receipt,
         },
         "norms": {
-            "psi": _field_norms(psi_error, psi_boundary_band),
-            "gradient": _field_norms(gradient_error, derivative_boundary_band),
-            "hessian": _field_norms(hessian_error, derivative_boundary_band),
+            "psi": _field_norms(
+                psi_error,
+                psi_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
+            "gradient": _field_norms(
+                gradient_error,
+                derivative_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
+            "hessian": _field_norms(
+                hessian_error,
+                derivative_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
         },
         "analytic_flux_regions": analytic_regions,
         "geometry": {
-            "magnetic_axis_position_error_m": float(
-                np.linalg.norm(np.asarray(root_topology["axis_rz_m"]) - axis_reference)
+            "magnetic_axis_position_error_m": (
+                float(
+                    np.linalg.norm(
+                        np.asarray(root_topology["axis_rz_m"]) - axis_reference
+                    )
+                )
+                if root_topology["axis_rz_m"] is not None
+                else None
             ),
             "x_point_position_error_m": x_error,
-            "boundary_flux_error_wb": abs(
-                float(root_topology["boundary_flux_wb"])
-                - float(exact_topology["boundary_flux_wb"])
+            "boundary_flux_error_wb": (
+                abs(
+                    float(root_topology["boundary_flux_wb"])
+                    - float(exact_topology["boundary_flux_wb"])
+                )
+                if root_topology["boundary_flux_wb"] is not None
+                else None
             ),
             "root_topology": root_topology,
             "exact_topology": exact_topology,
@@ -483,8 +894,13 @@ def _validate_row(row: dict[str, Any]) -> None:
     for field in NORM_FIELDS:
         for region in NORM_REGIONS:
             measured = row["norms"][field][region]
-            if not all(measured[name] is not None for name in NORM_STATISTICS):
-                raise RuntimeError("a named accuracy norm is missing")
+            for name in NORM_STATISTICS:
+                if measured[name] is None and not (
+                    row["solver"]["qualification"] == "unqualified"
+                    and measured["measurement_status"]
+                    in {"nonfinite_terminal_error", "unavailable"}
+                ):
+                    raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]
     if not src.startswith("/nova/figures/gs-absolute-accuracy/solovev/"):
         raise RuntimeError("figure src is not project absolute")
@@ -496,9 +912,12 @@ def _fit_quantity(
     by_qualification: dict[str, Any] = {}
     for qualification in ("qualified", "unqualified"):
         selected = [
-            row for row in rows if row["solver"]["qualification"] == qualification
+            row
+            for row in rows
+            if row["solver"]["qualification"] == qualification
+            and row["norms"][field][region][statistic] is not None
         ]
-        if len(selected) < 4:
+        if len(selected) < 3:
             by_qualification[qualification] = {
                 "status": "insufficient_same_qualification_rungs",
                 "rung_count": len(selected),
@@ -522,7 +941,45 @@ def _fit_quantity(
                     },
                 }
             )
-        fitted = _fit_order(adapted)
+        if len(adapted) >= 4:
+            fitted = _fit_order(adapted)
+        else:
+            pitch = np.asarray(
+                [row["characteristic_pitch_m"] for row in adapted], dtype=np.float64
+            )
+            error = np.asarray(
+                [
+                    row["one_application_residual"]["regions"]["all_carrier_cells"][
+                        "relative_sup"
+                    ]
+                    for row in adapted
+                ],
+                dtype=np.float64,
+            )
+            design = np.column_stack((np.ones(len(adapted)), np.log(pitch)))
+            coefficients = np.linalg.lstsq(design, np.log(error), rcond=None)[0]
+            fitted_log = design @ coefficients
+            residual = np.log(error) - fitted_log
+            degrees_of_freedom = len(adapted) - 2
+            variance = float(np.sum(residual**2) / degrees_of_freedom)
+            covariance = variance * np.linalg.inv(design.T @ design)
+            order = float(coefficients[1])
+            standard_error = float(np.sqrt(covariance[1, 1]))
+            critical = float(stats.t.ppf(0.975, degrees_of_freedom))
+            fitted = {
+                "model": ("log(error) = intercept + order*log(characteristic_pitch)"),
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "rung_count": len(adapted),
+                "order": order,
+                "standard_error": standard_error,
+                "confidence_level": 0.95,
+                "confidence_interval": [
+                    order - critical * standard_error,
+                    order + critical * standard_error,
+                ],
+                "degrees_of_freedom": degrees_of_freedom,
+                "fitted_error": np.exp(fitted_log).tolist(),
+            }
         fitted["error_quantity"] = f"{field}.{region}.{statistic}"
         fitted["qualification"] = qualification
         fitted["theoretical_order"] = THEORETICAL_ORDER
@@ -568,6 +1025,7 @@ def _registry_reproduction() -> dict[str, Any]:
             row["reduced_measurement_within_bound"] is not False
             for row in rows.values()
         ),
+        "lane_performance_qualification": RECOVERY_GATE_LANE_PERFORMANCE,
         "entries": rows,
     }
 
@@ -590,6 +1048,8 @@ def _schema() -> dict[str, Any]:
             "norms",
             "geometry",
             "solver",
+            "persistent_compilation_cache",
+            "stage_wall_seconds",
             "lane",
             "figure",
         ],

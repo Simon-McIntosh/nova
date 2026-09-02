@@ -595,6 +595,12 @@ class ForwardFluxOperator:
         self, physical, topology: TopologyState
     ) -> jax.Array:
         """Read the signed reachable-wall minus X-point flux margin."""
+        if (
+            self.moment_geometry is not None
+            and not self._fixed_design_topology.connectivity_radius.size
+        ):
+            emergent = self._fixed_design_read(physical)[1]
+            return jnp.where(emergent.diverted, jnp.inf, -jnp.inf)
         return self._connectivity_read(physical, topology, classify=True)[
             "class_margin"
         ]

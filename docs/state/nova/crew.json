@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:04:57",
+  "updated": "2026-09-02T15:35:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -723,9 +723,11 @@
         "id": "fsa-traced-current",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06236-1e9e-7b10-8ad0-d2ce93e5c352",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06236-1e9e-7b10-8ad0-d2ce93e5c352"
+        },
         "created": "2026-09-02"
       },
       {
@@ -77734,9 +77736,173 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T130141772929-fsa-traced-current",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-traced-current",
+        "node_definition": {
+          "done_when": "coil-edit-latency.json records twenty edits on shot 21989/55 with per-edit wall milliseconds, compilation-cache hit on every edit after the first, an unchanged executable identity, convergence and trip count per edit, the double-counting test and tests/test_prescribed_current_traced.py pass, the seven referee tests pass unmodified, the un-supplied path is bit-identical on the parity slice receipt, SLURM job id, node, elapsed and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/forward_operator.py",
+          "estimated_hours": 3.0,
+          "goal": "Coil currents as a traced argument of the jitted forward solve with replacement semantics, so a coil-current edit is a call rather than a compile: in nova/equilibrium/forward_operator.py the complete prescribed-current vector (the 101-circuit vector that PrescribedCurrentField holds on the passive-inclusive MAST case built by benchmarks/efit_forward_parity_slice.py _passive_inclusive_case) becomes an explicit traced argument threaded through flux_map, external and ForwardProfile.solve, REPLACING the operator's stored vector when supplied and never adding to the generic current= path (a double-counting test pins that), with the operator's geometry and response matrix left as static constants, accompanied by tests/test_prescribed_current_traced.py and by a benchmark benchmarks/coil_edit_latency.py which on one H200 (one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu set inside the sbatch body, TMPDIR=/tmp, persistent compilation cache, heartbeats, 3-hour limit, launch-then-harvest) loads the persisted frozen-six MAST carrier for shot 21989/55 (cold-seeded, current-pinned, route newton_krylov), compiles once, applies a twenty-point sweep of the P6 upper coil current over plus and minus twenty percent of the shot's value as traced edits, records per edit the wall time, the compilation-cache hit or miss, the unchanged executable identity, convergence and trip count, and writes docs/figures/forward-solve-api/coil-edit-latency.json with a figure coil-edit-latency.png of per-edit wall time and cache status, the seven referee tests run unmodified and the parity-slice receipt bit-identical when the argument is not supplied",
+          "id": "fsa-traced-current",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130141772929-fsa-traced-current/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_prescribed_current_traced.py",
+            "benchmarks/coil_edit_latency.py",
+            "docs/figures/forward-solve-api/coil-edit-latency.json",
+            "docs/figures/forward-solve-api/coil-edit-latency.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "fsa-traced-current",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:01:48Z",
+        "completed_at": "2026-09-02T13:34:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1933,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1933,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2f2dbe70b35014515e730a4184d1c7b3aba4afce",
+        "commits": [
+          "dea5639082ff9e13a812e2683321b6f76b1f39df"
+        ],
+        "changed_lines": {
+          "added": 569,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130141772929-fsa-traced-current/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a06236-1e9e-7b10-8ad0-d2ce93e5c352",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9148672,
+            "cached_input_tokens_cumulative": 9148672,
+            "input_tokens": 9232473,
+            "input_tokens_cumulative": 9232473,
+            "output_tokens": 24853,
+            "output_tokens_cumulative": 24853,
+            "reasoning_output_tokens": 7905,
+            "reasoning_output_tokens_cumulative": 7905
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6580,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 10180,
+              "log_age_seconds": 7334,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 7376,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1754,
+              "log_age_seconds": 364,
+              "log_fresh": true,
+              "manifest_commits": [
+                "790240576705da86bc8d69e71a0e64638f66143b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T123221151752-pta-parity-harness-repair --gate <verdict> --commit 790240576705da86bc8d69e71a0e64638f66143b",
+              "node": "pta-parity-harness-repair",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T123221151752-pta-parity-harness-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 393,
+              "terminal_at": "2026-09-02T12:55:11Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1364
+    "_version": 1366
   }
 }

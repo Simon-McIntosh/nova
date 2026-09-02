@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -72,6 +72,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260902T1515-raster-receipt" data-who="reckon-ship-s19" data-when="2026-09-02T15:15:00+00:00">
     <div class="r-comment-body">AMENDMENT (lead decision relayed by imas-ambix-8c 15:10, consumer conditioning frame): the decoder conditions on a rectangular (R, Z) grid that Nova evaluates directly, not a hex-to-raster resample in ambix. A fourth node C2, fsa-raster-receipt, follows nodes A and C rather than amending C mid-run because it touches forward_operator.py (A's fence): a rectangular FluxTarget built ONCE with the machine (static under coil edits, axes and shape recorded in the receipt, resolution Nova's call in the 65x65 to 129x129 range over the MAST vessel) whose coil and plasma-cell Green's matrices evaluate psi and psi_N on the raster exactly from the same coil and cell currents the hex solve uses, no interpolation; the receipt carries that raster field beside the hex-mesh labels (core, private, wall shadow, open) and, where the cell authority supplies them cheaply, the same labels on the raster. Consumer facts recorded: label source locked NOVA-ONLY (no EFIT training labels); after A lands ambix runs a bulk Nova label corpus over the camera-corpus shots of the same machine era at measured currents with replicated-width batching; demo shot locked 21989. Answer given on carrier scope: the persisted passive-inclusive response carrier is machine-era-wide (one response matrix, 1126 targets x 101 circuits, keyed on geometry and grid, not on shot), so one operator serves every shot of the era and per-shot inputs are only currents, profiles and target current.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260902T130141772929-fsa-traced-current" data-who="fsa-traced-current" data-when="2026-09-02T13:34:01Z">
+    <div class="r-comment-body"><p>operator-level traced prescribed current landed (forward_operator.py +71, replacement semantics, double-counting test 4/4, un-supplied path bit-identical, referees 9/9); the per-edit latency benchmark on 21989/55 is written and its sbatch ready but not run because ForwardProfile.solve&#x27;s one-keyword pass-through lives in forward.py, held by the receipt-topology node; measurement deferred to fsa-coil-edit-latency after that merge</p></div>
 </div>
 </section>
 </main>

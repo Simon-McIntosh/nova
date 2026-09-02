@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="51">
 <meta name="plan-impl" content="0.833">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -276,6 +276,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T114622676104-pta-mask-replay-on-main" data-who="pta-test" data-when="2026-09-02T11:51:12Z">
     <div class="r-comment-body"><p>Mask replay on merged main with the carrier topology read: MAST 22086/43 mixed, 1089 cells, 5 X candidates, 42 committed / 42 replayed private cells, symmetric difference 0, selected candidate index 1 matches, 0 per-candidate label differences, passes=true, 20.6 s</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T122602857160-pta-parity-harness-verify" data-who="pta-review-a" data-when="2026-09-02T12:31:38Z">
+    <div class="r-comment-body"><p>Review FAIL 6/9: the harness re-implements the carrier label algorithm inside the benchmark (topology_parity_harness.py:174-238) instead of invoking the production topology read, absent marginal metadata must be treated as unknown and fail closed rather than the interim converged=false rule, and the 22086/43 pure cell-diverted versus raster-limited class disagreement is not adjudicated or gated; receipt shape, not-replayable listing, wall census, figure and hygiene PASS</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T120740204083-pta-parity-harness" data-who="pta-partition" data-when="2026-09-02T12:25:46Z">
+    <div class="r-comment-body"><p>Harness and receipt built: 12 rows visible, 2 replayable with 0 differing cells and matching primaries, wall masks 5/5 and 10/10, figure and tests; review FAILED because the replay re-implements the label algorithm locally, absent marginal metadata is not fail-closed, and the pure row&#x27;s diverted-versus-limited class disagreement between authorities is not gated — repair to the same member</p></div>
 </div>
 </section>
 </main>

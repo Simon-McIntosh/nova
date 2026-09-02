@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:06:39",
+  "updated": "2026-09-02T14:32:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -76740,9 +76740,411 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T100129397211-gaa-certificate-production-route",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-certificate-production-route",
+        "node_definition": {
+          "done_when": "solovev-certificate-production-route.json validates against its embedded schema with 16 rows each carrying qualification, termination, globalisation decisions, residual history, norms and amplitude history, the seed provenance names profile.cold_seed_portfolio, the route names profile.solve newton_krylov with target_current, figures exist for every row, SLURM job ids, nodes, elapsed and exit markers are recorded, tests/test_solovev_recovery_gates.py stays green, and git diff --stat shows no change under nova/ or to solovev-certificate.json",
+          "estimated_hours": 3.0,
+          "goal": "The Solovev certificate measured through the PRODUCTION solver seam, receipt docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json with figures under docs/figures/gs-absolute-accuracy/solovev/ (production-route filenames distinct from the bare-route ones, which stay as the banked negative): benchmarks/solovev_certificate.py edited in place so its solve constructs the same ForwardProfile production uses (nova/equilibrium/forward.py) and calls profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form) with the oracle-specific budgets as keyword arguments, replacing the bare fixed_point.newton_krylov(operator.flux_map(), seed) call that the capability-wiring audit (~/.config/reckon/crew/reports/nova/capability-wiring-audit.md, gap 1) showed loses own-mask acceptance, strict settlement, continuation, best-iterate retention, the stagnation stop and the current pin, the seed taken through profile.cold_seed_portfolio with the requested class (gap 4), every rung including -110 loaded through cached_machine (gap 6), the persistent compilation cache on, the four cases at the four resolutions with CPU rungs on rigel (16 CPUs) and fine rungs on one H200 (one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, 3-hour limit, launch-then-harvest, heartbeats), banking per row the terminal residual with qualification against 1e-12, trip count and termination with the globalisation decisions taken (Krylov refused or accepted, damping trials, model rebuilds, continuation), the per-trip residual history, whole-domain and two-pitch-band psi, gradient and Hessian sup and rms norms, axis and X-point errors, the lambda amplitude history, the per-norm order fit with uncertainty for qualified rows, and a one-sentence verdict per case, with no solver source modified",
+          "id": "gaa-certificate-production-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T100129397211-gaa-certificate-production-route/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+            "docs/figures/gs-absolute-accuracy/solovev/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solovev-certificate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:01:35Z",
+        "completed_at": "2026-09-02T12:31:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8999,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "12965d4a131f46022861600568f485f24dc36588",
+        "commits": [
+          "b93f9b10c6f414331302d6c4cb20402feef615aa"
+        ],
+        "changed_lines": {
+          "added": 12564,
+          "removed": 0,
+          "files": 17
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "partial aggregate job 1261249 schema_valid=true; recovery gates 8 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T100129397211-gaa-certificate-production-route/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T100129397211-gaa-certificate-production-route/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a060ad-86f4-79b0-9e85-39020a3b9924",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15580672,
+            "cached_input_tokens_cumulative": 15580672,
+            "input_tokens": 15918048,
+            "input_tokens_cumulative": 15918048,
+            "output_tokens": 50830,
+            "output_tokens_cumulative": 50830,
+            "reasoning_output_tokens": 15843,
+            "reasoning_output_tokens_cumulative": 15843
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1641,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 5241,
+              "log_age_seconds": 3384,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 3413,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T122602857160-pta-parity-harness-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-review.md with a PASS or FAIL verdict over: (1) git show --stat 0a8f70ac lists only the four fenced paths; (2) the harness replays the cell-authority read from cached per-cell flux through the production authorities (not a re-implementation) and compares against committed labels, primaries and classification; rows without per-cell flux are listed as not replayable rather than silently skipped; (3) exact parity fails closed on non-marginal rows and marginal rows quantify every differing cell with psi_norm under both boundary authorities, with the marginal flag read from solver_qualification.marginal_solver_basin when present and the interim converged=false rule stated in the receipt otherwise; judge whether the interim rule mislabels any of the ten metadata-less rows; (4) the wall-node census compares the private wall-node mask under the census saddle and the raster binding level per node; (5) the receipt's finding that on 22086/43 pure the cell authority reads diverted while the retained raster diagnostic reads limited (class margin -0.135) with coincident boundary fluxes is explained or flagged as a defect, quoting the relevant harness lines; (6) the figure shows the differing cells and wall nodes per replayable row on the cell mesh with both boundary contours; (7) the manufactured test exercises the adjudication rule and the fail-closed behaviour; (8) naming hygiene; (9) every defect quoted with file:line. Read-only review of files and the receipt",
+          "estimated_hours": 0.75,
+          "goal": "Write an independent verdict report on commit 0a8f70ac of node pta-parity-harness (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness, paths benchmarks/topology_parity_harness.py, docs/figures/hex-cell-single-grid/topology-parity.json, docs/figures/hex-cell-single-grid/topology-parity.png, tests/test_topology_parity_harness.py) against the plan's parity-harness node",
+          "id": "pta-parity-harness-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T122602857160-pta-parity-harness-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T12:26:09Z",
+        "completed_at": "2026-09-02T12:31:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 329,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 329,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "eaff53bea382ca166a632d17045a21408b88dbe1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-parity-harness-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T122602857160-pta-parity-harness-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 837888,
+            "cached_input_tokens_cumulative": 1485056,
+            "input_tokens": 949264,
+            "input_tokens_cumulative": 1625626,
+            "output_tokens": 5100,
+            "output_tokens_cumulative": 10123,
+            "reasoning_output_tokens": 2496,
+            "reasoning_output_tokens_cumulative": 3403
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4440,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 8040,
+              "log_age_seconds": 5194,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5236,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T120740204083-pta-parity-harness",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness",
+        "node_definition": {
+          "done_when": "Running JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_parity_harness.py from the worktree root writes docs/figures/hex-cell-single-grid/topology-parity.json recording, per bank row of docs/figures/topology-visual-corroboration/mast-topology-operands.npz, whether per-cell flux is present (rows without it are listed as not replayable, not skipped silently), the compared cell count, differing cells with index, centroid, committed and replayed labels and psi_norm under both boundary authorities, selected-primary agreement, classification agreement and the wall-node census (count private under each authority, differing nodes with position and nearest-cell label), and the marginal flag read from the row's solver_qualification.marginal_solver_basin when the metadata carries it and otherwise from converged=false with that interim rule stated in the receipt; on the 22086/43 mixed row the result is 0 differing cells, primary match and 0 label differences; on 22086/43 pure every difference is quantified and adjudicated in the receipt, never absorbed; docs/figures/hex-cell-single-grid/topology-parity.png shows the differing cells and wall nodes per replayable row on the cell mesh with the two boundary contours; tests/test_topology_parity_harness.py exercises the receipt schema and the adjudication rule on a small manufactured row; the harness, receipt, figure and test are committed with a body; the manifest quotes every count",
+          "estimated_hours": 4.0,
+          "goal": "Build benchmarks/topology_parity_harness.py, extending benchmarks/topology_mask_replay.py, that replays the cell-authority topology read from the cached per-cell flux of every operand bank row carrying it and compares it against the row's committed domain labels, selected primaries and classification, with exact parity required on rows not flagged marginal, per-cell quantification with adjudication under the two boundary authorities (census saddle versus the raster read's binding level) on flagged rows, and a per-wall-node census of the private wall-node mask under those two authorities, writing docs/figures/hex-cell-single-grid/topology-parity.json plus a figure",
+          "id": "pta-parity-harness",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T120740204083-pta-parity-harness/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/topology_parity_harness.py",
+            "docs/figures/hex-cell-single-grid/topology-parity.json",
+            "docs/figures/hex-cell-single-grid/topology-parity.png",
+            "tests/test_topology_parity_harness.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:07:48Z",
+        "completed_at": "2026-09-02T12:25:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1078,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1078,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5edb59139dfb46be9b11f52dc82e034bbf4188c4",
+        "commits": [
+          "0a8f70acb9731736fce1c9066604fcef2dfe3427"
+        ],
+        "changed_lines": {
+          "added": 879,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T120740204083-pta-parity-harness/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2659456,
+            "cached_input_tokens_cumulative": 7929472,
+            "input_tokens": 2768694,
+            "input_tokens_cumulative": 8152111,
+            "output_tokens": 17931,
+            "output_tokens_cumulative": 26696,
+            "reasoning_output_tokens": 4123,
+            "reasoning_output_tokens_cumulative": 6504
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3339,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 6939,
+              "log_age_seconds": 4093,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 4136,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1352
+    "_version": 1355
   }
 }

@@ -1,0 +1,365 @@
+{
+  "analytic_flux_regions": {
+    "all_carrier_cells": {
+      "absolute_rms_wb": 2.0641970925384113e-16,
+      "absolute_sup_wb": 1.0547118733938987e-15,
+      "cell_count": 1076,
+      "finite_cell_count": 1076,
+      "measurement_status": "finite",
+      "relative_rms": 1.901245368721165e-13,
+      "relative_sup": 9.714508715635441e-13
+    },
+    "closed_flux_region": {
+      "absolute_rms_wb": 2.4342327212539414e-16,
+      "absolute_sup_wb": 6.268314860224944e-16,
+      "cell_count": 33,
+      "finite_cell_count": 33,
+      "measurement_status": "finite",
+      "relative_rms": 2.24206966689517e-13,
+      "relative_sup": 5.773481922229267e-13
+    },
+    "scrape_off_layer": {
+      "absolute_rms_wb": 2.0550756972603095e-16,
+      "absolute_sup_wb": 1.0547118733938987e-15,
+      "cell_count": 1037,
+      "finite_cell_count": 1037,
+      "measurement_status": "finite",
+      "relative_rms": 1.8928440340853137e-13,
+      "relative_sup": 9.714508715635441e-13
+    },
+    "separatrix_band": {
+      "absolute_rms_wb": 1.2647843175465705e-16,
+      "absolute_sup_wb": 2.1988975310721637e-16,
+      "cell_count": 6,
+      "finite_cell_count": 6,
+      "measurement_status": "finite",
+      "relative_rms": 1.164939789353874e-13,
+      "relative_sup": 2.0253122932666664e-13
+    }
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.3744192020967603,
+    "lock_wait_seconds": 2.5937333703041077e-05,
+    "semantic_key": "7c94be9b777c55ba",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+    "store_seconds": 0.0
+  },
+  "case": "diverted-jump-bearing",
+  "characteristic_pitch_m": 0.043671779202436194,
+  "derivative_support_cells": 930,
+  "figure": {
+    "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-jump-bearing-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-jump-bearing-production-route-cells-1000.png",
+    "sha256": "6d9e48a928a89eeb20accd1cab72253ddf67d65d337783de8e964b3eff4409dd"
+  },
+  "geometry": {
+    "boundary_flux_error_wb": 2.627919718856467e-19,
+    "exact_topology": {
+      "axis_flux_wb": 0.0010854716239421744,
+      "axis_rz_m": [
+        1.7627354924305096,
+        -0.061999790010329923
+      ],
+      "boundary_flux_wb": -2.3626337110432452e-07,
+      "class": "diverted",
+      "flux_span_wb": -0.0010857078873132786,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": [
+        1.2043590455560238,
+        -0.430600625876472
+      ]
+    },
+    "magnetic_axis_position_error_m": 0.005721737197053335,
+    "root_topology": {
+      "axis_flux_wb": 0.0010854716239422691,
+      "axis_rz_m": [
+        1.7627354924304037,
+        -0.06199979001040326
+      ],
+      "boundary_flux_wb": -2.3626337110406173e-07,
+      "class": "diverted",
+      "flux_span_wb": -0.0010857078873133732,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": [
+        1.2043590455557436,
+        -0.43060062587662773
+      ]
+    },
+    "x_point_position_error_m": 0.006899656974349233
+  },
+  "lane": {
+    "cpu_count": 1,
+    "elapsed_seconds": 849.7585532730445,
+    "execution": "slurm",
+    "exit_marker": "SOLOVEV_ROW_EXIT=0",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1261438",
+    "threaded_settings": {
+      "mkl_num_threads": "1",
+      "numexpr_num_threads": "1",
+      "omp_num_threads": "1",
+      "openblas_num_threads": "1",
+      "xla_flags": null
+    }
+  },
+  "norms": {
+    "gradient": {
+      "two_pitch_boundary_band": {
+        "component_count": 270,
+        "finite_component_count": 270,
+        "measurement_status": "finite",
+        "rms": 0.00012518030472668322,
+        "sup": 0.0002054470437919155,
+        "support_cells": 135
+      },
+      "whole_domain": {
+        "component_count": 1860,
+        "finite_component_count": 1860,
+        "measurement_status": "finite",
+        "rms": 0.00012165777942442765,
+        "sup": 0.0002054470438044298,
+        "support_cells": 930
+      }
+    },
+    "hessian": {
+      "two_pitch_boundary_band": {
+        "component_count": 540,
+        "finite_component_count": 540,
+        "measurement_status": "finite",
+        "rms": 6.155411769836985e-05,
+        "sup": 0.0010076020560541993,
+        "support_cells": 135
+      },
+      "whole_domain": {
+        "component_count": 3720,
+        "finite_component_count": 3720,
+        "measurement_status": "finite",
+        "rms": 0.0005802017577798751,
+        "sup": 0.006734209619015941,
+        "support_cells": 930
+      }
+    },
+    "psi": {
+      "two_pitch_boundary_band": {
+        "component_count": 135,
+        "finite_component_count": 135,
+        "measurement_status": "finite",
+        "rms": 2.2411637031819197e-16,
+        "sup": 6.591949208711867e-16,
+        "support_cells": 135
+      },
+      "whole_domain": {
+        "component_count": 1076,
+        "finite_component_count": 1076,
+        "measurement_status": "finite",
+        "rms": 2.0641970925384113e-16,
+        "sup": 1.0547118733938987e-15,
+        "support_cells": 1076
+      }
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "realised_cells": 1076,
+  "requested_cells": -1000,
+  "solver": {
+    "call": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form, oracle budgets as keywords)",
+    "gmres_iterations": 30,
+    "lambda_amplitude_history": {
+      "samples": [
+        {
+          "amplitude": 1.0046532763032163,
+          "state": "seed"
+        },
+        {
+          "amplitude": 0.9999999999999999,
+          "state": "terminal"
+        }
+      ],
+      "sampling": "seed and terminal production-seam states; intermediate amplitudes are not exposed by FixedPointResult",
+      "terminal_policy": "declared_scalar_current",
+      "terminal_rescaled": true
+    },
+    "newton_steps": 10,
+    "production_telemetry": {
+      "accepted_newton_promotions": 14,
+      "attempted_newton_promotions": 14,
+      "configured_controls": {
+        "continue_globalization_state": "production default enabled",
+        "continue_newton_trajectory": "production default enabled",
+        "own_mask_acceptance": "production default enabled",
+        "retain_outer_best_iterate": "production default enabled",
+        "stop_on_active_set_stagnation": "production default enabled",
+        "strict_active_set_settlement": "production default enabled"
+      },
+      "converged": true,
+      "exposed_terminal_trip_promotions": 0,
+      "finite_residual_trace": [
+        4.859816437766945e-19
+      ],
+      "finite_trace_indices": [
+        0
+      ],
+      "globalisation_decisions": [],
+      "krylov_action_qualification": "not_applicable",
+      "per_trip_residual_history": [
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.40791976070635577,
+          "mask_difference_cells": 12,
+          "trip": 1
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 4.859816437766945e-19,
+          "mask_difference_cells": 2,
+          "trip": 2
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 4.859816437766945e-19,
+          "mask_difference_cells": 0,
+          "trip": 3
+        }
+      ],
+      "promotion_globalisation": [],
+      "source_continuation": {
+        "common_sol": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        },
+        "private_flux": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        }
+      },
+      "telemetry_scope": "active-set residuals cover every production trip; detailed inner globalisation arrays describe the terminal frozen-mask trip exposed by FixedPointResult",
+      "termination": "converged",
+      "trip_count": 3
+    },
+    "qualification": "qualified",
+    "qualification_bound": 1e-12,
+    "qualification_reason": "fixed_point_residual_within_qualification_bound",
+    "requested_seed_class": "diverted",
+    "route": "profile.solve newton_krylov",
+    "seed": {
+      "anchor_available": true,
+      "anchor_m": [
+        1.1990794650650975,
+        -0.4336427036262585
+      ],
+      "branch_index": 1,
+      "construction": "axis_saddle_geometry",
+      "current_centroid_m": [
+        1.5770459610794418,
+        0.00018571338912177284
+      ],
+      "current_target_provenance": {
+        "closed_form_flux_samples_used_for_current_support_only": true,
+        "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+        "current_centroid_m": [
+          1.5770459610794418,
+          0.00018571338912177284
+        ],
+        "declared_current_a": 810819.8589730605
+      },
+      "declared_axis_m": [
+        1.7673817014758004,
+        -0.05866047600021829
+      ],
+      "declared_boundary_m": [
+        1.198405322435904,
+        -0.43408752240161563
+      ],
+      "factory": "profile.cold_seed_portfolio",
+      "plasma_current_a": 810819.8589730605,
+      "requested_class": "diverted",
+      "seed_radius_m": 0.5156567088351575,
+      "state_sha256_binary64": "9e8146e6457e196a9971f7c895630115b33564c05b229bcf9eadce2458649feb",
+      "stored_flux_samples_used": false,
+      "supported_cell_count": 439
+    },
+    "solve_wall_seconds": 808.0821709521115,
+    "target_current_a": 810819.8589730605,
+    "target_current_argument": "Ip_closed_form",
+    "terminal_fixed_point_residual": 4.859816437766945e-19,
+    "terminal_fixed_point_residual_status": "finite",
+    "termination": "converged"
+  },
+  "stage_wall_seconds": {
+    "accuracy_scoring": 0.42977743968367577,
+    "case_and_machine": 0.40864703990519047,
+    "figure_render": 0.5799782499670982,
+    "operator_and_seed": 24.49726885277778,
+    "production_solve": 808.0821709521115
+  }
+}

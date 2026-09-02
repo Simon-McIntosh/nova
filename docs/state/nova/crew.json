@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T13:51:18",
+  "updated": "2026-09-02T14:06:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -76632,9 +76632,117 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T102756614776-scr-bank-rebaseline",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-bank-rebaseline",
+        "node_definition": {
+          "done_when": "efit-topology-corroboration.json carries 12 regenerated rows with the marginal flag on the two named arms and a regeneration_receipt naming the revision and job, bank-rebaseline.json records per arm old versus new flag, termination, residual, saddle displacement and the three rewritten constants, pytest on tests/test_topology_domain_partition.py tests/test_topology_o_qualification.py tests/test_active_set_stagnation.py passes (command, exit status, log path), the commit body names marginal-arm-convergence-semantics, SLURM job id, node, elapsed and exit marker are recorded, and git diff --stat shows no change under nova/",
+          "estimated_hours": 2.5,
+          "goal": "The twelve-arm MAST bank re-baselined under the locked marginal-arm-convergence-semantics ruling with honest stagnated rows: docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json regenerated on current main (at or after 260a8b44) through the exact bank route with the current pin, the same producer the 2026-09-01 regeneration used (bank telemetry relaunch recipe, JAX_PLATFORMS=cuda,cpu, one H200, one CPU, reservation gpu_0003_grpA, TMPDIR=/tmp, persistent compilation cache, heartbeats, 3-hour limit, launch-then-harvest), every row carrying converged, termination_reason, terminal_residual, active-set telemetry and a marginal_solver_basin flag on 22086/43 pure and 21978/35 pure, together with the focused-suite constants that encode the pre-drift partition rewritten to the regenerated values in one commit whose body names the ruling: tests/test_topology_domain_partition.py lines 81-82 (pytest.param ids 21978-35-pure and 21978-35-mixed partition counts) and tests/test_topology_o_qualification.py line 112 (the wall-notch primary), plus a receipt docs/figures/solver-convergence-regression/bank-rebaseline.json recording per arm the old and new converged flag, termination, terminal residual, selected saddle and its displacement, the old and new focused-suite constants, and the SLURM evidence, with the focused suite (the two test files and tests/test_active_set_stagnation.py) green after the rewrite and no solver source modified",
+          "id": "scr-bank-rebaseline",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "tests/test_topology_domain_partition.py",
+            "tests/test_topology_o_qualification.py",
+            "docs/figures/solver-convergence-regression/bank-rebaseline.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:28:02Z",
+        "completed_at": "2026-09-02T12:05:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5842,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5842,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "938f7ef384944e0e1f7b6debadd095c49403ff4a",
+        "commits": [
+          "084f7e965ca3ef28e24f91ec03a59932c7ede557"
+        ],
+        "changed_lines": {
+          "added": 218,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "paired H200 job 1261236 (COMPLETED 0:0, EXIT_MARKER=0) at two revisions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4582144,
+            "cached_input_tokens_cumulative": 7057792,
+            "input_tokens": 4734940,
+            "input_tokens_cumulative": 7397673,
+            "output_tokens": 15352,
+            "output_tokens_cumulative": 22246,
+            "reasoning_output_tokens": 3533,
+            "reasoning_output_tokens_cumulative": 5922
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1351
+    "_version": 1352
   }
 }

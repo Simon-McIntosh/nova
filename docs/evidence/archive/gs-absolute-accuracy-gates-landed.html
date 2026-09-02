@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="gs-absolute-accuracy-gates-landed">
+  <meta name="plan-evidence-for" content="gs-absolute-accuracy-gates">
+  <meta name="plan-informs" content="millisecond-converged-solve,solver-convergence-regression">
+  <meta name="plan-title" content="GS absolute accuracy gates — cumulative evidence record">
+  <meta name="plan-summary" content="The reuse map, sixteen-row Solovev certificate, fourteen-bound reduced-oracle reproduction, eleven-row EFIT gate, oracle-lane cost, and the open convergence record.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-09-02">
+  <title>GS absolute accuracy gates — cumulative evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Evidence · absolute forward accuracy · 2026-09-02</p>
+    <h1>GS absolute accuracy gates — cumulative evidence</h1>
+    <p class="lede">The instruments and receipts are landed, but the scientific certificate remains negative. Across all 16 exact-reference rows and all 11 EFIT rows, the production solve does not reach a convergence-qualified root from its own seed. The tables below preserve the receipt values at their recorded precision; no failed or unqualified row is filtered from the record.</p>
+  </header>
+
+  <h2 id="reuse-map">Reuse map — compose the landed authorities</h2>
+  <p>The 45-row <a href="/nova/research/forward-accuracy-reuse-map">forward accuracy reuse map</a> searched Nova, imas-ambix, and Reckon by capability. It separated exact-reference accuracy, EFIT label inconsistency, nonlinear convergence, and active-set trip cost into four claims instead of allowing one measurement to stand in for another.</p>
+  <table>
+    <caption>Binding reuse decisions carried into the certificate</caption>
+    <thead><tr><th scope="col">Need</th><th scope="col">Authority reused</th><th scope="col">Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Exact-reference ladder</td><td><code>RotatingEquilibrium</code>, <code>split_fit_jump_field.py</code>, and <code>analytic_operator_ladder.py</code></td><td>Reuse the exact values and the four-rung regional-norm/order skeleton; replace the one-map payload with full production-solve error fields.</td></tr>
+      <tr><td>EFIT two-source score</td><td><code>diiid_forward_gs_match.py</code>, <code>efit_forward_parity_slice.py</code>, and the fixed-input operator floors</td><td>Keep solve-versus-label error and label-versus-GS inconsistency visible as independent terms; never subtract the floor into an opaque score.</td></tr>
+      <tr><td>Solver remedies</td><td><code>ForwardProfile.solve</code> with Picard, Anderson, Newton–Krylov, constraints, and continuation</td><td>Route remedy measurements through the existing solver authority. No production deflation implementation was found.</td></tr>
+      <tr><td>Publication identity</td><td>Reckon typed evidence and <code>audit-doc</code></td><td>Publish one evidence authority with stable anchors and project-absolute figure sources.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="solovev-certificate">Solov'ev certificate — 0 of 16 rows qualified</h2>
+  <p>The receipt is <code>docs/figures/gs-absolute-accuracy/solovev-certificate.json</code>. Every row uses the production axis/saddle or current-moment seed without closed-form flux samples. Qualification requires terminal fixed-point residual at or below <code>1e-12</code>. All sixteen terminal states are finite and all sixteen are recorded as <code>unqualified</code>, so the ψ errors below describe wrong-root terminal states, not certified discretisation error.</p>
+  <table>
+    <caption>Full certificate census: case by requested and realised resolution</caption>
+    <thead><tr><th scope="col">Case</th><th scope="col">Requested cells</th><th scope="col">Realised cells</th><th scope="col">Terminal relative residual</th><th scope="col">Qualification</th><th scope="col">Whole-domain ψ sup (Wb)</th><th scope="col">Whole-domain ψ RMS (Wb)</th></tr></thead>
+    <tbody>
+      <tr><td>diverted-jump-bearing</td><td>-110</td><td>136</td><td>2.5338676467802115</td><td>unqualified</td><td>1.0417108646536077</td><td>0.6303079010735774</td></tr>
+      <tr><td>diverted-jump-bearing</td><td>-300</td><td>342</td><td>2.4887091580777856</td><td>unqualified</td><td>1.2837850918354028</td><td>0.6738092982013195</td></tr>
+      <tr><td>diverted-jump-bearing</td><td>-500</td><td>551</td><td>2.6653009037709676</td><td>unqualified</td><td>1.4629013320768833</td><td>0.7258459629453629</td></tr>
+      <tr><td>diverted-jump-bearing</td><td>-1000</td><td>1076</td><td>2.2043533608033914</td><td>unqualified</td><td>1.2318783034018517</td><td>0.6614515884790542</td></tr>
+      <tr><td>moderate-rotation-conventional-static</td><td>-110</td><td>136</td><td>0.8354327189004547</td><td>unqualified</td><td>2.141320438396531</td><td>0.9331001903010232</td></tr>
+      <tr><td>moderate-rotation-conventional-static</td><td>-300</td><td>341</td><td>0.9121549089173303</td><td>unqualified</td><td>1.7805923222425077</td><td>0.7602804555491345</td></tr>
+      <tr><td>moderate-rotation-conventional-static</td><td>-500</td><td>548</td><td>0.9499505061282106</td><td>unqualified</td><td>1.6720475151622358</td><td>0.7276690527525563</td></tr>
+      <tr><td>moderate-rotation-conventional-static</td><td>-1000</td><td>1070</td><td>0.9938728207589154</td><td>unqualified</td><td>1.5969606289909795</td><td>0.708077895146545</td></tr>
+      <tr><td>strong-rotation-compact-static</td><td>-110</td><td>135</td><td>0.7919792843615323</td><td>unqualified</td><td>0.15355096318149397</td><td>0.06881185304844901</td></tr>
+      <tr><td>strong-rotation-compact-static</td><td>-300</td><td>341</td><td>0.7883142229559222</td><td>unqualified</td><td>0.13440699119256327</td><td>0.059190397006413216</td></tr>
+      <tr><td>strong-rotation-compact-static</td><td>-500</td><td>551</td><td>0.8372917654079264</td><td>unqualified</td><td>0.12392738416579696</td><td>0.056504589601982534</td></tr>
+      <tr><td>strong-rotation-compact-static</td><td>-1000</td><td>1069</td><td>0.8799215103080228</td><td>unqualified</td><td>0.12002759006296035</td><td>0.05619509795070792</td></tr>
+      <tr><td>weak-rotation-reactor-static</td><td>-110</td><td>135</td><td>0.6178027502292015</td><td>unqualified</td><td>88.80878687114253</td><td>40.29565230503443</td></tr>
+      <tr><td>weak-rotation-reactor-static</td><td>-300</td><td>342</td><td>0.9899050183110825</td><td>unqualified</td><td>68.15190315398327</td><td>29.167799968477546</td></tr>
+      <tr><td>weak-rotation-reactor-static</td><td>-500</td><td>555</td><td>1.0265259472972847</td><td>unqualified</td><td>61.19133636653031</td><td>26.81337171560606</td></tr>
+      <tr><td>weak-rotation-reactor-static</td><td>-1000</td><td>1072</td><td>1.0351882076830539</td><td>unqualified</td><td>60.72059866623017</td><td>26.763960249939448</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-jump-bearing-reduced.png" alt="Absolute psi, gradient, and Hessian error fields for the reduced diverted jump-bearing case">
+    <figcaption>Diverted jump-bearing case, 136 realised cells.</figcaption>
+  </figure>
+  <p>The diverted case shows a coherent signed ψ error across the carrier and derivative error spanning the domain rather than a narrow separatrix-only defect. Its reduced row ends at residual 2.5338676467802115 and ψ sup 1.0417108646536077 Wb; refinement does not create a qualified rung.</p>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-reduced.png" alt="Absolute psi, gradient, and Hessian error fields for the reduced moderate-rotation conventional static case">
+    <figcaption>Moderate-rotation conventional static case, 136 realised cells.</figcaption>
+  </figure>
+  <p>The conventional static case has a broad interior ψ and gradient error with large Hessian error throughout the plasma. The reduced row's residual is 0.8354327189004547 and ψ sup is 2.141320438396531 Wb; the finest row remains unqualified at residual 0.9938728207589154.</p>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-reduced.png" alt="Absolute psi, gradient, and Hessian error fields for the reduced strong-rotation compact static case">
+    <figcaption>Strong-rotation compact static case, 135 realised cells.</figcaption>
+  </figure>
+  <p>The compact case has the smallest absolute ψ error of the family, but its spatially smooth wrong-state field still ends at residual 0.7919792843615323, far above the qualification bound. A small field error cannot be promoted when the root has not been reached.</p>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-reduced.png" alt="Absolute psi, gradient, and Hessian error fields for the reduced weak-rotation reactor static case">
+    <figcaption>Weak-rotation reactor static case, 135 realised cells.</figcaption>
+  </figure>
+  <p>The reactor-scale case makes the wrong-root failure unmistakable: the reduced field has ψ sup 88.80878687114253 Wb and RMS 40.29565230503443 Wb, with a broad mid-plane maximum. Even at 1072 realised cells, the row remains unqualified and ψ sup remains 60.72059866623017 Wb.</p>
+
+  <h3 id="oracle-registry">Reduced-oracle registry reproduction — 14 of 14 bounds reproduced</h3>
+  <p>The same receipt reproduces the complete locked registry on the 136-cell closed-form oracle. <code>all_bounds_reproduced</code> and <code>directly_measured_entries_within_bound</code> are both <code>true</code>; the one-map reduced measurements are 2.65744538298329e-15 fixed-point residual and 3.6637359812630166e-15 Wb standing forcing. A null reduced measurement means the entry was registry-reproduced rather than directly remeasured in this reduced run.</p>
+  <table>
+    <caption>Fourteen locked recovery bounds and their reproduction</caption>
+    <thead><tr><th scope="col">Registry entry</th><th scope="col">Locked bound</th><th scope="col">Banked measured floor</th><th scope="col">Reduced measurement</th><th scope="col">Bound reproduced</th></tr></thead>
+    <tbody>
+      <tr><td>axis_position_m</td><td>0.00525243590786495</td><td>0.07483887226620761</td><td>null</td><td>true</td></tr>
+      <tr><td>divergence_b_relative</td><td>0.0023165108079651036</td><td>0.002199534539089839</td><td>null</td><td>true</td></tr>
+      <tr><td>divergence_j_relative</td><td>0.0023446322707221623</td><td>0.0021989978902018145</td><td>null</td><td>true</td></tr>
+      <tr><td>field_integral_fraction</td><td>0.016651149226035156</td><td>0.11676932314547409</td><td>null</td><td>true</td></tr>
+      <tr><td>fixed_point_residual</td><td>1e-12</td><td>3.040818052789354e-15</td><td>2.65744538298329e-15</td><td>true</td></tr>
+      <tr><td>flux_rms_fraction_of_span</td><td>1e-12</td><td>0.2718489700074329</td><td>null</td><td>true</td></tr>
+      <tr><td>flux_sup_fraction_of_span</td><td>1e-12</td><td>0.5338372524988493</td><td>null</td><td>true</td></tr>
+      <tr><td>grad_shafranov_relative</td><td>0.0010130238719381077</td><td>0.1931549079347778</td><td>null</td><td>true</td></tr>
+      <tr><td>internal_inductance_fraction</td><td>1.2355549290537537</td><td>0.024579044675625425</td><td>null</td><td>true</td></tr>
+      <tr><td>plasma_current_fraction</td><td>0.011364810207658166</td><td>0.05085249826782488</td><td>null</td><td>true</td></tr>
+      <tr><td>poloidal_beta_fraction</td><td>1.22739532336589</td><td>0.0764237641636299</td><td>null</td><td>true</td></tr>
+      <tr><td>standing_forcing_sup_wb</td><td>1e-13</td><td>4.440892098500626e-15</td><td>3.6637359812630166e-15</td><td>true</td></tr>
+      <tr><td>topology_class</td><td>limited</td><td><code>{"coarse":"limited","fine":"limited"}</code></td><td>null</td><td>true</td></tr>
+      <tr><td>x_point_absence</td><td>absent</td><td><code>{"coarse":"absent","fine":"absent"}</code></td><td>null</td><td>true</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="efit-reproduction">EFIT reproduction gate — 0 of 11 rows passed</h2>
+  <p>The receipt is <code>docs/figures/gs-absolute-accuracy/efit-reproduction.json</code>. It keeps the two error sources independent: the gauge-aligned Nova solve-to-label RMS and the EFIT label's own GS inconsistency. The locked stride-one floors are exactly <strong>0.0116147034 for MAST</strong> and <strong>0.0832365867 for DIII-D</strong>. The pass rule is convergence plus solve-to-label error no greater than the applicable floor. The machine-specific error terms use the receipt's stated normalisations, so cross-machine magnitudes must not be compared as though they shared a denominator.</p>
+  <table>
+    <caption>All EFIT reproduction rows, preserving both error terms and convergence</caption>
+    <thead><tr><th scope="col">Machine</th><th scope="col">Frame</th><th scope="col">Solve-to-label error</th><th scope="col">Label-GS inconsistency / floor</th><th scope="col">Fixed-point residual</th><th scope="col">Tolerance</th><th scope="col">Converged</th><th scope="col">Passes</th></tr></thead>
+    <tbody>
+      <tr><td>MAST</td><td>21978/35 pure</td><td>0.0034123454567333033</td><td>0.0116147034</td><td>0.0024509187258022736</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>MAST</td><td>21983/35 pure</td><td>0.008849986173509732</td><td>0.0116147034</td><td>0.001601081351241986</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>MAST</td><td>21985/51 pure</td><td>0.002691071250148193</td><td>0.0116147034</td><td>0.000684449133016612</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>MAST</td><td>21986/46 pure</td><td>0.005915483143583045</td><td>0.0116147034</td><td>0.005887639830277983</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>MAST</td><td>21989/55 pure</td><td>0.007055321366783535</td><td>0.0116147034</td><td>0.002856737994171574</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>MAST</td><td>22086/43 pure</td><td>0.004303969323326173</td><td>0.0116147034</td><td>0.00048023353539189173</td><td>1e-08</td><td>false</td><td>false</td></tr>
+      <tr><td>DIII-D</td><td>d3d_shot_00000c4a7b.parquet:179</td><td>2.1311155848944874</td><td>0.0832365867</td><td>1.2865016612957264e-10</td><td>1e-06</td><td>false</td><td>false</td></tr>
+      <tr><td>DIII-D</td><td>d3d_shot_0003ff34e7.parquet:44</td><td>1.139290889072396</td><td>0.0832365867</td><td>0.08117000452284825</td><td>1e-06</td><td>false</td><td>false</td></tr>
+      <tr><td>DIII-D</td><td>d3d_shot_001554e054.parquet:144</td><td>0.8195324440087708</td><td>0.0832365867</td><td>0.08838134940012617</td><td>1e-06</td><td>false</td><td>false</td></tr>
+      <tr><td>DIII-D</td><td>d3d_shot_002495e835.parquet:146</td><td>1.53529257532426</td><td>0.0832365867</td><td>0.058516982970557484</td><td>1e-06</td><td>false</td><td>false</td></tr>
+      <tr><td>DIII-D</td><td>d3d_shot_0040ca9bdc.parquet:137</td><td>0.758437265959663</td><td>0.0832365867</td><td>0.06053569152139815</td><td>1e-06</td><td>false</td><td>false</td></tr>
+    </tbody>
+  </table>
+  <p>MAST solve-to-label values are fractions of EFIT label peak-to-peak span; DIII-D values are fractions of centred EFIT label RMS. Both label-GS floors are fractions of interior drive sup. The receipt's aggregate verdict is <code>FAIL_ONE_OR_MORE_FRAMES_ABOVE_LABEL_GS_FLOOR_OR_UNCONVERGED</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21978-row-35.png" alt="MAST 21978 row 35 Nova-minus-EFIT and EFIT label GS inconsistency fields">
+    <figcaption>MAST 21978/35: solve-to-label error beside the independent label-GS inconsistency field.</figcaption>
+  </figure>
+  <p>The MAST difference is dominated by an up-down antisymmetric field extending beyond the labelled plasma, whereas the independent GS inconsistency is edge-adjacent and confined to the label interior. The solve-to-label value 0.0034123454567333033 is below the 0.0116147034 floor, but the row fails because its fixed-point residual is 0.0024509187258022736 against 1e-08.</p>
+
+  <figure>
+    <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_00000c4a7b-frame-179.png" alt="DIII-D frame 179 Nova-minus-EFIT and EFIT label GS inconsistency fields">
+    <figcaption>DIII-D d3d_shot_00000c4a7b frame 179: solve-to-label field beside its much smaller label-GS field.</figcaption>
+  </figure>
+  <p>The DIII-D solve-to-label field is a whole-plasma vertical displacement with order-one amplitude under its declared normalisation, while the independent label-GS field is visually small. Although the fixed-point residual is 1.2865016612957264e-10, the public branch selector reports no convergence-qualified diverted root, so <code>converged</code> and <code>passes</code> remain false.</p>
+
+  <h3 id="compilation-cache">Compilation cache — eleven misses</h3>
+  <p>The persistent cache recorded zero hits and zero saved compile seconds on every row. The receipt records 8987.96087177936 s of total compile-warm frame wall. MAST exposes 2291.968002715148 s explicitly as <code>jit_compile</code>; DIII-D records compilation inside <code>production_solve</code>, not as a separate timing field, so this table does not invent a split.</p>
+  <table>
+    <caption>Per-machine all-miss compilation-cache finding</caption>
+    <thead><tr><th scope="col">Machine</th><th scope="col">Rows</th><th scope="col">Cache hits</th><th scope="col">Misses</th><th scope="col">Saved compile seconds</th><th scope="col">Compile-warm wall (s)</th><th scope="col">Separately recorded compile-bearing phase (s)</th></tr></thead>
+    <tbody>
+      <tr><td>MAST</td><td>6</td><td>0</td><td>6</td><td>0.0</td><td>2784.8348949216306</td><td>2291.968002715148 (<code>jit_compile</code>)</td></tr>
+      <tr><td>DIII-D</td><td>5</td><td>0</td><td>5</td><td>0.0</td><td>6203.125976857729</td><td>6200.956979427487 (<code>production_solve</code>, compile not separated)</td></tr>
+      <tr><td>All</td><td>11</td><td>0</td><td>11</td><td>0.0</td><td>8987.96087177936</td><td>not combined across unlike phase fields</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="oracle-lane-cost">Oracle lane cost — fixture assembly before and after batching</h2>
+  <p>The paired receipt is <code>docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json</code>, measured on the same <code>98dci4-clu-2055</code> rigel node with 16 allocated CPUs. The fixture build fell from 58.17809939500876 s to 16.56210749410093 s. Across 275400 paired block values, maximum absolute and relative differences are both exactly 0.0.</p>
+  <table>
+    <caption>Fixture build phase wall seconds before and after batched source assembly</caption>
+    <thead><tr><th scope="col">Phase</th><th scope="col">Before (s)</th><th scope="col">After (s)</th></tr></thead>
+    <tbody>
+      <tr><td>flux_blocks</td><td>53.99016788206063</td><td>11.467956601874903</td></tr>
+      <tr><td>moment_geometry</td><td>0.1522747848648578</td><td>0.16962966811843216</td></tr>
+      <tr><td>loop_neighbour_vertices</td><td>0.015866172965615988</td><td>0.01872988697141409</td></tr>
+      <tr><td>hex_ring_slots</td><td>0.014043854316696525</td><td>0.016668360913172364</td></tr>
+      <tr><td>delaunay</td><td>0.0009059030562639236</td><td>0.0009083880577236414</td></tr>
+      <tr><td>remainder</td><td>4.004840797744691</td><td>4.888214588165283</td></tr>
+      <tr><td><strong>build_machine</strong></td><td><strong>58.17809939500876</strong></td><td><strong>16.56210749410093</strong></td></tr>
+    </tbody>
+  </table>
+  <p>The receipt reports build-machine speedup 3.5127232096356433 and flux-block speedup 4.707915259570632, with reductions of 71.53205816908857% and 78.7591758800858%. The unchanged recovery gate then passed in 38.860744862118736 s against its 60.0 s bound, leaving 21.139255137881264 s headroom.</p>
+
+  <h2 id="open-record">Open record — accuracy is not yet certifiable</h2>
+  <table>
+    <caption>What is closed, what remains open, and who owns it</caption>
+    <thead><tr><th scope="col">Question</th><th scope="col">Evidence</th><th scope="col">State</th><th scope="col">Owner</th></tr></thead>
+    <tbody>
+      <tr><td>Does the reduced operator admit the closed-form root?</td><td>14 of 14 registry bounds reproduced; direct one-map residual 2.65744538298329e-15</td><td>Closed: yes</td><td><code>gs-absolute-accuracy-gates</code></td></tr>
+      <tr><td>Does the production solve reach that root from its own seed?</td><td>0 of 16 Solov'ev rows qualified; terminal residuals 0.6178027502292015 to 2.6653009037709676 against 1e-12</td><td><strong>Open: no case reaches a qualified root</strong></td><td><code>solver-convergence-regression</code></td></tr>
+      <tr><td>Can EFIT reproduction be certified?</td><td>0 of 11 rows passed because all 11 are nonconverged; MAST's six solve-to-label values are below its floor but remain unclaimable</td><td><strong>Open: accuracy is not yet certifiable</strong></td><td><code>solver-convergence-regression</code></td></tr>
+      <tr><td>What consumes a convergence-qualified certificate?</td><td>The harnesses and complete censuses rerun unchanged after a solver remedy lands</td><td>Waiting on convergence evidence</td><td><code>millisecond-converged-solve</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Conclusion:</strong> the evidence record is complete, but a positive accuracy claim is withheld. The production solve does not reach the root from its own seed on any exact-reference or EFIT case. <code>solver-convergence-regression</code> owns that convergence question; <code>millisecond-converged-solve</code> consumes the result only after it is answered.</p>
+</main>
+</body>
+</html>

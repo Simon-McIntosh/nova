@@ -290,13 +290,13 @@ def _seed_control_result(
         np.isfinite(terminal_residual) and terminal_residual <= TERMINAL_RESIDUAL_BOUND
     )
     if not np.all(np.isfinite(terminal_state)):
-        termination = "nonfinite_terminal_state"
+        qualification_reason = "nonfinite_terminal_state"
     elif not np.isfinite(terminal_residual):
-        termination = "nonfinite_terminal_residual"
+        qualification_reason = "nonfinite_terminal_residual"
     elif qualified:
-        termination = "fixed_point_residual_within_qualification_bound"
+        qualification_reason = "fixed_point_residual_within_qualification_bound"
     else:
-        termination = (
+        qualification_reason = (
             "fixed_point_residual_above_qualification_bound_after_iteration_budget"
         )
     solver_termination = recovery.fixed_point.FixedPointTerminationReason(
@@ -313,8 +313,8 @@ def _seed_control_result(
         ),
         "qualification_bound": TERMINAL_RESIDUAL_BOUND,
         "qualification": "qualified" if qualified else "unqualified",
-        "termination": termination,
-        "solver_termination": solver_termination,
+        "termination": solver_termination,
+        "qualification_reason": qualification_reason,
         "solve_wall_seconds": solve_seconds,
         "whole_domain_psi_error": {
             "sup_wb": (

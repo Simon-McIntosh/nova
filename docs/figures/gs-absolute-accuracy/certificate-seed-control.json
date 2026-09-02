@@ -1,0 +1,220 @@
+{
+  "arms": [
+    {
+      "axis_position_error_m": 0.008450685491830917,
+      "initial_relative_residual": 0.8372917654079252,
+      "name": "production_moment_seed",
+      "per_trip_residual_history": [
+        {
+          "residuals": [
+            0.8372917654079252
+          ],
+          "trace_indices": [
+            0
+          ],
+          "trip": 1
+        }
+      ],
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+      "seed": {
+        "aggregate_moment": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            0.8875010108629255,
+            0.0
+          ],
+          "declared_current_a": 251245.90891804622,
+          "quadrature_current_a": 251245.90891804622,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 0.0
+        },
+        "closed_form_coupling_image_used": false,
+        "closed_form_flux_samples_used": false,
+        "current_sum_a": 251245.90891804622,
+        "fixture_exterior_boundary_condition_used": true,
+        "independent_of_closed_form_state": true,
+        "initial_axis_m": [
+          0.9084504176253734,
+          -6.728475771636399e-05
+        ],
+        "initial_core_cell_count": 220,
+        "initial_topology_class": "limited",
+        "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+        "limiter_midplane_extent_m": [
+          0.6274674744291012,
+          1.0903621913130435
+        ],
+        "seed_radius_fraction": 0.9,
+        "seed_radius_m": 0.18257506240510613,
+        "state_sha256_binary64": "c7d102bf21d20047403cfc5cbf4f5caf6d0680d8f2466723dfe216262571f8c0",
+        "supported_cell_count": 173,
+        "supported_minor_distance_m": 0.20286118045011792
+      },
+      "solve_wall_seconds": 855.868378167972,
+      "terminal_axis_rz_m": [
+        0.9084504176253734,
+        -6.728475771636399e-05
+      ],
+      "terminal_relative_residual": 0.8372917654079252,
+      "termination": "krylov_action_refused",
+      "trip_count": 1,
+      "whole_domain_psi_error": {
+        "finite_cells": 551,
+        "rms_wb": 0.056504589601982555,
+        "sup_wb": 0.12392738416579707,
+        "total_cells": 551
+      }
+    },
+    {
+      "axis_position_error_m": 0.00025036852970572454,
+      "initial_relative_residual": 3.12385789388428e-15,
+      "name": "closed_form_near_root_seed",
+      "per_trip_residual_history": [
+        {
+          "residuals": [
+            3.12385789388428e-15
+          ],
+          "trace_indices": [
+            0
+          ],
+          "trip": 1
+        }
+      ],
+      "qualification": "qualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_within_qualification_bound",
+      "seed": {
+        "construction": "the shipped analytic fixture closed-form state on the identical carrier; only the solve initial state differs from the production arm",
+        "kind": "closed-form-near-root-control",
+        "state_sha256_binary64": "b8de47a2110832ae455c0e6fc318be2ca3c8afd03fff5d1e19aaa9f2df644046"
+      },
+      "solve_wall_seconds": 84.02981842099689,
+      "terminal_axis_rz_m": [
+        0.8997496314702943,
+        2.4588950193332108e-17
+      ],
+      "terminal_relative_residual": 3.12385789388428e-15,
+      "termination": "converged",
+      "trip_count": 1,
+      "whole_domain_psi_error": {
+        "finite_cells": 551,
+        "rms_wb": 0.0,
+        "sup_wb": 0.0,
+        "total_cells": 551
+      }
+    }
+  ],
+  "case": "strong-rotation-compact-static",
+  "lane": {
+    "cpu_count": 16,
+    "execution": "slurm",
+    "exit_marker": "SEED_CONTROL_EXIT=0",
+    "hostname": "98dci4-clu-2049.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-2049",
+    "partition": "rigel",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0340c6126519e4c6742a",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "cpu",
+        "backend_version": "cpu",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "cpu",
+            "platform": "cpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0340c6126519e4c6742a"
+    },
+    "precision": "float64",
+    "reservation": null,
+    "slurm_job_id": "1261149",
+    "threaded_settings": {
+      "mkl_num_threads": "16",
+      "numexpr_num_threads": "16",
+      "omp_num_threads": "16",
+      "openblas_num_threads": "16",
+      "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+    },
+    "wall_seconds": 974.8783579678275
+  },
+  "realised_cells": 551,
+  "requested_cells": -500,
+  "schema": {
+    "arm_required": [
+      "initial_relative_residual",
+      "per_trip_residual_history",
+      "terminal_relative_residual",
+      "trip_count",
+      "termination",
+      "whole_domain_psi_error",
+      "axis_position_error_m"
+    ],
+    "name": "nova-solovev-certificate-seed-control",
+    "required": [
+      "case",
+      "requested_cells",
+      "realised_cells",
+      "lane",
+      "solver",
+      "arms",
+      "verdict"
+    ],
+    "version": 1
+  },
+  "solver": {
+    "gmres_iterations": 30,
+    "newton_steps": 10,
+    "qualification_bound": 1e-12,
+    "route": "production undamped Newton-Krylov machinery"
+  },
+  "solver_source_modified": false,
+  "source_revision": "466b9d027e745d3736cbb3575635af346059a865",
+  "verdict": {
+    "classification": "driver_sound_production_seed_basin_entry_failure",
+    "sentence": "Driver sound: the near-root control converges while basin entry fails from the production moment seed."
+  }
+}

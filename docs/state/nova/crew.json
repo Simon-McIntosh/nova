@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:52:19",
+  "updated": "2026-09-02T12:00:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -75832,9 +75832,134 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T093011958123-gaa-certificate-seed-control",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-certificate-seed-control",
+        "node_definition": {
+          "done_when": "certificate-seed-control.json records both seeds' initial residual, per-trip residual history, terminal residual, trip count, termination, psi error norms and axis error on the same node and job, states the verdict sentence, records the SLURM job id, node, elapsed and exit marker, and git diff --stat shows no change under nova/ or to solovev-certificate.json",
+          "estimated_hours": 1.5,
+          "goal": "A seed-control receipt docs/figures/gs-absolute-accuracy/certificate-seed-control.json that settles whether the certificate's 0 of 16 verdict is solver basin entry or a driver defect: on the strong-rotation compact static case at the 500-cell rung (the case with the smallest certificate error, whole-domain psi sup 0.12 Wb, terminal relative residual 0.84), run the production solve through benchmarks/solovev_certificate.py's exact machinery twice on one rigel CPU node (16 CPUs, JAX_PLATFORMS=cpu, TMPDIR=/tmp, persisted oracle cache, launch-then-harvest) with only the seed changed: (a) the production moment seed the certificate used, reproducing its 0.84 residual, and (b) the seed the shipped recovery gate path uses (scripts/analytic_oracle_fixtures/measure.py's independent-seed or near-root seed construction, as tests/test_solovev_recovery_gates.py::test_independent_seed_roots_report_the_measured_recovery_verdict drives it), recording for each the per-trip residual history, terminal residual against 1e-12, trip count, termination, the whole-domain psi sup and rms error against the closed-form field, the axis position error, and the seed's own initial residual, plus a one-sentence verdict (driver sound and basin entry fails from the production seed if (b) converges and (a) does not, driver suspect if neither converges, certificate wrong if both converge), with no solver source modified and the certificate receipt untouched",
+          "id": "gaa-certificate-seed-control",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093011958123-gaa-certificate-seed-control/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/certificate-seed-control.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solovev-certificate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:30:18Z",
+        "completed_at": "2026-09-02T09:59:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1766,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1766,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "241ee4a97a9a9f802b67fbdee67fc45da5a0737f",
+        "commits": [
+          "faec68778b033c5a052df452f70227ac313221ab"
+        ],
+        "changed_lines": {
+          "added": 226,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "seed-control job 1261149 rigel (SEED_CONTROL_EXIT=0, 16:36) plus schema validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093011958123-gaa-certificate-seed-control/seed-control-1261149.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093011958123-gaa-certificate-seed-control/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060ad-86f4-79b0-9e85-39020a3b9924",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 3363,
+              "log_age_seconds": 1506,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1535,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1344
+    "_version": 1345
   }
 }

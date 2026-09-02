@@ -1,0 +1,218 @@
+{
+  "artifact": "MAST bank regeneration terminal-diagnostic triage",
+  "status": "guard_reproduced_and_wall_shadow_migration_excluded",
+  "headline": "The 21983/35 pure bank arm is stopped by an exact-equality guard on a 16-ULP class-margin re-read; the identical mismatch already occurs at 588578a0, before the wall-shadow migration.",
+  "failed_regeneration": {
+    "job": {
+      "job_id": 1261207,
+      "node": "98dci4-gpu-0003",
+      "allocated_cpus": 1,
+      "accelerator": "NVIDIA H200 NVL",
+      "state": "FAILED",
+      "elapsed": "00:34:31",
+      "exit_code": "1:0",
+      "exit_marker": 1
+    },
+    "revision": "938f7ef384944e0e1f7b6debadd095c49403ff4a",
+    "failure": {
+      "identity": "21983/35",
+      "arm": "pure",
+      "exception_class": "RuntimeError",
+      "exception_message": "terminal X diagnostics changed the exact class-margin operand",
+      "producer_location": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py:570",
+      "diagnostic_location": "benchmarks/diiid_forward_gs_match.py:_terminal_xpoint_diagnostics",
+      "route": "real_equilibria_reachability._grid_geometry"
+    },
+    "completed_before_failure": {
+      "identities": [
+        "21978/35"
+      ],
+      "arms": [
+        "21978/35 pure",
+        "21978/35 mixed"
+      ],
+      "identity_count": 1,
+      "arm_count": 2,
+      "elapsed_seconds_for_identity": 1102.474,
+      "evidence": "The producer printed completed MAST 21978/35 only after _build_identity_operands returned its pure and mixed rows, then printed solving MAST 21983/35 before the first-arm list-comprehension entry raised."
+    },
+    "log": {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/logs/h200-bank-rebaseline.log",
+      "sha256": "5c756a4b3b7d54bf90d17644acfbdf2492eb59ff60179bb30312597fc5f637c8"
+    }
+  },
+  "paired_reproduction": {
+    "job": {
+      "job_id": 1261236,
+      "node": "98dci4-gpu-0003",
+      "allocated_cpus": 1,
+      "accelerator": "NVIDIA H200 NVL",
+      "state": "COMPLETED",
+      "elapsed": "00:26:01",
+      "exit_code": "0:0",
+      "exit_marker": 0,
+      "head_exit_marker": 0,
+      "pinned_exit_marker": 0
+    },
+    "execution_contract": {
+      "identity": "21983/35",
+      "arm": "pure",
+      "route": "the bank's passive-inclusive case construction and production solve_portfolio pure branch, followed by the real terminal X diagnostic guard",
+      "jax_platforms": "cuda,cpu",
+      "jax_enable_x64": true,
+      "tmpdir": "/tmp",
+      "reservation": "gpu_0003_grpA",
+      "carrier_file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "carrier_semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "python": "3.14.2",
+      "jax": "0.11.0",
+      "jaxlib": "0.11.0",
+      "cuda_backend": "PJRT C API cuda 12090",
+      "solver_source_modified": false
+    },
+    "captures": [
+      {
+        "label": "assigned main HEAD",
+        "revision": "938f7ef384944e0e1f7b6debadd095c49403ff4a",
+        "solve": {
+          "converged": false,
+          "termination_reason": "active_set_iteration_budget_exhausted",
+          "terminal_residual": 0.0016010813512420008,
+          "trip_count": 16,
+          "active_set_mask_differences": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0065894673419929,
+            0.0051731129840111075,
+            0.004112488033015337,
+            0.003306989044406373,
+            0.0027132182921497006,
+            0.002271024853224613,
+            0.0019121747127899033,
+            0.0016908509978307777,
+            0.0016316290669694704,
+            0.001627216855637715,
+            0.0016228109004278004,
+            0.0016184118744640217,
+            0.001614019720384541,
+            0.0016101642717528965,
+            0.0016056186400255227,
+            0.0016010813512420008
+          ],
+          "wall_seconds_including_compilation": 352.0785712013021
+        },
+        "class_margin_operands": {
+          "terminal_read": 0.028293392463377587,
+          "terminal_read_hex": "0x1.cf8f16d4adaa0p-6",
+          "diagnostics_reread": 0.02829339246337753,
+          "diagnostics_reread_hex": "0x1.cf8f16d4ada90p-6",
+          "diagnostics_minus_terminal": -5.551115123125783e-17,
+          "absolute_difference": 5.551115123125783e-17,
+          "difference_in_float64_ulps": -16,
+          "exactly_equal": false
+        },
+        "guard_fired": true,
+        "raw_capture": {
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/raw/terminal-margin-head.json",
+          "sha256": "5257b90cdce630c028d7c235eff4e2f291c992c5d0a6317dbee1693772e9d909"
+        }
+      },
+      {
+        "label": "pre-wall-shadow pin",
+        "revision": "588578a0628bff2ca9b8ddc28973f382d1bb8d5c",
+        "solve": {
+          "converged": false,
+          "termination_reason": "active_set_iteration_budget_exhausted",
+          "terminal_residual": 0.0016010813512420008,
+          "trip_count": 16,
+          "active_set_mask_differences": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0065894673419929,
+            0.0051731129840111075,
+            0.004112488033015337,
+            0.003306989044406373,
+            0.0027132182921497006,
+            0.002271024853224613,
+            0.0019121747127899033,
+            0.0016908509978307777,
+            0.0016316290669694704,
+            0.001627216855637715,
+            0.0016228109004278004,
+            0.0016184118744640217,
+            0.001614019720384541,
+            0.0016101642717528965,
+            0.0016056186400255227,
+            0.0016010813512420008
+          ],
+          "wall_seconds_including_compilation": 1093.42370214127
+        },
+        "class_margin_operands": {
+          "terminal_read": 0.028293392463377587,
+          "terminal_read_hex": "0x1.cf8f16d4adaa0p-6",
+          "diagnostics_reread": 0.02829339246337753,
+          "diagnostics_reread_hex": "0x1.cf8f16d4ada90p-6",
+          "diagnostics_minus_terminal": -5.551115123125783e-17,
+          "absolute_difference": 5.551115123125783e-17,
+          "difference_in_float64_ulps": -16,
+          "exactly_equal": false
+        },
+        "guard_fired": true,
+        "raw_capture": {
+          "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/raw/terminal-margin-588578a0.json",
+          "sha256": "f8eb42535e4881d44a4b31f0731436f638d762357218f5cb85c2dd34dd82cffe"
+        }
+      }
+    ],
+    "log": {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T102756614776-scr-bank-rebaseline/logs/terminal-margin-triage.log",
+      "sha256": "6ff03201b65981489587bf2ee0df3b12eebc6930083edf03db1feeb92b720811"
+    }
+  },
+  "attribution": {
+    "guard_fires_at_assigned_main_head": true,
+    "guard_fires_at_588578a0": true,
+    "guard_introduced_by_wall_shadow_migration": false,
+    "wall_shadow_candidate": {
+      "merge_commit": "260a8b4449b55b7783919634f2f37f1f7f76ba13",
+      "implementation_commit": "f944f6d3c66889c3c61ea1ee0b12624166066725",
+      "function": "nova.equilibrium.forward_operator.ForwardFluxOperator.residual_shadow_components",
+      "verdict": "excluded because both the terminal solve and the one-ULP diagnostic mismatch are identical before and after the migration"
+    },
+    "topology_authority_conditional_ownership_triggered": false,
+    "verdict": "The regeneration failure is a pre-existing exact-bit comparison fragility: two independently evaluated but physically equivalent float64 class margins differ by 16 ULPs at both revisions. It is not evidence that 260a8b44 changed this arm's terminal diagnostics.",
+    "regeneration_disposition": "paused; do not relaunch the twelve-arm bank until the diagnostic guard reuses the terminal operand or admits a documented float64 reduction-order floor"
+  }
+}

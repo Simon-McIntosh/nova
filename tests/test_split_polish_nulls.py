@@ -177,7 +177,7 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
     )
     dimensional_exclusions = {
         "position_rz": "attempted positions carry coordinate units",
-        "value": "attempted values carry flux units",
+        "value": "the map-owned selected values carry flux units",
         "gradient_norm": "gradient norms carry flux per coordinate units",
         "gradient": "gradient components carry flux per coordinate units",
         "hessian": "Hessian entries carry flux per coordinate squared units",
@@ -388,7 +388,11 @@ def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation
     assert bool(receipt["seed_stationary"][1])
     np.testing.assert_array_equal(np.asarray(saddle[:2]), np.asarray(seed_position))
     assert float(saddle[2]) == pytest.approx(-0.12271595465336929, abs=1.0e-9)
+    np.testing.assert_array_equal(
+        np.asarray(receipt["value"]), np.asarray(receipt["selected_value"])
+    )
     assert float(receipt["fit_value"][1]) == pytest.approx(-0.0889, abs=2.0e-3)
+    assert float(receipt["value"][1]) != float(receipt["fit_value"][1])
     assert float(receipt["sample_rms_residual"][1]) > abs(
         float(receipt["fit_value"][1] - census_value)
     )

@@ -1220,6 +1220,7 @@ def polish_census_stationary_points(
         "value_replaced": jnp.zeros(valid.shape, dtype=bool),
         "census_position_rz": selected[:, :2],
         "selected_position_rz": retained[:, :2],
+        "value": retained[:, 2],
         "selected_value": retained[:, 2],
     }
     return retained[0], retained[1], receipt

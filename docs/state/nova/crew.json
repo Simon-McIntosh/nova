@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T16:08:04",
+  "updated": "2026-09-02T16:14:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78051,9 +78051,152 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T123436142359-scr-bank-rebaseline-regen",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-bank-rebaseline-regen",
+        "node_definition": {
+          "done_when": "the guard compares within the stated bound with its test green, efit-topology-corroboration.json carries 12 regenerated rows with the marginal flag and basin_evidence on the two named arms and a regeneration_receipt naming revision and job, bank-rebaseline-regen.json records per arm old versus new flag, termination, residual, saddle displacement, trip-1 mask differences and the three rewritten constants, pytest on the two topology test files plus tests/test_active_set_stagnation.py plus the guard test passes (command, exit status, log path), the commit body names marginal-arm-convergence-semantics, SLURM job id, node, elapsed and exit marker are recorded, and git diff --stat under nova/ is empty",
+          "estimated_hours": 2.5,
+          "goal": "The twelve-arm MAST bank re-baselined under the locked marginal-arm-convergence-semantics ruling with honest stagnated rows, which requires as an included prerequisite that the diagnostics guard at benchmarks/diiid_forward_gs_match.py line 2531 (_terminal_xpoint_diagnostics, comparing diagnostic_margin != terminal_margin by exact float equality, fired on a 16-ULP roundoff difference per docs/figures/solver-convergence-regression/bank-rebaseline.json) compares within a stated roundoff bound (relative 1e-12 with an absolute floor at the class-margin scale, the bound named in the error message, pinned by a small test in tests/test_terminal_xpoint_margin_guard.py): docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json regenerated on current main through the merged schema-4 producer docs/figures/topology-visual-corroboration/generate_topology_visuals.py with the current pin (one H200, one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu set inside the sbatch body, TMPDIR=/tmp, persistent compilation cache, heartbeats, 3-hour limit, launch-then-harvest), every row carrying converged, termination_reason, terminal_residual, active-set telemetry, the pre- versus post-260a8b44 trip-1 mask difference where the arm has a banked predecessor, and solver_qualification.marginal_solver_basin plus basin_evidence (the EFIT gate receipt's shape) true on 22086/43 pure and 21978/35 pure, with the focused-suite constants rewritten to the regenerated values in the same commit whose body names the ruling (tests/test_topology_domain_partition.py lines 81-82, tests/test_topology_o_qualification.py line 112), a receipt docs/figures/solver-convergence-regression/bank-rebaseline-regen.json recording per arm old versus new flag, termination, residual, saddle displacement and the rewritten constants plus the SLURM evidence, the focused suite (the two topology test files, tests/test_active_set_stagnation.py, the new guard test) green afterwards, and no other solver source modified",
+          "id": "scr-bank-rebaseline-regen",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/test_terminal_xpoint_margin_guard.py",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/topology-visual-corroboration/",
+            "tests/test_topology_domain_partition.py",
+            "tests/test_topology_o_qualification.py",
+            "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bank-rebaseline",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:34:50Z",
+        "completed_at": "2026-09-02T14:13:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5949,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5949,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "acce6b3cf0832c9340c722c50dafb525c16954d7",
+        "commits": [
+          "61286b57525dd622a06754b30aef8d4b627f898e"
+        ],
+        "changed_lines": {
+          "added": 6313,
+          "removed": 4875,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_topology_domain_partition.py tests/test_topology_o_qualification.py tests/test_active_set_stagnation.py tests/test_terminal_xpoint_margin_guard.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/logs/focused-suite-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123436142359-scr-bank-rebaseline-regen/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0621d-7007-7062-9840-123f4e7760b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26046720,
+            "cached_input_tokens_cumulative": 26046720,
+            "input_tokens": 26347304,
+            "input_tokens_cumulative": 26347304,
+            "output_tokens": 43502,
+            "output_tokens_cumulative": 43502,
+            "reasoning_output_tokens": 13791,
+            "reasoning_output_tokens_cumulative": 13791
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4957,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 8557,
+              "log_age_seconds": 5712,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5754,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1370
+    "_version": 1371
   }
 }

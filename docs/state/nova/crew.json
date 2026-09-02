@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:59:37",
+  "updated": "2026-09-02T09:04:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -74699,9 +74699,111 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T065349492340-pta-build-machine-cost",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-build-machine-cost",
+        "node_definition": {
+          "done_when": "The manifest carries a phase table (tessellate, hex_ring_slots per-cell assignment, Delaunay, Biot coupling assembly, remainder) for build_machine on rigel via sbatch (--partition=rigel_debug or rigel, --cpus-per-task=16, --mem=32G, --time=01:00:00, export TMPDIR=/tmp, JAX_PLATFORMS=cpu, the worktree environment UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync) at main and at the parent of 5dd44f65 (a second worktree of your own at that commit is allowed for measurement only), naming the phase that grew; if hex_ring_slots or loop_neighbour_vertices grew, the committed vectorised assignment brings build_machine within 2 s of the pre-5dd44f65 figure in three sbatch runs quoted in the manifest and tests/test_plasma_cell_partition.py tests/test_hexstencil.py tests/test_stencil_nulls.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py stay green as fresh-process CPU lanes with logs cited; if the growth is elsewhere, no commit and a NEEDS-HELP brief naming the phase and the owning file",
+          "estimated_hours": 2.0,
+          "goal": "Attribute the 54.6 s build_machine phase of the reduced-oracle lane (your profile at ~/.config/reckon/crew/reports/nova/pta-carrier-read-cost/) between the tessellation with its HEX_RING slot assignment (PlasmaGrid.loop_neighbour_vertices, hex_ring_slots in nova/biot/plasmagrid.py) and the Biot assembly, by timing the construction phases on rigel at main and at the parent of 5dd44f65, and if the slot assignment dominates, vectorise it so the phase returns to its pre-5dd44f65 cost while the six-slot HEX_RING order tests stay green",
+          "id": "pta-build-machine-cost",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065349492340-pta-build-machine-cost/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/biot/plasmagrid.py",
+            "tests/test_plasma_cell_partition.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-build-machine-cost"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-perf",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:53:55Z",
+        "completed_at": "2026-09-02T07:03:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 575,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 575,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8e4eae84b80f8dc13499ccc5be8b964acc2cf1e8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rigel phase profile of build_machine at main 8e4eae84 and parent d2c49092 (profile_build.py, jobs 1261064/1261065)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-build-machine-cost/main-1261064.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065349492340-pta-build-machine-cost/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5423232,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5529618,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12312,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3567
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "attribution delivered; the conditional vectorisation branch was correctly not taken",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1324
+    "_version": 1325
   }
 }

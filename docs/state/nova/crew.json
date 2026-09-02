@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:05:53",
+  "updated": "2026-09-02T06:15:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -72633,9 +72633,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T040726598574-csv-evidence-record",
+        "plan": "cpu-solve-viability",
+        "section": "",
+        "node": "csv-evidence-record",
+        "node_definition": {
+          "done_when": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/cpu-solve-viability-landed.html reports 0 ERRORs, the document carries plan-evidence-for=cpu-solve-viability, four anchored sections cite their receipt paths with headline numbers matching the JSONs (11887 s HEAD wall, 2200 s pinned, per-trip 944/1108/700 s, 1.62 and 1.34 effective threads, 3.4 ms callbacks, 396 compile events 2945 s, threaded mean 1646.6 s vs 314 s), and both embedded figures resolve to existing files",
+          "estimated_hours": 1.0,
+          "goal": "The cumulative evidence record docs/evidence/archive/cpu-solve-viability-landed.html (reckon-type=evidence, plan-evidence-for=cpu-solve-viability, plan-informs=millisecond-converged-solve,solver-trip-orchestration) with one stable anchor per landed section of the plan (the frozen symptom with job 1260726, the hypothesis census with each hypothesis's measured verdict, the discriminator measurement with the HEAD 3.30 h versus pinned 37 min result, the thread-configuration measurement with the 396-event 2945 s compilation finding), embedding docs/figures/cpu-solve-viability/cpu-discriminator.png and thread-configuration.png by project-absolute src with a one-paragraph reading each, an HTML table of the compilation events grouped by module (jit_scan 2 events 2045 s, jit_while 1 event 799 s, jit_read_qualification 5 events 60 s, the rest) computed from thread-configuration.json, HTML tables for every tabular verdict with the numbers exactly as the two receipt JSONs record them, and a closing table stating the verdict (closed as understood, HEAD-side program growth) beside the locked build-on-H200-then-reuse-caches decision and the one-line fix target",
+          "id": "csv-evidence-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T040726598574-csv-evidence-record/manifest.md",
+          "plan": "cpu-solve-viability",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/evidence/archive/cpu-solve-viability-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cpu-viability",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T04:07:31Z",
+        "completed_at": "2026-09-02T04:15:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 467,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 467,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "4cc18b9de3b8a066db0227a8349f7ed74f65adcc",
+        "commits": [
+          "08b80458b612dddb4cf314a8e7ec1700547be905"
+        ],
+        "changed_lines": {
+          "added": 183,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/cpu-solve-viability-landed.html",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T040726598574-csv-evidence-record/gate-audit-doc.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T040726598574-csv-evidence-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ecf-a972-7d52-9922-e960373fcf46",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2301440,
+            "cached_input_tokens_cumulative": 3809280,
+            "input_tokens": 2397502,
+            "input_tokens_cumulative": 3999617,
+            "output_tokens": 8409,
+            "output_tokens_cumulative": 21739,
+            "reasoning_output_tokens": 1969,
+            "reasoning_output_tokens_cumulative": 5175
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1301
+    "_version": 1302
   }
 }

@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="cpu-solve-viability">
 <meta name="plan-title" content="CPU solve viability — a traced program that should run on CPU no longer does">
 <meta name="plan-summary" content="Diagnose why a full CPU Newton-Krylov solve now exceeds 3 h at ~1.5-core utilisation when the same producer previously finished arms in under an hour.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="mid">
 <meta name="plan-effort-hours" content="8.0">
 <meta name="plan-capability-version" content="1.0">
@@ -21,25 +21,31 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="10">
 <meta name="plan-sprint" content="S19">
-<meta name="plan-commits" content="20f3f2e1,58ed438a,6564951b,97df4a80">
-<meta name="plan-artifacts" content="docs/figures/cpu-solve-viability/cpu-discriminator.json,docs/figures/cpu-solve-viability/cpu-discriminator.png,docs/figures/cpu-solve-viability/thread-configuration.json,docs/figures/cpu-solve-viability/thread-configuration.png,benchmarks/cpu_solve_discriminator.py">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-commits" content="20f3f2e1,58ed438a,6564951b,97df4a80,08b80458">
+<meta name="plan-artifacts" content="docs/evidence/archive/cpu-solve-viability-landed.html,docs/figures/cpu-solve-viability/cpu-discriminator.json,docs/figures/cpu-solve-viability/cpu-discriminator.png,docs/figures/cpu-solve-viability/thread-configuration.json,docs/figures/cpu-solve-viability/thread-configuration.png,benchmarks/cpu_solve_discriminator.py">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
 <header><h1>CPU solve viability</h1>
 <p class="lede">Lead judgment 2026-09-01: the CPU's inability to finish one shot-pair solve in three hours reads as a bug, not a performance gap — the JAX-traced program's numpy shape should remain viable on CPU. Deliberately backlog: not scheduled to a sprint, recorded here so the anomaly and its freshest evidence survive until it is worth chasing.</p></header>
 
-<h2 id="s1">§1 — The symptom, with its evidence frozen</h2>
-<p>SLURM job 1260726 (rigel, 16 CPUs, 64 GiB, <code>generate_topology_visuals.py --cache-only --regenerate-mast-shot 22086</code>) ran to its 3 h TIMEOUT still inside the first stage, before <code>MAST_STATES_READY</code> — two Newton–Krylov solves (the dual-branch portfolio plus the margin-graded mixed arm) for MAST 22086/43. Three anchors: <strong>(a) utilisation</strong> — at 1h35 wall the batch step had accumulated 2h28 CPU, about 1.5 of 16 allocated cores, so the program was not using the machine; <strong>(b) history</strong> — the same producer completed the committed seventeen-row campaign at roughly a day of lane time (~25–50 min/arm), so a &gt;3 h single pair is a regression against its own record, not a constant; <strong>(c) the H200 reference</strong> — width-32 batch solves complete in ~37.5 s and the trip-quantum receipt (<code>docs/figures/solver-trip-orchestration/trip-quantum.json</code>) shows the per-trip cost is compiled mask-reconciliation and re-linearization compute, which XLA-CPU should execute at a sane ratio to the GPU, not &gt;300×.</p>
+<section id="s1" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-02</span><h2>§1 — The symptom, with its evidence frozen</h2></header>
+<p class="landed-summary">Symptom confirmed on the exact bank pure-arm route, not only on the topology-visuals producer: 22086/43 pure takes <strong>3.30 h (11887 s)</strong> on CPU at HEAD (job 1261003, rigel, 16 CPUs) against <strong>36.7 min (2200 s)</strong> at the 30 August revision a4bec44f on the same lane shape (job 1260944), both seven trips to the same 4.8023e-4 residual, at 1.6 effective threads of 16. Full record: <a href="/nova/evidence/archive/cpu-solve-viability-landed#frozen-symptom">symptom</a>.</p>
+</section>
 
-<h2 id="s2">§2 — Hypothesis census</h2>
-<p>Ranked by prior evidence, to be measured not argued: <strong>(1) telemetry callbacks serialize the CPU loop</strong> — the solve gained per-trip telemetry after the committed bank's revision, and its <code>jax.debug.callback</code>s (the same ones that crashed the GPU-only launch by demanding a local CPU device) force a host synchronization per invocation inside the trip loop; on CPU that turns a compiled loop into a host round-trip per trip per member. <strong>(2) Scan dispatch overhead on CPU</strong> — the banked 7.6 µs/iteration H200 scan latency has a much larger CPU counterpart, multiplied across GMRES inner scans. <strong>(3) Thread configuration</strong> — XLA-CPU intra-op threading may be pinned to one or two threads by environment or by the launch recipe, consistent with the 1.5-core reading. <strong>(4) A float64 CPU kernel pathology</strong> in one of the trip sub-stages. Hypothesis (1) is cheaply separable: the telemetry is flag-gated at the call site, so one CPU arm with telemetry off against one with it on is the discriminating pair.</p>
+<section id="s2" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-02</span><h2>§2 — Hypothesis census</h2></header>
+<p class="landed-summary">All four hypotheses measured. (1) Telemetry callbacks: <strong>refuted</strong>, 3.4 ms of host time in 3.3 h. (3) Thread configuration: <strong>refuted</strong>, forcing the sixteen-core XLA-CPU pool leaves per-trip walls ([1534, 2709, 697] vs [1560, 2758, 699] s) and effective threads (1.34) unchanged with residuals identical to 0.0. (2) and (4) subsumed by the finding: <strong>396 XLA compilation events totalling 2945 s</strong> inside a three-trip solve (two jit_scan 2045 s, one jit_while 799 s), plus about 700 s per trip executing the same enlarged program on one core. Full record: <a href="/nova/evidence/archive/cpu-solve-viability-landed#hypothesis-census">census</a>.</p>
+</section>
 
-<h2 id="s3">§3 — The measurement</h2>
-<p>One bounded CPU profiling arm on a compute node: a single 22086/43 diverted-branch solve with (i) telemetry on vs off, (ii) XLA-CPU thread count swept over {1, 8, 16}, (iii) a callback census (count × mean host time) from the profiler trace, and (iv) the per-trip wall time compared against the H200 trip quantum to state the honest CPU/GPU ratio for the same compiled stages. Done-when: a receipt names the dominant CPU cost with its measured share, states whether the pre-telemetry CPU cost is recovered with telemetry off, and either closes the anomaly as understood-and-accepted or hands a one-line fix target to a followup. The falsifier for hypothesis (1): telemetry-off fails to recover at least half the gap.</p>
+<section id="s3" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-02</span><h2>§3 — The measurement</h2></header>
+<p class="landed-summary">Verdict: <strong>HEAD-side, closed as understood, not fixed.</strong> The dominant CPU cost is program growth from the 30 August fixed-point commits (fixed_point.py +1027 lines): XLA-CPU takes 47 minutes to compile the trip programs the H200 compiles in 383 s, and the per-trip execution is 5.24× the pinned reference (1646.6 s vs 314 s) regardless of threading. One-line fix target: the CPU lane inherits the persistent compilation cache, and per-trip program size is owned by <code>millisecond-converged-solve</code> §2; under the locked build-on-H200-then-reuse-caches decision the CPU lane is no longer a validation requirement. Receipts <code>docs/figures/cpu-solve-viability/cpu-discriminator.json</code>, <code>thread-configuration.json</code>; commits <code>20f3f2e1</code>, <code>58ed438a</code>, <code>6564951b</code>, <code>97df4a80</code>, <code>08b80458</code>. Full record: <a href="/nova/evidence/archive/cpu-solve-viability-landed#thread-configuration">measurement</a>, <a href="/nova/evidence/archive/cpu-solve-viability-landed#closing-verdict">verdict</a>.</p>
+</section>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -52,10 +58,16 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-csv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship cpu-solve-viability" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-csv-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship cpu-solve-viability" data-resolved-at="2026-09-02T04:17:01+00:00" data-resolved-by="reckon-ship-s19">
     <h4 class="r-fu-title">Run the CPU-solve discriminating measurement</h4>
     <div class="r-fu-body">Backlog by lead direction — schedule to a sprint before shipping. One bounded profiling arm separates the telemetry-callback hypothesis from thread-configuration and scan-overhead explanations and states the honest CPU/GPU ratio for the same compiled stages.</div>
     <pre class="r-fu-prompt">/reckon-ship cpu-solve-viability</pre>
+    <p class="r-fu-outcome">Measured 2026-09-02 on the exact bank pure-arm route: HEAD-side program growth, closed as understood (telemetry and threading refuted, 396 XLA-CPU compilation events totalling 2945 s plus 5.24x per-trip execution); evidence docs/evidence/archive/cpu-solve-viability-landed.html; fix target handed to millisecond-converged-solve section 2 (per-trip program size) with the CPU lane inheriting the persistent compilation cache.</p>
+    </article>
+<article class="r-fu" data-id="f-csv-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: per-trip program size is owned by millisecond-converged-solve section 2</h4>
+    <div class="r-fu-body">Foreign-owner pointer, no work here: the CPU pathology is program growth in the compiled trip body, so shrinking it is the per-trip quantum restructuring that millisecond-converged-solve section 2 owns; the CPU lane's remaining action (enable the persistent compilation cache in its launch recipes) rides on the same recipe wiring solver-trip-orchestration landed. Under the locked build-on-H200-then-reuse-caches decision the CPU lane is not a validation requirement.</div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -76,6 +88,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260902T0610-thread-landed" data-who="reckon-ship-s19" data-when="2026-09-02T06:10:00+00:00">
     <div class="r-comment-body">csv-thread-configuration landed — commits 6564951b, 97df4a80 (merged); gate PASSED (SLURM 1261014 rigel 98dci4-clu-2009, 16 CPUs, COMPLETED 0:0, 2h51m). THREADING IS NOT THE CAUSE: with XLA_FLAGS=--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16 and all four BLAS/OMP pools at 16, the first three HEAD trips cost [1534, 2709, 697] s against the baseline [1560, 2758, 699] s, effective threads 1.34 versus 1.34, residuals identical to 0.0 relative (semantics untouched, as required); mean 1646.6 s per trip is 5.24x the 314 s pinned-revision reference. THE CENSUS IS NOW ANSWERED: hypothesis (1) telemetry callbacks refuted (3.4 ms total), hypothesis (3) threading refuted (the XLA-CPU program does not parallelise regardless of the pool), hypothesis (2) scan/launch overhead subsumed by the real finding: the run recorded 396 XLA compilation events totalling 2945 s, of which two jit_scan compiles cost 2045 s and one jit_while 799 s — XLA-CPU takes 47 minutes to compile the trip programs that the H200 compiles in 383 s, and the remaining ~700 s per trip is the same enlarged program executing on effectively one core. The a4bec44f CPU leg (2200 s for compile plus seven trips) predates the 30 August fixed-point commits that grew fixed_point.py by 1027 lines (Newton-state and globalization continuation, model-trust selection, induced-mask acceptance), so the HEAD-side cost is PROGRAM GROWTH: a larger traced scan body compiled and executed by XLA-CPU. VERDICT for §3: closed as understood, not fixed. One-line fix target: the CPU lane inherits the persistent compilation cache (removing the 47-minute compile on every fresh process) and the per-trip program size is the millisecond-converged-solve §2 restructuring's concern; under the locked build-on-H200-then-reuse-caches decision the CPU lane is not a validation requirement, so no CPU-specific solver change is proposed. Remaining node: the cumulative evidence record, then collapse and ship.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260902T040726598574-csv-evidence-record" data-who="cpu-viability" data-when="2026-09-02T04:15:18Z">
+    <div class="r-comment-body"><p>CPU viability evidence record landed: four anchors, two figures, eleven headline facts and the 396-event compiler table cross-checked against both receipts, audit-doc 0 errors</p></div>
 </div>
 </section>
 </main>

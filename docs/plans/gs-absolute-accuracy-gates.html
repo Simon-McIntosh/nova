@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.8">
@@ -51,10 +51,15 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-gaa-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-gaa-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="2026-09-02T16:44:24+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Build the accuracy certificate</h4>
     <div class="r-fu-body">Preregister the norms, run the Solov'ev certificate across resolutions, score the EFIT reproduction with the two-source error split, and pin the certificate with regression tests. Blocked on the backend-margin forensics landing first.</div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
+    </article>
+<article class="r-fu" data-id="f-gaa-002" data-status="open" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Per-machine evidence and the EFIT gate rerun after the acceptance decision</h4>
+    <div class="r-fu-body">Blocked on the acceptance decision on solver-convergence-regression. When a remedy lands: rerun the sixteen-row Solov'ev certificate (the fourteen unqualified rows are the remedy's exact test bed), rerun benchmarks/efit_reproduction_gate.py on the eleven frames with the compilation cache hitting, then author the two per-machine EFIT-match evidence documents (MAST, DIII-D) that forward-solve-api §2 requires, and pin the certificate with a default-lane regression test. If honest stagnation is chosen as final, record the certificate at 2 of 16 as the accuracy floor and ship the plan with that statement.</div>
+    <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates §3</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

@@ -22,10 +22,10 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-commits" content="4e0d9588,0e79227d,1926a170,9e7c76b4">
-<meta name="plan-artifacts" content="docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/true-pin-reproduction.png,benchmarks/bank_revision_reproduction.py,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/root-cause.png,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/null-polish-attribution.png">
+<meta name="plan-artifacts" content="docs/evidence/archive/solver-convergence-regression-landed.html,docs/research/convergence-stall-handoff.html,docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/true-pin-reproduction.png,benchmarks/bank_revision_reproduction.py,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/root-cause.png,docs/figures/solver-convergence-regression/head-mechanism.json,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/null-polish-attribution.png,docs/figures/solver-convergence-regression/remedy-krylov-depth.json,docs/figures/solver-convergence-regression/remedy-deflation.json,docs/figures/solver-convergence-regression/remedy-anderson.json,docs/figures/solver-convergence-regression/remedy-vertical-pin.json,docs/figures/solver-convergence-regression/remedy-nonmonotone.json,docs/figures/solver-convergence-regression/bank-rebaseline.json,docs/figures/solver-convergence-regression/bank-rebaseline-regen.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/evidence/mast-bank-efit-overlays.html,benchmarks/bank_efit_overlay.py">
 </head>
 <body>
 <main class="plan-doc">
@@ -45,9 +45,14 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-scr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-scr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="2026-09-02T16:45:24+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the mechanism characterisation, then root-cause</h4>
     <div class="r-fu-body">§2 dispatches now (mechanism from banked telemetry plus HEAD discriminators); §1 consumes the shadow-score receipt when the gates plan lands it; §3 follows both.</div>
+    <pre class="r-fu-prompt">/reckon-ship solver-convergence-regression</pre>
+    </article>
+<article class="r-fu" data-id="f-scr-002" data-status="open" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lock the last acceptance remedy, then prototype or close</h4>
+    <div class="r-fu-body">Lead decision required (docs/research/convergence-stall-handoff.html#decision): (1) score pre-settlement candidates on the incumbent partition, keeping induced-mask scoring after settlement, recommended; (2) honest stagnation as final; (3) reopen a2e65fda wholesale, not recommended. If (1): dispatch a worktree prototype measured first on the fourteen unqualified Solov'ev rows (exact answer known) then the two marginal MAST arms, seven referees and hex-reference gates green, merge returned to the lead; on success regenerate the bank and certificate and rerun the EFIT gate. If (2): re-baseline stands, record the limitation on the north-star page, collapse the plan and ship it.</div>
     <pre class="r-fu-prompt">/reckon-ship solver-convergence-regression</pre>
     </article>
 </section>

@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-impl" content="0.3">
 </head>
 <body>
@@ -44,10 +44,15 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="2026-09-02T16:44:31+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Carry the solve to certified 1 ms</h4>
     <div class="r-fu-body">Close the exit-window decision and implement the locked branch, restructure the per-trip quantum behind the referee surface, and bank the certified millisecond measurement on real bank mixes. Depends on solver-trip-orchestration receipts and the accuracy certificate.</div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-mcs-002" data-status="open" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Per-trip quantum at width 1, then the certified measurement</h4>
+    <div class="r-fu-body">The sequential receipt shows a real member costs 16 to 316 s at width 1 with 2 to 16 trips per solve, so the trip loop, not the exit, is the lever. §2: measure and restructure the per-trip quantum at width 1 (host reconciliation, retrace below the compiled boundary, device sync), persisting each member's row immediately after its solve so a timeout cannot erase it, and complete the three DIII-D frames once a member-selective path exists. §3 waits on the acceptance decision (certificate-passing solves) and on batched-operator-boundary (heterogeneous batches). Baselines 0.784 ms and 25.0 ms are stale at HEAD and must be re-measured before any §2 claim.</div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

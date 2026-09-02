@@ -1,0 +1,768 @@
+{
+  "arms": [
+    {
+      "first_nonfinite_public_intermediate": {
+        "flat_index": 0,
+        "intermediate": "unscaled_cell_current",
+        "kind": "nan",
+        "segment": "plasma_cell",
+        "segment_index": 0
+      },
+      "fixed_point_linear_action": {
+        "finite": false,
+        "finite_count": 5,
+        "first_nonfinite": {
+          "flat_index": 0,
+          "kind": "nan",
+          "segment": "grid",
+          "segment_index": 0
+        },
+        "nan_count": 767,
+        "negative_infinity_count": 0,
+        "nonfinite_count": 767,
+        "positive_infinity_count": 0,
+        "size": 772
+      },
+      "fixed_point_linear_action_finite": false,
+      "initial_frozen_shadow_cell_count": 5,
+      "lambda_amplitude_admissibility": {
+        "admissible": true,
+        "amplitude_jvp": null,
+        "amplitude_jvp_finite": false,
+        "attempted_amplitude": 0.9297775241954396,
+        "public_amplitude": 0.9297775241954396,
+        "target_current_a": 16314773.311828371,
+        "unscaled_current_a": 17546964.60956718
+      },
+      "map_jvp_finite": false,
+      "map_residual": {
+        "absolute_sup_wb": 76.37688910865768,
+        "census": {
+          "finite": true,
+          "finite_count": 772,
+          "first_nonfinite": null,
+          "nan_count": 0,
+          "negative_infinity_count": 0,
+          "nonfinite_count": 0,
+          "positive_infinity_count": 0,
+          "size": 772
+        },
+        "relative_sup": 0.7478962392290307
+      },
+      "name": "production_moment_seed",
+      "probe_direction": {
+        "census": {
+          "finite": true,
+          "finite_count": 772,
+          "first_nonfinite": null,
+          "nan_count": 0,
+          "negative_infinity_count": 0,
+          "nonfinite_count": 0,
+          "positive_infinity_count": 0,
+          "size": 772
+        },
+        "construction": "unit_sup_fixed_point_residual",
+        "sup_norm": 1.0
+      },
+      "public_intermediate_census": {
+        "amplitude": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "scalar",
+              "segment_index": 0
+            },
+            "nan_count": 1,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 1,
+            "positive_infinity_count": 0,
+            "size": 1
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 1,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 1
+          }
+        },
+        "frozen_map": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 5,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "grid",
+              "segment_index": 0
+            },
+            "nan_count": 767,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 767,
+            "positive_infinity_count": 0,
+            "size": 772
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 772,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 772
+          }
+        },
+        "normalised_cell_current": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "normalised_internal_flux": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "grid",
+              "segment_index": 0
+            },
+            "nan_count": 772,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 772,
+            "positive_infinity_count": 0,
+            "size": 772
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 772,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 772
+          }
+        },
+        "normalised_radial_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "normalised_vertical_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_cell_current": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 5,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 130,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 130,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_radial_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 5,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 130,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 130,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_vertical_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 5,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 130,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 130,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        }
+      },
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          7.8013957884461,
+          1.0368784752946875e-11
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_current_a": 16314773.311828371,
+          "quadrature_current_a": 16314773.311828367,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 2.2833846522164315e-16
+        },
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.8013957884461,
+          1.0368784752946875e-11
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 16314773.311828371,
+        "requested_class": "limited",
+        "seed_radius_m": 1.564079053601776,
+        "state_sha256_binary64": "b5f378bb50c4b5e714d99156463810ec62138138b3b67dcbe64e340c3a627cd1",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 36
+      }
+    },
+    {
+      "first_nonfinite_public_intermediate": {
+        "flat_index": 0,
+        "intermediate": "unscaled_cell_current",
+        "kind": "nan",
+        "segment": "plasma_cell",
+        "segment_index": 0
+      },
+      "fixed_point_linear_action": {
+        "finite": false,
+        "finite_count": 28,
+        "first_nonfinite": {
+          "flat_index": 0,
+          "kind": "nan",
+          "segment": "grid",
+          "segment_index": 0
+        },
+        "nan_count": 744,
+        "negative_infinity_count": 0,
+        "nonfinite_count": 744,
+        "positive_infinity_count": 0,
+        "size": 772
+      },
+      "fixed_point_linear_action_finite": false,
+      "initial_frozen_shadow_cell_count": 28,
+      "lambda_amplitude_admissibility": {
+        "admissible": true,
+        "amplitude_jvp": null,
+        "amplitude_jvp_finite": false,
+        "attempted_amplitude": 1.0914504141090353,
+        "public_amplitude": 1.0914504141090353,
+        "target_current_a": 16314773.311828371,
+        "unscaled_current_a": 14947791.581669172
+      },
+      "map_jvp_finite": false,
+      "map_residual": {
+        "absolute_sup_wb": 14.949716209746327,
+        "census": {
+          "finite": true,
+          "finite_count": 772,
+          "first_nonfinite": null,
+          "nan_count": 0,
+          "negative_infinity_count": 0,
+          "nonfinite_count": 0,
+          "positive_infinity_count": 0,
+          "size": 772
+        },
+        "relative_sup": 0.2322485412168137
+      },
+      "name": "closed_form_near_root_seed",
+      "probe_direction": {
+        "census": {
+          "finite": true,
+          "finite_count": 772,
+          "first_nonfinite": null,
+          "nan_count": 0,
+          "negative_infinity_count": 0,
+          "nonfinite_count": 0,
+          "positive_infinity_count": 0,
+          "size": 772
+        },
+        "construction": "unit_sup_fixed_point_residual",
+        "sup_norm": 1.0
+      },
+      "public_intermediate_census": {
+        "amplitude": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "scalar",
+              "segment_index": 0
+            },
+            "nan_count": 1,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 1,
+            "positive_infinity_count": 0,
+            "size": 1
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 1,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 1
+          }
+        },
+        "frozen_map": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 28,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "grid",
+              "segment_index": 0
+            },
+            "nan_count": 744,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 744,
+            "positive_infinity_count": 0,
+            "size": 772
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 772,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 772
+          }
+        },
+        "normalised_cell_current": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "normalised_internal_flux": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "grid",
+              "segment_index": 0
+            },
+            "nan_count": 772,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 772,
+            "positive_infinity_count": 0,
+            "size": 772
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 772,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 772
+          }
+        },
+        "normalised_radial_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "normalised_vertical_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 0,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 135,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 135,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_cell_current": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 28,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 107,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 107,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_radial_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 28,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 107,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 107,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        },
+        "unscaled_vertical_moment": {
+          "jvp": {
+            "finite": false,
+            "finite_count": 28,
+            "first_nonfinite": {
+              "flat_index": 0,
+              "kind": "nan",
+              "segment": "plasma_cell",
+              "segment_index": 0
+            },
+            "nan_count": 107,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 107,
+            "positive_infinity_count": 0,
+            "size": 135
+          },
+          "value": {
+            "finite": true,
+            "finite_count": 135,
+            "first_nonfinite": null,
+            "nan_count": 0,
+            "negative_infinity_count": 0,
+            "nonfinite_count": 0,
+            "positive_infinity_count": 0,
+            "size": 135
+          }
+        }
+      },
+      "seed": {
+        "construction": "independent closed-form total flux on the identical cached carrier",
+        "factory": "closed_form_near_root_control",
+        "requested_class": "limited",
+        "state_sha256_binary64": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2"
+      }
+    }
+  ],
+  "case": "weak-rotation-reactor-static",
+  "headline": {
+    "sentence": "Both seed classes have a non-finite first linearised action."
+  },
+  "lane": {
+    "cpu_count": 16,
+    "elapsed_seconds": 96.35221087560058,
+    "execution": "slurm",
+    "exit_marker": "SOLOVEV_NAN_CENSUS_EXIT=0",
+    "hostname": "98dci4-clu-2013.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-2013",
+    "partition": "rigel",
+    "precision": "float64",
+    "reservation": null,
+    "slurm_job_id": "1261238",
+    "threaded_settings": {
+      "mkl_num_threads": "16",
+      "numexpr_num_threads": "16",
+      "omp_num_threads": "16",
+      "openblas_num_threads": "16",
+      "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0340c6126519e4c6742a",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "cpu",
+      "backend_version": "cpu",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "cpu",
+          "platform": "cpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0340c6126519e4c6742a"
+  },
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "route": "ForwardProfile production frozen-mask Newton linearisation",
+  "schema": {
+    "$id": "nova.solovev-production-route-nan-census",
+    "required": [
+      "case",
+      "requested_cells",
+      "arms",
+      "headline",
+      "lane"
+    ],
+    "version": 1
+  },
+  "seed_factory": "profile.cold_seed_portfolio",
+  "stage_wall_seconds": {
+    "nan_census_closed_form_near_root_seed": 36.77522589499131,
+    "nan_census_construction": 15.270100784022361,
+    "nan_census_production_moment_seed": 38.67682735202834
+  },
+  "target_current_a": 16314773.311828371
+}

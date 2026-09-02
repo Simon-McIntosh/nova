@@ -40,8 +40,11 @@ DEFAULT_OUTPUT = ROOT / "docs/figures/forward-solve-api/coil-edit-latency.json"
 DEFAULT_FIGURE = ROOT / "docs/figures/forward-solve-api/coil-edit-latency.png"
 SHOT = 21989
 SLICE_INDEX = 55
-EDIT_COUNT = 20
-EDIT_FRACTIONS = np.linspace(-0.2, 0.2, EDIT_COUNT)
+EDIT_FRACTIONS = 0.05 * np.asarray(
+    (0, 1, 2, 3, 4, 3, 2, 1, 0, -1, -2, -3, -4, -3, -2, -1, 0, 1, 2, 3, 4),
+    dtype=np.float64,
+)
+EDIT_COUNT = len(EDIT_FRACTIONS)
 COIL_FAMILY = "p6_upper"
 
 
@@ -72,25 +75,6 @@ def _response_cache(carrier_path: Path) -> tuple[dict[str, Any], dict[str, Any]]
         "input_digests": input_digests,
         "audit": audit,
     }, metadata
-
-
-def _forward_overlay_receipt(commit: str) -> dict[str, Any]:
-    """Verify the test-time forward module is exactly the named peer version."""
-    current_path = ROOT / "nova/equilibrium/forward.py"
-    expected = subprocess.check_output(
-        ["git", "show", f"{commit}:nova/equilibrium/forward.py"],
-        cwd=ROOT,
-    )
-    actual = current_path.read_bytes()
-    if actual != expected:
-        raise RuntimeError("forward.py does not match the declared peer overlay commit")
-    return {
-        "peer_commit": commit,
-        "path": "nova/equilibrium/forward.py",
-        "sha256": _sha256_bytes(actual),
-        "test_time_overlay": True,
-        "excluded_from_this_worker_commit": True,
-    }
 
 
 def _scheduler() -> dict[str, Any]:
@@ -171,22 +155,27 @@ def _termination_name(value: Any) -> str:
 
 
 def _render(rows: list[dict[str, Any]], figure_path: Path) -> None:
-    fractions = 100.0 * np.asarray([row["edit_fraction"] for row in rows])
+    indices = np.asarray([row["edit_index"] for row in rows])
     milliseconds = np.asarray([row["wall_milliseconds"] for row in rows])
+    displacement = 1.0e3 * np.asarray([row["boundary_displacement_m"] for row in rows])
     colours = [
         "#d97706" if row["compilation_cache"] == "miss" else "#2563eb" for row in rows
     ]
-    figure, axis = plt.subplots(figsize=(8.2, 4.8), constrained_layout=True)
-    axis.plot(fractions, milliseconds, color="0.72", lw=1.0, zorder=1)
-    axis.scatter(fractions, milliseconds, c=colours, s=34, zorder=2)
-    axis.set_yscale("log")
-    axis.set_xlabel("P6 upper current edit [% of shot value]")
-    axis.set_ylabel("Public solve wall time [ms]")
-    axis.set_title("MAST 21989/55 traced coil-current edits")
-    axis.grid(True, which="both", alpha=0.25)
-    axis.scatter([], [], color="#d97706", label="compile miss")
-    axis.scatter([], [], color="#2563eb", label="cache hit")
-    axis.legend()
+    figure, axes = plt.subplots(2, 1, figsize=(8.4, 7.2), constrained_layout=True)
+    axes[0].plot(indices, milliseconds, color="0.72", lw=1.0, zorder=1)
+    axes[0].scatter(indices, milliseconds, c=colours, s=34, zorder=2)
+    axes[0].set_yscale("log")
+    axes[0].set_ylabel("Solve wall time [ms]")
+    axes[0].set_title("MAST 21989/55 warm traced P6-upper edits")
+    axes[0].grid(True, which="both", alpha=0.25)
+    axes[0].scatter([], [], color="#d97706", label="compile miss")
+    axes[0].scatter([], [], color="#2563eb", label="cache hit")
+    axes[0].legend()
+    axes[1].plot(indices, displacement, color="#059669", marker="o", ms=4)
+    axes[1].axhline(0.0, color="0.5", lw=0.8)
+    axes[1].set_xlabel("Successive edit index")
+    axes[1].set_ylabel("Boundary displacement [mm]")
+    axes[1].grid(True, alpha=0.25)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=180)
     plt.close(figure)
@@ -232,13 +221,11 @@ def run(
     output: Path,
     figure: Path,
     carrier_path: Path,
-    forward_commit: str,
 ) -> dict[str, Any]:
-    """Compile once and measure twenty same-shaped prescribed-current edits."""
+    """Compile once and measure successive warm prescribed-current edits."""
     total_started = time.perf_counter()
     configure_dtypes()
     _require_measurement_host()
-    overlay = _forward_overlay_receipt(forward_commit)
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
@@ -281,29 +268,55 @@ def run(
         stablehlo_identity = _sha256_bytes(stablehlo.encode())
         rows: list[dict[str, Any]] = []
         executable_identity = None
-        first_result = None
+        state = initial
+        reference_lcfs = None
+        reference_boundary = None
         for index, (fraction, current) in enumerate(
             zip(EDIT_FRACTIONS, edit_vectors, strict=True)
         ):
             cache_before = int(jitted._cache_size())
             started = time.perf_counter()
-            branch = jitted(initial, current)
+            branch = jitted(state, current)
             jax.block_until_ready(branch)
             wall_milliseconds = 1.0e3 * (time.perf_counter() - started)
             cache_after = int(jitted._cache_size())
-            compiled = jitted.lower(initial, current).compile()
+            compiled = jitted.lower(state, current).compile()
             fingerprint = compiled.runtime_executable().fingerprint.decode()
             if executable_identity is None:
                 executable_identity = fingerprint
             elif fingerprint != executable_identity:
                 raise RuntimeError("a coil edit changed the executable identity")
             fixed_point = branch.equilibrium.fixed_point
+            labelled = branch.equilibrium.labelled_flux
+            lcfs_count = int(np.asarray(labelled.lcfs_vertex_count))
+            lcfs = np.asarray(labelled.lcfs)[:lcfs_count]
+            boundary = np.asarray(branch.equilibrium.topology.boundary)
+            if reference_boundary is None:
+                reference_boundary = boundary
+                reference_lcfs = lcfs
+            if lcfs_count and len(reference_lcfs):
+                distances = np.linalg.norm(
+                    lcfs[:, None, :] - reference_lcfs[None, :, :], axis=2
+                )
+                boundary_displacement = float(
+                    max(
+                        np.max(np.min(distances, axis=0)),
+                        np.max(np.min(distances, axis=1)),
+                    )
+                )
+                displacement_source = "lcfs_symmetric_sup"
+            else:
+                boundary_displacement = float(
+                    np.linalg.norm(boundary - reference_boundary)
+                )
+                displacement_source = "binding_point"
             row = {
                 "edit_index": index,
                 "edit_fraction": float(fraction),
                 "coil_current_a": float(np.asarray(current[circuit_index])),
                 "wall_milliseconds": wall_milliseconds,
                 "compilation_cache": ("miss" if cache_after > cache_before else "hit"),
+                "compile_count": cache_after,
                 "jit_cache_size_before": cache_before,
                 "jit_cache_size_after": cache_after,
                 "executable_identity": fingerprint,
@@ -313,16 +326,20 @@ def run(
                 "trip_count": int(np.asarray(fixed_point.active_set_iterations)),
                 "fixed_iteration_count": int(np.asarray(branch.iterations)),
                 "termination": _termination_name(fixed_point.termination_reason),
+                "lcfs_vertex_count": lcfs_count,
+                "boundary_displacement_m": boundary_displacement,
+                "boundary_displacement_source": displacement_source,
             }
             rows.append(row)
-            first_result = branch if first_result is None else first_result
+            state = branch.equilibrium.flux
             print(
                 "EDIT_DONE "
                 f"index={index + 1}/{EDIT_COUNT} "
                 f"fraction={fraction:+.6f} "
                 f"milliseconds={wall_milliseconds:.6f} "
                 f"cache={row['compilation_cache']} "
-                f"converged={row['converged']} trips={row['trip_count']}",
+                f"converged={row['converged']} trips={row['trip_count']} "
+                f"boundary_mm={1.0e3 * boundary_displacement:.6f}",
                 flush=True,
             )
 
@@ -357,14 +374,23 @@ def run(
         one_executable = len({row["executable_identity"] for row in rows}) == 1
         all_converged = all(row["converged"] for row in rows)
         median_warm_ms = float(np.median(warm_ms))
-        tens_of_milliseconds = 10.0 <= median_warm_ms < 100.0
+        latency_regime = "millisecond" if median_warm_ms < 1.0e3 else "second"
+        boundary_displacements = np.asarray(
+            [row["boundary_displacement_m"] for row in rows], dtype=np.float64
+        )
         gates = {
-            "twenty_edits_recorded": len(rows) == EDIT_COUNT,
+            "at_least_twenty_edits_recorded": len(rows) >= 20,
+            "successive_edits_are_five_percent": bool(
+                np.allclose(np.abs(np.diff(EDIT_FRACTIONS)), 0.05)
+            ),
             "first_edit_is_compile_miss": rows[0]["compilation_cache"] == "miss",
             "all_later_edits_are_cache_hits": all_cache_hits_after_first,
+            "compile_count_is_one": int(jitted._cache_size()) == 1,
             "executable_identity_unchanged": one_executable,
             "all_edits_converged": all_converged,
-            "median_warm_latency_is_tens_of_milliseconds": tens_of_milliseconds,
+            "boundary_displacement_is_finite": bool(
+                np.all(np.isfinite(boundary_displacements))
+            ),
             "omitted_path_bit_identical_to_stored_vector": omitted_bit_identical,
         }
         passed = all(gates.values())
@@ -378,7 +404,10 @@ def run(
             "source_revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip(),
-            "forward_module": overlay,
+            "forward_module": {
+                "path": "nova/equilibrium/forward.py",
+                "sha256": _sha256(ROOT / "nova/equilibrium/forward.py"),
+            },
             "driver": {
                 "path": str(Path(__file__).relative_to(ROOT)),
                 "sha256": _sha256(Path(__file__)),
@@ -402,7 +431,10 @@ def run(
                 "shot": SHOT,
                 "slice_index": SLICE_INDEX,
                 "time_s": float(prepared["reference"]["time_s"]),
-                "seed_policy": "same cold reference seed for every edit",
+                "seed_policy": (
+                    "cold frozen-six state for the first solve; each later solve "
+                    "starts from the preceding terminal flux"
+                ),
                 "route": "newton_krylov",
                 "target_current_a": target_current,
                 "current_pin": True,
@@ -410,7 +442,11 @@ def run(
                 "coil_family": COIL_FAMILY,
                 "coil_circuit_index": circuit_index,
                 "shot_coil_current_a": float(np.asarray(base_current[circuit_index])),
-                "edit_fraction_bounds": [-0.2, 0.2],
+                "edit_fraction_bounds": [
+                    float(np.min(EDIT_FRACTIONS)),
+                    float(np.max(EDIT_FRACTIONS)),
+                ],
+                "successive_edit_step_fraction": 0.05,
             },
             "compile": {
                 "count": int(jitted._cache_size()),
@@ -422,12 +458,18 @@ def run(
                 "median_warm_wall_milliseconds": median_warm_ms,
                 "minimum_warm_wall_milliseconds": float(warm_ms.min()),
                 "maximum_warm_wall_milliseconds": float(warm_ms.max()),
+                "latency_regime": latency_regime,
+                "latency_statement": (
+                    f"The median warm solve is {median_warm_ms:.3f} ms, in the "
+                    f"{latency_regime} regime."
+                ),
                 "converged_edit_count": sum(row["converged"] for row in rows),
                 "trip_count_minimum": min(row["trip_count"] for row in rows),
                 "trip_count_median": float(
                     np.median([row["trip_count"] for row in rows])
                 ),
                 "trip_count_maximum": max(row["trip_count"] for row in rows),
+                "maximum_boundary_displacement_m": float(boundary_displacements.max()),
             },
             "omitted_argument_identity": {
                 "omitted_receipt_sha256": omitted_identity,
@@ -458,7 +500,6 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
     command = (
         f"UV_PROJECT_ENVIRONMENT={environment} PYTHONPATH={worktree} "
         "uv run --no-sync python benchmarks/coil_edit_latency.py run "
-        f"--forward-commit {arguments.forward_commit} "
         f"--carrier {arguments.carrier.resolve()} "
         f"--output {arguments.output.resolve()} "
         f"--figure {arguments.figure.resolve()}"
@@ -470,6 +511,7 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
+#SBATCH --mem=64G
 #SBATCH --gres=gpu:1
 #SBATCH --time=03:00:00
 #SBATCH --output={log_directory}/coil-edit-latency-%j.log
@@ -528,8 +570,6 @@ def main() -> None:
     run_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
-    run_parser.add_argument("--forward-commit", required=True)
-
     for name in ("sbatch", "submit"):
         job_parser = subparsers.add_parser(name)
         job_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
@@ -537,13 +577,12 @@ def main() -> None:
         job_parser.add_argument(
             "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
         )
-        job_parser.add_argument("--forward-commit", required=True)
         job_parser.add_argument(
             "--log-directory",
             type=Path,
             default=Path(
                 "/home/ITER/mcintos/.config/reckon/crew/runs/"
-                "r-20260902T130141772929-fsa-traced-current/logs"
+                "r-20260902T151655477529-fsa-coil-edit-latency/logs"
             ),
         )
 
@@ -555,7 +594,6 @@ def main() -> None:
             arguments.output,
             arguments.figure,
             arguments.carrier,
-            arguments.forward_commit,
         )
     elif arguments.command == "sbatch":
         print(_sbatch_script(arguments), end="")

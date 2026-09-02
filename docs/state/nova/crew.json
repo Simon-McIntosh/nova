@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:58:55",
+  "updated": "2026-09-02T15:04:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -77464,9 +77464,279 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T125811800215-pta-parity-harness-reverify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness-reverify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-rereview.md with a PASS or FAIL verdict over: (1) git show --stat 79024057 lists only the four fenced paths; (2) the replay now runs the production read (ForwardFluxOperator._fixed_design_read on an operator built from the row's cached polygons, call site quoted) with no label, admissibility or component logic left in the benchmark; (3) rows lacking solver_qualification.marginal_solver_basin are marginal-unknown and excluded from the non-marginal parity count, which the receipt states as 0 non-marginal rows; (4) the pure-row class disagreement is recorded with both class margins and both boundary fluxes and gated as a marginal finding \u2014 and judge whether the production class margin of +Infinity (the physical-carrier branch of _connectivity_class_margin when the constructed operator carries no tensor axes) is a faithful cell-authority reading or an artefact of how the harness constructs the operator; (5) the wall-node census now reports cell/raster 5/7 and 10/14 with 2 and 4 differing nodes where the first harness reported exact agreement: explain the change and judge which is right; (6) the census-saddle contour is visible in the figure; (7) tests cover the unknown-flag fail-closed rule and the classification adjudication; (8) naming hygiene; (9) every defect quoted with file:line. Read-only review of files and the receipt",
+          "estimated_hours": 0.75,
+          "goal": "Write an independent re-review verdict report on repair commit 79024057 of node pta-parity-harness-repair (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair, paths benchmarks/topology_parity_harness.py, docs/figures/hex-cell-single-grid/topology-parity.json, docs/figures/hex-cell-single-grid/topology-parity.png, tests/test_topology_parity_harness.py) against the three failing checks of your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-review.md",
+          "id": "pta-parity-harness-reverify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T125811800215-pta-parity-harness-reverify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-rereview.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T12:58:19Z",
+        "completed_at": "2026-09-02T13:04:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 387,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 387,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "acce6b3cf0832c9340c722c50dafb525c16954d7",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "re-review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-parity-harness-rereview.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-rereview.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T125811800215-pta-parity-harness-reverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 548480,
+            "cached_input_tokens_cumulative": 2033536,
+            "input_tokens": 645570,
+            "input_tokens_cumulative": 2271196,
+            "output_tokens": 90,
+            "output_tokens_cumulative": 10213,
+            "reasoning_output_tokens": 35,
+            "reasoning_output_tokens_cumulative": 3438
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6370,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 9970,
+              "log_age_seconds": 7124,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 7167,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only re-review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T123221151752-pta-parity-harness-repair",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness-repair",
+        "node_definition": {
+          "done_when": "The harness's replay path is the production read (the manifest quotes the call site and no label, admissibility or component logic is duplicated in the benchmark); rows without the marginal flag are reported as marginal-unknown and excluded from the non-marginal exact-parity count with that count stated; the receipt records per replayable row the replayed classification from the production result, the committed classification, the cell-authority class margin and the retained raster class margin with both boundary fluxes, and flags the pure-row disagreement as a marginal finding with its adjudication text; the regenerated docs/figures/hex-cell-single-grid/topology-parity.json and .png are committed (draw the census-saddle contour in a colour visible against the domain fill); tests/test_topology_parity_harness.py covers the unknown-flag fail-closed rule and the classification adjudication; the harness run and pytest tests/test_topology_parity_harness.py tests/test_plasma_cell_topology_read.py are green under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync with logs cited; both 22086/43 rows still report 0 differing cells",
+          "estimated_hours": 2.0,
+          "goal": "Repair benchmarks/topology_parity_harness.py per the review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-review.md: replay the cached per-cell flux through the production topology read (Topology.read_qualification or ForwardFluxOperator._fixed_design_read on a carrier constructed from the row's cell polygons) rather than a benchmark-local reconstruction of the label algorithm, treat a row whose metadata lacks solver_qualification.marginal_solver_basin as marginal-unknown that cannot pass as non-marginal (reported pending, never inferred from converged=false), and adjudicate the replayed classification against the committed one so that the 22086/43 pure cell-diverted versus raster-limited disagreement is recorded with both class margins and both boundary fluxes and gated as a marginal-row finding",
+          "id": "pta-parity-harness-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/topology_parity_harness.py",
+            "docs/figures/hex-cell-single-grid/topology-parity.json",
+            "docs/figures/hex-cell-single-grid/topology-parity.png",
+            "tests/test_topology_parity_harness.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:32:31Z",
+        "completed_at": "2026-09-02T12:55:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1390,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1390,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "0a8f70acb9731736fce1c9066604fcef2dfe3427",
+        "commits": [
+          "790240576705da86bc8d69e71a0e64638f66143b"
+        ],
+        "changed_lines": {
+          "added": 538,
+          "removed": 408,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_parity_harness.py; pytest tests/test_topology_parity_harness.py tests/test_plasma_cell_topology_read.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6170752,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6367839,
+            "output_tokens": 5270,
+            "output_tokens_cumulative": 31966,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 5681
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4820,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 8420,
+              "log_age_seconds": 5574,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5617,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_topology_parity_harness.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1362
+    "_version": 1364
   }
 }

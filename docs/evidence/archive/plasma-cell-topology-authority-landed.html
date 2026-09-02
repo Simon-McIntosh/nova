@@ -136,6 +136,22 @@
 </tbody>
 </table>
 </section>
+
+<section id="s4-harness"><h2 id="s4-harness-h">§4 — Parity harness (pending receipt)</h2>
+<p>Merged <code>3796002a</code> (<code>0a8f70ac</code> first harness, rejected for re-implementing the label algorithm locally; <code>79024057</code> routes the replay through the production read). Substrate <code>f053fdba</code> (replay harness, schema-4 operands, receipt) merged under the lead's ruling; <code>hex-grid-derisk-gates</code> shipped at <code>62b92137</code>.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Rows</td><td>12 in the bank; 2 replayable (22086/43 pure and mixed carry per-cell flux); 10 explicitly not replayable; 6 marginal-unknown pending <code>solver_qualification.marginal_solver_basin</code>.</td></tr>
+<tr><td>Label parity</td><td>Both replayable rows: 1089 cells compared, 0 differing, selected O and X candidates match.</td></tr>
+<tr><td>Classification</td><td>Mixed: cell and raster both diverted, boundary fluxes agree to roundoff (−0.12236728180376091 vs −0.12236728180376090 Wb). Pure: cell authority diverted at −0.124222 Wb (class margin +∞ on the physical-carrier route) against the retained raster diagnostic limited at −0.124391 Wb (margin −0.135) — recorded as a governed marginal finding, not absorbed.</td></tr>
+<tr><td>Wall-node census</td><td>Private wall nodes cell/raster 5/7 (pure) and 10/14 (mixed), 2 and 4 differing, all on the divertor plates behind the private lobes: the two authorities (census saddle versus LCFS-push binding level) differ exactly where the solver programme observed the trip-1 active-set partition move after 260a8b44.</td></tr>
+<tr><td>Fail-closed rules</td><td>Rows without the marginal flag cannot count as non-marginal (exact_non_marginal_row_count 0); a non-marginal label, primary or classification difference fails the receipt; manufactured tests cover both.</td></tr>
+<tr><td>Status</td><td><code>status=pending</code>: completes when the marginal flags publish and the twelve-arm schema-4 regeneration (solver programme, honest stagnated rows at ≥ 260a8b44) returns per-cell flux to every row; the harness then reruns unchanged.</td></tr>
+</tbody>
+</table>
+<figure><img src="/nova/figures/hex-cell-single-grid/topology-parity.png" alt="Parity harness: two replayable rows on the cell mesh with census-saddle and raster-binding contours and the differing wall nodes"><figcaption>22086/43 pure (left) and mixed (right): domain labels on the cell mesh, census-saddle (cyan) and raster-binding (orange, dashed) contours coincident, differing private wall nodes (magenta) on the divertor plates.</figcaption></figure>
+</section>
 </main>
 </body>
 </html>

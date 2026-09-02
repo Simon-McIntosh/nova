@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T04:42:44",
+  "updated": "2026-09-02T05:32:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -71974,9 +71974,144 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T024407435231-pta-carrier-label-attribution",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-carrier-label-attribution",
+        "node_definition": {
+          "done_when": "The manifest carries (1) a per-cell comparison on the 2214-cell reference machine between the carrier labels' profile_participation (published map interpolated to centroids, census normalisation) and the published cell-current support (cells whose stored current is nonzero), listing every disagreeing cell with centroid, label, published current and psi_norm, and the counts; (2) the carrier mismatch census recomputed against the map's own psi_norm equals 1 level set instead of the stored boundary scalar, with its out-of-band count (expected 0); (3) the GPU forward-reference lane run once WITHOUT JAX_PLATFORMS with -k 'not test_persistent_fixture_machine_cache_builds_once', captured to a log, and for each failing test a one-line attribution: label-caused (name the cells and the mechanism, then fix it in scope and rerun) or solver-convergence with zero participating-label disagreement (record the residual figures and leave the test failing, it is routed to solver-convergence-regression and never absorbed by an assertion change); (4) the focused CPU lanes tests/test_plasma_cell_topology_read.py (0 differing labels over 646 cells), tests/test_plasma_cell_flood_families.py (11/11), tests/test_solovev_recovery_gates.py (8/8) and tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_plasma_cell_partition.py tests/test_split_polish_nulls.py tests/test_rim_current_scatter.py green, each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; (5) any code change committed in your worktree with a conventional subject and body",
+          "estimated_hours": 3.0,
+          "goal": "Attribute each of the eight failing GPU forward-reference tests on the carrier topology read (your worktree base 3efe9194) to either a label defect, which you fix in scope, or a solver-convergence effect independent of the labels, using the published equilibrium's own cell-current support as the per-cell yardstick under the locked boundary-flux authority (the census-selected saddle flux on the map normalises the labels, the published boundary scalar being a reference datum only)",
+          "id": "pta-carrier-label-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T024407435231-pta-carrier-label-attribution/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/cell_partition.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_plasma_cell_topology_read.py",
+            "tests/test_plasma_cell_flood_families.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T02:44:14Z",
+        "completed_at": "2026-09-02T03:30:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2798,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2798,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3efe91946d4d0631af1dac9916a3890154180010",
+        "commits": [
+          "e9f93f73183af91464310baad83864d16236987b"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T024407435231-pta-carrier-label-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3712256,
+            "cached_input_tokens_cumulative": 8124416,
+            "input_tokens": 3753616,
+            "input_tokens_cumulative": 8221224,
+            "output_tokens": 9190,
+            "output_tokens_cumulative": 23806,
+            "reasoning_output_tokens": 2158,
+            "reasoning_output_tokens_cumulative": 6513
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2666,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the three-hour launch-then-harvest measurement outlives the 60-minute worker fence; job 1261014 is still running in baseline trip 2; the threaded step has not started; and terminal per-trip walls; sampled threaded effective cores; paired compile seconds; same-HEAD residual agreement and the one-sentence verdict therefore do not yet exist",
+              "elapsed_seconds": 6266,
+              "log_age_seconds": 2690,
+              "log_fresh": false,
+              "manifest_commits": [
+                "6564951b6936f8102648f9e416892701f3d3ddf7"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005936006858-csv-thread-configuration/manifest.md; resolve the blocker before resuming the run",
+              "node": "csv-thread-configuration",
+              "phase": "starting",
+              "plan": "cpu-solve-viability",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T005936006858-csv-thread-configuration",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2726,
+              "terminal_at": "2026-09-02T01:58:42Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1296
+    "_version": 1297
   }
 }

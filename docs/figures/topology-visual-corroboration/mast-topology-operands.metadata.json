@@ -111,11 +111,12 @@
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 43,
       "identity": "22086/43 pure",
       "machine": "MAST",
-      "qualification": "converged",
+      "qualification": "active_set_stagnated",
+      "regeneration_elapsed_s_per_shot": 779.0142377307639,
       "shot": 22086,
       "time": 0.22999998927116394
     },
@@ -126,6 +127,7 @@
       "identity": "22086/43 mixed",
       "machine": "MAST",
       "qualification": "converged",
+      "regeneration_elapsed_s_per_shot": 779.0142377307639,
       "shot": 22086,
       "time": 0.22999998927116394
     }

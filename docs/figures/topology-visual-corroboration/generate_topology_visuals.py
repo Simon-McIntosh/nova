@@ -19,6 +19,7 @@ from pathlib import Path
 import subprocess
 import sys
 import textwrap
+import time
 import types
 from typing import Any, Callable
 
@@ -46,8 +47,12 @@ from nova.equilibrium.connectivity_boundary import (
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
+    hex_edge_admissibility,
+    label_saddle_aware_hex_connected_components,
+    private_flux_mask,
     polish_stationary_points,
 )
+from nova.geometry.hexstencil import hex_stencil
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
@@ -78,6 +83,30 @@ NUMERIC_ARRAY_DTYPES = {
     "efit_axis": np.float64,
     "efit_x": np.float64,
     "efit_lcfs": np.float64,
+    "per_cell_flux_values": np.float64,
+    "per_candidate_domain_labels": np.int8,
+    "current_cell_polygons": np.float64,
+    "atomic_node_signed_flux": np.float64,
+}
+POINT_ARRAY_FIELDS = {
+    "cell_rz",
+    "o_candidates",
+    "x_candidates",
+    "selected_o",
+    "selected_x",
+    "wall_point",
+    "wall",
+    "nova_boundary",
+    "efit_axis",
+    "efit_x",
+    "efit_lcfs",
+}
+CACHE_EMPTY_SHAPES = {
+    "domain_labels": (0,),
+    "per_cell_flux_values": (0,),
+    "per_candidate_domain_labels": (0, 0),
+    "current_cell_polygons": (0, 0, 2),
+    "atomic_node_signed_flux": (0,),
 }
 PanelPublisher = Callable[[dict[str, Any], int], None]
 
@@ -133,7 +162,12 @@ def _stationary_records(
     return positions[: len(source_o)], positions[len(source_o) :]
 
 
-def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
+def _mast_rows(
+    publish: PanelPublisher | None = None,
+    *,
+    shots: set[int] | None = None,
+    retained_rows: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     source_authority = _source_authority(MAST_AUTHORITY)
     authority = _load_path(MAST_AUTHORITY, "mast_visual_authority")
     reachability = authority._reachability_module()
@@ -142,7 +176,15 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
     )
     selected = select_slices_by_shot(DECOMPOSITION_BANK)
     rows: list[dict[str, Any]] = []
+    if shots is not None:
+        selected = [item for item in selected if int(item[0]["shot"]) in shots]
+        if not selected:
+            raise ValueError(f"no selected MAST operand matches shots {sorted(shots)}")
+        if retained_rows is None:
+            raise ValueError("partial MAST regeneration requires retained cache rows")
     for selected_row, qualification in selected:
+        shot_started = time.perf_counter()
+        shot_row_start = len(rows)
         shot = int(selected_row["shot"])
         slice_index = int(selected_row["slice_index"])
         print(f"MAST_OPERANDS {shot}/{slice_index}", flush=True)
@@ -158,8 +200,10 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
         states = reachability._mast_states(
             profile, jnp.asarray(passive_case["state"]), target_current
         )
+        print(f"MAST_STATES_READY {shot}/{slice_index}", flush=True)
         referee = read_efit_referee(shot, store=SHOT_STORE)
         for arm, arm_result in states.items():
+            print(f"MAST_ARM {shot}/{slice_index} {arm}", flush=True)
             state = arm_result.state
             governed_wall = reachability._closed_wall(
                 np.asarray(profile.operator.wall.coordinate, dtype=float)
@@ -179,6 +223,99 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
                 height = np.asarray(geometry["height"], dtype=float)
                 o_candidates, x_candidates = _stationary_records(
                     np.asarray(source_o), np.asarray(source_x), radius, height, flux
+                )
+                connectivity_radius, connectivity_height, connectivity_shape = (
+                    profile.operator.connectivity_grid_axes()
+                )
+                radial_count, vertical_count = connectivity_shape
+                grid_values = np.asarray(grid_flux, dtype=float)
+                field = grid_values.reshape((radial_count, vertical_count)).T
+                rings = hex_stencil((vertical_count, radial_count))
+                _unused_rings, shared_edges = _raster_hex_partition_geometry(
+                    connectivity_radius, connectivity_height
+                )
+                axis_seed, connectivity_material = (
+                    profile.operator.connectivity_axis_seed(topology.axis)
+                )
+                axis_seed = (
+                    np.asarray(axis_seed, dtype=bool)
+                    .reshape((radial_count, vertical_count))
+                    .T
+                )
+                connectivity_material = (
+                    np.asarray(connectivity_material, dtype=bool)
+                    .reshape((radial_count, vertical_count))
+                    .T
+                )
+                field_spline = fit_tensor_spline(
+                    connectivity_radius, connectivity_height, jnp.asarray(field)
+                )
+                candidate_points = np.asarray(x_candidates, dtype=float)
+                candidate_present = np.all(np.isfinite(candidate_points), axis=1)
+                safe_candidate_points = np.where(
+                    candidate_present[:, None], candidate_points, 0.0
+                )
+                candidate_flux = np.asarray(
+                    field_spline(
+                        jnp.asarray(safe_candidate_points[:, 0]),
+                        jnp.asarray(safe_candidate_points[:, 1]),
+                    )
+                )
+                candidate_flux = np.where(candidate_present, candidate_flux, np.nan)
+                candidate_labels = np.full(
+                    (len(candidate_points), grid_values.size), -1, dtype=np.int8
+                )
+                for candidate_index in np.flatnonzero(candidate_present):
+                    level = candidate_flux[candidate_index]
+                    axis_value = float(topology.axis_flux)
+                    closed = np.where(
+                        axis_value >= level, field >= level, field < level
+                    )
+                    confined = connectivity_material & closed
+                    link_admissible = hex_edge_admissibility(
+                        jnp.asarray(field),
+                        connectivity_radius,
+                        connectivity_height,
+                        jnp.asarray(level),
+                        jnp.asarray(axis_value),
+                        shared_edges,
+                    )
+                    component_labels = label_saddle_aware_hex_connected_components(
+                        jnp.asarray(confined),
+                        jnp.asarray(rings),
+                        link_admissible,
+                        confined.size,
+                    )
+                    private = np.asarray(
+                        private_flux_mask(component_labels, jnp.asarray(axis_seed)),
+                        dtype=bool,
+                    )
+                    connected = confined & ~private
+                    labels = np.full(
+                        confined.shape,
+                        int(PlasmaDomain.COMMON_SOL),
+                        dtype=np.int8,
+                    )
+                    labels[~connectivity_material] = int(PlasmaDomain.EXCLUDED_MATERIAL)
+                    labels[connected] = int(PlasmaDomain.CORE)
+                    labels[private] = int(PlasmaDomain.PRIVATE_FLUX)
+                    candidate_labels[candidate_index] = labels.T.reshape(-1)
+
+                current_polygons = profile.operator.moment_geometry.polygons
+                polygon_width = max(len(polygon) for polygon in current_polygons)
+                padded_polygons = np.full(
+                    (len(current_polygons), polygon_width, 2), np.nan, dtype=float
+                )
+                for polygon_index, polygon in enumerate(current_polygons):
+                    vertices = np.asarray(polygon, dtype=float)
+                    padded_polygons[polygon_index, : len(vertices)] = vertices
+                shared_flux = profile.operator.shared_node_flux(state)
+                signed_flux = profile.operator.polarity * (
+                    shared_flux - topology.boundary_flux
+                )
+                print(
+                    f"MAST_REPLAY_FIELDS_READY {shot}/{slice_index} {arm}",
+                    flush=True,
                 )
                 assembled = jax.device_get(
                     assemble_separatrix_branches(
@@ -206,6 +343,10 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
                     "nova_boundary": closed,
                     "converged": bool(arm_result.converged),
                     "qualification": str(arm_result.termination_reason),
+                    "per_cell_flux_values": grid_values,
+                    "per_candidate_domain_labels": candidate_labels,
+                    "current_cell_polygons": padded_polygons,
+                    "atomic_node_signed_flux": np.asarray(signed_flux, dtype=float),
                 }
             except (
                 authority.NoQualifiedAxisError,
@@ -224,6 +365,10 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
                     "nova_boundary": empty_points,
                     "converged": False,
                     "qualification": type(error).__name__,
+                    "per_cell_flux_values": np.empty(0, dtype=float),
+                    "per_candidate_domain_labels": np.empty((0, 0), dtype=np.int8),
+                    "current_cell_polygons": np.empty((0, 0, 2), dtype=float),
+                    "atomic_node_signed_flux": np.empty(0, dtype=float),
                 }
             row = {
                 "machine": "MAST",
@@ -240,6 +385,19 @@ def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
             rows.append(row)
             if publish is not None:
                 publish(row, len(rows))
+        elapsed = time.perf_counter() - shot_started
+        for generated_row in rows[shot_row_start:]:
+            generated_row["regeneration_elapsed_s_per_shot"] = elapsed
+    if retained_rows is not None:
+        replacements = {
+            (int(row["shot"]), int(row["frame"]), str(row["arm"])): row for row in rows
+        }
+        rows = [
+            replacements.get(
+                (int(row["shot"]), int(row["frame"]), str(row["arm"])), row
+            )
+            for row in retained_rows
+        ]
     if len(rows) != EXPECTED_MAST_ROWS:
         raise RuntimeError(f"expected {EXPECTED_MAST_ROWS} MAST rows, got {len(rows)}")
     _write_cache(
@@ -400,14 +558,30 @@ def _write_cache(
             }
         )
         for field, dtype in NUMERIC_ARRAY_DTYPES.items():
-            value = [] if row[field] is None else row[field]
+            value = row.get(field)
+            if value is None:
+                value = np.empty(CACHE_EMPTY_SHAPES.get(field, (0, 2)), dtype=dtype)
             array = np.asarray(value, dtype=dtype)
             if array.dtype.kind not in "biuf":
                 raise TypeError(
                     f"cache numeric field {field} has forbidden dtype {array.dtype}"
                 )
-            if field != "domain_labels":
+            if field in POINT_ARRAY_FIELDS:
                 array = array.reshape((-1, 2))
+            elif field in (
+                "domain_labels",
+                "per_cell_flux_values",
+                "atomic_node_signed_flux",
+            ):
+                array = array.reshape(-1)
+            elif field == "per_candidate_domain_labels" and array.ndim != 2:
+                raise ValueError("per-candidate domain labels must be a matrix")
+            elif field == "current_cell_polygons" and (
+                array.ndim != 3 or array.shape[-1] != 2
+            ):
+                raise ValueError(
+                    "current-cell polygons must have shape (cells, vertices, 2)"
+                )
             arrays[f"row_{index:02d}_{field}"] = array
     np.savez_compressed(path, **arrays)
     path.with_suffix(".metadata.json").write_text(
@@ -436,6 +610,11 @@ def _read_cache(path: Path, source_identity: str) -> list[dict[str, Any]]:
             row = dict(record)
             for field, dtype in NUMERIC_ARRAY_DTYPES.items():
                 key = f"row_{index:02d}_{field}"
+                if key not in stored:
+                    row[field] = np.empty(
+                        CACHE_EMPTY_SHAPES.get(field, (0, 2)), dtype=dtype
+                    )
+                    continue
                 array = np.array(stored[key], copy=True)
                 if array.dtype != np.dtype(dtype) or array.dtype.kind not in "biuf":
                     raise TypeError(
@@ -1176,6 +1355,18 @@ def _parse_args() -> argparse.Namespace:
         default=HERE,
         help="Durable directory for caches, panels, JSON records, and evidence HTML.",
     )
+    parser.add_argument(
+        "--regenerate-mast-shot",
+        type=int,
+        action="append",
+        default=[],
+        help="Refresh both cached arms for one selected MAST shot.",
+    )
+    parser.add_argument(
+        "--cache-only",
+        action="store_true",
+        help="Refresh requested MAST cache rows without publishing panels.",
+    )
     return parser.parse_args()
 
 
@@ -1194,6 +1385,32 @@ def main() -> None:
     DIIID_CACHE = HERE / "diiid-topology-operands.npz"
     configure_dtypes()
     HERE.mkdir(parents=True, exist_ok=True)
+    if args.cache_only:
+        if not args.regenerate_mast_shot:
+            raise ValueError("cache-only regeneration requires a MAST shot")
+        mast_identity = _source_authority(MAST_AUTHORITY)["source_identity"]
+        retained = _read_cache(MAST_CACHE, mast_identity)
+        rows = _mast_rows(shots=set(args.regenerate_mast_shot), retained_rows=retained)
+        refreshed = [
+            row for row in rows if int(row["shot"]) in set(args.regenerate_mast_shot)
+        ]
+        print(
+            json.dumps(
+                {
+                    "cache": str(MAST_CACHE),
+                    "rows": len(rows),
+                    "refreshed_rows": len(refreshed),
+                    "regeneration_elapsed_s_per_shot": sorted(
+                        {
+                            float(row["regeneration_elapsed_s_per_shot"])
+                            for row in refreshed
+                        }
+                    ),
+                },
+                sort_keys=True,
+            )
+        )
+        return
     published: dict[int, dict[str, Any]] = {}
 
     def publish(row: dict[str, Any], index: int) -> None:

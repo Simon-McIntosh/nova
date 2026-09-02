@@ -26,8 +26,8 @@
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="121">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="122">
 </head>
 <body>
   <main class="plan-doc">
@@ -492,6 +492,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260901T123527271704-sse-stride-one-harvest" data-who="margin-remeasure" data-when="2026-09-01T12:43:37Z">
     <div class="r-comment-body"><p>The stride-one record is published at docs/research/stride-one-boundary-probe.html with the unification as its headline: MAST at 65x65 terminates active_set_stagnated at 9.0018e-4 after 9 of 16 trips with trips 7 and 8 bit-identical on a settled mask - the DIII-D signature on MAST, own-mask acceptance included - so the descent direction gates the quarter-width programme on both machines. The saddle improves threefold to 0.008463 m against the 0.007578 m gate; the boundary RMS 0.18888 m is stated as a convergence artifact of the 9e-4 state, with the discretisation verdict explicitly deferred until a converged stride-one solve exists. Operational record: first production firing of the stagnation exit saved seven trips, mask settled 970, 1055 then seven zeros, per-trip costs 809 to 4487 s with no warm speedup, cold construction 5768 s through the exact polygon route on CPU</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260902T1150-cold-start-adjudication" data-who="reckon-ship-s19" data-when="2026-09-02T11:50:00+00:00">
+    <div class="r-comment-body">ADJUDICATION of SLURM job 1260050 nova-efit-cold-start (rigel, 16 CPUs, 120 GB, 48 h limit, submitted 2026-09-01 08:52 from the run directory of r-20260901T062947707320-sse-efit-reproduction-completion, worktree s16-lead-review/sse-efit-reproduction-completion). The owning run was promoted at 06:55 on 2026-09-01, before the job started, and its session's follower is dead, so no harvest path exists for the job's output. At 27 h of run time it had completed the MAST stride-2 and stride-1 fixed-input cold solves (log COLD_SOLVE_COMPLETE lines; outputs under that run directory's job-output/, zero-iteration receipt already consumed by the EFIT gate floors 0.0116 and 0.0832) and was iterating the DIII-D stride-1 cold solve on CPU, the lane cpu-solve-viability closed as pathological (3.3 h per seven trips at HEAD) and the lead's build-on-H200-then-reuse-caches decision retired as a validation requirement. Verdict: cancel, preserving the log and job-output; if the DIII-D stride-1 cold solve is still wanted it reruns on the H200 under the locked pattern. The S19 coordinator's scancel was blocked by the harness permission classifier, so the cancellation itself is the lead's action.</div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

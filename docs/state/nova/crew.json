@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:00:08",
+  "updated": "2026-09-02T12:11:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -75957,9 +75957,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T064904118819-mcs-strict-exit-incidence",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a71",
+        "node": "mcs-strict-exit-incidence",
+        "node_definition": {
+          "done_when": "strict-exit-incidence.json records for every MAST and DIII-D member the firing trip or never, executed and no-op trip counts, terminal residual and termination for both arms with a bit-identity flag, per-machine mean and tail ms per member with and without the exit, the HEAD per-trip quantum in ms, the census projection and full-trip baseline beside them, SLURM job id, node, CPU count, elapsed and exit marker, strict-exit-incidence.png plots per-member firing trips and ms per member for both machines, and git diff --stat shows no change under nova/",
+          "estimated_hours": 2.5,
+          "goal": "The strict-exit incidence receipt docs/figures/millisecond-converged-solve/strict-exit-incidence.json (driver benchmarks/strict_exit_incidence.py, figure strict-exit-incidence.png) that measures, on main at or after 588578a0 with no solver source modified, the landed strict no-op settled exit (commit 365aaf81, the policy locked strict-no-op-exit-only on solver-trip-orchestration) on the REAL bank member mixes rather than a replicated state: the twelve MAST arms of docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json and the five DIII-D frames of docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json, solved as one batched width equal to the member count on one H200 (one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, hardened sbatch, heartbeat, flushed stage timings, persisted carriers reused, persistent compilation cache, 3-hour SLURM limit, launch-then-harvest), with the exit enabled versus disabled as a paired control, recording per member the trip at which the strict qualification fires (or never), the executed versus no-op trips, terminal residual and termination, bit-identity of the terminal state between the two arms wherever the exit fired, and per machine the mean and tail ms per member with the exit against without, the cache-warm per-trip quantum measured at HEAD (which supersedes the banked 25.0 ms figure taken before the census polish entered the topology read), beside the census projection of 1.163 ms/slice and the 415.6 ms full-trip baseline",
+          "id": "mcs-strict-exit-incidence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064904118819-mcs-strict-exit-incidence/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+            "docs/figures/millisecond-converged-solve/strict-exit-incidence.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "mcs-exit-incidence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:49:10Z",
+        "completed_at": "2026-09-02T10:08:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11981,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "7d7f7f80054a9568cf8a50f842818d65b3483bca",
+        "commits": [
+          "0842cd7cbbf905349ca884178778ff4476f70bff"
+        ],
+        "changed_lines": {
+          "added": 376,
+          "removed": 22,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064904118819-mcs-strict-exit-incidence/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a060e0-f4b6-79c3-8096-2ec4bbb9b475",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1806336,
+            "cached_input_tokens_cumulative": 1806336,
+            "input_tokens": 1888234,
+            "input_tokens_cumulative": 1888234,
+            "output_tokens": 14749,
+            "output_tokens_cumulative": 14749,
+            "reasoning_output_tokens": 4123,
+            "reasoning_output_tokens_cumulative": 4123
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1345
+    "_version": 1346
   }
 }

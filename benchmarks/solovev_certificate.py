@@ -26,10 +26,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Normalize
 import numpy as np
+from scipy import stats
 
-from benchmarks.analytic_operator_ladder import _fit_order, _regional_norms
+from benchmarks.analytic_operator_ladder import _fit_order, _region_masks
 from benchmarks.split_fit_jump_field import (
     BOUNDARY_BAND_PITCHES,
     _distance_to_boundary,
@@ -391,30 +392,104 @@ def _norm(field: np.ndarray, mask: np.ndarray) -> dict[str, Any]:
     if selected.size == 0:
         raise RuntimeError("an accuracy norm has empty support")
     finite = np.isfinite(selected)
-    if not np.all(finite):
+    if not np.any(finite):
         return {
             "support_cells": int(np.count_nonzero(mask)),
             "component_count": int(selected.size),
-            "finite_component_count": int(np.count_nonzero(finite)),
+            "finite_component_count": 0,
             "measurement_status": "nonfinite_terminal_error",
             "sup": None,
             "rms": None,
         }
+    finite_selected = selected[finite]
     return {
         "support_cells": int(np.count_nonzero(mask)),
         "component_count": int(selected.size),
-        "finite_component_count": int(selected.size),
-        "measurement_status": "finite",
-        "sup": float(np.max(selected)),
-        "rms": float(np.sqrt(np.mean(selected**2))),
+        "finite_component_count": int(np.count_nonzero(finite)),
+        "measurement_status": "finite" if np.all(finite) else "finite_subset",
+        "sup": float(np.max(finite_selected)),
+        "rms": float(np.sqrt(np.mean(finite_selected**2))),
     }
 
 
-def _field_norms(field: np.ndarray, boundary_band: np.ndarray) -> dict[str, Any]:
+def _unavailable_norm(reason: str) -> dict[str, Any]:
+    return {
+        "support_cells": 0,
+        "component_count": 0,
+        "finite_component_count": 0,
+        "measurement_status": "unavailable",
+        "unavailable_reason": reason,
+        "sup": None,
+        "rms": None,
+    }
+
+
+def _field_norms(
+    field: np.ndarray,
+    boundary_band: np.ndarray,
+    *,
+    band_unavailable_reason: str | None = None,
+) -> dict[str, Any]:
     return {
         "whole_domain": _norm(field, np.ones(len(field), dtype=bool)),
-        "two_pitch_boundary_band": _norm(field, boundary_band),
+        "two_pitch_boundary_band": (
+            _norm(field, boundary_band)
+            if band_unavailable_reason is None
+            else _unavailable_norm(band_unavailable_reason)
+        ),
     }
+
+
+def _analytic_region_norms(
+    field: np.ndarray, psi_norm: np.ndarray, span_wb: float
+) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    absolute = np.abs(np.asarray(field, dtype=np.float64))
+    for name, mask in _region_masks(psi_norm).items():
+        count = int(np.count_nonzero(mask))
+        if count == 0:
+            reason = (
+                "no separatrix band at this resolution"
+                if name == "separatrix_band"
+                else f"no {name} cells at this resolution"
+            )
+            result[name] = {
+                "cell_count": 0,
+                "finite_cell_count": 0,
+                "measurement_status": "unavailable",
+                "unavailable_reason": reason,
+                "absolute_sup_wb": None,
+                "absolute_rms_wb": None,
+                "relative_sup": None,
+                "relative_rms": None,
+            }
+            continue
+        finite = np.isfinite(absolute[mask])
+        selected = absolute[mask][finite]
+        if selected.size == 0:
+            result[name] = {
+                "cell_count": count,
+                "finite_cell_count": 0,
+                "measurement_status": "unavailable",
+                "unavailable_reason": "no finite terminal error in this region",
+                "absolute_sup_wb": None,
+                "absolute_rms_wb": None,
+                "relative_sup": None,
+                "relative_rms": None,
+            }
+            continue
+        sup = float(np.max(selected))
+        rms = float(np.sqrt(np.mean(selected**2)))
+        result[name] = {
+            "cell_count": count,
+            "finite_cell_count": int(selected.size),
+            "measurement_status": "finite" if np.all(finite) else "finite_subset",
+            "absolute_sup_wb": sup,
+            "absolute_rms_wb": rms,
+            "relative_sup": sup / span_wb,
+            "relative_rms": rms / span_wb,
+        }
+    return result
 
 
 def _topology(operator, state: np.ndarray) -> dict[str, Any]:
@@ -473,28 +548,47 @@ def _plot(
     ):
         magnitude = np.asarray(errors[name], dtype=np.float64)
         if magnitude.ndim > 1:
-            magnitude = np.sqrt(
-                np.mean(magnitude**2, axis=tuple(range(1, magnitude.ndim)))
+            components = magnitude.reshape(len(magnitude), -1)
+            scale = np.max(np.abs(components), axis=1)
+            normalized = np.divide(
+                components,
+                scale[:, None],
+                out=np.zeros_like(components),
+                where=np.isfinite(scale[:, None]) & (scale[:, None] > 0.0),
             )
+            magnitude = scale * np.sqrt(np.mean(normalized**2, axis=1))
         finite = np.isfinite(magnitude)
-        positive = magnitude[finite & (magnitude > 0.0)]
-        floor = float(np.min(positive)) if len(positive) else np.finfo(float).tiny
-        ceiling = (
-            max(float(np.max(magnitude[finite])), floor * 10.0)
-            if np.any(finite)
-            else floor * 10.0
-        )
-        color = np.where(finite, np.maximum(magnitude, floor), ceiling)
-        artist = axis.scatter(
-            points[:, 0],
-            points[:, 1],
-            c=color,
-            s=10,
-            cmap="magma",
-            norm=LogNorm(vmin=floor, vmax=ceiling),
-            linewidths=0.0,
-        )
-        figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
+        finite_values = magnitude[finite]
+        if finite_values.size == 0:
+            axis.scatter(points[:, 0], points[:, 1], s=10, c="0.72", linewidths=0.0)
+            axis.text(
+                0.5,
+                0.5,
+                "no finite field, unqualified",
+                ha="center",
+                va="center",
+                transform=axis.transAxes,
+                bbox={"facecolor": "white", "alpha": 0.9, "edgecolor": "0.4"},
+            )
+        else:
+            minimum = float(np.nanmin(finite_values))
+            maximum = float(np.nanmax(finite_values))
+            positive = finite_values[finite_values > 0.0]
+            if positive.size and float(np.min(positive)) < maximum:
+                norm = LogNorm(vmin=float(np.min(positive)), vmax=maximum)
+            else:
+                width = max(abs(minimum), 1.0) * np.finfo(float).eps
+                norm = Normalize(vmin=minimum - width, vmax=maximum + width)
+            artist = axis.scatter(
+                points[finite, 0],
+                points[finite, 1],
+                c=finite_values,
+                s=10,
+                cmap="magma",
+                norm=norm,
+                linewidths=0.0,
+            )
+            figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
         if not np.all(finite):
             axis.scatter(
                 points[~finite, 0],
@@ -616,6 +710,16 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         and terminal_residual <= TERMINAL_RESIDUAL_BOUND
         else "unqualified"
     )
+    if not np.all(np.isfinite(terminal_state)):
+        termination_reason = "nonfinite_terminal_state"
+    elif not np.isfinite(terminal_residual):
+        termination_reason = "nonfinite_terminal_residual"
+    elif terminal_residual > TERMINAL_RESIDUAL_BOUND:
+        termination_reason = (
+            "fixed_point_residual_above_qualification_bound_after_iteration_budget"
+        )
+    else:
+        termination_reason = "fixed_point_residual_within_qualification_bound"
 
     with _timed_stage(
         "accuracy_scoring",
@@ -645,11 +749,13 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             derivative_coordinates, boundary
         ) <= (BOUNDARY_BAND_PITCHES * pitch)
         exact_topology = _topology(operator, oracle_state)
+        reference_topology_fallback = False
         if (
             case_name == "diverted-jump-bearing"
             and exact_topology["read_status"] == "no_qualified_axis"
         ):
             exact_topology = _analytic_diverted_topology(exact)
+            reference_topology_fallback = True
         root_topology = _topology(operator, terminal_state)
         axis_reference = (
             AXIS_M
@@ -666,7 +772,14 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         exact_psi_norm = (exact_grid - float(exact_topology["axis_flux_wb"])) / float(
             exact_topology["flux_span_wb"]
         )
-        analytic_regions = _regional_norms(psi_error, exact_psi_norm, span)
+        analytic_regions = _analytic_region_norms(psi_error, exact_psi_norm, span)
+        band_unavailable_reason = (
+            "no separatrix band at this resolution"
+            if case_name == "diverted-jump-bearing"
+            and requested_cells == -110
+            and reference_topology_fallback
+            else None
+        )
     figure = _figure_path(case_name, requested_cells)
     with _timed_stage(
         "figure_render",
@@ -706,6 +819,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "terminal_fixed_point_residual_status": (
                 "finite" if np.isfinite(terminal_residual) else "nonfinite"
             ),
+            "termination_reason": termination_reason,
             "qualification_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification": qualification,
             "compile_and_solve_wall_seconds": compile_and_solve_seconds,
@@ -718,9 +832,21 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "seed": seed_receipt,
         },
         "norms": {
-            "psi": _field_norms(psi_error, psi_boundary_band),
-            "gradient": _field_norms(gradient_error, derivative_boundary_band),
-            "hessian": _field_norms(hessian_error, derivative_boundary_band),
+            "psi": _field_norms(
+                psi_error,
+                psi_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
+            "gradient": _field_norms(
+                gradient_error,
+                derivative_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
+            "hessian": _field_norms(
+                hessian_error,
+                derivative_boundary_band,
+                band_unavailable_reason=band_unavailable_reason,
+            ),
         },
         "analytic_flux_regions": analytic_regions,
         "geometry": {
@@ -771,7 +897,8 @@ def _validate_row(row: dict[str, Any]) -> None:
             for name in NORM_STATISTICS:
                 if measured[name] is None and not (
                     row["solver"]["qualification"] == "unqualified"
-                    and measured["measurement_status"] == "nonfinite_terminal_error"
+                    and measured["measurement_status"]
+                    in {"nonfinite_terminal_error", "unavailable"}
                 ):
                     raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]
@@ -790,7 +917,7 @@ def _fit_quantity(
             if row["solver"]["qualification"] == qualification
             and row["norms"][field][region][statistic] is not None
         ]
-        if len(selected) < 4:
+        if len(selected) < 3:
             by_qualification[qualification] = {
                 "status": "insufficient_same_qualification_rungs",
                 "rung_count": len(selected),
@@ -814,7 +941,45 @@ def _fit_quantity(
                     },
                 }
             )
-        fitted = _fit_order(adapted)
+        if len(adapted) >= 4:
+            fitted = _fit_order(adapted)
+        else:
+            pitch = np.asarray(
+                [row["characteristic_pitch_m"] for row in adapted], dtype=np.float64
+            )
+            error = np.asarray(
+                [
+                    row["one_application_residual"]["regions"]["all_carrier_cells"][
+                        "relative_sup"
+                    ]
+                    for row in adapted
+                ],
+                dtype=np.float64,
+            )
+            design = np.column_stack((np.ones(len(adapted)), np.log(pitch)))
+            coefficients = np.linalg.lstsq(design, np.log(error), rcond=None)[0]
+            fitted_log = design @ coefficients
+            residual = np.log(error) - fitted_log
+            degrees_of_freedom = len(adapted) - 2
+            variance = float(np.sum(residual**2) / degrees_of_freedom)
+            covariance = variance * np.linalg.inv(design.T @ design)
+            order = float(coefficients[1])
+            standard_error = float(np.sqrt(covariance[1, 1]))
+            critical = float(stats.t.ppf(0.975, degrees_of_freedom))
+            fitted = {
+                "model": ("log(error) = intercept + order*log(characteristic_pitch)"),
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "rung_count": len(adapted),
+                "order": order,
+                "standard_error": standard_error,
+                "confidence_level": 0.95,
+                "confidence_interval": [
+                    order - critical * standard_error,
+                    order + critical * standard_error,
+                ],
+                "degrees_of_freedom": degrees_of_freedom,
+                "fitted_error": np.exp(fitted_log).tolist(),
+            }
         fitted["error_quantity"] = f"{field}.{region}.{statistic}"
         fitted["qualification"] = qualification
         fitted["theoretical_order"] = THEORETICAL_ORDER

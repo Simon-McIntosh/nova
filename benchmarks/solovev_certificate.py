@@ -38,7 +38,9 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_gradient,
     _polynomial_hessian,
 )
+from nova.equilibrium import ForwardProfile, SaddleSeedGeometry
 from nova.equilibrium.stencil_mesh import StencilMesh
+from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -243,6 +245,54 @@ def _diverted_source(coefficients: np.ndarray) -> RotatingEquilibrium:
         boundary_temperature=carrier.boundary_temperature,
         mean_particle_mass=carrier.mean_particle_mass,
     )
+
+
+def _diverted_seed(
+    source_case: RotatingEquilibrium, machine: Any, operator: Any
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Return the production axis-saddle cold seed for the diverted basin."""
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
+    seed_radius = 0.9 * float(np.linalg.norm(X_POINT_M - AXIS_M))
+    supported = np.linalg.norm(machine.node - AXIS_M, axis=1) < seed_radius
+    cell_current = (
+        source_case.toroidal_current_density(machine.node[:, 0], machine.node[:, 1])
+        * machine.area
+        * supported
+    )
+    total_current = float(np.sum(cell_current))
+    centroid = np.sum(machine.node * cell_current[:, None], axis=0) / total_current
+    geometry = SaddleSeedGeometry(tuple(AXIS_M), tuple(X_POINT_M))
+    portfolio = profile.cold_seed_portfolio(
+        total_current,
+        centroid,
+        diverted_geometry=geometry,
+    )
+    branch = int(TopologyClass.DIVERTED)
+    branches = portfolio.branches
+    seed = np.asarray(branches.flux[branch], dtype=np.float64)
+    receipt = {
+        "kind": "production-current-moment-axis-saddle-geometry",
+        "independent_of_closed_form_state": True,
+        "closed_form_flux_samples_used": False,
+        "closed_form_coupling_image_used": False,
+        "fixture_exterior_boundary_condition_used": True,
+        "declared_axis_m": AXIS_M.tolist(),
+        "declared_saddle_m": X_POINT_M.tolist(),
+        "plasma_current_a": total_current,
+        "current_centroid_m": centroid.tolist(),
+        "seed_support_radius_m": seed_radius,
+        "supported_cell_count": int(np.count_nonzero(cell_current)),
+        "production_seed_radius_m": float(branches.radius[branch]),
+        "anchor_available": bool(branches.anchor_available[branch]),
+        "anchor_m": np.asarray(branches.anchor[branch], dtype=np.float64).tolist(),
+        "stored_flux_samples_used": bool(branches.stored_flux_samples_used[branch]),
+        "state_sha256_binary64": hashlib.sha256(seed.tobytes()).hexdigest(),
+    }
+    return seed, receipt
 
 
 def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
@@ -476,9 +526,16 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         operator = oracle_fixture.forward_operator(
             source_case, machine, oracle_state - exact_internal
         )
-        seed, _moment_image, seed_receipt = recovery._moment_seed(
-            source_case, machine, operator
-        )
+        if case_name == "diverted-jump-bearing":
+            seed, seed_receipt = _diverted_seed(source_case, machine, operator)
+            solver_route = (
+                "production axis-saddle cold seed with undamped Newton-Krylov"
+            )
+        else:
+            seed, _moment_image, seed_receipt = recovery._moment_seed(
+                source_case, machine, operator
+            )
+            solver_route = "production moment seed with undamped Newton-Krylov"
 
     with _timed_stage(
         "compile_and_first_solve",
@@ -580,7 +637,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "stage_wall_seconds": stage_timings,
         "lane": _lane(),
         "solver": {
-            "route": "production moment seed with undamped Newton-Krylov",
+            "route": solver_route,
             "newton_steps": recovery.NEWTON_STEPS,
             "gmres_iterations": recovery.KRYLOV_ITERATIONS,
             "terminal_fixed_point_residual": terminal_residual,

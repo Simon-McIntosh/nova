@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:23:51",
+  "updated": "2026-09-02T11:35:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -214,6 +214,15 @@
         }
       },
       {
+        "id": "certificate-current-pin",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "chain-factory",
         "harness": "codex",
         "role": "implement",
@@ -314,6 +323,15 @@
           "gpt-5.6-sol": "01a03f75-0f36-7192-bb27-6710c52ac3e1"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "constraint-scout",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "contour-order",
@@ -669,6 +687,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "gaa-evidence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "gate-packet",
@@ -75420,6 +75447,6 @@
       }
     ],
     "holds": [],
-    "_version": 1334
+    "_version": 1337
   }
 }

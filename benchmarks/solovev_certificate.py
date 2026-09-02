@@ -40,7 +40,7 @@ from benchmarks.split_fit_jump_field import (
 )
 from nova.equilibrium import ForwardProfile, SaddleSeedGeometry
 from nova.equilibrium.stencil_mesh import StencilMesh
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -390,9 +390,21 @@ def _norm(field: np.ndarray, mask: np.ndarray) -> dict[str, Any]:
     selected = np.abs(np.asarray(field)[mask])
     if selected.size == 0:
         raise RuntimeError("an accuracy norm has empty support")
+    finite = np.isfinite(selected)
+    if not np.all(finite):
+        return {
+            "support_cells": int(np.count_nonzero(mask)),
+            "component_count": int(selected.size),
+            "finite_component_count": int(np.count_nonzero(finite)),
+            "measurement_status": "nonfinite_terminal_error",
+            "sup": None,
+            "rms": None,
+        }
     return {
         "support_cells": int(np.count_nonzero(mask)),
         "component_count": int(selected.size),
+        "finite_component_count": int(selected.size),
+        "measurement_status": "finite",
         "sup": float(np.max(selected)),
         "rms": float(np.sqrt(np.mean(selected**2))),
     }
@@ -406,15 +418,41 @@ def _field_norms(field: np.ndarray, boundary_band: np.ndarray) -> dict[str, Any]
 
 
 def _topology(operator, state: np.ndarray) -> dict[str, Any]:
-    _masks, topology = operator.read(jnp.asarray(state))
+    try:
+        _masks, topology = operator.read(jnp.asarray(state))
+    except NoQualifiedAxisError:
+        return {
+            "read_status": "no_qualified_axis",
+            "class": None,
+            "axis_rz_m": None,
+            "x_point_rz_m": None,
+            "boundary_flux_wb": None,
+            "axis_flux_wb": None,
+            "flux_span_wb": None,
+        }
     x_point = np.asarray(topology.x_point, dtype=np.float64)
     return {
+        "read_status": "qualified_axis",
         "class": "diverted" if bool(topology.diverted) else "limited",
         "axis_rz_m": np.asarray(topology.axis, dtype=np.float64).tolist(),
         "x_point_rz_m": x_point.tolist() if np.all(np.isfinite(x_point)) else None,
         "boundary_flux_wb": float(topology.boundary_flux),
         "axis_flux_wb": float(topology.axis_flux),
         "flux_span_wb": float(topology.flux_span),
+    }
+
+
+def _analytic_diverted_topology(coefficients: np.ndarray) -> dict[str, Any]:
+    axis_flux = float(_polynomial_flux(AXIS_M[None, :], coefficients)[0])
+    boundary_flux = float(_polynomial_flux(X_POINT_M[None, :], coefficients)[0])
+    return {
+        "read_status": "analytic_stationary_point_fallback",
+        "class": "diverted",
+        "axis_rz_m": AXIS_M.tolist(),
+        "x_point_rz_m": X_POINT_M.tolist(),
+        "boundary_flux_wb": boundary_flux,
+        "axis_flux_wb": axis_flux,
+        "flux_span_wb": axis_flux - boundary_flux,
     }
 
 
@@ -438,19 +476,36 @@ def _plot(
             magnitude = np.sqrt(
                 np.mean(magnitude**2, axis=tuple(range(1, magnitude.ndim)))
             )
-        positive = magnitude[magnitude > 0.0]
+        finite = np.isfinite(magnitude)
+        positive = magnitude[finite & (magnitude > 0.0)]
         floor = float(np.min(positive)) if len(positive) else np.finfo(float).tiny
-        ceiling = max(float(np.max(magnitude)), floor * 10.0)
+        ceiling = (
+            max(float(np.max(magnitude[finite])), floor * 10.0)
+            if np.any(finite)
+            else floor * 10.0
+        )
+        color = np.where(finite, np.maximum(magnitude, floor), ceiling)
         artist = axis.scatter(
             points[:, 0],
             points[:, 1],
-            c=np.maximum(magnitude, floor),
+            c=color,
             s=10,
             cmap="magma",
             norm=LogNorm(vmin=floor, vmax=ceiling),
             linewidths=0.0,
         )
         figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
+        if not np.all(finite):
+            axis.scatter(
+                points[~finite, 0],
+                points[~finite, 1],
+                marker="x",
+                s=16,
+                c="#35b9c8",
+                linewidths=0.7,
+                label=f"non-finite: {np.count_nonzero(~finite)}",
+            )
+            axis.legend(loc="best", fontsize="x-small")
         axis.plot(boundary[:, 0], boundary[:, 1], color="#35b9c8", lw=0.9)
         axis.set_title(name)
         axis.set_xlabel("R [m]")
@@ -590,6 +645,11 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             derivative_coordinates, boundary
         ) <= (BOUNDARY_BAND_PITCHES * pitch)
         exact_topology = _topology(operator, oracle_state)
+        if (
+            case_name == "diverted-jump-bearing"
+            and exact_topology["read_status"] == "no_qualified_axis"
+        ):
+            exact_topology = _analytic_diverted_topology(exact)
         root_topology = _topology(operator, terminal_state)
         axis_reference = (
             AXIS_M
@@ -640,12 +700,21 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "route": solver_route,
             "newton_steps": recovery.NEWTON_STEPS,
             "gmres_iterations": recovery.KRYLOV_ITERATIONS,
-            "terminal_fixed_point_residual": terminal_residual,
+            "terminal_fixed_point_residual": (
+                terminal_residual if np.isfinite(terminal_residual) else None
+            ),
+            "terminal_fixed_point_residual_status": (
+                "finite" if np.isfinite(terminal_residual) else "nonfinite"
+            ),
             "qualification_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification": qualification,
             "compile_and_solve_wall_seconds": compile_and_solve_seconds,
             "compile_warm_wall_seconds": warm_solve_seconds,
-            "first_run_terminal_residual": float(compiled.residual),
+            "first_run_terminal_residual": (
+                float(compiled.residual)
+                if np.isfinite(float(compiled.residual))
+                else None
+            ),
             "seed": seed_receipt,
         },
         "norms": {
@@ -655,13 +724,23 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         },
         "analytic_flux_regions": analytic_regions,
         "geometry": {
-            "magnetic_axis_position_error_m": float(
-                np.linalg.norm(np.asarray(root_topology["axis_rz_m"]) - axis_reference)
+            "magnetic_axis_position_error_m": (
+                float(
+                    np.linalg.norm(
+                        np.asarray(root_topology["axis_rz_m"]) - axis_reference
+                    )
+                )
+                if root_topology["axis_rz_m"] is not None
+                else None
             ),
             "x_point_position_error_m": x_error,
-            "boundary_flux_error_wb": abs(
-                float(root_topology["boundary_flux_wb"])
-                - float(exact_topology["boundary_flux_wb"])
+            "boundary_flux_error_wb": (
+                abs(
+                    float(root_topology["boundary_flux_wb"])
+                    - float(exact_topology["boundary_flux_wb"])
+                )
+                if root_topology["boundary_flux_wb"] is not None
+                else None
             ),
             "root_topology": root_topology,
             "exact_topology": exact_topology,
@@ -689,8 +768,12 @@ def _validate_row(row: dict[str, Any]) -> None:
     for field in NORM_FIELDS:
         for region in NORM_REGIONS:
             measured = row["norms"][field][region]
-            if not all(measured[name] is not None for name in NORM_STATISTICS):
-                raise RuntimeError("a named accuracy norm is missing")
+            for name in NORM_STATISTICS:
+                if measured[name] is None and not (
+                    row["solver"]["qualification"] == "unqualified"
+                    and measured["measurement_status"] == "nonfinite_terminal_error"
+                ):
+                    raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]
     if not src.startswith("/nova/figures/gs-absolute-accuracy/solovev/"):
         raise RuntimeError("figure src is not project absolute")
@@ -702,7 +785,10 @@ def _fit_quantity(
     by_qualification: dict[str, Any] = {}
     for qualification in ("qualified", "unqualified"):
         selected = [
-            row for row in rows if row["solver"]["qualification"] == qualification
+            row
+            for row in rows
+            if row["solver"]["qualification"] == qualification
+            and row["norms"][field][region][statistic] is not None
         ]
         if len(selected) < 4:
             by_qualification[qualification] = {

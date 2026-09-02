@@ -149,10 +149,11 @@
     <p>The S19 coordination session (<code>s19-northstar</code>, cross-session name <code>nova-78</code>) closed
     with the sprint relaunch handed to a fresh session. Pick up with <code>/reckon-ship S19</code>.</p>
     <ul>
-      <li><strong>Live run at close:</strong> <code>r-20260902T163248970005-sdw-efit-parity-current-default</code>
-      (member <code>sdw-efit-parity-default</code>, solve-default-wiring §1 item 3, dispatched 18:33, 60-minute
-      fence). Recorded in the drain ledger as still-working. If parked, resume it with a harvest brief; if
-      complete, audit, merge its worktree tip, <code>crew complete</code>, record on the plan.</li>
+      <li><strong>No live run of this session at close.</strong> The first default-wiring node
+      (<code>sdw-efit-parity-current-default</code>, solve-default-wiring §1 item 3) was dispatched at 18:33 and
+      its worker process died silently at 18:34 after reading the parity driver, with no commits and no manifest;
+      the pointer is discarded and its clean worktree removed. The relaunch session redispatches that node with a
+      fresh roster member (a member whose session died is not reused).</li>
       <li><strong>Peer session runs (not this session's):</strong> the topology session's
       <code>r-20260902T163323361856-pta-schema4-producer-repair</code> (member <code>pta-perf</code>) regenerates
       the schema-4 bank operands; its manifest comes to the S19 coordinator for a cache-identity review before

@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="123">
 </head>
 <body>
   <main class="plan-doc">
@@ -495,6 +495,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260902T1150-cold-start-adjudication" data-who="reckon-ship-s19" data-when="2026-09-02T11:50:00+00:00">
     <div class="r-comment-body">ADJUDICATION of SLURM job 1260050 nova-efit-cold-start (rigel, 16 CPUs, 120 GB, 48 h limit, submitted 2026-09-01 08:52 from the run directory of r-20260901T062947707320-sse-efit-reproduction-completion, worktree s16-lead-review/sse-efit-reproduction-completion). The owning run was promoted at 06:55 on 2026-09-01, before the job started, and its session's follower is dead, so no harvest path exists for the job's output. At 27 h of run time it had completed the MAST stride-2 and stride-1 fixed-input cold solves (log COLD_SOLVE_COMPLETE lines; outputs under that run directory's job-output/, zero-iteration receipt already consumed by the EFIT gate floors 0.0116 and 0.0832) and was iterating the DIII-D stride-1 cold solve on CPU, the lane cpu-solve-viability closed as pathological (3.3 h per seven trips at HEAD) and the lead's build-on-H200-then-reuse-caches decision retired as a validation requirement. Verdict: cancel, preserving the log and job-output; if the DIII-D stride-1 cold solve is still wanted it reruns on the H200 under the locked pattern. The S19 coordinator's scancel was blocked by the harness permission classifier, so the cancellation itself is the lead's action.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260902T095407931691-sse-fixed-input-harvest" data-who="diiid-forward-gs" data-when="2026-09-02T10:15:19Z">
+    <div class="r-comment-body"><p>Fixed-input inversion published. MAST 22086/43 65x65 cold: EFIT&#x27;s own inputs converge to 9.678e-12 in 6 trips, saddle 0.1507 m off, no eligible boundary; Nova inference inputs stall at 9.0e-4, saddle 0.0085 m on. Convergence tracks input family, topology inversely. Stride-2 fixed-input budget-exhausted 3.603e-3, saddle 0.1135 m. Fixed-input residuals below EFIT map&#x27;s own 1.16e-2 under our operator, so the fixed point is displaced - discretisation vs transported inputs vs EFIT self-consistency slack unseparated, zero-iteration maps the lever. Proves solver sound; root-cause input to s19-northstar solver-convergence-regression. DIII-D lost to admin cancellation at 27h; relaunch a lead decision, 75791.5s+6448.1s. Checkpoints banked</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

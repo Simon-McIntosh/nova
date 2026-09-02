@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:11:11",
+  "updated": "2026-09-02T12:16:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -76055,9 +76055,145 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T095407931691-sse-fixed-input-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-fixed-input-harvest",
+        "node_definition": {
+          "done_when": "The fixed-input reproduction record is audited and published with its central inversion stated as measured, and every tension left visible rather than resolved by prose. Job 1260050 ran 1-02:57:29 on rigel and was CANCELLED during the DIII-D stride-1 solve; the durable outputs in /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/job-output are complete for everything MAST plus both machines' zero-iteration maps: zero_iteration_receipt.json and its residual-field NPZ and PNG, mast_stride_2_cold_solve_receipt.json with its stalled-state checkpoint, mast_stride_1_cold_solve_receipt.json with its state checkpoint, the stride-one carrier receipt and prescribed-response NPZ with digest, the moment-geometry preflight, and cold_start_partial_receipt.json. (1) Audit each receipt strictly: finite-or-null leaves, checkpoint digests matching sidecars, and the log milestones matching the receipts; establish and state who cancelled the job and at which phase, from sacct and the log, without guessing. (2) Publish the full record in docs/research/efit-fixed-input-reproduction.html, extending the existing page. THE MEASURED INVERSION IS THE HEADLINE: with EFIT's own p-prime, FF-prime and fitted currents, the stride-1 cold start CONVERGES to 9.678145996015393e-12 in six trips - on the same grid where Nova's own inference inputs stall at 9.0e-4 - but the converged equilibrium's selected saddle sits 0.15065971085750432 m from EFIT's X with no rms-eligible closed boundary, while Nova's inference inputs at stride 1, unconverged, put the saddle at 0.008463 m. State both pairings plainly: convergence quality tracks the input family, and topology agreement tracks it inversely. Establish from the receipt what the converged fixed-input equilibrium's achieved topology class is - if it is limited or wall-bound rather than diverted, say so, since a class flip would explain both the missing boundary and the 15 cm saddle. (3) The stride-2 fixed-input row: budget exhausted at 16 trips, residual 3.603081345806867e-3, saddle 0.11354584786549118 m, no boundary - beside the production stride-2 solve of the same arm that converges to 2.6e-16 with saddle 0.024 m. (4) Carry the zero-iteration table for both machines and both strides unchanged, and state the consistency observation: the fixed-input solves reach residuals far below the 1.16e-2 that EFIT's own map scores under our operator, so our operator's fixed point under EFIT inputs is genuinely displaced from EFIT's solution, and the record must say the open question is whether the displacement is our discretisation, the transported inputs, or slack in EFIT's own published self-consistency - naming what measurement would separate those, without asserting one. (5) State the DIII-D gap honestly: the cold starts for DIII-D were lost to the cancellation, the machine carries the shipped-inference-current qualification anyway, and relaunching is a lead decision recorded as a follow_on with the measured cost basis (the MAST stride-1 solve alone cost 75791.5 s plus the 6448.1 s carrier). (6) Commit the receipts, checkpoints, NPZ, PNG and the research page together; audit-doc passes; project-absolute figure paths; focused lane not applicable beyond the doc gate since no source module changes.",
+          "estimated_hours": null,
+          "goal": "The fixed-input reproduction published with the convergence-versus-topology inversion stated as measured and the DIII-D gap recorded as a lead decision",
+          "id": "sse-fixed-input-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T095407931691-sse-fixed-input-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/efit-fixed-input-reproduction.html",
+            "docs/figures/efit-fixed-input-reproduction"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:54:13Z",
+        "completed_at": "2026-09-02T10:15:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1266,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1266,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "751b02433e920a65d4a6fc5646ee348b56127f17",
+        "commits": [
+          "0f339920e7c424f431e431a8a3fee359982be80c"
+        ],
+        "changed_lines": {
+          "added": 4372,
+          "removed": 169,
+          "files": 16
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "corrected strict audit PASS: 6/6 receipts finite, checkpoints and carrier digests match, DIII-D truncation proven from log; 13/13 copies byte-identical; audit-doc PASS",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T095407931691-sse-fixed-input-harvest/strict-artifact-audit-authorized.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T095407931691-sse-fixed-input-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4425984,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4588017,
+            "output_tokens": 5608,
+            "output_tokens_cumulative": 24390,
+            "reasoning_output_tokens": 961,
+            "reasoning_output_tokens_cumulative": 5075
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1199,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 4799,
+              "log_age_seconds": 2942,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2971,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1346
+    "_version": 1347
   }
 }

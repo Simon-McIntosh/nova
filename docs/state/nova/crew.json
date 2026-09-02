@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:32:20",
+  "updated": "2026-09-02T19:53:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1545,7 +1545,43 @@
         "created": "2026-09-01"
       },
       {
+        "id": "sdw-compile-cache",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "sdw-efit-parity-default",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-oracle-seam",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-parity-current",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-visual-bank-seam",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -79243,6 +79279,6 @@
       }
     ],
     "holds": [],
-    "_version": 1380
+    "_version": 1384
   }
 }

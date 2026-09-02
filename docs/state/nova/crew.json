@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:34:44",
+  "updated": "2026-09-02T17:39:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78703,9 +78703,179 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T130200757161-gaa-fixture-derivative-fix",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-fixture-derivative-fix",
+        "node_definition": {
+          "done_when": "tests/test_analytic_oracle_tangent.py passes showing a finite current-moment JVP on the reduced oracle, solovev-certificate-production-route.json validates with 16 rows each carrying qualification and termination, the order fits are reported per norm for whatever cohort qualifies, tests/test_solovev_recovery_gates.py stays green, SLURM job ids, nodes, elapsed and exit markers are recorded, and git diff --stat shows no change under nova/",
+          "estimated_hours": 2.0,
+          "goal": "The production-route Solovev certificate for all sixteen rows on a fixture whose derivative is finite: the one-line fix named by docs/figures/gs-absolute-accuracy/nan-tangent-localisation.json, where in scripts/analytic_oracle_fixtures/measure.py line 118 the angular_frequency function returns an identically zero function when rotation_parameter is zero (a branch chosen on the Python-level parameter so the static limit never differentiates sqrt at zero), pinned by tests/test_analytic_oracle_tangent.py asserting a finite current-moment JVP on the reduced strong-rotation compact oracle, together with the rerun of benchmarks/solovev_certificate.py's production route (profile.solve newton_krylov with target_current, cold_seed_portfolio seeds, cached_machine) over the four cases at four resolutions, reduced and coarse rungs on rigel with 16 CPUs and a 3-hour limit so the -300 rows do not time out again, fine rungs on one H200 (one CPU, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu in the sbatch body, persistent compilation cache, launch-then-harvest), aggregated into docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json replacing the twelve-row partial, with figures, every row carrying qualification, termination, globalisation decisions, residual history, norms, amplitude history and the order fits, and tests/test_solovev_recovery_gates.py green",
+          "id": "gaa-fixture-derivative-fix",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "scripts/analytic_oracle_fixtures/measure.py",
+            "tests/test_analytic_oracle_tangent.py",
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+            "docs/figures/gs-absolute-accuracy/solovev/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "certificate-rerun",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:02:11Z",
+        "completed_at": "2026-09-02T15:38:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9353,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "2f2dbe70b35014515e730a4184d1c7b3aba4afce",
+        "commits": [
+          "8fb5a76728476ea040eef1d36dc4973051932dff"
+        ],
+        "changed_lines": {
+          "added": 18951,
+          "removed": 6219,
+          "files": 32
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch 1261468: benchmarks/solovev_certificate.py --aggregate then --validate (schema_valid, 16 rows, 2 qualified); sbatch 1261413: pytest tests/test_analytic_oracle_tangent.py (1 passed) and tests/test_solovev_recovery_gates.py (8 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/aggregate-1261468.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06236-7a54-7133-8afc-480001e4080b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 25932544,
+            "cached_input_tokens_cumulative": 25932544,
+            "input_tokens": 26247706,
+            "input_tokens_cumulative": 26247706,
+            "output_tokens": 40498,
+            "output_tokens_cumulative": 40498,
+            "reasoning_output_tokens": 13657,
+            "reasoning_output_tokens_cumulative": 13657
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6603,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 10203,
+              "log_age_seconds": 7357,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 7400,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1777,
+              "log_age_seconds": 387,
+              "log_fresh": true,
+              "manifest_commits": [
+                "790240576705da86bc8d69e71a0e64638f66143b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T123221151752-pta-parity-harness-repair --gate <verdict> --commit 790240576705da86bc8d69e71a0e64638f66143b",
+              "node": "pta-parity-harness-repair",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T123221151752-pta-parity-harness-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 417,
+              "terminal_at": "2026-09-02T12:55:11Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1375
+    "_version": 1376
   }
 }

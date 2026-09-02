@@ -521,7 +521,14 @@ def compile_receipt(
         int(raw["allocation"]["job_id"]),
         float(raw["execution_contract"]["capture_started_epoch"]),
     )
-    dominant = max(per_trip, key=lambda row: row["wall_seconds"])
+    all_callbacks = raw["telemetry_callback_census"]["events"]
+    diverted_completion = float(per_trip[-1]["cumulative_wall_seconds"])
+    final_callback = max(
+        float(event["elapsed_since_solve_start_seconds"]) for event in all_callbacks
+    )
+    limited_continuation = final_callback - diverted_completion
+    post_callback_completion = head_wall - final_callback
+    post_diverted_tail = head_wall - diverted_completion
     classification, sentence = _verdict(head_wall)
     receipt = {
         "receipt": "MAST 22086/43 CPU solve viability discriminator",
@@ -553,13 +560,18 @@ def compile_receipt(
         },
         "dominant_cpu_cost": {
             "name": (
-                f"active-set trip {dominant['trip_one_based']} including its "
-                "bank-portfolio Newton-Krylov work"
+                "post-diverted portfolio tail: limited-branch continuation plus "
+                "result materialization"
             ),
-            "trip_one_based": dominant["trip_one_based"],
-            "wall_seconds": dominant["wall_seconds"],
-            "share_of_solve_wall": dominant["wall_seconds"] / head_wall,
+            "wall_seconds": post_diverted_tail,
+            "share_of_solve_wall": post_diverted_tail / head_wall,
             "measurement": "ordered active-set callback timestamps",
+            "components": {
+                "limited_branch_callback_continuation_seconds": limited_continuation,
+                "post_final_callback_completion_seconds": post_callback_completion,
+                "selected_diverted_completion_seconds": diverted_completion,
+                "final_portfolio_callback_seconds": final_callback,
+            },
         },
         "verdict": {
             "classification": classification,
@@ -616,6 +628,14 @@ def check(receipt: dict[str, Any], *, require_figure: bool = True) -> None:
         raise RuntimeError("HEAD capture lacks sstat process utilisation samples")
     if not receipt["dominant_cpu_cost"]["name"]:
         raise RuntimeError("dominant CPU cost is unnamed")
+    dominant = receipt["dominant_cpu_cost"]
+    components = dominant["components"]
+    component_sum = (
+        components["limited_branch_callback_continuation_seconds"]
+        + components["post_final_callback_completion_seconds"]
+    )
+    if not math.isclose(component_sum, dominant["wall_seconds"], abs_tol=1.0e-9):
+        raise RuntimeError("dominant CPU tail components do not sum to its wall time")
     if not receipt["verdict"]["sentence"]:
         raise RuntimeError("CPU-pathology verdict is absent")
     if receipt["execution_contract"]["assigned_worktree_nova_diff_stat"]:

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:04:43",
+  "updated": "2026-09-02T09:05:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1061,6 +1061,15 @@
         "role": "implement",
         "session_id": "01a03774-b58d-7963-b477-2442c3949fa9",
         "created": "2026-08-25"
+      },
+      {
+        "id": "oracle-fixture-perf",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "packaging",
@@ -74804,6 +74813,6 @@
       }
     ],
     "holds": [],
-    "_version": 1325
+    "_version": 1326
   }
 }

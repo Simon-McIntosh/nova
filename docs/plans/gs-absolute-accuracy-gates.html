@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e">
 <meta name="plan-impl" content="0.33">
@@ -67,6 +67,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260901T195519540142-gaa-solovev-certificate" data-who="solovev-certificate" data-when="2026-09-01T20:08:38Z">
     <div class="r-comment-body"><p>parked on a pre-existing main failure: the default-lane Solovev recovery gate raises 'topology connectivity requires a tensor-product grid' at topology.py:392 since 9ccd8165 (26 Aug); certificate driver landed, no receipt produced; redispatch the node once the plasma-cell topology-read commit lands</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260902T0910-oracle-lane-cost" data-who="reckon-ship-s19" data-when="2026-09-02T09:10:00+00:00">
+    <div class="r-comment-body">ORACLE LANE COST, attributed (topology-authority session's phase table, rigel jobs 1261064/1261065, receipts under ~/.config/reckon/crew/reports/nova/pta-build-machine-cost/): the reduced-oracle default-lane gate misses its 60 s bound (77 to 87 s on rigel) because of THIS plan's fixture, not the carrier read. build_machine total 58.18 s, of which scripts/analytic_oracle_fixtures/measure.py::_flux_blocks calling nova/biot/polygonanalytic.py::polygon_analytic_flux_moments once per source polygon costs 53.99 s (92.8%, three serial calls); hex_ring_slots 0.014 s over 89 calls; tessellation 1.8 ms; Delaunay 0.9 ms; remainder 4.17 s; plus 16.3 s exact-state preparation and 4.0 s map. The topology read itself is 6 ms per call and forcing the polish off saves 7.5 s. The earlier note blaming the carrier read is withdrawn. The registered 35 s was measured on a faster login node, and the pre-change parent cannot build this fixture at all, so there is no like-for-like history; the gate's bound is node-sensitive and the fixture's Biot assembly is serial. Folded node: batch or vectorise the fixture's polygon flux-moment assembly across sources (or cache the fixture's Biot blocks the way the reference machine caches its operator) so the cold reduced oracle builds under 60 s on rigel, roundoff bounds unchanged; fenced to scripts/analytic_oracle_fixtures/measure.py and the polygon-analytic entry point, test and bound untouched.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T195533190820-gaa-efit-reproduction" data-who="efit-reproduction" data-when="2026-09-01T21:21:50Z">
     <div class="r-comment-body"><p>diagnostic only, gate receipt not produced: the 47-minute silent stall was a cold 95x95 response rebuild after the persisted 33x33 carrier was rejected by a forced native-grid override; with the override removed one MAST frame costs 382 s compile-warm wall (345.5 s cold JIT, 20 s first solve, 16 s case construction, 12 ms carrier load); MAST 21978/35 pure solve-label RMS 0.00341 below the 0.0116 floor but converged=false so the row fails; eleven-frame run redispatched</p></div>

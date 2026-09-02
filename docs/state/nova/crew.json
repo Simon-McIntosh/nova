@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:19:18",
+  "updated": "2026-09-02T09:26:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -75011,9 +75011,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T071950085019-scr-stagnation-fixture-fix",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-stagnation-fixture-fix",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/test_active_set_stagnation.py passes in full (command, exit status and log path in the manifest), the seven referee node IDs pass unmodified, git show --stat touches only tests/test_active_set_stagnation.py, and the diff is the single keyword argument",
+          "estimated_hours": 0.3,
+          "goal": "The one-line repair of the stale stagnation fixture named by docs/figures/solver-convergence-regression/stagnation-exit-test-triage.json: pass stop_on_active_set_settlement=False in _stagnating_solve's newton_krylov call in tests/test_active_set_stagnation.py so the fixture isolates consecutive-residual stagnation under the settled-exit policy of c8cd79bf, with tests/test_active_set_stagnation.py run in full on CPU and the seven referee tests named in docs/figures/solver-trip-orchestration/settlement-histogram.json run unmodified as the paired check, no other file touched",
+          "id": "scr-stagnation-fixture-fix",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T071950085019-scr-stagnation-fixture-fix/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "tests/test_active_set_stagnation.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "scr-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:19:56Z",
+        "completed_at": "2026-09-02T07:26:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 364,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 364,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "63fcdc5f7a068b830a8637e0e9c3ac2a1e26f66e",
+        "commits": [
+          "9edc66862d82e49708633a1d37dced6b7ecc7911"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/test_active_set_stagnation.py (exit 0) plus the seven referee node IDs (exit 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T071950085019-scr-stagnation-fixture-fix/logs/active-set-stagnation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T071950085019-scr-stagnation-fixture-fix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2475648,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2662733,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6894,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2389
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_active_set_stagnation.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1328
+    "_version": 1329
   }
 }

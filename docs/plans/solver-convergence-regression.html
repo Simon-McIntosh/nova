@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="4e0d9588,0e79227d,1926a170,9e7c76b4">
 <meta name="plan-artifacts" content="docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/true-pin-reproduction.png,benchmarks/bank_revision_reproduction.py,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/root-cause.png,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/null-polish-attribution.png">
@@ -111,6 +111,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T070110541689-scr-stagnation-test-triage" data-who="scr-mechanism" data-when="2026-09-02T07:19:05Z">
     <div class="r-comment-body"><p>loop-side, stale fixture: fails from c8cd79bf (mask qualified settled trips) because the no-promotion synthetic case stops on settlement after trip 1; passing stop_on_active_set_settlement=False restores 2 trips and ACTIVE_SET_STAGNATED in eager and JIT; not a carrier-read regression</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T071950085019-scr-stagnation-fixture-fix" data-who="scr-mechanism" data-when="2026-09-02T07:26:00Z">
+    <div class="r-comment-body"><p>stale stagnation fixture repaired with the single keyword argument stop_on_active_set_settlement=False; tests/test_active_set_stagnation.py 2 passed, seven referee node IDs green (9 cases)</p></div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

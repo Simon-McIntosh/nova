@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="solver-trip-orchestration">
 <meta name="plan-title" content="Solver trip orchestration — collapsing the per-trip quantum toward 1 ms/slice">
 <meta name="plan-summary" content="Attack the 95.9% Newton/Krylov orchestration share of H200 solve time: compile cadence, the per-trip quantum, and trip-count cut-through.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-capability-version" content="1.0">
@@ -21,8 +21,8 @@
 <title>Solver trip orchestration | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="24">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="25">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="5b04815a,4c615c03,b0bf0575,09754128,9a6caa4d,365aaf81,759be066,5d7e93e6">
 <meta name="plan-artifacts" content="docs/evidence/archive/solver-trip-orchestration-landed.html,docs/figures/solver-trip-orchestration/compile-cadence.json,docs/figures/solver-trip-orchestration/cache-wiring.json,docs/figures/solver-trip-orchestration/trip-quantum.json,docs/figures/solver-trip-orchestration/settlement-histogram.json,docs/figures/solver-trip-orchestration/settled-exit-throughput.json,docs/figures/solver-trip-orchestration/suffix-census.json">
@@ -63,19 +63,25 @@
     <p class="r-dec-q">Adopt a settled-early trip exit (masked no-op continuation) once §3&#x27;s histogram and test surface are banked?</p>
     <p class="r-dec-rat">Lead decision 2026-09-01 on the full census: adopt the settled-early trip exit as a masked no-op continuation, gated on the seven named preservation tests (own-mask acceptance, best-iterate retention, paired bit-identity where the mask does not move) staying green plus a paired before/after bank comparison. Basis: MAST settles in mean 2.0 trips and DIII-D in 4.2 of 16, projecting 0.22-0.47 ms/slice - through the 1 ms target on both machines - and every post-settlement trip is provably a no-op today, so the exit removes work that changes nothing. The fixed-shorter-cap alternative was rejected as leaving 2-4x on the table and risking the 4-trip tail; deferral was rejected because the histogram shape is robust to the open drift question, whose arms are fenced.</p>
     </div>
-<div class="r-dec" data-key="residual-progress-exit-window" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="residual-progress-exit-window" data-choice="strict-no-op-exit-only" data-by="Simon McIntosh" data-when="2026-09-02T05:53:20+00:00">
     <p class="r-dec-q">residual-progress-exit-window</p>
     <p class="r-dec-ctx">The suffix census (docs/figures/solver-trip-orchestration/suffix-census.json) gives the trade: the landed strict exit is semantically free and projects 1.163 ms/slice (1.504x) on the observable bank mix (DIII-D 5/5 qualify at trips 3-6, observable MAST arms keep improving, declared-bank lower bound 29.4%); a causal residual-progress window projects 0.915 ms/slice observed (through the 1 ms target) but tolerates an explicit state/residual error and requires paired semantic validation. Mask-only exit is inadmissible. The width-1024 replicated-state measurement cannot exhibit exit incidence and does not bear on this choice.</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-02 07:35: keep the landed semantics-free strict no-op exit as the only exit policy - 1.163 ms/slice projected (1.504x) on the observable bank mix, bit-identical wherever the mask settles, zero tolerated error. The causal 1% residual-progress window (0.915 ms/slice projected) is rejected because it tolerates an explicit state or residual error on marginal arms; the remaining distance to the 1 ms target is taken through the per-trip quantum restructuring on millisecond-converged-solve instead. Deferral was rejected because the exit and the acceptance question on marginal arms are decoupled by the strict semantics.</p>
     </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sto-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-trip-orchestration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sto-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship solver-trip-orchestration" data-resolved-at="2026-09-02T05:53:20+00:00" data-resolved-by="reckon-ship-s19">
     <h4 class="r-fu-title">Run the three orchestration investigations</h4>
     <div class="r-fu-body">Measure the compile cadence and its decomposition (§1), attribute the per-trip orchestration quantum to named sub-stages (§2), and mine the committed bank telemetry for the active-set settlement histogram with a projected mean-trip ms/slice (§3). Each section lands a receipt with numbers; the settled-exit policy itself stays an open lead decision fed by §3.</div>
     <pre class="r-fu-prompt">/reckon-ship solver-trip-orchestration</pre>
+    <p class="r-fu-outcome">All three investigations landed with receipts (compile cadence 383.5 s cold / 63.7 s cache-warm with the persistent cache wired; per-trip quantum 25.0 ms = 12.61 + 12.34 + 0.048; settlement census MAST 2.0 and DIII-D 4.2 trips) plus the settled-exit implementation (bit-identical, out-of-band at width 1024) and the qualified-suffix census; the residual-progress-exit-window decision is locked strict-no-op-exit-only by the lead on 2026-09-02; evidence docs/evidence/archive/solver-trip-orchestration-landed.html. Continuation on millisecond-converged-solve section 1.</p>
+    </article>
+<article class="r-fu" data-id="f-sto-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship millisecond-converged-solve §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: the strict exit&#x27;s measured incidence on real bank mixes is owned by millisecond-converged-solve section 1</h4>
+    <div class="r-fu-body">Foreign-owner pointer, no work here: with strict-no-op-exit-only locked, millisecond-converged-solve section 1 measures the exit incidence and ms/slice on the real MAST and DIII-D bank member mixes (the width-1024 replicated measurement cannot exhibit it) and section 2 restructures the per-trip quantum.</div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §1</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

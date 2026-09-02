@@ -1,5 +1,8 @@
 """Checks for census-owned null selection with split-spline polishing."""
 
+import json
+from pathlib import Path
+
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -169,10 +172,12 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
         "seed_stationary",
         "converged",  # The exposed convergence qualification is acceptance.
         "fit_converged",
+        "representation_adequate",
+        "value_replaced",
     )
     dimensional_exclusions = {
         "position_rz": "attempted positions carry coordinate units",
-        "value": "attempted values carry flux units",
+        "value": "the map-owned selected values carry flux units",
         "gradient_norm": "gradient norms carry flux per coordinate units",
         "gradient": "gradient components carry flux per coordinate units",
         "hessian": "Hessian entries carry flux per coordinate squared units",
@@ -184,6 +189,7 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
         "census_position_rz": "census positions carry coordinate units",
         "selected_position_rz": "selected positions carry coordinate units",
         "selected_value": "selected values carry flux units",
+        "fit_value": "the split fit's diagnostic value carries flux units",
     }
     compared_keys = set(numerical_receipts) | set(exact_receipts)
     assert compared_keys.isdisjoint(dimensional_exclusions)
@@ -289,6 +295,109 @@ def test_sample_coincidence_does_not_imply_stationarity():
         np.testing.assert_array_equal(
             np.asarray(selected_saddle), np.asarray(sampled_saddle)
         )
+
+
+def test_accepted_unmoved_polish_preserves_census_value_bits():
+    radial = jnp.linspace(-1.0, 1.0, 33)
+    vertical = jnp.linspace(-1.0, 1.0, 33)
+    radial_grid, vertical_grid = jnp.meshgrid(radial, vertical)
+    census_value = jnp.asarray(0.37)
+    values = census_value + radial_grid**2 + vertical_grid**2
+    selected_extremum = jnp.asarray((0.0, 0.0, census_value, -1.0))
+    absent_saddle = jnp.full_like(selected_extremum, jnp.nan)
+
+    extremum, _saddle, receipt = polish_census_stationary_points(
+        values,
+        radial,
+        vertical,
+        jnp.asarray(1.0),
+        jnp.asarray(-1.0),
+        selected_extremum,
+        absent_saddle,
+    )
+
+    assert bool(receipt["converged"][0])
+    assert bool(receipt["seed_stationary"][0])
+    assert int(receipt["iteration_count"][0]) == 0
+    np.testing.assert_array_equal(
+        np.asarray(receipt["selected_position_rz"][0]),
+        np.asarray(selected_extremum[:2]),
+    )
+    assert np.asarray(extremum[2]).tobytes() == np.asarray(census_value).tobytes()
+    assert not bool(receipt["value_replaced"][0])
+
+
+def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation():
+    """An inadequate fit cannot replace the published MAST map flux.
+
+    Production evidence comes from
+    ``docs/figures/solver-convergence-regression/null-polish-attribution.json``;
+    the selected saddle is corroborated by the 22086/43 pure row in
+    ``docs/figures/topology-visual-corroboration/mast-topology-operands.npz``.
+    """
+    root = Path(__file__).parents[1]
+    evidence_path = (
+        root / "docs/figures/solver-convergence-regression/null-polish-attribution.json"
+    )
+    operand_path = (
+        root / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
+    )
+    evidence = json.loads(evidence_path.read_text())
+    slot = evidence["revisions"]["main_head"]["arms"]["22086/43 pure"]["solve"][
+        "topology_qualification_polish_receipt"
+    ]["slots"]["x"]
+    with np.load(operand_path, allow_pickle=False) as operands:
+        bank_saddle = operands["row_10_selected_x"][0]
+        operand_coordinate = operands["row_10_cell_rz"]
+
+    seed_position = jnp.asarray(slot["seed_position_rz_m"])
+    census_value = jnp.asarray(slot["seed_value_wb"])
+    published_fit_value = float(slot["polished_value_wb"])
+    assert np.linalg.norm(np.asarray(seed_position) - bank_saddle) < 3.0e-3
+
+    radial = jnp.asarray(np.unique(operand_coordinate[:, 0]))
+    vertical = jnp.asarray(np.unique(operand_coordinate[:, 1]))
+    radial_grid, vertical_grid = jnp.meshgrid(radial, vertical)
+    local_r = radial_grid - seed_position[0]
+    local_z = vertical_grid - seed_position[1]
+    checkerboard = (-1.0) ** jnp.indices(radial_grid.shape).sum(axis=0)
+    values = published_fit_value + 0.08 * (local_r**2 - local_z**2)
+    values = values + 0.06 * checkerboard
+    selected_saddle = jnp.r_[seed_position, census_value, 0.0]
+    absent_extremum = jnp.full_like(selected_saddle, jnp.nan)
+
+    _extremum, saddle, receipt = polish_census_stationary_points(
+        values,
+        radial,
+        vertical,
+        census_value,
+        jnp.asarray(-1.0),
+        absent_extremum,
+        selected_saddle,
+    )
+    print(
+        "mast_value_authority_receipt "
+        f"census_value={float(saddle[2]):.17g} "
+        f"fit_value={float(receipt['fit_value'][1]):.17g} "
+        "sample_rms_residual="
+        f"{float(receipt['sample_rms_residual'][1]):.17g} "
+        f"representation_adequate={bool(receipt['representation_adequate'][1])}"
+    )
+
+    assert bool(receipt["converged"][1])
+    assert bool(receipt["seed_stationary"][1])
+    np.testing.assert_array_equal(np.asarray(saddle[:2]), np.asarray(seed_position))
+    assert float(saddle[2]) == pytest.approx(-0.12271595465336929, abs=1.0e-9)
+    np.testing.assert_array_equal(
+        np.asarray(receipt["value"]), np.asarray(receipt["selected_value"])
+    )
+    assert float(receipt["fit_value"][1]) == pytest.approx(-0.0889, abs=2.0e-3)
+    assert float(receipt["value"][1]) != float(receipt["fit_value"][1])
+    assert float(receipt["sample_rms_residual"][1]) > abs(
+        float(receipt["fit_value"][1] - census_value)
+    )
+    assert not bool(receipt["representation_adequate"][1])
+    assert not bool(receipt["value_replaced"][1])
 
 
 def test_failed_fit_retains_the_census_rows_and_reports_failure():

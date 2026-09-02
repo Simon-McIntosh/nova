@@ -545,7 +545,7 @@ def fit_split_spline(
         level_patch,
         condition_number,
         fit_executed,
-        sample_count,
+        jnp.where(fit_executed, sample_count, 0).astype(jnp.int32),
         jnp.where(fit_executed, 1, 0).astype(jnp.int32),
         solve_residual,
         solve_converged,

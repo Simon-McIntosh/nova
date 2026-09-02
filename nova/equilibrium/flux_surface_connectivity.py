@@ -917,6 +917,72 @@ def _minimum_cell_pitch(
     return jnp.where(jnp.isfinite(pitch), pitch, 1.0)
 
 
+def _census_local_values(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    sample_valid: jnp.ndarray,
+    census_position: jnp.ndarray,
+    evaluation_position: jnp.ndarray,
+) -> jnp.ndarray:
+    """Evaluate the census's local quadratic at two selected positions.
+
+    ``Null2D`` assigns each candidate to a centre-first, six-neighbour cluster
+    and fits a quadratic in locally normalised coordinates. Recovering the
+    same six axial offsets around that centre reproduce the interpolation on
+    the raster and on the carrier's half-offset embedding. An unchanged position
+    is replaced by the original census value by the caller, preserving its
+    exact bits.
+    """
+    radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
+    coordinates = jnp.stack((radial_grid, vertical_grid), axis=-1).reshape((-1, 2))
+    flattened_values = values.reshape(-1)
+    flattened_valid = sample_valid.reshape(-1)
+    row_offset = jnp.asarray((0, 0, -1, -1, 0, 1, 1), dtype=jnp.int32)
+    column_offset = jnp.asarray((0, -1, 0, 1, 1, 0, -1), dtype=jnp.int32)
+
+    def evaluate(census_rz, evaluation_rz):
+        centre_distance = jnp.sum((coordinates - census_rz) ** 2, axis=-1)
+        centre_index = jnp.argmin(jnp.where(flattened_valid, centre_distance, jnp.inf))
+        centre = coordinates[centre_index]
+        centre_row = centre_index // values.shape[1]
+        centre_column = centre_index % values.shape[1]
+        row = jnp.clip(centre_row + row_offset, 0, values.shape[0] - 1)
+        column = jnp.clip(centre_column + column_offset, 0, values.shape[1] - 1)
+        indices = row * values.shape[1] + column
+        indices = jnp.where(flattened_valid[indices], indices, centre_index)
+        cluster = coordinates[indices]
+        offset = cluster - centre
+        scale = jnp.max(jnp.abs(offset), axis=0)
+        scale = jnp.where(scale > 0.0, scale, 1.0)
+        local = offset / scale
+        design = jnp.column_stack(
+            (
+                local[:, 0] ** 2,
+                local[:, 1] ** 2,
+                local[:, 0],
+                local[:, 1],
+                local[:, 0] * local[:, 1],
+                jnp.ones(7, dtype=values.dtype),
+            )
+        )
+        coefficient = jnp.linalg.lstsq(design, flattened_values[indices])[0]
+        query = (evaluation_rz - centre) / scale
+        basis = jnp.stack(
+            (
+                query[0] ** 2,
+                query[1] ** 2,
+                query[0],
+                query[1],
+                query[0] * query[1],
+                jnp.asarray(1.0, dtype=values.dtype),
+            )
+        )
+        return basis @ coefficient
+
+    return jax.vmap(evaluate)(census_position, evaluation_position)
+
+
 @jax.jit
 def polish_census_stationary_points(
     values: jnp.ndarray,
@@ -943,18 +1009,20 @@ def polish_census_stationary_points(
     solve, so its columns have the same units as the interior columns.  The
     representation floor
     treats the fit's sample RMS residual as unresolved field variation across
-    one cell: ``(rms / field_range) / (cell_pitch / span)``.  Both floors are
-    is separately invariant to coordinate and field units.  The complete
+    one cell: ``(rms / field_range) / (cell_pitch / span)``. The representation
+    floor is separately invariant to coordinate and field units. The complete
     scaled-coordinate construction makes the roundoff floor invariant as well,
     and the active coefficient count is evaluated separately at each slot.
 
     A seed already below that fitted-gradient floor takes zero active updates.
-    Every other valid seed receives exactly one bounded Newton update.  Flux
-    value consistency has its own dimensionless floor: the larger of the
+    Every other valid seed receives exactly one bounded Newton update. Fit-value
+    consistency has its own dimensionless floor: the larger of the
     normalized sample RMS and ``n_active * condition_number * eps``.  It is not
     divided by cell pitch because it bounds a value rather than a gradient.
     Thus gradient stationarity cannot admit a representation that materially
-    changes the selected boundary level.  A fit or result
+    disagrees with the census interpolation. An accepted fit changes only the
+    position: its selected value is evaluated by the census's local quadratic,
+    while the split fit's proposed value remains diagnostic. A fit or result
     outside the finite, Hessian-type, stationarity, and value-consistency gates
     retains the complete census row while preserving the attempted receipt.
     """
@@ -1092,6 +1160,8 @@ def polish_census_stationary_points(
     )
     stationarity_tolerance = jnp.maximum(roundoff_floor, representation_floor)
     normalized_value_change = jnp.abs(attempted["value"] - selected[:, 2]) / field_scale
+    normalized_sample_rms = spline.sample_rms_residual / field_scale
+    representation_adequate = normalized_sample_rms <= normalized_value_change
     value_consistency_tolerance = jnp.maximum(
         spline.sample_rms_residual / field_scale,
         active_count.astype(values.dtype)
@@ -1111,8 +1181,18 @@ def polish_census_stationary_points(
         & (normalized_gradient <= stationarity_tolerance)
         & (normalized_value_change <= value_consistency_tolerance)
     )
+    census_value = _census_local_values(
+        values,
+        radial,
+        vertical,
+        sample_valid,
+        selected[:, :2],
+        attempted["position_rz"],
+    )
+    position_unchanged = jnp.all(attempted["position_rz"] == selected[:, :2], axis=-1)
+    census_value = jnp.where(position_unchanged, selected[:, 2], census_value)
     polished = selected.at[:, :2].set(attempted["position_rz"])
-    polished = polished.at[:, 2].set(attempted["value"])
+    polished = polished.at[:, 2].set(census_value)
     retained = jnp.where(converged[:, None], polished, selected)
     receipt = attempted | {
         "converged": converged,
@@ -1135,8 +1215,12 @@ def polish_census_stationary_points(
         "normalized_value_change": normalized_value_change,
         "value_consistency_tolerance": value_consistency_tolerance,
         "seed_stationary": seed_stationary,
+        "fit_value": attempted["value"],
+        "representation_adequate": representation_adequate,
+        "value_replaced": jnp.zeros(valid.shape, dtype=bool),
         "census_position_rz": selected[:, :2],
         "selected_position_rz": retained[:, :2],
+        "value": retained[:, 2],
         "selected_value": retained[:, 2],
     }
     return retained[0], retained[1], receipt

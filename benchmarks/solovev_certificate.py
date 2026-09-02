@@ -2003,17 +2003,38 @@ def _aggregate_partial(
     }
     production_nonfinite = []
     near_root_finite = []
+    production_first_nonfinite = []
+    near_root_first_nonfinite = []
+    admissible_amplitudes = 0
     for case_name, diagnostic in diagnostics.items():
         arms = {arm["name"]: arm for arm in diagnostic["arms"]}
         if not arms["production_moment_seed"]["fixed_point_linear_action_finite"]:
             production_nonfinite.append(case_name)
+        production_first_nonfinite.append(
+            arms["production_moment_seed"]["first_nonfinite_public_intermediate"][
+                "intermediate"
+            ]
+        )
         if arms["closed_form_near_root_seed"]["fixed_point_linear_action_finite"]:
             near_root_finite.append(case_name)
+        near_root_first_nonfinite.append(
+            arms["closed_form_near_root_seed"]["first_nonfinite_public_intermediate"][
+                "intermediate"
+            ]
+        )
+        admissible_amplitudes += sum(
+            arm["lambda_amplitude_admissibility"]["admissible"] for arm in arms.values()
+        )
+    production_first = sorted(set(production_first_nonfinite))
+    near_root_first = sorted(set(near_root_first_nonfinite))
     headline = (
-        f"The production moment seed has a non-finite first (I-J)v action in "
-        f"{len(production_nonfinite)} of {len(CASE_NAMES)} reduced cases; the "
-        f"closed-form near-root control has a finite action in "
-        f"{len(near_root_finite)} of {len(CASE_NAMES)} cases."
+        f"The first (I-J)v action is non-finite in "
+        f"{len(production_nonfinite)} of {len(CASE_NAMES)} production moment seeds "
+        f"and {len(CASE_NAMES) - len(near_root_finite)} of {len(CASE_NAMES)} "
+        f"closed-form controls; all {admissible_amplitudes} lambda amplitudes are "
+        f"admissible, and the earliest exposed non-finite JVP is "
+        f"{', '.join(production_first)} for the production seeds and "
+        f"{', '.join(near_root_first)} for the controls."
     )
     receipt = {
         "schema": {
@@ -2072,6 +2093,9 @@ def _aggregate_partial(
             "full_ladder_deferred": True,
             "production_nonfinite_action_cases": production_nonfinite,
             "near_root_finite_action_cases": near_root_finite,
+            "production_first_nonfinite_intermediates": production_first,
+            "near_root_first_nonfinite_intermediates": near_root_first,
+            "admissible_lambda_amplitude_count": admissible_amplitudes,
         },
     }
     _validate_partial(receipt)

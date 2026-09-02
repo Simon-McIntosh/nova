@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:21:48",
+  "updated": "2026-09-02T06:44:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73009,9 +73009,104 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T041731765625-pta-topology-read-final-lanes",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-topology-read-final-lanes",
+        "node_definition": {
+          "done_when": "Five logs exist in /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-final-lanes (create it): test_equilibrium_forward_reference_gpu.log produced from the worktree root WITHOUT JAX_PLATFORMS set by UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_equilibrium_forward_reference.py -k 'not test_persistent_fixture_machine_cache_builds_once' (28 selected; record the passed and failed counts and the names of failing tests; this lane is expected to carry up to seven known solver-convergence failures and its EXIT may be 1); and test_hex_flood_geometries.log, test_hex_flood_snowflake.log, test_hex_flood_coil_nulls.log, test_rim_current_scatter.log each produced by JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on exactly that one file, each ending with a summary line and EXIT=0; every log has stdout and stderr redirected into it and the line EXIT= plus the exit status appended; the manifest lists the five log paths with pass and fail counts, names every failing GPU test, and reports jax.default_backend() from a one-line python -c check before the GPU lane; no source or test file is modified and no commit is made",
+          "estimated_hours": 1.0,
+          "goal": "Produce the remaining lane evidence for the carrier topology read at commit 696f437a as separate fresh-process lanes with one log per file into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-final-lanes",
+          "id": "pta-topology-read-final-lanes",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T041731765625-pta-topology-read-final-lanes/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-final-lanes"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T04:17:36Z",
+        "completed_at": "2026-09-02T04:43:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1553,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1553,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "696f437adf63c66e245c2274de607b13abe23615",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T041731765625-pta-topology-read-final-lanes/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8185856,
+            "cached_input_tokens_cumulative": 11552000,
+            "input_tokens": 8046298,
+            "input_tokens_cumulative": 11784428,
+            "output_tokens": 782,
+            "output_tokens_cumulative": 11111,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1945
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane node",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_equilibrium_forward_reference.py",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1304
+    "_version": 1305
   }
 }

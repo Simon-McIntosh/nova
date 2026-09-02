@@ -81,6 +81,54 @@ REUSE_MAP_ROWS = (
     "scripts/analytic_oracle_fixtures/reduced_oracle.py::measure_reduced_oracle",
     "tests/test_solovev_recovery_gates.py::LOCKED_RECOVERY_BOUNDS",
 )
+RECOVERY_GATE_LANE_PERFORMANCE = {
+    "classification": "lane-performance qualification, not certificate accuracy",
+    "registered_wall_bound_seconds": 60.0,
+    "last_green_wall_seconds_approx": 35.0,
+    "path_change_since_last_green": {
+        "revision": "32f16b3b",
+        "change": "restored the hex-carrier topology read",
+        "only_change_on_reduced_oracle_read_path": True,
+    },
+    "attempts": [
+        {
+            "slurm_job_id": "1261036",
+            "node": "98dci4-clu-2009",
+            "cpu_count": 1,
+            "threaded_settings": {"enabled": False},
+            "wall_seconds": 87.43643704202259,
+            "wall_bound_seconds": 60.0,
+            "ratio_to_last_green": 2.4981839154863595,
+            "numerical_forcing_and_fixed_point_assertions": "passed",
+            "timing_assertion": "failed",
+        },
+        {
+            "slurm_job_id": "1261037",
+            "node": "98dci4-clu-2009",
+            "cpu_count": 16,
+            "threaded_settings": {
+                "enabled": True,
+                "xla_flags": (
+                    "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+                ),
+                "omp_num_threads": 16,
+                "openblas_num_threads": 16,
+                "mkl_num_threads": 16,
+                "numexpr_num_threads": 16,
+            },
+            "wall_seconds": 77.55223163502524,
+            "wall_bound_seconds": 60.0,
+            "ratio_to_last_green": 2.2157780467150067,
+            "numerical_forcing_and_fixed_point_assertions": "passed",
+            "timing_assertion": "failed",
+        },
+    ],
+    "finding": (
+        "the restored reduced-oracle topology read is 2.2 to 2.5 times slower "
+        "than the approximately 35-second last-green lane"
+    ),
+    "disposition": "performance regression handed to the topology-read owner",
+}
 
 
 @contextmanager
@@ -669,6 +717,7 @@ def _registry_reproduction() -> dict[str, Any]:
             row["reduced_measurement_within_bound"] is not False
             for row in rows.values()
         ),
+        "lane_performance_qualification": RECOVERY_GATE_LANE_PERFORMANCE,
         "entries": rows,
     }
 

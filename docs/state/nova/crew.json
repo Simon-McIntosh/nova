@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:32:19",
+  "updated": "2026-09-02T14:58:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -49,6 +49,15 @@
         "role": "implement",
         "session_id": "01a03215-6d8c-73b2-8575-c1290ebf8ee8",
         "created": "2026-08-24"
+      },
+      {
+        "id": "bank-rebaseline",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "basin-branches",
@@ -222,6 +231,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a06179-9aee-77c1-913a-363f8eb00188"
         },
+        "created": "2026-09-02"
+      },
+      {
+        "id": "certificate-rerun",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-02"
       },
       {
@@ -691,6 +709,33 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "fsa-receipt-topology",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "fsa-traced-current",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "fsa-warm-start",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "gaa-evidence",
@@ -77142,9 +77187,286 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T123307804677-gaa-nan-tangent-localisation",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-nan-tangent-localisation",
+        "node_definition": {
+          "done_when": "nan-tangent-localisation.json names the first non-finite tangent operation with file and line, the class it falls in, plasma cell 0's geometry, the finite or non-finite verdict of the same JVP on the MAST carrier, the proposed fix in one sentence, and the SLURM job id, node and exit marker, with git diff --stat showing no change under nova/",
+          "estimated_hours": 1.5,
+          "goal": "A localisation receipt docs/figures/gs-absolute-accuracy/nan-tangent-localisation.json (driver benchmarks/nan_tangent_localisation.py) for the finding in solovev-certificate-production-route.json that the frozen-mask (I-J)v linear action is non-finite in all eight arms while every primal residual is finite, first appearing as unscaled_cell_current at plasma-cell index 0 in the JVP of ForwardFluxOperator.cell_current_moments before amplitude normalisation: on the strong-rotation compact static case at the reduced rung (cached machine, rigel CPU, 16 CPUs, JAX_PLATFORMS=cpu, 40-minute limit, launch-then-harvest) evaluate the JVP of cell_current_moments at the near-root state in a probe direction and, with jax.debug_nans and a staged census over the public intermediates and the operator's cell geometry, name the first operation whose tangent is non-finite (candidate classes: a jnp.where or select whose untaken branch carries nan, a sqrt or division or arctan2 at a zero argument on a degenerate or wall-clipped cell polygon, a normalised-flux division where axis and boundary flux coincide at cell 0, or a custom VJP boundary), report the geometry of plasma cell 0 (area, clipped, vertex count, distance to wall), whether the same JVP is finite on the persisted MAST frozen-six carrier at 22086/43 so the defect is oracle-machine-specific or general, and propose the one-line fix as text with no solver source modified",
+          "id": "gaa-nan-tangent-localisation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123307804677-gaa-nan-tangent-localisation/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/nan_tangent_localisation.py",
+            "docs/figures/gs-absolute-accuracy/nan-tangent-localisation.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solovev-certificate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:33:19Z",
+        "completed_at": "2026-09-02T12:54:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1253,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1253,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "acce6b3cf0832c9340c722c50dafb525c16954d7",
+        "commits": [
+          "f7d9557bc95d5ff468f63fbf7e256b7a5c7e679c"
+        ],
+        "changed_lines": {
+          "added": 1462,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rigel job 1261377 NAN_TANGENT_LOCALISATION_EXIT=0 plus embedded-contract validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123307804677-gaa-nan-tangent-localisation/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123307804677-gaa-nan-tangent-localisation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060ad-86f4-79b0-9e85-39020a3b9924",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7402752,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7773780,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 31366,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 7905
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4868,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 8468,
+              "log_age_seconds": 5622,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 5665,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T112721217237-scr-remedy-nonmonotone-acceptance",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-remedy-nonmonotone-acceptance",
+        "node_definition": {
+          "done_when": "remedy-nonmonotone.json states for both arms the terminal residual against 1e-8, trip count, the count and size of transient increases admitted, the mode contraction before versus after, records the seven referee tests passing unmodified plus tests/test_nonmonotone_acceptance_window.py passing (command, exit status, log path), remedy-nonmonotone.png exists on one log axis, SLURM job id, node, CPU count, elapsed and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/fixed_point.py",
+          "estimated_hours": 3.0,
+          "goal": "A worktree prototype of the lead-approved nonmonotone acceptance window in nova/equilibrium/fixed_point.py on main at or after 588578a0: within the own-induced-mask acceptance of a2e65fda, once the active-set mask has been zero-difference for two trips and the residual contraction ratio exceeds 0.95, admit a candidate whose own-mask residual exceeds the incumbent by at most a bounded factor (a fixed relative increase, for example 1.5, exposed as an opt-in parameter) for a limited window of trips (for example 3), with the best-iterate retention untouched so the returned state can never be worse than the best observed, the window closing and strict decrease resuming after it, all fixed-shape and opt-in, with a test file tests/test_nonmonotone_acceptance_window.py, a benchmark benchmarks/stall_remedy_nonmonotone.py re-solving 22086/43 pure together with 21978/35 pure through benchmarks/bank_revision_reproduction.py's exact bank route on the H200 (one CPU, one H200, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, hardened sbatch, heartbeat, flushed stage timings, persisted carrier reused, persistent compilation cache, 3-hour limit, launch-then-harvest), a receipt docs/figures/solver-convergence-regression/remedy-nonmonotone.json recording per arm the per-trip residual history, mask differences, termination, trip count, the candidates admitted under the window and the transient increase each carried, the antisymmetric-mode contraction before versus after, the terminal residual against 1e-8, wall seconds, the seven referee tests run unmodified, and a figure remedy-nonmonotone.png plotting both histories against the banked old, own-mask and rung-1, 2, 3, 5 histories, the whole prototype committed in the worktree only and never merged",
+          "id": "scr-remedy-nonmonotone-acceptance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T112721217237-scr-remedy-nonmonotone-acceptance/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_nonmonotone_acceptance_window.py",
+            "benchmarks/stall_remedy_nonmonotone.py",
+            "docs/figures/solver-convergence-regression/remedy-nonmonotone.json",
+            "docs/figures/solver-convergence-regression/remedy-nonmonotone.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "stall-remedy-krylov",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T11:27:26Z",
+        "completed_at": "2026-09-02T12:56:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5356,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5356,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1ba05eb83a8b4adae717db5c68cad0bfd8f14b88",
+        "commits": [
+          "ebe02ae446c177bf51f034342ac82fc84eb9136a"
+        ],
+        "changed_lines": {
+          "added": 2025,
+          "removed": 23,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/stall_remedy_nonmonotone.py check plus the seven referee tests (SLURM 1261276 COMPLETED 0:0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T112721217237-scr-remedy-nonmonotone-acceptance/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T112721217237-scr-remedy-nonmonotone-acceptance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ecf-6ce6-7ec0-ab50-6636eae50b33",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12228096,
+            "cached_input_tokens_cumulative": 20661760,
+            "input_tokens": 12128877,
+            "input_tokens_cumulative": 20781251,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 19139,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4001
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 917,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 4517,
+              "log_age_seconds": 1671,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1714,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            }
+          ]
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1355
+    "_version": 1362
   }
 }

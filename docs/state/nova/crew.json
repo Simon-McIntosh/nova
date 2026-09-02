@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:47:12",
+  "updated": "2026-09-02T08:53:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1019,6 +1019,15 @@
         "created": "2026-08-26"
       },
       {
+        "id": "mcs-exit-incidence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "moment-blocks",
         "harness": "codex",
         "role": "implement",
@@ -1155,9 +1164,11 @@
         "id": "pta-perf",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060d6-e103-7f71-9114-d8247246ed9e"
+        },
         "created": "2026-09-02"
       },
       {
@@ -74386,9 +74397,106 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T063759170920-pta-carrier-read-cost",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-carrier-read-cost",
+        "node_definition": {
+          "done_when": "The manifest carries a table of wall_seconds for the four switches measured on rigel via sbatch (--partition=rigel_debug or rigel, --cpus-per-task=16, --mem=32G, --time=01:00:00, export TMPDIR=/tmp, the worktree environment UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync, JAX_PLATFORMS=cpu), naming the dominant mechanism; the committed fast path brings the test's wall_seconds below 60 s on rigel in three consecutive sbatch runs quoted in the manifest; tests/test_plasma_cell_topology_read.py (0 differing labels over 646 cells), tests/test_plasma_cell_flood_families.py 11/11, tests/test_solovev_recovery_gates.py 8/8, tests/test_split_polish_nulls.py, tests/test_hex_flood_sn_secondary.py stay green as fresh-process CPU lanes with logs cited; the commit body names the mechanism; the test file and its bound are not modified; nova/equilibrium/forward_operator.py is held by a concurrent node, so if the fast path needs it stop with a NEEDS-HELP brief carrying the table; if the bound cannot be met without changing labels or receipts, stop likewise",
+          "estimated_hours": 3.0,
+          "goal": "Land the fast path in the carrier topology read that restores the reduced-oracle test's 60 s wall bound on rigel (tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point, currently 87 s against a former 35 s) without changing any label or receipt, guided by a four-switch profile on rigel \u2014 as landed, census polish forced to fallback, carrier geometry hoisted to construction where any of it is rebuilt per read, saddle neighbourhood precomputed \u2014 that attributes the excess to its mechanism",
+          "id": "pta-carrier-read-cost",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T063759170920-pta-carrier-read-cost/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "75m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/cell_partition.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-carrier-read-cost"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-perf",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:38:09Z",
+        "completed_at": "2026-09-02T06:52:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 853,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 853,
+        "stalled": false,
+        "time_budget": "75m",
+        "base_sha": "c6ebd658cddae94703f1dc271dde35ec6c133289",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T063759170920-pta-carrier-read-cost/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8415232,
+            "cached_input_tokens_cumulative": 8415232,
+            "input_tokens": 8600083,
+            "input_tokens_cumulative": 8600083,
+            "output_tokens": 24733,
+            "output_tokens_cumulative": 24733,
+            "reasoning_output_tokens": 7732,
+            "reasoning_output_tokens_cumulative": 7732
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "profile only; the fix lies outside the node's fence",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1319
+    "_version": 1322
   }
 }

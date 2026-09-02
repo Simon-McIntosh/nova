@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:26:49",
+  "updated": "2026-09-02T13:24:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -217,9 +217,11 @@
         "id": "certificate-current-pin",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06179-9aee-77c1-913a-363f8eb00188",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06179-9aee-77c1-913a-363f8eb00188"
+        },
         "created": "2026-09-02"
       },
       {
@@ -76363,9 +76365,145 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T093547536495-gaa-certificate-current-pin",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-certificate-current-pin",
+        "node_definition": {
+          "done_when": "certificate-current-pin.json records for the three static cases at two rungs the pinned and unpinned terminal residual, trip count, termination, amplitude history, psi sup/rms and axis error side by side, states the verdict sentence, records the SLURM job id, node, elapsed and exit marker, and git diff --stat shows no change under nova/ or to benchmarks/solovev_certificate.py or solovev-certificate.json",
+          "estimated_hours": 1.5,
+          "goal": "A net-current-pinned rerun of the Solovev certificate solves, receipt docs/figures/gs-absolute-accuracy/certificate-current-pin.json, testing the lead's hypothesis that the 0 of 16 verdict is amplitude drift of the unpinned fixed-point map: a separate driver benchmarks/solovev_certificate_current_pin.py (importing the case, machine, seed and norm machinery from benchmarks/solovev_certificate.py without editing it, since that file is held by another run) passes the closed-form case's exact net toroidal plasma current (integrated from RotatingEquilibrium's toroidal_current_density over the plasma, or the case's declared plasma current where the reference exposes it) as target_current to operator.flux_map so the lambda normalisation (ForwardFluxOperator.current_normalisation_amplitude) is active exactly as the EFIT parity path uses it, re-solving the three static references at the reduced and coarse (-110, -300) rungs on one rigel node (16 CPUs, JAX_PLATFORMS=cpu, TMPDIR=/tmp, persisted oracle cache, launch-then-harvest) from the same production seed as the certificate, recording per case per rung the pinned versus unpinned terminal relative residual, trip count, termination, the lambda amplitude history, whole-domain psi sup and rms error and axis position error against the closed-form field, and a one-sentence verdict on whether pinning the net current recovers convergence toward the root (residual falling by orders of magnitude and psi error collapsing) or not, with no solver source modified and the existing certificate receipt untouched",
+          "id": "gaa-certificate-current-pin",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093547536495-gaa-certificate-current-pin/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/solovev_certificate_current_pin.py",
+            "docs/figures/gs-absolute-accuracy/certificate-current-pin.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "certificate-current-pin",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:35:54Z",
+        "completed_at": "2026-09-02T10:31:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3363,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3363,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "241ee4a97a9a9f802b67fbdee67fc45da5a0737f",
+        "commits": [
+          "d0a01760c1b274fe850f0dca050ddbad958ffd33"
+        ],
+        "changed_lines": {
+          "added": 2189,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rigel job 1261172 CERTIFICATE_CURRENT_PIN_EXIT=0 plus schema validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093547536495-gaa-certificate-current-pin/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093547536495-gaa-certificate-current-pin/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06179-9aee-77c1-913a-363f8eb00188",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20739072,
+            "cached_input_tokens_cumulative": 20739072,
+            "input_tokens": 20990924,
+            "input_tokens_cumulative": 20990924,
+            "output_tokens": 59148,
+            "output_tokens_cumulative": 59148,
+            "reasoning_output_tokens": 18168,
+            "reasoning_output_tokens_cumulative": 18168
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 99,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 3699,
+              "log_age_seconds": 1843,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1871,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1348
+    "_version": 1350
   }
 }

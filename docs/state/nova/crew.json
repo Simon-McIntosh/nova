@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:21:12",
+  "updated": "2026-09-02T17:34:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -239,9 +239,11 @@
         "id": "certificate-rerun",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06236-7a54-7133-8afc-480001e4080b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06236-7a54-7133-8afc-480001e4080b"
+        },
         "created": "2026-09-02"
       },
       {
@@ -78504,9 +78506,206 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T151208909854-pta-parity-harness-full-bank",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness-full-bank",
+        "node_definition": {
+          "done_when": "docs/figures/hex-cell-single-grid/topology-parity.json reports 12 rows, 12 replayable, 0 marginal-unknown, status complete, with the ten non-marginal rows at 0 differing labels and matching primaries and classification (a row that raises NoQualifiedAxisError, such as 21986/46 mixed, is recorded as unavailable with the exception name rather than blank or passing), the two marginal rows carrying every differing cell with both-authority psi_norm and an adjudication line, and the per-row wall-node census under the census saddle and the raster binding level; docs/figures/hex-cell-single-grid/topology-parity.png shows every replayable row; the harness run and pytest tests/test_topology_parity_harness.py tests/test_plasma_cell_topology_read.py are green under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync with logs cited; the manifest quotes per row the differing-cell count, classification pair and wall census; any non-marginal row with a difference is reported as a finding, never absorbed; commit the receipt, figure and any harness change with a body",
+          "estimated_hours": 1.5,
+          "goal": "Run benchmarks/topology_parity_harness.py against the regenerated twelve-row MAST bank on main (8678047a: all rows carry per-cell flux and solver_qualification.marginal_solver_basin in docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, true only for 21978/35 pure and 22086/43 pure) so the receipt reaches status complete with exact parity on the ten non-marginal rows and per-cell adjudication on the two marginal rows, adapting only the flag-source path and figure layout if the harness does not already read that receipt",
+          "id": "pta-parity-harness-full-bank",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151208909854-pta-parity-harness-full-bank/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/topology_parity_harness.py",
+            "docs/figures/hex-cell-single-grid/topology-parity.json",
+            "docs/figures/hex-cell-single-grid/topology-parity.png",
+            "tests/test_topology_parity_harness.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T15:12:16Z",
+        "completed_at": "2026-09-02T15:34:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1337,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1337,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f8151c7211b39a628ba5c71ac65910fa5a466b5d",
+        "commits": [
+          "0d550c171ee3550d1f3e25f832489ba0abff710f"
+        ],
+        "changed_lines": {
+          "added": 172,
+          "removed": 39,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151208909854-pta-parity-harness-full-bank/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5666432,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5902298,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7311,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1330
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1573,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 5173,
+              "log_age_seconds": 2694,
+              "log_fresh": false,
+              "manifest_commits": [
+                "7eebe4c9436a65ddc6e8173a6020936b63a3f4f8"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130149558094-fsa-receipt-topology/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T130149558094-fsa-receipt-topology --gate <verdict> --commit 7eebe4c9436a65ddc6e8173a6020936b63a3f4f8",
+              "node": "fsa-receipt-topology",
+              "phase": "working",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T130149558094-fsa-receipt-topology",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2754,
+              "terminal_at": "2026-09-02T14:26:18Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/fsa-receipt-topology"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4201,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The 60-minute worker fence expires before the launch-then-harvest production jobs can complete. The acceptance artifact is not yet produced: only 5 of 16 corrected rows are durable; jobs 1261437_0/_1/_2; 1261438 and 1261467_3 are still running; and aggregate/validate job 1261468 is waiting on them.",
+              "elapsed_seconds": 7801,
+              "log_age_seconds": 4444,
+              "log_fresh": false,
+              "manifest_commits": [
+                "8f8ef64ecb61440e0ee89ee1d2925066669aa790",
+                "cac9bd1b5ace86af07d7abe7122534bec3c39fe6",
+                "bb4f158e6b9f127943df5e21d8be59fa83468e02"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130200757161-gaa-fixture-derivative-fix/manifest.md; resolve the blocker before resuming the run",
+              "node": "gaa-fixture-derivative-fix",
+              "phase": "starting",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T130200757161-gaa-fixture-derivative-fix",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 4506,
+              "terminal_at": "2026-09-02T13:57:05Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-fixture-derivative-fix"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 370,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3970,
+              "log_age_seconds": 2761,
+              "log_fresh": false,
+              "manifest_commits": [
+                "825a2cd95117a3b37660b4d47f8bca7d933345e7"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T140545356101-scr-bank-efit-overlays/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T140545356101-scr-bank-efit-overlays --gate <verdict> --commit 825a2cd95117a3b37660b4d47f8bca7d933345e7",
+              "node": "scr-bank-efit-overlays",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T140545356101-scr-bank-efit-overlays",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 2816,
+              "terminal_at": "2026-09-02T14:25:16Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-bank-efit-overlays"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_topology_parity_harness.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1373
+    "_version": 1375
   }
 }

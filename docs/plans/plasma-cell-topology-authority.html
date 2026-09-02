@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-impl" content="0.833">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -291,6 +291,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T123221151752-pta-parity-harness-repair" data-who="pta-partition" data-when="2026-09-02T12:55:41Z">
     <div class="r-comment-body"><p>Parity harness routes the replay through the production read; 12 rows, 2 replayable (22086/43 pure and mixed) each 1089 cells with 0 differing and matching primaries; pure row: cell class diverted (boundary -0.124222 Wb) versus retained raster limited (boundary -0.124391 Wb, margin -0.135), governed marginal finding; wall census cell/raster 5/7 and 10/14 differing 2 and 4 at the divertor plates; 10 rows not replayable; 6 rows marginal-unknown; receipt status pending; 5/5 tests; re-review PASS</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T151208909854-pta-parity-harness-full-bank" data-who="pta-partition" data-when="2026-09-02T15:34:33Z">
+    <div class="r-comment-body"><p>Node assumed a twelve-row schema-4 bank that main does not carry (ten rows have empty per-cell flux); the worker refused to synthesise operands and instead committed the harness adaptations — flag loader reading the corroboration receipt&#x27;s root-level rows, NoQualifiedAxisError unavailable-row evidence, multi-row figure — with an explicitly pending two-row receipt (0 marginal-unknown now that flags exist), 7/7 tests; the twelve-row rerun follows the bank regeneration</p></div>
 </div>
 </section>
 </main>

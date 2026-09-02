@@ -11,6 +11,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 import threading
@@ -604,6 +605,410 @@ def _distribution(values: list[float]) -> dict[str, Any]:
     }
 
 
+def _job_receipt(job_id: int) -> dict[str, Any]:
+    fields = "JobID,State,Elapsed,ExitCode,NodeList,AllocCPUS,ReqMem,MaxRSS"
+    output = subprocess.check_output(
+        ["sacct", "-j", str(job_id), "-n", "-P", f"--format={fields}"],
+        text=True,
+    )
+    records = {}
+    for line in output.splitlines():
+        values = line.split("|")
+        if len(values) != 8:
+            continue
+        records[values[0]] = dict(zip(fields.split(","), values, strict=True))
+    allocation = records.get(str(job_id))
+    batch = records.get(f"{job_id}.batch")
+    if allocation is None or batch is None:
+        raise RuntimeError(f"sacct omitted allocation or batch record for {job_id}")
+    max_rss = batch["MaxRSS"]
+    max_rss_mib = float(max_rss.removesuffix("K")) / 1024.0
+    hours, minutes, seconds = (int(value) for value in allocation["Elapsed"].split(":"))
+    return {
+        "job_id": job_id,
+        "scheduler_state": allocation["State"],
+        "node": allocation["NodeList"],
+        "cpu_count": int(allocation["AllocCPUS"]),
+        "requested_memory": allocation["ReqMem"],
+        "elapsed": allocation["Elapsed"],
+        "elapsed_seconds": hours * 3600 + minutes * 60 + seconds,
+        "allocation_exit_code": allocation["ExitCode"],
+        "batch_state": batch["State"],
+        "batch_exit_code": batch["ExitCode"],
+        "batch_max_rss": max_rss,
+        "batch_max_rss_mib": max_rss_mib,
+        "exit_marker": None,
+    }
+
+
+def _partial_member(
+    identity: str,
+    compile_seconds: float,
+    compile_rss_mib: float,
+    without_exit_ms: float,
+    without_exit_rss_mib: float,
+    with_exit_ms: float,
+    with_exit_rss_mib: float,
+    member_peak_rss_mib: float,
+    released_rss_mib: float,
+) -> dict[str, Any]:
+    saving_fraction = (without_exit_ms - with_exit_ms) / without_exit_ms
+    unavailable = {
+        "executed_trips": None,
+        "no_op_trips": None,
+        "terminal_residual": None,
+        "termination": None,
+        "terminal_state_sha256": None,
+        "result_availability": "not persisted before scheduler timeout",
+    }
+    return {
+        "identity": identity,
+        "measurement_state": "paired_timing_complete_semantics_not_persisted",
+        "compile_seconds": compile_seconds,
+        "strict_qualification_firing_trip": None,
+        "strict_qualification": "not_persisted",
+        "with_exit": {
+            **unavailable,
+            "timing": {
+                "first_compiled_solve_ms": with_exit_ms,
+                "samples_compile_warm_ms": [with_exit_ms],
+                "compile_warm_solve_ms": with_exit_ms,
+                "compile_warm_p95_ms": with_exit_ms,
+            },
+            "rss_after_synchronized_solve_mib": with_exit_rss_mib,
+        },
+        "without_exit": {
+            **unavailable,
+            "timing": {
+                "first_compiled_solve_ms": without_exit_ms,
+                "samples_compile_warm_ms": [without_exit_ms],
+                "compile_warm_solve_ms": without_exit_ms,
+                "compile_warm_p95_ms": without_exit_ms,
+            },
+            "rss_after_synchronized_solve_mib": without_exit_rss_mib,
+        },
+        "exit_saving_ms": without_exit_ms - with_exit_ms,
+        "exit_saving_fraction": saving_fraction,
+        "terminal_state_bit_identical_where_exit_fired": None,
+        "host_memory": {
+            "rss_after_compile_mib": compile_rss_mib,
+            "member_peak_rss_mib": member_peak_rss_mib,
+            "released_rss_mib": released_rss_mib,
+            "qualification": (
+                "the stage log persisted RSS after each pass and the sampler's "
+                "whole-member peak; it did not persist an independent peak for "
+                "each solve pass"
+            ),
+        },
+    }
+
+
+def _partial_machine(rows: list[dict[str, Any]], declared: int) -> dict[str, Any]:
+    without = [row["without_exit"]["timing"]["compile_warm_solve_ms"] for row in rows]
+    with_exit = [row["with_exit"]["timing"]["compile_warm_solve_ms"] for row in rows]
+    fractions = [row["exit_saving_fraction"] for row in rows]
+    return {
+        "execution_contract": {
+            "width": 1,
+            "declared_member_count": declared,
+            "harvested_member_count": len(rows),
+            "one_compiled_program_per_member": True,
+            "same_program_reused_for_both_arms": True,
+            "settlement_flag_is_runtime_argument": True,
+            "arm_order_per_member": ["without_exit", "with_exit"],
+            "additional_repetitions_after_first_compiled_solve": 0,
+        },
+        "members": rows,
+        "summary": {
+            "declared_members": declared,
+            "harvested_paired_timing_members": len(rows),
+            "semantic_result_members": 0,
+            "strict_exit_fired_members": None,
+            "strict_exit_never_members": None,
+            "bit_identical_fired_members": None,
+            "timing": {
+                "without_exit_ms": _distribution(without),
+                "with_exit_ms": _distribution(with_exit),
+                "compile_seconds": _distribution(
+                    [row["compile_seconds"] for row in rows]
+                ),
+                "exit_saving_fraction": _distribution(fractions),
+            },
+        },
+    }
+
+
+def harvest_partial(
+    log_path: Path, output_json: Path, output_png: Path
+) -> dict[str, Any]:
+    """Recover synchronized paired timings from a time-limited stage log."""
+    log_text = log_path.read_text(encoding="utf-8")
+    starts = re.finditer(
+        r"^STAGE (MAST|DIIID)_MEMBER_(\d+)_COMPILE_START width=1 "
+        r"identity='([^']+)' rss_mib=([0-9.]+)$",
+        log_text,
+        flags=re.MULTILINE,
+    )
+    staged: dict[tuple[str, int], dict[str, Any]] = {}
+    for match in starts:
+        key = (match.group(1), int(match.group(2)))
+        staged[key] = {
+            "identity": match.group(3),
+            "compile_start_rss_mib": float(match.group(4)),
+        }
+    patterns = {
+        "compile": (
+            r"^STAGE (MAST|DIIID)_MEMBER_(\d+)_COMPILE_DONE "
+            r"seconds=([0-9.]+) rss_mib=([0-9.]+)$"
+        ),
+        "without_exit": (
+            r"^STAGE (MAST|DIIID)_MEMBER_(\d+)_WITHOUT_EXIT_COMPILE_WARM "
+            r"solve_ms=([0-9.]+) rss_mib=([0-9.]+)$"
+        ),
+        "with_exit": (
+            r"^STAGE (MAST|DIIID)_MEMBER_(\d+)_WITH_EXIT_COMPILE_WARM "
+            r"solve_ms=([0-9.]+) rss_mib=([0-9.]+)$"
+        ),
+        "released": (
+            r"^STAGE (MAST|DIIID)_MEMBER_(\d+)_RELEASED "
+            r"max_rss_mib=([0-9.]+) rss_mib=([0-9.]+)$"
+        ),
+    }
+    for stage, pattern in patterns.items():
+        for match in re.finditer(pattern, log_text, flags=re.MULTILINE):
+            key = (match.group(1), int(match.group(2)))
+            if key not in staged:
+                raise RuntimeError(
+                    f"{stage} stage appeared before compile start: {key}"
+                )
+            staged[key][stage] = (float(match.group(3)), float(match.group(4)))
+
+    completed: dict[str, list[dict[str, Any]]] = {"MAST": [], "DIII-D": []}
+    incomplete = []
+    for (machine_token, member_number), record in staged.items():
+        missing_stages = [stage for stage in patterns if stage not in record]
+        machine = "DIII-D" if machine_token == "DIIID" else machine_token
+        if missing_stages:
+            incomplete.append(
+                {
+                    "machine": machine,
+                    "member_number": member_number,
+                    "identity": record["identity"],
+                    "compile_start_rss_mib": record["compile_start_rss_mib"],
+                    "missing_stages": missing_stages,
+                }
+            )
+            continue
+        compile_seconds, compile_rss = record["compile"]
+        without_ms, without_rss = record["without_exit"]
+        with_ms, with_rss = record["with_exit"]
+        peak_rss, released_rss = record["released"]
+        completed[machine].append(
+            _partial_member(
+                record["identity"],
+                compile_seconds,
+                compile_rss,
+                without_ms,
+                without_rss,
+                with_ms,
+                with_rss,
+                peak_rss,
+                released_rss,
+            )
+        )
+
+    if len(completed["MAST"]) != 12 or len(completed["DIII-D"]) != 2:
+        raise RuntimeError(
+            "partial harvest expected twelve MAST and two DIII-D paired rows, "
+            f"received {len(completed['MAST'])} and {len(completed['DIII-D'])}"
+        )
+    diiid_bank = _read_json(DIIID_BANK)["result"]["frame_records"]
+    missing_diiid = [
+        {
+            "member_number": index,
+            "identity": f"{row['shot']} frame {row['frame']}",
+            "reason": (
+                "compile interrupted by scheduler timeout"
+                if index == 3
+                else "not reached before scheduler timeout"
+            ),
+        }
+        for index, row in enumerate(diiid_bank, start=1)
+        if index >= 3
+    ]
+    job_match = re.search(r"HEARTBEAT .* job=(\d+)", log_text)
+    if job_match is None:
+        raise RuntimeError("stage log does not identify its SLURM job")
+    job = _job_receipt(int(job_match.group(1)))
+    revision = _git("rev-parse", "HEAD")
+    driver_path = Path(__file__).relative_to(ROOT)
+    measured_driver = subprocess.check_output(
+        ["git", "show", f"{revision}:{driver_path}"], cwd=ROOT
+    )
+    machines = {
+        "MAST": _partial_machine(completed["MAST"], 12),
+        "DIII-D": _partial_machine(completed["DIII-D"], 5),
+    }
+    machines["DIII-D"]["missing_members"] = missing_diiid
+    mast_values = [
+        *machines["MAST"]["summary"]["timing"]["with_exit_ms"]["values"],
+        *machines["MAST"]["summary"]["timing"]["without_exit_ms"]["values"],
+    ]
+    diiid_values = [
+        *machines["DIII-D"]["summary"]["timing"]["with_exit_ms"]["values"],
+        *machines["DIII-D"]["summary"]["timing"]["without_exit_ms"]["values"],
+    ]
+    diiid_compiles = machines["DIII-D"]["summary"]["timing"]["compile_seconds"]
+    diiid_stage_peak_rss = max(
+        row["host_memory"]["member_peak_rss_mib"] for row in completed["DIII-D"]
+    )
+    payload = {
+        "schema": "nova.strict-exit-incidence/1",
+        "measurement_state": "partial_scheduler_timeout",
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "completion": {
+            "declared_member_count": 17,
+            "paired_timing_complete_member_count": 14,
+            "semantic_result_member_count": 0,
+            "missing_member_count": 3,
+            "missing_members": missing_diiid,
+            "incomplete_attempts": incomplete,
+            "semantic_result_limitation": (
+                "the driver assembled trip counts, terminal residuals, termination, "
+                "state hashes, and bit-identity in memory but wrote them only after "
+                "all members; the scheduler timeout prevented the atomic receipt "
+                "write, and those values are absent from the flushed stage log"
+            ),
+        },
+        "source": {
+            "measurement_revision": revision,
+            "required_ancestor": REQUIRED_ANCESTOR,
+            "driver": str(driver_path),
+            "measurement_driver_sha256": hashlib.sha256(measured_driver).hexdigest(),
+            "harvest_driver_sha256": _sha256(Path(__file__)),
+            "stage_log": str(log_path),
+            "stage_log_sha256": _sha256(log_path),
+            "solver_source_modified": False,
+            "nova_diff_stat": subprocess.check_output(
+                ["git", "diff", "--stat", "--", "nova"], cwd=ROOT, text=True
+            ).splitlines(),
+        },
+        "execution": {
+            **job,
+            "partition": "betelgeuse",
+            "reservation": "gpu_0003_grpA",
+            "gpu_count": 1,
+            "device": "NVIDIA H200",
+            "jax_platforms": ["cuda", "cpu"],
+            "tmpdir": "/tmp",
+            "requested_time_limit": "03:00:00",
+            "persistent_compilation_cache": True,
+            "heartbeats_flushed": True,
+            "stage_timings_flushed": True,
+        },
+        "configuration": {
+            "trip_limit": TRIP_LIMIT,
+            "execution_width": 1,
+            "member_counts": {"MAST": 12, "DIII-D": 5},
+            "paired_control": (
+                "one width-1 compiled program per member received "
+                "stop_on_active_set_settlement as a runtime boolean and was reused "
+                "first with the exit disabled and then with the exit enabled"
+            ),
+            "memory_lifecycle": (
+                "members were compiled and measured sequentially; each member's "
+                "compiled host and device buffers were released before the next"
+            ),
+            "solve_ms_scope": (
+                "wall time from invoking the compiled top-level solve through "
+                "jax.block_until_ready(result.flux); it includes the complete trip "
+                "loop, per-trip host reconciliation, any retrace or compilation "
+                "triggered beneath the top-level boundary, and final device sync"
+            ),
+            "latency_qualification": (
+                "width-1 compile-warm solve_ms is per-member latency, not batched "
+                "milliseconds per slice; batched throughput awaits the boundary "
+                "that separates shared geometry from member-varying operator data"
+            ),
+        },
+        "evidence_inputs": {
+            "MAST": {
+                "bank": {
+                    "path": str(MAST_BANK.relative_to(ROOT)),
+                    "sha256": _sha256(MAST_BANK),
+                },
+                "bank_route": {
+                    "path": str(BANK_REVISION_ROUTE.relative_to(ROOT)),
+                    "sha256": _sha256(BANK_REVISION_ROUTE),
+                    "current_pin": "current revision production bank route",
+                },
+            },
+            "DIII-D": {
+                "bank": {
+                    "path": str(DIIID_BANK.relative_to(ROOT)),
+                    "sha256": _sha256(DIIID_BANK),
+                },
+                "machine_artifact_digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
+            },
+            "settlement_census": {
+                "path": str(SETTLEMENT_CENSUS.relative_to(ROOT)),
+                "sha256": _sha256(SETTLEMENT_CENSUS),
+            },
+        },
+        "machines": machines,
+        "observations": {
+            "width_one_latency": (
+                f"MAST paired warm solves span {min(mast_values) / 1000:.1f} to "
+                f"{max(mast_values) / 1000:.1f} s per member; the two completed "
+                f"DIII-D members span {min(diiid_values) / 1000:.1f} to "
+                f"{max(diiid_values) / 1000:.1f} s. These are seconds-scale "
+                "width-1 latencies, not millisecond-scale batched throughput."
+            ),
+            "exit_saving": (
+                "the paired exit effect is reported per member as "
+                "(without_exit_ms - with_exit_ms) / without_exit_ms; it is not "
+                "converted into a per-trip quantum because trip counts were not "
+                "persisted"
+            ),
+            "heterogeneous_frame_compile": (
+                "the two completed DIII-D members compiled in "
+                f"{diiid_compiles['values'][0]:.1f} s and "
+                f"{diiid_compiles['values'][1]:.1f} s; stage RSS reached "
+                f"{diiid_stage_peak_rss:.1f} "
+                "MiB and the batch MaxRSS reached "
+                f"{job['batch_max_rss_mib']:.1f} MiB. This is direct evidence of "
+                "the heterogeneous-frame recompile cost named by the batched "
+                "operator-boundary work."
+            ),
+        },
+        "head_per_trip_quantum_ms": {
+            "value": None,
+            "reason": "executed trip counts were not persisted before timeout",
+            "supersedes_banked_ms": 25.0,
+        },
+        "comparison_baselines": {
+            "strict_census_projection_ms_per_slice": CENSUS_PROJECTION_MS_PER_SLICE,
+            "full_trip_baseline_ms_per_member": FULL_TRIP_BASELINE_MS_PER_MEMBER,
+            "comparison_qualification": (
+                "the 1.163 ms/slice census projection is batched throughput and is "
+                "not directly comparable to width-1 latency"
+            ),
+        },
+        "project_absolute_figure_src": (
+            "/nova/figures/millisecond-converged-solve/strict-exit-incidence.png"
+        ),
+    }
+    _draw(payload, output_png)
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(f"PARTIAL_RECEIPT_WRITTEN={output_json}", flush=True)
+    print(f"PARTIAL_FIGURE_WRITTEN={output_png}", flush=True)
+    return payload
+
+
 def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str, Any]:
     rows = []
     for member_number, member in enumerate(members, start=1):
@@ -753,12 +1158,17 @@ def _draw(payload: dict[str, Any], output: Path) -> None:
         axis = figure.add_subplot(grid[0, column])
         firing = [row["strict_qualification_firing_trip"] for row in rows]
         displayed = [TRIP_LIMIT + 1 if value is None else value for value in firing]
-        axis.scatter(positions, displayed, s=54, color=colors[machine])
+        markers = [
+            "x" if row["strict_qualification"] == "not_persisted" else "o"
+            for row in rows
+        ]
+        for position, value, marker in zip(positions, displayed, markers, strict=True):
+            axis.scatter(position, value, s=54, color=colors[machine], marker=marker)
         axis.axhline(TRIP_LIMIT, color="#999999", linewidth=1.0, linestyle="--")
         axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
         axis.set_yticks(
             [1, 4, 8, 12, 16, 17],
-            ["1", "4", "8", "12", "16", "never"],
+            ["1", "4", "8", "12", "16", "not persisted"],
         )
         axis.set_ylim(0.25, 17.8)
         axis.set_ylabel("strict qualification firing trip")
@@ -791,8 +1201,17 @@ def _draw(payload: dict[str, Any], output: Path) -> None:
         timing_axis.set_title(f"{machine}: paired per-member latency")
         timing_axis.legend(frameon=False)
         timing_axis.spines[["top", "right"]].set_visible(False)
+    state = payload.get("measurement_state", "complete").replace("_", " ")
+    missing = payload.get("completion", {}).get("missing_members", [])
+    missing_note = ""
+    if missing:
+        missing_note = "\nmissing DIII-D: " + ", ".join(
+            row["identity"].replace("d3d_shot_", "").replace(".parquet frame ", "/")
+            for row in missing
+        )
     figure.suptitle(
-        "Strict settled exit on real bank members — sequential width-1 solves",
+        "Strict settled exit on real bank members — sequential width-1 solves\n"
+        f"measurement state: {state}{missing_note}",
         fontsize=15,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -1018,6 +1437,7 @@ def main() -> None:
     )
     parser.add_argument("--repeats", type=int, default=0)
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--harvest-log", type=Path)
     arguments = parser.parse_args()
     if arguments.repeats < 0:
         raise ValueError("additional timing repetitions cannot be negative")
@@ -1025,6 +1445,13 @@ def main() -> None:
         preflight(
             arguments.mast_state_cache.resolve(),
             arguments.diiid_machine_cache.resolve(),
+        )
+        return
+    if arguments.harvest_log is not None:
+        harvest_partial(
+            arguments.harvest_log.resolve(),
+            arguments.json.resolve(),
+            arguments.png.resolve(),
         )
         return
     run(

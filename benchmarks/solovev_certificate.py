@@ -707,10 +707,10 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
             }
         )
 
-    promotion_count = int(history.attempted_newton_promotions)
+    total_promotion_count = int(history.attempted_newton_promotions)
     recovery_outcomes = np.asarray(history.promotion_recovery_outcomes, dtype=np.int64)
     promotions = []
-    for index in range(promotion_count):
+    for index in executed:
         recovery_outcome = int(recovery_outcomes[index])
         promotions.append(
             {
@@ -774,8 +774,9 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
             recovery.fixed_point.KrylovActionQualification,
             history.krylov_action_qualification,
         ),
-        "attempted_newton_promotions": promotion_count,
+        "attempted_newton_promotions": total_promotion_count,
         "accepted_newton_promotions": int(history.accepted_newton_promotions),
+        "exposed_terminal_trip_promotions": len(promotions),
         "globalisation_decisions": inner,
         "promotion_globalisation": promotions,
         "source_continuation": continuation,
@@ -1749,9 +1750,11 @@ def _validate_row(row: dict[str, Any]) -> None:
             measured = row["norms"][field][region]
             for name in NORM_STATISTICS:
                 if measured[name] is None and not (
-                    row["solver"]["qualification"] == "unqualified"
-                    and measured["measurement_status"]
-                    in {"nonfinite_terminal_error", "unavailable"}
+                    measured["measurement_status"] == "unavailable"
+                    or (
+                        row["solver"]["qualification"] == "unqualified"
+                        and measured["measurement_status"] == "nonfinite_terminal_error"
+                    )
                 ):
                     raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]

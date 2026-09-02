@@ -114,8 +114,15 @@ def _rotation_closure(case: RotatingEquilibrium) -> IsothermalRotation:
     def temperature(psi_norm):
         return edge + (axis - edge) * jnp.clip(1.0 - jnp.asarray(psi_norm), 0.0, 1.0)
 
-    def angular_frequency(psi_norm):
-        return jnp.sqrt(2.0 * parameter * temperature(psi_norm) / mass)
+    if parameter == 0.0:
+
+        def angular_frequency(psi_norm):
+            return jnp.zeros_like(jnp.asarray(psi_norm))
+
+    else:
+
+        def angular_frequency(psi_norm):
+            return jnp.sqrt(2.0 * parameter * temperature(psi_norm) / mass)
 
     def temperature_gradient(psi_norm):
         return jnp.full_like(jnp.asarray(psi_norm), temperature_slope)

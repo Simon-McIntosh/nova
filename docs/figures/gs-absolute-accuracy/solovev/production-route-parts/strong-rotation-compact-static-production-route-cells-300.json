@@ -1,0 +1,673 @@
+{
+  "analytic_flux_regions": {
+    "all_carrier_cells": {
+      "absolute_rms_wb": 0.02136735321541326,
+      "absolute_sup_wb": 0.08079520502286094,
+      "cell_count": 341,
+      "finite_cell_count": 341,
+      "measurement_status": "finite",
+      "relative_rms": 0.18494563221520696,
+      "relative_sup": 0.6993248121218593
+    },
+    "closed_flux_region": {
+      "absolute_rms_wb": 0.022658394483631727,
+      "absolute_sup_wb": 0.08079520502286094,
+      "cell_count": 259,
+      "finite_cell_count": 259,
+      "measurement_status": "finite",
+      "relative_rms": 0.19612027051314784,
+      "relative_sup": 0.6993248121218593
+    },
+    "scrape_off_layer": {
+      "absolute_rms_wb": 0.015024274459399946,
+      "absolute_sup_wb": 0.018357278357055317,
+      "cell_count": 44,
+      "finite_cell_count": 44,
+      "measurement_status": "finite",
+      "relative_rms": 0.13004296369585558,
+      "relative_sup": 0.15889185793245977
+    },
+    "separatrix_band": {
+      "absolute_rms_wb": 0.018342391386778602,
+      "absolute_sup_wb": 0.022492581238480674,
+      "cell_count": 38,
+      "finite_cell_count": 38,
+      "measurement_status": "finite",
+      "relative_rms": 0.1587630034083716,
+      "relative_sup": 0.19468507003955826
+    }
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.16400655498728156,
+    "lock_wait_seconds": 2.153799869120121e-05,
+    "semantic_key": "5c022b142d6aa15f",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+    "store_seconds": 0.0
+  },
+  "case": "strong-rotation-compact-static",
+  "characteristic_pitch_m": 0.03186842212527238,
+  "derivative_support_cells": 262,
+  "figure": {
+    "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
+    "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
+    "sha256": "8b9842bc8716fb46a2eaa1ad4a3ccfaff29371f9d6983418edb82d0db8a39e04"
+  },
+  "geometry": {
+    "boundary_flux_error_wb": 0.022292020944484358,
+    "exact_topology": {
+      "axis_flux_wb": 0.11553315944520216,
+      "axis_rz_m": [
+        0.8997197746539723,
+        2.8400715913956133e-16
+      ],
+      "boundary_flux_wb": -1.9638628288680404e-16,
+      "class": "limited",
+      "flux_span_wb": -0.11553315944520236,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": null
+    },
+    "magnetic_axis_position_error_m": 0.004054765026308307,
+    "root_topology": {
+      "axis_flux_wb": 0.09217662262933943,
+      "axis_rz_m": [
+        0.8959753291227275,
+        -0.0004930960841532712
+      ],
+      "boundary_flux_wb": -0.022292020944484556,
+      "class": "limited",
+      "flux_span_wb": -0.11446864357382398,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": null
+    },
+    "x_point_position_error_m": null
+  },
+  "lane": {
+    "cpu_count": 16,
+    "elapsed_seconds": 2183.529575117165,
+    "execution": "slurm",
+    "exit_marker": "SOLOVEV_ROW_EXIT=0",
+    "hostname": "98dci4-clu-2059.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-2059",
+    "partition": "rigel",
+    "precision": "float64",
+    "reservation": null,
+    "slurm_job_id": "1261441",
+    "threaded_settings": {
+      "mkl_num_threads": "16",
+      "numexpr_num_threads": "16",
+      "omp_num_threads": "16",
+      "openblas_num_threads": "16",
+      "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+    }
+  },
+  "norms": {
+    "gradient": {
+      "two_pitch_boundary_band": {
+        "component_count": 218,
+        "finite_component_count": 218,
+        "measurement_status": "finite",
+        "rms": 0.37394815823674776,
+        "sup": 3.3714561336104283,
+        "support_cells": 109
+      },
+      "whole_domain": {
+        "component_count": 524,
+        "finite_component_count": 524,
+        "measurement_status": "finite",
+        "rms": 0.24169041448279208,
+        "sup": 3.3714561336104283,
+        "support_cells": 262
+      }
+    },
+    "hessian": {
+      "two_pitch_boundary_band": {
+        "component_count": 436,
+        "finite_component_count": 436,
+        "measurement_status": "finite",
+        "rms": 18.707053507163163,
+        "sup": 226.2201414273161,
+        "support_cells": 109
+      },
+      "whole_domain": {
+        "component_count": 1048,
+        "finite_component_count": 1048,
+        "measurement_status": "finite",
+        "rms": 12.066416106602233,
+        "sup": 226.2201414273161,
+        "support_cells": 262
+      }
+    },
+    "psi": {
+      "two_pitch_boundary_band": {
+        "component_count": 188,
+        "finite_component_count": 188,
+        "measurement_status": "finite",
+        "rms": 0.02119965369471259,
+        "sup": 0.08079520502286094,
+        "support_cells": 188
+      },
+      "whole_domain": {
+        "component_count": 341,
+        "finite_component_count": 341,
+        "measurement_status": "finite",
+        "rms": 0.02136735321541326,
+        "sup": 0.08079520502286094,
+        "support_cells": 341
+      }
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0340c6126519e4c6742a",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "cpu",
+      "backend_version": "cpu",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": "--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=16"
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "cpu",
+          "platform": "cpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0340c6126519e4c6742a"
+  },
+  "realised_cells": 341,
+  "requested_cells": -300,
+  "solver": {
+    "call": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form, oracle budgets as keywords)",
+    "gmres_iterations": 30,
+    "lambda_amplitude_history": {
+      "samples": [
+        {
+          "amplitude": 0.9011236746341574,
+          "state": "seed"
+        },
+        {
+          "amplitude": 0.9595040156129678,
+          "state": "terminal"
+        }
+      ],
+      "sampling": "seed and terminal production-seam states; intermediate amplitudes are not exposed by FixedPointResult",
+      "terminal_policy": "declared_scalar_current",
+      "terminal_rescaled": true
+    },
+    "newton_steps": 10,
+    "production_telemetry": {
+      "accepted_newton_promotions": 37,
+      "attempted_newton_promotions": 50,
+      "configured_controls": {
+        "continue_globalization_state": "production default enabled",
+        "continue_newton_trajectory": "production default enabled",
+        "own_mask_acceptance": "production default enabled",
+        "retain_outer_best_iterate": "production default enabled",
+        "stop_on_active_set_stagnation": "production default enabled",
+        "strict_active_set_settlement": "production default enabled"
+      },
+      "converged": false,
+      "exposed_terminal_trip_promotions": 10,
+      "finite_residual_trace": [
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767,
+        0.018425499297598767
+      ],
+      "finite_trace_indices": [
+        0,
+        31,
+        32,
+        63,
+        64,
+        95,
+        96,
+        127,
+        128,
+        159,
+        160,
+        191,
+        192,
+        223,
+        224,
+        255,
+        256,
+        287,
+        288,
+        319
+      ],
+      "globalisation_decisions": [
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 1,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 2,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 3,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 4,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 5,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 6,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 7,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 8,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 9,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 10,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 7.178894665233456e-16,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.001709999599954768,
+          "residual_after": 0.018425499297598767,
+          "residual_before": 0.018425499297598767
+        }
+      ],
+      "krylov_action_qualification": "accepted",
+      "per_trip_residual_history": [
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.01957933243514114,
+          "mask_difference_cells": 29,
+          "trip": 1
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.018457178921210356,
+          "mask_difference_cells": 0,
+          "trip": 2
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.01842916284802383,
+          "mask_difference_cells": 0,
+          "trip": 3
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.018425499297598767,
+          "mask_difference_cells": 0,
+          "trip": 4
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.018425499297598767,
+          "mask_difference_cells": 0,
+          "trip": 5
+        }
+      ],
+      "promotion_globalisation": [
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+116,
+          "promotion": 1,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000006e+122,
+          "promotion": 2,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+128,
+          "promotion": 3,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+134,
+          "promotion": 4,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+140,
+          "promotion": 5,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000006e+146,
+          "promotion": 6,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+152,
+          "promotion": 7,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000006e+158,
+          "promotion": 8,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+164,
+          "promotion": 9,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000004e+170,
+          "promotion": 10,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        }
+      ],
+      "source_continuation": {
+        "common_sol": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        },
+        "private_flux": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        }
+      },
+      "telemetry_scope": "active-set residuals cover every production trip; detailed inner globalisation arrays describe the terminal frozen-mask trip exposed by FixedPointResult",
+      "termination": "active_set_settled",
+      "trip_count": 5
+    },
+    "qualification": "unqualified",
+    "qualification_bound": 1e-12,
+    "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+    "requested_seed_class": "limited",
+    "route": "profile.solve newton_krylov",
+    "seed": {
+      "anchor_available": true,
+      "anchor_m": [
+        1.0902686675161324,
+        -0.007832057821463808
+      ],
+      "branch_index": 0,
+      "construction": "current_centroid_disc",
+      "current_centroid_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "current_target_provenance": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "current_centroid_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "declared_current_a": 251245.90891804622,
+        "quadrature_current_a": 251245.90891804622,
+        "quadrature_nodes": 512,
+        "quadrature_relative_closure": 0.0
+      },
+      "declared_axis_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "declared_boundary_m": [
+        1.0902686675161324,
+        -0.007832057821463808
+      ],
+      "factory": "profile.cold_seed_portfolio",
+      "plasma_current_a": 251245.90891804622,
+      "requested_class": "limited",
+      "seed_radius_m": 0.18257506240510613,
+      "state_sha256_binary64": "8594ff83cd4ee884da62122a3173f76819f77dd8fdf2d69a54b135616b29ab77",
+      "stored_flux_samples_used": false,
+      "supported_cell_count": 104
+    },
+    "solve_wall_seconds": 2161.5154117019847,
+    "target_current_a": 251245.90891804622,
+    "target_current_argument": "Ip_closed_form",
+    "terminal_fixed_point_residual": 0.018425499297598767,
+    "terminal_fixed_point_residual_status": "finite",
+    "termination": "active_set_settled"
+  },
+  "stage_wall_seconds": {
+    "accuracy_scoring": 0.3485748500097543,
+    "case_and_machine": 0.1768828658387065,
+    "figure_render": 0.9050743691623211,
+    "operator_and_seed": 19.65672249905765,
+    "production_solve": 2161.5154117019847
+  }
+}

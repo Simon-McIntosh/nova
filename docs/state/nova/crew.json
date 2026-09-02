@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:45:29",
+  "updated": "2026-09-02T11:52:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1902,9 +1902,11 @@
         "id": "wiring-audit",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0617b-150b-7ea1-a118-8d77b794c6d5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0617b-150b-7ea1-a118-8d77b794c6d5"
+        },
         "created": "2026-09-02"
       },
       {
@@ -75711,9 +75713,128 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T093725226077-scr-capability-wiring-audit",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-capability-wiring-audit",
+        "node_definition": {
+          "done_when": "the report exists at the path, its table has at least 14 capability rows and 7 entry-point columns with every cell one of DEFAULT-ON, OPT-IN or ABSENT plus a path:line, the gap list names the owning plan per gap, and every cited path exists (checked with test -e in the manifest's test line)",
+          "estimated_hours": 1.0,
+          "goal": "A capability-wiring audit at /home/ITER/mcintos/.config/reckon/crew/reports/nova/capability-wiring-audit.md, read-only, answering the lead's concern that landed solver breakthroughs are not wired through as defaults: one HTML-free markdown table with a row per landed capability - the net-current lambda normalisation (target_current, ForwardFluxOperator.current_normalisation_amplitude), the moment-conditioned seed (moment-conditioned-basin-entry plan), the dual-branch portfolio and cold_seed_portfolio, own-induced-mask acceptance (a2e65fda), the strict settled-exit (stop_on_active_set_settlement), Newton-state and globalization continuation across settled masks, best-iterate retention, the stagnation stop, Anderson acceleration, the exact polygon kernels by default (solovev-exact-recovery), the cached machine builds, the persistent XLA compilation cache (nova.jax.config.configure_persistent_compilation_cache), the constraint pins (ConstraintPinSet), and the carrier topology read with census polish - and a column per production entry point: ForwardProfile.solve and its routes in nova/equilibrium/forward.py, the exact bank regeneration route (benchmarks/bank_revision_reproduction.py and the topology-visuals generator), benchmarks/efit_forward_parity_slice.py, benchmarks/diiid_forward_gs_match.py, the Solovev oracle path (scripts/analytic_oracle_fixtures, scripts/oracle_rebaseline), benchmarks/solovev_certificate.py, and the default pytest lane, each cell reading DEFAULT-ON, OPT-IN (with the flag or argument name), or ABSENT, with the file path and line for the evidence, followed by a ranked list of the gaps where a capability the plans describe as landed is opt-in or absent on the production route, and for each gap the one-line wiring change and the plan that owns it",
+          "id": "scr-capability-wiring-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093725226077-scr-capability-wiring-audit/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/capability-wiring-audit.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "wiring-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T09:37:30Z",
+        "completed_at": "2026-09-02T09:52:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 887,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 887,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f2c5634a1cd4ac21d1f68776cbdd3b9b4ec51655",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -e over every cited path plus table shape check (16 rows x 8 columns)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093725226077-scr-capability-wiring-audit/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T093725226077-scr-capability-wiring-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0617b-150b-7ea1-a118-8d77b794c6d5",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 196,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 3796,
+              "log_age_seconds": 1940,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1968,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only audit report delivered to the crew reports directory",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1342
+    "_version": 1344
   }
 }

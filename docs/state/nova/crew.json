@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:39:00",
+  "updated": "2026-09-02T17:45:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78873,9 +78873,96 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T152559448736-pta-schema4-bank-regeneration",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-schema4-bank-regeneration",
+        "node_definition": {
+          "done_when": "The regenerated mast-topology-operands.npz and mast-topology-operands.metadata.json are committed in the worktree with a body naming the producer commit, the base revision, the carrier semantic identity and the SLURM job id; a census in the manifest lists per row the cell count, per_cell_flux_values length, current_cell_polygons shape and atomic_node_signed_flux length (11 rows populated, 21986/46 mixed recorded unavailable with the exception name); the metadata carries the cache identity and staleness fields the producer writes, and solver_qualification.marginal_solver_basin stays consistent with docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json (true for 21978/35 pure and 22086/43 pure only); JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_mask_replay.py on the regenerated bank still reports 0 of 42 differing cells on 22086/43 mixed with the log cited; the committed 22086/43 rows' domain labels are unchanged from the current bank (state the differing-label count per row against the current file, expected 0 for the two schema-4 rows and reported as a finding for any other row whose labels moved under the re-baselined solver); no other file is modified; if the H200 queue does not start the job within 20 minutes, hand off with the job id in the manifest rather than cancel",
+          "estimated_hours": 3.0,
+          "goal": "Regenerate the twelve-row MAST operand bank docs/figures/topology-visual-corroboration/mast-topology-operands.npz with the schema-4 fields (per_cell_flux_values, per_candidate_domain_labels, current_cell_polygons, atomic_node_signed_flux) populated for every row that has cells, using the merged schema-4 producer docs/figures/topology-visual-corroboration/generate_topology_visuals.py and the pinned regeneration recipe docs/figures/topology-visual-corroboration/mast-22086-pinned-regeneration.sbatch adapted to current main on the H200 (sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --mem=64G --time=04:00:00, export TMPDIR=/tmp), against the persisted frozen-six response carrier with semantic identity 1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994, recording 21986/46 mixed (NoQualifiedAxisError before any residual) as an unavailable zero-cell row rather than failing the bank",
+          "id": "pta-schema4-bank-regeneration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T152559448736-pta-schema4-bank-regeneration/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "150m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-perf",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T15:27:27Z",
+        "completed_at": "2026-09-02T15:28:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 75,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 75,
+        "stalled": false,
+        "time_budget": "150m",
+        "base_sha": "ab29d88cc200186b175445a4bbac211f818013fe",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T152559448736-pta-schema4-bank-regeneration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "worker process died one minute after launch with no manifest and empty stderr, before any repository change",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1376
+    "_version": 1377
   }
 }

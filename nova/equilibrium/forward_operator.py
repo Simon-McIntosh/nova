@@ -348,9 +348,19 @@ class PrescribedCurrentField:
         """Return the number of prescribed circuit currents."""
         return self.current.size
 
-    def flux(self) -> jax.Array:
-        """Return the prescribed conductor flux [Wb] at every target."""
-        return self.response @ self.current
+    def flux(self, current=None) -> jax.Array:
+        """Return the prescribed conductor flux [Wb] at every target.
+
+        An explicitly supplied vector replaces the stored circuit state.  The
+        response remains immutable geometry while same-shaped current edits
+        stay ordinary traced data.
+        """
+        conductor = self.current if current is None else jnp.asarray(current)
+        if conductor.shape != self.current.shape:
+            raise ValueError(
+                "prescribed current must match the stored circuit vector shape"
+            )
+        return self.response @ conductor
 
 
 @dataclass
@@ -572,8 +582,13 @@ class ForwardFluxOperator:
         """Return the conductor currents one evaluation should use."""
         return self.external_current if current is None else jnp.asarray(current)
 
-    def external(self, current=None) -> jax.Array:
-        """Return the flux map [Wb] of every conductor but the plasma."""
+    def external(self, current=None, prescribed_current=None) -> jax.Array:
+        """Return the flux map [Wb] of every conductor but the plasma.
+
+        ``current`` drives the ordinary conductor targets.  A separate
+        ``prescribed_current`` replaces the complete vector held by the
+        prescribed response policy; it is never added to ``current``.
+        """
         conductor = self._current(current)
         physical = jnp.r_[self.grid.external(conductor), self.wall.external(conductor)]
         external = (
@@ -582,8 +597,12 @@ class ForwardFluxOperator:
             else jnp.r_[physical, self.sample.external(conductor)]
         )
         if self.prescribed_field is None:
+            if prescribed_current is not None:
+                raise ValueError(
+                    "prescribed_current requires a prescribed current field"
+                )
             return external
-        return external + self.prescribed_field.flux()
+        return external + self.prescribed_field.flux(prescribed_current)
 
     def __getattribute__(self, name: str):
         """Retain the public prescribed-current accessor without storing a target."""
@@ -1030,10 +1049,15 @@ class ForwardFluxOperator:
         return jnp.r_[physical, self.sample.internal(moments)]
 
     def __call__(
-        self, psi, current=None, requested_class=None, target_current=None
+        self,
+        psi,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
     ) -> jax.Array:
         """Return the total poloidal flux [Wb] one write-then-read cycle gives."""
-        mapped = self.external(current) + self.internal(
+        mapped = self.external(current, prescribed_current) + self.internal(
             psi, requested_class, target_current
         )
         return self._exclude_shadow_residual(psi, mapped, requested_class)
@@ -1048,20 +1072,35 @@ class ForwardFluxOperator:
         return jnp.where(shadow, psi, mapped)
 
     def residual(
-        self, psi, current=None, requested_class=None, target_current=None
+        self,
+        psi,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
     ) -> jax.Array:
         """Return the free-boundary flux residual of a trial flux map."""
-        return psi - self(psi, current, requested_class, target_current)
+        return psi - self(
+            psi,
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
+        )
 
     def flux_map(
-        self, current=None, requested_class=None, target_current=None
+        self,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
     ) -> Callable[[jax.Array], jax.Array]:
         """Return the fixed-point map ``psi -> g(psi)`` at one conductor state.
 
         The external contribution is evaluated once and captured, so a
         fixed-point ladder pays for the plasma coupling alone.
         """
-        external = self.external(current)
+        external = self.external(current, prescribed_current)
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
@@ -1071,10 +1110,14 @@ class ForwardFluxOperator:
         return mapped
 
     def flux_map_with_shadow(
-        self, current=None, requested_class=None, target_current=None
+        self,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
     ) -> Callable[[jax.Array, jax.Array], jax.Array]:
         """Return a fixed-point map evaluated with one promoted shadow mask."""
-        external = self.external(current)
+        external = self.external(current, prescribed_current)
 
         def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
             image = external + self.internal(psi, requested_class, target_current)

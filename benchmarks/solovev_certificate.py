@@ -9,14 +9,16 @@ by the terminal residual qualification.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
 import socket
 import subprocess
+import threading
 from time import perf_counter
-from typing import Any
+from typing import Any, Iterator
 
 import jax
 import jax.numpy as jnp
@@ -37,7 +39,11 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_hessian,
 )
 from nova.equilibrium.stencil_mesh import StencilMesh
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.reduced_oracle import measure_reduced_oracle
 from scripts.dual_basin_fixtures.build_diverted_fixture import (
@@ -66,6 +72,7 @@ THEORETICAL_ORDER = 2.0
 NORM_FIELDS = ("psi", "gradient", "hessian")
 NORM_REGIONS = ("whole_domain", "two_pitch_boundary_band")
 NORM_STATISTICS = ("sup", "rms")
+HEARTBEAT_SECONDS = 30.0
 REUSE_MAP_ROWS = (
     "tests/rotating_equilibrium_references.py::reference_cases",
     "benchmarks/split_fit_jump_field.py::_polynomial_gradient,_polynomial_hessian,_lcfs",
@@ -74,6 +81,49 @@ REUSE_MAP_ROWS = (
     "scripts/analytic_oracle_fixtures/reduced_oracle.py::measure_reduced_oracle",
     "tests/test_solovev_recovery_gates.py::LOCKED_RECOVERY_BOUNDS",
 )
+
+
+@contextmanager
+def _timed_stage(
+    name: str,
+    timings: dict[str, float],
+    *,
+    case_name: str,
+    requested_cells: int,
+) -> Iterator[None]:
+    """Emit flushed stage boundaries and heartbeats for scheduler harvesting."""
+
+    started = perf_counter()
+    stopped = threading.Event()
+
+    def heartbeat() -> None:
+        while not stopped.wait(HEARTBEAT_SECONDS):
+            print(
+                f"SOLOVEV_STAGE_HEARTBEAT case={case_name} "
+                f"requested_cells={requested_cells} stage={name} "
+                f"elapsed_seconds={perf_counter() - started:.3f}",
+                flush=True,
+            )
+
+    print(
+        f"SOLOVEV_STAGE_BEGIN case={case_name} requested_cells={requested_cells} "
+        f"stage={name}",
+        flush=True,
+    )
+    worker = threading.Thread(target=heartbeat, daemon=True)
+    worker.start()
+    try:
+        yield
+    finally:
+        elapsed = perf_counter() - started
+        timings[name] = elapsed
+        stopped.set()
+        worker.join()
+        print(
+            f"SOLOVEV_STAGE_END case={case_name} requested_cells={requested_cells} "
+            f"stage={name} elapsed_seconds={elapsed:.6f}",
+            flush=True,
+        )
 
 
 def _strict(value: Any) -> Any:
@@ -316,51 +366,88 @@ def _plot(
 
 def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     configure_dtypes()
-    carrier_case, source_case, exact = _case(case_name)
-    machine_builder = (
-        oracle_fixture.build_machine
-        if requested_cells == -110
-        else oracle_fixture.cached_machine
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
     )
-    if requested_cells == -110:
-        machine = machine_builder(
-            carrier_case, requested_cells, wall_nodes=oracle_fixture.WALL_POINT_COUNT
+    print(
+        f"SOLOVEV_COMPILATION_CACHE directory={compilation_cache.directory} "
+        f"version={compilation_cache.version_key}",
+        flush=True,
+    )
+    stage_timings: dict[str, float] = {}
+    with _timed_stage(
+        "case_and_machine",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        carrier_case, source_case, exact = _case(case_name)
+        machine_builder = (
+            oracle_fixture.build_machine
+            if requested_cells == -110
+            else oracle_fixture.cached_machine
         )
-        machine.cache.update(
-            {
-                "hit": False,
-                "semantic_key": "reduced-oracle-direct-build",
-                "build_seconds": None,
-            }
+        if requested_cells == -110:
+            machine = machine_builder(
+                carrier_case,
+                requested_cells,
+                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+            )
+            machine.cache.update(
+                {
+                    "hit": False,
+                    "semantic_key": "reduced-oracle-direct-build",
+                    "build_seconds": None,
+                }
+            )
+        else:
+            machine = machine_builder(
+                carrier_case,
+                requested_cells,
+                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+            )
+
+    with _timed_stage(
+        "operator_and_seed",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
         )
-    else:
-        machine = machine_builder(
-            carrier_case, requested_cells, wall_nodes=oracle_fixture.WALL_POINT_COUNT
+        oracle_state = _exact_state(case_name, exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, oracle_state
         )
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
-    )
-    oracle_state = _exact_state(case_name, exact, coordinates)
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
-    )
-    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-    exact_internal = oracle_fixture._internal_flux_image(
-        empty_operator, exact_coefficients
-    )
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - exact_internal
-    )
-    seed, _moment_image, seed_receipt = recovery._moment_seed(
-        source_case, machine, operator
-    )
-    compile_started = perf_counter()
-    compiled = recovery._solve(operator.flux_map(), seed)
-    compile_and_solve_seconds = perf_counter() - compile_started
-    warm_started = perf_counter()
-    terminal = recovery._solve(operator.flux_map(), seed)
-    warm_solve_seconds = perf_counter() - warm_started
+        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+        exact_internal = oracle_fixture._internal_flux_image(
+            empty_operator, exact_coefficients
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, oracle_state - exact_internal
+        )
+        seed, _moment_image, seed_receipt = recovery._moment_seed(
+            source_case, machine, operator
+        )
+
+    with _timed_stage(
+        "compile_and_first_solve",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        compiled = recovery._solve(operator.flux_map(), seed)
+    compile_and_solve_seconds = stage_timings["compile_and_first_solve"]
+    with _timed_stage(
+        "compile_warm_solve",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        terminal = recovery._solve(operator.flux_map(), seed)
+    warm_solve_seconds = stage_timings["compile_warm_solve"]
     terminal_state = np.asarray(terminal.state, dtype=np.float64)
     terminal_residual = float(terminal.residual)
     qualification = (
@@ -370,58 +457,70 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         else "unqualified"
     )
 
-    cell_count = len(machine.node)
-    root_grid = terminal_state[:cell_count]
-    exact_grid = oracle_state[:cell_count]
-    mesh = StencilMesh(machine.node, machine.stencil, machine.area)
-    derivative_coordinates, root_gradient, root_hessian = _quadratic_derivatives(
-        mesh, root_grid
-    )
-    exact_gradient, exact_hessian = _exact_derivatives(
-        case_name, exact, derivative_coordinates
-    )
-    psi_error = root_grid - exact_grid
-    gradient_error = root_gradient - exact_gradient
-    hessian_error = root_hessian - exact_hessian
-    boundary = _boundary(case_name, exact)
-    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
-    psi_boundary_band = _distance_to_boundary(machine.node, boundary) <= (
-        BOUNDARY_BAND_PITCHES * pitch
-    )
-    derivative_boundary_band = _distance_to_boundary(
-        derivative_coordinates, boundary
-    ) <= (BOUNDARY_BAND_PITCHES * pitch)
-    exact_topology = _topology(operator, oracle_state)
-    root_topology = _topology(operator, terminal_state)
-    axis_reference = (
-        AXIS_M
-        if case_name == "diverted-jump-bearing"
-        else np.asarray(exact.magnetic_axis)
-    )
-    x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
-    x_error = None
-    if x_reference is not None and root_topology["x_point_rz_m"] is not None:
-        x_error = float(
-            np.linalg.norm(np.asarray(root_topology["x_point_rz_m"]) - x_reference)
+    with _timed_stage(
+        "accuracy_scoring",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        cell_count = len(machine.node)
+        root_grid = terminal_state[:cell_count]
+        exact_grid = oracle_state[:cell_count]
+        mesh = StencilMesh(machine.node, machine.stencil, machine.area)
+        derivative_coordinates, root_gradient, root_hessian = _quadratic_derivatives(
+            mesh, root_grid
         )
-    span = max(abs(float(exact_topology["flux_span_wb"])), np.finfo(float).tiny)
-    exact_psi_norm = (exact_grid - float(exact_topology["axis_flux_wb"])) / float(
-        exact_topology["flux_span_wb"]
-    )
-    analytic_regions = _regional_norms(psi_error, exact_psi_norm, span)
+        exact_gradient, exact_hessian = _exact_derivatives(
+            case_name, exact, derivative_coordinates
+        )
+        psi_error = root_grid - exact_grid
+        gradient_error = root_gradient - exact_gradient
+        hessian_error = root_hessian - exact_hessian
+        boundary = _boundary(case_name, exact)
+        pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+        psi_boundary_band = _distance_to_boundary(machine.node, boundary) <= (
+            BOUNDARY_BAND_PITCHES * pitch
+        )
+        derivative_boundary_band = _distance_to_boundary(
+            derivative_coordinates, boundary
+        ) <= (BOUNDARY_BAND_PITCHES * pitch)
+        exact_topology = _topology(operator, oracle_state)
+        root_topology = _topology(operator, terminal_state)
+        axis_reference = (
+            AXIS_M
+            if case_name == "diverted-jump-bearing"
+            else np.asarray(exact.magnetic_axis)
+        )
+        x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
+        x_error = None
+        if x_reference is not None and root_topology["x_point_rz_m"] is not None:
+            x_error = float(
+                np.linalg.norm(np.asarray(root_topology["x_point_rz_m"]) - x_reference)
+            )
+        span = max(abs(float(exact_topology["flux_span_wb"])), np.finfo(float).tiny)
+        exact_psi_norm = (exact_grid - float(exact_topology["axis_flux_wb"])) / float(
+            exact_topology["flux_span_wb"]
+        )
+        analytic_regions = _regional_norms(psi_error, exact_psi_norm, span)
     figure = _figure_path(case_name, requested_cells)
-    _plot(
-        machine.node,
-        derivative_coordinates,
-        {
-            "psi": psi_error,
-            "gradient": gradient_error,
-            "hessian": hessian_error,
-        },
-        boundary,
-        figure,
-        f"{case_name} · {_slug(requested_cells)} · {qualification}",
-    )
+    with _timed_stage(
+        "figure_render",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        _plot(
+            machine.node,
+            derivative_coordinates,
+            {
+                "psi": psi_error,
+                "gradient": gradient_error,
+                "hessian": hessian_error,
+            },
+            boundary,
+            figure,
+            f"{case_name} · {_slug(requested_cells)} · {qualification}",
+        )
     row = {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -429,6 +528,8 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "characteristic_pitch_m": pitch,
         "derivative_support_cells": len(derivative_coordinates),
         "cache": machine.cache,
+        "persistent_compilation_cache": compilation_cache.receipt(),
+        "stage_wall_seconds": stage_timings,
         "lane": _lane(),
         "solver": {
             "route": "production moment seed with undamped Newton-Krylov",
@@ -590,6 +691,8 @@ def _schema() -> dict[str, Any]:
             "norms",
             "geometry",
             "solver",
+            "persistent_compilation_cache",
+            "stage_wall_seconds",
             "lane",
             "figure",
         ],

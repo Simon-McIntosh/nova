@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T06:51:58",
+  "updated": "2026-09-02T07:07:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73204,9 +73204,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T044551842111-pta-topology-read-slurm-gpu-lane",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-topology-read-slurm-gpu-lane",
+        "node_definition": {
+          "done_when": "A job script /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-slurm-gpu/forward_reference_gpu.sbatch exists and was submitted with sbatch from the worktree root using --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=03:00:00 (this partition has no time limit, so a generous request costs nothing), with export TMPDIR=/tmp at the top, then cd to the worktree and run: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python -c 'import jax; print(jax.default_backend(), jax.devices())' followed by UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_equilibrium_forward_reference.py -k 'not test_persistent_fixture_machine_cache_builds_once' with stdout and stderr redirected to /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-slurm-gpu/test_equilibrium_forward_reference_gpu.log and the line EXIT= plus the exit status appended; you poll squeue for the job every 60 seconds and, when it ends, the manifest reports the job id, the node, the backend and devices line, the wall time, the passed and failed counts from the log's summary line and the name of every failing test (up to seven solver-convergence failures are expected and EXIT=1 is then acceptable); if the job has not started within 15 minutes of submission write a NEEDS-HELP brief with the squeue reason and stop, leaving the job queued and its id in the manifest; no source or test file is modified and no commit is made",
+          "estimated_hours": 1.0,
+          "goal": "Produce the GPU forward-reference lane evidence for commit 696f437a on a SLURM H200 compute node, because the login node's 64 GiB user cgroup kills the lane, writing the job script, the job output and the test log into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-slurm-gpu",
+          "id": "pta-topology-read-slurm-gpu-lane",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T044551842111-pta-topology-read-slurm-gpu-lane/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-topology-read-slurm-gpu"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T04:45:56Z",
+        "completed_at": "2026-09-02T05:06:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1249,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1249,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "696f437adf63c66e245c2274de607b13abe23615",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T044551842111-pta-topology-read-slurm-gpu-lane/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3272448,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3408602,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10861,
+            "reasoning_output_tokens": 969,
+            "reasoning_output_tokens_cumulative": 2914
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane node; the SLURM job it launched continues to run",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_equilibrium_forward_reference.py",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1306
+    "_version": 1307
   }
 }

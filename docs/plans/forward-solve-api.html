@@ -19,12 +19,12 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="equilibrium,fixed-point,provenance,jax,reuse">
 <meta name="plan-depends-on" content="solver-convergence-regression,solve-default-wiring">
-<meta name="plan-blocks" content="batched-operator-boundary">
+<meta name="plan-blocks" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -62,6 +62,11 @@
     <div class="r-fu-body">After solve-default-wiring lands its one-line gap fixes and the first default-wiring test, author the request and receipt types with the resolved-defaults block (§1), migrate the production routes and the imas-ambix consumer and regenerate the two EFIT-match evidence documents through the seam (§2), bring the transport forwards under the same defaults (§3), and wire the seam into the AGENTS.md files (§4). Waits on solver-convergence-regression only for which acceptance becomes the declared default.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-20260902T1440-ambix-consumer" data-who="reckon-ship-s19" data-when="2026-09-02T14:40:00+00:00">
+    <div class="r-comment-body">CONSUMER POINTER: imas-ambix plan physics-carried-playable-plasma (imas-ambix sprint S19, draft) declares depends_on nova:forward-solve-api and records this section's three demands verbatim in its §3: external_current as a traced argument over static geometry with a measured warm per-edit cost, warm-start from the previous edit's state measured across a coil sweep, LCFS and X-points in the receipt at no extra compile. Its interactive lane runs on precomputed coil sweeps until (i) lands, then switches to live solves through the same wrapper; the demo shot is drawn from the converging frozen-six set (21983, 21985, 21986, 21989). nova:batched-operator-boundary is its live-lane latency unlock.</div>
+</div>
 </section>
 </main>
 </body>

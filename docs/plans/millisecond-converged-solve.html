@@ -22,6 +22,8 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -37,17 +39,20 @@
 <h2 id="s3">§3 — The certified millisecond measurement</h2>
 <p>The end state, measured honestly: on the H200, cache-warm, at production width over the real MAST and DIII-D bank member mixes, the mean per-member cost of solves that <em>pass the accuracy certificate</em> (from <code>gs-absolute-accuracy-gates</code>) is at or near 1 ms, with the distribution plotted — settled members, deep members, and the certified-converged criterion on one figure — and the non-qualifying arms (the backend-margin arms, pending their forensics verdict) reported separately rather than averaged in. Done-when: the receipt states mean and tail ms/member for certificate-passing solves per machine, beside the 0.784 ms map floor and the 415.6 ms full-trip baseline it replaces.</p>
 
-<section data-reckon="decisions" id="decisions" class="r-decisions">
-<h2><span class="sec">§</span> Decisions</h2>
-</section>
+
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-mcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
-<h4 class="r-fu-title">Carry the solve to certified 1 ms</h4>
-<div class="r-fu-body">Close the exit-window decision and implement the locked branch, restructure the per-trip quantum behind the referee surface, and bank the certified millisecond measurement on real bank mixes. Depends on solver-trip-orchestration receipts and the accuracy certificate.</div>
-<pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
-</article>
+    <h4 class="r-fu-title">Carry the solve to certified 1 ms</h4>
+    <div class="r-fu-body">Close the exit-window decision and implement the locked branch, restructure the per-trip quantum behind the referee surface, and bank the certified millisecond measurement on real bank mixes. Depends on solver-trip-orchestration receipts and the accuracy certificate.</div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260902T0905-s1-opens" data-who="reckon-ship-s19" data-when="2026-09-02T09:05:00+00:00">
+    <div class="r-comment-body">DEPENDENCY READING before dispatch. solver-trip-orchestration SHIPPED 2026-09-02 with the residual-progress-exit-window locked STRICT-NO-OP-EXIT-ONLY by the lead (1.163 ms/slice projected, zero tolerated error; the causal 1% window rejected). So §1's 'implement the locked branch' is already landed (the strict exit, commit 365aaf81, referees green, bit-identical) and what remains of §1 is the MEASUREMENT the plan demands: the exit incidence and ms/slice on the REAL MAST and DIII-D bank member mixes, since the width-1024 replicated-state measurement cannot exhibit exit incidence. §1 and §2 depend only on solver-trip-orchestration; §3 (the certified measurement) additionally depends on gs-absolute-accuracy-gates, which is still active, so the plan-level dependency keeps this plan reading blocked until the certificate ships while §1 and §2 nodes run now. Two baselines the plan quotes are STALE at HEAD and must be re-measured before §2 claims anything: the 0.784 ms map and the 25.0 ms per-trip quantum were banked before the census null polish entered the jitted topology read (merge aecea6a7, corrected at 588578a0), which adds two dense normal-equation solves to every read on every trip; and every solve must run on main at or after 588578a0, where the polished X flux equals the census value again (the earlier polish value swap made 22086/43 converge for the wrong reason). Compute pattern per the locked build-on-H200-then-reuse-caches decision: one H200, one CPU (the reservation's cores are held by serving jobs), persistent compilation cache, persisted carriers.</div>
+</div>
 </section>
 </main>
 </body>

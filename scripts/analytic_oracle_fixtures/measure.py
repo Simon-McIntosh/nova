@@ -24,7 +24,10 @@ import xarray
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.polygonanalytic import polygon_analytic_flux_moments
+from nova.biot.polygonanalytic import (
+    polygon_analytic_flux_moment_executor,
+    polygon_analytic_flux_moments_batched,
+)
 from nova.biot.target import FluxTarget
 from nova.database.zarrstore import ZarrStore
 from nova.equilibrium.domain import PlasmaDomain
@@ -364,20 +367,20 @@ def _clean_vertices(vertices: np.ndarray) -> np.ndarray:
 
 
 def _flux_blocks(
-    targets: np.ndarray, polygons: tuple[np.ndarray, ...], centres: np.ndarray
+    targets: np.ndarray,
+    polygons: tuple[np.ndarray, ...],
+    centres: np.ndarray,
+    *,
+    executor=None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Assemble exact authored-section blocks for one target family."""
-    rows = [np.empty((len(targets), len(polygons)), dtype=np.float64) for _ in range(3)]
-    for source, polygon in enumerate(polygons):
-        values = polygon_analytic_flux_moments(
-            targets[:, 0],
-            targets[:, 1],
-            polygon,
-            expansion_point=centres[source],
-        )
-        for row, value in zip(rows, values, strict=True):
-            row[:, source] = value
-    return tuple(rows)
+    return polygon_analytic_flux_moments_batched(
+        targets[:, 0],
+        targets[:, 1],
+        polygons,
+        expansion_points=centres,
+        executor=executor,
+    )
 
 
 def build_machine(
@@ -429,9 +432,16 @@ def build_machine(
     regular = np.asarray([len(polygon) == 6 for polygon in polygons])
     interior_stencil = stencil[(condition < 1.0e3) & regular[stencil].all(axis=1)]
     sample = geometry.sample_node_coordinates
-    grid_blocks = _flux_blocks(centres, polygons, geometry.atomic_mesh.centroids)
-    wall_blocks = _flux_blocks(wall, polygons, geometry.atomic_mesh.centroids)
-    sample_blocks = _flux_blocks(sample, polygons, geometry.atomic_mesh.centroids)
+    with polygon_analytic_flux_moment_executor() as executor:
+        grid_blocks = _flux_blocks(
+            centres, polygons, geometry.atomic_mesh.centroids, executor=executor
+        )
+        wall_blocks = _flux_blocks(
+            wall, polygons, geometry.atomic_mesh.centroids, executor=executor
+        )
+        sample_blocks = _flux_blocks(
+            sample, polygons, geometry.atomic_mesh.centroids, executor=executor
+        )
     return OracleMachine(
         node=centres,
         area=area,

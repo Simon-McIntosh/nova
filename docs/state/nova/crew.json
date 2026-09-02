@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:05:38",
+  "updated": "2026-09-02T09:09:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -74810,9 +74810,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T070304405007-pta-stagnation-recheck",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-stagnation-recheck",
+        "node_definition": {
+          "done_when": "The log /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-recheck/test_active_set_stagnation_recheck.log exists, produced from the worktree root by JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_active_set_stagnation.py with stdout and stderr redirected into it and the line EXIT= plus the exit status appended; the manifest states the base commit, the pass and fail counts, and for any failure the assertion line; no source or test file is modified and no commit is made",
+          "estimated_hours": 0.25,
+          "goal": "Establish whether tests/test_active_set_stagnation.py still fails on current main now that the map-owned polish value (588578a0) and the mask migration (260a8b44) are merged, by running it once as a fresh-process lane into the directory /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-recheck",
+          "id": "pta-stagnation-recheck",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070304405007-pta-stagnation-recheck/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-recheck"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pta-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:03:11Z",
+        "completed_at": "2026-09-02T07:07:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 279,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 279,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "eb297a48dce558b3c713ae6b079c4e3f0053f740",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_active_set_stagnation.py on main eb297a48",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-stagnation-recheck/test_active_set_stagnation_recheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070304405007-pta-stagnation-recheck/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f20-23f3-76c3-97eb-562b08815283",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3008512,
+            "cached_input_tokens_cumulative": 3008512,
+            "input_tokens": 3080075,
+            "input_tokens_cumulative": 3080075,
+            "output_tokens": 5355,
+            "output_tokens_cumulative": 5355,
+            "reasoning_output_tokens": 1006,
+            "reasoning_output_tokens_cumulative": 1006
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "evidence-only lane",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_active_set_stagnation.py",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1326
+    "_version": 1327
   }
 }

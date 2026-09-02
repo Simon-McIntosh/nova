@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T16:14:19",
+  "updated": "2026-09-02T17:13:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78194,9 +78194,178 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T130149558094-fsa-receipt-topology",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-receipt-topology",
+        "node_definition": {
+          "done_when": "receipt-topology.json records equal compile counts and solve wall within noise with and without the new fields, tests/test_solve_receipt_topology.py passes with the label set exactly core, private, wall shadow and open, the seven referee tests pass unmodified, existing receipt fields are bit-identical on the parity slice, SLURM job id, node and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/forward.py",
+          "estimated_hours": 2.5,
+          "goal": "The full labelled flux map in the solve receipt at no extra compile: ForwardEquilibrium in nova/equilibrium/forward.py gains typed fields carrying psi and psi_N on the hex mesh, the O-point, primary and secondary X-points, the LCFS polyline from the separatrix extraction the operator already performs, the strike points, and the per-cell domain labels the plasma-cell authority resolves (core, private flux, wall shadow, every other cell open, with no scrape-off-layer class because the hex cells cannot resolve it), populated from the terminal topology read the solve already performs inside the same compiled launch, accompanied by tests/test_solve_receipt_topology.py asserting on a converging frozen-six MAST arm (cached carrier, CPU) that the receipt fields equal a separate operator.read of the terminal flux and that the label set contains no SOL class, and by a benchmark benchmarks/receipt_topology_check.py recording on the H200 (one CPU, one H200, persistent compilation cache, launch-then-harvest) the compile counts and solve wall with and without the receipt fields populated to prove no extra compile or launch, written to docs/figures/forward-solve-api/receipt-topology.json, with the seven referee tests run unmodified and the parity-slice receipt bit-identical in its existing fields",
+          "id": "fsa-receipt-topology",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130149558094-fsa-receipt-topology/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_solve_receipt_topology.py",
+            "benchmarks/receipt_topology_check.py",
+            "docs/figures/forward-solve-api/receipt-topology.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-receipt-topology",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:01:57Z",
+        "completed_at": "2026-09-02T14:27:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5120,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5120,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2f2dbe70b35014515e730a4184d1c7b3aba4afce",
+        "commits": [
+          "7eebe4c9436a65ddc6e8173a6020936b63a3f4f8"
+        ],
+        "changed_lines": {
+          "added": 929,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_solve_receipt_topology.py plus the seven referee node IDs; H200 job 1261465 COMPLETED",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130149558094-fsa-receipt-topology/logs/forward-receipt-focused.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130149558094-fsa-receipt-topology/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06236-445f-7111-8241-f26a7af6d1ea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18199808,
+            "cached_input_tokens_cumulative": 18199808,
+            "input_tokens": 18285352,
+            "input_tokens_cumulative": 18285352,
+            "output_tokens": 26732,
+            "output_tokens_cumulative": 26732,
+            "reasoning_output_tokens": 7285,
+            "reasoning_output_tokens_cumulative": 7285
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6589,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the 60-minute worker fence expires before the three-hour launch-then-harvest job can finish; job 1261213 remains active and must not be cancelled; while the final JSON and PNG do not exist until it completes",
+              "elapsed_seconds": 10189,
+              "log_age_seconds": 7343,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9ebe21dd9f7593b63532885d835c2028a9c14fd2",
+                "4f8426295e9039ba4c82da325a2d560d1196d1f1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T101159578707-mcs-strict-exit-sequential/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-sequential",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T101159578707-mcs-strict-exit-sequential",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 7386,
+              "terminal_at": "2026-09-02T10:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-sequential"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1763,
+              "log_age_seconds": 373,
+              "log_fresh": true,
+              "manifest_commits": [
+                "790240576705da86bc8d69e71a0e64638f66143b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T123221151752-pta-parity-harness-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T123221151752-pta-parity-harness-repair --gate <verdict> --commit 790240576705da86bc8d69e71a0e64638f66143b",
+              "node": "pta-parity-harness-repair",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T123221151752-pta-parity-harness-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 403,
+              "terminal_at": "2026-09-02T12:55:11Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1371
+    "_version": 1372
   }
 }

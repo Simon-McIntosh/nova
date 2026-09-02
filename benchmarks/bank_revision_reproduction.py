@@ -328,9 +328,14 @@ def capture(
     )
     from benchmarks.label_seed_residual_field import _persisted_response_cache
     from nova.imas.mast_vacuum_cohort import SHOT_STORE
-    from nova.jax.config import configure_dtypes
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
 
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     if jax.default_backend() != "gpu":
         raise RuntimeError(
             f"capture requires the GPU backend, selected {jax.default_backend()!r}"

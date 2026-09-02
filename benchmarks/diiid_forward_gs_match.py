@@ -94,7 +94,12 @@ from nova.imas.diiid_current import (
     shipped_current_at,
 )
 from nova.imas.machine_artifact import resolve_machine_artifact
-from nova.jax.config import Precision, configure_dtypes
+from nova.jax.config import (
+    Precision,
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/forward-gs")
@@ -2913,6 +2918,7 @@ def run_wall_topology_surface(
     """Measure the rectangle sweep, then the default physical-ring arm."""
 
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     comparator, banked_records = _wall_topology_comparator()
     banked_by_key = {
         (record["shot"], record["frame"]): record for record in banked_records
@@ -3561,6 +3567,7 @@ def run_margin_frame_remeasure(
     """Re-measure both wall surfaces with continuously graded proposals."""
 
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     banked_receipt = json.loads(output.read_text()) if output.exists() else None
     sign_parity = _run_sign_parity_check()
     pseudo_banked, physical_banked = _banked_boolean_surface_records()
@@ -3705,6 +3712,7 @@ def run(
             f"scoring requires exactly {EXECUTION_FRAME_COUNT} declared frames"
         )
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     preregistration_path = output / PREREGISTRATION_NAME
     preregistration_hash = require_preregistration(preregistration_path)
     registered = json.loads(preregistration_path.read_text())

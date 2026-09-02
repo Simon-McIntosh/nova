@@ -22,7 +22,11 @@ from nova.equilibrium.moment import (
     limiter_radial_extent,
 )
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, StencilMesh
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 from scripts.analytic_oracle_fixtures.measure import (
     FIXTURE_REQUESTS,
     TOTAL_FLUX_FACTOR,
@@ -494,6 +498,7 @@ def _measure_root(case, machine, operator, oracle, seed, history) -> dict[str, o
 def measure_fixture(name: str) -> dict[str, object]:
     """Solve one warm oracle carrier and bank its recovery receipt."""
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     case = analytic_case()
     requested_cells = FIXTURE_REQUESTS[name]
     print(f"CACHE_REQUEST fixture={name} requested_cells={requested_cells}", flush=True)

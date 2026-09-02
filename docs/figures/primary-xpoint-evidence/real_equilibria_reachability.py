@@ -67,7 +67,11 @@ from nova.equilibrium.forward import SaddleSeedGeometry
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.io import geqdsk
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 
 HERE = Path(__file__).resolve().parent
@@ -635,6 +639,7 @@ def _draw(axis_plot, plot: dict[str, Any]) -> None:
 
 def run() -> dict[str, Any]:
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     before_rows = json.loads(CONTAINMENT_BANK.read_text())["rows"]
     before = {(row["reference"], row["arm"]): row for row in before_rows}
     selected = {

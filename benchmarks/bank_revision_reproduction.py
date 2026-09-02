@@ -37,6 +37,13 @@ DEFAULT_TRUE_PIN = (
 TRAJECTORY_REVISION = "4ee90ece25ad47cc655dc4531249da24d13763e1"
 MODEL_TRUST_REVISION = "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed"
 OWN_MASK_REVISION = "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b"
+NULL_POLISH_MERGE = "aecea6a7d8913b105b5ab15317280f167d818cf2"
+PRE_POLISH_REVISION = "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3"
+COMMITTED_SADDLES = {
+    "22086/43 pure": (0.5904799259797128, 1.2250633080352826),
+    "21978/35 pure": (0.5628646606371921, 1.2634878586583973),
+}
+DEFAULT_ROOT_CAUSE = ROOT / "docs/figures/solver-convergence-regression/root-cause.json"
 
 
 def _sha256(path: Path) -> str:
@@ -96,15 +103,15 @@ def _corroboration_module(shadow_root: Path):
     return module
 
 
-def _allocation() -> dict[str, Any]:
+def _allocation(expected_cpus: int = 4) -> dict[str, Any]:
     job_id = os.environ.get("SLURM_JOB_ID")
     if job_id is None:
         raise RuntimeError("capture requires a scheduler allocation")
     cpus = int(os.environ.get("SLURM_CPUS_PER_TASK", "0"))
     platforms = os.environ.get("JAX_PLATFORMS", "")
     reservation = os.environ.get("SLURM_JOB_RESERVATION", "")
-    if cpus != 4:
-        raise RuntimeError(f"capture requires four CPUs, received {cpus}")
+    if cpus != expected_cpus:
+        raise RuntimeError(f"capture requires {expected_cpus} CPUs, received {cpus}")
     if platforms != "cuda,cpu":
         raise RuntimeError(
             f"capture requires JAX_PLATFORMS=cuda,cpu, received {platforms!r}"
@@ -138,6 +145,82 @@ def _strict_floats(values: Any, count: int) -> list[float] | None:
     array = np.asarray(values, dtype=np.float64).reshape(-1)[:count]
     finite = array[np.isfinite(array)]
     return finite.tolist() if finite.size else None
+
+
+def _stationary_point_polish_receipt(operator, state) -> dict[str, Any] | None:
+    """Return the final qualified O/X polish attempt when the revision exposes it."""
+    from nova.equilibrium.topology import TopologyClass, require_qualified_axis
+
+    physical = state[: operator.physical_node_number]
+    requested_class = int(TopologyClass.DIVERTED)
+    topology = operator._fixed_design_topology
+    initial = topology.read_qualification(
+        physical,
+        operator.polarity,
+        operator.inside_material,
+        requested_class,
+    )
+    _seed, material = operator.connectivity_axis_seed(initial.state.axis)
+    result = topology.read_qualification(
+        physical,
+        operator.polarity,
+        material,
+        requested_class,
+    )
+    require_qualified_axis(initial.axis_admitted & result.axis_admitted)
+    if not hasattr(result, "polish_receipt"):
+        return None
+
+    psi_grid, psi_wall = topology.split_flux_map(physical)
+    candidates_o, candidates_x = topology.grid(psi_grid)
+    wall = topology.wall(psi_wall, operator.polarity)
+    qualified_o = topology.qualified_o_candidates(
+        candidates_o,
+        candidates_x,
+        wall,
+        operator.polarity,
+        psi_grid,
+        material,
+    )
+    axis = topology.o_point_qualification(
+        candidates_o, operator.polarity, qualified_o
+    ).data
+    saddle = topology.x_point_data(candidates_x, operator.polarity, axis[2])
+    seed_values = np.asarray((axis[2], saddle[2]), dtype=np.float64)
+    receipt = result.polish_receipt
+
+    slots = {}
+    for index, name in enumerate(("o", "x")):
+        seed_value = float(seed_values[index])
+        polished_value = float(np.asarray(receipt["value"])[index])
+        selected_value = float(np.asarray(receipt["selected_value"])[index])
+        slots[name] = {
+            "accepted": bool(np.asarray(receipt["converged"])[index]),
+            "seed_position_rz_m": np.asarray(
+                receipt["census_position_rz"], dtype=np.float64
+            )[index].tolist(),
+            "polished_position_rz_m": np.asarray(
+                receipt["position_rz"], dtype=np.float64
+            )[index].tolist(),
+            "selected_position_rz_m": np.asarray(
+                receipt["selected_position_rz"], dtype=np.float64
+            )[index].tolist(),
+            "seed_value_wb": seed_value,
+            "polished_value_wb": polished_value,
+            "selected_value_wb": selected_value,
+            "polished_minus_seed_value_wb": polished_value - seed_value,
+            "normalized_gradient": float(
+                np.asarray(receipt["normalized_gradient"])[index]
+            ),
+            "roundoff_floor": float(np.asarray(receipt["roundoff_floor"])[index]),
+            "representation_floor": float(
+                np.asarray(receipt["representation_floor"])[index]
+            ),
+        }
+    return {
+        "slot_order": ["o", "x"],
+        "slots": slots,
+    }
 
 
 def _solve_pure_arm(
@@ -187,6 +270,7 @@ def _solve_pure_arm(
     state = branch.equilibrium.flux
     _masks, topology = profile.operator.read(state)
     geometry = corroboration._post_cutover_geometry(profile, state, topology)
+    polish_receipt = _stationary_point_polish_receipt(profile.operator, state)
     trip_count = int(np.asarray(getattr(fixed, "active_set_iterations", 0)))
     return {
         "converged": bool(np.asarray(branch.converged)),
@@ -208,6 +292,7 @@ def _solve_pure_arm(
         "selected_saddle_m": np.asarray(geometry["selected_saddle"], dtype=np.float64)[
             :2
         ].tolist(),
+        "topology_qualification_polish_receipt": polish_receipt,
         "solve_wall_seconds_including_compilation": elapsed,
         "solver": {
             "fixed_point_tolerance": FIXED_POINT_CRITERION,
@@ -225,6 +310,7 @@ def capture(
     *,
     expected_revision: str = TRUE_REVISION,
     targets: tuple[tuple[int, int], ...] = TARGETS,
+    expected_cpus: int = 4,
 ) -> dict[str, Any]:
     source = _validate_shadow(shadow_root, expected_revision)
     _configure_shadow_import(shadow_root)
@@ -249,7 +335,7 @@ def capture(
         raise RuntimeError(
             f"capture requires the GPU backend, selected {jax.default_backend()!r}"
         )
-    allocation = _allocation()
+    allocation = _allocation(expected_cpus)
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
@@ -824,6 +910,284 @@ def _check_root_cause(receipt: dict[str, Any], *, require_figure: bool = True) -
             raise RuntimeError("root-cause figure is absent")
 
 
+def _intervening_nova_commits(start: str, end: str) -> dict[str, Any]:
+    command = [
+        "git",
+        "log",
+        "--reverse",
+        "--format=%H%x09%P%x09%s",
+        f"{start}..{end}",
+        "--",
+        "nova/",
+    ]
+    verbatim = subprocess.check_output(command, cwd=ROOT, text=True).rstrip("\n")
+    rows = []
+    for line in verbatim.splitlines():
+        sha, parents, subject = line.split("\t", 2)
+        rows.append({"sha": sha, "parents": parents.split(), "subject": subject})
+    return {
+        "command": " ".join(command),
+        "verbatim": verbatim,
+        "count": len(rows),
+        "commits": rows,
+    }
+
+
+def _attribution_arm(
+    raw: dict[str, Any], key: str, *, elapsed: str, exit_marker: int
+) -> dict[str, Any]:
+    captured = raw["arms"][key]
+    solve = captured["solve"]
+    committed_saddle = np.asarray(COMMITTED_SADDLES[key], dtype=np.float64)
+    measured_saddle = np.asarray(solve["selected_saddle_m"], dtype=np.float64)
+    return {
+        **captured,
+        "committed_row": raw["committed_rows"][key],
+        "terminal_residual_below_1e-8": float(solve["terminal_residual"]) < 1.0e-8,
+        "selected_saddle_distance_from_committed_m": float(
+            np.linalg.norm(measured_saddle - committed_saddle)
+        ),
+        "scheduler": {
+            "job_id": raw["allocation"]["job_id"],
+            "node": raw["allocation"]["node"],
+            "cpu_count": raw["allocation"]["allocated_cpus"],
+            "elapsed": elapsed,
+            "exit_marker": exit_marker,
+        },
+    }
+
+
+def _plot_null_polish_attribution(receipt: dict[str, Any], figure: Path) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, axis = plt.subplots(figsize=(12, 7), constrained_layout=True)
+    styles = {
+        ("before_null_polish", "22086/43 pure"): ("o", "-", "C0"),
+        ("before_null_polish", "21978/35 pure"): ("s", "-", "C1"),
+        ("main_head", "22086/43 pure"): ("o", "--", "C2"),
+        ("main_head", "21978/35 pure"): ("s", "--", "C3"),
+    }
+    labels = {
+        "before_null_polish": "69fc5e3e before null polish",
+        "main_head": f"{receipt['revisions']['main_head']['revision'][:8]} main HEAD",
+    }
+    for (revision_key, arm_key), (marker, linestyle, color) in styles.items():
+        history = receipt["revisions"][revision_key]["arms"][arm_key]["solve"][
+            "active_set_residuals"
+        ]
+        axis.semilogy(
+            range(1, len(history) + 1),
+            history,
+            marker=marker,
+            linestyle=linestyle,
+            linewidth=2.0,
+            color=color,
+            label=f"{labels[revision_key]} · {arm_key}",
+        )
+    for key, label, marker, color in (
+        ("banked_old", "d47f7cd1 banked 22086/43", "D", "0.25"),
+        ("own_mask", "a4bec44f own-mask 22086/43", "^", "0.55"),
+    ):
+        history = receipt["reference_histories"][key]["active_set_residuals"]
+        axis.semilogy(
+            range(1, len(history) + 1),
+            history,
+            marker=marker,
+            linestyle=":" if key == "banked_old" else "-.",
+            linewidth=1.7,
+            color=color,
+            label=label,
+        )
+    axis.axhline(1.0e-8, color="black", linestyle=":", linewidth=1.2, label="1e-8")
+    axis.set_xlabel("active-set trip")
+    axis.set_ylabel("relative sup residual")
+    axis.set_title("Pure-arm convergence before and after census null polishing")
+    axis.grid(True, which="both", alpha=0.25)
+    axis.legend(fontsize=8, ncol=2)
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure, dpi=180)
+    plt.close(fig)
+
+
+def compile_null_polish_attribution(
+    before_raw_path: Path,
+    head_raw_path: Path,
+    root_cause_path: Path,
+    output: Path,
+    figure: Path,
+    job_elapsed: str,
+    exit_marker: int,
+) -> dict[str, Any]:
+    before_raw = json.loads(before_raw_path.read_text())
+    head_raw = json.loads(head_raw_path.read_text())
+    reference = json.loads(root_cause_path.read_text())
+    if before_raw["allocation"]["job_id"] != head_raw["allocation"]["job_id"]:
+        raise RuntimeError("revision captures did not share one H200 allocation")
+
+    revisions = {}
+    for revision_key, raw, raw_path in (
+        ("before_null_polish", before_raw, before_raw_path),
+        ("main_head", head_raw, head_raw_path),
+    ):
+        revisions[revision_key] = {
+            "revision": raw["source"]["revision"],
+            "shadow_root": raw["source"]["shadow_root"],
+            "allocation": raw["allocation"],
+            "raw_capture": str(raw_path),
+            "raw_capture_sha256": _sha256(raw_path),
+            "arms": {
+                key: _attribution_arm(
+                    raw, key, elapsed=job_elapsed, exit_marker=exit_marker
+                )
+                for key in ("22086/43 pure", "21978/35 pure")
+            },
+        }
+
+    head_x = revisions["main_head"]["arms"]["22086/43 pure"]["solve"][
+        "topology_qualification_polish_receipt"
+    ]["slots"]["x"]
+    x_changes_selected_flux = bool(head_x["accepted"]) and (
+        float(head_x["polished_minus_seed_value_wb"]) != 0.0
+    )
+    if x_changes_selected_flux:
+        attributed_commit = NULL_POLISH_MERGE
+        mechanism = "census_selected_null_polish"
+        verdict = (
+            "The convergence flip is attributed to the census-selected null polish: "
+            "the main-HEAD 22086/43 X slot accepted a polish with a nonzero flux-value "
+            "change, so the boundary flux entering the exact bank route moved."
+        )
+    else:
+        attributed_commit = "990cf0caa5071e54e119eb05ec6b72bc4b00c291"
+        mechanism = "distorted_hex_ring_order"
+        verdict = (
+            "The convergence flip is not attributable to the null polish because the "
+            "main-HEAD 22086/43 X slot did not accept a nonzero flux-value change; "
+            "the remaining candidate is the distorted-hex ring-order correction."
+        )
+
+    banked_old = reference["histories"]["banked_old"]
+    own_mask = reference["histories"]["banked_new"]
+    receipt = {
+        "receipt": "census null-polish convergence attribution",
+        "revisions": revisions,
+        "current_main_22086_43_converges_below_1e-8": revisions["main_head"]["arms"][
+            "22086/43 pure"
+        ]["terminal_residual_below_1e-8"],
+        "attribution": {
+            "mechanism": mechanism,
+            "commit": attributed_commit,
+            "head_22086_x_slot_accepted": bool(head_x["accepted"]),
+            "head_22086_x_polished_minus_seed_value_wb": float(
+                head_x["polished_minus_seed_value_wb"]
+            ),
+            "x_slot_accepted_with_nonzero_value_change": x_changes_selected_flux,
+            "verdict": verdict,
+        },
+        "intervening_nova_commits": _intervening_nova_commits(
+            PRE_POLISH_REVISION, head_raw["source"]["revision"]
+        ),
+        "reference_histories": {
+            "source": str(root_cause_path),
+            "source_sha256": _sha256(root_cause_path),
+            "banked_old": banked_old,
+            "own_mask": own_mask,
+        },
+        "scheduler": {
+            "job_id": head_raw["allocation"]["job_id"],
+            "node": head_raw["allocation"]["node"],
+            "cpu_count": head_raw["allocation"]["allocated_cpus"],
+            "elapsed": job_elapsed,
+            "exit_marker": exit_marker,
+        },
+        "carrier": head_raw["carrier"],
+        "execution_contract": {
+            "one_reserved_h200": True,
+            "same_bank_generation_route": head_raw["execution_contract"][
+                "same_bank_generation_route"
+            ],
+            "solver_source_modified": False,
+            "assigned_worktree_nova_diff_stat": subprocess.check_output(
+                ["git", "diff", "--stat", "--", "nova"], cwd=ROOT, text=True
+            ).strip(),
+        },
+        "figure": str(figure),
+    }
+    _check_null_polish_attribution(receipt, require_figure=False)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    _plot_null_polish_attribution(receipt, figure)
+    _check_null_polish_attribution(receipt, require_figure=True)
+    return receipt
+
+
+def _check_null_polish_attribution(
+    receipt: dict[str, Any], *, require_figure: bool = True
+) -> None:
+    if receipt["revisions"]["before_null_polish"]["revision"] != PRE_POLISH_REVISION:
+        raise RuntimeError("pre-polish capture uses the wrong revision")
+    if receipt["execution_contract"]["solver_source_modified"]:
+        raise RuntimeError("receipt reports modified solver source")
+    if receipt["execution_contract"]["assigned_worktree_nova_diff_stat"]:
+        raise RuntimeError("assigned worktree contains a change under nova")
+    if receipt["scheduler"]["cpu_count"] != 1:
+        raise RuntimeError("attribution capture did not use one CPU")
+    if receipt["scheduler"]["exit_marker"] != 0:
+        raise RuntimeError("attribution capture did not exit cleanly")
+    if receipt["intervening_nova_commits"]["count"] < 2:
+        raise RuntimeError("intervening nova commit list is incomplete")
+    for revision_key in ("before_null_polish", "main_head"):
+        revision = receipt["revisions"][revision_key]
+        if revision["allocation"]["allocated_cpus"] != 1:
+            raise RuntimeError(f"{revision_key} did not use one CPU")
+        for arm_key in ("22086/43 pure", "21978/35 pure"):
+            arm = revision["arms"][arm_key]
+            solve = arm["solve"]
+            for field in (
+                "active_set_residuals",
+                "active_set_mask_differences",
+                "termination_reason",
+                "trip_count",
+                "terminal_residual",
+                "selected_saddle_m",
+            ):
+                if solve.get(field) is None:
+                    raise RuntimeError(f"{revision_key} {arm_key} omits {field}")
+            if arm["selected_saddle_distance_from_committed_m"] < 0.0:
+                raise RuntimeError(f"{revision_key} {arm_key} has invalid distance")
+            if revision_key == "main_head":
+                polish = solve.get("topology_qualification_polish_receipt")
+                if polish is None:
+                    raise RuntimeError(f"main HEAD {arm_key} omits polish receipt")
+                for slot_name in ("x", "o"):
+                    slot = polish["slots"][slot_name]
+                    for field in (
+                        "accepted",
+                        "seed_position_rz_m",
+                        "polished_position_rz_m",
+                        "seed_value_wb",
+                        "polished_value_wb",
+                        "normalized_gradient",
+                        "roundoff_floor",
+                        "representation_floor",
+                    ):
+                        if field not in slot:
+                            raise RuntimeError(
+                                f"main HEAD {arm_key} {slot_name} omits {field}"
+                            )
+    if not isinstance(receipt["current_main_22086_43_converges_below_1e-8"], bool):
+        raise RuntimeError("main HEAD convergence verdict is not explicit")
+    if not receipt["attribution"]["verdict"]:
+        raise RuntimeError("attribution verdict is absent")
+    if require_figure:
+        figure = Path(receipt["figure"])
+        if not figure.exists() or figure.stat().st_size == 0:
+            raise RuntimeError("null-polish attribution figure is absent")
+
+
 def _comparison(solve: dict[str, Any], committed: dict[str, Any]) -> dict[str, Any]:
     residual_difference = abs(
         float(solve["terminal_residual"]) - float(committed["terminal_residual"])
@@ -1004,6 +1368,7 @@ def _parse_args() -> argparse.Namespace:
     capture_parser = subparsers.add_parser("capture")
     capture_parser.add_argument("--shadow-root", type=Path, default=DEFAULT_SHADOW_ROOT)
     capture_parser.add_argument("--expected-revision", default=TRUE_REVISION)
+    capture_parser.add_argument("--expected-cpus", type=int, default=4)
     capture_parser.add_argument("--target", type=_target, action="append")
     capture_parser.add_argument("--output", type=Path, required=True)
     compile_parser = subparsers.add_parser("compile")
@@ -1026,6 +1391,18 @@ def _parse_args() -> argparse.Namespace:
     root_parser.add_argument("--exit-marker", type=int, required=True)
     root_check_parser = subparsers.add_parser("root-cause-check")
     root_check_parser.add_argument("--receipt", type=Path, required=True)
+    attribution_parser = subparsers.add_parser("null-polish-compile")
+    attribution_parser.add_argument("--before-raw", type=Path, required=True)
+    attribution_parser.add_argument("--head-raw", type=Path, required=True)
+    attribution_parser.add_argument(
+        "--root-cause", type=Path, default=DEFAULT_ROOT_CAUSE
+    )
+    attribution_parser.add_argument("--output", type=Path, required=True)
+    attribution_parser.add_argument("--figure", type=Path, required=True)
+    attribution_parser.add_argument("--job-elapsed", required=True)
+    attribution_parser.add_argument("--exit-marker", type=int, required=True)
+    attribution_check_parser = subparsers.add_parser("null-polish-check")
+    attribution_check_parser.add_argument("--receipt", type=Path, required=True)
     return parser.parse_args()
 
 
@@ -1036,6 +1413,7 @@ def main() -> None:
             args.shadow_root,
             expected_revision=args.expected_revision,
             targets=tuple(args.target) if args.target else TARGETS,
+            expected_cpus=args.expected_cpus,
         )
         _write_json(args.output, payload)
         print(
@@ -1088,10 +1466,31 @@ def main() -> None:
             f"{reopening['own_mask_revision_blocks_reopening']}",
             flush=True,
         )
-    else:
+    elif args.command == "root-cause-check":
         receipt = json.loads(args.receipt.read_text())
         _check_root_cause(receipt)
         print("ROOT_CAUSE_CHECK PASS", flush=True)
+    elif args.command == "null-polish-compile":
+        receipt = compile_null_polish_attribution(
+            args.before_raw,
+            args.head_raw,
+            args.root_cause,
+            args.output,
+            args.figure,
+            args.job_elapsed,
+            args.exit_marker,
+        )
+        print(
+            "NULL_POLISH_ATTRIBUTION PASS "
+            f"main_22086_below_1e-8="
+            f"{receipt['current_main_22086_43_converges_below_1e-8']} "
+            f"mechanism={receipt['attribution']['mechanism']}",
+            flush=True,
+        )
+    else:
+        receipt = json.loads(args.receipt.read_text())
+        _check_null_polish_attribution(receipt)
+        print("NULL_POLISH_ATTRIBUTION_CHECK PASS", flush=True)
 
 
 if __name__ == "__main__":

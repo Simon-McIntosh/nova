@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="4e0d9588,0e79227d,1926a170,9e7c76b4">
 <meta name="plan-artifacts" content="docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/true-pin-reproduction.png,benchmarks/bank_revision_reproduction.py,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/root-cause.png,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/null-polish-attribution.png">
@@ -120,6 +120,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260902T1035-remedy-rung2" data-who="reckon-ship-s19" data-when="2026-09-02T10:35:00+00:00">
     <div class="r-comment-body">scr-remedy-deflation measured — worktree commit 5ac69379, HELD UNMERGED in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-deflation (fixed_point.py +212: opt-in fixed-shape one-vector Krylov augmentation by the normalized successive settled-mask residual difference, activated after two zero-mask-difference trips with contraction at least 0.95; own-mask acceptance untouched; referees 9/9 and 6 behavioural tests green); node gate PASSED (SLURM 1261066, one CPU + one H200, 1h07m on main at 588578a0 where the polished X flux equals the census value). REMEDY RUNG 2 IS NEGATIVE, as the rung-4 audit predicted: on 22086/43 pure the augmentation activates at trip 7, spends 12 extra linear actions and changes nothing — residual 4.8023e-4, 7 trips, mask [38,23,0,0,0,0,0], terminal mode contraction 0.9999999999999991 before and after; the estimated mode has L2 norm 7.9e-6. 21978/35 pure is inert (cycle at 2.4509e-3 in 4 trips, contraction 0.896). Baseline note: at 588578a0 both arms reproduce their pre-polish histories exactly, confirming the value fix restored the census boundary flux. Under the locked remedy-ladder-order decision the last step-side rung, rung 3 Anderson acceleration on the fixed-mask outer map, is measured next; if it too leaves the refused step untouched, the ladder is exhausted on the step side and the nonmonotone-acceptance question returns to the lead with three negative receipts behind it.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T093557811088-scr-minor-radius-pin-scout" data-who="constraint-scout" data-when="2026-09-02T09:45:16Z">
+    <div class="r-comment-body"><p>minor-radius pin design brief banked at ~/.config/reckon/crew/reports/nova/minor-radius-pin-design.md: one two-ended psi_norm=1 isoflux pin at measured inboard/outboard midplane radii through the held minimum-norm correction seam, weak eight-trip schedule [0.25,0.25,0.125,0.0625,0.03125,0.015625,0,0], Thomson edge (MAST ayc/atm/aye, DIII-D core/edge) as the radius source, D-alpha for gating only, EFIT labels referee-only, referees untouched</p></div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

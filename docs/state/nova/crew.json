@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:44:31",
+  "updated": "2026-09-02T10:32:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -75207,9 +75207,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T064936446017-scr-remedy-deflation",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-remedy-deflation",
+        "node_definition": {
+          "done_when": "remedy-deflation.json states for both arms the terminal residual against 1e-8, trip count, the estimated mode's per-trip contraction before versus after and the actions spent, records the seven referee tests passing unmodified plus tests/test_residual_mode_deflation.py passing (command, exit status, log path), remedy-deflation.png exists on one log axis, SLURM job id, node, CPU count, elapsed and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/fixed_point.py",
+          "estimated_hours": 3.0,
+          "goal": "A worktree prototype of stall-remedy rung 2, deflation or recycling of the repeated settled-mask residual mode, in nova/equilibrium/fixed_point.py on main at or after 588578a0 (where the polished X flux equals the census value again, so 22086/43 pure stagnates for the right reason): the near-neutral up-down antisymmetric direction estimated from the successive residual differences once the mask has settled with a residual contraction ratio above 0.95, deflated from the Krylov linear solve or used to augment its space, fixed-shape and opt-in, own-induced-mask acceptance untouched, with a test file tests/test_residual_mode_deflation.py, a benchmark benchmarks/stall_remedy_deflation.py re-solving 22086/43 pure together with 21978/35 pure through benchmarks/bank_revision_reproduction.py's exact bank route on the H200 (one CPU, one H200, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, hardened sbatch, heartbeat, flushed stage timings, persisted carrier reused, persistent compilation cache, 3-hour SLURM limit, launch-then-harvest), a receipt docs/figures/solver-convergence-regression/remedy-deflation.json recording per arm the per-trip residual history, mask differences, termination, trip count, the deflated direction's per-trip contraction before versus after, the terminal residual against 1e-8, wall seconds, the seven referee tests run unmodified, and a figure remedy-deflation.png plotting both histories against the banked old, own-mask, rung-1 and rung-5 histories, the whole prototype committed in the worktree only and never merged, since a solver-semantics change returns to the lead before merging",
+          "id": "scr-remedy-deflation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064936446017-scr-remedy-deflation/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_residual_mode_deflation.py",
+            "benchmarks/stall_remedy_deflation.py",
+            "docs/figures/solver-convergence-regression/remedy-deflation.json",
+            "docs/figures/solver-convergence-regression/remedy-deflation.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "stall-remedy-krylov",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:49:44Z",
+        "completed_at": "2026-09-02T08:32:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6156,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6156,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7d7f7f80054a9568cf8a50f842818d65b3483bca",
+        "commits": [
+          "5ac69379067f267d2db3943c1018ca89ab3e69f2"
+        ],
+        "changed_lines": {
+          "added": 6113,
+          "removed": 3,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/stall_remedy_deflation.py check plus the seven referee tests (SLURM 1261066 COMPLETED 0:0, EXIT_MARKER=0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064936446017-scr-remedy-deflation/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064936446017-scr-remedy-deflation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ecf-6ce6-7ec0-ab50-6636eae50b33",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6721536,
+            "cached_input_tokens_cumulative": 10765824,
+            "input_tokens": 7060376,
+            "input_tokens_cumulative": 11172363,
+            "output_tokens": 23812,
+            "output_tokens_cumulative": 38863,
+            "reasoning_output_tokens": 9632,
+            "reasoning_output_tokens_cumulative": 13858
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1331
+    "_version": 1332
   }
 }

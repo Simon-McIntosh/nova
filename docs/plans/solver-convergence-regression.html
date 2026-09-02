@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="27">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="4e0d9588,0e79227d,1926a170,9e7c76b4">
 <meta name="plan-artifacts" content="docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/backend-divergence.png,benchmarks/backend_divergence_forensics.py,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/true-pin-reproduction.png,benchmarks/bank_revision_reproduction.py,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/root-cause.png,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/null-polish-attribution.png">
@@ -114,6 +114,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T071950085019-scr-stagnation-fixture-fix" data-who="scr-mechanism" data-when="2026-09-02T07:26:00Z">
     <div class="r-comment-body"><p>stale stagnation fixture repaired with the single keyword argument stop_on_active_set_settlement=False; tests/test_active_set_stagnation.py 2 passed, seven referee node IDs green (9 cases)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T064936446017-scr-remedy-deflation" data-who="stall-remedy-krylov" data-when="2026-09-02T08:32:20Z">
+    <div class="r-comment-body"><p>remedy rung 2 (one-vector Krylov augmentation by the repeated settled-mask residual mode) NEGATIVE: 22086/43 pure unchanged at 4.8023e-4 in 7 trips, mode contraction 0.9999999999999991, 12 extra actions on trip 7 changed nothing; 21978/35 inert; referees 9/9 and 6 behavioural tests green; prototype held unmerged in its worktree</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260902T1035-remedy-rung2" data-who="reckon-ship-s19" data-when="2026-09-02T10:35:00+00:00">
+    <div class="r-comment-body">scr-remedy-deflation measured — worktree commit 5ac69379, HELD UNMERGED in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-deflation (fixed_point.py +212: opt-in fixed-shape one-vector Krylov augmentation by the normalized successive settled-mask residual difference, activated after two zero-mask-difference trips with contraction at least 0.95; own-mask acceptance untouched; referees 9/9 and 6 behavioural tests green); node gate PASSED (SLURM 1261066, one CPU + one H200, 1h07m on main at 588578a0 where the polished X flux equals the census value). REMEDY RUNG 2 IS NEGATIVE, as the rung-4 audit predicted: on 22086/43 pure the augmentation activates at trip 7, spends 12 extra linear actions and changes nothing — residual 4.8023e-4, 7 trips, mask [38,23,0,0,0,0,0], terminal mode contraction 0.9999999999999991 before and after; the estimated mode has L2 norm 7.9e-6. 21978/35 pure is inert (cycle at 2.4509e-3 in 4 trips, contraction 0.896). Baseline note: at 588578a0 both arms reproduce their pre-polish histories exactly, confirming the value fix restored the census boundary flux. Under the locked remedy-ladder-order decision the last step-side rung, rung 3 Anderson acceleration on the fixed-mask outer map, is measured next; if it too leaves the refused step untouched, the ladder is exhausted on the step side and the nonmonotone-acceptance question returns to the lead with three negative receipts behind it.</div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

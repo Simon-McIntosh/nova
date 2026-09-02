@@ -37,7 +37,7 @@
     </tbody>
   </table>
 
-  <h2 id="solovev-certificate">Solov'ev certificate — 0 of 16 rows qualified</h2>
+  <h2 id="solovev-certificate">Solov'ev certificate (NaN-era, superseded below) — 0 of 16 rows qualified</h2>
   <p>The receipt is <code>docs/figures/gs-absolute-accuracy/solovev-certificate.json</code>. Every row uses the production axis/saddle or current-moment seed without closed-form flux samples. Qualification requires terminal fixed-point residual at or below <code>1e-12</code>. All sixteen terminal states are finite and all sixteen are recorded as <code>unqualified</code>, so the ψ errors below describe wrong-root terminal states, not certified discretisation error.</p>
   <table>
     <caption>Full certificate census: case by requested and realised resolution</caption>
@@ -108,6 +108,53 @@
       <tr><td>x_point_absence</td><td>absent</td><td><code>{"coarse":"absent","fine":"absent"}</code></td><td>null</td><td>true</td></tr>
     </tbody>
   </table>
+
+  <h2 id="corrected-certificate">Corrected Solov'ev certificate — 2 of 16 rows qualified, 16 of 16 finite</h2>
+  <p><strong>Receipt:</strong> <code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code>
+  (superseding the twelve-row NaN-era receipt in place), per-row JSON and PNG beside it; fixture fix in
+  <code>scripts/analytic_oracle_fixtures/measure.py</code>, sentry <code>tests/test_analytic_oracle_tangent.py</code>;
+  merged at <code>0dd66093</code>. The zero-rotation branch now returns an identically zero angular-frequency
+  closure, so autodiff never traverses <code>sqrt</code> at zero and every static current-moment tangent is finite.
+  Jobs: CPU array 1261437 (three of four members) with 1261467_3 replacing the failed fourth, H200 1261438
+  (1 h 48 m), aggregate and validate 1261468.</p>
+
+  <table>
+    <caption>Production-route rows against the 1e-12 terminal-residual bound (whole-domain psi rms in the case's flux units)</caption>
+    <thead><tr><th scope="col">Case</th><th scope="col">Cells</th><th scope="col">Terminal residual</th><th scope="col">Termination</th><th scope="col">psi rms</th><th scope="col">Verdict</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">diverted-jump-bearing</th><td>136</td><td>2.380e-15</td><td>converged</td><td>4.97e-16</td><td>qualified</td></tr>
+      <tr><th scope="row">diverted-jump-bearing</th><td>342</td><td>3.079e-02</td><td>active_set_settled</td><td>1.67e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">diverted-jump-bearing</th><td>551</td><td>8.994e-05</td><td>active_set_settled</td><td>2.10e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">diverted-jump-bearing</th><td>1076</td><td>4.860e-19</td><td>converged</td><td>2.06e-16</td><td>qualified</td></tr>
+      <tr><th scope="row">moderate-rotation-conventional-static</th><td>136</td><td>1.246e-02</td><td>active_set_settled</td><td>2.79e-01</td><td>unqualified</td></tr>
+      <tr><th scope="row">moderate-rotation-conventional-static</th><td>341</td><td>8.583e-03</td><td>active_set_settled</td><td>2.13e-01</td><td>unqualified</td></tr>
+      <tr><th scope="row">moderate-rotation-conventional-static</th><td>548</td><td>6.932e-03</td><td>active_set_settled</td><td>2.53e-01</td><td>unqualified</td></tr>
+      <tr><th scope="row">moderate-rotation-conventional-static</th><td>1070</td><td>5.743e-03</td><td>active_set_settled</td><td>3.14e-01</td><td>unqualified</td></tr>
+      <tr><th scope="row">strong-rotation-compact-static</th><td>135</td><td>1.292e-02</td><td>active_set_settled</td><td>2.00e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">strong-rotation-compact-static</th><td>341</td><td>1.843e-02</td><td>active_set_settled</td><td>2.14e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">strong-rotation-compact-static</th><td>551</td><td>6.029e-03</td><td>active_set_settled</td><td>2.97e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">strong-rotation-compact-static</th><td>1069</td><td>4.795e-03</td><td>active_set_settled</td><td>3.40e-02</td><td>unqualified</td></tr>
+      <tr><th scope="row">weak-rotation-reactor-static</th><td>135</td><td>7.447e-03</td><td>active_set_settled</td><td>1.77e+01</td><td>unqualified</td></tr>
+      <tr><th scope="row">weak-rotation-reactor-static</th><td>342</td><td>5.558e-03</td><td>active_set_settled</td><td>8.10e+00</td><td>unqualified</td></tr>
+      <tr><th scope="row">weak-rotation-reactor-static</th><td>555</td><td>1.246e-03</td><td>active_set_settled</td><td>1.10e+01</td><td>unqualified</td></tr>
+      <tr><th scope="row">weak-rotation-reactor-static</th><td>1072</td><td>4.372e-03</td><td>active_set_settled</td><td>1.18e+01</td><td>unqualified</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Reading</h3>
+  <ul>
+    <li><strong>Where the trip loop converges, the discretisation is exact.</strong> The two qualified rows
+    reproduce the polynomial Solov'ev flux to 5e-16 and 2e-16 rms, at 136 and 1076 cells.</li>
+    <li><strong>Fourteen rows settle far above tolerance.</strong> Every unqualified row terminates
+    <code>active_set_settled</code> after ten Newton steps with the fixed-point residual between 1.2e-3 and
+    3.1e-2: the same honest-stagnation signature the regenerated MAST bank shows on nine of twelve rows, here
+    on exact solutions with no measurement noise and no seed ambiguity.</li>
+    <li><strong>The accuracy question is the convergence question.</strong> The fixture defect explained the
+    NaNs, not the misses. The remaining remedy under <code>solver-convergence-regression</code> has an exact
+    test bed in these fourteen rows.</li>
+    <li>Convergence-order fits are unavailable: no band has two qualified rungs. The fourteen reduced-oracle
+    registry bounds still reproduce. Wall per row was 150 to 2160 s on the CPU array and 808 to 855 s on the H200.</li>
+  </ul>
 
   <h2 id="efit-reproduction">EFIT reproduction gate — 0 of 11 rows passed</h2>
   <p>The receipt is <code>docs/figures/gs-absolute-accuracy/efit-reproduction.json</code>. It keeps the two error sources independent: the gauge-aligned Nova solve-to-label RMS and the EFIT label's own GS inconsistency. The locked stride-one floors are exactly <strong>0.0116147034 for MAST</strong> and <strong>0.0832365867 for DIII-D</strong>. The pass rule is convergence plus solve-to-label error no greater than the applicable floor. The machine-specific error terms use the receipt's stated normalisations, so cross-machine magnitudes must not be compared as though they shared a denominator.</p>

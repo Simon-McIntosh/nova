@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="forward-solve-api-landed">
+  <meta name="plan-title" content="Forward solve API — cumulative execution evidence">
+  <meta name="plan-summary" content="Landed receipts for the interactive-consumer seam: the traced prescribed-current vector, the labelled terminal flux receipt, and the per-edit latency they were measured with.">
+  <meta name="plan-evidence-for" content="forward-solve-api">
+  <meta name="plan-verifies" content="forward-solve-api#s5">
+  <meta name="plan-informs" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
+  <title>Forward solve API — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Forward solve API — cumulative execution evidence</h1>
+    <p class="lede">Section 5 of the plan (the interactive consumer) landed first because the
+    imas-ambix demonstrator depends on it. Two of its nodes are on main: the prescribed-current
+    vector as a traced argument of the jitted solve, and the labelled terminal flux receipt.
+    Receipt values keep their recorded precision; prose values are display roundings of the
+    receipt fields they cite.</p>
+  </header>
+
+  <section id="traced-current">
+    <h2>Node A — the prescribed-current vector as traced data</h2>
+    <p><strong>Commits:</strong> operator half merged at <code>e464be9d</code>
+    (<code>nova/equilibrium/forward_operator.py</code>, +71 lines); solve-level keyword merged at
+    <code>6af77248</code> (worker commit <code>31e27272</code>, <code>ForwardProfile.solve</code>
+    and <code>solve_branch</code> take <code>prescribed_current</code> and pass it to
+    <code>operator.flux_map</code> unchanged, <code>None</code> keeps the stored vector).
+    <strong>Receipt:</strong> <code>docs/figures/forward-solve-api/coil-edit-latency.json</code>
+    (H200 job 1261545, MAST 21989/55, P6 upper edited in five percent steps to plus or minus
+    twenty percent, 21 edits, each warm-started from the previous terminal state).</p>
+    <p>The production MAST case zeros the ordinary external current and installs a
+    <code>PrescribedCurrentField</code> holding the full 101-circuit vector (13 active plus 88
+    passive), whose flux is <code>response @ current</code> added by <code>external()</code>; the
+    traced argument therefore carries the complete vector with replacement semantics, pinned by
+    a double-counting test (4 of 4) and an un-supplied path that stays bit-identical.</p>
+    <table>
+      <caption>Coil-edit latency on 21989/55 (a stagnating limited row of the regenerated bank)</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Compile count across 21 edits</th><td>1 (StableHLO digest and executable identity constant; 20 of 20 later edits are jit cache hits)</td></tr>
+        <tr><th scope="row">First edit wall (includes the process's one compile)</th><td>705 s</td></tr>
+        <tr><th scope="row">Warm re-solve per edit</th><td>21 to 68 s (2 to 16 trips per edit at about 10 s per trip at width 1)</td></tr>
+        <tr><th scope="row">Edits converged</th><td>0 of 21 (18 settled, 3 budget exhausted)</td></tr>
+        <tr><th scope="row">Binding-point displacement, 400 A edit of a 1983 A coil</th><td>under 1 mm (insensitive proxy: the raster path published zero LCFS vertices)</td></tr>
+        <tr><th scope="row">Tests</th><td><code>tests/test_prescribed_current_solve.py</code> 2 passed; seven referees 9 passed</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The API half is right: a coil-current edit never recompiles. The latency is the trip loop,
+    not the seam, and the demonstrator case was itself a stagnating arm. Open finding carried to
+    the bitwise-magnitude node: omitting <code>prescribed_current</code> (stored vector closed into
+    the trace as a constant) versus passing the identical vector as traced data produced bitwise
+    different receipts (digests <code>d0d4fac5</code> versus <code>ef8b86a4</code>); the magnitude
+    is measured before the traced path is declared the default.</p>
+  </section>
+
+  <section id="receipt-topology">
+    <h2>Node C — the labelled terminal flux receipt</h2>
+    <p><strong>Commit:</strong> worker <code>7eebe4c9</code> merged at <code>6fb07a40</code>
+    (<code>nova/equilibrium/forward.py</code> only). <strong>Receipt:</strong>
+    <code>docs/figures/forward-solve-api/receipt-topology.json</code> (H200 job 1261465).</p>
+    <p><code>ForwardEquilibrium</code> gains an optional typed <code>labelled_flux</code> leaf
+    (<code>ForwardLabelledFlux</code>) populated by every production receipt from the same terminal
+    topology state: <code>psi</code>, <code>psi_norm</code>, the O-point, primary and secondary
+    X-points, a fixed-capacity LCFS polyline with its vertex count, strike points, and per-cell
+    <code>ForwardDomainLabel</code> with exactly core, private flux, wall shadow and open. There is
+    no scrape-off-layer class: the hex plasma cells cannot resolve the SOL, so the consumer never
+    re-derives topology from psi. The hex path interpolates the shared atomic edges at
+    <code>psi_N = 1</code>; the persisted MAST 33 by 33 raster publishes psi, psi_N and labels on
+    all 1089 nodes by scattering the 961 interior-ring labels through the ring index, and reports
+    zero raster LCFS vertices because the existing separatrix read requests zero rays.</p>
+    <table>
+      <caption>Cost of the leaf on a converging frozen-MAST arm</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Without leaf</th><th scope="col">With leaf</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Compile calls</th><td>1</td><td>1</td></tr>
+        <tr><th scope="row">Launch count</th><td>6</td><td>6</td></tr>
+        <tr><th scope="row">Median solve wall</th><td>6.05 s</td><td>6.11 s (delta 60 ms inside the 302 ms noise allowance)</td></tr>
+        <tr><th scope="row">Existing receipt fields</th><td colspan="2">bit-identical</td></tr>
+        <tr><th scope="row">Tests</th><td colspan="2"><code>tests/test_solve_receipt_topology.py</code> 2 passed (all four labels observed); seven referees 9 passed</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record</h2>
+    <ul>
+      <li>Node B (warm start on a converging arm with a boundary-coupled circuit), node C2 (the
+      rectangular raster receipt built once with the machine) and the bitwise-magnitude
+      measurement are in flight under the S19 relaunch; their receipts land as anchors here.</li>
+      <li>Sections 1 to 4 (the request and receipt types, route migration, transport defaults,
+      agent guidance) wait on solve-default-wiring and on the acceptance decision that fixes which
+      acceptance becomes the declared default.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

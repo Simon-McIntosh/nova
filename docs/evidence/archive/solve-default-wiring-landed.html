@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="solve-default-wiring-landed">
+  <meta name="plan-title" content="Solve default wiring — cumulative execution evidence">
+  <meta name="plan-summary" content="Receipts for each one-line wiring fix that makes a landed solver default reach a production route, and for the default-wiring test that pins them.">
+  <meta name="plan-evidence-for" content="solve-default-wiring">
+  <meta name="plan-verifies" content="solve-default-wiring#s1">
+  <meta name="plan-informs" content="forward-solve-api">
+  <title>Solve default wiring — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Solve default wiring — cumulative execution evidence</h1>
+    <p class="lede">Each anchor records one wiring node: the route it changes, the receipt that
+    shows the route's terminal state before and after (bit-identical where the semantics are
+    unchanged, a qualified change where they are not), and the referee tests that stayed green.
+    Receipt values keep their recorded precision.</p>
+  </header>
+
+  <section id="currency-audit">
+    <h2>Currency audit at relaunch (main 9a7e80ca)</h2>
+    <p>The capability-wiring audit was taken at <code>f2c5634a</code>; by the relaunch the
+    accuracy-gates plan had already moved the Solov'ev certificate onto the production seam
+    (<code>profile.solve</code> with the closed-form current pin at <code>0dd66093</code>,
+    <code>cold_seed_portfolio</code> seeds, <code>cached_machine</code> at every rung, the
+    compilation cache configured). The certificate halves of wiring items 1, 4 and 6 are therefore
+    done, and the open scope is the parity driver (items 3 and 6), the oracle rebaseline (items 1
+    and 4), the visual and bank routes (items 1 and 5) and the compilation cache on the launchers
+    that lack it (item 2).</p>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record</h2>
+    <ul>
+      <li>Item 2 (compilation cache on five launchers) and item 3 (parity driver current-constrained
+      by default) are in flight; their anchors follow.</li>
+      <li>The topology-visuals generator's cache line waits on the topology session's live claim on
+      that file.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

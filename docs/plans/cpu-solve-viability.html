@@ -20,9 +20,12 @@
 <title>CPU solve viability | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="5">
 <meta name="plan-sprint" content="S19">
+<meta name="plan-commits" content="20f3f2e1,58ed438a">
+<meta name="plan-artifacts" content="docs/figures/cpu-solve-viability/cpu-discriminator.json,docs/figures/cpu-solve-viability/cpu-discriminator.png,benchmarks/cpu_solve_discriminator.py">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
 <main class="plan-doc">
@@ -61,6 +64,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260901T2358-interim-cpu" data-who="reckon-ship-s19" data-when="2026-09-01T23:58:00+00:00">
     <div class="r-comment-body">csv-cpu-discriminator INTERIM (worker parked on its fence with a harvest brief; job 1261003 still running on rigel 98dci4-clu-2011, 16 CPUs, JAX_PLATFORMS=cpu, 4 h limit, driver commit 20f3f2e1 in its worktree). Persisted carrier and case loaded in 42.5 s with no rebuild. HEAD per-trip wall on CPU: trip 1 = 944.1 s, trip 2 = 1107.9 s, so the 12-trip HEAD trajectory of this arm is a multi-hour course; the a4bec44f CPU leg (job 1260944) did 7 trips in 38 min, about 326 s per trip, on the same lane shape, so HEAD is roughly 3x slower per trip on CPU while being bit-identical to GPU in state. Effective threads 1.49 of 16 allocated at 36 min elapsed (54:22 CPU), max RSS 6.1 GiB. Telemetry callback host time 0.11 to 0.29 ms per callback — hypothesis (1) of the census is REFUTED as a cost; the cost is inside the compiled trip body running on about one and a half cores, pointing at XLA-CPU intra-op threading (hypothesis 3) or a HEAD-side per-trip work increase from the 30 August fixed-point commits. Verdict so far: HEAD-side on this exact bank route, not producer-specific. Final residual, trip count, dominant-cost share and the verdict sentence follow the harvest.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T211049883942-csv-cpu-discriminator" data-who="cpu-viability" data-when="2026-09-02T00:57:35Z">
+    <div class="r-comment-body"><p>HEAD-side: exact bank pure-arm route took 3.30 h on CPU at HEAD (per-trip 944/1108/~700 s, 7 trips, residual 4.80e-4) vs 37 min at a4bec44f; 1.6 effective XLA-CPU threads of 16; callback host time 3.4 ms total; dominant cost the post-diverted portfolio tail 6334 s (53%)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260902T0300-discriminator-landed" data-who="reckon-ship-s19" data-when="2026-09-02T03:00:00+00:00">
+    <div class="r-comment-body">csv-cpu-discriminator landed — commits 20f3f2e1, 58ed438a (merged); gate PASSED (check exit 0, SLURM 1261003 rigel 98dci4-clu-2011, 16 CPUs, COMPLETED 0:0, 3h19m). VERDICT: HEAD-SIDE. The exact bank pure-arm route for 22086/43 took 3.30 h (11887 s) at HEAD against 36.7 min (2200 s) at a4bec44f on the same lane shape, both 7 trips to the same terminal residual 4.8023e-4 (HEAD terminates active_set_settled). Per-trip HEAD walls [944, 1108, 700, 699, 700, 700, 703] s versus about 314 s amortised at a4bec44f, so the trip body itself is 2.2 to 3.5x slower at HEAD; and the post-diverted portfolio tail costs a further 6334 s (53% of the wall: 2098 s of limited-branch callback continuation plus 4236 s of post-final-callback completion). Sampled utilisation 1.62 effective XLA-CPU threads of 16 allocated throughout. Telemetry callbacks cost 3.4 ms in total — hypothesis (1) REFUTED. The persisted carrier loaded in 42.5 s; nothing was rebuilt. The pathology is therefore inside the compiled program on one and a half cores: the census's hypothesis (3) thread configuration (XLA-CPU intra-op parallelism not engaged, so the 16-core allocation buys nothing) and a HEAD-side per-trip work increase from the 30 August fixed-point commits are the two live explanations, and the dual-branch portfolio tail is a third, route-level cost the pinned leg never paid. Next node: the fix measurement — pin XLA-CPU intra-op threads to the allocation on the same route and re-time one trip plus the portfolio tail, stating the recovered per-trip wall against 314 s.</div>
 </div>
 </section>
 </main>

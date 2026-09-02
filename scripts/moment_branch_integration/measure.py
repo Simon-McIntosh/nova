@@ -31,14 +31,13 @@ def _internal_image(operator, coefficients) -> np.ndarray:
 
 def _production_physical_moments(operator, state):
     """Evaluate the sole production moment route on one support partition."""
-    masks, _topology, sample_flux, core_support, common_support = (
+    masks, _topology, sample_flux, profile_support = (
         operator._support_partition(jnp.asarray(state))
     )
     return operator.source.current_moments(
         masks,
         operator.support_current_moments,
-        core_support,
-        common_support,
+        profile_support,
         sample_flux=sample_flux,
     )
 
@@ -80,7 +79,7 @@ def measure() -> dict[str, object]:
     baseline = json.loads(FIT_BASELINE.read_text(encoding="utf-8"))["fixtures"][
         "coarse"
     ]["forcing"]
-    _masks, _topology, _sample, support, _common = operator._support_partition(
+    _masks, _topology, _sample, support = operator._support_partition(
         jnp.asarray(exact)
     )
     participating = np.asarray(support.included)

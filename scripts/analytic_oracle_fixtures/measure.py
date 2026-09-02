@@ -692,7 +692,7 @@ def exact_current_moments(
     case: RotatingEquilibrium, operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
     """Integrate the analytic density over the operator's exact traced supports."""
-    masks, _topology, _sample, support, _common = operator._support_partition(
+    masks, _topology, _sample, support = operator._support_partition(
         jnp.asarray(state)
     )
     counts = np.asarray(support.vertex_count)
@@ -730,14 +730,13 @@ def _production_physical_moments(
     operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
     """Evaluate production physical moments from one shared support partition."""
-    masks, _topology, sample_flux, core_support, common_support = (
+    masks, _topology, sample_flux, profile_support = (
         operator._support_partition(jnp.asarray(state))
     )
     return operator.source.current_moments(
         masks,
         operator.support_current_moments,
-        core_support,
-        common_support,
+        profile_support,
         sample_flux=sample_flux,
     )
 

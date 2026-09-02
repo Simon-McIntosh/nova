@@ -1,0 +1,197 @@
+{
+  "status": "pass",
+  "scheduler": {
+    "job_id": 1260050,
+    "state": "CANCELLED by 39486",
+    "owner": "mcintos",
+    "owner_uid": 39486,
+    "exit_code": "0:0",
+    "elapsed": "1-02:57:29",
+    "accepted_time_limit": "2-00:00:00",
+    "partition": "rigel",
+    "node": "98dci4-clu-2013",
+    "cancellation_phase": "DIII-D stride-1 cold solve after inner iteration 1 began",
+    "log_exit_marker": 0,
+    "terminal_truth": "scheduler cancellation overrides the trap-written exit marker"
+  },
+  "strict_json_files": [
+    "cold_start_partial_receipt.json",
+    "mast_stride_1_cold_solve_receipt.json",
+    "mast_stride_2_cold_solve_receipt.json",
+    "mast_stride_one_carrier_receipt.json",
+    "moment_geometry_preflight.json",
+    "zero_iteration_receipt.json"
+  ],
+  "zero_iteration_rows": [
+    {
+      "machine": "DIII-D",
+      "stride": 2,
+      "relative_grad_shafranov_sup": 0.07127063768931534,
+      "minimum_width_m": 0.05312499962747097,
+      "quarter_width_gate_m": 0.013281249906867743,
+      "wall_seconds": 50.82074609596748
+    },
+    {
+      "machine": "DIII-D",
+      "stride": 1,
+      "relative_grad_shafranov_sup": 0.08323658669934644,
+      "minimum_width_m": 0.026562499813735485,
+      "quarter_width_gate_m": 0.006640624953433871,
+      "wall_seconds": 194.2130450050172
+    },
+    {
+      "machine": "MAST",
+      "stride": 2,
+      "relative_grad_shafranov_sup": 0.020797195320912416,
+      "minimum_width_m": 0.060625000041909516,
+      "quarter_width_gate_m": 0.015156250010477379,
+      "wall_seconds": 48.125356857985025
+    },
+    {
+      "machine": "MAST",
+      "stride": 1,
+      "relative_grad_shafranov_sup": 0.011614703393987796,
+      "minimum_width_m": 0.030312500020954758,
+      "quarter_width_gate_m": 0.0075781250052386895,
+      "wall_seconds": 173.8717194609926
+    }
+  ],
+  "mast_cold_solves": {
+    "2": {
+      "converged": false,
+      "qualified_terminal": false,
+      "termination_reason": "active_set_iteration_budget_exhausted",
+      "terminal_residual": 0.003603081345806867,
+      "tolerance": 1e-08,
+      "active_set_iterations": 16,
+      "nova_achieved_class": "diverted",
+      "efit_label": "diverted",
+      "label_agreement": true,
+      "boundary_rms_m": null,
+      "boundary_sup_m": null,
+      "saddle_to_efit_x_m": 0.11354584786549118,
+      "comparison_failures": [
+        "missing_predicted_closed_boundary"
+      ],
+      "solve_wall_seconds": 11891.812679639086,
+      "response_build_wall_seconds": 0.0,
+      "checkpoint_sha256": "8f15643d0a43bb247b1286b34b72bae088aede0fd3e876f7c3dfcaf2e246b70c",
+      "checkpoint_size_bytes": 11776,
+      "checkpoint_arrays": [
+        "state",
+        "residual",
+        "termination_reason",
+        "inner_iteration_residuals_before",
+        "inner_iteration_residuals_after",
+        "inner_iteration_proposed_step_norms",
+        "inner_iteration_accepted",
+        "inner_iteration_decisions",
+        "inner_iteration_krylov_qualifications",
+        "inner_iteration_applied_factors",
+        "inner_iteration_krylov_reductions",
+        "inner_iteration_krylov_tolerances"
+      ]
+    },
+    "1": {
+      "converged": true,
+      "qualified_terminal": true,
+      "termination_reason": "converged",
+      "terminal_residual": 9.678145996015393e-12,
+      "tolerance": 1e-08,
+      "active_set_iterations": 6,
+      "nova_achieved_class": "diverted",
+      "efit_label": "diverted",
+      "label_agreement": true,
+      "boundary_rms_m": null,
+      "boundary_sup_m": null,
+      "saddle_to_efit_x_m": 0.15065971085750432,
+      "comparison_failures": [
+        "missing_predicted_closed_boundary"
+      ],
+      "solve_wall_seconds": 75791.53904471314,
+      "response_build_wall_seconds": 6448.063886499964,
+      "checkpoint_sha256": "6685676f64bd868e8e674f39b30571c919c3b25239890ecbc3cf77ec4847deb9",
+      "checkpoint_size_bytes": 35653,
+      "checkpoint_arrays": [
+        "state",
+        "residual",
+        "termination_reason",
+        "inner_iteration_residuals_before",
+        "inner_iteration_residuals_after",
+        "inner_iteration_proposed_step_norms",
+        "inner_iteration_accepted",
+        "inner_iteration_decisions",
+        "inner_iteration_krylov_qualifications",
+        "inner_iteration_applied_factors",
+        "inner_iteration_krylov_reductions",
+        "inner_iteration_krylov_tolerances"
+      ]
+    }
+  },
+  "cold_start_partial_row_count": 2,
+  "carrier": {
+    "sha256": "4fc46fea6bbcf0338cce8106d48d9a793d83f50a4ffbdff938f379b902b0001a",
+    "size_bytes": 2738653,
+    "build_wall_seconds": 6448.063886499964,
+    "arrays": [
+      "response",
+      "current",
+      "resolved_targets",
+      "response_sha256",
+      "current_sha256",
+      "input_digests_json",
+      "audit_json"
+    ]
+  },
+  "zero_iteration_residual_arrays": [
+    "DIII_D_2_radius",
+    "DIII_D_2_height",
+    "DIII_D_2_relative",
+    "DIII_D_2_axis",
+    "DIII_D_2_x_points",
+    "DIII_D_2_boundary",
+    "DIII_D_1_radius",
+    "DIII_D_1_height",
+    "DIII_D_1_relative",
+    "DIII_D_1_axis",
+    "DIII_D_1_x_points",
+    "DIII_D_1_boundary",
+    "MAST_2_radius",
+    "MAST_2_height",
+    "MAST_2_relative",
+    "MAST_2_axis",
+    "MAST_2_x_points",
+    "MAST_2_boundary",
+    "MAST_1_radius",
+    "MAST_1_height",
+    "MAST_1_relative",
+    "MAST_1_axis",
+    "MAST_1_x_points",
+    "MAST_1_boundary"
+  ],
+  "artifact_digests": {
+    "cold_start_partial_receipt.json": "f8e99af7d4be1567ca426cf6f4c90149ab6124ff1bd7bd967ef1d8969ac9460d",
+    "mast_stride_1_cold_solve_receipt.json": "c423fefe045a570a66fa9d5effbe250f6c718bdd5b5d0903e78ed96f89f27d9d",
+    "mast_stride_2_cold_solve_receipt.json": "418a95bfe37d2463b1315e30ee2d64438d6458e54f0511a49873aca3486e4d0c",
+    "mast_stride_one_carrier_receipt.json": "ab9ed7a9950f202f5263bea2aa5b025d0741e1cf12bdf300fda0cfb848dcd464",
+    "moment_geometry_preflight.json": "a70155f47c1a47bdf7a2754969e93656e643b2dab18e17cbc557b6cf80db4ade",
+    "zero_iteration_receipt.json": "7d8cf5d005b510fe2708767f078ad73528295083ea9327b97fbe2fe9ba42122f",
+    "mast_stride_1_stalled_state.npz": "6685676f64bd868e8e674f39b30571c919c3b25239890ecbc3cf77ec4847deb9",
+    "mast_stride_1_stalled_state.npz.sha256": "c164a3f2dbbfb960a5eb61e246f45ce62198b6b98485a1fbe597cbb4cc96d334",
+    "mast_stride_2_stalled_state.npz": "8f15643d0a43bb247b1286b34b72bae088aede0fd3e876f7c3dfcaf2e246b70c",
+    "mast_stride_2_stalled_state.npz.sha256": "f98bcda171fa61ded2a5a60649e14fede9e612be64ee03e8e0775aa82d08aa99",
+    "mast_stride_one_prescribed_response.npz": "4fc46fea6bbcf0338cce8106d48d9a793d83f50a4ffbdff938f379b902b0001a",
+    "zero_iteration_residual_fields.npz": "26f090510fb8c0abbc91df53270557073a1a7b3e55ec7fb851ce67c669846ebe",
+    "zero_iteration_residual_fields.png": "3867bdb8f5ebcf17df71b79723811c9dbb98ec432a2a70f9bb36c42b5c4a3fa2"
+  },
+  "log_milestones": [
+    "COLD_SOLVE_START machine=MAST stride=2",
+    "COLD_SOLVE_COMPLETE machine=MAST stride=2",
+    "COLD_SOLVE_START machine=MAST stride=1",
+    "tolerant carrier completion marker with verified digest",
+    "COLD_SOLVE_COMPLETE machine=MAST stride=1",
+    "COLD_SOLVE_START machine=DIII-D stride=1",
+    "inner-newton iterations 0 and 1",
+    "scheduler cancellation before DIII-D completion"
+  ]
+}

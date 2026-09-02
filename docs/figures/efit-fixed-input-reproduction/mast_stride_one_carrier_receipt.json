@@ -1,0 +1,16 @@
+{
+  "current_count": 101,
+  "current_sha256": "6d174b7e87a5ac14bb3a1ad69f7239cd524d4d7d403a1b0cb5564e26d3f5489d",
+  "direct_response_build_seconds": 6448.063886499964,
+  "file_sha256": "4fc46fea6bbcf0338cce8106d48d9a793d83f50a4ffbdff938f379b902b0001a",
+  "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/job-output/mast_stride_one_prescribed_response.npz",
+  "resolved_target_count": 4262,
+  "response_sha256": "4d79e6b071d57f36383bfc908c2d0dc649127175cbf0b289035f7246b7d20692",
+  "response_shape": [
+    4262,
+    101
+  ],
+  "semantic_response_identity": "75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d",
+  "size_bytes": 2738653,
+  "source_row": 43
+}

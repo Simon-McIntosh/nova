@@ -1,0 +1,64 @@
+[
+  {
+    "authority": "nova.equilibrium.forward.ForwardProfile.from_lattice, which constructs MomentGeometry.from_cells from the stride-selected FluxLattice",
+    "coupled_shapes": [
+      [
+        1089
+      ],
+      [
+        1089
+      ],
+      [
+        1089
+      ]
+    ],
+    "coupling_current_moments_finite": true,
+    "lattice_node_count": 1089,
+    "lattice_shape": [
+      33,
+      33
+    ],
+    "minimum_second_moment_determinant": 3.988054069098881e-07,
+    "moment_polygon_count": 1089,
+    "resolution_preserved": true,
+    "second_moment_finite": true,
+    "second_moment_sha256": "e267efb5819f108bb7adea36590a3b4acbb4467cc0eb0c6f7d1c206a3959273c",
+    "second_moment_shape": [
+      1089,
+      3
+    ],
+    "source_identity_preserved": true,
+    "stored_axis_stride": 2
+  },
+  {
+    "authority": "nova.equilibrium.forward.ForwardProfile.from_lattice, which constructs MomentGeometry.from_cells from the stride-selected FluxLattice",
+    "coupled_shapes": [
+      [
+        4225
+      ],
+      [
+        4225
+      ],
+      [
+        4225
+      ]
+    ],
+    "coupling_current_moments_finite": true,
+    "lattice_node_count": 4225,
+    "lattice_shape": [
+      65,
+      65
+    ],
+    "minimum_second_moment_determinant": 2.4925337931868007e-08,
+    "moment_polygon_count": 4225,
+    "resolution_preserved": true,
+    "second_moment_finite": true,
+    "second_moment_sha256": "13e81266fa3985eb40dfc2a0dd75a9d1728f2606f0034b4db59ef93b8100287e",
+    "second_moment_shape": [
+      4225,
+      3
+    ],
+    "source_identity_preserved": true,
+    "stored_axis_stride": 1
+  }
+]

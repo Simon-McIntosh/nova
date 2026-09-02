@@ -1,0 +1,202 @@
+{
+  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache_source_identity": "sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae",
+  "marginal_rule": "use solver_qualification.marginal_solver_basin when present; otherwise converged=false is the interim marginal flag",
+  "not_replayable_row_count": 10,
+  "passes": true,
+  "qualification_metadata": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+  "replayable_row_count": 2,
+  "row_count": 12,
+  "rows": [
+    {
+      "arm": "pure",
+      "frame": 35,
+      "identity": "21978/35 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21978
+    },
+    {
+      "arm": "mixed",
+      "frame": 35,
+      "identity": "21978/35 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21978
+    },
+    {
+      "arm": "pure",
+      "frame": 35,
+      "identity": "21983/35 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21983
+    },
+    {
+      "arm": "mixed",
+      "frame": 35,
+      "identity": "21983/35 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21983
+    },
+    {
+      "arm": "pure",
+      "frame": 51,
+      "identity": "21985/51 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21985
+    },
+    {
+      "arm": "mixed",
+      "frame": 51,
+      "identity": "21985/51 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21985
+    },
+    {
+      "arm": "pure",
+      "frame": 46,
+      "identity": "21986/46 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21986
+    },
+    {
+      "arm": "mixed",
+      "frame": 46,
+      "identity": "21986/46 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21986
+    },
+    {
+      "arm": "pure",
+      "frame": 55,
+      "identity": "21989/55 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": false,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21989
+    },
+    {
+      "arm": "mixed",
+      "frame": 55,
+      "identity": "21989/55 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": true,
+      "not_replayable_reason": "no cached per-cell flux for this bank row",
+      "replayable": false,
+      "shot": 21989
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3414295434030137,
+      "census_saddle_flux": -0.12439126215921247,
+      "classification": {
+        "adjudication": "matches",
+        "committed": "diverted",
+        "matches": true,
+        "raster_class_margin": -0.13502043154904375,
+        "replayed": "diverted",
+        "retained_raster": "limited"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "frame": 43,
+      "identity": "22086/43 pure",
+      "marginal_flag_source": "solver_qualification",
+      "marginal_solver_basin": true,
+      "raster_binding_flux": -0.12439126215921247,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.002843668505709056,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 0.003700615500644282,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "census_private_count": 5,
+        "differing_node_count": 0,
+        "differing_nodes": [],
+        "node_count": 37,
+        "raster_private_count": 5
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.34157609764779046,
+      "census_saddle_flux": -0.12236728180376091,
+      "classification": {
+        "adjudication": "matches",
+        "committed": "diverted",
+        "matches": true,
+        "raster_class_margin": null,
+        "replayed": "diverted",
+        "retained_raster": "diverted"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "frame": 43,
+      "identity": "22086/43 mixed",
+      "marginal_flag_source": "interim converged=false rule",
+      "marginal_solver_basin": false,
+      "raster_binding_flux": -0.1223672818037609,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.002769248620356953,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 0.002882939403054736,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "census_private_count": 10,
+        "differing_node_count": 0,
+        "differing_nodes": [],
+        "node_count": 37,
+        "raster_private_count": 10
+      }
+    }
+  ],
+  "schema": "nova.topology-cell-parity",
+  "validation_errors": []
+}

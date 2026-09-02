@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:27:58",
+  "updated": "2026-09-02T08:28:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73805,9 +73805,112 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T054350369190-pta-polish-value-authority",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-polish-value-authority",
+        "node_definition": {
+          "done_when": "tests/test_split_polish_nulls.py gains (a) a regression pinning that an accepted polish with an unmoved position leaves selected_value bit-identical to the census value, (b) a regression on the MAST 22086/43 operand row (docs/figures/topology-visual-corroboration/mast-topology-operands.npz or the bank row the solver programme used) asserting the selected X flux equals the census value -0.12272 Wb to 1e-9 with the receipt reporting representation_adequate false, fit_value near -0.0889 Wb, citing docs/figures/solver-convergence-regression/null-polish-attribution.json as the production evidence; the Solovev axis stays <= 0.2 mm; the focused CPU lanes tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; the commit body names the production defect together with the rule; no other behaviour change",
+          "estimated_hours": 2.0,
+          "goal": "Make the census polish position-only in polish_census_stationary_points, its carrier-native variant included: selected_value becomes the census interpolation's flux at the polished position (bit-identical to the census value when the position is unmoved), the fit's own value is retained in the receipt as fit_value for diagnosis, a representation_adequate receipt flag is false whenever the fit's normalised RMS misfit exceeds the field-range fraction of the value change it would have assigned",
+          "id": "pta-polish-value-authority",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054350369190-pta-polish-value-authority/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/linalg/split_spline.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T05:43:55Z",
+        "completed_at": "2026-09-02T06:19:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2130,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2130,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6768880dcbd5588cc48efd3a55a4079d8332772e",
+        "commits": [
+          "46dd6e7841a7b6070197dcfdda0eafc0c2336af3"
+        ],
+        "changed_lines": {
+          "added": 195,
+          "removed": 7,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054350369190-pta-polish-value-authority/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13142912,
+            "cached_input_tokens_cumulative": 16788352,
+            "input_tokens": 13495697,
+            "input_tokens_cumulative": 17260112,
+            "output_tokens": 26789,
+            "output_tokens_cumulative": 34792,
+            "reasoning_output_tokens": 10994,
+            "reasoning_output_tokens_cumulative": 12619
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1312
+    "_version": 1313
   }
 }

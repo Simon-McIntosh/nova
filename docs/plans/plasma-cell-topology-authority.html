@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -212,7 +212,10 @@
     <div class="r-comment-body"><p>Review PASS: completeness gap closed, scope test-only, 41/41 log confirmed, hygiene clean</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260902T061905679679-pta-polish-value-authority-verify" data-who="pta-review-b" data-when="2026-09-02T06:27:11Z">
-    <div class="r-comment-body"><p>Review: position-only authority, MAST regression, unmoved regression, inactive-fit receipt, 54/54 lanes and hygiene PASS; FAIL on one receipt alias — the legacy value key still exposes the fit&#x27;s value beside fit_value (flux_surface_connectivity.py:1129-1134,1197-1219)</p></div>
+    <div class="r-comment-body"><p>Review: position-only authority, MAST regression, unmoved regression, inactive-fit receipt, 54/54 lanes and hygiene PASS; FAIL on one receipt alias — the legacy value key still exposes the fit's value beside fit_value (flux_surface_connectivity.py:1129-1134,1197-1219)</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260902T054350369190-pta-polish-value-authority" data-who="pta-census" data-when="2026-09-02T06:19:25Z">
+    <div class="r-comment-body"><p>Polish made position-only with the map-owned value (MAST 22086/43 X flux restored to the census -0.12272 Wb, representation_adequate false at RMS misfit 0.060 Wb, Solovev axis 0.0657 mm), 54/54 lanes; review FAILED narrowly on the legacy value receipt key still aliasing the fit&#x27;s value — receipt-only repair on the same member</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T061708423251-pta-stagnation-baseline" data-who="pta-test" data-when="2026-09-02T06:21:37Z">
     <div class="r-comment-body"><p>On main 85dac172 tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts already fails with active_set_iterations 1 == 2 (1 passed, 1 failed), so the failure is pre-existing and not caused by the mask migration; recheck after the polish-value fix merges</p></div>

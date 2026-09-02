@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:45:10",
+  "updated": "2026-09-02T08:47:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -74150,9 +74150,245 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T064254823865-pta-polish-receipt-alias-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-polish-receipt-alias-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-polish-receipt-alias-review.md with a PASS or FAIL verdict over: (1) git show --stat 9cb6afc8 lists only the two fenced paths; (2) the receipt's value key now equals selected_value for accepted and rejected slots on both the raster and carrier-native routes, fit_value alone exposes the split fit's value, and the closed receipt-key regression classifies value as the map-owned selected flux, quoting file:line; (3) the captured lanes in the run directory record 54 passed across six files; (4) naming hygiene; (5) any defect quoted with file:line. Read-only review of files and logs",
+          "estimated_hours": 0.25,
+          "goal": "Write an independent re-review verdict report on commit 9cb6afc8 of node pta-polish-receipt-alias (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-polish-receipt-alias, paths nova/equilibrium/flux_surface_connectivity.py, tests/test_split_polish_nulls.py) against the sole defect of your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-polish-value-authority-review.md",
+          "id": "pta-polish-receipt-alias-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064254823865-pta-polish-receipt-alias-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "10m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-polish-receipt-alias-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pta-review-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T06:43:00Z",
+        "completed_at": "2026-09-02T06:47:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 246,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 246,
+        "stalled": false,
+        "time_budget": "10m",
+        "base_sha": "711ceea63427699561e80b4f6130ca26360c5bce",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "re-review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-polish-receipt-alias-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-polish-receipt-alias-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064254823865-pta-polish-receipt-alias-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-0a59-7140-9ef4-83bc9c54a807",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 763776,
+            "cached_input_tokens_cumulative": 763776,
+            "input_tokens": 856892,
+            "input_tokens_cumulative": 856892,
+            "output_tokens": 8296,
+            "output_tokens_cumulative": 8296,
+            "reasoning_output_tokens": 2096,
+            "reasoning_output_tokens_cumulative": 2096
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1079,
+              "log_age_seconds": 295,
+              "log_fresh": true,
+              "manifest_commits": [
+                "8ce682f4a26c64fd00d18174cfb67f61cc3d7aab"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062452961792-pta-shadow-census-fixture/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T062452961792-pta-shadow-census-fixture --gate <verdict> --commit 8ce682f4a26c64fd00d18174cfb67f61cc3d7aab",
+              "node": "pta-shadow-census-fixture",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T062452961792-pta-shadow-census-fixture",
+              "session": "s18-pta",
+              "terminal_age_seconds": 322,
+              "terminal_at": "2026-09-02T06:37:34Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-shadow-census-fixture"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only re-review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T062845899263-pta-polish-receipt-alias",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a72",
+        "node": "pta-polish-receipt-alias",
+        "node_definition": {
+          "done_when": "In polish_census_stationary_points and the carrier-native route the receipt's value key equals selected_value for every slot (accepted or rejected) and fit_value alone carries the fit's value; tests/test_split_polish_nulls.py updates its closed receipt-key assertions accordingly and adds one assertion that value equals selected_value while fit_value differs on the MAST 22086/43 regression; the six CPU lanes tests/test_split_polish_nulls.py tests/test_hex_flood_sn_secondary.py tests/test_flux_surface_connectivity.py tests/test_split_spline.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; no other change",
+          "estimated_hours": 0.5,
+          "goal": "Redefine the polish receipt's legacy value key as the map-owned selected value so that fit_value is the only key carrying the split fit's value, per the review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-polish-value-authority-review.md (flux_surface_connectivity.py:1129-1134,1197-1219)",
+          "id": "pta-polish-receipt-alias",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062845899263-pta-polish-receipt-alias/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pta-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:28:51Z",
+        "completed_at": "2026-09-02T06:42:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 820,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 820,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "46dd6e7841a7b6070197dcfdda0eafc0c2336af3",
+        "commits": [
+          "9cb6afc8dd1c074a4d3c419e05aafeae821e5d70"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six fresh-process CPU lanes: JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on test_split_polish_nulls.py test_hex_flood_sn_secondary.py test_flux_surface_connectivity.py test_split_spline.py test_plasma_cell_topology_read.py test_solovev_recovery_gates.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062845899263-pta-polish-receipt-alias/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062845899263-pta-polish-receipt-alias/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e89-3bc1-7c21-9a13-5a2126f275d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1676288,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1922732,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6846,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1062
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1317
+    "_version": 1319
   }
 }

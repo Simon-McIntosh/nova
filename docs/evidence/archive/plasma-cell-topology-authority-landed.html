@@ -105,6 +105,22 @@
 </table>
 <p><strong>Findings banked.</strong> (1) A closed cell outside an inward-offset flood level but inside the exact boundary reads private unless the offset is confined to the saddle neck. (2) <code>test_equilibrium_forward_reference.py</code> is a GPU lane; its builds-once test rebuilds the fixture machine (54 min on CPU). (3) The forward-mode differentiation of the split fit's custom VJP raised a TypeError on the oracle path; the implicit JVP of the regularised normal equations closes it.</p>
 </section>
+
+<section id="s2-value-authority"><h2 id="s2-value-authority-h">§2 — Polish value authority (production defect repair)</h2>
+<p>Found 2026-09-02 07:08 by the solver-convergence programme's attribution (<code>docs/figures/solver-convergence-regression/null-polish-attribution.json</code>): on MAST 22086/43 the merged polish left the X position unmoved and replaced its flux with the split fit's value, −0.12272 → −0.08890 Wb (+28%), accepted because both gates loosen with the fit's own misfit (representation floor 2.22). The changed boundary flux flipped a stagnating pure arm (4.80e-4 in 7 trips) to spurious convergence (3.18e-11 in 10 trips). Decision <em>polish-value-authority</em>: positions only; values from the map. Merged <code>588578a0</code> (<code>46dd6e78</code>, <code>9cb6afc8</code>).</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Selected value</td><td>Census local-quadratic interpolation at the polished position; bit-identical to the census value when unmoved (regression); no code path writes the fit's value into <code>selected_value</code>; the receipt's <code>value</code> equals <code>selected_value</code>, <code>fit_value</code> alone carries the fit.</td></tr>
+<tr><td>Adequacy flag</td><td><code>representation_adequate</code> = RMS misfit / field range ≤ |fit_value − census_value| / field range.</td></tr>
+<tr><td>MAST 22086/43</td><td>Selected X flux −0.12271595 Wb (census, within 1e-9 of the attribution's seed value); <code>fit_value</code> −0.08883 Wb; sample RMS residual 0.060 Wb; <code>representation_adequate</code> false.</td></tr>
+<tr><td>Solov'ev</td><td>Axis 0.0657 mm accepted; saddle 0 m fallback; 33×33/65×65 fit residuals 2.3e-16/3.3e-16.</td></tr>
+<tr><td>Lanes</td><td>54 passed across six files (split polish 15, secondary null 6, connectivity 19, split spline 4, carrier topology read 2, Solov'ev gates 8). An unrelated truthful-receipt defect (an unexecuted fit reported its valid sample count instead of zero) was fixed in scope.</td></tr>
+<tr><td>Reviews</td><td>FAIL (legacy <code>value</code> key still aliased the fit) → PASS after <code>9cb6afc8</code>.</td></tr>
+</tbody>
+</table>
+<p><strong>Lesson banked.</strong> A gate whose tolerance is built from the fit's own residual accepts precisely the fits that are wrong; four reviews of the derivation on manufactured fields never saw it because every manufactured field had a small floor. Every polish validation must include one production map.</p>
+</section>
 </main>
 </body>
 </html>

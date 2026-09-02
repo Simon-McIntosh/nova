@@ -12,7 +12,11 @@ import numpy as np
 
 from nova.graphics.plot import Plot2D
 from nova.biot.null import Null1D, Null2D
-from nova.equilibrium.connectivity_boundary import _raster_hex_partition_geometry
+from nova.equilibrium.connectivity_boundary import (
+    _PRE_SADDLE_OFFSET_FRACTION,
+    _canonicalize_reciprocal_hex_edges,
+    _raster_hex_partition_geometry,
+)
 from nova.equilibrium.domain import (
     DomainMasks,
     axis_connected_component,
@@ -415,21 +419,48 @@ class Topology(Pytree):
         return self.x_mask(data_o, vmap_x) & self.psi_mask(polarity, psi_grid, psi_lcfs)
 
     @jax.jit
-    def axis_component(self, psi_grid, boundary_flux, axis_flux, axis, closed, inside):
-        """Return the closed, in-material hex component containing the axis."""
+    def axis_component(
+        self,
+        psi_grid,
+        boundary_flux,
+        axis_flux,
+        axis,
+        closed,
+        inside,
+        saddle_cut=False,
+    ):
+        """Return the closed, in-material hex component containing the axis.
+
+        A selected saddle is read immediately on its axis side, using the same
+        scale-relative inward offset as the raster connectivity boundary. The
+        published ``closed`` mask remains cut at the exact boundary flux; only
+        graph propagation moves inward, so the disconnected lobe is labelled
+        private flux rather than open flux.
+        """
         rings = self.connectivity_rings
         shared_edges = self.connectivity_shared_edges
+        inside_flux = jnp.where(inside, psi_grid, jnp.nan)
+        inward = _PRE_SADDLE_OFFSET_FRACTION * (
+            jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
+        )
+        direction = jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
+        component_flux = boundary_flux + direction * inward
+        component_closed = direction * (psi_grid - component_flux) >= 0.0
+        component_flux = jnp.where(saddle_cut, component_flux, boundary_flux)
+        component_closed = jnp.where(saddle_cut, component_closed, closed)
         structured = self.connectivity_radius.size and self.connectivity_height.size
         if structured:
             radial_count = self.connectivity_radius.shape[0]
             vertical_count = self.connectivity_height.shape[0]
             flux = psi_grid.reshape((radial_count, vertical_count)).T
-            confined = (closed & inside).reshape((radial_count, vertical_count)).T
+            confined = (
+                (component_closed & inside).reshape((radial_count, vertical_count)).T
+            )
             link_admissible = hex_edge_admissibility(
                 flux,
                 self.connectivity_radius,
                 self.connectivity_height,
-                boundary_flux,
+                component_flux,
                 axis_flux,
                 shared_edges,
             )
@@ -437,7 +468,7 @@ class Topology(Pytree):
                 (radial_count, vertical_count, 2)
             ).transpose((1, 0, 2))
         else:
-            confined = closed & inside
+            confined = component_closed & inside
             edge_values = jnp.sum(
                 self.connectivity_edge_weight * psi_grid[self.connectivity_edge_gather],
                 axis=-1,
@@ -446,7 +477,7 @@ class Topology(Pytree):
                 psi_grid,
                 self.connectivity_coordinate[:, 0],
                 self.connectivity_coordinate[:, 1],
-                boundary_flux,
+                component_flux,
                 axis_flux,
                 shared_edges,
                 edge_values=edge_values,
@@ -458,6 +489,7 @@ class Topology(Pytree):
             )
             link_admissible = link_admissible & ~missing
             coordinate = self.connectivity_coordinate
+        link_admissible = _canonicalize_reciprocal_hex_edges(rings, link_admissible)
         distance2 = jnp.sum((coordinate - axis) ** 2, axis=-1)
         seed_index = jnp.argmin(jnp.where(confined, distance2, jnp.inf))
         seed = (
@@ -479,6 +511,7 @@ class Topology(Pytree):
             owner_index = jnp.argmin(distance2)
             owner = jnp.arange(coordinate.shape[0]) == owner_index
             admitted_material = inside_material | owner
+            data_x = self.x_point_data(vmap_x, polarity, data_o[2])
             data_b = self.boundary(data_o, vmap_x, data_w, polarity)
             closed = self.psi_mask(polarity, psi_grid, data_b[2])
             component = self.axis_component(
@@ -488,6 +521,7 @@ class Topology(Pytree):
                 data_o[:2],
                 closed,
                 admitted_material,
+                jnp.equal(data_b[2], data_x[2]),
             )
             component_size = jnp.sum(component)
             governed_connection = jnp.any(component & inside_material)
@@ -600,6 +634,7 @@ class Topology(Pytree):
             data_o[:2],
             closed,
             inside_material,
+            boundary_is_xpoint,
         )
         masks = classify_domains(
             psi_norm,

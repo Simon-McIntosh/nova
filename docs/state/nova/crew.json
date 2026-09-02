@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:36:56",
+  "updated": "2026-09-02T08:45:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73919,9 +73919,240 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T063859670020-pta-shadow-census-fixture-verify",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-shadow-census-fixture-verify",
+        "node_definition": {
+          "done_when": "A report exists at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md with a PASS or FAIL verdict over: (1) git show --stat 8ce682f4 lists only tests/test_plasma_cell_shadow_telemetry.py; (2) both analytic fixtures construct the operator with the polarity their flux convention requires and pin the selected axis within one cell spacing of the analytic minimum and the boundary to the central saddle, with nonzero core, private and common-SOL counts asserted where the geometry has them; (3) the wall-difference adjudication derives each row's classification from the node's own flux and its owner's flux against the census boundary and the retained binding level, never from the label under review, and a row with no independent mechanism fails the test; (4) with corrected fixtures the carrier and retained masks report 0 differences on both fixtures \u2014 judge whether that agreement is meaningful (the fixtures exercise wall nodes near a private lobe) or trivial (no wall node near a private region); (5) the captured lanes in the run directory record 28 passed across four files; (6) naming hygiene; (7) any defect quoted with file:line. Read-only review of files and logs",
+          "estimated_hours": 0.5,
+          "goal": "Write an independent re-review verdict report on commit 8ce682f4 of node pta-shadow-census-fixture (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-shadow-census-fixture, path tests/test_plasma_cell_shadow_telemetry.py) against the defect in your report /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md",
+          "id": "pta-shadow-census-fixture-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T063859670020-pta-shadow-census-fixture-verify/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "15m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pta-review-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T06:39:07Z",
+        "completed_at": "2026-09-02T06:44:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 325,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 325,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "711ceea63427699561e80b4f6130ca26360c5bce",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review report present with verdict at ~/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-shadow-census-fixture-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T063859670020-pta-shadow-census-fixture-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 922880,
+            "cached_input_tokens_cumulative": 922880,
+            "input_tokens": 993604,
+            "input_tokens_cumulative": 993604,
+            "output_tokens": 6963,
+            "output_tokens_cumulative": 6963,
+            "reasoning_output_tokens": 1466,
+            "reasoning_output_tokens_cumulative": 1466
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only review; report written outside the worktree",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T062452961792-pta-shadow-census-fixture",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a73",
+        "node": "pta-shadow-census-fixture",
+        "node_definition": {
+          "done_when": "tests/test_plasma_cell_shadow_telemetry.py passes with the fixture polarity fixed, the axis and saddle pinned to their analytic positions within one cell spacing, nonzero core/private/common-SOL counts asserted on the single-null fixture, and the census of carrier-versus-retained wall-mask differences reporting counts and per-node classification derived from the node flux against the two boundary levels (census saddle flux and the raster read's binding flux), failing only on a contradiction; the manifest quotes the difference counts for both fixtures; the CPU lanes tests/test_plasma_cell_shadow_telemetry.py tests/test_wall_height_exclusion.py tests/test_plasma_cell_topology_read.py tests/test_solovev_recovery_gates.py are green each as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest, logs cited; production files unchanged unless the corrected fixture exposes a real defect, in which case stop with a NEEDS-HELP brief",
+          "estimated_hours": 1.0,
+          "goal": "Repair tests/test_plasma_cell_shadow_telemetry.py per the review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-cell-mask-shadow-telemetry-review.md: construct the analytic fixtures with the polarity their flux convention requires (the single-null lobes are minima), pin the selected axis to the analytic minimum and the boundary to the central saddle, assert non-degenerate domain counts (core, private, common-SOL all nonzero where the geometry has them), and adjudicate each carrier-versus-raster wall-node difference from independently evaluated operands \u2014 the wall node's own flux against the census saddle flux versus the raster read's binding level \u2014 instead of from the label under review",
+          "id": "pta-shadow-census-fixture",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062452961792-pta-shadow-census-fixture/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_plasma_cell_shadow_telemetry.py",
+            "nova/equilibrium/forward_operator.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:24:58Z",
+        "completed_at": "2026-09-02T06:38:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 783,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 783,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f944f6d3c66889c3c61ea1ee0b12624166066725",
+        "commits": [
+          "8ce682f4a26c64fd00d18174cfb67f61cc3d7aab"
+        ],
+        "changed_lines": {
+          "added": 105,
+          "removed": 20,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062452961792-pta-shadow-census-fixture/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 303104,
+            "cached_input_tokens_cumulative": 5199616,
+            "input_tokens": 439507,
+            "input_tokens_cumulative": 5407085,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10821,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2996
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2460,
+              "log_age_seconds": 329,
+              "log_fresh": true,
+              "manifest_commits": [
+                "46dd6e7841a7b6070197dcfdda0eafc0c2336af3"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T054350369190-pta-polish-value-authority/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T054350369190-pta-polish-value-authority --gate <verdict> --commit 46dd6e7841a7b6070197dcfdda0eafc0c2336af3",
+              "node": "pta-polish-value-authority",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T054350369190-pta-polish-value-authority",
+              "session": "s18-pta",
+              "terminal_age_seconds": 401,
+              "terminal_at": "2026-09-02T06:18:13Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-polish-value-authority"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1315
+    "_version": 1317
   }
 }

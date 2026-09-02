@@ -1,0 +1,181 @@
+{
+  "receipt": "stagnation-exit-test-triage",
+  "generated_at_utc": "2026-09-02T07:14:04Z",
+  "test": {
+    "nodeid": "tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+    "command_template": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=<shadow-worktree> uv run --project <shadow-worktree> --no-sync pytest -q <shadow-worktree>/tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+    "lane": "default CPU lane",
+    "host": "98dci4-srv-1006.iter.org",
+    "jax_platforms": "cpu",
+    "jax_backend": "cpu",
+    "jax_version": "0.11.0",
+    "jaxlib_version": "0.11.0",
+    "shared_environment": "/home/ITER/mcintos/Code/nova/.venv",
+    "assertion": {
+      "path": "tests/test_active_set_stagnation.py",
+      "line": 68,
+      "source": "assert executed == 2"
+    }
+  },
+  "requested_revision_matrix": [
+    {
+      "label": "current_main",
+      "revision": "d70d6ef959aa85f9a3b8e4a09535d9c80d9f9501",
+      "revision_subject": "docs(topology): attribute the oracle timing miss to fixture construction",
+      "revision_date": "2026-09-02T09:04:45+02:00",
+      "result": "fail",
+      "exit_status": 1,
+      "assertion_message": "assert 1 == 2",
+      "observed_trip_count": 1,
+      "transforms_completed": [],
+      "transform_at_failure": "eager",
+      "note": "The eager assertion fails before the JIT member is reached.",
+      "elapsed_seconds": 20.47,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/current-main.log",
+      "log_sha256": "98c2c11cbeab7598b305db443bb1a68b67709e0f692c79ff1583e93a8d21ae2f"
+    },
+    {
+      "label": "map_owned_null_polish_merge",
+      "revision": "588578a0628bff2ca9b8ddc28973f382d1bb8d5c",
+      "revision_subject": "Merge the map-owned null polish value",
+      "revision_date": "2026-09-02T08:47:17+02:00",
+      "result": "fail",
+      "exit_status": 1,
+      "assertion_message": "assert 1 == 2",
+      "observed_trip_count": 1,
+      "transforms_completed": [],
+      "transform_at_failure": "eager",
+      "note": "The eager assertion fails before the JIT member is reached.",
+      "elapsed_seconds": 16.74,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/map-owned-polish.log",
+      "log_sha256": "b975352053a945d2dffe46f586b130435f8a302b0dfe403e855ad30575bfd848"
+    },
+    {
+      "label": "wall_mask_census_revision",
+      "revision": "85dac1726459f3838017dc476a620cee67405f28",
+      "revision_subject": "docs(plans): make the wall-mask comparison a census across two authorities",
+      "revision_date": "2026-09-02T08:00:08+02:00",
+      "result": "fail",
+      "exit_status": 1,
+      "assertion_message": "assert 1 == 2",
+      "observed_trip_count": 1,
+      "transforms_completed": [],
+      "transform_at_failure": "eager",
+      "note": "The eager assertion fails before the JIT member is reached.",
+      "elapsed_seconds": 22.61,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/wall-census.log",
+      "log_sha256": "a61ea5c888b5b7f1a517aa5b3690261f5649683d131b6891689d196be64659e8"
+    },
+    {
+      "label": "first_topology_authority_merge_parent",
+      "revision": "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3",
+      "revision_subject": "docs(plans): record the interim CPU discriminator readings",
+      "revision_date": "2026-09-01T23:57:20+02:00",
+      "revision_relation": "aecea6a7^1",
+      "result": "fail",
+      "exit_status": 1,
+      "assertion_message": "assert 1 == 2",
+      "observed_trip_count": 1,
+      "transforms_completed": [],
+      "transform_at_failure": "eager",
+      "note": "The eager assertion fails before the JIT member is reached.",
+      "elapsed_seconds": 28.38,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/topology-parent.log",
+      "log_sha256": "90923e1192c189e78d26e3899383f4dcd70d336e2fe03ec22bb8b61040c01ad8"
+    }
+  ],
+  "failure_boundary": {
+    "last_passing_revision": {
+      "revision": "e5e7d2823d6175b8a3dba416965ee0ddfea001b0",
+      "revision_subject": "docs(plans): lock the settled-exit and gate-scoring decisions",
+      "revision_date": "2026-09-01T18:29:35+02:00",
+      "result": "pass",
+      "exit_status": 0,
+      "assertion_message": null,
+      "observed_trip_count": 2,
+      "transforms_completed": [
+        "eager",
+        "jit"
+      ],
+      "elapsed_seconds": 16.48,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/settlement-parent.log",
+      "log_sha256": "b6ca8dad43bcc8b21114ca5c3ba5064d53b9d2ad63ad206f93e08553513f42b5"
+    },
+    "first_failing_revision": {
+      "revision": "c8cd79bf7691a487778fc92da334aa84b1fc8890",
+      "revision_subject": "feat(equilibrium): mask qualified settled trips",
+      "revision_date": "2026-09-01T18:56:29+02:00",
+      "result": "fail",
+      "exit_status": 1,
+      "assertion_message": "assert 1 == 2",
+      "observed_trip_count": 1,
+      "transforms_completed": [],
+      "transform_at_failure": "eager",
+      "elapsed_seconds": 13.4,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/settlement-introduction.log",
+      "log_sha256": "f67fb69e1f71ee66e13a02638c91db90d14997d1dbbe69ce5f755d48d1baeb6c"
+    },
+    "intervening_nova_commits": [
+      {
+        "revision": "c8cd79bf7691a487778fc92da334aa84b1fc8890",
+        "subject": "feat(equilibrium): mask qualified settled trips",
+        "affected_mechanism": "Adds stop_on_active_set_settlement=True and terminates an own-mask-qualified, zero-mask-difference, no-promotion, unchanged-state trip as ACTIVE_SET_SETTLED."
+      }
+    ],
+    "path_filter": "nova/",
+    "boundary_statement": "The test passes at c8cd79bf^1 with two trips in eager and JIT modes, then first fails at c8cd79bf with one eager trip; that single intervening nova/ commit introduced the default settled exit."
+  },
+  "synthetic_case_reading": {
+    "evidence_line": {
+      "path": "tests/test_active_set_stagnation.py",
+      "line": 28,
+      "source": "promoted_shadow_mask_fn=lambda _state, previous: previous"
+    },
+    "supporting_lines": [
+      {
+        "line_start": 13,
+        "line_end": 14,
+        "meaning": "The observed mask is a local one-cell all-false constant."
+      },
+      {
+        "line_start": 18,
+        "line_end": 19,
+        "meaning": "The synthetic shadowed map ignores its mask and returns state + 1."
+      },
+      {
+        "line_start": 27,
+        "line_end": 29,
+        "meaning": "Both mask callbacks and the map callback are local to the test; no carrier or topology read is invoked."
+      }
+    ],
+    "verdict": "Loop-side: the synthetic case pins the promoted mask to the previous mask at line 28, so the new default first-trip settlement in fixed_point.py, not any carrier topology read or changed mask history, changes the observed trip count.",
+    "classification": "stale stagnation-specific test setup after a deliberate settled-exit policy addition"
+  },
+  "proposed_fix": {
+    "sentence": "Pass stop_on_active_set_settlement=False in _stagnating_solve's newton_krylov call so this fixture isolates consecutive-residual stagnation.",
+    "text_only": true,
+    "verification": {
+      "result": "pass",
+      "exit_status": 0,
+      "eager": {
+        "observed_trip_count": 2,
+        "termination_reason_value": 9,
+        "termination_reason": "ACTIVE_SET_STAGNATED"
+      },
+      "jit": {
+        "observed_trip_count": 2,
+        "termination_reason_value": 9,
+        "termination_reason": "ACTIVE_SET_STAGNATED"
+      },
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070110541689-scr-stagnation-test-triage/logs/proposed-fix-probe.log",
+      "log_sha256": "13dcb9ecfa897bf956cf1ef96f9578cf2c5b04e9ce2c2d13660ec805dc03ae9b"
+    }
+  },
+  "scope": {
+    "solver_source_modified": false,
+    "test_modified": false,
+    "nova_diff_stat": "empty",
+    "tests_diff_stat": "empty"
+  },
+  "headline": "All four requested revisions fail with one executed trip; the exact adjacent boundary is c8cd79bf^1 PASS at two trips to c8cd79bf FAIL at one trip, caused by the deliberate default settled exit, and the stagnation-only fixture should disable settlement."
+}

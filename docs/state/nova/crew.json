@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:35:23",
+  "updated": "2026-09-02T11:38:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -692,9 +692,11 @@
         "id": "gaa-evidence",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06171-2897-7631-a1f0-9fedcf2f32d1",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06171-2897-7631-a1f0-9fedcf2f32d1"
+        },
         "created": "2026-09-02"
       },
       {
@@ -1893,6 +1895,15 @@
         "role": "implement",
         "session_id": "873551b5-ecde-42de-b56e-a097270f68b8",
         "created": "2026-08-22"
+      },
+      {
+        "id": "wiring-audit",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "xpoint-map",
@@ -75444,9 +75455,144 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T092634752284-gaa-evidence-record",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "gaa-evidence-record",
+        "node_definition": {
+          "done_when": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/gs-absolute-accuracy-gates-landed.html reports 0 ERRORs, the document carries plan-evidence-for=gs-absolute-accuracy-gates, its certificate table lists 16 rows whose residuals and qualifications match solovev-certificate.json, its EFIT table lists 11 rows matching efit-reproduction.json with the floors 0.0116147034 and 0.0832365867, the registry table lists 14 bounds, every embedded figure resolves to an existing file, and the closing table names the convergence owner",
+          "estimated_hours": 1.5,
+          "goal": "The cumulative evidence record docs/evidence/archive/gs-absolute-accuracy-gates-landed.html (reckon-type=evidence, plan-evidence-for=gs-absolute-accuracy-gates, plan-informs=millisecond-converged-solve,solver-convergence-regression) with one stable anchor per landed section: the reuse map, the Solovev certificate (sixteen rows from docs/figures/gs-absolute-accuracy/solovev-certificate.json as an HTML table of case by resolution with terminal relative residual, qualification, whole-domain psi sup and rms, plus the fourteen-bound reduced-oracle registry reproduction as a table, embedding a representative error-field figure per case from docs/figures/gs-absolute-accuracy/solovev/ by project-absolute src with a one-paragraph reading), the EFIT reproduction gate (eleven rows from efit-reproduction.json as an HTML table with both error terms, the floors, convergence residual and verdict, embedding one MAST and one DIII-D figure with readings, the all-miss compilation-cache finding as a table), the oracle lane cost (phase table before and after the fixture-assembly batching from oracle-fixture-assembly.json), and a closing open-record table stating plainly that accuracy is not yet certifiable because the production solve does not reach the root from its own seed on any case, naming solver-convergence-regression as the owner of that convergence question, with numbers exactly as the receipt JSONs record them and never an image of a table",
+          "id": "gaa-evidence-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092634752284-gaa-evidence-record/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/archive/gs-absolute-accuracy-gates-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "gaa-evidence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:26:40Z",
+        "completed_at": "2026-09-02T09:37:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 671,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 671,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "241ee4a97a9a9f802b67fbdee67fc45da5a0737f",
+        "commits": [
+          "adfff6dc02892edf1a9049034371a97fd9c4939a"
+        ],
+        "changed_lines": {
+          "added": 188,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --project ~/Code/reckon reckon audit-doc docs/evidence/archive/gs-absolute-accuracy-gates-landed.html",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092634752284-gaa-evidence-record/gate-audit-doc.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092634752284-gaa-evidence-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06171-2897-7631-a1f0-9fedcf2f32d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2496896,
+            "cached_input_tokens_cumulative": 2496896,
+            "input_tokens": 2646828,
+            "input_tokens_cumulative": 2646828,
+            "output_tokens": 22009,
+            "output_tokens_cumulative": 22009,
+            "reasoning_output_tokens": 2660,
+            "reasoning_output_tokens_cumulative": 2660
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The sole authorized measurement job 1261119 has not started; SLURM reports PENDING (Priority) with estimated start 2026-09-02T16:40:20+02:00; beyond this node's 60-minute fence; so terminal residuals; trip counts; mixed-candidate decisions; mode contractions; receipt; figure and local commit cannot yet be produced.",
+              "elapsed_seconds": 3145,
+              "log_age_seconds": 1289,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; prototype remains uncommitted because the required H200 measurement has not run"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-anderson",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 1317,
+              "terminal_at": "2026-09-02T09:04:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1337
+    "_version": 1340
   }
 }

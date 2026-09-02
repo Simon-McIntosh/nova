@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:26:08",
+  "updated": "2026-09-02T09:44:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1066,9 +1066,11 @@
         "id": "oracle-fixture-perf",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060f0-ba32-7da3-8599-af5a03e32323",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060f0-ba32-7da3-8599-af5a03e32323"
+        },
         "created": "2026-09-02"
       },
       {
@@ -75112,9 +75114,102 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260902T070614671470-gaa-oracle-fixture-assembly",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a71",
+        "node": "gaa-oracle-fixture-assembly",
+        "node_definition": {
+          "done_when": "oracle-fixture-assembly.json records the before and after build_machine phase seconds on the same rigel node, the paired block comparison's maximum absolute and relative difference against the per-source assembly (at or below the float64 roundoff floor the receipt states), the recovery-gate test's wall_seconds under 60 with its pass status and SLURM job id, node and exit marker, the new paired-comparison test passes, tests/test_solovev_recovery_gates.py is unmodified, and the diff under nova/ is confined to nova/biot/polygonanalytic.py",
+          "estimated_hours": 2.0,
+          "goal": "A faster cold build of the closed-form oracle fixture so the default-lane gate tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point returns under its untouched 60 s wall bound on a rigel node: the serial per-source assembly in scripts/analytic_oracle_fixtures/measure.py::_flux_blocks (three polygon_analytic_flux_moments calls totalling 53.99 s of the 58.18 s build, per the topology-authority phase table in ~/.config/reckon/crew/reports/nova/pta-build-machine-cost/) replaced by a batched or vectorised evaluation of the same exact polygon flux moments across all source polygons at once (a batched entry point in nova/biot/polygonanalytic.py is permitted if it returns bit-for-bit or roundoff-floor-equal blocks to the per-source calls, proven by a paired comparison in a new test), the exact-state preparation left alone unless it is the next largest phase, measured cold on rigel by sbatch (16 CPUs, JAX_PLATFORMS=cpu, TMPDIR=/tmp, launch-then-harvest) with the phase trace before versus after and the single recovery-gate test's wall_seconds and pass status recorded in a receipt docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json, with the roundoff assertions of the gate unchanged and the bound unchanged",
+          "id": "gaa-oracle-fixture-assembly",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "open",
+          "time_budget": "45m",
+          "write_paths": [
+            "scripts/analytic_oracle_fixtures/measure.py",
+            "nova/biot/polygonanalytic.py",
+            "tests/test_polygon_analytic_batched_moments.py",
+            "docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "oracle-fixture-perf",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:06:23Z",
+        "completed_at": "2026-09-02T07:44:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2278,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2278,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "1dabd9564cc5c5b71b196ff3e747237e08878db5",
+        "commits": [
+          "1f6f3e2cc03b485619f59ae35422dfdaa5171789"
+        ],
+        "changed_lines": {
+          "added": 348,
+          "removed": 16,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rigel job 1261084: pytest tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point (exit 0, wall 38.86 s) plus tests/test_polygon_analytic_batched_moments.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/logs/gate-receipt-1261084.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T070614671470-gaa-oracle-fixture-assembly/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060f0-ba32-7da3-8599-af5a03e32323",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1329
+    "_version": 1331
   }
 }

@@ -22,7 +22,9 @@ def _zero_profile(psi_norm):
     return jnp.zeros_like(psi_norm)
 
 
-def _raster_operator(shape: tuple[int, int]) -> ForwardFluxOperator:
+def _raster_operator(
+    shape: tuple[int, int], *, wall_through_lower_lobe: bool = False
+) -> ForwardFluxOperator:
     """Return a structured carrier with an independently sampled wall."""
     radius = np.linspace(1.05, 2.35, shape[0])
     height = np.linspace(-0.72, 0.72, shape[1])
@@ -32,6 +34,19 @@ def _raster_operator(shape: tuple[int, int]) -> ForwardFluxOperator:
         1.7 + 0.64 * np.cos(wall_angle),
         0.68 * np.sin(wall_angle),
     ]
+    if wall_through_lower_lobe:
+        lower_lobe_segment = np.asarray(
+            (
+                (1.58, -0.46),
+                (1.58, -0.31),
+                (1.70, -0.31),
+                (1.82, -0.31),
+                (1.82, -0.46),
+            )
+        )
+        wall_coordinate = np.r_[
+            wall_coordinate[:68], lower_lobe_segment, wall_coordinate[77:]
+        ]
     return ForwardFluxOperator(
         grid=FluxTarget(
             source_target=jnp.zeros((lattice.node_count, 1)),
@@ -67,7 +82,10 @@ def _limited_flux(radius, height):
 
 def _fixture_read(flux, requested_class):
     """Return one structured fixture read through the carrier authority."""
-    operator = _raster_operator((17, 19))
+    operator = _raster_operator(
+        (17, 19),
+        wall_through_lower_lobe=requested_class == TopologyClass.DIVERTED,
+    )
     grid = np.asarray(operator.grid.coordinate)
     wall = np.asarray(operator.wall.coordinate)
     physical = jnp.asarray(
@@ -139,6 +157,7 @@ def test_carrier_private_wall_is_label_owned_with_raster_census():
                 )
             }
             assert all(count > 0 for count in domain_counts.values())
+            assert np.count_nonzero(carrier) > 0
         else:
             domain_counts = {
                 domain.name: int(np.count_nonzero(labels == domain))
@@ -147,6 +166,10 @@ def test_carrier_private_wall_is_label_owned_with_raster_census():
             assert domain_counts[PlasmaDomain.CORE.name] > 0
             assert domain_counts[PlasmaDomain.COMMON_SOL.name] > 0
             assert domain_counts[PlasmaDomain.PRIVATE_FLUX.name] == 0
+            assert (
+                np.linalg.norm(np.asarray(topology.axis) - np.asarray((1.7, 0.0)))
+                <= cell_spacing
+            )
 
         differing = np.flatnonzero(retained != carrier)
         wall_flux = np.asarray(
@@ -205,6 +228,14 @@ def test_carrier_private_wall_is_label_owned_with_raster_census():
             rows.append(row)
             if contradiction:
                 contradictions.append(row)
+        classification_tally = {
+            classification: sum(row["classification"] == classification for row in rows)
+            for classification in (
+                "binding-level difference",
+                "touch-dilation",
+                "contradiction",
+            )
+        }
         print(
             "wall_mask_census="
             + json.dumps(
@@ -219,6 +250,7 @@ def test_carrier_private_wall_is_label_owned_with_raster_census():
                     "selected_x_m": np.asarray(topology.x_point).tolist(),
                     "census_boundary_flux": census_boundary_flux,
                     "raster_boundary_flux": raster_boundary_flux,
+                    "classification_tally": classification_tally,
                     "rows": rows,
                 },
                 sort_keys=True,

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-bank-efit-overlays">
+  <meta name="plan-evidence-for" content="solver-convergence-regression">
+  <meta name="plan-verifies" content="solver-convergence-regression#s3">
+  <meta name="plan-title" content="MAST bank terminal-flux overlays">
+  <meta name="plan-summary" content="All twelve regenerated MAST bank arms shown as Nova terminal-flux contours against same-level EFIT map contours, with retained failures and boundary metrics visible row by row.">
+  <title>MAST bank terminal-flux overlays | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Evidence · terminal equilibrium geometry</p>
+    <h1>MAST bank terminal-flux overlays</h1>
+    <p class="lede">All twelve regenerated bank rows are retained in a four-by-three comparison and as individual figures. Every panel uses one physical contour-level array for Nova and EFIT, includes the Nova binding flux as a heavy solid contour when the terminal map exists, and shows the EFIT LCFS separately as a heavy dashed curve. EFIT flux contours were read and drawn for <strong>12/12 panels</strong>; Nova terminal contours were available for <strong>11/12</strong>.</p>
+  </header>
+
+  <section id="authority">
+    <h2>Authority and reading contract</h2>
+    <p>The row identities, terminal residuals, termination reasons, active-set trip counts, class verdicts, LCFS distances, geometry markers and Nova flux maps come from the secured regeneration outputs <code>current-bank.json</code> and <code>current-operands.npz</code> under <code>~/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/</code>. Their SHA-256 identities are <code>8e3ab989b884aba9e5b2a679a2e1fa7f5f604824cb5880327ae1e92c58bf8165</code> and <code>42adaac7151f0c16eb48c6220e97ee7e2e6c20a9f1f7b4599726bbb148903d90</code>, respectively.</p>
+    <p>The EFIT maps are fresh read-only loads of <code>efm/psirz</code>, <code>gridr</code> and <code>gridz</code> from the same MAST shot catalogue used by the bank producer: <code>/work/projects/imas_gpu/mast/level1/shots/&lt;shot&gt;.zarr</code>. The catalogue map is already in Wb/rad. Nova carries total poloidal flux in Wb, so the renderer divides Nova's map and binding value by exactly 2π. It applies the EFIT map's 1st-to-99th-percentile level array, augmented with the Nova binding value, verbatim to both maps. There is <strong>no per-map rescaling, normalization or additive gauge alignment</strong>.</p>
+    <p>EFIT is the independent magnetics-fitted referee used by this bank, not physical ground truth. A close overlay demonstrates agreement with that reconstruction; it does not prove uniqueness or experimental truth. The heavy EFIT LCFS comes from the retained referee geometry rather than being re-derived from the raster. The heavy Nova curve is the recorded terminal binding-flux level.</p>
+  </section>
+
+  <section id="grid">
+    <h2>Twelve-row comparison</h2>
+    <figure>
+      <img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-bank-efit-overlays.png" alt="A four-by-three grid of all twelve regenerated MAST bank rows. Solid blue lines are Nova terminal flux contours, dashed orange lines are EFIT flux contours evaluated at the identical physical levels, the heavy dark-blue line is Nova's binding contour, the heavy dark-red dashed line is the EFIT LCFS, and the wall plus Nova axis, Nova saddle and EFIT X-point markers are overlaid. The 21986/46 mixed panel explicitly shows that its Nova terminal map is unavailable after NoQualifiedAxisError while retaining the EFIT map and referee geometry." style="max-width:100%">
+      <figcaption><strong>Complete fixed cohort:</strong> 12 rows, 12 EFIT map overlays, 11 Nova terminal maps, 3 converged arms and 9 retained nonconverged arms. The 21986/46 mixed row is not blanked or substituted: its EFIT map, LCFS, X points and the machine-invariant governed wall remain visible, while the missing Nova map, axis and saddle are explicitly attributed to <code>NoQualifiedAxisError</code>.</figcaption>
+    </figure>
+  </section>
+
+  <section id="summary">
+    <h2>Row summary</h2>
+    <table>
+      <caption>Terminal bank values. “Trips” is the retained active-set iteration count; a zero is the recorded value, not missing data. Distances are symmetric Nova binding-boundary to EFIT LCFS values.</caption>
+      <thead>
+        <tr><th>Identity</th><th>Arm</th><th>Converged</th><th>Residual</th><th>Trips</th><th>Termination</th><th>Class verdict</th><th>LCFS RMS / sup [m]</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>pure</td><td>no</td><td>2.45065e-3</td><td>4</td><td><code>active_set_cycle_detected</code></td><td>diverted · agrees</td><td>0.019873 / 0.097584</td></tr>
+        <tr><td>21978/35</td><td>mixed</td><td>yes</td><td>7.50780e-12</td><td>0</td><td><code>converged</code></td><td>diverted · agrees</td><td>0.033671 / 0.170831</td></tr>
+        <tr><td>21983/35</td><td>pure</td><td>no</td><td>1.60108e-3</td><td>16</td><td><code>active_set_iteration_budget_exhausted</code></td><td>diverted · agrees</td><td>unavailable</td></tr>
+        <tr><td>21983/35</td><td>mixed</td><td>no</td><td>1.33235e-3</td><td>0</td><td><code>iteration_budget_exhausted</code></td><td>diverted · agrees</td><td>unavailable</td></tr>
+        <tr><td>21985/51</td><td>pure</td><td>no</td><td>6.84449e-4</td><td>7</td><td><code>active_set_settled</code></td><td>diverted · agrees</td><td>unavailable</td></tr>
+        <tr><td>21985/51</td><td>mixed</td><td>yes</td><td>2.79902e-16</td><td>0</td><td><code>converged</code></td><td>diverted · agrees</td><td>unavailable</td></tr>
+        <tr><td>21986/46</td><td>pure</td><td>no</td><td>5.88764e-3</td><td>16</td><td><code>active_set_iteration_budget_exhausted</code></td><td>limited · disagrees</td><td>0.182258 / 0.473397</td></tr>
+        <tr><td>21986/46</td><td>mixed</td><td>no</td><td>unavailable</td><td>0</td><td><code>NoQualifiedAxisError</code></td><td>unavailable</td><td>unavailable</td></tr>
+        <tr><td>21989/55</td><td>pure</td><td>no</td><td>2.85674e-3</td><td>16</td><td><code>active_set_iteration_budget_exhausted</code></td><td>limited · disagrees</td><td>0.236021 / 0.492009</td></tr>
+        <tr><td>21989/55</td><td>mixed</td><td>no</td><td>2.95379e-3</td><td>0</td><td><code>iteration_budget_exhausted</code></td><td>limited · disagrees</td><td>0.236311 / 0.499851</td></tr>
+        <tr><td>22086/43</td><td>pure</td><td>no</td><td>4.80019e-4</td><td>7</td><td><code>active_set_settled</code></td><td>diverted · agrees</td><td>unavailable</td></tr>
+        <tr><td>22086/43</td><td>mixed</td><td>yes</td><td>1.73648e-14</td><td>0</td><td><code>converged</code></td><td>diverted · agrees</td><td>0.029164 / 0.167427</td></tr>
+      </tbody>
+    </table>
+    <p>Across the fixed denominator, the regenerated bank records <strong>8 class agreements, 3 disagreements and 1 unavailable class comparison</strong>. Only the converged 21978/35 mixed and 22086/43 mixed arms are eligible for the bank's RMS acceptance surface; the other numeric distances remain diagnostic rather than convergence-qualified passes.</p>
+  </section>
+
+  <section id="reading">
+    <h2>What the overlays show</h2>
+    <p>The converged mixed controls at 21978/35 and 22086/43 preserve the EFIT diverted class and show closely interleaved solid and dashed core contours. Their available LCFS RMS distances are 33.7 mm and 29.2 mm. The 21985/51 mixed arm also reaches machine-level residual, but its assembled closed boundary is unavailable, so the contour agreement may be inspected while an LCFS distance must not be claimed.</p>
+    <p>The two explicitly settled rows, 21985/51 pure and 22086/43 pure, retain coherent terminal flux fields rather than numerical debris: their Nova and EFIT contours remain comparable across the vessel, but the bank cannot assemble a valid closed Nova boundary for a scalar LCFS score. This is the spatial face of the stagnation result—the terminal map exists and has recognizable nested structure, while the accepted state does not deliver a convergence-qualified boundary.</p>
+    <p>The strongest geometry failures are not the lowest residual plateaus. The 21986/46 pure and both 21989/55 arms terminate on the iteration budget in the wrong <em>limited</em> class; their available LCFS RMS separations span 182–236 mm and the heavy Nova binding contour visibly departs from the EFIT LCFS. Conversely, 21978/35 pure cycles rather than converges but retains the diverted class and the smallest available diagnostic RMS distance, 19.9 mm. Thus terminal convergence, class correctness and EFIT shape distance are distinct evidence axes; none can stand in for the other.</p>
+  </section>
+
+  <section id="rows">
+    <h2>Individual row figures</h2>
+
+    <article id="mast-21978-35-pure">
+      <h3>21978/35 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21978-35-pure.png" alt="Nova and EFIT flux contours for MAST 21978/35 pure, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Retained cycle after 4 active-set trips at residual 2.45065e-3; diverted-class agreement; diagnostic LCFS RMS/sup 0.019873/0.097584 m.</figcaption></figure>
+    </article>
+    <article id="mast-21978-35-mixed">
+      <h3>21978/35 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21978-35-mixed.png" alt="Nova and EFIT flux contours for MAST 21978/35 mixed, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Converged at residual 7.50780e-12; diverted-class agreement; LCFS RMS/sup 0.033671/0.170831 m.</figcaption></figure>
+    </article>
+    <article id="mast-21983-35-pure">
+      <h3>21983/35 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21983-35-pure.png" alt="Nova and EFIT flux contours for MAST 21983/35 pure, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Active-set iteration budget exhausted after 16 trips at residual 1.60108e-3; diverted-class agreement; closed-boundary distance unavailable.</figcaption></figure>
+    </article>
+    <article id="mast-21983-35-mixed">
+      <h3>21983/35 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21983-35-mixed.png" alt="Nova and EFIT flux contours for MAST 21983/35 mixed, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Iteration budget exhausted at residual 1.33235e-3; the retained active-set trip count is zero; diverted-class agreement; closed-boundary distance unavailable.</figcaption></figure>
+    </article>
+    <article id="mast-21985-51-pure">
+      <h3>21985/51 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21985-51-pure.png" alt="Nova and EFIT flux contours for MAST 21985/51 pure, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Active set settled after 7 trips at residual 6.84449e-4; diverted-class agreement; closed-boundary distance unavailable.</figcaption></figure>
+    </article>
+    <article id="mast-21985-51-mixed">
+      <h3>21985/51 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21985-51-mixed.png" alt="Nova and EFIT flux contours for MAST 21985/51 mixed, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Converged at residual 2.79902e-16 with diverted-class agreement; closed-boundary distance remains unavailable and is not inferred from the visible contours.</figcaption></figure>
+    </article>
+    <article id="mast-21986-46-pure">
+      <h3>21986/46 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21986-46-pure.png" alt="Nova and EFIT flux contours for MAST 21986/46 pure, showing a limited Nova class against a diverted EFIT reference." style="max-width:100%"><figcaption>Active-set iteration budget exhausted after 16 trips at residual 5.88764e-3; limited-class disagreement; diagnostic LCFS RMS/sup 0.182258/0.473397 m.</figcaption></figure>
+    </article>
+    <article id="mast-21986-46-mixed">
+      <h3>21986/46 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21986-46-mixed.png" alt="EFIT flux contours, LCFS and X points for MAST 21986/46 mixed, with the shared governed wall and an explicit notice that the Nova terminal map and markers are unavailable because no qualified axis was found." style="max-width:100%"><figcaption><code>NoQualifiedAxisError</code> is retained with no terminal residual or Nova map. The EFIT map read succeeded; no Nova contours, axis, saddle, class or LCFS distance are fabricated.</figcaption></figure>
+    </article>
+    <article id="mast-21989-55-pure">
+      <h3>21989/55 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21989-55-pure.png" alt="Nova and EFIT flux contours for MAST 21989/55 pure, showing a limited Nova class against a diverted EFIT reference." style="max-width:100%"><figcaption>Active-set iteration budget exhausted after 16 trips at residual 2.85674e-3; limited-class disagreement; diagnostic LCFS RMS/sup 0.236021/0.492009 m.</figcaption></figure>
+    </article>
+    <article id="mast-21989-55-mixed">
+      <h3>21989/55 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-21989-55-mixed.png" alt="Nova and EFIT flux contours for MAST 21989/55 mixed, showing a limited Nova class against a diverted EFIT reference." style="max-width:100%"><figcaption>Iteration budget exhausted at residual 2.95379e-3; the retained active-set trip count is zero; limited-class disagreement; diagnostic LCFS RMS/sup 0.236311/0.499851 m.</figcaption></figure>
+    </article>
+    <article id="mast-22086-43-pure">
+      <h3>22086/43 · pure</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-22086-43-pure.png" alt="Nova and EFIT flux contours for MAST 22086/43 pure, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Active set settled after 7 trips at residual 4.80019e-4; diverted-class agreement; closed-boundary distance unavailable.</figcaption></figure>
+    </article>
+    <article id="mast-22086-43-mixed">
+      <h3>22086/43 · mixed</h3>
+      <figure><img src="/nova/figures/solver-convergence-regression/bank-efit-overlays/mast-22086-43-mixed.png" alt="Nova and EFIT flux contours for MAST 22086/43 mixed, with wall, LCFS, axis, selected saddle and EFIT X points." style="max-width:100%"><figcaption>Converged at residual 1.73648e-14; diverted-class agreement; LCFS RMS/sup 0.029164/0.167427 m.</figcaption></figure>
+    </article>
+  </section>
+
+  <section id="reproduction">
+    <h2>Reproduction</h2>
+    <p>From the Nova repository root, run:</p>
+    <pre><code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync python benchmarks/bank_efit_overlay.py \
+  ~/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902</code></pre>
+    <p>The script validates the twelve-row JSON/NPZ identity alignment, requires one common governed wall across populated rows, reads each distinct EFIT shot/slice once, emits the four-by-three grid and twelve row PNGs, and prints explicit EFIT/Nova contour coverage counts. It performs no equilibrium solve and writes only the figure directory.</p>
+  </section>
+</main>
+</body>
+</html>

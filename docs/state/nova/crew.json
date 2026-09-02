@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T03:51:03",
+  "updated": "2026-09-02T03:56:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -71761,9 +71761,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T005311592929-pta-cell-topology-read-gate",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a71",
+        "node": "pta-cell-topology-read-gate",
+        "node_definition": {
+          "done_when": "(a) tests/test_plasma_cell_topology_read.py asserts that on every raster-carrier fixture flux map in tests/test_equilibrium_forward_reference.py the new path returns DomainMasks bitwise equal to the retained raster path; (b) tests/test_plasma_cell_flood_families.py re-samples the manufactured geometry families of the four tests/test_hex_flood_*.py files on a hex-tiled carrier and reproduces their analytic partitions through the cell partition geometry with the admissibility flux read on the carrier's physical shared edges; (c) tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point passes; (d) tests/test_equilibrium_forward_reference.py, run once WITHOUT JAX_PLATFORMS set on this login node's GPU with -k 'not test_persistent_fixture_machine_cache_builds_once', reports 28 collected with 0 errors and 0 failures (on main it has 25 fixture errors at the tensor-product guard); (e) each of tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_plasma_cell_partition.py tests/test_split_polish_nulls.py tests/test_rim_current_scatter.py tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_solovev_recovery_gates.py is green as its own fresh-process lane under JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest on that one file, each lane captured whole to a log the manifest cites with pass counts; (f) any cell whose label differs between the two paths on a raster fixture is quantified in the manifest, never absorbed; (g) the commit body records that the recovery gate had been unreachable since the guard landed, which is why the stale unpack survived; (h) the manifest states where _structured_grid_axes is still required",
+          "estimated_hours": 4.0,
+          "goal": "Deliver the gate evidence for the carrier topology read begun in commit 84cb6c33 (your worktree base), including the four-entry _support_partition unpack correction in scripts/analytic_oracle_fixtures/measure.py (lines 695, 734) and scripts/moment_branch_integration/measure.py (line 83) that the Solovev oracle gate needs",
+          "id": "pta-cell-topology-read-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005311592929-pta-cell-topology-read-gate/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/cell_partition.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_plasma_cell_topology_read.py",
+            "tests/test_plasma_cell_flood_families.py",
+            "scripts/analytic_oracle_fixtures/measure.py",
+            "scripts/moment_branch_integration/measure.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "pta-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T00:53:17Z",
+        "completed_at": "2026-09-02T01:54:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3662,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3662,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "84cb6c33b9555b1b9cd16c65f65ce3ff1ea59e8f",
+        "commits": [
+          "95fad275ad5d97c1f0c8b4af05934d68965b3e9b",
+          "2c60cfaeab5be2d3d097490edb6718c207974d8e"
+        ],
+        "changed_lines": {
+          "added": 468,
+          "removed": 9,
+          "files": 5
+        },
+        "tests_added": 14,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T005311592929-pta-cell-topology-read-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e88-db44-73c3-9d46-acca26a64400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17085440,
+            "cached_input_tokens_cumulative": 19043840,
+            "input_tokens": 17210740,
+            "input_tokens_cumulative": 19181292,
+            "output_tokens": 25377,
+            "output_tokens_cumulative": 29486,
+            "reasoning_output_tokens": 7885,
+            "reasoning_output_tokens_cumulative": 8253
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest on",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1294
+    "_version": 1295
   }
 }

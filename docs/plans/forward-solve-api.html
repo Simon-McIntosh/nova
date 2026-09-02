@@ -7,10 +7,10 @@
 <meta name="reckon-type" content="plan">
 <meta name="plan-slug" content="forward-solve-api">
 <meta name="plan-title" content="Forward solve API — the request and receipt contract every route consumes">
-<meta name="plan-summary" content="One typed solve request and receipt whose defaults are declared once, versioned by Nova's own version, recorded in every receipt, consumed by every route, and found first by agents.">
+<meta name="plan-summary" content="One typed solve request and receipt, defaults declared once and keyed by Nova version, recorded in every receipt, consumed by every route and found first by agents.">
 <meta name="plan-status" content="draft">
 <meta name="plan-roi" content="high">
-<meta name="plan-effort-hours" content="20.0">
+<meta name="plan-effort-hours" content="26.0">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -23,6 +23,8 @@
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -41,12 +43,15 @@
 <h2 id="s4">§4 — Agents find the seam first</h2>
 <p>A default that agents do not know about is a default they route around, which is how the audit's gaps arose. Wire the contract into the repository guidance at the narrowest scope that owns it: <code>nova/equilibrium/AGENTS.md</code> gains a section naming the request and receipt types as the only way to run a forward solve, the declared-defaults table and where it lives, the rule that a benchmark or script never calls the bare fixed-point routine or configures a default by hand, and the default-wiring test as the check to run after touching a route; <code>nova/transport/AGENTS.md</code> gains the same for the coupled forward; the root <code>AGENTS.md</code> gains one pointer line to each; and the reckon-ship prior-art scout brief for this repository names the seam so future nodes cite it in their reuse maps. Done-when: the three AGENTS.md files carry those sections with paths that exist, and a fresh read-only scout dispatched against the plan's own question ("how do I run a forward solve with production defaults") returns the seam as its first row.</p>
 
+<h2 id="s5">§5 — The interactive consumer: coil edits at interactive latency</h2>
+<p>imas-ambix is planning a physics-supported "play the plasma" demonstrator on MAST: a user edits one coil current, Nova's forward solve returns the moved boundary, and the camera decoder renders the frame. Three things that consumer needs are not yet true of the seam and are owed here. (1) <strong>Coil currents as a traced argument.</strong> Today <code>external_current</code> is closed into the jitted solve as a constant, so every edit is a fresh compile of several minutes; the request must carry it (and the profile tables and target current) as traced arguments over static host geometry, so an edit is a call, not a compile, and the compilation cache hits. This is the single-member case of the boundary <code>batched-operator-boundary</code> generalises, and it lands here first. (2) <strong>A warm-start policy.</strong> Seed each edit from the previous edit's converged state rather than the cold portfolio, with the settled exit and the referees unchanged, and measure convergence and trip count across a bounded coil sweep on a converging MAST arm (a frozen-six shot from the persisted carrier, never a marginal diverted arm). (3) <strong>Geometry in the receipt.</strong> The receipt carries the extracted LCFS polyline, axis and X-points from the separatrix extraction at no extra compile, so the consumer never re-reads topology. Done-when: a warm single-member MAST solve on the H200 with a traced coil edit costs tens of milliseconds per edit (stated as a measured per-edit wall time over a twenty-point sweep of one position coil), the persistent compilation cache reports hits after the first edit, the warm-started solves converge on every sweep point with their trip counts recorded, and the receipt carries LCFS, axis and X-point fields the imas-ambix consumer reads directly.</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="defaults-version" data-choice="nova-package-version" data-by="Simon McIntosh" data-when="2026-09-02T14:10:00+00:00">
-    <p class="r-dec-q">Does the declared-defaults table carry its own interface version, or is it keyed by Nova's version?</p>
-    <p class="r-dec-ctx">A separate api_version would let banked receipts be compared by interface generation independently of the package; the receipt's resolved-defaults block already records what ran.</p>
-    <p class="r-dec-rat">Lead decision 2026-09-02: no separate API version. The defaults table is keyed by Nova's own package version and every receipt records that version beside the resolved defaults; comparability across banks comes from the resolved-defaults block, and a change of default is a Nova release note, not an interface bump.</p>
+    <p class="r-dec-q">Does the declared-defaults table carry its own interface version, or is it keyed by Nova&#x27;s version?</p>
+    <p class="r-dec-ctx">A separate api_version would let banked receipts be compared by interface generation independently of the package; the receipt&#x27;s resolved-defaults block already records what ran.</p>
+    <p class="r-dec-rat">Lead decision 2026-09-02: no separate API version. The defaults table is keyed by Nova&#x27;s own package version and every receipt records that version beside the resolved defaults; comparability across banks comes from the resolved-defaults block, and a change of default is a Nova release note, not an interface bump.</p>
     </div>
 </section>
 

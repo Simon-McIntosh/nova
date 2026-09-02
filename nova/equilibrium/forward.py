@@ -497,10 +497,19 @@ class ForwardProfile:
         return self.operator.source
 
     def flux_map(
-        self, current=None, requested_class=None, target_current=None
+        self,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
     ) -> Callable[[jax.Array], jax.Array]:
         """Return the traced map at one conductor state and optional constraints."""
-        return self.operator.flux_map(current, requested_class, target_current)
+        return self.operator.flux_map(
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
+        )
 
     def cold_seed_portfolio(
         self,
@@ -1214,10 +1223,15 @@ class ForwardProfile:
         )
 
     def _host_history(
-        self, trace, flux, current, target_current=None
+        self, trace, flux, current, target_current=None, prescribed_current=None
     ) -> fixed_point.FixedPointResult:
         """Return the shared fixed-point result of a host solve."""
-        mapped = self.operator(flux, current, target_current=target_current)
+        mapped = self.operator(
+            flux,
+            current,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+        )
         scale = jnp.maximum(jnp.max(jnp.abs(mapped)), 1.0e-30)
         return fixed_point.FixedPointResult(
             state=flux,
@@ -1234,6 +1248,7 @@ class ForwardProfile:
         relaxation: float | None = None,
         tolerance: float = 1.0e-10,
         target_current=None,
+        prescribed_current=None,
         **options,
     ) -> ForwardEquilibrium:
         """Drive the map with a host relaxed fixed-point iteration.
@@ -1253,7 +1268,11 @@ class ForwardProfile:
             )
         budget = self.evaluations if evaluations is None else int(evaluations)
         step = self.relaxation if relaxation is None else float(relaxation)
-        mapped = self.flux_map(current, target_current=target_current)
+        mapped = self.flux_map(
+            current,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+        )
         trace = np.full(budget, np.nan)
         state = np.asarray(initial_flux, dtype=np.float64)
         for index in range(budget):
@@ -1268,12 +1287,23 @@ class ForwardProfile:
         flux = jnp.asarray(state)
         return self._receipt(
             flux,
-            self._host_history(trace, flux, current, target_current),
+            self._host_history(
+                trace,
+                flux,
+                current,
+                target_current,
+                prescribed_current,
+            ),
             target_current=target_current,
         )
 
     def _solve_host_krylov(
-        self, initial_flux, current, target_current=None, **options
+        self,
+        initial_flux,
+        current,
+        target_current=None,
+        prescribed_current=None,
+        **options,
     ) -> ForwardEquilibrium:
         """Drive the map with a host Jacobian-free Newton-Krylov root find.
 
@@ -1281,7 +1311,11 @@ class ForwardProfile:
         moves freely between the branches of the free-boundary map and needs
         a seed already on the intended one.
         """
-        mapped = self.flux_map(current, target_current=target_current)
+        mapped = self.flux_map(
+            current,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+        )
         trace = np.full(self.evaluations, np.nan)
         recorded = 0
         initial = np.asarray(initial_flux, dtype=np.float64)
@@ -1312,7 +1346,13 @@ class ForwardProfile:
         flux = jnp.asarray(solution)
         return self._receipt(
             flux,
-            self._host_history(trace, flux, current, target_current),
+            self._host_history(
+                trace,
+                flux,
+                current,
+                target_current,
+                prescribed_current,
+            ),
             target_current=target_current,
         )
 
@@ -1323,12 +1363,21 @@ class ForwardProfile:
         current,
         requested_class=None,
         target_current=None,
+        prescribed_current=None,
         **options,
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
-        mapped = self.flux_map(current, requested_class, target_current)
+        mapped = self.flux_map(
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
+        )
         shadowed_map = self.operator.flux_map_with_shadow(
-            current, requested_class, target_current
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
         )
 
         def shadow_mask(state):
@@ -1376,6 +1425,7 @@ class ForwardProfile:
         route: SolveRoute = "newton_krylov",
         current=None,
         target_current=None,
+        prescribed_current=None,
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         **options,
@@ -1410,11 +1460,19 @@ class ForwardProfile:
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         if route == "host":
             equilibrium = self._solve_host(
-                initial_flux, current, target_current=target_current, **options
+                initial_flux,
+                current,
+                target_current=target_current,
+                prescribed_current=prescribed_current,
+                **options,
             )
         elif route == "host_krylov":
             equilibrium = self._solve_host_krylov(
-                initial_flux, current, target_current=target_current, **options
+                initial_flux,
+                current,
+                target_current=target_current,
+                prescribed_current=prescribed_current,
+                **options,
             )
         elif route not in _ACCELERATED:
             raise ValueError(
@@ -1427,6 +1485,7 @@ class ForwardProfile:
                 initial_flux,
                 current,
                 target_current=target_current,
+                prescribed_current=prescribed_current,
                 **options,
             )
         self._require_constraints(equilibrium.flux, pins, target_current)
@@ -1447,6 +1506,7 @@ class ForwardProfile:
         requested_class,
         current,
         target_current=None,
+        prescribed_current=None,
         *,
         route: str,
         tolerance: float,
@@ -1462,6 +1522,7 @@ class ForwardProfile:
             current,
             requested_class=requested_class,
             target_current=target_current,
+            prescribed_current=prescribed_current,
             **options,
         )
         _masks, achieved = self.operator.read(equilibrium.flux)
@@ -1497,6 +1558,7 @@ class ForwardProfile:
         route: SolveRoute = "newton_krylov",
         current=None,
         target_current=None,
+        prescribed_current=None,
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         tolerance: float = 1.0e-10,
@@ -1515,6 +1577,7 @@ class ForwardProfile:
             requested_class,
             current,
             target_current,
+            prescribed_current,
             route=route,
             tolerance=tolerance,
             iterations=self._iteration_count(route, options),

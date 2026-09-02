@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -211,6 +211,9 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260901T215937566883-pta-census-split-polish-regression-verify" data-who="pta-review-b" data-when="2026-09-01T22:01:42Z">
     <div class="r-comment-body"><p>Review PASS: completeness gap closed, scope test-only, 41/41 log confirmed, hygiene clean</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260902T061905679679-pta-polish-value-authority-verify" data-who="pta-review-b" data-when="2026-09-02T06:27:11Z">
+    <div class="r-comment-body"><p>Review: position-only authority, MAST regression, unmoved regression, inactive-fit receipt, 54/54 lanes and hygiene PASS; FAIL on one receipt alias — the legacy value key still exposes the fit&#x27;s value beside fit_value (flux_surface_connectivity.py:1129-1134,1197-1219)</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T061708423251-pta-stagnation-baseline" data-who="pta-test" data-when="2026-09-02T06:21:37Z">
     <div class="r-comment-body"><p>On main 85dac172 tests/test_active_set_stagnation.py::test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts already fails with active_set_iterations 1 == 2 (1 passed, 1 failed), so the failure is pre-existing and not caused by the mask migration; recheck after the polish-value fix merges</p></div>
 </div>
@@ -218,7 +221,7 @@
     <div class="r-comment-body"><p>Review FAIL 7/8: production routing, mask layout, untouched raster comparator, telemetry equality and hygiene PASS; the census test's fixture inherits polarity +1 for a field whose lobes are minima so every closed cell reads private (96/96), and the adjudication labels differences by the label under review (tautology); _wall_carrier_index is a plausible nearest-centroid map, not a defect</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T054306674283-pta-cell-mask-shadow-telemetry" data-who="pta-partition" data-when="2026-09-02T06:16:03Z">
-    <div class="r-comment-body"><p>residual_shadow_components now takes the private wall-node mask and X candidates from the cell authority for every constructed operator (nearest-centroid ownership, private_star semantics), mask layout unchanged, raster comparator untouched, telemetry equality eager and JIT, reference machine wall-shadow count 44 reproduced, 33/34 lanes green (the stagnation failure is pre-existing on main); review FAILED on the census test&#x27;s fixture polarity and tautological adjudication — test-only repair routed to the same member</p></div>
+    <div class="r-comment-body"><p>residual_shadow_components now takes the private wall-node mask and X candidates from the cell authority for every constructed operator (nearest-centroid ownership, private_star semantics), mask layout unchanged, raster comparator untouched, telemetry equality eager and JIT, reference machine wall-shadow count 44 reproduced, 33/34 lanes green (the stagnation failure is pre-existing on main); review FAILED on the census test's fixture polarity and tautological adjudication — test-only repair routed to the same member</p></div>
 </div>
 </section>
 </main>

@@ -87,6 +87,24 @@
 </tbody>
 </table>
 </section>
+
+<section id="s1-topology-read"><h2 id="s1-topology-read-h">§1 — Topology read on the carrier cells</h2>
+<p>Merged <code>32f16b3b</code>. Chain: <code>84cb6c33</code> carrier route; <code>95fad275</code> stale five-entry consumers restored to the four-entry <code>_support_partition</code> contract (the recovery gate had been unreachable since the guard landed on 2026-08-25, which is why the stale unpack survived); <code>2c60cfae</code> parity and flood-family tests; <code>3efe9194</code> saddle-neck closure; <code>e9f93f73</code> carrier boundary class without raster axes; <code>fa8b63f7</code> independent parity oracle, carrier-native polish, implicit-JVP repair of the forward-mode differentiation defect; <code>696f437a</code> saddle cut localised to three pitches of a census X candidate.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Raster parity</td><td>0 differing labels over 646 cells on the reference fixtures, oracle built from <code>_raster_hex_partition_geometry → hex_edge_admissibility → label_saddle_aware_hex_connected_components → classify_domains</code> without calling the read under test.</td></tr>
+<tr><td>Flood families on a hex carrier</td><td>11/11 through a production-constructed <code>ForwardFluxOperator</code>; double-null: two boundary-band cells at (0, ±0.4157) m, none out of band.</td></tr>
+<tr><td>Solov'ev oracle</td><td><code>tests/test_solovev_recovery_gates.py</code> 8/8 (the reduced gate 45 s against its 60 s bound); on <code>main</code> before this landing the file failed at the tensor-product guard.</td></tr>
+<tr><td>Secondary null</td><td>Regressed to 0/6 by the global inward admissibility level (a closed band read private), recovered to 6/6 by applying the inward level only within three pitches of a census X candidate.</td></tr>
+<tr><td>Reference hex machine (2214 cells)</td><td>Census saddle at (5.1095, −3.4124) m, −4.7159 Wb; 1602 core cells; 0 core cells with ψ_norm &gt; 1; 39 closed-but-private lobe cells; participation 2175 ⊇ published support 1721, 0 excluded. The published boundary scalar (−5.1228 Wb) sits 0.41 Wb inside the saddle — reference datum only (decision <em>boundary-flux-authority</em>).</td></tr>
+<tr><td>CPU lanes</td><td>80/80 across ten files (partition 6, hexstencil 13, stencil nulls 14+1s, geometries 12, sn-secondary 6, snowflake 16, coil nulls 2, polish 13, rim scatter 4, parity 2, flood families 11, oracle 8 — as run across the final two lane sets).</td></tr>
+<tr><td>H200 forward-reference lane</td><td>20 passed, 8 failed, 1 deselected (35 min, job 1261026, <code>98dci4-gpu-0003</code>): the eight are solver-convergence or route effects (post-map residuals 1.9e-3 to 1.2e-2 against 1e-6, nonfinite Picard traces, −24.8 kA common-SOL ledger on the nonconverged state, 1.43 Wb route divergence, passive-closure sup-norm 0.415 &lt; 1.0), none label-caused; owned by <code>solver-convergence-regression</code>. Login-node attempts of this lane were cut at 54 min (CPU machine rebuild) and SIGKILLed by the 64 GiB user cgroup.</td></tr>
+<tr><td>Reviews</td><td>Chain review FAIL (circular parity, skipped carrier polish) → re-review PASS 8/8 after <code>fa8b63f7</code>, <code>696f437a</code>.</td></tr>
+</tbody>
+</table>
+<p><strong>Findings banked.</strong> (1) A closed cell outside an inward-offset flood level but inside the exact boundary reads private unless the offset is confined to the saddle neck. (2) <code>test_equilibrium_forward_reference.py</code> is a GPU lane; its builds-once test rebuilds the fixture machine (54 min on CPU). (3) The forward-mode differentiation of the split fit's custom VJP raised a TypeError on the oracle path; the implicit JVP of the regularised normal equations closes it.</p>
+</section>
 </main>
 </body>
 </html>

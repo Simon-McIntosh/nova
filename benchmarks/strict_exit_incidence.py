@@ -563,13 +563,14 @@ def _time_arm(
     started = time.perf_counter_ns()
     result = compiled(state, flag)
     _block(result)
-    warmup_ms = (time.perf_counter_ns() - started) / 1.0e6
+    first_solve_ms = (time.perf_counter_ns() - started) / 1.0e6
     print(
-        f"STAGE {machine}_MEMBER_{member_number}_{arm_name}_WARM "
-        f"solve_ms={warmup_ms:.6f} rss_mib={_PeakRssSampler._current_mib():.3f}",
+        f"STAGE {machine}_MEMBER_{member_number}_{arm_name}_COMPILE_WARM "
+        f"solve_ms={first_solve_ms:.6f} "
+        f"rss_mib={_PeakRssSampler._current_mib():.3f}",
         flush=True,
     )
-    samples = []
+    samples = [first_solve_ms]
     for repetition in range(repeats):
         started = time.perf_counter_ns()
         result = compiled(state, flag)
@@ -578,12 +579,13 @@ def _time_arm(
         samples.append(elapsed)
         print(
             f"STAGE {machine}_MEMBER_{member_number}_{arm_name}_SAMPLE "
-            f"repetition={repetition + 1}/{repeats} solve_ms={elapsed:.6f} "
+            f"additional_repetition={repetition + 1}/{repeats} "
+            f"solve_ms={elapsed:.6f} "
             f"rss_mib={_PeakRssSampler._current_mib():.3f}",
             flush=True,
         )
     return _arm_row(result), {
-        "warmup_solve_ms": warmup_ms,
+        "first_compiled_solve_ms": first_solve_ms,
         "samples_compile_warm_ms": samples,
         "compile_warm_solve_ms": float(np.mean(samples)),
         "compile_warm_p95_ms": float(np.percentile(samples, 95)),
@@ -714,7 +716,7 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
             "same_program_reused_for_both_arms": True,
             "settlement_flag_is_runtime_argument": True,
             "arm_order_per_member": ["without_exit", "with_exit"],
-            "steady_repetitions_per_arm": repeats,
+            "additional_repetitions_after_first_compiled_solve": repeats,
         },
         "members": rows,
         "summary": {
@@ -945,7 +947,7 @@ def run(
             ),
             "execution_width": 1,
             "member_counts": {"MAST": 12, "DIII-D": 5},
-            "repeats": repeats,
+            "additional_repetitions_after_first_compiled_solve": repeats,
             "latency_qualification": (
                 "width-1 compile-warm solve milliseconds are per-member latency, "
                 "not batched milliseconds per slice; batched throughput awaits an "
@@ -1014,11 +1016,11 @@ def main() -> None:
     parser.add_argument(
         "--diiid-machine-cache", type=Path, default=DEFAULT_DIIID_MACHINE_CACHE
     )
-    parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--repeats", type=int, default=0)
     parser.add_argument("--preflight", action="store_true")
     arguments = parser.parse_args()
-    if arguments.repeats < 2:
-        raise ValueError("paired timing requires at least two repetitions")
+    if arguments.repeats < 0:
+        raise ValueError("additional timing repetitions cannot be negative")
     if arguments.preflight:
         preflight(
             arguments.mast_state_cache.resolve(),

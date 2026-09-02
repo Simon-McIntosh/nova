@@ -11,11 +11,11 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Hex single-grid de-risk gates — the three falsifiers that clear the cutover">
 <meta name="plan-summary" content="Measure the three falsifiers the feasibility record names: mask replay from cached per-cell flux, split-fit advantage on measured maps, H200 batch behaviour.">
-<meta name="plan-status" content="pending">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-modified" content="2026-09-02">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-blocks" content="plasma-cell-topology-authority,single-grid-solver-cutover">
 <meta name="plan-capability-version" content="1.0">
@@ -23,7 +23,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="18">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
 <meta name="plan-impl" content="1.0">
 </head>
@@ -31,16 +31,22 @@
 <main class="plan-doc">
 <header><h1>Hex single-grid de-risk gates</h1>
 <p class="lede">The feasibility prototype (<code>benchmarks/hex_cell_field_feasibility.py</code>, 4/4 criteria) names three conditions that overturn its 80–140 worker-hour cutover estimate. This plan measures all three. Any one firing halts the cutover plans and returns the programme to the lead with the number.</p></header>
-<section id="s1"><h2>§1 Cache regeneration and independent mask replay</h2>
-<p>The committed topology operand caches carry cell centres, domain labels and walls but lack <code>per_cell_flux_values</code>, <code>per_candidate_domain_labels</code>, <code>current_cell_polygons</code> and <code>atomic_node_signed_flux</code> — the four fields two figure campaigns and the prototype each named as missing. Regenerate the caches with those fields through the production authorities, then replay saddle-edge admissibility and the MAST 22086/43 private mask independently from the cached flux, on the plasma-cell adjacency.</p>
-<p><strong>Falsifier:</strong> any differing private-mask cell against the committed operand. The prototype measured zero of 42 on the mixed arm; the replay must reproduce that from cache alone, including the X-candidate selection — the step the current caches cannot support.</p></section>
-<section id="s2"><h2>§2 Split-fit advantage on a jump-bearing forward-solve field</h2>
+<section id="s1" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-02</span><h2>§1 Cache regeneration and independent mask replay</h2></header>
+<p class="landed-summary"><strong>Falsifier CLEAR: 0 of 42 differing private cells</strong>, X-candidate selection and all per-candidate labels reproduced from cache alone at the pinned revision, all four schema-4 fields banked. Merged at <code>f053fdba</code> under the lead's integration ruling, the pure arm carried as an honest stagnated marginal row and the two focused-suite constants visibly red until the S19 bank re-baseline. Full record: <a href="/nova/evidence/archive/hex-grid-derisk-gates-landed">gate evidence</a> (receipt <code>mask-replay-gate.json</code>).</p>
+</section>
+<section id="s2-landed" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-01</span><h2>§2 Split-fit advantage — fired, re-adjudicated, cleared</h2></header>
+<p class="landed-summary">The measured-map arm <strong>fired</strong> (factors 0.626/0.612), was lead-ruled confounded (EFIT ψ is globally smooth), and the re-specified jump-bearing gate <strong>cleared at 1.0115×</strong> at matched 16-dof — corroborated at production capacity by the basis plan's 1.849×/2.110×. Receipts <code>measured-map-advantage.json</code>, <code>jump-field-advantage.json</code>; full record: <a href="/nova/evidence/archive/hex-grid-derisk-gates-landed">gate evidence</a>. Original re-specification prose retained below.</p>
+</section>
+<section id="s2"><h2>§2 Split-fit advantage on a jump-bearing forward-solve field (reference)</h2>
 <p><em>Re-specified 2026-09-01 under the locked <code>s2-firing-adjudication</code> decision.</em> The original measured-map arm fired on both committed EFIT maps at matched 16-dof fits (improvement factors 0.626 MAST 22086/43, 0.612 DIII-D frame 179; receipt <code>docs/figures/hex-cell-single-grid/measured-map-advantage.json</code>) and the firing was ruled confounded: an EFIT ψ map is itself a globally smooth solution representation, so its finite-difference curvature carries no physical interface jump for the split basis to represent. Those numbers stay on the page as data.</p>
 <p>The re-specified target provably carries the jump. Solov'ev profiles have constant p′ and FF′, so the current density is finite at the separatrix and the truncated source — plasma current supported on plasma cells only, exactly nova's forward-solve construction — creates a closed-form curvature step, ⟦Δ*ψ⟧ = μ₀R·j_φ(LCFS) with j_φ = Rp′ + FF′/(μ₀R). Fit split against global C2 at matched degrees of freedom on nova's converged forward-solve ψ for the diverted Solov'ev reference (the <code>solovev-exact-recovery</code> machinery and <code>tests/rotating_equilibrium_references.py</code> are the reuse anchors), interface on the solve's own separatrix, band of two cell pitches, on the production lattices. The curvature reference is analytic — Solov'ev Hessian inside, vacuum field outside — never finite differences of a smoothed representation and never any function containing the split basis's own exterior term.</p>
 <p><strong>Falsifier:</strong> the split fit loses its boundary-band second-derivative advantage (factor ≤ 1) on the jump-bearing forward-solve field. A finite advantage factor is expected, not the prototype's circular e-15.</p></section>
-<section id="s3"><h2>§3 Accelerator batch behaviour</h2>
-<p>Measure the fixed-slot split carrier at production batch widths on one reserved H200 (betelgeuse, <code>--reservation=gpu_0003_grpA</code>), against the committed throughput ladder (26.797× saturation at width 1024, out-of-memory at 2048, receipt <code>docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json</code>). CPU reference from the prototype: split costs 12–17% over global, 25.0M active point evaluations per second at width 32.</p>
-<p><strong>Falsifier:</strong> a material batch regression — the split carrier failing to sustain the committed ladder's saturation shape within the stated overhead band.</p></section>
+<section id="s3" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-01</span><h2>§3 Accelerator batch behaviour</h2></header>
+<p class="landed-summary"><strong>Falsifier CLEAR at 50 samples/route/width</strong> on one reserved H200: all six widths sustain the committed ladder shape, width-1024 split gain 8.503× against the required 1.981×, split throughput up to 1,988 M point-evals/s; mid-ladder split/global medians 0.50–0.51 at widths 256/512. Receipt <code>h200-split-batch.json</code>; full record: <a href="/nova/evidence/archive/hex-grid-derisk-gates-landed">gate evidence</a>.</p>
+</section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="cutover-gating" data-choice="three-falsifiers-must-clear" data-by="Simon McIntosh" data-when="2026-09-01T00:00:00+00:00">
@@ -61,10 +67,11 @@
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-hdg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hex-grid-derisk-gates" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-hdg-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hex-grid-derisk-gates" data-resolved-at="2026-09-02T12:59:09+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the three de-risk gates in parallel nodes</h4>
     <div class="r-fu-body">Three independent measurements, one node each: the cache-regeneration-and-replay gate (adds per-cell flux, per-candidate domain labels, current_cell_polygons and atomic_node_signed_flux to the topology operand caches, and independently replays saddle-edge admissibility and the MAST 22086/43 private mask, where ANY differing cell fires the falsifier); the measured-map gate (fits the boundary-split representation on committed MAST and DIII-D EFIT psi maps at matched degrees of freedom and reports the boundary-band second-derivative advantage against a single global C2 fit, where losing the advantage fires the falsifier); and the accelerator gate (measures the fixed-slot split carrier at production batch widths on one reserved H200, where a material regression against the committed 26.797x saturation ladder fires the falsifier). Each gate reports its number to this plan whether it passes or fires.</div>
     <pre class="r-fu-prompt">/reckon-ship hex-grid-derisk-gates</pre>
+    <p class="r-fu-outcome">done — no followup. All three falsifiers CLEAR on committed receipts: s1 cache-only mask replay 0 of 42 differing private cells with X-candidate selection reproduced (mask-replay-gate.json); s2 fired on EFIT maps, was lead-adjudicated confounded, and the re-specified jump-bearing gate cleared at 1.0115x (with the production-capacity 1.849x/2.110x corroboration on the basis plan); s3 H200 ladder sustained at all six widths, width-1024 gain 8.503x. The gate worktree was merged to main at f053fdba under the lead's 2026-09-02 integration ruling with the pure 22086/43 arm carried as an honest stagnated marginal row; the focused-suite constants stay visibly red until solver-convergence-regression's bank re-baseline node rewrites them in one commit. Cumulative record: docs/evidence/archive/hex-grid-derisk-gates-landed.html. The chain continues through the DAG: plasma-cell-topology-authority (shipping under lead override, s18-pta) and single-grid-solver-cutover declare this plan in depends_on, and the code-drift margin is owned by solver-convergence-regression on S19.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

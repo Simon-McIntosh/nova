@@ -1,0 +1,1564 @@
+{
+  "comparisons": [
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 1099.7148680547252,
+          "compile_warm_solve_wall_seconds": 167.06390012800694,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 1624991.1778605897,
+            "target_a": 1624991.1778605897,
+            "terminal_relative_error": 0.0,
+            "unscaled_terminal_a": 1804684.1949598736
+          },
+          "finite_residual_history": [
+            1.611285063261996
+          ],
+          "first_run_terminal_relative_residual": 1.611285063261996,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9004296609893682,
+              0.9004296609893682
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9004296609893682,
+              0.9004296609893682
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9004296609893682
+          },
+          "magnetic_axis_position_error_m": 0.03396122920541688,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 1.611285063261996,
+          "terminal_topology": {
+            "axis_flux_wb": 3.153080854540089,
+            "axis_rz_m": [
+              1.7336412712168885,
+              -0.0046508020872326255
+            ],
+            "boundary_flux_wb": 1.1244164695722334,
+            "class": "limited",
+            "flux_span_wb": -2.028664384967856,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.7602804555491345,
+            "sup_wb": 1.7805923222425077
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 881.8248972520232,
+          "compile_warm_solve_wall_seconds": 75.58210600214079,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.9121549089173303
+          ],
+          "first_run_terminal_relative_residual": 0.9121549089173303,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.03396122920541688,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.9121549089173303,
+          "terminal_topology": {
+            "axis_flux_wb": 3.153080854540089,
+            "axis_rz_m": [
+              1.7336412712168885,
+              -0.0046508020872326255
+            ],
+            "boundary_flux_wb": 1.1244164695722334,
+            "class": "limited",
+            "flux_span_wb": -2.028664384967856,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.7602804555491345,
+            "sup_wb": 1.7805923222425077
+          }
+        }
+      },
+      "case": "moderate-rotation-conventional-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 1.7664598935004237,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.24710378146563566
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.2595828529447317,
+        "lock_wait_seconds": 2.30567529797554e-05,
+        "semantic_key": "f9fbeea7c8727e83",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              1.6580796852430872,
+              0.0
+            ],
+            "declared_current_a": 1624991.1778605897,
+            "quadrature_current_a": 1624991.1778605892,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.8656234793890617e-16
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 1624991.1778605895,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            1.7336412712168885,
+            -0.0046508020872326255
+          ],
+          "initial_core_cell_count": 118,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            0.989968763686133,
+            2.154986510011224
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 0.44721614229132306,
+          "state_sha256_binary64": "4989e2836c584e84f8cf321d64728bec5e386946d4f02fc8a65b26c95fe46d86",
+          "supported_cell_count": 98,
+          "supported_minor_distance_m": 0.49690682476813675
+        },
+        "target_current": {
+          "density_quadrature_a": 1624991.1778605892,
+          "density_quadrature_relative_closure": 2.8656234793890617e-16,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 1624991.1778605897
+        }
+      },
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "wall_seconds": 1298.1506549962796
+    },
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 931.9029273837805,
+          "compile_warm_solve_wall_seconds": 80.68393084825948,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 1624991.1778605897,
+            "target_a": 1624991.1778605897,
+            "terminal_relative_error": 0.0,
+            "unscaled_terminal_a": 1779199.427761292
+          },
+          "finite_residual_history": [
+            1.0629560088706076
+          ],
+          "first_run_terminal_relative_residual": 1.0629560088706076,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9133271697963968,
+              0.9133271697963968
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9133271697963968,
+              0.9133271697963968
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9133271697963968
+          },
+          "magnetic_axis_position_error_m": 0.061630059548184554,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 1.0629560088706076,
+          "terminal_topology": {
+            "axis_flux_wb": 3.491234120244472,
+            "axis_rz_m": [
+              1.7605906177310928,
+              -0.01127125915225751
+            ],
+            "boundary_flux_wb": 1.6193568662172146,
+            "class": "limited",
+            "flux_span_wb": -1.8718772540272575,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.9331001903010232,
+            "sup_wb": 2.141320438396531
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 876.2086690750439,
+          "compile_warm_solve_wall_seconds": 72.12281170208007,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.8354327189004547
+          ],
+          "first_run_terminal_relative_residual": 0.8354327189004547,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.061630059548184554,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.8354327189004547,
+          "terminal_topology": {
+            "axis_flux_wb": 3.491234120244472,
+            "axis_rz_m": [
+              1.7605906177310928,
+              -0.01127125915225751
+            ],
+            "boundary_flux_wb": 1.6193568662172146,
+            "class": "limited",
+            "flux_span_wb": -1.8718772540272575,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.9331001903010232,
+            "sup_wb": 2.141320438396531
+          }
+        }
+      },
+      "case": "moderate-rotation-conventional-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 1.2723418473118997,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.10460381135587521
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.4119692053645849,
+        "lock_wait_seconds": 2.249889075756073e-05,
+        "semantic_key": "eaae72d63a1a4556",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              1.6580796852430872,
+              0.0
+            ],
+            "declared_current_a": 1624991.1778605897,
+            "quadrature_current_a": 1624991.1778605892,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.8656234793890617e-16
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 1624991.1778605895,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            1.7605906177310928,
+            -0.01127125915225751
+          ],
+          "initial_core_cell_count": 37,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            0.989968763686133,
+            2.154986510011224
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 0.44721614229132306,
+          "state_sha256_binary64": "b7d2a79c77d7b67e77214d81ed10956de6608fd378e97f36a275b3c0f2007a35",
+          "supported_cell_count": 36,
+          "supported_minor_distance_m": 0.49690682476813675
+        },
+        "target_current": {
+          "density_quadrature_a": 1624991.1778605892,
+          "density_quadrature_relative_closure": 2.8656234793890617e-16,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 1624991.1778605897
+        }
+      },
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "wall_seconds": 1030.3907162030227
+    },
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 1107.2156279501505,
+          "compile_warm_solve_wall_seconds": 169.54586495878175,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 251245.90891804622,
+            "target_a": 251245.90891804622,
+            "terminal_relative_error": 0.0,
+            "unscaled_terminal_a": 278814.0140919594
+          },
+          "finite_residual_history": [
+            1.784723592328927
+          ],
+          "first_run_terminal_relative_residual": 1.784723592328927,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9011236746341574,
+              0.9011236746341574
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9011236746341574,
+              0.9011236746341574
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9011236746341574
+          },
+          "magnetic_axis_position_error_m": 0.01174682190284092,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 1.784723592328927,
+          "terminal_topology": {
+            "axis_flux_wb": 0.2493553079574037,
+            "axis_rz_m": [
+              0.9109421596590299,
+              -0.004272817198683085
+            ],
+            "boundary_flux_wb": 0.0780171351974304,
+            "class": "limited",
+            "flux_span_wb": -0.17133817275997332,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.059190397006413216,
+            "sup_wb": 0.13440699119256327
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 879.6173507070635,
+          "compile_warm_solve_wall_seconds": 75.77257492300123,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.7883142229559222
+          ],
+          "first_run_terminal_relative_residual": 0.7883142229559222,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.01174682190284092,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.7883142229559222,
+          "terminal_topology": {
+            "axis_flux_wb": 0.2493553079574037,
+            "axis_rz_m": [
+              0.9109421596590299,
+              -0.004272817198683085
+            ],
+            "boundary_flux_wb": 0.0780171351974304,
+            "class": "limited",
+            "flux_span_wb": -0.17133817275997332,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.059190397006413216,
+            "sup_wb": 0.13440699119256327
+          }
+        }
+      },
+      "case": "strong-rotation-compact-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 2.2639748724015067,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.3548716023581381
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.6292549418285489,
+        "lock_wait_seconds": 1.9120052456855774e-05,
+        "semantic_key": "5c022b142d6aa15f",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              0.8875010108629255,
+              0.0
+            ],
+            "declared_current_a": 251245.90891804622,
+            "quadrature_current_a": 251245.90891804622,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 0.0
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 251245.90891804622,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            0.9109421596590299,
+            -0.004272817198683085
+          ],
+          "initial_core_cell_count": 130,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            0.6274674744291012,
+            1.0903621913130435
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 0.18257506240510613,
+          "state_sha256_binary64": "8594ff83cd4ee884da62122a3173f76819f77dd8fdf2d69a54b135616b29ab77",
+          "supported_cell_count": 104,
+          "supported_minor_distance_m": 0.20286118045011792
+        },
+        "target_current": {
+          "density_quadrature_a": 251245.90891804622,
+          "density_quadrature_relative_closure": 0.0,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 251245.90891804622
+        }
+      },
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "wall_seconds": 1301.3323650248349
+    },
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 1092.2338787703775,
+          "compile_warm_solve_wall_seconds": 144.03249974781647,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 251245.90891804625,
+            "target_a": 251245.90891804622,
+            "terminal_relative_error": 1.1583802730187764e-16,
+            "unscaled_terminal_a": 273408.0671824855
+          },
+          "finite_residual_history": [
+            1.1593501092294682
+          ],
+          "first_run_terminal_relative_residual": 1.1593501092294682,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9189410960224258,
+              0.9189410960224258
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9189410960224258,
+              0.9189410960224258
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9189410960224258
+          },
+          "magnetic_axis_position_error_m": 0.017849368611340986,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 1.1593501092294682,
+          "terminal_topology": {
+            "axis_flux_wb": 0.26774188493345097,
+            "axis_rz_m": [
+              0.9177950610364264,
+              -0.0013913168342922903
+            ],
+            "boundary_flux_wb": 0.11145992561239136,
+            "class": "limited",
+            "flux_span_wb": -0.1562819593210596,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.06881185304844901,
+            "sup_wb": 0.15355096318149397
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 880.5833638550248,
+          "compile_warm_solve_wall_seconds": 72.66943357815035,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.7919792843615323
+          ],
+          "first_run_terminal_relative_residual": 0.7919792843615323,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.017849368611340986,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.7919792843615323,
+          "terminal_topology": {
+            "axis_flux_wb": 0.26774188493345097,
+            "axis_rz_m": [
+              0.9177950610364264,
+              -0.0013913168342922903
+            ],
+            "boundary_flux_wb": 0.11145992561239136,
+            "class": "limited",
+            "flux_span_wb": -0.1562819593210596,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 0.06881185304844901,
+            "sup_wb": 0.15355096318149397
+          }
+        }
+      },
+      "case": "strong-rotation-compact-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 1.4638641844831815,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.16550078528408432
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 1.573826814070344,
+        "lock_wait_seconds": 1.854635775089264e-05,
+        "semantic_key": "fc8dff910c18796c",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              0.8875010108629255,
+              0.0
+            ],
+            "declared_current_a": 251245.90891804622,
+            "quadrature_current_a": 251245.90891804622,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 0.0
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 251245.90891804622,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            0.9177950610364264,
+            -0.0013913168342922903
+          ],
+          "initial_core_cell_count": 41,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            0.6274674744291012,
+            1.0903621913130435
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 0.18257506240510613,
+          "state_sha256_binary64": "575dfb42190b923579096a641fb521bb93f24ccc5ba0787be91f7451f4db88f4",
+          "supported_cell_count": 39,
+          "supported_minor_distance_m": 0.20286118045011792
+        },
+        "target_current": {
+          "density_quadrature_a": 251245.90891804622,
+          "density_quadrature_relative_closure": 0.0,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 251245.90891804622
+        }
+      },
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "wall_seconds": 1257.3696436011232
+    },
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 1118.7888229019009,
+          "compile_warm_solve_wall_seconds": 165.83794797584414,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 16314773.311828371,
+            "target_a": 16314773.311828371,
+            "terminal_relative_error": 0.0,
+            "unscaled_terminal_a": 18002802.154425845
+          },
+          "finite_residual_history": [
+            1.5252923213677498
+          ],
+          "first_run_terminal_relative_residual": 1.5252923213677498,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9062352167113893,
+              0.9062352167113893
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9062352167113893,
+              0.9062352167113893
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9062352167113893
+          },
+          "magnetic_axis_position_error_m": 0.13270725696361743,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 1.5252923213677498,
+          "terminal_topology": {
+            "axis_flux_wb": 117.75665924659697,
+            "axis_rz_m": [
+              6.33041353149176,
+              -0.024566783563489878
+            ],
+            "boundary_flux_wb": 43.718127396275655,
+            "class": "limited",
+            "flux_span_wb": -74.0385318503213,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 29.167799968477546,
+            "sup_wb": 68.15190315398327
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 895.295302429935,
+          "compile_warm_solve_wall_seconds": 96.9374327310361,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.9899050183110825
+          ],
+          "first_run_terminal_relative_residual": 0.9899050183110825,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.13270725696361743,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.9899050183110825,
+          "terminal_topology": {
+            "axis_flux_wb": 117.75665924659697,
+            "axis_rz_m": [
+              6.33041353149176,
+              -0.024566783563489878
+            ],
+            "boundary_flux_wb": 43.718127396275655,
+            "class": "limited",
+            "flux_span_wb": -74.0385318503213,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 29.167799968477546,
+            "sup_wb": 68.15190315398327
+          }
+        }
+      },
+      "case": "weak-rotation-reactor-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 1.5408471450827814,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.18775955803076083
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.5715313069522381,
+        "lock_wait_seconds": 1.833401620388031e-05,
+        "semantic_key": "b9d893c32a653ef4",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 16314773.311828371,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            6.33041353149176,
+            -0.024566783563489878
+          ],
+          "initial_core_cell_count": 114,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            3.73931207037127,
+            7.801395788445983
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "c41e1cba3a449adf31052577c69f488791545ed484185938387d683fe0b7f4aa",
+          "supported_cell_count": 96,
+          "supported_minor_distance_m": 1.7378656151130842
+        },
+        "target_current": {
+          "density_quadrature_a": 16314773.311828367,
+          "density_quadrature_relative_closure": 2.2833846522164315e-16,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 16314773.311828371
+        }
+      },
+      "realised_cells": 342,
+      "requested_cells": -300,
+      "wall_seconds": 1313.074302077759
+    },
+    {
+      "arms": {
+        "current_pinned": {
+          "accepted_newton_trip_count": 0,
+          "attempted_newton_trip_count": 1,
+          "compile_and_first_solve_wall_seconds": 918.8150364011526,
+          "compile_warm_solve_wall_seconds": 81.03658397495747,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": 16314773.311828371,
+            "target_a": 16314773.311828371,
+            "terminal_relative_error": 0.0,
+            "unscaled_terminal_a": 17546964.60956718
+          },
+          "finite_residual_history": [
+            0.7478962392290307
+          ],
+          "first_run_terminal_relative_residual": 0.7478962392290307,
+          "lambda": {
+            "applied_amplitude_history": [
+              0.9297775241954396,
+              0.9297775241954396
+            ],
+            "history_entry_count": 2,
+            "history_semantics": "seed and terminal state amplitudes; the fixed-point result does not expose intermediate states",
+            "map_evaluation_amplitude_history": [
+              0.9297775241954396,
+              0.9297775241954396
+            ],
+            "policy": "declared scalar current applied at every map evaluation",
+            "terminal_amplitude": 0.9297775241954396
+          },
+          "magnetic_axis_position_error_m": 0.2315852348168992,
+          "recorded_residual_evaluations": 1,
+          "terminal_relative_residual": 0.7478962392290307,
+          "terminal_topology": {
+            "axis_flux_wb": 136.81238560996297,
+            "axis_rz_m": [
+              6.431585234816899,
+              1.2396813289741002e-13
+            ],
+            "boundary_flux_wb": 73.85389783438806,
+            "class": "limited",
+            "flux_span_wb": -62.95848777557491,
+            "read_status": "qualified_axis",
+            "x_point_rz_m": null
+          },
+          "termination": "krylov_action_refused",
+          "whole_domain_psi_error": {
+            "rms_wb": 40.29565230503443,
+            "sup_wb": 88.80878687114253
+          }
+        },
+        "unpinned": {
+          "accepted_newton_trip_count": null,
+          "attempted_newton_trip_count": 10,
+          "compile_and_first_solve_wall_seconds": 895.0424483729876,
+          "compile_warm_solve_wall_seconds": 72.77850600599777,
+          "converged": false,
+          "current": {
+            "achieved_terminal_a": null,
+            "target_a": null,
+            "terminal_relative_error": null,
+            "unscaled_terminal_a": null
+          },
+          "finite_residual_history": [
+            0.6178027502292015
+          ],
+          "first_run_terminal_relative_residual": 0.6178027502292015,
+          "lambda": {
+            "applied_amplitude_history": [
+              1.0
+            ],
+            "history_entry_count": 1,
+            "history_semantics": "the unpinned map applies unit amplitude at every evaluation; the banked receipt did not retain per-evaluation states",
+            "map_evaluation_amplitude_history": [
+              1.0
+            ],
+            "policy": "absolute source; no current normalisation applied",
+            "terminal_amplitude": 1.0
+          },
+          "magnetic_axis_position_error_m": 0.2315852348168992,
+          "provenance": {
+            "fresh_rerun": false,
+            "kind": "banked immutable certificate control",
+            "same_case_machine_seed_and_solver_budget": true,
+            "source_path": "docs/figures/gs-absolute-accuracy/solovev-certificate.json",
+            "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+          },
+          "recorded_residual_evaluations": null,
+          "terminal_relative_residual": 0.6178027502292015,
+          "terminal_topology": {
+            "axis_flux_wb": 136.81238560996297,
+            "axis_rz_m": [
+              6.431585234816899,
+              1.2396813289741002e-13
+            ],
+            "boundary_flux_wb": 73.85389783438806,
+            "class": "limited",
+            "flux_span_wb": -62.95848777557491,
+            "x_point_rz_m": null
+          },
+          "termination": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+          "whole_domain_psi_error": {
+            "rms_wb": 40.29565230503443,
+            "sup_wb": 88.80878687114253
+          }
+        }
+      },
+      "case": "weak-rotation-reactor-static",
+      "comparison": {
+        "pinned_over_unpinned_psi_rms": 1.0,
+        "pinned_over_unpinned_terminal_residual": 1.210574473732215,
+        "psi_rms_collapse_factor": 1.0,
+        "residual_improvement_orders": -0.08299151210575756
+      },
+      "lane": {
+        "allocated_cpus": 16,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-2013.iter.org",
+        "jax_default_backend": "cpu",
+        "jax_platforms": "cpu",
+        "node": "98dci4-clu-2013",
+        "partition": "rigel",
+        "precision": "float64",
+        "slurm_job_id": "1261172"
+      },
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.2300250120460987,
+        "lock_wait_seconds": 1.696404069662094e-05,
+        "semantic_key": "af85caeb3e86e4a1",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+        "store_seconds": 0.0
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-abdc43c0d16f90d9417b",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": "--xla_cpu_multi_thread_eigen=false"
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-abdc43c0d16f90d9417b"
+      },
+      "production_inputs": {
+        "seed": {
+          "aggregate_moment": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "closed_form_coupling_image_used": false,
+          "closed_form_flux_samples_used": false,
+          "current_sum_a": 16314773.311828371,
+          "fixture_exterior_boundary_condition_used": true,
+          "independent_of_closed_form_state": true,
+          "initial_axis_m": [
+            6.431585234816899,
+            1.2396813289741002e-13
+          ],
+          "initial_core_cell_count": 35,
+          "initial_topology_class": "limited",
+          "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+          "limiter_midplane_extent_m": [
+            3.73931207037127,
+            7.801395788445983
+          ],
+          "seed_radius_fraction": 0.9,
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "b5f378bb50c4b5e714d99156463810ec62138138b3b67dcbe64e340c3a627cd1",
+          "supported_cell_count": 36,
+          "supported_minor_distance_m": 1.7378656151130842
+        },
+        "target_current": {
+          "density_quadrature_a": 16314773.311828367,
+          "density_quadrature_relative_closure": 2.2833846522164315e-16,
+          "sign_preserved": true,
+          "source": "RotatingEquilibrium.plasma_current closed-form declaration",
+          "value_a": 16314773.311828371
+        }
+      },
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "wall_seconds": 1022.0707502248697
+    }
+  ],
+  "execution": {
+    "allocated_cpus": 16,
+    "execution": "slurm",
+    "exit_marker": "CERTIFICATE_CURRENT_PIN_EXIT=0",
+    "hostname": "98dci4-clu-2013.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "launch_then_harvest": true,
+    "machine_cache_prewarm": [
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.5148496390320361,
+          "lock_wait_seconds": 3.8182828575372696e-05,
+          "semantic_key": "af85caeb3e86e4a1",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110
+      },
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.8650787360966206,
+          "lock_wait_seconds": 6.33997842669487e-06,
+          "semantic_key": "b9d893c32a653ef4",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -300
+      },
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.10332906479015946,
+          "lock_wait_seconds": 7.737893611192703e-06,
+          "semantic_key": "eaae72d63a1a4556",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "moderate-rotation-conventional-static",
+        "requested_cells": -110
+      },
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.10240958910435438,
+          "lock_wait_seconds": 6.916932761669159e-06,
+          "semantic_key": "f9fbeea7c8727e83",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "moderate-rotation-conventional-static",
+        "requested_cells": -300
+      },
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.09683781303465366,
+          "lock_wait_seconds": 6.213784217834473e-06,
+          "semantic_key": "fc8dff910c18796c",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "strong-rotation-compact-static",
+        "requested_cells": -110
+      },
+      {
+        "cache": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.14521735394373536,
+          "lock_wait_seconds": 6.010755896568298e-06,
+          "semantic_key": "5c022b142d6aa15f",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+          "store_seconds": 0.0
+        },
+        "case": "strong-rotation-compact-static",
+        "requested_cells": -300
+      }
+    ],
+    "node": "98dci4-clu-2013",
+    "partition": "rigel",
+    "precision": "float64",
+    "scheduler_harvest": {
+      "elapsed": "00:27:14",
+      "elapsed_seconds": 1634,
+      "exit_code": "0:0",
+      "job_id": "1261172",
+      "node": "98dci4-clu-2013",
+      "state": "COMPLETED"
+    },
+    "slurm_job_id": "1261172",
+    "wall_seconds": 1619.5662412047386,
+    "worker_processes": 6
+  },
+  "preregistration": {
+    "cases": [
+      "weak-rotation-reactor-static",
+      "moderate-rotation-conventional-static",
+      "strong-rotation-compact-static"
+    ],
+    "certificate_driver_modified": false,
+    "control_provenance": "unpinned metrics are the immutable same-seed certificate rows; only the current-pinned intervention is rerun",
+    "controlled_difference": "only target_current supplied to ForwardFluxOperator.flux_map",
+    "gauge": "shared exact exterior supply; no post-solve re-zeroing",
+    "original_certificate_modified": false,
+    "requested_cells": [
+      -110,
+      -300
+    ],
+    "shared_seed": "production current-centroid uniform-disc moment seed",
+    "solver_source_modified": false,
+    "source_file_sha256": {
+      "benchmarks/solovev_certificate.py": "de3a3e11edd0fa3c7baebc13f2aa15b064bbf3650b1fb45fcfa3cfe4eaefc7d3",
+      "docs/figures/gs-absolute-accuracy/solovev-certificate.json": "f060c5e30c48ba68480dd3c9a96f174621722ed9b9a6179cc9d1e69b255ee5a5"
+    },
+    "source_revision": "241ee4a97a9a9f802b67fbdee67fc45da5a0737f",
+    "verdict_rule": "recovery requires every row to improve terminal residual by at least two orders and reduce whole-domain psi RMS by at least tenfold"
+  },
+  "schema": {
+    "arms": [
+      "unpinned",
+      "current_pinned"
+    ],
+    "case_count": 3,
+    "id": "nova.solovev-certificate-current-pin",
+    "rung_count_per_case": 2,
+    "version": 1
+  },
+  "verdict": {
+    "recovers_convergence_toward_root": false,
+    "row_count": 6,
+    "rows_with_psi_rms_collapse_of_at_least_tenfold": 0,
+    "rows_with_residual_improvement_of_at_least_two_orders": 0,
+    "sentence": "Pinning the exact net plasma current does not by itself recover convergence toward the closed-form root: not every row lowers the residual by two orders of magnitude and collapses whole-domain psi RMS tenfold."
+  }
+}

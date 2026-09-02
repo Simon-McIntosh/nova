@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:16:24",
+  "updated": "2026-09-02T12:26:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -76191,9 +76191,181 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T083406518803-scr-remedy-anderson",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a73",
+        "node": "scr-remedy-anderson",
+        "node_definition": {
+          "done_when": "remedy-anderson.json states for both arms the terminal residual against 1e-8, trip count, the count of mixed candidates offered versus admitted, the mode contraction before versus after, records the seven referee tests passing unmodified plus tests/test_settled_mask_anderson.py passing (command, exit status, log path), remedy-anderson.png exists on one log axis, SLURM job id, node, CPU count, elapsed and exit marker are recorded, and the diff under nova/ is confined to nova/equilibrium/fixed_point.py",
+          "estimated_hours": 3.0,
+          "goal": "A worktree prototype of stall-remedy rung 3, Anderson acceleration on the fixed-mask outer fixed-point map, in nova/equilibrium/fixed_point.py on main at or after 588578a0: a fixed-window Anderson mixing of the outer trip iterates (reusing the existing anderson machinery's safeguarded history, ridge and step cap) that engages only after the active-set mask has been zero-difference for two trips with residual contraction ratio above 0.95, fixed-shape and opt-in, own-induced-mask strict-decrease acceptance untouched so the mixed iterate is offered to the same acceptance as any candidate, with a test file tests/test_settled_mask_anderson.py, a benchmark benchmarks/stall_remedy_anderson.py re-solving 22086/43 pure together with 21978/35 pure through benchmarks/bank_revision_reproduction.py's exact bank route on the H200 (one CPU, one H200, reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, hardened sbatch, heartbeat, flushed stage timings, persisted carrier reused, persistent compilation cache, 3-hour SLURM limit, launch-then-harvest), a receipt docs/figures/solver-convergence-regression/remedy-anderson.json recording per arm the per-trip residual history, mask differences, termination, trip count, the mixed candidates offered and whether the acceptance admitted or refused each, the antisymmetric-mode contraction before versus after, the terminal residual against 1e-8, wall seconds, the seven referee tests run unmodified, and a figure remedy-anderson.png plotting both histories against the banked old, own-mask, rung-1, rung-2 and rung-5 histories, the whole prototype committed in the worktree only and never merged",
+          "id": "scr-remedy-anderson",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_settled_mask_anderson.py",
+            "benchmarks/stall_remedy_anderson.py",
+            "docs/figures/solver-convergence-regression/remedy-anderson.json",
+            "docs/figures/solver-convergence-regression/remedy-anderson.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "stall-remedy-krylov",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:34:11Z",
+        "completed_at": "2026-09-02T10:26:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6742,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6742,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "bc5e798210f772f6bf2e8c0097ef75e59be89326",
+        "commits": [
+          "a4cb791805120a5af6e7066a4014901ae8fe8aba"
+        ],
+        "changed_lines": {
+          "added": 2033,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/stall_remedy_anderson.py check plus the seven referee tests (SLURM 1261119 COMPLETED 0:0, EXIT_MARKER=0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T083406518803-scr-remedy-anderson/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ecf-6ce6-7ec0-ab50-6636eae50b33",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 8433664,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8652374,
+            "output_tokens": 253,
+            "output_tokens_cumulative": 39116,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 12325
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 573,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The 60-minute worker fence expired while all eight H200s remained allocated. Required job 1261079 is still pending behind job 1261068; so 3 fine rows remain absent and dependent aggregate/validate job 1261083 cannot start. Per the latest instruction neither queued job was cancelled. The final receipt does not yet exist; the artifact census is 13/16; schema validation and order-fit inspection are absent; and no artifact commit can honestly be made until the live jobs finish.",
+              "elapsed_seconds": 4173,
+              "log_age_seconds": 725,
+              "log_fresh": true,
+              "manifest_commits": [
+                "ebb5676852dc2445d9e6fec909050bc1094d137e",
+                "ae9c0ed65ecbc2b850da9dfdc6b1a9411f0cfca2",
+                "eca38a8e88a10f03389827fb1b84cd781421a661",
+                "5bb6850f986aa8daac3fa8e3f90603ee0c1082ba",
+                "a3ae6bd4e9e8744308069450c3b8ad9c4a199357"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T055253904678-gaa-solovev-certificate-run/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T055253904678-gaa-solovev-certificate-run/manifest.md; resolve the blocker before resuming the run",
+              "node": "gaa-solovev-certificate-run",
+              "phase": "working",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T055253904678-gaa-solovev-certificate-run",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 761,
+              "terminal_at": "2026-09-02T08:21:27Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/gaa-solovev-certificate-run"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2698,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: H200 scheduler capacity was not granted before the 60-minute node fence; job 1261068 remains PENDING (Resources) behind running job 1261066; so no GPU timing; strict-exit incidence; terminal-state identity; JSON receipt; or PNG figure exists yet",
+              "elapsed_seconds": 6298,
+              "log_age_seconds": 2972,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; job 1261068 is armed against detached revision 7d7f7f80054a9568cf8a50f842818d65b3483bca and immutable driver sha256 4546ecc6507cd521017060efd8a7533f97acb4d54aa1161837039502004acd63"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064904118819-mcs-strict-exit-incidence/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T064904118819-mcs-strict-exit-incidence/manifest.md; resolve the blocker before resuming the run",
+              "node": "mcs-strict-exit-incidence",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T064904118819-mcs-strict-exit-incidence",
+              "session": "s19-northstar",
+              "terminal_age_seconds": 3169,
+              "terminal_at": "2026-09-02T07:41:18Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/mcs-strict-exit-incidence"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1347
+    "_version": 1348
   }
 }

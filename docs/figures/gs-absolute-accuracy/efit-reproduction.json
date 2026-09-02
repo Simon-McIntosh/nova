@@ -1,0 +1,1013 @@
+{
+  "data": {
+    "aggregate": {
+      "all_figures_project_absolute": true,
+      "fail_count": 11,
+      "frame_count": 11,
+      "marginal_rows": [
+        "21978/35 pure",
+        "22086/43 pure"
+      ],
+      "pass_count": 0,
+      "verdict": "FAIL_ONE_OR_MORE_FRAMES_ABOVE_LABEL_GS_FLOOR_OR_UNCONVERGED"
+    },
+    "execution": {
+      "allocation": {
+        "allocated_cpus": 4,
+        "jax_backend": "gpu",
+        "jax_devices": [
+          "cuda:0"
+        ],
+        "jax_platforms": "cuda,cpu",
+        "job_id": "1261006",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "compile_policy": "one process with the explicit versioned persistent JAX compilation cache; per-frame monitoring events distinguish hits from misses; recorded wall is per complete frame after preceding compilation state",
+      "diiid_machine_artifact_cache": "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache",
+      "driver_sha256": "e5a6b6d5b1fbcf9e0b1edb15a23484d1ffd3861c7bb672cd83e0c1fa7e542cb9",
+      "mast_response_carrier": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "observed_compile_time_saved_seconds": 0.0,
+        "observed_hits": 0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "gpu",
+          "backend_version": "PJRT C API\ncuda 12090",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "NVIDIA H200 NVL",
+              "platform": "gpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-0745ecebea4cb264e054"
+      },
+      "reuse_map_rows": [
+        "docs/research/forward-accuracy-reuse-map.html#efit-reproduction rows 50-55"
+      ],
+      "solver_source_modified": false,
+      "source_commit": "873cfba6f9a535a7733d87e4fd5159b35efec517",
+      "zero_iteration_fields_sha256": "26f090510fb8c0abbc91df53270557073a1a7b3e55ec7fb851ce67c669846ebe",
+      "zero_iteration_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/job-output/zero_iteration_receipt.json",
+      "zero_iteration_receipt_sha256": "7d8cf5d005b510fe2708767f078ad73528295083ea9327b97fbe2fe9ba42122f"
+    },
+    "floors": {
+      "DIII-D": 0.0832365867,
+      "MAST": 0.0116147034
+    },
+    "measurement": "production forward solve versus EFIT label with independent label-GS floor",
+    "rows": [
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 399.1852573119104,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21978-row-35.png",
+        "frame_identity": {
+          "label": "21978/35 pure",
+          "shot": 21978,
+          "slice_index": 35,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.1899999976158142
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": -0.0001979854085443478,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.0034123454567333033
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": {
+            "all_common_trip_differences_inside_float64_noise": true,
+            "first_backend_divergence": null,
+            "paired_arm": "22086/43 pure",
+            "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+            "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+            "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+          },
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.0024509187258022736,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": true,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.053389035165309906,
+          "figure": 0.4224072303622961,
+          "first_solve": 19.79546619206667,
+          "jit_compile": 363.9645644174889,
+          "mast_case_from_selection": 14.50084405951202,
+          "passive_inclusive_case": 0.4395182467997074,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 459.4658215958625,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21983-row-35.png",
+        "frame_identity": {
+          "label": "21983/35 pure",
+          "shot": 21983,
+          "slice_index": 35,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.1899999976158142
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.00043996196260729617,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.008849986173509732
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.001601081351241986,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.010861675255000591,
+          "figure": 0.1597779979929328,
+          "first_solve": 66.08124986570328,
+          "jit_compile": 377.49358355253935,
+          "mast_case_from_selection": 15.659495607949793,
+          "passive_inclusive_case": 0.05328951124101877,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 449.4075253177434,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21985-row-51.png",
+        "frame_identity": {
+          "label": "21985/51 pure",
+          "shot": 21985,
+          "slice_index": 51,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.2750000059604645
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.0003493169418338622,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.002691071250148193
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.000684449133016612,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.01444219145923853,
+          "figure": 0.1644265865907073,
+          "first_solve": 51.34948476124555,
+          "jit_compile": 381.9506533322856,
+          "mast_case_from_selection": 15.863343339413404,
+          "passive_inclusive_case": 0.05363074690103531,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 486.60383690334857,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21986-row-46.png",
+        "frame_identity": {
+          "label": "21986/46 pure",
+          "shot": 21986,
+          "slice_index": 46,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.25
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": -0.0011619762331649191,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.005915483143583045
+        },
+        "solver_qualification": {
+          "achieved_class": "limited",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.005887639830277983,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": false
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.005600771866738796,
+          "figure": 0.17372995521873236,
+          "first_solve": 67.5239707166329,
+          "jit_compile": 385.2354441219941,
+          "mast_case_from_selection": 33.597243952564895,
+          "passive_inclusive_case": 0.05846915580332279,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 495.33141483180225,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21989-row-55.png",
+        "frame_identity": {
+          "label": "21989/55 pure",
+          "shot": 21989,
+          "slice_index": 55,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.29499998688697815
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.0005304015899061272,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.007055321366783535
+        },
+        "solver_qualification": {
+          "achieved_class": "limited",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.002856737994171574,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": false
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.01641793642193079,
+          "figure": 0.1730067478492856,
+          "first_solve": 66.13323912676424,
+          "jit_compile": 393.3262981791049,
+          "mast_case_from_selection": 35.62903262116015,
+          "passive_inclusive_case": 0.04838498588651419,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 494.8410389609635,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-22086-row-43.png",
+        "frame_identity": {
+          "label": "22086/43 pure",
+          "shot": 22086,
+          "slice_index": 43,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.22999998927116394
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.009581835009157658
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.0011740769786458087,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.004303969323326173
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": {
+            "all_common_trip_differences_inside_float64_noise": true,
+            "first_backend_divergence": null,
+            "paired_arm": "22086/43 pure",
+            "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+            "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+            "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+          },
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.00048023353539189173,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": true,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.013888102024793625,
+          "figure": 0.1625196598470211,
+          "first_solve": 58.00569169409573,
+          "jit_compile": 389.9974591117352,
+          "mast_case_from_selection": 46.59619456063956,
+          "passive_inclusive_case": 0.06333017814904451,
+          "persisted_response_carrier_load": 0.011859848164021969,
+          "slice_selection": 0.005262500606477261
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 1382.8366059372202,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_00000c4a7b-frame-179.png",
+        "frame_identity": {
+          "frame": 179,
+          "label": "d3d_shot_00000c4a7b.parquet:179",
+          "shot": "d3d_shot_00000c4a7b.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3740.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "solve_against_label": {
+          "additive_gauge_wb": 1.760181388940456,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 2.1311155848944874
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "limited",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 1.2865016612957264e-10,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.009956062771379948,
+          "figure": 0.1610428560525179,
+          "frame_selection": 1.0221245605498552,
+          "input_read": 0.11057898309081793,
+          "production_solve": 1382.5537025174126
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 1203.513161931187,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0003ff34e7-frame-44.png",
+        "frame_identity": {
+          "frame": 44,
+          "label": "d3d_shot_0003ff34e7.parquet:44",
+          "shot": "d3d_shot_0003ff34e7.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 1080.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "solve_against_label": {
+          "additive_gauge_wb": 0.2771412951159737,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 1.139290889072396
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.08117000452284825,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.0010869288817048073,
+          "figure": 0.2378738336265087,
+          "input_read": 0.17165220249444246,
+          "production_solve": 1203.1016268329695
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 1210.8862581634894,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_001554e054-frame-144.png",
+        "frame_identity": {
+          "frame": 144,
+          "label": "d3d_shot_001554e054.parquet:144",
+          "shot": "d3d_shot_001554e054.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3240.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "solve_against_label": {
+          "additive_gauge_wb": 0.15111542465819622,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 0.8195324440087708
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.08838134940012617,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.0015509799122810364,
+          "figure": 0.15441197156906128,
+          "input_read": 0.15137688722461462,
+          "production_solve": 1210.5780146336183
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 1179.204156843014,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_002495e835-frame-146.png",
+        "frame_identity": {
+          "frame": 146,
+          "label": "d3d_shot_002495e835.parquet:146",
+          "shot": "d3d_shot_002495e835.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3180.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "solve_against_label": {
+          "additive_gauge_wb": 0.1151677317983415,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 1.53529257532426
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.058516982970557484,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.001504208892583847,
+          "figure": 0.27892549987882376,
+          "input_read": 0.1800384633243084,
+          "production_solve": 1178.7425589021295
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 1226.6857939828187,
+        "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0040ca9bdc-frame-137.png",
+        "frame_identity": {
+          "frame": 137,
+          "label": "d3d_shot_0040ca9bdc.parquet:137",
+          "shot": "d3d_shot_0040ca9bdc.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3000.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
+        "passes": false,
+        "solve_against_label": {
+          "additive_gauge_wb": -0.09524721941794177,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 0.758437265959663
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.06053569152139815,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "stage_timings_seconds": {
+          "comparison": 0.0017330246046185493,
+          "figure": 0.1521182181313634,
+          "input_read": 0.5495374593883753,
+          "production_solve": 1225.9810765413567
+        }
+      }
+    ]
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": true,
+    "properties": {
+      "aggregate": {
+        "type": "object"
+      },
+      "execution": {
+        "type": "object"
+      },
+      "floors": {
+        "properties": {
+          "DIII-D": {
+            "const": 0.0832365867
+          },
+          "MAST": {
+            "const": 0.0116147034
+          }
+        },
+        "required": [
+          "DIII-D",
+          "MAST"
+        ],
+        "type": "object"
+      },
+      "measurement": {
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "additionalProperties": true,
+          "properties": {
+            "band": {
+              "type": "object"
+            },
+            "compile_cache": {
+              "properties": {
+                "compile_time_saved_seconds": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "hit_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "status": {
+                  "enum": [
+                    "hit",
+                    "miss"
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "hit_count",
+                "compile_time_saved_seconds"
+              ],
+              "type": "object"
+            },
+            "compile_warm_wall_seconds": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "figure_src": {
+              "pattern": "^/nova/figures/",
+              "type": "string"
+            },
+            "frame_identity": {
+              "type": "object"
+            },
+            "label_gs_inconsistency": {
+              "additionalProperties": true,
+              "properties": {
+                "field_unit": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "norm": {
+                  "type": "string"
+                },
+                "value": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "norm",
+                "field_unit"
+              ],
+              "type": "object"
+            },
+            "machine": {
+              "enum": [
+                "MAST",
+                "DIII-D"
+              ]
+            },
+            "passes": {
+              "type": "boolean"
+            },
+            "solve_against_label": {
+              "additionalProperties": true,
+              "properties": {
+                "field_unit": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "norm": {
+                  "type": "string"
+                },
+                "value": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "norm",
+                "field_unit"
+              ],
+              "type": "object"
+            },
+            "solver_qualification": {
+              "type": "object"
+            },
+            "stage_timings_seconds": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "machine",
+            "frame_identity",
+            "band",
+            "solve_against_label",
+            "label_gs_inconsistency",
+            "solver_qualification",
+            "compile_warm_wall_seconds",
+            "stage_timings_seconds",
+            "compile_cache",
+            "passes",
+            "figure_src"
+          ],
+          "type": "object"
+        },
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "measurement",
+      "execution",
+      "floors",
+      "rows",
+      "aggregate"
+    ],
+    "type": "object"
+  }
+}

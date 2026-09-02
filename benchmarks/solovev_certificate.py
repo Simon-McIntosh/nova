@@ -68,6 +68,7 @@ SEED_CONTROL_OUTPUT = (
 )
 FIGURE_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev"
 PART_ROOT = FIGURE_ROOT / "production-route-parts"
+DIAGNOSTIC_ROOT = FIGURE_ROOT / "production-route-diagnostics"
 REQUESTED_CELLS = (-110, -300, -500, -1000)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
@@ -214,6 +215,10 @@ def _part_path(case_name: str, requested_cells: int) -> Path:
 
 def _figure_path(case_name: str, requested_cells: int) -> Path:
     return FIGURE_ROOT / f"{case_name}-production-route-{_slug(requested_cells)}.png"
+
+
+def _diagnostic_path(case_name: str) -> Path:
+    return DIAGNOSTIC_ROOT / f"{case_name}-reduced-nan-census.json"
 
 
 def _source_revision() -> str:
@@ -783,6 +788,326 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
             "continue_globalization_state": "production default enabled",
         },
     }
+
+
+def _finite_census(
+    values: Any, segments: tuple[tuple[str, int], ...] = ()
+) -> dict[str, Any]:
+    """Count non-finite values and locate the first one in a named segment."""
+
+    array = np.asarray(values, dtype=np.float64).reshape(-1)
+    nonfinite = np.flatnonzero(~np.isfinite(array))
+    first = None
+    if len(nonfinite):
+        index = int(nonfinite[0])
+        offset = 0
+        segment_name = "scalar"
+        local_index = index
+        for name, size in segments:
+            if index < offset + size:
+                segment_name = name
+                local_index = index - offset
+                break
+            offset += size
+        value = array[index]
+        if np.isnan(value):
+            kind = "nan"
+        elif value > 0:
+            kind = "positive_infinity"
+        else:
+            kind = "negative_infinity"
+        first = {
+            "flat_index": index,
+            "segment": segment_name,
+            "segment_index": int(local_index),
+            "kind": kind,
+        }
+    return {
+        "size": int(array.size),
+        "finite": not len(nonfinite),
+        "finite_count": int(np.count_nonzero(np.isfinite(array))),
+        "nonfinite_count": int(len(nonfinite)),
+        "nan_count": int(np.count_nonzero(np.isnan(array))),
+        "positive_infinity_count": int(np.count_nonzero(np.isposinf(array))),
+        "negative_infinity_count": int(np.count_nonzero(np.isneginf(array))),
+        "first_nonfinite": first,
+    }
+
+
+def _diagnose_seed_action(
+    *,
+    name: str,
+    seed: np.ndarray,
+    seed_receipt: dict[str, Any],
+    profile: ForwardProfile,
+    target_current: float,
+) -> dict[str, Any]:
+    """Measure the first frozen-mask linear action through public operators."""
+
+    operator = profile.operator
+    state = jnp.asarray(seed, dtype=jnp.float64)
+    initial_mask = operator.residual_shadow_mask(state)
+    shadowed_map = operator.flux_map_with_shadow(target_current=target_current)
+
+    def frozen_map(candidate):
+        return shadowed_map(candidate, initial_mask)
+
+    mapped = jax.jit(frozen_map)(state)
+    jax.block_until_ready(mapped)
+    residual = np.asarray(mapped - state, dtype=np.float64)
+    mapped_values = np.asarray(mapped, dtype=np.float64)
+    residual_sup = float(np.max(np.abs(residual)))
+    relative_residual = residual_sup / max(
+        float(np.max(np.abs(mapped_values))), np.finfo(np.float64).tiny
+    )
+    if residual_sup > np.finfo(np.float64).tiny:
+        direction = residual / residual_sup
+        direction_kind = "unit_sup_fixed_point_residual"
+    else:
+        direction = np.zeros_like(residual)
+        direction[int(np.argmax(np.abs(np.asarray(seed))))] = 1.0
+        direction_kind = "unit_coordinate_at_largest_seed_component"
+
+    def exposed(candidate):
+        unscaled = operator.cell_current_moments(candidate)
+        normalised, amplitude = operator.normalised_current_moments(
+            candidate, target_current
+        )
+        normalised_internal = operator.current_moment_image(normalised)
+        return {
+            "amplitude": amplitude,
+            "frozen_map": frozen_map(candidate),
+            "normalised_cell_current": normalised.cell_current,
+            "normalised_internal_flux": normalised_internal,
+            "normalised_radial_moment": normalised.radial_moment,
+            "normalised_vertical_moment": normalised.vertical_moment,
+            "unscaled_cell_current": unscaled.cell_current,
+            "unscaled_radial_moment": unscaled.radial_moment,
+            "unscaled_vertical_moment": unscaled.vertical_moment,
+        }
+
+    values, tangents = jax.jit(
+        lambda candidate, vector: jax.jvp(exposed, (candidate,), (vector,))
+    )(state, jnp.asarray(direction))
+    jax.block_until_ready(tangents)
+    state_segments = (
+        ("grid", int(operator.grid.node_number)),
+        ("wall", int(operator.wall.node_number)),
+        (
+            "sample",
+            0 if operator.sample is None else int(operator.sample.node_number),
+        ),
+    )
+    cell_segments = (("plasma_cell", int(operator.grid.node_number)),)
+    intermediate_segments = {
+        "amplitude": (),
+        "frozen_map": state_segments,
+        "normalised_cell_current": cell_segments,
+        "normalised_internal_flux": state_segments,
+        "normalised_radial_moment": cell_segments,
+        "normalised_vertical_moment": cell_segments,
+        "unscaled_cell_current": cell_segments,
+        "unscaled_radial_moment": cell_segments,
+        "unscaled_vertical_moment": cell_segments,
+    }
+    intermediates = {
+        key: {
+            "value": _finite_census(values[key], intermediate_segments[key]),
+            "jvp": _finite_census(tangents[key], intermediate_segments[key]),
+        }
+        for key in values
+    }
+    linear_action = np.asarray(direction) - np.asarray(tangents["frozen_map"])
+    action_census = _finite_census(linear_action, state_segments)
+    ordered = (
+        "unscaled_cell_current",
+        "unscaled_radial_moment",
+        "unscaled_vertical_moment",
+        "amplitude",
+        "normalised_cell_current",
+        "normalised_radial_moment",
+        "normalised_vertical_moment",
+        "normalised_internal_flux",
+        "frozen_map",
+    )
+    first_nonfinite = next(
+        (
+            {
+                "intermediate": key,
+                **intermediates[key]["jvp"]["first_nonfinite"],
+            }
+            for key in ordered
+            if intermediates[key]["jvp"]["first_nonfinite"] is not None
+        ),
+        None,
+    )
+    unscaled_total = float(np.sum(np.asarray(values["unscaled_cell_current"])))
+    attempted_amplitude = (
+        target_current / unscaled_total if unscaled_total != 0.0 else float("inf")
+    )
+    amplitude = float(np.asarray(values["amplitude"]))
+    return {
+        "name": name,
+        "seed": seed_receipt,
+        "initial_frozen_shadow_cell_count": int(
+            np.count_nonzero(np.asarray(initial_mask))
+        ),
+        "map_residual": {
+            "relative_sup": relative_residual,
+            "absolute_sup_wb": residual_sup,
+            "census": _finite_census(residual, state_segments),
+        },
+        "probe_direction": {
+            "construction": direction_kind,
+            "sup_norm": float(np.max(np.abs(direction))),
+            "census": _finite_census(direction, state_segments),
+        },
+        "lambda_amplitude_admissibility": {
+            "target_current_a": target_current,
+            "unscaled_current_a": unscaled_total,
+            "attempted_amplitude": attempted_amplitude,
+            "public_amplitude": amplitude if np.isfinite(amplitude) else None,
+            "admissible": bool(np.isfinite(amplitude)),
+            "amplitude_jvp": float(np.asarray(tangents["amplitude"])),
+            "amplitude_jvp_finite": bool(
+                np.isfinite(float(np.asarray(tangents["amplitude"])))
+            ),
+        },
+        "public_intermediate_census": intermediates,
+        "fixed_point_linear_action": action_census,
+        "map_jvp_finite": intermediates["frozen_map"]["jvp"]["finite"],
+        "fixed_point_linear_action_finite": action_census["finite"],
+        "first_nonfinite_public_intermediate": first_nonfinite,
+    }
+
+
+def _nan_census(case_name: str) -> dict[str, Any]:
+    """Bank the production and near-root first-action census at reduced size."""
+
+    started = perf_counter()
+    configure_dtypes()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    requested_cells = -110
+    timings: dict[str, float] = {}
+    with _timed_stage(
+        "nan_census_construction",
+        timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        carrier_case, source_case, exact = _case(case_name)
+        machine = oracle_fixture.cached_machine(
+            carrier_case,
+            requested_cells,
+            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        )
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        oracle_state = _exact_state(case_name, exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, oracle_state
+        )
+        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+        exact_internal = oracle_fixture._internal_flux_image(
+            empty_operator, exact_coefficients
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, oracle_state - exact_internal
+        )
+        profile = ForwardProfile(
+            operator,
+            StencilMesh(machine.node, machine.stencil, machine.area),
+            newton_steps=recovery.NEWTON_STEPS,
+        )
+        target_current, centroid, current_receipt = _closed_form_current_target(
+            case_name, source_case, operator, exact_physical
+        )
+        production_seed, requested_class, production_receipt = _production_seed(
+            profile, case_name, target_current, centroid, current_receipt
+        )
+        near_root_seed = np.asarray(oracle_state, dtype=np.float64)
+        near_root_receipt = {
+            "factory": "closed_form_near_root_control",
+            "requested_class": TopologyClass(requested_class).name.lower(),
+            "construction": (
+                "independent closed-form total flux on the identical cached carrier"
+            ),
+            "state_sha256_binary64": hashlib.sha256(
+                near_root_seed.tobytes()
+            ).hexdigest(),
+        }
+    arms = []
+    for name, seed, seed_receipt in (
+        ("production_moment_seed", production_seed, production_receipt),
+        ("closed_form_near_root_seed", near_root_seed, near_root_receipt),
+    ):
+        with _timed_stage(
+            f"nan_census_{name}",
+            timings,
+            case_name=case_name,
+            requested_cells=requested_cells,
+        ):
+            arms.append(
+                _diagnose_seed_action(
+                    name=name,
+                    seed=np.asarray(seed, dtype=np.float64),
+                    seed_receipt=seed_receipt,
+                    profile=profile,
+                    target_current=target_current,
+                )
+            )
+    by_name = {arm["name"]: arm for arm in arms}
+    production_finite = by_name["production_moment_seed"][
+        "fixed_point_linear_action_finite"
+    ]
+    near_root_finite = by_name["closed_form_near_root_seed"][
+        "fixed_point_linear_action_finite"
+    ]
+    if not production_finite and near_root_finite:
+        sentence = (
+            "The production moment seed has a non-finite first linearised action "
+            "while the closed-form near-root control has a finite action."
+        )
+    elif not production_finite:
+        sentence = "Both seed classes have a non-finite first linearised action."
+    else:
+        sentence = "The production moment seed has a finite first linearised action."
+    receipt = {
+        "schema": {
+            "$id": "nova.solovev-production-route-nan-census",
+            "version": 1,
+            "required": [
+                "case",
+                "requested_cells",
+                "arms",
+                "headline",
+                "lane",
+            ],
+        },
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": len(machine.node),
+        "route": "ForwardProfile production frozen-mask Newton linearisation",
+        "seed_factory": "profile.cold_seed_portfolio",
+        "target_current_a": target_current,
+        "persistent_compilation_cache": compilation_cache.receipt(),
+        "stage_wall_seconds": timings,
+        "arms": arms,
+        "headline": {"sentence": sentence},
+        "lane": {
+            **_lane(),
+            "cpu_count": int(os.environ.get("SLURM_CPUS_PER_TASK", "1")),
+            "threaded_settings": _thread_settings(),
+            "elapsed_seconds": perf_counter() - started,
+            "exit_marker": "SOLOVEV_NAN_CENSUS_EXIT=0",
+        },
+    }
+    _write_json(_diagnostic_path(case_name), receipt)
+    return receipt
 
 
 def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
@@ -1731,12 +2056,19 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--validate", action="store_true")
     parser.add_argument("--seed-control", action="store_true")
     parser.add_argument("--validate-seed-control", action="store_true")
+    parser.add_argument("--nan-census", action="store_true")
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = _parse()
+    if arguments.nan_census:
+        if arguments.case is None:
+            raise SystemExit("--nan-census requires one --case")
+        receipt = _nan_census(arguments.case)
+        print(json.dumps(receipt["headline"], sort_keys=True), flush=True)
+        return
     if arguments.seed_control:
         output = SEED_CONTROL_OUTPUT if arguments.output == OUTPUT else arguments.output
         receipt = _seed_control(output)

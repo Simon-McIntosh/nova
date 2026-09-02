@@ -61,6 +61,9 @@ from tests.test_solovev_recovery_gates import LOCKED_RECOVERY_BOUNDS
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs/figures/gs-absolute-accuracy/solovev-certificate.json"
+SEED_CONTROL_OUTPUT = (
+    ROOT / "docs/figures/gs-absolute-accuracy/certificate-seed-control.json"
+)
 FIGURE_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev"
 PART_ROOT = FIGURE_ROOT / "parts"
 REQUESTED_CELLS = (-110, -300, -500, -1000)
@@ -229,6 +232,254 @@ def _lane() -> dict[str, Any]:
         "jax_default_backend": jax.default_backend(),
         "precision": "float64",
     }
+
+
+def _thread_settings() -> dict[str, Any]:
+    names = (
+        "XLA_FLAGS",
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+    )
+    return {name.lower(): os.environ.get(name) for name in names}
+
+
+def _trip_residual_history(history: Any) -> list[dict[str, Any]]:
+    trace = np.asarray(history.trace, dtype=np.float64)
+    stride = recovery.KRYLOV_ITERATIONS + 2
+    trips = []
+    for trip_index in range(recovery.NEWTON_STEPS):
+        start = trip_index * stride
+        stop = start + stride
+        local_indices = np.flatnonzero(np.isfinite(trace[start:stop]))
+        if not len(local_indices):
+            continue
+        absolute_indices = start + local_indices
+        trips.append(
+            {
+                "trip": trip_index + 1,
+                "trace_indices": absolute_indices.tolist(),
+                "residuals": trace[absolute_indices].tolist(),
+            }
+        )
+    return trips
+
+
+def _seed_control_result(
+    *,
+    name: str,
+    seed: np.ndarray,
+    seed_receipt: dict[str, Any],
+    map_fn: Any,
+    operator: Any,
+    oracle_state: np.ndarray,
+    axis_reference: np.ndarray,
+    cell_count: int,
+) -> dict[str, Any]:
+    initial_residual = recovery._relative_map_residual(map_fn, seed)
+    started = perf_counter()
+    history = recovery._solve(map_fn, seed)
+    solve_seconds = perf_counter() - started
+    terminal_state = np.asarray(history.state, dtype=np.float64)
+    terminal_residual = float(history.residual)
+    error = terminal_state[:cell_count] - oracle_state[:cell_count]
+    finite_error = error[np.isfinite(error)]
+    topology = _topology(operator, terminal_state)
+    qualified = bool(
+        np.isfinite(terminal_residual) and terminal_residual <= TERMINAL_RESIDUAL_BOUND
+    )
+    if not np.all(np.isfinite(terminal_state)):
+        termination = "nonfinite_terminal_state"
+    elif not np.isfinite(terminal_residual):
+        termination = "nonfinite_terminal_residual"
+    elif qualified:
+        termination = "fixed_point_residual_within_qualification_bound"
+    else:
+        termination = (
+            "fixed_point_residual_above_qualification_bound_after_iteration_budget"
+        )
+    solver_termination = recovery.fixed_point.FixedPointTerminationReason(
+        int(history.termination_reason)
+    ).name.lower()
+    return {
+        "name": name,
+        "seed": seed_receipt,
+        "initial_relative_residual": initial_residual,
+        "per_trip_residual_history": _trip_residual_history(history),
+        "trip_count": len(_trip_residual_history(history)),
+        "terminal_relative_residual": (
+            terminal_residual if np.isfinite(terminal_residual) else None
+        ),
+        "qualification_bound": TERMINAL_RESIDUAL_BOUND,
+        "qualification": "qualified" if qualified else "unqualified",
+        "termination": termination,
+        "solver_termination": solver_termination,
+        "solve_wall_seconds": solve_seconds,
+        "whole_domain_psi_error": {
+            "sup_wb": (
+                float(np.max(np.abs(finite_error))) if len(finite_error) else None
+            ),
+            "rms_wb": (
+                float(np.sqrt(np.mean(finite_error**2))) if len(finite_error) else None
+            ),
+            "finite_cells": int(len(finite_error)),
+            "total_cells": cell_count,
+        },
+        "axis_position_error_m": (
+            float(
+                np.linalg.norm(
+                    np.asarray(topology["axis_rz_m"], dtype=np.float64) - axis_reference
+                )
+            )
+            if topology["axis_rz_m"] is not None
+            else None
+        ),
+        "terminal_axis_rz_m": topology["axis_rz_m"],
+    }
+
+
+def _seed_control(output: Path = SEED_CONTROL_OUTPUT) -> dict[str, Any]:
+    started = perf_counter()
+    configure_dtypes()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    case_name = "strong-rotation-compact-static"
+    requested_cells = -500
+    carrier_case, source_case, exact = _case(case_name)
+    machine = oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+    )
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    oracle_state = _exact_state(case_name, exact, coordinates)
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    exact_physical = oracle_fixture.exact_current_moments(
+        source_case, empty_operator, oracle_state
+    )
+    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+    exact_internal = oracle_fixture._internal_flux_image(
+        empty_operator, exact_coefficients
+    )
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, oracle_state - exact_internal
+    )
+    production_seed, _moment_image, production_receipt = recovery._moment_seed(
+        source_case, machine, operator
+    )
+    near_root_seed = np.asarray(oracle_state, dtype=np.float64)
+    near_root_receipt = {
+        "kind": "closed-form-near-root-control",
+        "construction": (
+            "the shipped analytic fixture closed-form state on the identical carrier; "
+            "only the solve initial state differs from the production arm"
+        ),
+        "state_sha256_binary64": hashlib.sha256(near_root_seed.tobytes()).hexdigest(),
+    }
+    map_fn = operator.flux_map()
+    arms = [
+        _seed_control_result(
+            name="production_moment_seed",
+            seed=np.asarray(production_seed, dtype=np.float64),
+            seed_receipt=production_receipt,
+            map_fn=map_fn,
+            operator=operator,
+            oracle_state=oracle_state,
+            axis_reference=np.asarray(exact.magnetic_axis, dtype=np.float64),
+            cell_count=len(machine.node),
+        ),
+        _seed_control_result(
+            name="closed_form_near_root_seed",
+            seed=near_root_seed,
+            seed_receipt=near_root_receipt,
+            map_fn=map_fn,
+            operator=operator,
+            oracle_state=oracle_state,
+            axis_reference=np.asarray(exact.magnetic_axis, dtype=np.float64),
+            cell_count=len(machine.node),
+        ),
+    ]
+    by_name = {arm["name"]: arm for arm in arms}
+    production_qualified = by_name["production_moment_seed"]["qualification"]
+    control_qualified = by_name["closed_form_near_root_seed"]["qualification"]
+    if production_qualified == "unqualified" and control_qualified == "qualified":
+        verdict = (
+            "Driver sound: the near-root control converges while basin entry fails "
+            "from the production moment seed."
+        )
+        classification = "driver_sound_production_seed_basin_entry_failure"
+    elif production_qualified == "unqualified":
+        verdict = "Driver suspect: neither seed converges to the registered bound."
+        classification = "driver_suspect"
+    else:
+        verdict = "Certificate wrong: both seeds converge to the registered bound."
+        classification = "certificate_wrong"
+    receipt = {
+        "schema": {
+            "name": "nova-solovev-certificate-seed-control",
+            "version": 1,
+            "required": [
+                "case",
+                "requested_cells",
+                "realised_cells",
+                "lane",
+                "solver",
+                "arms",
+                "verdict",
+            ],
+            "arm_required": [
+                "initial_relative_residual",
+                "per_trip_residual_history",
+                "terminal_relative_residual",
+                "trip_count",
+                "termination",
+                "whole_domain_psi_error",
+                "axis_position_error_m",
+            ],
+        },
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": len(machine.node),
+        "source_revision": _source_revision(),
+        "solver_source_modified": False,
+        "lane": {
+            **_lane(),
+            "cpu_count": int(os.environ.get("SLURM_CPUS_PER_TASK", "1")),
+            "threaded_settings": _thread_settings(),
+            "persistent_compilation_cache": compilation_cache.receipt(),
+            "wall_seconds": perf_counter() - started,
+            "exit_marker": "SEED_CONTROL_EXIT=0",
+        },
+        "solver": {
+            "route": "production undamped Newton-Krylov machinery",
+            "newton_steps": recovery.NEWTON_STEPS,
+            "gmres_iterations": recovery.KRYLOV_ITERATIONS,
+            "qualification_bound": TERMINAL_RESIDUAL_BOUND,
+        },
+        "arms": arms,
+        "verdict": {"classification": classification, "sentence": verdict},
+    }
+    _validate_seed_control(receipt)
+    _write_json(output, receipt)
+    return receipt
+
+
+def _validate_seed_control(receipt: dict[str, Any]) -> None:
+    for name in receipt["schema"]["required"]:
+        if name not in receipt:
+            raise RuntimeError(f"seed control is missing {name}")
+    if len(receipt["arms"]) != 2:
+        raise RuntimeError("seed control must contain exactly two arms")
+    for arm in receipt["arms"]:
+        for name in receipt["schema"]["arm_required"]:
+            if name not in arm:
+                raise RuntimeError(f"seed control arm is missing {name}")
+    if receipt["lane"]["slurm_job_id"] is None:
+        raise RuntimeError("seed control must be measured under SLURM")
 
 
 def _diverted_source(coefficients: np.ndarray) -> RotatingEquilibrium:
@@ -1171,12 +1422,25 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--requested-cells", type=int, choices=REQUESTED_CELLS)
     parser.add_argument("--aggregate", action="store_true")
     parser.add_argument("--validate", action="store_true")
+    parser.add_argument("--seed-control", action="store_true")
+    parser.add_argument("--validate-seed-control", action="store_true")
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = _parse()
+    if arguments.seed_control:
+        output = SEED_CONTROL_OUTPUT if arguments.output == OUTPUT else arguments.output
+        receipt = _seed_control(output)
+        print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
+        return
+    if arguments.validate_seed_control:
+        output = SEED_CONTROL_OUTPUT if arguments.output == OUTPUT else arguments.output
+        receipt = json.loads(output.read_text(encoding="utf-8"))
+        _validate_seed_control(receipt)
+        print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
+        return
     if arguments.aggregate:
         receipt = _aggregate(arguments.output)
         print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)

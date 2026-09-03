@@ -1,0 +1,19 @@
+{
+  "construction": "closed-form field, profiles, density, and exact exterior",
+  "fixed_point_residual": 3.060088622829243e-15,
+  "forcing_sup_wb": 4.218847493575595e-15,
+  "gauge_receipt": {
+    "axis_flux_wb": 1.3807124549744763,
+    "boundary_flux_wb": -3.903127820947816e-18,
+    "psi_norm_oracle_anchors_from": "closed_form_field",
+    "psi_norm_root_anchors_from": "root_field",
+    "raw_flux_comparison_gauge": "shared_exact_exterior",
+    "reference_gauge_constant_used": false
+  },
+  "grid_forcing_fraction_of_span": 2.089884993108479e-15,
+  "map_evaluations": 1,
+  "realised_cells": 136,
+  "requested_cells": -110,
+  "state_size": 675,
+  "wall_rows": 41
+}

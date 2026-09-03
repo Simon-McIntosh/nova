@@ -1,0 +1,33 @@
+{
+  "cache_event": "/jax/compilation_cache/cache_hits",
+  "device": "cpu",
+  "processes": [
+    {
+      "cache_hits": 0,
+      "compile_seconds_saved": 0.0,
+      "receipt": "process-1-receipt.json",
+      "receipt_sha256": "6e52fce900c7f9d749a622aff957c3130d8984919123d5e5c0848ebec3bf54e7",
+      "wall_seconds": 49.414789161179215
+    },
+    {
+      "cache_hits": 1,
+      "compile_seconds_saved": 7.672311640810221,
+      "receipt": "process-2-receipt.json",
+      "receipt_sha256": "6e52fce900c7f9d749a622aff957c3130d8984919123d5e5c0848ebec3bf54e7",
+      "wall_seconds": 40.99019610695541
+    }
+  ],
+  "receipt_comparison": {
+    "bit_identical": true,
+    "excluded_runtime_fields": [
+      "wall_seconds"
+    ]
+  },
+  "reduced_oracle": {
+    "fixed_point_residual": 3.060088622829243e-15,
+    "forcing_sup_wb": 4.218847493575595e-15,
+    "map_evaluations": 1,
+    "realised_cells": 136,
+    "state_size": 675
+  }
+}

@@ -46,7 +46,11 @@ from nova.imas.mast_solve_inputs import (
     TARGET_CONVENTION,
 )
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 
 HERE = Path(__file__).resolve().parent
@@ -930,6 +934,7 @@ def run() -> dict[str, Any]:
     """Regenerate the twelve-arm corroboration figure and strict-JSON receipt."""
 
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )

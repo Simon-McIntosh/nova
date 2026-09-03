@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:31:19",
+  "updated": "2026-09-03T21:44:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -315,36 +315,44 @@
         "id": "c-nia-admission",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "4782c4e8-9a64-4824-a001-ece647b90a3f",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "4782c4e8-9a64-4824-a001-ece647b90a3f"
+        },
         "created": "2026-09-03"
       },
       {
         "id": "c-nia-limiter",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "7c425468-1df5-4003-8fe8-16fb95c1cd45",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "7c425468-1df5-4003-8fe8-16fb95c1cd45"
+        },
         "created": "2026-09-03"
       },
       {
         "id": "c-scr-measure-mast",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "0347e161-26f9-4a0b-9169-75069872e37e",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "0347e161-26f9-4a0b-9169-75069872e37e"
+        },
         "created": "2026-09-03"
       },
       {
         "id": "c-scr-measure-solovev",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "ed4846b2-7c50-4ac0-adf1-c0d7e145a40e",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "ed4846b2-7c50-4ac0-adf1-c0d7e145a40e"
+        },
         "created": "2026-09-03"
       },
       {
@@ -1552,7 +1560,8 @@
         "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
         "session_model": "gpt-5.6-sol",
         "sessions": {
-          "gpt-5.6-sol": "01a060d6-e103-7f71-9114-d8247246ed9e"
+          "gpt-5.6-sol": "01a060d6-e103-7f71-9114-d8247246ed9e",
+          "{\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a060d6-e103-7f71-9114-d8247246ed9e"
         },
         "created": "2026-09-02"
       },
@@ -1563,7 +1572,8 @@
         "session_id": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
         "session_model": "gpt-5.6-sol",
         "sessions": {
-          "gpt-5.6-sol": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37"
+          "gpt-5.6-sol": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37",
+          "{\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a05e9a-2893-7c21-b0b5-2ec1f34cab37"
         },
         "created": "2026-09-01"
       },
@@ -82229,7 +82239,22 @@
         }
       }
     ],
-    "holds": [],
-    "_version": 1450
+    "holds": [
+      {
+        "hold_id": "hold-claude-20260903194142",
+        "backend": "claude",
+        "purpose": "resume",
+        "opened_at": "2026-09-03T19:41:42Z",
+        "closed_at": "2026-09-03T19:44:04Z",
+        "held_seconds": 142,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
+      }
+    ],
+    "_version": 1458
   }
 }

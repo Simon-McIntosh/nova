@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T20:11:49",
+  "updated": "2026-09-03T21:07:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -182,6 +182,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "c-inv-diiid-tare",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "c-inv-flux-chain",
         "harness": "claude",
         "role": "investigate",
@@ -193,7 +202,27 @@
         "created": "2026-09-03"
       },
       {
+        "id": "c-inv-limiter-point",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "c-inv-mask-reopen",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": "78d0d857-4422-4fc0-80e2-bc15bc61e3a1",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "78d0d857-4422-4fc0-80e2-bc15bc61e3a1"
+        },
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-inv-oracle-axis",
         "harness": "claude",
         "role": "investigate",
         "session_id": null,
@@ -235,6 +264,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "c-inv-stationary-census",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "c-inv-timeline",
         "harness": "claude",
         "role": "investigate",
@@ -256,6 +294,15 @@
       },
       {
         "id": "c-scr-presettlement",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-scr-proto-2",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
@@ -81059,9 +81106,160 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T190125273924-scr-triage-mask-reopen-mechanism",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-triage-mask-reopen-mechanism",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/triage/mask-reopen-mechanism.md with the per-trip table for the converged and stagnated paths side by side (residual, mask difference, selected O and X and boundary flux where recorded, class), an explicit statement of what changed at trips 2, 4 and 5 in the converged path and what the stagnated path holds instead, a verdict on identification versus acceptance with the evidence that discriminates, the exact telemetry fields missing from the banked receipts that prevent a firmer verdict, and the single re-solve that would close them (which section 4 node 3 of the plan then records)",
+          "estimated_hours": null,
+          "goal": "Determine from the banked per-trip histories whether the trip-4 and trip-5 mask re-opening in the converged d47f7cd1 path of 22086/43 pure (mask differences 1 and 22 cells) was an O-point or X-point re-selection, a boundary-flux change or a pure residual-acceptance event, reading docs/figures/solver-convergence-regression/root-cause.json, true-pin-reproduction.json, head-mechanism.json, the five remedy receipts, docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, docs/evidence/archive/solver-convergence-regression-landed.html and the triage reports under ~/.config/reckon/crew/reports/nova/triage/",
+          "id": "scr-triage-mask-reopen-mechanism",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190125273924-scr-triage-mask-reopen-mechanism/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/mask-reopen-mechanism.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "c-inv-mask-reopen",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T19:01:31Z",
+        "completed_at": "2026-09-03T19:04:13.011Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 155,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 162,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "4e5c5b25f35af864071ef218d961de4fd3bcae58",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "triage report written to /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/mask-reopen-mechanism.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/mask-reopen-mechanism.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190125273924-scr-triage-mask-reopen-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "78d0d857-4422-4fc0-80e2-bc15bc61e3a1",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 117177,
+            "cache_creation_input_tokens_cumulative": 117177,
+            "cache_read_input_tokens": 840452,
+            "cache_read_input_tokens_cumulative": 840452,
+            "inference_geo": "not_available",
+            "input_tokens": 18,
+            "input_tokens_cumulative": 18,
+            "output_tokens": 13003,
+            "output_tokens_cumulative": 13003,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.7668644000000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.7668644000000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 84473,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 95273,
+              "log_age_seconds": 89503,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "working",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 89548,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 158.837,
+          "generated_tokens": 13003,
+          "generation_seconds": 152.257,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.6,
+          "machine_seconds": 6.58,
+          "peak_input_tokens": 136408,
+          "tokens_per_second": 85.4,
+          "wall_tokens_per_second": 81.86
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1426
+    "_version": 1433
   }
 }

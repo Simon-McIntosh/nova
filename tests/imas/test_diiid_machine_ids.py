@@ -13,7 +13,9 @@ from benchmarks.diiid_ids_machine_description import (
 from nova.imas.diiid_machine_ids import (
     IDS_NAMES,
     SOURCE_PATH,
+    _primitive_leaves,
     latest_published_dd_version,
+    machine_ids_snapshot,
     round_trip_leaf_receipt,
 )
 from nova.scripts.diiid_machine_artifact import publish_diiid_machine_artifact
@@ -104,12 +106,61 @@ def test_live_export_writes_exact_native_latest_dd(tmp_path: Path):
     assert versions == {name: written_dd for name in IDS_NAMES}
 
 
+def _wiring_and_passive_leaf_count(pf_active_ids, pf_passive_ids) -> int:
+    """Count the circuit/supply/pf_passive leaves layered onto the core bundle."""
+
+    count = 0
+    for circuit in pf_active_ids.circuit:
+        count += sum(1 for _ in _primitive_leaves(circuit, ("name", "description")))
+        count += 1  # connections
+    for supply in pf_active_ids.supply:
+        count += sum(1 for _ in _primitive_leaves(supply, ("name", "description")))
+    for loop in pf_passive_ids.loop:
+        count += sum(
+            1
+            for _ in _primitive_leaves(
+                loop,
+                (
+                    "name",
+                    "description",
+                    "resistivity",
+                    "resistance",
+                    "resistance_error_lower",
+                    "resistance_error_upper",
+                ),
+            )
+        )
+        for element in loop.element:
+            count += sum(
+                1
+                for _ in _primitive_leaves(
+                    element, ("name", "description", "area", "turns_with_sign")
+                )
+            )
+            count += 3  # geometry_type, outline/r, outline/z
+    return count
+
+
 def test_published_receipt_records_repaired_identity_and_native_authoring():
     receipt_path = DEFAULT_OUTPUT.with_suffix(".receipt.json")
     receipt = json.loads(receipt_path.read_text())
 
-    assert receipt["artifact"]["round_trip"]["authored_leaf_count"] == 1550
-    assert receipt["artifact"]["round_trip"]["exact_equal"] is True
+    round_trip = receipt["artifact"]["round_trip"]
+    published_dd = receipt["native_authoring"]["target_data_dictionary"]
+    extended_ids_names = (*IDS_NAMES, "pf_passive")
+    with imas.DBEntry(DEFAULT_OUTPUT, "r", dd_version=published_dd) as database:
+        published = {
+            name: database.get(name, 0, autoconvert=False)
+            for name in extended_ids_names
+        }
+    core = machine_ids_snapshot({name: published[name] for name in IDS_NAMES})
+    authored_leaf_count = sum(len(values) for values in core.values())
+    authored_leaf_count += _wiring_and_passive_leaf_count(
+        published["pf_active"], published["pf_passive"]
+    )
+
+    assert round_trip["authored_leaf_count"] == authored_leaf_count
+    assert round_trip["exact_equal"] is True
     assert receipt["native_authoring"]["target_data_dictionary"] == (
         latest_published_dd_version()
     )

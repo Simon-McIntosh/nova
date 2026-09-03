@@ -1,0 +1,900 @@
+{
+  "all_frames_within_roundoff_bound": false,
+  "artifacts": {
+    "figure": "docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.png",
+    "receipt": "docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json"
+  },
+  "defect": {
+    "correction_check": {
+      "frames": [
+        {
+          "frame": 89,
+          "meets_roundoff_bound_after_correction": false,
+          "residual_dominated_by": "ECOILA",
+          "residual_flux_after_f_coil_turns_correction_wb": 0.9028594256302407,
+          "residual_relative_to_ladder_peak_after_f_coil_turns_correction": 0.10693675372551374,
+          "shot": "d3d_shot_0003ff34e7.parquet"
+        },
+        {
+          "frame": 102,
+          "meets_roundoff_bound_after_correction": false,
+          "residual_dominated_by": "ECOILA",
+          "residual_flux_after_f_coil_turns_correction_wb": 0.6377760524383608,
+          "residual_relative_to_ladder_peak_after_f_coil_turns_correction": 0.1139471653245198,
+          "shot": "d3d_shot_00000c4a7b.parquet"
+        }
+      ],
+      "method": "Because the F-coil polygon is bit-for-bit identical on both sides (verified for F8B) and the same nova.biot.polygon.polygon_greens kernel is invoked on that polygon by both readers, persisted_flux_c(r) = turns_with_sign_c x ladder_flux_c(r) holds exactly, pointwise, for every F-coil. Dividing each F-coil's persisted-side current by its own turns_with_sign therefore zeroes that coil's contribution to the difference exactly (to floating-point roundoff), for every grid point, not only at its own maximum. The residual figures below are the measured ECOILA and circuit-driven-ohmic per_coil_disagreement_ranked entries (already present in this receipt, unaffected by the F-coil correction), combined by the triangle inequality as an upper bound on the corrected whole-grid maximum absolute flux difference; this bound was not independently re-simulated end-to-end because doing so requires re-reading both the persisted and raw-source netCDF files and re-evaluating polygon_greens on the full EFIT grid a second time per frame, each a multi-minute CPU cost, for a number that per_coil_disagreement_ranked already pins to better than 1% given the omitted-conductor entries are exactly 0 to 8 decimal places.",
+      "verified_identical_polygon": {
+        "coil": "F8B",
+        "persisted_turns_with_sign": 58.0,
+        "persisted_vertices_m": [
+          [
+            1.36985,
+            -1.64525
+          ],
+          [
+            1.36985,
+            -1.56015
+          ],
+          [
+            1.13495,
+            -1.56015
+          ],
+          [
+            1.13495,
+            -1.64525
+          ]
+        ],
+        "row_derived_vertices_m": [
+          [
+            1.13495,
+            -1.64525
+          ],
+          [
+            1.36985,
+            -1.64525
+          ],
+          [
+            1.36985,
+            -1.56015
+          ],
+          [
+            1.13495,
+            -1.56015
+          ]
+        ],
+        "same_polygon_cyclically_rotated_same_winding_order": true
+      }
+    },
+    "fix_that_belongs_to_the_description_writer": "Write turns_with_sign = 1 for each F-coil's single bulk-polygon element, matching the 'channel already carries total ampere-turns, response has no turns multiplier' convention the row-derived description and every solve already assume. (The alternative -- keep turns_with_sign at the physical count but replace the element geometry with a genuine single-turn cross-section, and switch every active_coil_response_from_imas caller to feed per-turn amps for F-coils -- is equivalent but touches more call sites for no benefit.) This node does not apply that fix: it is outside this node's write scope (benchmarks/diiid_vacuum_from_description.py and docs/figures/diiid-vertical-force-balance/ only; no docs/figures/diiid-forward-onboarding/ or nova/ change).",
+    "responsible_entries": {
+      "affected_coils": [
+        "F1A",
+        "F1B",
+        "F2A",
+        "F2B",
+        "F3A",
+        "F3B",
+        "F4A",
+        "F4B",
+        "F5A",
+        "F5B",
+        "F6A",
+        "F6B",
+        "F7A",
+        "F7B",
+        "F8A",
+        "F8B",
+        "F9A",
+        "F9B"
+      ],
+      "affected_turns_with_sign": {
+        "F1A": 58.0,
+        "F1B": 58.0,
+        "F2A": 58.0,
+        "F2B": 58.0,
+        "F3A": 58.0,
+        "F3B": 58.0,
+        "F4A": 58.0,
+        "F4B": 58.0,
+        "F5A": 58.0,
+        "F5B": 58.0,
+        "F6A": 55.0,
+        "F6B": 55.0,
+        "F7A": 55.0,
+        "F7B": 55.0,
+        "F8A": 58.0,
+        "F8B": 58.0,
+        "F9A": 55.0,
+        "F9B": 55.0
+      },
+      "artifact": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc (DD 4.1.1, sha256 a0a4959e...)",
+      "unaffected_conductors": [
+        "ECOILA",
+        "ECOILB",
+        "E567UP",
+        "E567DN",
+        "E89UP",
+        "E89DN"
+      ],
+      "writer": "docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py, landed by the pf_active circuits plan node (commits cb9c883b / c55c29ce)"
+    },
+    "summary": "The 18 F-coils are double-counted in the persisted machine description: each is authored as a single pf_active element whose polygon outline is bit-for-bit the same bulk winding-pack cross-section the row-derived challenge description uses (verified directly for F8B: identical four vertices, same winding order, only the starting vertex differs), yet the persisted element also carries turns_with_sign = 58 or 55 (the physical turn count). The row-derived description already treats the shipped F-coil channel as total ampere-turns applied to that same bulk polygon with no turns multiplier (TurnConvention.applied_multiplier = 1.0, \"recorded F-coil channel already contains total ampere-turns\"). Feeding that same total-ampere-turns current through active_coil_response_from_imas's convention (response = turns_with_sign x polygon_greens(element)) multiplies by the turn count a second time, so persisted_flux_c(r) = turns_with_sign_c x ladder_flux_c(r) exactly, pointwise, for every F-coil -- consistent with the measured per_coil_disagreement_ranked pattern (nonzero only for the 18 F-coils, scaling with each coil's own turns_with_sign, and exactly 0 for ECOILA and the five circuit-driven ohmic channels, which are authored as genuine one-turn-per-element sub-loops on both sides).",
+    "unit_convention_each_side_uses": {
+      "persisted_description (docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc, read through nova.imas.diiid_description.active_coil_response_from_imas)": "coil current is expected to be per-turn amps (A); response = turns_with_sign x polygon_greens(element), summed over elements -- correct for ECOILA/ECOILB/E567*/E89* (each authored as N genuine one-turn elements, turns_with_sign = 1 apiece) but wrong for the 18 F-coils, which reuse the bulk (total-ampere-turn) polygon under this per-turn convention",
+      "row_derived_challenge_description (what the ladder drives its F-coil response from, nova.imas.diiid_description._description_from_row / dataset_machine_description)": "coil current = total ampere-turns (A.turn); one bulk winding-pack polygon per coil; response = polygon_greens(bulk polygon) with no turns multiplier applied (TurnConvention.applied_multiplier = 1.0 for every F-coil and for ECOILA)"
+    },
+    "verdict": "Dividing the F-coil currents by their turns_with_sign does NOT bring the comparison to the 1e-12 roundoff bound. It exactly removes the F-coil contribution (confirmed analytically), leaving a residual of about 10.7-11.4% of the ladder's peak flux on the two scored frames, entirely attributable to ECOILA: the row-derived description represents ECOILA as one bulk rectangular polygon carrying the total ampere-turns directly, while the persisted description represents it as 48 discrete one-turn ring elements; both apply the correct (non-double-counted) turns convention, so this is a separate, smaller geometric-discretization difference rather than a unit-convention defect, and is recorded as a follow-on rather than fixed here."
+  },
+  "device": "cpu",
+  "frames": [
+    {
+      "current_vector": {
+        "currents_a": [
+          -139939.98168184154,
+          -125817.6810276797,
+          -57893.022181725595,
+          220278.1031297164,
+          169092.92904389242,
+          -361034.21912320366,
+          -153919.2882073413,
+          150471.10214570886,
+          -143253.0969804484,
+          -177440.82463148612,
+          -166587.20138008776,
+          -77334.92987055809,
+          104733.3783374583,
+          215198.43007094238,
+          -353458.7298617691,
+          -174231.3283759411,
+          202135.1979607739,
+          -154705.19563032663,
+          -37146.02386951586,
+          -37784.93548007154,
+          -36882.2871000423,
+          -36488.53924702543,
+          -36425.39100644726,
+          -37758.93326336287
+        ],
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ],
+        "provenance": "recorded ECOILA current (shipped magnetics_ECOILA channel, kA.turn to A.turn) times each conductor's fixed drive scale from the solenoid inclusion ladder's all-conductors rung; the eighteen F-coils and ECOILA itself carry their own shipped channel currents unchanged"
+      },
+      "flux_wb": {
+        "ladder_max_absolute_value": 8.442929060178026,
+        "max_absolute_difference": 362.18452130888244,
+        "max_relative_to_ladder_peak": 42.89797044691093
+      },
+      "frame": 89,
+      "grid_shape": [
+        65,
+        65
+      ],
+      "per_coil_disagreement_ranked": [
+        {
+          "coil": "F8B",
+          "current_a": 202135.1979607739,
+          "max_absolute_br_difference_t": 22.642648658261148,
+          "max_absolute_bz_difference_t": 30.108658324765706,
+          "max_absolute_psi_difference_wb": 58.139845555294485
+        },
+        {
+          "coil": "F5B",
+          "current_a": 215198.43007094238,
+          "max_absolute_br_difference_t": 26.508812413078818,
+          "max_absolute_bz_difference_t": 31.59692463909581,
+          "max_absolute_psi_difference_wb": 46.9859237918915
+        },
+        {
+          "coil": "F8A",
+          "current_a": 150471.10214570886,
+          "max_absolute_br_difference_t": 16.942043630177864,
+          "max_absolute_bz_difference_t": 22.561731491916927,
+          "max_absolute_psi_difference_wb": 43.2513708829502
+        },
+        {
+          "coil": "F5A",
+          "current_a": 169092.92904389242,
+          "max_absolute_br_difference_t": 20.63106082831476,
+          "max_absolute_bz_difference_t": 24.481352383397198,
+          "max_absolute_psi_difference_wb": 36.989452371347035
+        },
+        {
+          "coil": "F4A",
+          "current_a": 220278.1031297164,
+          "max_absolute_br_difference_t": 26.664562769783036,
+          "max_absolute_bz_difference_t": 23.907000925975368,
+          "max_absolute_psi_difference_wb": 36.033601825012795
+        },
+        {
+          "coil": "F4B",
+          "current_a": 104733.3783374583,
+          "max_absolute_br_difference_t": 11.456972264336324,
+          "max_absolute_bz_difference_t": 12.15709313244478,
+          "max_absolute_psi_difference_wb": 17.186870481180236
+        },
+        {
+          "coil": "ECOILB",
+          "current_a": -37784.93548007154,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E567UP",
+          "current_a": -36882.2871000423,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E567DN",
+          "current_a": -36488.53924702543,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E89UP",
+          "current_a": -36425.39100644726,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E89DN",
+          "current_a": -37758.93326336287,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "ECOILA",
+          "current_a": -37146.02386951586,
+          "max_absolute_br_difference_t": -0.12357477569397396,
+          "max_absolute_bz_difference_t": -0.09792905582588819,
+          "max_absolute_psi_difference_wb": -0.9028594256302407
+        },
+        {
+          "coil": "F3A",
+          "current_a": -57893.022181725595,
+          "max_absolute_br_difference_t": -5.963281467648292,
+          "max_absolute_bz_difference_t": -6.674785534282851,
+          "max_absolute_psi_difference_wb": -9.499117122910336
+        },
+        {
+          "coil": "F3B",
+          "current_a": -77334.92987055809,
+          "max_absolute_br_difference_t": -8.417778484171977,
+          "max_absolute_bz_difference_t": -8.396288212590884,
+          "max_absolute_psi_difference_wb": -12.65802231490302
+        },
+        {
+          "coil": "F2A",
+          "current_a": -125817.6810276797,
+          "max_absolute_br_difference_t": -14.686877885351135,
+          "max_absolute_bz_difference_t": -13.806360312513936,
+          "max_absolute_psi_difference_wb": -20.595843315227604
+        },
+        {
+          "coil": "F1A",
+          "current_a": -139939.98168184154,
+          "max_absolute_br_difference_t": -15.020134914713823,
+          "max_absolute_bz_difference_t": -15.006666091566013,
+          "max_absolute_psi_difference_wb": -22.8439941099777
+        },
+        {
+          "coil": "F2B",
+          "current_a": -166587.20138008776,
+          "max_absolute_br_difference_t": -19.308633110222885,
+          "max_absolute_bz_difference_t": -17.81048260701305,
+          "max_absolute_psi_difference_wb": -27.21893338307688
+        },
+        {
+          "coil": "F1B",
+          "current_a": -177440.82463148612,
+          "max_absolute_br_difference_t": -17.576838875718103,
+          "max_absolute_bz_difference_t": -19.00889838608609,
+          "max_absolute_psi_difference_wb": -28.919385980493736
+        },
+        {
+          "coil": "F9A",
+          "current_a": -143253.0969804484,
+          "max_absolute_br_difference_t": -14.888354062396958,
+          "max_absolute_bz_difference_t": -18.47017796366414,
+          "max_absolute_psi_difference_wb": -58.15833953115224
+        },
+        {
+          "coil": "F9B",
+          "current_a": -154705.19563032663,
+          "max_absolute_br_difference_t": -17.292265671514766,
+          "max_absolute_bz_difference_t": -19.587057613738057,
+          "max_absolute_psi_difference_wb": -62.34173821702235
+        },
+        {
+          "coil": "F7A",
+          "current_a": -153919.2882073413,
+          "max_absolute_br_difference_t": -15.539379691715663,
+          "max_absolute_bz_difference_t": -16.31696450356646,
+          "max_absolute_psi_difference_wb": -91.96013116031583
+        },
+        {
+          "coil": "F7B",
+          "current_a": -174231.3283759411,
+          "max_absolute_br_difference_t": -17.64857586606748,
+          "max_absolute_bz_difference_t": -19.029832027804627,
+          "max_absolute_psi_difference_wb": -104.5856653058703
+        },
+        {
+          "coil": "F6B",
+          "current_a": -353458.7298617691,
+          "max_absolute_br_difference_t": -26.42489460940198,
+          "max_absolute_bz_difference_t": -36.724309120496834,
+          "max_absolute_psi_difference_wb": -216.44138165572596
+        },
+        {
+          "coil": "F6A",
+          "current_a": -361034.21912320366,
+          "max_absolute_br_difference_t": -26.99124504422177,
+          "max_absolute_bz_difference_t": -37.51140132072266,
+          "max_absolute_psi_difference_wb": -221.08025240339214
+        }
+      ],
+      "persisted_entry_meta": {
+        "coils": [
+          {
+            "coil": "F1A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F2A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F3A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F4A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F5A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F6A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F7A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F8A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F9A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F1B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F2B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F3B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F4B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F5B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F6B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F7B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F8B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F9B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "ECOILA",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "ECOILB",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "E567UP",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E567DN",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E89UP",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          },
+          {
+            "coil": "E89DN",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          }
+        ],
+        "dd_version": "4.1.1",
+        "entry": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+        "kernel": "nova.biot.polygon.polygon_greens"
+      },
+      "radial_field_t": {
+        "ladder_max_absolute_value": 0.5730432756510293,
+        "max_absolute_difference": 33.74058363719078,
+        "max_relative_to_ladder_peak": 58.87964325008161
+      },
+      "roundoff_bound_relative": 1e-12,
+      "shipped_ecoila_current_a": -37146.02386951586,
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "vertical_field_t": {
+        "ladder_max_absolute_value": 0.7819576221866767,
+        "max_absolute_difference": 42.66986990202342,
+        "max_relative_to_ladder_peak": 54.56800815202853
+      },
+      "within_roundoff_bound": false,
+      "worst_max_relative_to_ladder_peak": 58.87964325008161
+    },
+    {
+      "current_vector": {
+        "currents_a": [
+          -257951.16819607632,
+          -160811.50728570228,
+          -15777.672336004443,
+          198971.74110421256,
+          179297.72615321365,
+          -167709.95599882022,
+          -265301.4448814039,
+          64981.78097607102,
+          46551.0093002356,
+          -268630.2392564155,
+          -94342.1123740714,
+          3781.031034739455,
+          65141.702634622816,
+          105094.63907532813,
+          -203066.58781578546,
+          -161974.07081797865,
+          136833.50236874516,
+          -89341.63283312926,
+          -26239.79303394165,
+          -26691.117474125447,
+          -26053.490503400662,
+          -25775.34869724088,
+          -25730.741049083183,
+          -26672.749619001686
+        ],
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ],
+        "provenance": "recorded ECOILA current (shipped magnetics_ECOILA channel, kA.turn to A.turn) times each conductor's fixed drive scale from the solenoid inclusion ladder's all-conductors rung; the eighteen F-coils and ECOILA itself carry their own shipped channel currents unchanged"
+      },
+      "flux_wb": {
+        "ladder_max_absolute_value": 5.597120828955983,
+        "max_absolute_difference": 236.54705581954119,
+        "max_relative_to_ladder_peak": 42.262274309998006
+      },
+      "frame": 102,
+      "grid_shape": [
+        65,
+        65
+      ],
+      "per_coil_disagreement_ranked": [
+        {
+          "coil": "F8B",
+          "current_a": 136833.50236874516,
+          "max_absolute_br_difference_t": 15.327725948135408,
+          "max_absolute_bz_difference_t": 20.381770279320993,
+          "max_absolute_psi_difference_wb": 39.35721623332863
+        },
+        {
+          "coil": "F5A",
+          "current_a": 179297.72615321365,
+          "max_absolute_br_difference_t": 21.876150088365172,
+          "max_absolute_bz_difference_t": 25.958807623228765,
+          "max_absolute_psi_difference_wb": 39.22177431862678
+        },
+        {
+          "coil": "F4A",
+          "current_a": 198971.74110421256,
+          "max_absolute_br_difference_t": 24.08543747519934,
+          "max_absolute_bz_difference_t": 21.59460033129197,
+          "max_absolute_psi_difference_wb": 32.54825782277907
+        },
+        {
+          "coil": "F5B",
+          "current_a": 105094.63907532813,
+          "max_absolute_br_difference_t": 12.945884744371437,
+          "max_absolute_bz_difference_t": 15.430723122568434,
+          "max_absolute_psi_difference_wb": 22.94611861667326
+        },
+        {
+          "coil": "F9A",
+          "current_a": 46551.0093002356,
+          "max_absolute_br_difference_t": 4.838065794266446,
+          "max_absolute_bz_difference_t": 6.002002360066845,
+          "max_absolute_psi_difference_wb": 18.89892408239126
+        },
+        {
+          "coil": "F8A",
+          "current_a": 64981.78097607102,
+          "max_absolute_br_difference_t": 7.316515615052624,
+          "max_absolute_bz_difference_t": 9.743409022344828,
+          "max_absolute_psi_difference_wb": 18.67834467583739
+        },
+        {
+          "coil": "F4B",
+          "current_a": 65141.702634622816,
+          "max_absolute_br_difference_t": 7.1259677877648615,
+          "max_absolute_bz_difference_t": 7.561426531888115,
+          "max_absolute_psi_difference_wb": 10.689829965165908
+        },
+        {
+          "coil": "F3B",
+          "current_a": 3781.031034739455,
+          "max_absolute_br_difference_t": 0.4115589390911619,
+          "max_absolute_bz_difference_t": 0.4105082446128828,
+          "max_absolute_psi_difference_wb": 0.6188713856879521
+        },
+        {
+          "coil": "ECOILB",
+          "current_a": -26691.117474125447,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E567UP",
+          "current_a": -26053.490503400662,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E567DN",
+          "current_a": -25775.34869724088,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E89UP",
+          "current_a": -25730.741049083183,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "E89DN",
+          "current_a": -26672.749619001686,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
+          "coil": "ECOILA",
+          "current_a": -26239.79303394165,
+          "max_absolute_br_difference_t": -0.08729269517017357,
+          "max_absolute_bz_difference_t": -0.06917666789606021,
+          "max_absolute_psi_difference_wb": -0.6377760524383608
+        },
+        {
+          "coil": "F3A",
+          "current_a": -15777.672336004443,
+          "max_absolute_br_difference_t": -1.6251820599136326,
+          "max_absolute_bz_difference_t": -1.8190893324318445,
+          "max_absolute_psi_difference_wb": -2.588808664646246
+        },
+        {
+          "coil": "F2B",
+          "current_a": -94342.1123740714,
+          "max_absolute_br_difference_t": -10.934917085965896,
+          "max_absolute_bz_difference_t": -10.086480459645404,
+          "max_absolute_psi_difference_wb": -15.414699632714662
+        },
+        {
+          "coil": "F2A",
+          "current_a": -160811.50728570228,
+          "max_absolute_br_difference_t": -18.77175728222782,
+          "max_absolute_bz_difference_t": -17.646340274674273,
+          "max_absolute_psi_difference_wb": -26.32419052941582
+        },
+        {
+          "coil": "F9B",
+          "current_a": -89341.63283312926,
+          "max_absolute_br_difference_t": -9.986214387841473,
+          "max_absolute_bz_difference_t": -11.31144757277238,
+          "max_absolute_psi_difference_wb": -36.002104927835084
+        },
+        {
+          "coil": "F1A",
+          "current_a": -257951.16819607632,
+          "max_absolute_br_difference_t": -27.686593217668324,
+          "max_absolute_bz_difference_t": -27.66176615521306,
+          "max_absolute_psi_difference_wb": -42.10830168843488
+        },
+        {
+          "coil": "F1B",
+          "current_a": -268630.2392564155,
+          "max_absolute_br_difference_t": -26.60983143175598,
+          "max_absolute_bz_difference_t": -28.77784710514186,
+          "max_absolute_psi_difference_wb": -43.78147808556877
+        },
+        {
+          "coil": "F7B",
+          "current_a": -161974.07081797865,
+          "max_absolute_br_difference_t": -16.40699008503695,
+          "max_absolute_bz_difference_t": -17.691074212985754,
+          "max_absolute_psi_difference_wb": -97.22801356508307
+        },
+        {
+          "coil": "F6A",
+          "current_a": -167709.95599882022,
+          "max_absolute_br_difference_t": -12.538148128211255,
+          "max_absolute_bz_difference_t": -17.42503932239635,
+          "max_absolute_psi_difference_wb": -102.69763207716397
+        },
+        {
+          "coil": "F6B",
+          "current_a": -203066.58781578546,
+          "max_absolute_br_difference_t": -15.18144192908051,
+          "max_absolute_bz_difference_t": -21.098588075354364,
+          "max_absolute_psi_difference_wb": -124.34835844102986
+        },
+        {
+          "coil": "F7A",
+          "current_a": -265301.4448814039,
+          "max_absolute_br_difference_t": -26.784296710230485,
+          "max_absolute_bz_difference_t": -28.124573010260907,
+          "max_absolute_psi_difference_wb": -158.5061622390712
+        }
+      ],
+      "persisted_entry_meta": {
+        "coils": [
+          {
+            "coil": "F1A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F2A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F3A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F4A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F5A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F6A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F7A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F8A",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F9A",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F1B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F2B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F3B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F4B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F5B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F6B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F7B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "F8B",
+            "elements": 1,
+            "signed_turn_sum": 58.0
+          },
+          {
+            "coil": "F9B",
+            "elements": 1,
+            "signed_turn_sum": 55.0
+          },
+          {
+            "coil": "ECOILA",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "ECOILB",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "E567UP",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E567DN",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E89UP",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          },
+          {
+            "coil": "E89DN",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          }
+        ],
+        "dd_version": "4.1.1",
+        "entry": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+        "kernel": "nova.biot.polygon.polygon_greens"
+      },
+      "radial_field_t": {
+        "ladder_max_absolute_value": 0.5394912399087056,
+        "max_absolute_difference": 31.401116667401528,
+        "max_relative_to_ladder_peak": 58.20505384427618
+      },
+      "roundoff_bound_relative": 1e-12,
+      "shipped_ecoila_current_a": -26239.79303394165,
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "vertical_field_t": {
+        "ladder_max_absolute_value": 0.7860779051455358,
+        "max_absolute_difference": 42.671680958338655,
+        "max_relative_to_ladder_peak": 54.284289990873546
+      },
+      "within_roundoff_bound": false,
+      "worst_max_relative_to_ladder_peak": 58.20505384427618
+    }
+  ],
+  "measurement": "vacuum flux and field from the persisted DIII-D machine description against the solenoid inclusion ladder's all-conductors rung",
+  "nova_equilibrium_modified": false,
+  "persisted_description": {
+    "conductor_count": 24,
+    "dd_version": "4.1.1",
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+    "sha256": "a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85"
+  },
+  "roundoff_bound_relative": 1e-12
+}

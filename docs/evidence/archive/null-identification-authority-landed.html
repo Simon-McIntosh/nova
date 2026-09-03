@@ -103,6 +103,7 @@
         <tr><th scope="row">21985/51 pure and mixed from the bank operands</th><td>admitted axis R 0.8972 m and 0.8974 m against the R 0.90 m cluster (cell pitch 0.0606 m); the wrong wells reached 0.15 to 0.29 percent of material, the true candidate 16.7 to 17.3 percent</td></tr>
         <tr><th scope="row">Fraction bound</th><td>0.1 broke the coarse 17 by 19 referee fixture whose single correct candidate floods 2.2 percent; 0.01 sits two times below that and three to six times above the worst spurious well</td></tr>
         <tr><th scope="row">Pre-existing failures reproduced at the base</th><td>two in test_forward_operator_axes.py, one each in test_forward_operator_domain.py, test_connectivity_boundary.py and test_jax_topology.py; none attributable to the change</td></tr>
+        <tr><th scope="row">Independent CPU verification</th><td>seven solver referees 9 passed, new tests 5 passed, nine bank-facing files 103 passed with 4 failures identical at the parent base (two in test_equilibrium_forward_constrained.py on a flux_map arity, one float32 rendering in test_wall_height_exclusion.py, one numerical in test_forward_operator_tangent.py); MERGE-CANDIDATE</td></tr>
       </tbody>
     </table>
     <p>The production candidate table keeps five extrema; on the coarse 33 by 33 debug grid the true R 0.90 m
@@ -124,7 +125,8 @@
       <thead><tr><th scope="col">Check</th><th scope="col">Result</th></tr></thead>
       <tbody>
         <tr><th scope="row">tests/test_limiter_line_of_sight.py</th><td>6 passed: notch mouth flooded but not its back wall, notch narrower than one raster cell, notch flux forced more extreme than the X-point, and wall node 10 at (0.56493, 1.72808) losing line of sight from the EFIT axis on 21986/46 pure, 21989/55 pure and 21989/55 mixed</td></tr>
-        <tr><th scope="row">tests/test_connectivity_boundary.py</th><td>14 passed, 2 failed; the module's pinned behaviours all green; the two failures attributed to a pre-existing signature mismatch and to GPU contention, under independent CPU verification</td></tr>
+        <tr><th scope="row">tests/test_connectivity_boundary.py</th><td>14 passed; one failure (a 9-argument call against a 7-parameter signature) and one hang (a nineteen-amplitude sweep past 480 s on CPU) reproduce identically at the parent base 54afed8b, so neither is introduced</td></tr>
+        <tr><th scope="row">Independent CPU verification</th><td>seven solver referee node IDs 9 passed, six new tests passed; prototype a merge candidate on its own evidence</td></tr>
       </tbody>
     </table>
     <p>The flux-dependent half of the section (the four rows re-solved on the corrected read) waits on the schema-4

@@ -185,6 +185,30 @@
     flux error.</p>
   </section>
 
+  <section id="presettlement-prototype">
+    <h2>Pre-settlement incumbent-mask acceptance: the prototype</h2>
+    <p><strong>Decision:</strong> <code>presettlement-acceptance-scoring</code>, locked 2026-09-02.
+    <strong>Worktree commit:</strong> <code>fff05974</code>, held unmerged in
+    <code>.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-incumbent</code>
+    (<code>nova/equilibrium/fixed_point.py</code> +47, <code>tests/test_presettlement_incumbent_scoring.py</code> +147).
+    <code>newton_krylov(presettlement_incumbent_scoring=True)</code> carries a per-trip boolean, true on the first trip
+    and thereafter whenever the previous trip's active-set mask difference was nonzero; while it is true every
+    backtracking candidate and the incumbent are scored on the incumbent's frozen mask, and once a trip confirms no
+    mask change the induced-mask scoring of <code>a2e65fda</code> resumes. Strict decrease, best-iterate retention and
+    the own-mask referees are untouched; the default is off and bit-identical.</p>
+    <table>
+      <caption>Gate evidence, CPU, before and after the change</caption>
+      <thead><tr><th scope="col">Check</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Seven referee node IDs</th><td>9 passed before, 9 passed after, exit 0</td></tr>
+        <tr><th scope="row">tests/test_presettlement_incumbent_scoring.py</th><td>5 passed: the full Newton step refused under induced-mask scoring is accepted at rung 0 on the incumbent mask, eager and jitted, flag as bool and as traced array; default-off bit-identity; ValueError without own-mask acceptance; four-trip public-API smoke</td></tr>
+        <tr><th scope="row">tests/test_fixed_point.py</th><td>39 passed</td></tr>
+      </tbody>
+    </table>
+    <p>The measurement nodes follow on this base: the sixteen-row Solov'ev certificate and the two marginal MAST arms
+    with per-trip O, X and boundary-flux telemetry.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

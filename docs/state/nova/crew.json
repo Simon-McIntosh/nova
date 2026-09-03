@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:24:16",
+  "updated": "2026-09-03T21:27:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -312,6 +312,24 @@
         "created": "2026-09-03"
       },
       {
+        "id": "c-scr-measure-mast",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-scr-measure-solovev",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "c-scr-presettlement",
         "harness": "claude",
         "role": "implement",
@@ -324,9 +342,11 @@
         "id": "c-scr-proto-2",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "cda73918-158e-4ec1-a799-80f75fc18d56",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "cda73918-158e-4ec1-a799-80f75fc18d56"
+        },
         "created": "2026-09-03"
       },
       {
@@ -82031,9 +82051,167 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T190053966162-scr-remedy-presettlement-incumbent",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-remedy-presettlement-incumbent",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/fixed_point.py and tests/test_presettlement_incumbent_scoring.py, the seven referee tests green unmodified (log with exit 0 and passed count, run in the foreground), the behavioural test green and demonstrating on a synthetic fixture that a pre-settlement candidate refused by induced-mask scoring is accepted when it decreases the residual on the incumbent mask while a post-settlement candidate is still scored on its induced mask, the manifest written before the referee run begins and naming the exact keyword or default through which the measurement drivers reach the prototype, the prototype held unmerged in its worktree for the lead",
+          "estimated_hours": null,
+          "goal": "Prototype pre-settlement candidate scoring on the incumbent partition in nova/equilibrium/fixed_point.py: while the active-set mask is still changing, score candidate and incumbent on the incumbent's mask (the banked pre-a2e65fda behaviour), switching to induced-mask scoring once the mask has settled, with strict decrease, best-iterate retention and the own-mask referees unchanged (locked decision presettlement-acceptance-scoring, plan section 4 node 1, reuse map: _newton_krylov_inner and _backtracked_promotion in fixed_point.py, the acceptance_shadow_mask_fn plumbing at fixed_point.py lines 2176 to 2188 and 875 to 897 traced in ~/.config/reckon/crew/reports/nova/triage/boundary-flux-chain.md, the five held remedy worktrees under .reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-* as the prototype pattern)",
+          "id": "scr-remedy-presettlement-incumbent",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190053966162-scr-remedy-presettlement-incumbent/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "open",
+          "time_budget": "50m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_presettlement_incumbent_scoring.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "c-scr-proto-2",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:01:01Z",
+        "completed_at": "2026-09-03T19:26:20.182Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1510,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1519,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "4e5c5b25f35af864071ef218d961de4fd3bcae58",
+        "commits": [
+          "fff05974635f31994879d26627f6184a48be0bc5"
+        ],
+        "changed_lines": {
+          "added": 194,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider <seven referee node IDs> before and after, plus tests/test_presettlement_incumbent_scoring.py and tests/test_fixed_point.py (JAX_PLATFORMS=cpu)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190053966162-scr-remedy-presettlement-incumbent/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190053966162-scr-remedy-presettlement-incumbent/manifest.md",
+        "scope_changed": false,
+        "session_id": "cda73918-158e-4ec1-a799-80f75fc18d56",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.78,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 227218,
+            "cache_creation_input_tokens_cumulative": 227218,
+            "cache_read_input_tokens": 14040546,
+            "cache_read_input_tokens_cumulative": 14040546,
+            "inference_geo": "not_available",
+            "input_tokens": 170,
+            "input_tokens_cumulative": 170,
+            "output_tokens": 92168,
+            "output_tokens_cumulative": 92168,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.639001200000002,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.639001200000002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 84442,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 95242,
+              "log_age_seconds": 89473,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "working",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 89518,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1515.808,
+          "generated_tokens": 92168,
+          "generation_seconds": 940.626,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 24.6,
+          "machine_seconds": 575.182,
+          "peak_input_tokens": 246449,
+          "tokens_per_second": 97.99,
+          "wall_tokens_per_second": 60.8
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1444
+    "_version": 1448
   }
 }

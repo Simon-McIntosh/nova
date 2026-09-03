@@ -1,0 +1,61 @@
+{
+  "counts": {
+    "pf_active_circuits": 19,
+    "pf_active_supplies": 19,
+    "pf_passive_loops": 47,
+    "poloidal_coils": 24
+  },
+  "identity": {
+    "artifact_receipt_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_artifact.receipt.json",
+    "identity_receipt_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.receipt.json"
+  },
+  "manifest": {
+    "dd_version": "4.1.1",
+    "digest": "sha256:d4bde025df48acc5a5275c4a5a320a45cb7405da1e4256d8db526308967a713f",
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json"
+  },
+  "measurement": "DIII-D pf_active circuits and pf_passive loops regeneration",
+  "output": {
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+    "sha256": "a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85",
+    "size_bytes": 288217
+  },
+  "round_trip": {
+    "authored_leaf_count": 2256,
+    "exact_equal": true,
+    "maximum_absolute_difference": 0.0
+  },
+  "source": {
+    "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "source_dd_version": "3.41.0",
+    "target_dd_version": "4.1.1"
+  },
+  "vacuum_field_reproduction": {
+    "comparison_target": "docs/figures/current-constrained-forward-solve/inclusion-ladder/solenoid_inclusion_receipt.json (frame 89, all-conductors rung)",
+    "measured_in_this_node": false,
+    "reason": "the current-constrained forward solve that reproduces the inclusion ladder's all-conductors rung on frame 89 is owned by nova.equilibrium modules assigned to concurrent nodes in this sprint (nia-connected-stationary-points, nia-line-of-sight-limiter); this node's write scope is limited to nova/imas/diiid_description.py, nova/imas/diiid_passive.py, tests/test_diiid_pf_active_circuits.py and this figures directory, none of which can run a forward Grad-Shafranov solve",
+    "recommended_follow_up": "a separately dispatched node should build the vacuum field from this regenerated pf_active/pf_passive description (reusing nova.imas.diiid_description.active_coil_response_from_imas against the persisted diiid_machine_description.nc) and compare frame 89's X-point separation against the banked receipt"
+  },
+  "wiring": {
+    "connections_matrix_shape_ohmic": [
+      7,
+      43
+    ],
+    "f_coil_circuit_count": 18,
+    "ohmic_circuit_conductors": [
+      "ECOILA",
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "ohmic_circuit_effective_gains": [
+      2.0,
+      1.0,
+      1.0,
+      1.0456947569496173,
+      1.0456240764323717
+    ]
+  }
+}

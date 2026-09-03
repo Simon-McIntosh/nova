@@ -233,16 +233,16 @@ class PfActiveSupplyRecord:
     statement: str
 
     def validate(self) -> None:
-        if self.input_column != "magnetics_ECOILA":
-            raise DiiidDescriptionError("ohmic supply must use shipped ECOILA")
+        if not self.input_column.startswith("magnetics_"):
+            raise DiiidDescriptionError("supply must join a shipped magnetics channel")
         if self.input_unit != "kA.turn" or self.output_unit != "A.turn":
-            raise DiiidDescriptionError("ohmic supply units must preserve ampere-turns")
+            raise DiiidDescriptionError("supply units must preserve ampere-turns")
         if self.scale_to_output != 1000.0:
             raise DiiidDescriptionError(
                 "kA.turn supply conversion must be exactly 1000"
             )
         if not self.name or not self.identifier or not self.statement:
-            raise DiiidDescriptionError("ohmic supply record is incomplete")
+            raise DiiidDescriptionError("supply record is incomplete")
 
     def as_record(self) -> dict[str, Any]:
         """Return the supply as a JSON-compatible record."""
@@ -552,36 +552,33 @@ class PfActiveCircuitRecord:
     caveats: tuple[str, ...]
 
     def validate(self) -> None:
-        if self.source_conductor != "ECOILA" or self.current_unit != "A.turn":
-            raise DiiidDescriptionError(
-                "ohmic circuit source must be ECOILA ampere-turns"
-            )
+        if self.current_unit != "A.turn":
+            raise DiiidDescriptionError("circuit source must carry ampere-turns")
         drive_names = tuple(drive.conductor for drive in self.drives)
-        if drive_names != CIRCUIT_DRIVEN_CONDUCTORS:
-            raise DiiidDescriptionError(
-                "ohmic circuit drives are incomplete or unordered"
-            )
+        if len(set(drive_names)) != len(drive_names) or self.source_conductor in (
+            drive_names
+        ):
+            raise DiiidDescriptionError("circuit drives are incomplete or unordered")
+        if drive_names and drive_names != CIRCUIT_DRIVEN_CONDUCTORS:
+            raise DiiidDescriptionError("circuit drives are incomplete or unordered")
         expected_components = (
             self.supply_identifier,
             self.source_conductor,
-            *CIRCUIT_DRIVEN_CONDUCTORS,
+            *drive_names,
         )
         if self.component_order != expected_components:
-            raise DiiidDescriptionError("ohmic circuit component order is invalid")
+            raise DiiidDescriptionError("circuit component order is invalid")
         matrix = np.asarray(self.connections, dtype=int)
         component_count = len(self.component_order)
         if matrix.shape != (component_count, 2 * component_count):
-            raise DiiidDescriptionError(
-                "ohmic circuit connection matrix has wrong shape"
-            )
+            raise DiiidDescriptionError("circuit connection matrix has wrong shape")
         if not np.all((matrix == 0) | (matrix == 1)):
-            raise DiiidDescriptionError("ohmic circuit connections must be binary")
+            raise DiiidDescriptionError("circuit connections must be binary")
         if not np.all(matrix.sum(axis=0) == 1) or not np.all(matrix.sum(axis=1) == 2):
-            raise DiiidDescriptionError(
-                "ohmic circuit must form one closed series loop"
-            )
-        if not self.name or not self.identifier or len(self.caveats) < 4:
-            raise DiiidDescriptionError("ohmic circuit provenance is incomplete")
+            raise DiiidDescriptionError("circuit must form one closed series loop")
+        minimum_caveats = 4 if drive_names else 1
+        if not self.name or not self.identifier or len(self.caveats) < minimum_caveats:
+            raise DiiidDescriptionError("circuit provenance is incomplete")
         for drive in self.drives:
             drive.validate()
 
@@ -802,6 +799,160 @@ PF_ACTIVE_CIRCUIT = PfActiveCircuitRecord(
         "obtain the A.turn values consumed by the response operator",
     ),
 )
+
+
+def _f_coil_supply(name: str) -> PfActiveSupplyRecord:
+    """Return the direct one-channel supply record for one F-coil."""
+
+    return PfActiveSupplyRecord(
+        name=f"DIII-D {name} supply",
+        identifier=f"diiid_{name.lower()}_supply",
+        input_column=f"magnetics_{name}",
+        input_unit="kA.turn",
+        output_unit="A.turn",
+        scale_to_output=1000.0,
+        statement=(
+            f"logical description supply: the shipped {name} channel already "
+            "carries total ampere-turns and is converted from kiloampere-turns "
+            "exactly once; no cross-pulse scale is applied"
+        ),
+    )
+
+
+def _f_coil_circuit(name: str, supply: PfActiveSupplyRecord) -> PfActiveCircuitRecord:
+    """Return the direct supply-to-coil circuit record for one F-coil."""
+
+    return PfActiveCircuitRecord(
+        name=f"DIII-D {name} circuit",
+        identifier=f"diiid_{name.lower()}_circuit",
+        supply_identifier=supply.identifier,
+        source_conductor=name,
+        current_unit="A.turn",
+        component_order=(supply.identifier, name),
+        connections=_closed_series_connections(2),
+        drives=(),
+        provenance=(
+            f"{name} carries its own recorded competition channel; the circuit "
+            "records the direct one-supply-to-one-coil topology and applies no "
+            "fitted or cross-pulse coefficient"
+        ),
+        caveats=(
+            f"{name} current is read directly from its own shipped channel, "
+            "never derived through another conductor's circuit relation",
+        ),
+    )
+
+
+F_COIL_SUPPLIES: tuple[PfActiveSupplyRecord, ...] = tuple(
+    _f_coil_supply(name) for name in F_COILS
+)
+F_COIL_CIRCUITS: tuple[PfActiveCircuitRecord, ...] = tuple(
+    _f_coil_circuit(name, supply) for name, supply in zip(F_COILS, F_COIL_SUPPLIES)
+)
+ALL_PF_ACTIVE_SUPPLIES: tuple[PfActiveSupplyRecord, ...] = (
+    PF_ACTIVE_SUPPLY,
+    *F_COIL_SUPPLIES,
+)
+ALL_PF_ACTIVE_CIRCUITS: tuple[PfActiveCircuitRecord, ...] = (
+    PF_ACTIVE_CIRCUIT,
+    *F_COIL_CIRCUITS,
+)
+
+
+def _global_signed_connections(
+    circuit: PfActiveCircuitRecord,
+    *,
+    supply_index: Mapping[str, int],
+    coil_index: Mapping[str, int],
+    supply_count: int,
+) -> np.ndarray:
+    """Return one circuit's node-by-(supply,coil) IMAS connections matrix.
+
+    Row ``i`` places the positive terminal of component ``i`` and the negative
+    terminal of component ``i + 1`` at the same node, closing every component
+    of the circuit -- the supply and each conductor it drives -- into one
+    series loop. Columns follow the Data Dictionary convention: every shipped
+    supply first, then every shipped coil, so untouched components read zero.
+    """
+
+    def _column(component: str) -> int:
+        if component == circuit.supply_identifier:
+            return supply_index[circuit.supply_identifier]
+        return supply_count + coil_index[component]
+
+    columns = [_column(component) for component in circuit.component_order]
+    node_count = len(columns)
+    matrix = np.zeros((node_count, supply_count + len(coil_index)), dtype=int)
+    for node in range(node_count):
+        matrix[node, columns[node]] = 1
+        matrix[node, columns[(node + 1) % node_count]] = -1
+    return matrix
+
+
+def author_pf_active_circuits(
+    pf_active_ids: Any,
+    *,
+    supplies: tuple[PfActiveSupplyRecord, ...] = ALL_PF_ACTIVE_SUPPLIES,
+    circuits: tuple[PfActiveCircuitRecord, ...] = ALL_PF_ACTIVE_CIRCUITS,
+) -> dict[str, Any]:
+    """Populate ``pf_active.supply`` and ``pf_active.circuit`` in place.
+
+    ``pf_active_ids.coil`` must already carry every conductor the circuits
+    reference, in the shipped element/geometry form the machine-description
+    writer authors. Only ``name`` and ``description`` are written on supplies
+    and circuits: DD 4.1.1 carries no ``identifier`` leaf on either structure,
+    so the record identifiers stay internal bookkeeping.
+    """
+
+    for supply in supplies:
+        supply.validate()
+    for circuit in circuits:
+        circuit.validate()
+    if len(supplies) != len(set(supply.identifier for supply in supplies)):
+        raise DiiidDescriptionError("supply identifiers must be unique")
+    coil_names = tuple(str(coil.name).strip() for coil in pf_active_ids.coil)
+    coil_index = {name: index for index, name in enumerate(coil_names)}
+    supply_index = {supply.identifier: index for index, supply in enumerate(supplies)}
+    referenced = {
+        component
+        for circuit in circuits
+        for component in circuit.component_order
+        if component != circuit.supply_identifier
+    }
+    missing = sorted(referenced - set(coil_names))
+    if missing:
+        raise DiiidDescriptionError(f"circuits reference absent coils: {missing}")
+    for circuit in circuits:
+        if circuit.supply_identifier not in supply_index:
+            raise DiiidDescriptionError(f"{circuit.name} references an absent supply")
+
+    pf_active_ids.supply.resize(len(supplies))
+    for target, record in zip(pf_active_ids.supply, supplies, strict=True):
+        target.name = record.name
+        target.description = record.statement
+
+    pf_active_ids.circuit.resize(len(circuits))
+    written_connections: dict[str, np.ndarray] = {}
+    for target, record in zip(pf_active_ids.circuit, circuits, strict=True):
+        target.name = record.name
+        target.description = record.provenance
+        matrix = _global_signed_connections(
+            record,
+            supply_index=supply_index,
+            coil_index=coil_index,
+            supply_count=len(supplies),
+        )
+        target.connections = matrix
+        written_connections[record.identifier] = matrix
+
+    return {
+        "supply_count": len(supplies),
+        "circuit_count": len(circuits),
+        "coil_count": len(coil_names),
+        "coil_index": coil_index,
+        "supply_index": supply_index,
+        "connections": written_connections,
+    }
 
 
 @dataclass(frozen=True)
@@ -1382,6 +1533,8 @@ def _json_values(row: Mapping[str, Any], key: str) -> list[Any]:
 
 __all__ = [
     "ALL_CONDUCTORS",
+    "ALL_PF_ACTIVE_CIRCUITS",
+    "ALL_PF_ACTIVE_SUPPLIES",
     "DATASET_SOURCE",
     "DiiidConductor",
     "DiiidDescription",
@@ -1389,6 +1542,8 @@ __all__ = [
     "DiiidDescriptionRegistry",
     "DiiidDatasetMachineDescription",
     "F_COILS",
+    "F_COIL_CIRCUITS",
+    "F_COIL_SUPPLIES",
     "CIRCUIT_DRIVEN_CONDUCTORS",
     "CircuitFitUncertainty",
     "CircuitWiringAdjudication",
@@ -1405,6 +1560,7 @@ __all__ = [
     "WiringSystematic",
     "active_coil_response_from_imas",
     "adjudicate_circuit_wiring",
+    "author_pf_active_circuits",
     "dataset_machine_description",
     "geometry_digest",
     "section_vertices",

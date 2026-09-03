@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="diiid-vertical-force-balance-landed">
+  <meta name="plan-title" content="DIII-D vertical force balance — cumulative execution evidence">
+  <meta name="plan-summary" content="What the tared DIII-D residual already says about the missing external field, and the receipts of each node that lands: the ohmic circuits persisted in pf_active first.">
+  <meta name="plan-evidence-for" content="diiid-vertical-force-balance">
+  <meta name="plan-verifies" content="diiid-vertical-force-balance#s4">
+  <meta name="plan-informs" content="gs-absolute-accuracy-gates,diiid-forward-onboarding">
+  <title>DIII-D vertical force balance — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>DIII-D vertical force balance — cumulative execution evidence</h1>
+    <p class="lede">The plan opened on 2026-09-03 from the S19 triage. This record carries the external-field scout
+    that reframed section 2 and the receipt of each landing node. Receipt values keep their recorded precision.</p>
+  </header>
+
+  <section id="tare-scout">
+    <h2>Scout, 2026-09-03: what the tared residual already says</h2>
+    <p>Report <code>~/.config/reckon/crew/reports/nova/triage/diiid-external-field-tare.md</code>. Six landed drivers
+    tare the plasma and the coils out of the EFIT map and read the residual; none fits a coefficient.</p>
+    <table>
+      <caption>Banked residual findings on the DIII-D tare cohort</caption>
+      <thead><tr><th scope="col">Instrument</th><th scope="col">Finding</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Exact clipped-cell tare, 60 frames</th><td>interior closure residual mean 0.67 percent, max 3.78 percent of extracted current</td></tr>
+        <tr><th scope="row">Coil tare, gauge removed</th><td>dipole (first-order R, Z) mode carries 41 to 82 percent of the residual energy, mean 54.8 percent</td></tr>
+        <tr><th scope="row">Exterior patches and origin</th><td>99.56 percent of unclaimed ampere-turns explained by the label's own GS inconsistency; total falls 37.6 percent under factor-two decimation; 2 of 11 position-stable clusters, both dismissed; vessel-following structure not supported</td></tr>
+        <tr><th scope="row">Ohmic-circuit retest</th><td>ECOILB, E567DN, E89UP not recoverable from ECOILA (5.4 to 7.3 percent of peak); E567UP and E89DN within 1 percent</td></tr>
+        <tr><th scope="row">Solenoid inclusion ladder</th><td>frame 89 X-point separation 2.540 m to 0.004 m with all five conductors; frame 102 non-monotonic (0.453 to 0.157 m after ECOILB alone, back to 0.452 m with the pairs)</td></tr>
+      </tbody>
+    </table>
+    <p>The shipped description carried eighteen F-coils and ECOILA; the five ohmic channels had geometry in the netCDF
+    description but entered a solve only when a driver appended them, and their corpus currents are the same-frame
+    ECOILA value times fixed cross-pulse scales measured on one netCDF pulse. The lead admitted them on 2026-09-03
+    (decision <code>ohmic-proxy-currents-admissible</code>) as wired circuits under the rule that no unphysical
+    external constraint is ever enforced.</p>
+  </section>
+
+  <section id="pf-active-circuits">
+    <h2>§4 — The ohmic circuits persisted in pf_active, the vessel in pf_passive</h2>
+    <p><strong>Commits:</strong> worker <code>cb9c883b</code> (description and writer, regeneration script, test, DD
+    validation report) and <code>c4a6dd55</code> (the receipt leaf-count assertion derived from the artifact), merged
+    together; independent review MERGE on nine criteria
+    (<code>~/.config/reckon/crew/reports/nova/dvf-pf-active-circuits-review.md</code>).</p>
+    <table>
+      <caption>Regenerated docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc (DD 4.1.1)</caption>
+      <thead><tr><th scope="col">Content</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">pf_active coils</th><td>24 poloidal (18 F-coils, ECOILA, ECOILB, E567UP, E567DN, E89UP, E89DN), all outline geometry, turns from the netCDF description</td></tr>
+        <tr><th scope="row">pf_active circuits</th><td>19: one ohmic seven-node circuit wiring the ECOILA supply to the six ohmic coils with the recorded gains 2.0, 1.0, 1.0, 1.0456947569496173, 1.0456240764323717; eighteen direct one-supply-to-one-coil F-coil circuits</td></tr>
+        <tr><th scope="row">pf_active supplies</th><td>19, kA.turn to A.turn scale 1000</td></tr>
+        <tr><th scope="row">pf_passive loops</th><td>47 wall-following loops from the passive description</td></tr>
+        <tr><th scope="row">Round trip through imas-python</th><td>2256 authored leaves, exact, maximum absolute difference 0.0</td></tr>
+        <tr><th scope="row">Data Dictionary validation</th><td>23 of 23 written pf_active and pf_passive paths found at DD major 4 (dd_path_validation.report.json)</td></tr>
+        <tr><th scope="row">Tests</th><td>tests/test_diiid_pf_active_circuits.py with the description and passive tests 40 passed; the four DIII-D artifact test files 37 passed after the leaf-count repair</td></tr>
+      </tbody>
+    </table>
+    <p>Not yet measured: the vacuum field built from the persisted description against the inclusion ladder's
+    all-conductors rung on frame 89, which the next node records. One skip-gated test
+    (<code>tests/imas/test_diiid_repaired_machine_artifact.py</code>) still carries the literal 1550 and is repaired
+    when the authoritative netCDF source is mounted.</p>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record</h2>
+    <ul>
+      <li>§1 (axis decomposition), §2 (per-frame residual decomposition with the vertical-field conversion) and §3
+      (frame 144 and the single-shot gate) are not yet dispatched.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

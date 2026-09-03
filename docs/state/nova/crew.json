@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T23:23:38",
+  "updated": "2026-09-03T23:50:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -375,6 +375,15 @@
         "sessions": {
           "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "4782c4e8-9a64-4824-a001-ece647b90a3f"
         },
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-nia-bank",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-03"
       },
       {
@@ -83797,6 +83806,198 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T204023896859-dvf-vacuum-field-reproduction",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a74",
+        "node": "dvf-vacuum-field-reproduction",
+        "node_definition": {
+          "done_when": "Receipt docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json plus one figure stating, for frame 89 and at least one more ladder frame, the maximum absolute and relative difference between the persisted-description vacuum flux and field and the ladder's all-conductors rung, the per-coil current vector used with its provenance (recorded ECOILA times the circuit gain), a roundoff verdict against a stated bound (1e-12 relative, anything larger named as a defect with the coil responsible), driver benchmarks/diiid_vacuum_from_description.py committed with a conventional subject and body, no nova/ change, computed on CPU with the manifest written before the run",
+          "estimated_hours": null,
+          "goal": "Measure whether the vacuum field built from the persisted DIII-D description (docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc with its 24 pf_active coils and 19 circuits, merged at c55c29ce) reproduces the solenoid inclusion ladder's all-conductors rung on frame 89 to roundoff, by driving the persisted coils and circuits with that rung's recorded currents and comparing the poloidal flux and field on the ladder's grid against docs/figures/current-constrained-forward-solve/inclusion-ladder/solenoid_inclusion_receipt.json (plan section 4 closing measure, reuse map: nova.imas.diiid_description.active_coil_response_from_imas and the response construction the ladder driver benchmarks/diiid_solenoid_inclusion_ladder.py uses for its all-conductors rung, the circuit gains recorded in the new pf_active circuits)",
+          "id": "dvf-vacuum-field-reproduction",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T204023896859-dvf-vacuum-field-reproduction/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/diiid_vacuum_from_description.py",
+            "docs/figures/diiid-vertical-force-balance/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "c-dvf-vacuum",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T20:40:32Z",
+        "completed_at": "2026-09-03T21:24:51.280Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2649,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2659,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "2c172521c3bd16b0228dd2d1cd7995bffb886f47",
+        "commits": [
+          "34b647df497551c2799b57c8c08a9a90522a3801"
+        ],
+        "changed_lines": {
+          "added": 1372,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "benchmarks/diiid_vacuum_from_description.py on CPU against the inclusion ladder's all-conductors rung, frames 89 and 102",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T204023896859-dvf-vacuum-field-reproduction/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T204023896859-dvf-vacuum-field-reproduction/manifest.md",
+        "scope_changed": false,
+        "session_id": "a3a753a7-9362-467e-82a4-26fd16cf16bc",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 40536,
+            "cache_creation_input_tokens_cumulative": 40536,
+            "cache_read_input_tokens": 3722689,
+            "cache_read_input_tokens_cumulative": 3722689,
+            "inference_geo": "not_available",
+            "input_tokens": 34,
+            "input_tokens_cumulative": 34,
+            "output_tokens": 24257,
+            "output_tokens_cumulative": 24257,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.1493198,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.1493198
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 90413,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 101213,
+              "log_age_seconds": 95443,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 95489,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the H200 capture job 1262181 has not completed within this node's 60-minute time fence; and its current single-combination progress (44.5s allocation+carrier setup; then >24 minutes with no solve-finish) makes it very unlikely to complete the remaining ~7 solve_arm combinations before the SLURM job's own 3-hour cap either; without a design change to the driver's per-trip state-recovery method. Resume path for a subsequent dispatch: (1) `squeue -j 1262181` / `sacct -j 1262181 --format=JobID; State; ExitCode; Elapsed`; (2) read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/logs/h200-capture.log for EXIT_MARKER and progress (grep 'STAGE\\|HEARTBEAT' \u2014 heartbeats alone with no advancing STAGE lines mean it is still stuck on the same combination); (3) if EXIT_MARKER=0 in that log; the raw capture JSON is at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/raw-presettlement-mast.json \u2014 run; from a worktree carrying benchmarks/acceptance_presettlement_remedy.py (this file; unmodified): `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <that raw path> --referee-log <a referee log> --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; which writes docs/figures/solver-convergence-regression/remedy-presettlement/mast/{remedy-presettlement.json; remedy-presettlement.png}; then commit benchmarks/acceptance_presettlement_remedy.py plus those two files with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer before considering the node done); (4) if the job is still running past its own 3-hour cap or fails; the driver needs the redesign described under follow_ons before resubmitting; since resubmitting unchanged will very likely repeat the same multi-hour stall.",
+              "elapsed_seconds": 3137,
+              "log_age_seconds": 2271,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (driver is uncommitted in this worktree; committing an unvalidated driver before the H200 measurement it exists to produce is against the node's own evidence gate",
+                "which requires the receipt to exist first)"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 2282,
+              "terminal_at": "2026-09-03T20:02:25Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 311.403,
+          "generated_tokens": 24257,
+          "generation_seconds": 303.029,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 24.0,
+          "machine_seconds": 8.374,
+          "peak_input_tokens": 240194,
+          "tokens_per_second": 80.05,
+          "wall_tokens_per_second": 77.9
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -83815,6 +84016,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1480
+    "_version": 1482
   }
 }

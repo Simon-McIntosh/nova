@@ -23,10 +23,10 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-03">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
-<meta name="plan-commits" content="72ed7f60,ebc4371d">
-<meta name="plan-impl" content="0.3">
+<meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
 <main class="plan-doc">
@@ -110,6 +110,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260903T231600000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T23:16:00+02:00">
     <div class="r-comment-body">VERIFIED (nia-admission-verification, CPU lane, report ~/.config/reckon/crew/reports/nova/nia-admission-verification.md with one log per file): at ebc4371d the seven solver referee node IDs 9 passed, tests/test_stationary_point_admission.py 5 passed, and the nine bank-facing files 103 passed with 4 failed; all four failures reproduce byte-for-byte at the parent base 54afed8b in an isolated worktree and none is introduced by the prototype; no previously passing test turned red and none turned green. VERDICT MERGE-CANDIDATE for the lead. THE FOUR PRE-EXISTING RED TESTS ON MAIN with their likely owners: tests/test_equilibrium_forward_constrained.py::test_absent_target_delegates_to_the_ordinary_operator_path (flux_map() takes 3 positional arguments but 4 were given) and ::test_public_map_enforces_the_exact_declared_current, both plausibly the prescribed_current keyword landed on forward-solve-api section 5 (6af77248) reaching flux_map with one more positional argument than the test's stub accepts (owner forward-solve-api, repair node dispatched); tests/test_wall_height_exclusion.py::test_opt_in_eligibility_reporting_names_each_side_and_disqualifier fails on a float32 rendering of ambiguity_threshold 0.0236 (owner this plan's section 5); tests/test_forward_operator_tangent.py::test_symmetric_null_fit_has_finite_exact_residual_action fails with 0.99999964 against 1e-6, a numerical failure of the symmetric null fit's tangent that needs its own investigation (owner this plan's section 5). None is folded into the prototype.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260903T235100000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T23:51:00+02:00">
+    <div class="r-comment-body">MERGED on the lead's decision 2026-09-03 23:25 (merge both now, then regenerate the bank): the connected stationary-point admission ebc4371d at f4a1b9b5 and the line-of-sight limiter 72ed7f60 at b2a7a046 are on main. The closing measure of sections 2 and 3 is dispatched as nia-bank-regeneration-corrected-read on base b2a7a046 (H200, 120-minute fence by explicit override because one job is the unit): the twelve-row bank regenerated through the exact producer with a nova axis field banked per row, a per-row change table against the 8678047a bank (axis, saddle, binding limiter point, boundary flux, class against EFIT, trip-1 mask difference, terminal residual, trips, termination), the twelve overlay panels regenerated, the focused-suite constants re-baselined only where partitions moved and stated per constant, referees green. Expected: 21985/51 axes at R about 0.90 m, the four 21986/46 and 21989/55 rows no longer binding wall node 10 with their class and axis qualification stated, the eight agreeing rows unchanged or every change quantified. impl 0.4.</div>
 </div>
 </section>
 </main>

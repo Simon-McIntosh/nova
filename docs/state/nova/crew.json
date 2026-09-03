@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:44:04",
+  "updated": "2026-09-03T21:48:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -142,6 +142,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-24"
+      },
+      {
+        "id": "c-dvf-pf-active",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "c-fsa-bitwise",
@@ -82255,6 +82264,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1458
+    "_version": 1459
   }
 }

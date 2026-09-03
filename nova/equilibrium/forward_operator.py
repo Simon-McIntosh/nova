@@ -413,6 +413,14 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        material_flag = np.asarray(self.inside_material, dtype=bool)
+        grid_coordinate_host = np.asarray(self.grid.coordinate, dtype=np.float64)
+        centroid = (
+            grid_coordinate_host[material_flag].mean(axis=0)
+            if material_flag.any()
+            else grid_coordinate_host.mean(axis=0)
+        )
+        self._material_centroid = jnp.asarray(centroid, dtype=jnp.float64)
         polygons = (
             self.moment_geometry.polygons
             if self.moment_geometry is not None
@@ -560,15 +568,32 @@ class ForwardFluxOperator:
         """Return the owning axis cell and the material mask used by its flood."""
         return axis_cell_seed(self.grid.coordinate, axis, self.inside_material)
 
+    def _independent_rescue_axis(self, vmap_o) -> jax.Array:
+        """Return the raw O extremum nearest the material centroid.
+
+        Chosen from the un-ranked, un-qualified candidate table by proximity
+        to a fixed geometric prior alone, so it carries no dependence on
+        which candidate the first admission pass ranked highest. Widening
+        material by this candidate's own cell can therefore only ever help
+        the same candidate a correct first pass already selected, never
+        substitute a different one in its place.
+        """
+        distance2 = jnp.sum((vmap_o[:, :2] - self._material_centroid) ** 2, axis=1)
+        distance2 = jnp.where(jnp.isfinite(vmap_o[:, 0]), distance2, jnp.inf)
+        return vmap_o[jnp.argmin(distance2), :2]
+
     def _fixed_design_read(self, physical, requested_class=None):
-        """Read topology data after admitting the continuous-axis owner."""
+        """Read topology data after admitting a centroid-nearest rescue cell."""
         initial = self._fixed_design_topology.read_qualification(
             physical,
             self.polarity,
             self.inside_material,
             requested_class,
         )
-        _seed, material = self.connectivity_axis_seed(initial.state.axis)
+        grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)
+        vmap_o, _vmap_x = self._fixed_design_topology.grid(grid_flux)
+        rescue_axis = self._independent_rescue_axis(vmap_o)
+        _seed, material = self.connectivity_axis_seed(rescue_axis)
         result = self._fixed_design_topology.read_qualification(
             physical,
             self.polarity,

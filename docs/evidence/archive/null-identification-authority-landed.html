@@ -34,7 +34,7 @@
       <caption>Mechanism classes across the MAST bank, the Solov'ev certificate, the DIII-D frames and the hex reference logs</caption>
       <thead><tr><th scope="col">Mechanism</th><th scope="col">Cases</th><th scope="col">Worst</th><th scope="col">Status</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Disjoint axis (O-point outside the plasma)</th><td>2 (21985/51 pure and mixed)</td><td>axis at R 0.374 m, Z −1.921 m on a solve converged to 2.8e-16</td><td>measured from the bank operands; mechanism scout in flight</td></tr>
+        <tr><th scope="row">Disjoint axis (O-point outside the plasma)</th><td>2 (21985/51 pure and mixed)</td><td>axis at R 0.374 m, Z −1.921 m on a solve converged to 2.8e-16</td><td>traced: self-referential connectivity gate and a flux-only argmax admit a coil-adjacent well</td></tr>
         <tr><th scope="row">Limiter-point capture</th><td>3 (21986/46 pure, 21989/55 pure and mixed)</td><td>binding point 631 mm from EFIT's X-point</td><td>traced: raster reachability with no line of sight on a re-entrant wall notch</td></tr>
         <tr><th scope="row">Axis admission failure</th><td>3 (21986/46 mixed; Solov'ev diverted at 136 and 342 cells)</td><td>no coordinate at all, one at residual 2.4e-15</td><td>traced: empty pass one seeds pass two at an arbitrary cell; candidate table capped at five</td></tr>
         <tr><th scope="row">Resolution-limited read</th><td>17</td><td>143.7 mm axis error (Solov'ev diverted, 551 cells)</td><td>precision tracks distance from the residual tolerance</td></tr>
@@ -71,6 +71,14 @@
       extrema and truncates silently; nothing penalises a qualified extremum far from the plasma. The exact side
       of the certificate runs the same reader and falls back to closed-form values under a different status
       when it fails, so its status alternates with the hex layout of each resolution.</li>
+      <li><strong>Disjoint axis.</strong> O-point selection is a pure flux argmax over candidates whose
+      qualification is self-referential: each candidate's own cell is forced into the material mask it is tested
+      against and the flood is seeded there, so any extremum inside the vessel qualifies; the second admission pass
+      seeds at the first pass's winner and confirms it. On 21985/51 a coil-adjacent well an order of magnitude
+      deeper than the boundary flux wins on both arms, and the Newton residual converges around it because nothing
+      in the residual or the class margin validates the axis. Rule: connectivity to the plasma's confined component
+      tested against the original mask with a size floor, ranking only among connected candidates, and a second pass
+      that can rescue but never change the winner.</li>
       <li><strong>Boundary flux chain.</strong> Twenty hops from candidates to the residual mask; the 38 to 29 and
       31 to 29 trip-1 mask moves at <code>260a8b44</code> are the wall-height shadow's X-candidate source switching
       from the raster read to the census read.</li>
@@ -80,7 +88,7 @@
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>The disjoint-axis ranking rule (scout in flight) and its fix are §1 and §2 work; the line-of-sight limiter
+      <li>The disjoint-axis admission fix is §2 work beside the X-point containment; the line-of-sight limiter
       rule is §3; the admission repairs and the joint qualification are §4; the hardening tests are §5.</li>
       <li>Codex is out of quota until 8 September; every node runs on the claude backend.</li>
     </ul>

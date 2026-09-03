@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:14:18",
+  "updated": "2026-09-03T21:24:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -168,6 +168,17 @@
         "session_id": null,
         "session_model": null,
         "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-inv-axis-disjoint",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": "6269db67-2d7b-4dc0-9f93-d2e602ae7e3c",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "6269db67-2d7b-4dc0-9f93-d2e602ae7e3c"
+        },
         "created": "2026-09-03"
       },
       {
@@ -81869,9 +81880,160 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T191543164094-nia-axis-disjoint-mechanism",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-axis-disjoint-mechanism",
+        "node_definition": {
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/axis-disjoint-mechanism.md with the ranked O candidates for arm_04 and arm_05 where recoverable from the operands or the code (position, flux, qualified flag, connectivity component size), the exact rule that let the off-plasma extremum outscore the true axis stated with file:line, whether the chosen point is a private-flux or centre-column extremum disconnected from the plasma's confined region, why the mixed arm still converged and read diverted with that axis, the same check on the other ten rows (all near R 0.90 m) to show the rule's failure is specific to this shot's flux structure, and the admission rule Nova should apply (connectivity to the plasma's confined component, not a flux ranking over every finite extremum) with the test cases that would pin it",
+          "estimated_hours": null,
+          "goal": "Root-cause why the regenerated MAST bank places the magnetic axis outside the plasma on both 21985/51 arms (pure arm_04 axis at R 0.202 m Z 0.988 m while the flux map's plasma centre sits near R 0.90 m, mixed arm_05 axis at R 0.374 m Z minus 1.921 m on a solve that converged to 2.8e-16, both saddles read within 33 mm of EFIT) while the other ten rows place it near R 0.90 m, tracing the O candidate table (nova/biot/null.py Null2D, maxsize 5), qualified_o_candidates and o_point_qualification and o_point_index in nova/equilibrium/topology.py, the two-pass admission in nova/equilibrium/forward_operator.py _fixed_design_read, and the per-row operands (arm_04 and arm_05 axis, selected_saddle, per-cell flux and domain labels) in /home/ITER/mcintos/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/current-operands.npz and docs/figures/topology-visual-corroboration/mast-topology-operands.npz, with the overlay panels for 21985/51 under docs/figures/solver-convergence-regression/bank-efit-overlays/",
+          "id": "nia-axis-disjoint-mechanism",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191543164094-nia-axis-disjoint-mechanism/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/axis-disjoint-mechanism.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "c-inv-axis-disjoint",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T19:15:50Z",
+        "completed_at": "2026-09-03T19:22:10.955Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 374,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 380,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5e05f18b8126325f10f74c9d6fc7b5c0a67d2172",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "scoping report written to /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/axis-disjoint-mechanism.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/axis-disjoint-mechanism.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191543164094-nia-axis-disjoint-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "6269db67-2d7b-4dc0-9f93-d2e602ae7e3c",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.77,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 131842,
+            "cache_creation_input_tokens_cumulative": 131842,
+            "cache_read_input_tokens": 2049863,
+            "cache_read_input_tokens_cumulative": 2049863,
+            "inference_geo": "not_available",
+            "input_tokens": 38,
+            "input_tokens_cumulative": 38,
+            "output_tokens": 30606,
+            "output_tokens_cumulative": 30606,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.2434766,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.2434766
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 85331,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 96131,
+              "log_age_seconds": 90362,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "working",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 90407,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 377.798,
+          "generated_tokens": 30606,
+          "generation_seconds": 362.306,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 15.1,
+          "machine_seconds": 15.492,
+          "peak_input_tokens": 151073,
+          "tokens_per_second": 84.48,
+          "wall_tokens_per_second": 81.01
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1441
+    "_version": 1444
   }
 }

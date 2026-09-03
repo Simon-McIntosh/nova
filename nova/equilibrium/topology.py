@@ -15,6 +15,7 @@ from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.connectivity_boundary import (
     _PRE_SADDLE_OFFSET_FRACTION,
     _canonicalize_reciprocal_hex_edges,
+    _points_inside_polygon,
     _raster_hex_partition_geometry,
 )
 from nova.equilibrium.domain import (
@@ -28,6 +29,20 @@ from nova.equilibrium.flux_surface_connectivity import (
 )
 from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
+
+_MATERIAL_CONNECTED_FRACTION = 0.01
+"""Minimum share of the material grid an O candidate's component must reach.
+
+A candidate confined to a private well beside a coil or limiter can flood a
+handful of cells regardless of grid resolution; a genuinely confined region
+reaches a share of the material grid that scales with it. On production MAST
+operands a spurious private-well candidate's component reaches a few tenths
+of a percent of the material cell count while the true confined region
+reaches several times ten percent, so one percent sits with wide margin on
+both sides. Requiring the flood to reach this fraction of ``inside_material``
+(rather than merely touching it once) is what keeps a private well from
+qualifying as if it were the confined region.
+"""
 
 
 class TopologyState(NamedTuple):
@@ -333,10 +348,21 @@ class Topology(Pytree):
 
     @jax.jit
     def x_point_index(self, vmap_x, polarity, o_psi):
-        """Return index of primary x-point."""
+        """Return index of primary x-point.
+
+        A candidate outside the wall polygon is excluded before the flux
+        ranking runs, so a private-flux or coil-adjacent saddle that scores
+        higher than the true separatrix on raw flux never wins by default.
+        """
         x_psi = vmap_x[:, 2]
+        inside_wall = _points_inside_polygon(
+            vmap_x[:, 0],
+            vmap_x[:, 1],
+            self.wall.coordinate[:, 0],
+            self.wall.coordinate[:, 1],
+        )
         score = jnp.asarray(polarity * (x_psi - o_psi), dtype=self.grid.fit_dtype)
-        return jnp.nanargmax(score)
+        return jnp.nanargmax(jnp.where(inside_wall, score, -jnp.inf))
 
     @jax.jit
     def x_point_data(self, vmap_x, polarity, o_psi):
@@ -606,14 +632,34 @@ class Topology(Pytree):
     def qualified_o_candidates(
         self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material
     ):
-        """Return O candidates that own a resolved material component."""
+        """Return O candidates whose flood reaches the confined material.
+
+        Every finite candidate's owning cell is admitted into one shared seed
+        mask up front, uniformly, before any candidate is tested — no
+        candidate buys its own admission by being the one under test. The
+        flood is grown through that shared mask (so a genuinely confined but
+        wall-trimmed candidate can still seed), but the qualification test
+        itself intersects the resulting component with the original,
+        un-widened ``inside_material`` and requires that intersection to
+        reach :data:`_MATERIAL_CONNECTED_FRACTION` of its cell count — a
+        private well beside a coil cannot flood a comparable share of the
+        material grid regardless of how deep its own flux extremum is.
+        """
         coordinate = self.grid.coordinate
+        finite_o = jnp.isfinite(vmap_o[:, 0])
+        owner_index = jax.vmap(
+            lambda position: jnp.argmin(jnp.sum((coordinate - position) ** 2, axis=1))
+        )(vmap_o[:, :2])
+        seedable = (
+            jnp.zeros(coordinate.shape[0], dtype=bool).at[owner_index].max(finite_o)
+        )
+        seed_material = inside_material | seedable
+        material_cell_count = jnp.sum(inside_material)
+        connection_floor = _MATERIAL_CONNECTED_FRACTION * jnp.maximum(
+            material_cell_count, 1
+        )
 
         def qualify(data_o):
-            distance2 = jnp.sum((coordinate - data_o[:2]) ** 2, axis=1)
-            owner_index = jnp.argmin(distance2)
-            owner = jnp.arange(coordinate.shape[0]) == owner_index
-            admitted_material = inside_material | owner
             data_x = self.x_point_data(vmap_x, polarity, data_o[2])
             data_b = self.boundary(data_o, vmap_x, data_w, polarity)
             closed = self.psi_mask(polarity, psi_grid, data_b[2])
@@ -623,19 +669,14 @@ class Topology(Pytree):
                 data_o[2],
                 data_o[:2],
                 closed,
-                admitted_material,
+                seed_material,
                 jnp.equal(data_b[2], data_x[2]),
                 data_x[:2],
             )
-            component_size = jnp.sum(component)
-            governed_connection = jnp.any(component & inside_material)
+            governed_size = jnp.sum(component & inside_material)
+            governed_connection = governed_size >= connection_floor
             resolved = jnp.all(jnp.isfinite(data_b[:3]))
-            return (
-                jnp.all(jnp.isfinite(data_o[:3]))
-                & resolved
-                & governed_connection
-                & (component_size > 1)
-            )
+            return jnp.all(jnp.isfinite(data_o[:3])) & resolved & governed_connection
 
         return jax.vmap(qualify)(vmap_o)
 

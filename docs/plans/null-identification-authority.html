@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-03">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="6">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,8 +57,17 @@
 <div class="r-comment" data-section="s1" data-id="c-20260903T190800000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T21:08:00+02:00">
     <div class="r-comment-body">LEAD MANDATE 2026-09-03 20:58: a proper investigation into the misplaced stationary points. If Nova cannot place the plasma O-point and the primary X-point, nor identify non-shadowed limiter points correctly and consistently, there is no hope of landing a robust and fast forward GS solver. Three read-only scoping nodes dispatched on the claude backend (authorised restart of the fleet): nia-stationary-point-census (section 1; the consolidated census of every banked misplacement across the MAST bank, the Solov'ev certificate, the DIII-D frames, the hex reference tests and the shadow-score receipt, by mechanism class, plus the preregistered banking design), nia-limiter-point-selection (section 3; the binding-limiter-point and wall-shadow rule trace and why 21986/46 and 21989/55 bind the upper-wall point near R 0.565 Z 1.77, with the non-shadowed limiter rule stated and its test cases), nia-oracle-axis-admission (section 4; why the exact diverted oracle admits no axis at 136 and 342 cells and misplaces it by 143.7 mm at 551, with the cheapest CPU reproduction). Their reports land under ~/.config/reckon/crew/reports/nova/triage/ and become this plan's node briefs; the implementation nodes follow in section order once the reports are read.</div>
 </div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260903T190401117728-nia-stationary-point-census" data-who="c-inv-stationary-census" data-when="2026-09-03T19:11:54.806Z">
+    <div class="r-comment-body"><p>census by mechanism: limiter capture 3 rows (binding point 631 mm from EFIT X), axis admission failure 3 (one at machine-precision residual), resolution-limited read 17, containment and polish unguarded with no diagnostic trace; no O-point banked in the MAST corroboration; preregistered banking design with a joint qualification flag</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20260903T191200000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T21:12:00+02:00">
     <div class="r-comment-body">LEAD READING OF THE OVERLAYS 2026-09-03 21:10 (docs/evidence/mast-bank-efit-overlays.html, panels 21986/46 pure, 21989/55 pure, 21989/55 mixed): the rows where the dark-blue Nova binding contour is much smaller than the EFIT LCFS are limiter identification errors, most likely limiter points selected from private regions topologically disconnected from the plasma O-point. This is MAST work, not only DIII-D. MECHANISM TO TEST FIRST: the binding wall point is a wall node lying in a private-flux region (behind a divertor plate or beyond an X-point) whose flux is the most confined of all wall nodes, so the height-band shadow test lets it bind and the closed region shrinks to the small ellipse the overlays show, with the axis still correctly placed. THE RULE THE LEAD IMPLIES: a limiter point is admissible only if it is topologically connected to the O-point's confined region, that is the wall node is reached by the axis-connected flood without crossing an X-point separatrix, and every wall node in the private-flux region of any admitted X-point is shadowed regardless of its flux value or height. Non-shadowed limiter identification is a connectivity test, not a height band. The running node nia-limiter-point-selection tests this mechanism against the three rows' competing binding-point fluxes; section 3's implementation then replaces the height-band predicate with the connectivity rule and re-solves the four rows, with the overlay panels regenerated so the Nova binding contour is judged against the EFIT LCFS on every row.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260903T190429395996-nia-limiter-point-selection" data-who="c-inv-limiter-point" data-when="2026-09-03T19:11:27.269Z">
+    <div class="r-comment-body"><p>class comes from the connectivity classifier, not the height band: the wall-limiter test is nearest-raster-cell reachability on a 96x18 raster with no line-of-sight check and class_wall_shadowed is computed then discarded; all three rows bind wall node 10 at (0.5649, 1.7281), the back wall of a re-entrant upper notch EFIT's LCFS never touches; verdict containment gap exposed by nonconvergence; rule: reachable AND line-of-sight</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260903T190502681048-nia-oracle-axis-admission" data-who="c-inv-oracle-axis" data-when="2026-09-03T19:11:37.068Z">
+    <div class="r-comment-body"><p>136-cell diverted oracle fails on both the converged numeric field and the exact field (stencil or connectivity, no candidate qualifies); o_point_index returns index 0 when nothing qualifies so the second pass seeds an arbitrary cell; Null2D maxsize 5 truncates silently; 551 cells admits a spurious extremum 143.7 mm off; exact-side fallback is scoped to one case; reproduction is the -110 rung on CPU</p></div>
 </div>
 </section>
 </main>

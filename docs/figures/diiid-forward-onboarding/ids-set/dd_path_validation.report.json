@@ -1,0 +1,37 @@
+{
+  "measurement": "DD path validation for every pf_active and pf_passive path this node wrote",
+  "tool": "mcp__imas-dd__check_dd_paths",
+  "manifest_dd_pin": "4.1.1",
+  "checked_dd_major": 4,
+  "summary": {
+    "checked": 23,
+    "found": 23,
+    "not_found": 0
+  },
+  "paths": [
+    {"path": "pf_active/coil/name", "verdict": "found", "type": "STR_0D", "note": "unchanged existing entry; carried for naming comparison"},
+    {"path": "pf_active/coil/element/geometry/geometry_type", "verdict": "found", "type": "INT_0D"},
+    {"path": "pf_active/coil/element/geometry/outline/r", "verdict": "found", "type": "FLT_1D", "units": "m"},
+    {"path": "pf_active/coil/element/geometry/outline/z", "verdict": "found", "type": "FLT_1D", "units": "m"},
+    {"path": "pf_active/coil/element/turns_with_sign", "verdict": "found", "type": "FLT_0D"},
+    {"path": "pf_active/circuit/name", "verdict": "found", "type": "STR_0D", "note": "written for the ohmic circuit and all 18 F-coil circuits"},
+    {"path": "pf_active/circuit/description", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_active/circuit/connections", "verdict": "found", "type": "INT_2D", "note": "node-by-(supply,coil) signed connections matrix, per Data Dictionary convention"},
+    {"path": "pf_active/supply/name", "verdict": "found", "type": "STR_0D", "note": "written for the ECOILA ohmic supply and all 18 F-coil supplies"},
+    {"path": "pf_active/supply/description", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_passive/loop/name", "verdict": "found", "type": "STR_0D", "note": "written for all 47 wall-following loops"},
+    {"path": "pf_passive/loop/description", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_passive/loop/resistivity", "verdict": "found", "type": "FLT_0D", "units": "m.ohm", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/resistance", "verdict": "found", "type": "FLT_0D", "units": "ohm", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/resistance_error_lower", "verdict": "found", "type": "FLT_0D", "units": "ohm"},
+    {"path": "pf_passive/loop/resistance_error_upper", "verdict": "found", "type": "FLT_0D", "units": "ohm"},
+    {"path": "pf_passive/loop/element/name", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_passive/loop/element/description", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_passive/loop/element/area", "verdict": "found", "type": "FLT_0D", "units": "m^2", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/element/turns_with_sign", "verdict": "found", "type": "FLT_0D", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/element/geometry/geometry_type", "verdict": "found", "type": "INT_0D", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/element/geometry/outline/r", "verdict": "found", "type": "FLT_1D", "units": "m", "lifecycle": "alpha"},
+    {"path": "pf_passive/loop/element/geometry/outline/z", "verdict": "found", "type": "FLT_1D", "units": "m", "lifecycle": "alpha"}
+  ],
+  "note": "pf_active.coil, pf_active.supply and pf_active.circuit carry no identifier leaf at DD 4.1.1 (confirmed by direct IDSFactory introspection); only name/description are authored for supplies and circuits, matching what the coil array already carries"
+}

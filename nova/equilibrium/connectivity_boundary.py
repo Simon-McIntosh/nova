@@ -618,6 +618,53 @@ def _wall_nodes_touching_region(region, inside_limiter, rg, zg, wall_r, wall_z):
     return region.reshape(-1)[nearest]
 
 
+def _signed_area2(origin_r, origin_z, a_r, a_z, b_r, b_z):
+    """Twice the signed area of (origin, a, b); zero when the three are collinear."""
+    return (a_r - origin_r) * (b_z - origin_z) - (a_z - origin_z) * (b_r - origin_r)
+
+
+def _wall_nodes_in_line_of_sight(
+    source_r, source_z, target_r, target_z, wall_r, wall_z
+):
+    """Mark targets with an unobstructed sightline from ``source`` to the wall.
+
+    A target sitting exactly on the wall polyline touches its own two
+    incident segments at a shared endpoint, which degenerates to a zero
+    signed area on one side of the standard proper-crossing test; those
+    segments therefore never register as a crossing of their own node, so no
+    explicit incident-edge exclusion is needed.  A re-entrant notch's roof
+    (or any other wall segment strictly between the source and the target)
+    still registers, independent of raster resolution: this is exact
+    polyline geometry, not a raster reachability test.
+    """
+    target_r = jnp.asarray(target_r)
+    target_z = jnp.asarray(target_z)
+    source_r = jnp.broadcast_to(
+        jnp.asarray(source_r, dtype=target_r.dtype), target_r.shape
+    )
+    source_z = jnp.broadcast_to(
+        jnp.asarray(source_z, dtype=target_z.dtype), target_z.shape
+    )
+
+    edge_start_r = wall_r[None, :]
+    edge_start_z = wall_z[None, :]
+    edge_end_r = jnp.roll(wall_r, -1)[None, :]
+    edge_end_z = jnp.roll(wall_z, -1)[None, :]
+
+    src_r, src_z = source_r[:, None], source_z[:, None]
+    tgt_r, tgt_z = target_r[:, None], target_z[:, None]
+
+    across_edge = _signed_area2(
+        edge_start_r, edge_start_z, edge_end_r, edge_end_z, src_r, src_z
+    ) * _signed_area2(edge_start_r, edge_start_z, edge_end_r, edge_end_z, tgt_r, tgt_z)
+    across_query = _signed_area2(
+        src_r, src_z, tgt_r, tgt_z, edge_start_r, edge_start_z
+    ) * _signed_area2(src_r, src_z, tgt_r, tgt_z, edge_end_r, edge_end_z)
+
+    crossed = jnp.any((across_edge < 0.0) & (across_query < 0.0), axis=-1)
+    return ~crossed
+
+
 def _sample_wall_polyline(wall_r, wall_z, sample_count):
     """Return fixed-count, equal-arc samples around a closed wall polyline."""
     segment_length = jnp.hypot(
@@ -779,11 +826,23 @@ def _select_reachable_wall_limiter(
     pre_saddle_region,
     psi_axis,
     global_surface,
+    axis_r,
+    axis_z,
 ):
-    """Select a limiter point over exact wall nodes and reachable sub-segments."""
+    """Select a limiter point over exact wall nodes and reachable sub-segments.
+
+    A node or sample qualifies only when it BOTH touches the pre-saddle axis
+    flood on the connectivity raster AND has an unobstructed straight
+    sightline from the axis to the exact wall polyline (``axis_r``,
+    ``axis_z`` are always themselves inside that flood, being the flood's own
+    seed).  The raster test alone accepts a node sitting behind a re-entrant
+    wall notch whenever the notch is too fine for the raster to resolve; the
+    sightline test uses the exact polyline instead, so it excludes that node
+    regardless of raster resolution or how extreme its fitted flux is.
+    """
     node_reachable = _wall_nodes_touching_region(
         pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
-    )
+    ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, wall_r, wall_z, wall_r, wall_z)
     node_point = _reachable_wall_limiter_point(
         psi2d,
         rg,
@@ -802,7 +861,7 @@ def _select_reachable_wall_limiter(
     )
     sample_reachable = _wall_nodes_touching_region(
         pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
-    )
+    ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, sample_r, sample_z, wall_r, wall_z)
     sample_psi = global_surface(sample_r, sample_z)
     sample_point = _reachable_wall_limiter_point(
         psi2d,
@@ -1214,6 +1273,8 @@ def _read_ingredients(
             pre_saddle_region,
             psi_axis,
             global_surface,
+            axis_r,
+            axis_z,
         )
         supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
         supplied_wall_index = _argmin_exact(

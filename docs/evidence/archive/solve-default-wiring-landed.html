@@ -37,11 +37,34 @@
     that lack it (item 2).</p>
   </section>
 
+  <section id="compile-cache">
+    <h2>Item 2 — the persistent compilation cache on five launchers</h2>
+    <p><strong>Commit:</strong> worker <code>9d6a5068</code> merged at <code>e04970ad</code>; independent
+    review MERGE (<code>~/.config/reckon/crew/reports/nova/sdw-compile-cache-review.md</code>).
+    <code>benchmarks/bank_revision_reproduction.py</code>, <code>benchmarks/diiid_forward_gs_match.py</code>
+    (all three solve modes), <code>scripts/oracle_rebaseline/measure.py</code>,
+    <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code> and
+    <code>efit_topology_corroboration.py</code> now call
+    <code>configure_persistent_compilation_cache(default_persistent_compilation_cache_root())</code>
+    immediately after <code>configure_dtypes()</code>, with no other change.</p>
+    <table>
+      <caption>Two-process reduced-rung oracle rebaseline on CPU (receipts under docs/figures/solve-default-wiring/compile-cache/)</caption>
+      <thead><tr><th scope="col">Process</th><th scope="col">Cache hits</th><th scope="col">Wall (s)</th><th scope="col">Compile saved (s)</th><th scope="col">Scientific receipt sha256</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">1 (cold)</th><td>0</td><td>49.41</td><td>0</td><td>6e52fce9…</td></tr>
+        <tr><th scope="row">2 (warm)</th><td>1</td><td>40.99</td><td>7.67</td><td>6e52fce9… (byte-identical, wall_seconds excluded)</td></tr>
+      </tbody>
+    </table>
+    <p>Referees: seven node IDs, 9 passed, exit 0. Fixed-point residual 3.06e-15, forcing sup 4.22e-15 on both
+    processes. Not yet wired: the parity slice (with item 3) and the topology-visuals generator (held by the
+    topology session's worktree).</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>Item 2 (compilation cache on five launchers) and item 3 (parity driver current-constrained
-      by default) are in flight; their anchors follow.</li>
+      <li>Item 3 (parity driver current-constrained by default) must be redispatched on the claude backend after the
+      codex outage of 2026-09-02; items 1, 4, 5 and 6 follow it.</li>
       <li>The topology-visuals generator's cache line waits on the topology session's live claim on
       that file.</li>
     </ul>

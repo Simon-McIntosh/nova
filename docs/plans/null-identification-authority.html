@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="null-identification-authority">
+<meta name="plan-title" content="Null identification authority — one containment-aware O-point and X-point read, banked and gated">
+<meta name="plan-summary" content="Make the magnetic axis and X-point identification a checked property of every solve: banked beside EFIT in every receipt, containment-aware on the path the solve actually uses, jointly gated with convergence, and pinned on the marginal arms and the exact solutions.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="22.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S19">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,topology,convergence,mast,solovev">
+<meta name="plan-blocks" content="gs-absolute-accuracy-gates">
+<title>Null identification authority | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-03">
+<meta name="plan-version" content="1">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Null identification authority</h1>
+<p class="lede">The lead's hypothesis at the S19 triage of 2026-09-03 was that errors in the O-point and X-point identification drive the convergence and stability failures. Six read-only investigations tested it against the twelve-arm MAST bank, its EFIT flux overlays (<code>docs/evidence/mast-bank-efit-overlays.html</code>), the exact Solov'ev certificate, the DIII-D gate frames, the code path and the commit history (reports under <code>~/.config/reckon/crew/reports/nova/triage/</code>). The verdict is split. X-point placement error does not separate converged from stalled rows: displacement to the nearer EFIT X-point spans 7.4 to 39.0 mm across the bank with converged arms at 30 to 32 mm and the tightest agreement (7.4 mm) on a stalled arm, and the flagship stall on 22086/43 pure is located at the acceptance policy in <code>fixed_point.py</code>, so the acceptance remedy on solver-convergence-regression stays the primary lever. But the same reports found identification defects that are real, reproducible and currently unguarded: the read path the solve actually uses ranks X candidates by flux with no containment test (the polygon containment fix landed only in the class-margin comparator); two shots (21986/46 and 21989/55, four rows, all nonconverged) latch onto the same off-axis limiter coordinate near the upper wall and read limited against EFIT's diverted; on exact Solov'ev solutions the diverted case returns no qualified axis at two of four resolutions and a 143.7 mm axis error at a third while its residual gate still marks a row qualified; and no receipt anywhere banks Nova's own O-point beside EFIT's, so the hypothesis could not be tested on the axis at all. This plan makes identification a checked property, so that the convergence question can be asked on arms whose topology read is known to be right.</p></header>
+
+<h2 id="s1">§1 — Bank the axis and the saddle in every receipt</h2>
+<p>The twelve-row bank carries Nova's selected saddle and limiter point but no magnetic axis for either Nova or EFIT; the DIII-D gate rows carry the EFIT axis and a scalar displacement but not Nova's own post-solve axis (<code>benchmarks/diiid_forward_gs_match.py</code> computes it and writes only the norm); the Solov'ev certificate records position errors only where the read succeeded and no candidate count, second-best margin or exception detail where it failed. Extend the three producers (<code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, <code>benchmarks/efit_reproduction_gate.py</code> with <code>diiid_forward_gs_match.py</code>, <code>benchmarks/solovev_certificate.py</code>) so every row records Nova's axis and X-point positions and flux values, the reference counterpart (EFIT <code>rmaxis</code>/<code>zmaxis</code> and X-points on MAST and DIII-D, the closed-form stationary points on Solov'ev), the number of admitted O and X candidates, the flux margin to the second-best candidate, and the read status with its exception text when the read fails. Done-when: the three receipts regenerate with the new fields on the H200 at unchanged terminal states (bit-identical existing fields), and a compact table in the evidence record states, per row, axis and saddle displacement in millimetres and the candidate margins.</p>
+
+<h2 id="s2">§2 — Containment on the read the solve uses</h2>
+<p>The candidate-selection audit found two parallel topology readers. <code>Topology.read_qualification</code> (<code>nova/equilibrium/topology.py</code>, the entry point <code>ForwardFluxOperator.read</code> calls on every default path) selects the X-point by <code>argmax</code> of the polarity-signed flux offset over all candidates in the fixed-capacity stencil table with no geometric screening (<code>x_point_index</code>, lines 335 to 345), and its legacy <code>boundary</code> predicate decides between the X-point and the wall extremum by a height band rather than containment. The polygon ray-cast containment (<code>_points_inside_polygon</code>) lives only in <code>traced_boundary_read</code> (<code>connectivity_boundary.py</code>), which the solve consults for the class margin and nothing else. Apply the same containment to the candidate set before the flux ranking on the solve's read path, keep the wall-extremum comparison on the contained set only, and add the regression the audit names: a flux map where an out-of-vessel saddle outscores the true X-point on flux, asserting the qualification's <code>x_point</code> is the in-vessel one. Add the end-to-end parity test between the two readers on a battery that includes an out-of-vessel saddle. Done-when: both tests green in the default lane, the seven referee tests green, and the twelve-row bank regenerated with the contained read showing which rows changed selected saddle, boundary flux or trip-1 partition (expected none on the eight label-agreeing rows; any change is stated).</p>
+
+<h2 id="s3">§3 — The limiter-point capture on 21986/46 and 21989/55</h2>
+<p>Three of the twelve rows disagree with EFIT's diverted label and one raises <code>NoQualifiedAxisError</code>; all four sit on two shots, all four are nonconverged with <code>topology_consistent</code> false, and the three that produce a saddle bind on the same off-axis limiter coordinate, R about 0.565 m, Z about 1.77 m, near the upper wall, while their X-point offsets (19 to 30 mm) are unremarkable. The commit timeline finds no receipt attributing these rows to any commit. Root-cause the capture: trace the legacy boundary predicate's wall-extremum choice on those flux maps, test whether §2's containment or the wall-extremum rule is what binds the wrong point, and determine whether the class flip is a by-product of premature termination (the triage's second hypothesis) or an independent identification defect. Done-when: a receipt names the mechanism with the flux values of the competing binding points on each of the four rows, and the four rows are re-solved on the corrected read with class agreement, convergence verdict and axis qualification stated beside the current bank rows.</p>
+
+<h2 id="s4">§4 — Identification on exact solutions</h2>
+<p>The corrected Solov'ev certificate proves the defect exists without noise or seed ambiguity: the diverted-jump-bearing case returns <code>no_qualified_axis</code> at 136 cells (a row the residual gate marks qualified at 2.4e-15) and at 342 cells, a 143.7 mm axis and 33.0 mm saddle error at 551 cells, and a correct 5.7 mm and 6.9 mm read only at 1076 cells; the twelve limited rows read the right class with axis errors growing from 1.8 to 64.3 mm with resolution on the weak-rotation reactor case; and the exact side's own <code>read_status</code> alternates between <code>analytic_stationary_point_fallback</code> and <code>qualified_axis</code> across resolutions of one case without explanation. Root-cause the no-qualified-axis rows on the hex oracle (the two-pass admission in <code>_fixed_design_read</code>, the material seed, the candidate table capacity), fix it, and make the certificate's qualification joint: a row is qualified only when the residual bound holds and the topology read is admitted with axis and saddle errors inside a preregistered bound. Done-when: sixteen rows regenerated with every read admitted, axis and saddle errors tabulated against the closed-form values with a stated bound, and the qualified-row count restated under the joint rule.</p>
+
+<h2 id="s5">§5 — Polish and selection hardening</h2>
+<p>The audits list fragilities that do not yet bite the bank but sit on the same path: the polish position-acceptance tolerance scales with the fit's own misfit (the value channel was closed by the census-value fix, the position channel was not), the candidate dedupe radius is a fixed 1.5 cell pitches unscaled by saddle separation, the Hessian-type gate reads the split fit's own Hessian near the up-down antisymmetric mode where it is least reliable, <code>_fixed_design_read</code> runs three times per residual from three call sites that must stay in lockstep, and the wall-height shadow's X-candidate source became single-authority at <code>260a8b44</code> with no cross-check against the raster reader. Land the tests the audit names (bounded move under a poor fit, dedupe-radius boundary on coarse and fine grids, near-degenerate Hessian, a marginal-arm regression fixture pinning <code>x_point</code>, <code>boundary_flux</code> and the partition for 22086/43 pure and 21978/35 pure), and collapse the three reads to one shared read per residual evaluation with a bit-identity test. Done-when: the tests are green in the default lane, the referee tests green, and the shared read is bit-identical to the triple read on the bank rows.</p>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-nia-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19-relaunch" data-written-at="2026-09-03" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Bank the reads, contain the selection, then close the four rows and the exact case</h4>
+    <div class="r-fu-body">Order: §1 banking first because every later verdict needs the axis beside EFIT; §2 and §4 in parallel (different files); §3 after §2 on the corrected read; §5 last. Each node runs on the H200 with the persistent compilation cache and the persisted carriers; codex is out of quota until 8 September, so dispatch on the claude backend. Reports: ~/.config/reckon/crew/reports/nova/triage/ (ox-vs-efit, boundary-flux-chain, candidate-selection-audit, solovev-ox, commit-timeline).</div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

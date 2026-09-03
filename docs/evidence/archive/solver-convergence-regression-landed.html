@@ -144,6 +144,47 @@
     21989/55 arms) are the real geometry failures at 182 to 236 mm rms.</p>
   </section>
 
+  <section id="triage-2026-09-03">
+    <h2>Triage of 2026-09-03: is the stall an identification error?</h2>
+    <p>Six read-only investigations (claude backend, reports under
+    <code>~/.config/reckon/crew/reports/nova/triage/</code>) tested the lead's hypothesis that O-point and
+    X-point misidentification drives the convergence and stability failures, against the twelve-row bank and
+    its EFIT overlays, the exact Solov'ev certificate, the DIII-D gate frames, the code path and the commit
+    history.</p>
+    <table>
+      <caption>Nova's selected saddle against the nearer EFIT X-point, twelve bank rows</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">X displacement (mm)</th><th scope="col">Class Nova / EFIT</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure</th><td>27.7</td><td>diverted / diverted</td><td>cycle</td></tr>
+        <tr><th scope="row">21978/35 mixed</th><td>29.9</td><td>diverted / diverted</td><td>converged</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>36.8</td><td>diverted / diverted</td><td>budget</td></tr>
+        <tr><th scope="row">21983/35 mixed</th><td>39.0</td><td>diverted / diverted</td><td>budget</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td>7.4</td><td>diverted / diverted</td><td>settled</td></tr>
+        <tr><th scope="row">21985/51 mixed</th><td>32.4</td><td>diverted / diverted</td><td>converged</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>19.1</td><td>limited / diverted</td><td>budget</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td>none</td><td>none / diverted</td><td>no qualified axis</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td>26.0</td><td>limited / diverted</td><td>budget</td></tr>
+        <tr><th scope="row">21989/55 mixed</th><td>29.9</td><td>limited / diverted</td><td>budget</td></tr>
+        <tr><th scope="row">22086/43 pure</th><td>20.4</td><td>diverted / diverted</td><td>settled</td></tr>
+        <tr><th scope="row">22086/43 mixed</th><td>30.9</td><td>diverted / diverted</td><td>converged</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>X-point placement does not separate converged from stalled rows, and the flagship stall stays located at
+    the acceptance policy, so the remedy on this plan remains the primary lever. Three identification defects
+    are nevertheless real and unguarded: the solve's default read ranks X candidates by flux with no containment
+    test (the polygon fix landed only in the class-margin comparator); the four class-disagreeing rows on two
+    shots all bind the same off-axis limiter coordinate near R 0.565 m, Z 1.77 m and are unattributed to any
+    commit; and the exact diverted Solov'ev case returns no qualified axis at 136 and 342 cells and a 143.7 mm
+    axis error at 551 cells while the residual gate still marks a row qualified. No receipt banks Nova's own
+    O-point beside EFIT's. These are carried by the new plans
+    <a href="/nova/plans/null-identification-authority">null-identification-authority</a> and
+    <a href="/nova/plans/diiid-vertical-force-balance">diiid-vertical-force-balance</a>. The code trace also
+    explains the trip-1 mask moves 38 to 29 and 31 to 29 at <code>260a8b44</code> as the wall-height shadow's
+    X-candidate source switching from the raster read to the census read, an authority change rather than a
+    flux error.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave
@@ -151,8 +192,7 @@
     (<a href="/nova/evidence/archive/gs-absolute-accuracy-gates-landed#corrected-certificate">gs-absolute-accuracy-gates</a>)
     shows the same settled-above-tolerance signature on fourteen of sixteen exact-solution rows, so the
     remaining remedy has an exact test bed. The one untested remedy is the policy itself: score pre-settlement
-    candidates on the incumbent partition (a scoped re-opening of <code>a2e65fda</code>), which the lead has so
-    far declined; see the handoff at <a href="/nova/research/convergence-stall-handoff">convergence-stall-handoff</a>.</p>
+    candidates on the incumbent partition (a scoped re-opening of <code>a2e65fda</code>), which the lead locked on 2026-09-03 (decision presettlement-acceptance-scoring, prototype in flight); see the handoff at <a href="/nova/research/convergence-stall-handoff">convergence-stall-handoff</a>.</p>
   </section>
 </main>
 </body>

@@ -15,7 +15,7 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-modified" content="2026-09-03">
 <meta name="plan-effort-hours" content="28.0">
 <meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-impl" content="0.833">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -303,7 +303,10 @@
     <div class="r-comment-body"><p>Codex worker killed at 17:28 during plan reading (stream ends mid-command, stderr empty, no manifest): the login node's 64 GiB user cgroup was at 50 GiB with MATLAB and ITERCTRL sessions and has 119 historical OOM kills; redispatched</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T154619171050-pta-schema4-bank-regeneration-2" data-who="pta-perf" data-when="2026-09-02T16:29:31Z">
-    <div class="r-comment-body"><p>H200 job 1261547 (twelve-row cache-only refresh through the merged schema-4 producer at a9f1bbf1) failed before _write_cache, so the bank is unchanged (sha fa286c13); the repair lies in generate_topology_visuals.py, outside this node&#x27;s fence; baseline bank, census helper and launch recipe preserved under ~/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration/</p></div>
+    <div class="r-comment-body"><p>H200 job 1261547 (twelve-row cache-only refresh through the merged schema-4 producer at a9f1bbf1) failed before _write_cache, so the bank is unchanged (sha fa286c13); the repair lies in generate_topology_visuals.py, outside this node's fence; baseline bank, census helper and launch recipe preserved under ~/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration/</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260903T182200000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T20:22:00+02:00">
+    <div class="r-comment-body">CACHE-IDENTITY REVIEW of the schema-4 producer repair (run r-20260902T163323361856-pta-schema4-producer-repair, commits 7a285cd9 and 66db7675), requested by this session's coordinator and parked here because that session had ended when the verdict was ready. VERDICT HOLD (report ~/.config/reckon/crew/reports/nova/scr-schema4-cache-identity-review.md, reviewer on the claude backend). Condition 2 (polygon source, bitwise reproduction of both 22086/43 rows) PASSES. Condition 1 partial: terminal residuals match bit-for-bit on 12 of 12 rows against efit-topology-corroboration.json at 8678047a, termination reasons on 11 of 12, but 22086/43 pure reads active_set_stagnated in the regenerated metadata versus active_set_settled in the corroboration file at the identical residual 4.8001875929238176e-4, and trip counts cannot be checked because the regenerated metadata carries no per-row trip-count field. Condition 3: carrier identity 1d2c4a2b unchanged (PASS); the section_kernel_evaluations_this_shot == 0 assertion appears nowhere in regenerate-1261550.log (42 lines read in full); mast-topology-operands.metadata.json records neither the producer commit nor the base revision. To lift the hold: resolve the 22086/43 pure label disagreement, add a per-row trip-count field, make the kernel-evaluation assertion assertable and quoted from the log, and record producer commit plus base revision in the metadata. The bank on main is still the 10-row fa286c13 file; the regenerated bank exists only in the unmerged worktree. The producer-repair pointer and its dead verify run (codex quota, 2026-09-02 20:14) remain unpromoted for this plan's owner.</div>
 </div>
 </section>
 </main>

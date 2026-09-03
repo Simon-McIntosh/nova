@@ -85,6 +85,27 @@
     </ul>
   </section>
 
+  <section id="limiter-line-of-sight">
+    <h2>§3 — The line-of-sight limiter rule (prototype, held for the lead)</h2>
+    <p><strong>Worktree commit:</strong> <code>72ed7f60</code>, held unmerged in
+    <code>.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-line-of-sight-limiter</code>
+    (<code>nova/equilibrium/connectivity_boundary.py</code> +64, <code>tests/test_limiter_line_of_sight.py</code> +262).
+    A wall node now binds only if its nearest raster cell lies in the axis-connected pre-saddle flood AND the
+    straight segment from the magnetic axis to the node crosses no wall segment other than its own two incident
+    edges; the axis is the sightline source because it is the flood's own seed and so immune to the raster's
+    false reachability inside a notch. The previously discarded shadow flag now reflects the corrected set.</p>
+    <table>
+      <caption>Gate evidence at 72ed7f60</caption>
+      <thead><tr><th scope="col">Check</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">tests/test_limiter_line_of_sight.py</th><td>6 passed: notch mouth flooded but not its back wall, notch narrower than one raster cell, notch flux forced more extreme than the X-point, and wall node 10 at (0.56493, 1.72808) losing line of sight from the EFIT axis on 21986/46 pure, 21989/55 pure and 21989/55 mixed</td></tr>
+        <tr><th scope="row">tests/test_connectivity_boundary.py</th><td>14 passed, 2 failed; the module's pinned behaviours all green; the two failures attributed to a pre-existing signature mismatch and to GPU contention, under independent CPU verification</td></tr>
+      </tbody>
+    </table>
+    <p>The flux-dependent half of the section (the four rows re-solved on the corrected read) waits on the schema-4
+    bank, whose regenerated per-cell flux for those rows sits in the topology session's worktree on HOLD.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

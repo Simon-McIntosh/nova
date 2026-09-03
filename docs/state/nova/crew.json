@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T22:50:17",
+  "updated": "2026-09-03T23:01:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -377,6 +377,15 @@
       },
       {
         "id": "c-nia-verify",
+        "harness": "claude",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-nia-verify-2",
         "harness": "claude",
         "role": "test",
         "session_id": null,
@@ -82842,6 +82851,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1469
+    "_version": 1470
   }
 }

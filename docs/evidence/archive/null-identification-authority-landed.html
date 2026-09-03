@@ -85,6 +85,31 @@
     </ul>
   </section>
 
+  <section id="connected-admission">
+    <h2>§2 — Connected, contained stationary-point admission (prototype, held for the lead)</h2>
+    <p><strong>Worktree commit:</strong> <code>ebc4371d</code>, held unmerged in
+    <code>.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-connected-stationary-points</code>
+    (<code>topology.py</code> +73, <code>forward_operator.py</code> +29, <code>tests/test_stationary_point_admission.py</code> +269).
+    O candidates flood through one shared seed mask (every finite candidate's owning cell admitted uniformly) but
+    qualify against the original material mask, and the intersection must reach one percent of the material
+    cells (<code>_MATERIAL_CONNECTED_FRACTION = 0.01</code>); X candidates are screened by the wall polygon before the
+    flux ranking; the second admission pass widens by the raw extremum nearest the material centroid rather than by
+    the first pass's winner, so it can rescue but never change a correct pick.</p>
+    <table>
+      <caption>Gate evidence at ebc4371d (CPU)</caption>
+      <thead><tr><th scope="col">Check</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Six test files (new admission tests, O qualification, domain partition, boundary, hex flood, plasma-cell read)</th><td>32 passed, no existing expectation edited</td></tr>
+        <tr><th scope="row">21985/51 pure and mixed from the bank operands</th><td>admitted axis R 0.8972 m and 0.8974 m against the R 0.90 m cluster (cell pitch 0.0606 m); the wrong wells reached 0.15 to 0.29 percent of material, the true candidate 16.7 to 17.3 percent</td></tr>
+        <tr><th scope="row">Fraction bound</th><td>0.1 broke the coarse 17 by 19 referee fixture whose single correct candidate floods 2.2 percent; 0.01 sits two times below that and three to six times above the worst spurious well</td></tr>
+        <tr><th scope="row">Pre-existing failures reproduced at the base</th><td>two in test_forward_operator_axes.py, one each in test_forward_operator_domain.py, test_connectivity_boundary.py and test_jax_topology.py; none attributable to the change</td></tr>
+      </tbody>
+    </table>
+    <p>The production candidate table keeps five extrema; on the coarse 33 by 33 debug grid the true R 0.90 m
+    candidate is truncated away before qualification and the test raises the capacity to thirty, a fixture detail
+    that is itself the §4 truncation-visibility item.</p>
+  </section>
+
   <section id="limiter-line-of-sight">
     <h2>§3 — The line-of-sight limiter rule (prototype, held for the lead)</h2>
     <p><strong>Worktree commit:</strong> <code>72ed7f60</code>, held unmerged in

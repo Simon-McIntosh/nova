@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="null-identification-authority-landed">
+  <meta name="plan-title" content="Null identification authority — cumulative execution evidence">
+  <meta name="plan-summary" content="The scoping record of where Nova's magnetic axis, X-point and binding limiter point are misplaced or absent, the mechanisms traced, and the receipts each landing node adds.">
+  <meta name="plan-evidence-for" content="null-identification-authority">
+  <meta name="plan-verifies" content="null-identification-authority#s1">
+  <meta name="plan-informs" content="solver-convergence-regression,gs-absolute-accuracy-gates,diiid-vertical-force-balance">
+  <title>Null identification authority — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Null identification authority — cumulative execution evidence</h1>
+    <p class="lede">The plan opened on 2026-09-03 from a lead-directed triage. This record carries the scoping
+    that preceded implementation (six read-only investigations on the claude backend, reports under
+    <code>~/.config/reckon/crew/reports/nova/triage/</code>) and then each landing node's receipt.
+    Receipt values keep their recorded precision.</p>
+  </header>
+
+  <section id="scoping-2026-09-03">
+    <h2>Scoping, 2026-09-03: where the stationary points are wrong</h2>
+    <p>The lead's premise: if Nova cannot place the plasma O-point and the primary X-point, nor identify
+    non-shadowed limiter points correctly and consistently, a robust and fast forward solver cannot land.
+    The census below consolidates every banked misplacement by mechanism.</p>
+    <table>
+      <caption>Mechanism classes across the MAST bank, the Solov'ev certificate, the DIII-D frames and the hex reference logs</caption>
+      <thead><tr><th scope="col">Mechanism</th><th scope="col">Cases</th><th scope="col">Worst</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Disjoint axis (O-point outside the plasma)</th><td>2 (21985/51 pure and mixed)</td><td>axis at R 0.374 m, Z −1.921 m on a solve converged to 2.8e-16</td><td>measured from the bank operands; mechanism scout in flight</td></tr>
+        <tr><th scope="row">Limiter-point capture</th><td>3 (21986/46 pure, 21989/55 pure and mixed)</td><td>binding point 631 mm from EFIT's X-point</td><td>traced: raster reachability with no line of sight on a re-entrant wall notch</td></tr>
+        <tr><th scope="row">Axis admission failure</th><td>3 (21986/46 mixed; Solov'ev diverted at 136 and 342 cells)</td><td>no coordinate at all, one at residual 2.4e-15</td><td>traced: empty pass one seeds pass two at an arbitrary cell; candidate table capped at five</td></tr>
+        <tr><th scope="row">Resolution-limited read</th><td>17</td><td>143.7 mm axis error (Solov'ev diverted, 551 cells)</td><td>precision tracks distance from the residual tolerance</td></tr>
+        <tr><th scope="row">Containment-free ranking, polish relocation</th><td>0 attributable</td><td>—</td><td>unguarded on the solve's read path; no diagnostic trace exists to attribute a row</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Nova axis and selected saddle per regenerated MAST row (bank-regeneration-raw-20260902/current-operands.npz)</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Axis (R, Z) m</th><th scope="col">Saddle (R, Z) m</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure</th><td>0.9030, 0.0155</td><td>0.5629, 1.2635</td><td>cycle</td></tr>
+        <tr><th scope="row">21978/35 mixed</th><td>0.9035, 0.0296</td><td>0.5746, 1.2639</td><td>converged</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>0.9027, 0.0413</td><td>0.5520, 1.2723</td><td>budget</td></tr>
+        <tr><th scope="row">21983/35 mixed</th><td>0.9025, 0.0441</td><td>0.5527, 1.2743</td><td>budget</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td><strong>0.2020, 0.9878</strong></td><td>0.5554, −1.1189</td><td>settled</td></tr>
+        <tr><th scope="row">21985/51 mixed</th><td><strong>0.3741, −1.9211</strong></td><td>0.5425, −1.0975</td><td>converged</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>0.9132, 0.0588</td><td>0.6192, 1.1745</td><td>budget, limiter capture</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td>none</td><td>none</td><td>no qualified axis</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td>0.9133, 0.0422</td><td>0.5881, 1.1589</td><td>budget, limiter capture</td></tr>
+        <tr><th scope="row">21989/55 mixed</th><td>0.9130, 0.0474</td><td>0.5898, 1.1624</td><td>budget, limiter capture</td></tr>
+        <tr><th scope="row">22086/43 pure</th><td>0.9019, 0.0202</td><td>0.5924, 1.2203</td><td>settled</td></tr>
+        <tr><th scope="row">22086/43 mixed</th><td>0.9016, 0.0246</td><td>0.5853, 1.2334</td><td>converged</td></tr>
+      </tbody>
+    </table>
+    <h3>Mechanisms traced</h3>
+    <ul>
+      <li><strong>Limiter capture.</strong> The class is read by the connectivity classifier, whose wall half admits
+      any wall node whose nearest cell on a 96 by 18 raster lies in the axis-connected pre-saddle flood, with no
+      line-of-sight test; the shadow flag it computes is discarded. All three rows bind governed-wall node 10 at
+      (0.5649, 1.7281) m, the back wall of a re-entrant notch EFIT's LCFS never touches. The rule to apply is
+      reachability plus line of sight through the flooded region.</li>
+      <li><strong>Axis admission.</strong> When no O candidate qualifies, <code>o_point_index</code> returns index
+      zero and the second admission pass seeds material at that arbitrary cell; the candidate table keeps five
+      extrema and truncates silently; nothing penalises a qualified extremum far from the plasma. The exact side
+      of the certificate runs the same reader and falls back to closed-form values under a different status
+      when it fails, so its status alternates with the hex layout of each resolution.</li>
+      <li><strong>Boundary flux chain.</strong> Twenty hops from candidates to the residual mask; the 38 to 29 and
+      31 to 29 trip-1 mask moves at <code>260a8b44</code> are the wall-height shadow's X-candidate source switching
+      from the raster read to the census read.</li>
+    </ul>
+  </section>
+
+  <section id="open-record">
+    <h2>Open record</h2>
+    <ul>
+      <li>The disjoint-axis ranking rule (scout in flight) and its fix are §1 and §2 work; the line-of-sight limiter
+      rule is §3; the admission repairs and the joint qualification are §4; the hardening tests are §5.</li>
+      <li>Codex is out of quota until 8 September; every node runs on the claude backend.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

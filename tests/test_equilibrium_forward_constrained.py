@@ -37,10 +37,11 @@ def _operator() -> ForwardFluxOperator:
     """Return the smallest operator surface the constrained map evaluates."""
     operator = object.__new__(ForwardFluxOperator)
     operator.cell_current_moments = lambda _state, _requested=None: _moments()
-    operator.external = lambda _current=None: jnp.zeros(2)
+    operator.external = lambda _current=None, _prescribed=None: jnp.zeros(2)
     operator.current_moment_image = lambda moments: jnp.asarray(
         [jnp.sum(moments.cell_current), jnp.sum(moments.radial_moment)]
     )
+    operator._exclude_shadow_residual = lambda _psi, image, _requested=None: image
     return operator
 
 
@@ -108,7 +109,7 @@ def test_absent_target_delegates_to_the_ordinary_operator_path() -> None:
     def sentinel(state):
         return state + 3.0
 
-    def flux_map(current, requested, target):
+    def flux_map(current, requested, target, prescribed):
         return sentinel
 
     operator = SimpleNamespace(flux_map=flux_map)

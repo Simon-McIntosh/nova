@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:27:45",
+  "updated": "2026-09-03T21:31:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -304,6 +304,24 @@
       },
       {
         "id": "c-mcs-quantum",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-nia-admission",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c-nia-limiter",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
@@ -82212,6 +82230,6 @@
       }
     ],
     "holds": [],
-    "_version": 1448
+    "_version": 1450
   }
 }

@@ -43,6 +43,10 @@ from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
     wall_height_shadow_mask,
 )
+from nova.equilibrium.flux_surface_connectivity import (
+    fit_tensor_spline,
+    polish_stationary_points,
+)
 from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
     clipped_support_quadrature,
@@ -191,21 +195,25 @@ def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class _FixedDesignNull2D:
-    """Locate grid nulls without differentiating a fixed SVD factorisation.
+    """Locate grid nulls from one complete-map tensor spline.
 
-    The quadratic design depends only on immutable grid geometry.  Applying its
-    host-built pseudoinverse as a matrix is algebraically the same least-squares
-    fit while keeping JAX differentiation on the sampled flux alone.  This
-    avoids the SVD JVP's undefined singular-vector derivative when a symmetric
-    stencil has repeated singular values.
+    Strict-interior ring geometry is immutable.  One tensor spline supplies the
+    centre-relative cyclic sign count, the stationary-point polish, the value,
+    the gradient, and the Hessian type.  A local quadratic remains available
+    only for non-tensor-product compatibility; it is never the production
+    admission authority on a complete structured map.
     """
 
     locator: Null2D
     fit_weight: jax.Array = field(repr=False)
+    spline_radial: jax.Array = field(repr=False)
+    spline_vertical: jax.Array = field(repr=False)
+    spline_shape: tuple[int, int]
+    structured: bool
 
     @classmethod
     def from_locator(cls, locator: Null2D) -> _FixedDesignNull2D:
-        """Precompute one quadratic least-squares operator per grid stencil."""
+        """Precompute immutable ring geometry and compatibility fit weights."""
         local = np.asarray(locator.local_coordinate_stencil, dtype=np.float64)
         radial = local[..., 0]
         vertical = local[..., 1]
@@ -221,7 +229,24 @@ class _FixedDesignNull2D:
             axis=-1,
         )
         weight = np.linalg.pinv(design)
-        return cls(locator=locator, fit_weight=jnp.asarray(weight, locator.fit_dtype))
+        try:
+            radial_axis, vertical_axis = _structured_grid_axes(locator.coordinate)
+        except ValueError:
+            radial_axis = np.empty(0, dtype=np.float64)
+            vertical_axis = np.empty(0, dtype=np.float64)
+            spline_shape = (0, 0)
+            structured = False
+        else:
+            spline_shape = (radial_axis.size, vertical_axis.size)
+            structured = True
+        return cls(
+            locator=locator,
+            fit_weight=jnp.asarray(weight, locator.fit_dtype),
+            spline_radial=jnp.asarray(radial_axis, dtype=locator.fit_dtype),
+            spline_vertical=jnp.asarray(vertical_axis, dtype=locator.fit_dtype),
+            spline_shape=spline_shape,
+            structured=structured,
+        )
 
     @property
     def coordinate(self):
@@ -238,9 +263,8 @@ class _FixedDesignNull2D:
         """Return the dtype of the local quadratic fits."""
         return self.locator.fit_dtype
 
-    @jax.jit
-    def _candidate_census(self, psi):
-        """Fit every stencil and return supported stationary-point candidates."""
+    def _local_fit_census(self, psi):
+        """Retain the fixed-SVD compatibility read for irregular test grids."""
         sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
         coefficient = jnp.einsum("...ij,...j->...i", self.fit_weight, sampled)
         determinant = (
@@ -292,50 +316,279 @@ class _FixedDesignNull2D:
         masks = jnp.stack((finite & (kind != 0.0), finite & (kind == 0.0)))
         return result, masks
 
+    @staticmethod
+    def _root_uncertainty(polish, cell_width, domain_scale):
+        """Estimate positional root uncertainty from residual and curvature."""
+        hessian = polish["hessian"]
+        half_trace = 0.5 * (hessian[..., 0, 0] + hessian[..., 1, 1])
+        eigen_radius = jnp.sqrt(
+            (0.5 * (hessian[..., 0, 0] - hessian[..., 1, 1])) ** 2
+            + hessian[..., 0, 1] ** 2
+        )
+        first_eigenvalue = half_trace + eigen_radius
+        second_eigenvalue = half_trace - eigen_radius
+        minimum_curvature = jnp.minimum(
+            jnp.abs(first_eigenvalue), jnp.abs(second_eigenvalue)
+        )
+        dtype = polish["position_rz"].dtype
+        safe_curvature = jnp.maximum(minimum_curvature, jnp.finfo(dtype).tiny)
+        residual_position = polish["gradient_norm"] / safe_curvature
+        arithmetic_floor = (
+            256.0 * jnp.finfo(dtype).eps * jnp.maximum(domain_scale, cell_width)
+        )
+        return jnp.maximum(residual_position, arithmetic_floor)
+
+    @staticmethod
+    def _deduplicate_type(position, valid, uncertainty):
+        """Keep deterministic first representatives of numerically equal roots."""
+        slot_count = position.shape[0]
+        slot = jnp.arange(slot_count, dtype=jnp.int32)
+        representatives = jnp.zeros(slot_count, dtype=bool)
+        multiplicity = jnp.zeros(slot_count, dtype=jnp.int32)
+        representative_index = jnp.full(slot_count, -1, dtype=jnp.int32)
+
+        def retain_one(index, state):
+            retained, counts, parent = state
+            distance = jnp.linalg.norm(position - position[index], axis=1)
+            same_root = (
+                (slot < index)
+                & retained
+                & valid[index]
+                & jnp.isfinite(distance)
+                & (distance <= uncertainty + uncertainty[index])
+            )
+            has_parent = jnp.any(same_root)
+            prior = jnp.argmax(same_root).astype(jnp.int32)
+            is_representative = valid[index] & ~has_parent
+            assigned = jnp.where(
+                is_representative,
+                index,
+                jnp.where(has_parent, prior, jnp.asarray(-1, jnp.int32)),
+            )
+            retained = retained.at[index].set(is_representative)
+            parent = parent.at[index].set(assigned)
+            target = jnp.maximum(assigned, 0)
+            counts = counts.at[target].add(valid[index].astype(jnp.int32))
+            return retained, counts, parent
+
+        return jax.lax.fori_loop(
+            0,
+            slot_count,
+            retain_one,
+            (representatives, multiplicity, representative_index),
+        )
+
+    def _structured_census(self, psi):
+        """Return spline-authored candidates and complete fixed-slot telemetry."""
+        radial_count, vertical_count = self.spline_shape
+        values = (
+            jnp.asarray(psi, dtype=self.fit_dtype)
+            .reshape((radial_count, vertical_count))
+            .T
+        )
+        spline = fit_tensor_spline(self.spline_radial, self.spline_vertical, values)
+        ring_coordinate = self.locator.coordinate[self.locator.stencil]
+        ring_values = spline(
+            ring_coordinate[..., 0].astype(self.fit_dtype),
+            ring_coordinate[..., 1].astype(self.fit_dtype),
+        )
+        crossing_count = self.locator.crossing_count(ring_values)
+        ring_mask = jnp.stack((crossing_count == 0, crossing_count == 4), axis=0)
+        admitted = jnp.any(ring_mask, axis=0)
+        seed = self.locator.physical_origin.astype(self.fit_dtype)
+        polish = polish_stationary_points(spline, seed, admitted)
+        displacement = jnp.linalg.norm(polish["position_rz"] - seed, axis=1)
+        requested_displacement = jnp.where(admitted, displacement, jnp.nan)
+        neighbours = ring_coordinate[:, 1:] - ring_coordinate[:, :1]
+        cell_width = jnp.max(jnp.linalg.norm(neighbours, axis=-1), axis=1).astype(
+            self.fit_dtype
+        )
+        within_cell = displacement < cell_width
+        expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)[:, None]
+        type_agrees = polish["hessian_type"][None, :] == expected_hessian_type
+        polished_mask = ring_mask & polish["converged"][None, :] & within_cell[None, :]
+        typed_mask = polished_mask & type_agrees
+        domain_scale = jnp.hypot(
+            self.spline_radial[-1] - self.spline_radial[0],
+            self.spline_vertical[-1] - self.spline_vertical[0],
+        )
+        root_uncertainty = self._root_uncertainty(polish, cell_width, domain_scale)
+        deduplicated = [
+            self._deduplicate_type(
+                polish["position_rz"], typed_mask[index], root_uncertainty
+            )
+            for index in range(2)
+        ]
+        representative_mask = jnp.stack([item[0] for item in deduplicated])
+        multiplicity = jnp.stack([item[1] for item in deduplicated])
+        representative_index = jnp.stack([item[2] for item in deduplicated])
+
+        hessian = polish["hessian"]
+        hessian_determinant = (
+            hessian[..., 0, 0] * hessian[..., 1, 1]
+            - hessian[..., 0, 1] * hessian[..., 1, 0]
+        )
+        extremum_kind = -jnp.sign(jnp.trace(hessian, axis1=-2, axis2=-1))
+        kind = jnp.where(crossing_count == 4, 0.0, extremum_kind)
+        candidates = jnp.column_stack(
+            (
+                polish["position_rz"].astype(jnp.float64),
+                polish["value"].astype(jnp.float64),
+                kind.astype(jnp.float64),
+            )
+        )
+        source_origin = self.locator.stencil[:, 0].astype(jnp.int32)
+        raw_ring_count = jnp.sum(ring_mask, axis=1, dtype=jnp.int32)
+        polished_count = jnp.sum(polished_mask, axis=1, dtype=jnp.int32)
+        typed_count = jnp.sum(typed_mask, axis=1, dtype=jnp.int32)
+        same_root_count = jnp.sum(representative_mask, axis=1, dtype=jnp.int32)
+        capacity = jnp.full(
+            same_root_count.shape, self.locator.maxsize, dtype=jnp.int32
+        )
+        retained_count = jnp.minimum(same_root_count, capacity)
+        retained_index = jnp.stack(
+            [
+                jnp.where(mask, size=self.locator.maxsize, fill_value=0)[0]
+                for mask in representative_mask
+            ]
+        )
+        retained_slot = jnp.arange(self.locator.maxsize)[None, :]
+        retained_valid = retained_slot < retained_count[:, None]
+        retained_multiplicity = jnp.take_along_axis(
+            multiplicity, retained_index, axis=1
+        )
+        retained_multiplicity = jnp.where(retained_valid, retained_multiplicity, 0)
+
+        def retain(values_to_gather, *, trailing=0, fill=0):
+            gathered = values_to_gather[retained_index]
+            valid_shape = retained_valid.shape + (1,) * trailing
+            return jnp.where(
+                retained_valid.reshape(valid_shape),
+                gathered,
+                jnp.asarray(fill, dtype=gathered.dtype),
+            )
+
+        return {
+            "candidate": candidates,
+            "ring_crossing_count": crossing_count,
+            "ring_admitted_mask": ring_mask,
+            "polish_converged": polish["converged"],
+            "requested_displacement": requested_displacement,
+            "cell_width": cell_width,
+            "within_cell": within_cell,
+            "polish_rejected": ring_mask
+            & (~polish["converged"][None, :] | ~within_cell[None, :]),
+            "hessian_type": polish["hessian_type"],
+            "hessian_type_agrees": type_agrees,
+            "typed_mask": typed_mask,
+            "representative_mask": representative_mask,
+            "representative_index": representative_index,
+            "multiplicity": multiplicity,
+            "source_origin_index": source_origin,
+            "spline_gradient": polish["gradient"],
+            "spline_gradient_norm": polish["gradient_norm"],
+            "spline_hessian_determinant": hessian_determinant,
+            "root_uncertainty": root_uncertainty,
+            "raw_ring_count": raw_ring_count,
+            "polished_count": polished_count,
+            "typed_count": typed_count,
+            "same_root_count": same_root_count,
+            "retained_count": retained_count,
+            "capacity": capacity,
+            "overflow": same_root_count > capacity,
+            "retained_candidate": retain(candidates, trailing=1),
+            "retained_valid": retained_valid,
+            "retained_representative_origin_index": retain(source_origin),
+            "retained_representative_origin_rz": retain(
+                self.locator.physical_origin, trailing=1
+            ),
+            "retained_multiplicity": retained_multiplicity,
+            "retained_spline_gradient": retain(polish["gradient"], trailing=1),
+            "retained_spline_gradient_norm": retain(polish["gradient_norm"]),
+            "retained_spline_hessian_determinant": retain(hessian_determinant),
+            "retained_requested_displacement": retain(displacement),
+            "retained_root_uncertainty": retain(root_uncertainty),
+        }
+
+    def _compatibility_census(self, psi):
+        """Adapt the irregular-grid local fit to the census telemetry schema."""
+        candidates, masks = self._local_fit_census(psi)
+        count = jnp.sum(masks, axis=1, dtype=jnp.int32)
+        capacity = jnp.full(count.shape, self.locator.maxsize, dtype=jnp.int32)
+        retained_count = jnp.minimum(count, capacity)
+        retained_index = jnp.stack(
+            [
+                jnp.where(mask, size=self.locator.maxsize, fill_value=0)[0]
+                for mask in masks
+            ]
+        )
+        retained_slot = jnp.arange(self.locator.maxsize)[None, :]
+        retained_valid = retained_slot < retained_count[:, None]
+        retained = candidates[retained_index]
+        retained = jnp.where(retained_valid[..., None], retained, 0.0)
+        return {
+            "candidate": candidates,
+            "representative_mask": masks,
+            "raw_ring_count": count,
+            "polished_count": count,
+            "typed_count": count,
+            "same_root_count": count,
+            "retained_count": retained_count,
+            "capacity": capacity,
+            "overflow": count > capacity,
+            "retained_candidate": retained,
+            "retained_valid": retained_valid,
+        }
+
+    @jax.jit
+    def candidate_census(self, psi):
+        """Publish the fixed-shape stationary-point census and its evidence."""
+        if self.structured:
+            return self._structured_census(psi)
+        return self._compatibility_census(psi)
+
+    @jax.jit
+    def _candidate_census(self, psi):
+        """Return candidates and final same-root representative masks."""
+        census = self.candidate_census(psi)
+        return census["candidate"], census["representative_mask"]
+
     @jax.jit
     def candidate_table_status(self, psi):
-        """Report whether fitted stationary points exceeded the retained table."""
-        _candidates, masks = self._candidate_census(psi)
-        counts = jnp.sum(masks, axis=1, dtype=jnp.int32)
-        capacity = jnp.full(counts.shape, self.locator.maxsize, dtype=jnp.int32)
-        return {
-            "candidate_count": counts,
-            "capacity": capacity,
-            "truncated": counts > capacity,
+        """Report pre-capacity counts, overflow, and retained-root telemetry."""
+        census = self.candidate_census(psi)
+        return census | {
+            "candidate_count": census["same_root_count"],
+            "truncated": census["overflow"],
         }
 
     @jax.jit
     def __call__(self, psi):
-        """Return extrema and saddles from fixed quadratic fit matrices."""
-        candidates, masks = self._candidate_census(psi)
-        number = jnp.sum(masks, axis=1, dtype=jnp.int32)
-        index = jnp.stack(
-            [
-                jnp.where(
-                    mask,
-                    size=self.locator.maxsize,
-                    fill_value=0,
-                )[0]
-                for mask in masks
-            ]
-        )
-        result = candidates[index]
-        position = jnp.arange(1, self.locator.maxsize + 1)
+        """Return fixed-capacity extrema and saddles from the spline census."""
+        census = self.candidate_census(psi)
         return jnp.where(
-            position[None, :, None] <= number[:, None, None],
-            result,
-            jnp.full_like(result, jnp.nan),
+            census["retained_valid"][..., None],
+            census["retained_candidate"],
+            jnp.full_like(census["retained_candidate"], jnp.nan),
         )
 
     def tree_flatten(self):
-        """Return the locator and its fixed least-squares weights."""
-        return (self.locator, self.fit_weight), {}
+        """Return immutable locator and spline geometry as pytree state."""
+        children = (
+            self.locator,
+            self.fit_weight,
+            self.spline_radial,
+            self.spline_vertical,
+        )
+        return children, {
+            "spline_shape": self.spline_shape,
+            "structured": self.structured,
+        }
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
-        """Rebuild a fixed-design locator from JAX pytree leaves."""
-        del aux_data
-        return cls(*children)
+        """Rebuild a fixed-design locator from JAX pytree state."""
+        return cls(*children, **aux_data)
 
 
 @dataclass(frozen=True)

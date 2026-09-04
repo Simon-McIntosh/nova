@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T17:36:05",
+  "updated": "2026-09-04T17:39:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -93427,6 +93427,189 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T151143603375-scr-vertical-field-deficit-source",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-vertical-field-deficit-source",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8265,
+                "cached_input_tokens": 215957,
+                "input_tokens": 224224,
+                "output_tokens": 3401,
+                "reasoning_output_tokens": 404,
+                "total_tokens": 227625,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/vertical-mode/field-deficit-source.md with one row per candidate source giving its estimated radial field at the centroid or P6 ampere-equivalent beside the measured deficits, the file:line of how the prescribed current set is assembled plus which circuits it includes or omits, whether efm carries passive currents for these slices with their magnitudes, a ranked conclusion on the most likely source with the evidence for it, the next measurement that would confirm it, every claim cited to a file, IDS path or receipt, read-only",
+          "estimated_hours": null,
+          "goal": "Explain physically where the vertical-field deficit of the two vertical-mode rows comes from: holding the plasma at the seed's vertical centroid needs a compensating current of minus 4103 A on 21986/46 plus 3022 A on 21989/55 expressed on the P6 radial-field pair (receipt docs/figures/solver-convergence-regression/vertical-mode/constraint/four-rows.json), the free prescribed-current equilibrium sits at a different height (the elimination receipt docs/figures/solver-convergence-regression/vertical-mode/elimination/four-rows.json shows the outer secant moving the centroid from 0.0656 m with a stiffness dI/dZ of 67772 A/m on 21986/46, implying a free root about 6 cm above the EFIT centroid), so the candidate explanations to test against the data are the passive structure currents EFIT (efm) reconstructs in the MAST vessel plus coil cases that the forward operator's prescribed current set omits, the P4 lower survivor plus the 0.50 probe gain findings in the MAST magnetics record, the active current set itself (which circuits, which turn counts, from which IDS at which slice, checking the sign plus the time slice of every current against efm), plus the coil-case plates, so that the report quantifies for each candidate the radial field at the plasma centroid it would produce, or the ampere-equivalent on P6, beside the 4103 A plus 3022 A deficits, reading nova/equilibrium/forward_operator.py plus nova/imas (pf_passive.py, mast_seed_parameters.py) for how the MAST prescribed currents are assembled, the machine description plus pf_passive contents in the imasdb entries the bank uses, the efm equilibrium IDS for the two rows, with no repository change",
+          "id": "scr-vertical-field-deficit-source",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T151143603375-scr-vertical-field-deficit-source/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/field-deficit-source.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "scr-passive-field-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T15:11:51Z",
+        "completed_at": "2026-09-04T15:36:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1470,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1470,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "724f6b21f9a4923d009a5b876036d92ab4c12945",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T151143603375-scr-vertical-field-deficit-source/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06cf9-e700-7810-bb96-63230d8e945a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15112064,
+            "cached_input_tokens_cumulative": 15112064,
+            "input_tokens": 15484392,
+            "input_tokens_cumulative": 15484392,
+            "output_tokens": 42469,
+            "output_tokens_cumulative": 42469,
+            "reasoning_output_tokens": 10745,
+            "reasoning_output_tokens_cumulative": 10745
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 32030,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 34430,
+              "external_wait": null,
+              "log_age_seconds": 33528,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 33584,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 53214,
+          "peak_input_tokens": 30596456
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only scout; the report is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-field-deficit-source",
+          "session_id": "01a06cf9-e700-7810-bb96-63230d8e945a",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T15:36:21Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -93543,6 +93726,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1626
+    "_version": 1627
   }
 }

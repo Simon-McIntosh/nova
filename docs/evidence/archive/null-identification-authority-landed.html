@@ -133,6 +133,36 @@
     bank, whose regenerated per-cell flux for those rows sits in the topology session's worktree on HOLD.</p>
   </section>
 
+  <section id="bank-corrected-read">
+    <h2>The twelve-row bank on the corrected read (merged at f07ee0c5)</h2>
+    <p>H200 job 1262210, 1 h 11 min, on main at <code>b2a7a046</code> with both prototypes merged; every row now banks
+    Nova's axis beside EFIT's. Change table <code>docs/figures/null-identification-authority/bank-corrected-read.json</code>,
+    all twelve overlay panels regenerated. Seven rows changed, five unchanged; focused-suite constants unchanged.</p>
+    <table>
+      <caption>Per-row outcome against the 8678047a bank</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Limiter node 10</th><th scope="col">Axis</th><th scope="col">Termination</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure, mixed</th><td>never bound</td><td>(0.903, 0.016), (0.904, 0.030) m; 15 and 29 mm from EFIT</td><td>unchanged (cycle, converged)</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>never bound</td><td>(0.902, 0.034) m</td><td>budget exhausted to settled</td></tr>
+        <tr><th scope="row">21983/35 mixed</th><td>never bound</td><td><strong>none</strong></td><td>budget exhausted to NoQualifiedAxisError</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td>never bound</td><td><strong>none</strong> (was the disjoint 0.202, 0.988)</td><td>settled to NoQualifiedAxisError</td></tr>
+        <tr><th scope="row">21985/51 mixed</th><td>never bound</td><td><strong>none</strong> (was the disjoint 0.374, −1.921)</td><td>converged to NoQualifiedAxisError</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td><strong>removed</strong></td><td>(0.913, 0.059) m</td><td>unchanged (budget), class limited</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td>—</td><td>none before and after</td><td>unchanged</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td><strong>removed</strong></td><td>(0.912, 0.029) m</td><td>budget exhausted to settled, class limited</td></tr>
+        <tr><th scope="row">21989/55 mixed</th><td><strong>removed</strong></td><td><strong>none</strong></td><td>budget exhausted to NoQualifiedAxisError</td></tr>
+        <tr><th scope="row">22086/43 pure, mixed</th><td>never bound</td><td>(0.902, 0.020), (0.902, 0.025) m</td><td>unchanged (settled, converged)</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The limiter rule does what it was built for: zero rows bind the notch node against three before. The admission
+    rule does not: on the production grid it rejects every O candidate on four rows that previously qualified, so the
+    disjoint axes on 21985/51 became no axis at all rather than the R 0.90 m read the prototype produced on the coarse
+    test fixture with a widened candidate table. That points at the fixed five-entry candidate table truncating the
+    true extremum before the connectivity test runs, or at the shared seed mask behaving differently on the production
+    hex stencil; the repair node on the plan settles it from the cached operands on CPU.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T05:57:49",
+  "updated": "2026-09-04T06:30:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -892,6 +892,24 @@
         "session_model": "gpt-5.6-sol"
       },
       {
+        "id": "dvf-residual",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "dvf-residual-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "ebd-metric-verify",
         "harness": "codex",
         "role": "test",
@@ -1517,6 +1535,51 @@
         "role": "implement",
         "session_id": "01a02aee-69e2-7670-8cc3-04b66a6973b9",
         "created": "2026-08-22"
+      },
+      {
+        "id": "nia-admission-grid",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-oracle-repair",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-oracle-repair-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-test-health",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-test-health-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "observable-discriminator",
@@ -84212,6 +84275,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1484
+    "_version": 1491
   }
 }

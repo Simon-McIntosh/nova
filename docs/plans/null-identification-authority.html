@@ -22,10 +22,10 @@
 <title>Null identification authority | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-03">
-<meta name="plan-version" content="20">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="21">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
-<meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046">
+<meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -113,6 +113,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260903T235100000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T23:51:00+02:00">
     <div class="r-comment-body">MERGED on the lead's decision 2026-09-03 23:25 (merge both now, then regenerate the bank): the connected stationary-point admission ebc4371d at f4a1b9b5 and the line-of-sight limiter 72ed7f60 at b2a7a046 are on main. The closing measure of sections 2 and 3 is dispatched as nia-bank-regeneration-corrected-read on base b2a7a046 (H200, 120-minute fence by explicit override because one job is the unit): the twelve-row bank regenerated through the exact producer with a nova axis field banked per row, a per-row change table against the 8678047a bank (axis, saddle, binding limiter point, boundary flux, class against EFIT, trip-1 mask difference, terminal residual, trips, termination), the twelve overlay panels regenerated, the focused-suite constants re-baselined only where partitions moved and stated per constant, referees green. Expected: 21985/51 axes at R about 0.90 m, the four 21986/46 and 21989/55 rows no longer binding wall node 10 with their class and axis qualification stated, the eight agreeing rows unchanged or every change quantified. impl 0.4.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260904T063500000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T06:35:00+02:00">
+    <div class="r-comment-body">BANK REGENERATED ON THE CORRECTED READ, NEGATIVE ON THE ADMISSION HALF (nia-bank-regeneration-corrected-read, worker commit 63b50480 merged at f07ee0c5; H200 job 1262210, 1 h 11 min; gate classified negative-result; docs/figures/null-identification-authority/bank-corrected-read.json plus png, all twelve overlay panels regenerated, efit-topology-corroboration.json now banks nova_axis_m, efit_axis_m and axis_distance_m on every row). LIMITER HALF CONFIRMED: zero rows bind governed wall node 10 against three before (21986/46 pure, 21989/55 pure and mixed), the class on those rows stays limited and their axes read at (0.913, 0.059) and (0.912, 0.029) m. ADMISSION HALF REGRESSED: on the production grid the connected admission admits NO O candidate on four rows that previously qualified, 21983/35 mixed (budget exhausted before), 21985/51 pure (settled, the disjoint axis at 0.202, 0.988), 21985/51 mixed (converged to 2.8e-16 around the disjoint axis at 0.374, minus 1.921) and 21989/55 mixed, all four now NoQualifiedAxisError, so the expected R 0.90 m axes on 21985/51 did not appear; the prototype's own test reached them only after widening Null2D's candidate table from five to thirty on the coarse fixture, which points at the five-entry table truncating the true extremum before the connectivity floor runs, or at the shared seed mask acting differently on the production hex stencil. The five other rows are unchanged and 21983/35 pure and 21989/55 pure improved from budget exhaustion to settled. Focused-suite constants unchanged (11 passed), referees 9 passed. The regenerated bank is the honest state of main and stays merged; the coverage regression is the first item to repair. DISPATCHED on codex (nia-admission-production-grid-repair, member nia-admission-grid, fresh worktree on f07ee0c5): root-cause the four rejections from the cached per-row operands on CPU, repair the table truncation and the empty-qualification sentinel with the oracle admission defects in one change, and tabulate the twelve rows' admitted axes in the manifest before any H200 regeneration. Also dispatched on codex: nia-test-health-repairs-codex (section 5, the connectivity signature test, the slow sweep marker and the float32 threshold assertion). Evidence anchor docs/evidence/archive/null-identification-authority-landed.html#bank-corrected-read.</div>
 </div>
 </section>
 </main>

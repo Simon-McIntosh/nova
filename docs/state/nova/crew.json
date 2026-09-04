@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:57:59",
+  "updated": "2026-09-04T14:21:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1586,6 +1586,15 @@
       },
       {
         "id": "mcs-profile-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "mcs-profile-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -91138,6 +91147,171 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T112448915386-scr-production-path-damping",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-production-path-damping",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/production-path/production-path-damping.md plus receipt docs/figures/solver-convergence-regression/settled-mask-stall/production/production-path.json with figures recording per row and per Newton step through the production route the linear residual at GMRES 30, the bypass flag, the raw and proposed step norms with the cap and ladder factors, the mask difference per trip, and for 21985/51 the residual along the full Newton step at eight fractions with the quadratic-model prediction beside it, ending in a named mechanism per row (GMRES budget too small for the bypass, the step cap, the merit ladder, mask motion, or a residual not Newton-consistent at the 1e-3 level) with the repair each implies and its owner, driver confined to benchmarks/settled_mask_stall.py, no nova/ change, the manifest written before any SLURM wait",
+          "estimated_hours": null,
+          "goal": "Explain why the production active-set solves of 21986/46, 21989/55 plus 22086/43 are bitwise unchanged by the conditioning bypass held at e2661ddeb0b23db65dd7af0036b9f57aecbbb268 (their frozen-mask contraction improved, 22086/43 to 1.5e-9, yet the full solves from the bank seeds reproduce the bank exactly and 0 of 4 converge) by measuring on the H200, per Newton step through the production route on the four rows, the Krylov relative residual reached at the production GMRES budget of 30 and whether the sqrt-epsilon bypass engages, the step cap and merit-ladder factors that still hold 21986/46 and 21989/55 at 4.6 and 11.9 percent of the raw direction, the mask difference per trip, and on 21985/51 the frozen-mask oscillation between 2.4e-3 and 2.8e-3 under full accepted steps measured against the residual sampled along the whole step (not only the directional derivative at the origin), so each remaining damping layer and any Newton-inconsistency of the residual is named with its repair (reuse map: the repair driver benchmarks/settled_mask_stall.py in this tree with its receipts under docs/figures/solver-convergence-regression/settled-mask-stall/repair/, the bank per-trip telemetry in docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, the cached operands under ~/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz, the persistent compilation cache wired at e04970ad, one or two SLURM jobs on betelgeuse under reservation gpu_0003_grpA polled in the foreground because a backgrounded wait ends the worker's turn, no nova/ change)",
+          "id": "scr-production-path-damping",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112448915386-scr-production-path-damping/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "benchmarks/settled_mask_stall.py",
+            "docs/figures/solver-convergence-regression/settled-mask-stall/production/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/production-path/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-prodpath-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:24:58Z",
+        "completed_at": "2026-09-04T12:20:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3355,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3355,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "e2661ddeb0b23db65dd7af0036b9f57aecbbb268",
+        "commits": [
+          "fd34b655d3ccce6910877d7081bd8c3b6cfbb547"
+        ],
+        "changed_lines": {
+          "added": 22875,
+          "removed": 1,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/settled_mask_stall.py production-path diagnosis on the H200 (receipt docs/figures/solver-convergence-regression/settled-mask-stall/production/production-path.json)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/production-path/production-path-damping.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112448915386-scr-production-path-damping/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c2a-2d04-7853-9770-e53dcb3dec77",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29120512,
+            "cached_input_tokens_cumulative": 29120512,
+            "input_tokens": 29430935,
+            "input_tokens_cumulative": 29430935,
+            "output_tokens": 65332,
+            "output_tokens_cumulative": 65332,
+            "reasoning_output_tokens": 22275,
+            "reasoning_output_tokens_cumulative": 22275
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 18417,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 20817,
+              "external_wait": null,
+              "log_age_seconds": 19915,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 19971,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 87607,
+          "peak_input_tokens": 58551447
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-production-path-damping",
+          "session_id": "01a06c2a-2d04-7853-9770-e53dcb3dec77",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T12:20:53Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -91254,6 +91428,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1594
+    "_version": 1596
   }
 }

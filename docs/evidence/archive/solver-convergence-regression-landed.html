@@ -351,6 +351,32 @@
     damping, is the remaining question.</p>
   </section>
 
+  <section id="production-path">
+    <h2>The production route: which damping layers remain per row (merged at 66d34a0e)</h2>
+    <p><strong>Commit:</strong> <code>fd34b655</code>; receipts <code>docs/figures/solver-convergence-regression/settled-mask-stall/production/</code>;
+    report <code>~/.config/reckon/crew/reports/nova/production-path/production-path-damping.md</code>. Four rows solved through
+    <code>ForwardProfile.solve_branch</code> at the public GMRES budget of 30 on the H200, every Newton step traced.</p>
+    <img src="/nova/figures/solver-convergence-regression/settled-mask-stall/production/production-path.png" alt="Per-step linear residual, bypass, cap and ladder factors and mask motion on four MAST rows through the production route" style="max-width:100%">
+    <table>
+      <caption>Layers active on the production route</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Bypass engaged</th><th scope="col">Primary layer</th><th scope="col">Also active</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>60 of 60</td><td>residual not Newton-consistent along the step (whole-step error up to 8.1e-3 against the quadratic model)</td><td>step cap, merit ladder, mask motion 5, 32, 0, 35, 35 cells per trip</td></tr>
+        <tr><th scope="row">21986/46</th><td>96 of 96</td><td>step cap (raw direction sup 6 to 140, effective step near 1e-2)</td><td>merit ladder, mask motion 5 then 0</td></tr>
+        <tr><th scope="row">21989/55</th><td>104 of 108</td><td>step cap</td><td>merit ladder, mask motion 8, 33 then 0</td></tr>
+        <tr><th scope="row">22086/43</th><td>3 of 5</td><td>the bank route's GMRES budget of 12 (public route converges to 7.2e-15 in five updates)</td><td>mask motion 27, 1, 0</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The bank has been measuring a stricter route than production: its producer pins GMRES 12, where the conditioning guard
+    still fires twelve times a solve, while the public budget of 30 resolves the linear model so the trusted bypass engages on
+    nearly every direction. On the public route 22086/43 converges. The remaining layers are the step cap on directions whose raw
+    norm grows to 6 to 140, the merit ladder behind it, mask motion of tens of cells per trip on 21985/51, and on that row a
+    residual the linearisation does not describe across a step. Raw directions that large on a state of order one are the
+    signature of a near-singular Jacobian, which the null-direction measurement decides. A telemetry defect is noted: the
+    active-set result keeps only the last inner solve's conditioning count.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T17:43:32",
+  "updated": "2026-09-04T17:51:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1185,6 +1185,15 @@
       },
       {
         "id": "fsa-request-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "fsa-routes-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -2536,6 +2545,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "scr-test-contract-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "scr-vconstraint-x",
         "harness": "codex",
         "role": "implement",
@@ -2605,6 +2623,15 @@
       },
       {
         "id": "sdw-parity-current-3",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "sdw-profile-defaults-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -93791,6 +93818,190 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T153351646917-scr-continuation-test-regression-attribution",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-continuation-test-regression-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2721,
+                "cached_input_tokens": 265390,
+                "input_tokens": 268212,
+                "output_tokens": 3262,
+                "reasoning_output_tokens": 1120,
+                "total_tokens": 271474,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/attribution/continuation-test-regression.md with one row per checkout per test giving pass or fail plus the observed value, the flipping merge named for each test with the mechanism quoted from its diff at file:line, a verdict per test (solver regression or stale expectation) with the reasoning, the recommended repair with the file it touches, all logs under the same report directory, read-only on the repository",
+          "estimated_hours": null,
+          "goal": "Attribute two focused test failures found on main ac0d29bd by the default-wiring node (its log ~/.config/reckon/crew/runs/r-20260904T151648756117-sdw-default-wiring-test/fixture-gate.log): tests/test_newton_trajectory_continuation.py::test_continuation_accumulates_contracting_segments_eager_and_jit expects 2 active-set iterations but observes 5, tests/test_globalization_state_continuation.py::test_inner_decision_state_accumulates_across_segments expects a carried recovery radius of 1.0 but observes 0.000244140625, neither of which is in the seven referee node IDs so they slipped past the merge gates of the fixed_point.py landings of this session (the model-error step cap plus partition relinearisation merged at e930710c, the trusted-Krylov admission at c9b9b963, the pre-settlement scoring default at f0f1112f, the census admission at 82949087), by running the two node IDs once each in detached checkouts created with git worktree add under the run's own directory at main plus at the first parent of each of those merges (each checkout's .venv a symlink to /home/ITER/mcintos/Code/nova/.venv, JAX_PLATFORMS=cpu, uv run --no-sync pytest -p no:cacheprovider, one log per checkout) so that the report names the merge that flipped each test, reads the failing assertion against the mechanism that merge introduced (a mask change now resets carried conditioning plus model-error state before relinearising, which is exactly a carried recovery radius) plus states whether the test's expectation or the solver is wrong under the lead's rule that a landed mechanism must not silently change accepted contracts, with no source change because nova/equilibrium/fixed_point.py is held by the live one-read-per-trip node",
+          "id": "scr-continuation-test-regression-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T153351646917-scr-continuation-test-regression-attribution/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/continuation-test-regression.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/continuation-test-regression-logs/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-regression-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T15:34:03Z",
+        "completed_at": "2026-09-04T15:49:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 954,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 954,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "fc7e1b19b86b89a399eb4a37a4551ef1034c7f82",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T153351646917-scr-continuation-test-regression-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d0e-3a39-73d2-8e63-afb96ee02287",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9229952,
+            "cached_input_tokens_cumulative": 9229952,
+            "input_tokens": 9427087,
+            "input_tokens_cumulative": 9427087,
+            "output_tokens": 28288,
+            "output_tokens_cumulative": 28288,
+            "reasoning_output_tokens": 13039,
+            "reasoning_output_tokens_cumulative": 13039
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 33360,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 35760,
+              "external_wait": null,
+              "log_age_seconds": 34858,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 34914,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 41327,
+          "peak_input_tokens": 18657039
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only attribution; the report is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-continuation-test-regression-attribution",
+          "session_id": "01a06d0e-3a39-73d2-8e63-afb96ee02287",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T15:49:57Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -93907,6 +94118,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1628
+    "_version": 1632
   }
 }

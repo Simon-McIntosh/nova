@@ -163,12 +163,50 @@
     hex stencil; the repair node on the plan settles it from the cached operands on CPU.</p>
   </section>
 
+  <section id="admission-production-grid">
+    <h2>§4 — The complete stationary-point census on the production grid (merged at 82949087)</h2>
+    <p><strong>Commit:</strong> worker <code>23a86b25</code> merged at <code>82949087</code> (<code>nova/equilibrium/topology.py</code>,
+    <code>nova/equilibrium/forward_operator.py</code>, <code>nova/biot/null.py</code>, tests). CPU re-read of the cached per-row
+    operands, receipt <code>~/.config/reckon/crew/runs/r-20260904T043020189632-nia-admission-production-grid-repair/logs/mast-production-reread.json</code>.</p>
+    <p>Four defects behind the four NoQualifiedAxisError rows, repaired in one change: the production locator selected
+    crossing-count rows into a fixed five-slot candidate table while the 33 by 33 MAST maps carry 18 to 25 fitted extrema, so
+    the confined axis could be discarded before the connected-share test ran (the reader now fits every stencil, keeps 30
+    candidates and reports overflow); an all-false qualification made the argmax return index 0 (now a sentinel with all-NaN
+    O data); the rescue pass seeded from pass one's winner (now from the centroid-nearest raw extremum, admitting a recovered
+    result only after an empty first pass); and the one percent material floor compared 1.36 to an integer count on the
+    136-cell oracle (now at least one cell).</p>
+    <table>
+      <caption>Admitted axis per row on the repaired read (candidate counts are [O, X]; the table holds 30)</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Axis R (m)</th><th scope="col">Connected share</th><th scope="col">Candidates</th><th scope="col">Saddle table</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure, mixed</th><td>0.90656, 0.90355</td><td>0.240, 0.243</td><td>[25, 34], [23, 34]</td><td>overflowed</td></tr>
+        <tr><th scope="row">21983/35 pure, mixed</th><td>0.90245, 0.90252</td><td>0.259, 0.257</td><td>[21, 25], [21, 26]</td><td>complete</td></tr>
+        <tr><th scope="row">21985/51 pure, mixed</th><td>0.89722, 0.89743 (were none; before that the disjoint 0.202 and 0.374)</td><td>0.173, 0.167</td><td>[18, 27], [18, 28]</td><td>complete</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>0.91364</td><td>0.175</td><td>[20, 31]</td><td>overflowed</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td colspan="4">no terminal flux in either operand capture</td></tr>
+        <tr><th scope="row">21989/55 pure, mixed</th><td>0.91252, 0.91355 (mixed was none)</td><td>0.156, 0.156</td><td>[19, 35], [20, 36]</td><td>overflowed</td></tr>
+        <tr><th scope="row">22086/43 pure, mixed</th><td>0.90193, 0.90161</td><td>0.199, 0.200</td><td>[22, 39], [22, 41]</td><td>overflowed</td></tr>
+        <tr><th scope="row">Solov'ev diverted, 136 cells, exact field</th><td colspan="4">axis (1.75945, −0.06426) m, saddle (1.28778, −0.38092) m; 4 extrema, 1 saddle, none truncated</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Gate:</strong> the admission four-file gate 21 passed, <code>tests/test_solovev_recovery_gates.py</code> 8 passed,
+    the seven referee node IDs 9 passed; the forward-reader files 40 passed with the two <code>tests/test_forward_operator_axes.py</code>
+    failures the worker attributes to the base (non-tensor-product construction, synthetic cubic class margin).
+    <strong>Provenance:</strong> the corrected-regeneration capture holds flux for rows 00, 01, 02, 06, 08, 10 and 11 only;
+    rows 03, 04, 05 and 09 were read from the preceding capture, the terminal maps whose read raised before the producer saved
+    flux. <strong>Newly visible:</strong> the saddle table overflows on seven of eleven rows (31 to 41 fitted saddle
+    candidates), so the X read on those rows is not yet a complete census.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>The disjoint-axis admission fix is §2 work beside the X-point containment; the line-of-sight limiter
-      rule is §3; the admission repairs and the joint qualification are §4; the hardening tests are §5.</li>
-      <li>Codex is out of quota until 8 September; every node runs on the claude backend.</li>
+      <li>§1 banking (candidate table status per row, attempted terminal flux retained when a row raises) and the bank
+      regeneration on the repaired census wait on the pre-settlement acceptance default so one H200 job measures both.</li>
+      <li>§4 owes the joint qualification rule and the saddle-table ranking or widening on the seven overflowing rows;
+      §5 owes the two forward-operator-axes failures, the 0.13025 mm X-coordinate identity in the slow sweep and the
+      symmetric null-fit tangent.</li>
+      <li>Codex is the default backend again; the connectivity test-health repairs landed at f34ba4bb.</li>
     </ul>
   </section>
 </main>

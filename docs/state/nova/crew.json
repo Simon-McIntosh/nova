@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T07:04:05",
+  "updated": "2026-09-04T07:20:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1999,6 +1999,17 @@
         "id": "scr-default-on",
         "harness": "codex",
         "role": "implement",
+        "session_id": "01a06acb-8af2-77d2-bdf1-ede2779ab40f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06acb-8af2-77d2-bdf1-ede2779ab40f"
+        },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-default-on-2",
+        "harness": "codex",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -2060,9 +2071,19 @@
         "session_id": "01a06342-9fbd-7be1-bea6-3001b4f7dd38",
         "session_model": "gpt-5.6-sol",
         "sessions": {
-          "gpt-5.6-sol": "01a06342-9fbd-7be1-bea6-3001b4f7dd38"
+          "gpt-5.6-sol": "01a06342-9fbd-7be1-bea6-3001b4f7dd38",
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06aac-1603-78a0-a70b-4baa05c3742f"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-parity-current-2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "sdw-review-a",
@@ -85400,6 +85421,224 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T043020189632-nia-admission-production-grid-repair",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-admission-production-grid-repair",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/topology.py, nova/equilibrium/forward_operator.py, nova/biot/null.py, tests/test_stationary_point_admission.py and tests/test_oracle_axis_admission.py, held unmerged for the lead, with a CPU re-read of all twelve rows from the regeneration operands tabulated in the manifest (admitted axis position or the distinguishable no-axis status per row, the connected share the winning candidate reached, and whether the candidate table truncated) showing the eleven populated rows admit an axis within one cell pitch of R 0.90 m and the 136-cell diverted oracle's exact field reads a qualified axis and saddle, the named mechanism for the four rejections stated with file:line, an empty-qualification read raising or reporting the distinguishable status, the truncation flag exercised by a synthetic map with more than five extrema, and the seven referee node IDs, tests/test_stationary_point_admission.py, tests/test_topology_o_qualification.py, tests/test_topology_domain_partition.py and tests/test_solovev_recovery_gates.py green, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Root-cause and repair why the connected O-point admission merged at f4a1b9b5 rejects every candidate on the production 33-by-33 MAST grid for 21983/35 mixed, 21985/51 pure, 21985/51 mixed and 21989/55 mixed (all four now NoQualifiedAxisError in the regenerated bank at 63b50480, while the prototype's coarse test admitted the 21985/51 axes at R 0.897 m only with the candidate table widened to thirty) together with the oracle admission defects (o_point_index returning index 0 when nothing qualifies so the second pass seeds an arbitrary cell, Null2D's fixed capacity of five truncating extrema silently, the 136-cell diverted Solovev oracle reading no axis on both the numeric and the exact field), in nova/equilibrium/topology.py, nova/equilibrium/forward_operator.py and nova/biot/null.py (reuse map: the per-row operands with flux for all twelve rows in /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/raw/current-operands.npz and the change table docs/figures/null-identification-authority/bank-corrected-read.json, the traces in /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/axis-disjoint-mechanism.md and /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/oracle-axis-admission.md, tests/test_stationary_point_admission.py, the connected-share floor _MATERIAL_CONNECTED_FRACTION and the shared seed mask in qualified_o_candidates)",
+          "id": "nia-admission-production-grid-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T043020189632-nia-admission-production-grid-repair/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/biot/null.py",
+            "tests/test_stationary_point_admission.py",
+            "tests/test_oracle_axis_admission.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-admission-grid",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T04:30:49Z",
+        "completed_at": "2026-09-04T05:11:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2452,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2452,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f07ee0c566c37dbb937d32aec540fe63f3572876",
+        "commits": [
+          "23a86b25b74c04d4c7609dc0c337b80a95a28ad4"
+        ],
+        "changed_lines": {
+          "added": 248,
+          "removed": 49,
+          "files": 5
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_stationary_point_admission.py tests/test_topology_o_qualification.py tests/test_topology_domain_partition.py tests/test_oracle_axis_admission.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T043020189632-nia-admission-production-grid-repair/logs/after-admission-focused.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T043020189632-nia-admission-production-grid-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06aaf-05f2-7870-9c1b-bc4520be82d0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18190976,
+            "cached_input_tokens_cumulative": 18190976,
+            "input_tokens": 18412141,
+            "input_tokens_cumulative": 18412141,
+            "output_tokens": 41981,
+            "output_tokens_cumulative": 41981,
+            "reasoning_output_tokens": 13084,
+            "reasoning_output_tokens_cumulative": 13084
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 118623,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 129423,
+              "log_age_seconds": 123653,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 123699,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6528,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: SLURM job 1262252 (job name presettlement-mast-capture-v2; submitted from this worktree) remained PENDING(Priority) for the entire foreground wait (submitted ~03:33; still PENDING at 04:19; i.e. ~44 minutes with zero state change) because the single H200 node under reservation gpu_0003_grpA is fully occupied by other concurrently-running jobs (see follow_ons for the exact job list observed via squeue). This is a cluster-availability blocker; not a code or design blocker. Resume path for a subsequent dispatch: (1) `squeue -j 1262252` / `squeue -p betelgeuse -o \"%i %u %T %M\"` to check whether it has started or whether the node has freed up; (2) if it completed; read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/logs/h200-capture.log for EXIT_MARKER; if 0; the raw capture is at .../raw-presettlement-mast.json in this run directory \u2014 run from this worktree `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <raw path> --referee-log logs/referee.log --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; verify the printed verdict against the banked 4.8002e-4 / 7-trip figure; then commit benchmarks/acceptance_presettlement_remedy.py plus the two new files under docs/figures/solver-convergence-regression/remedy-presettlement/mast/ with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer); (3) if job 1262252 is still PENDING or was never scheduled before a future dispatch's own time budget runs out; either wait longer (the SLURM job itself has no deadline pressure \u2014 it persists independently of any single dispatch's fence) or escalate the node contention to the lead; since four to five long-running jobs occupying the sole H200 node is likely worth knowing about regardless of this measurement.",
+              "elapsed_seconds": 10128,
+              "log_age_seconds": 7731,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 7827,
+              "terminal_at": "2026-09-04T02:20:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 7200,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 878,
+              "log_age_seconds": 429,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[\"63b5048086c27ca5414a34089dc4e567ca7b083e\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260903T214824918852-nia-bank-regeneration-corrected-read --gate <verdict> --commit [\"63b5048086c27ca5414a34089dc4e567ca7b083e\"]",
+              "node": "nia-bank-regeneration-corrected-read",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T214824918852-nia-bank-regeneration-corrected-read",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 436,
+              "terminal_at": "2026-09-04T04:23:21Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-bank-regeneration-corrected-read"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55065,
+          "peak_input_tokens": 36603117
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -85430,8 +85669,36 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904051106",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T05:11:06Z",
+        "closed_at": "2026-09-04T05:12:22Z",
+        "held_seconds": 76,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904051923",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T05:19:23Z",
+        "closed_at": "2026-09-04T05:20:26Z",
+        "held_seconds": 63,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
       }
     ],
-    "_version": 1503
+    "_version": 1512
   }
 }

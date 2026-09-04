@@ -77,6 +77,43 @@ class ForwardSolvePolicy:
 
         return asdict(self)
 
+    def kernel_options(self) -> dict[str, JsonScalar]:
+        """Translate this policy into the selected route's public keywords."""
+
+        if self.route == "newton_krylov":
+            return {
+                "newton_steps": self.newton_steps,
+                "gmres_iterations": self.gmres_iterations,
+                "warmup": self.warmup,
+                "relaxation": self.relaxation,
+                "step_cap": self.step_cap,
+                "active_set_steps": self.active_set_steps,
+                "convergence_tolerance": self.kernel_tolerance,
+                "stop_on_active_set_stagnation": self.stagnation_stop,
+                "stop_on_active_set_settlement": self.settled_exit,
+                "retain_outer_best_iterate": self.best_iterate_retention,
+                "continue_newton_trajectory": self.continuation,
+                "continue_globalization_state": self.continuation,
+                "own_mask_acceptance": self.own_mask_acceptance,
+            }
+        if self.route in {"picard", "anderson"}:
+            options: dict[str, JsonScalar] = {
+                "evaluations": self.newton_steps,
+                "relaxation": self.relaxation,
+            }
+            if self.route == "anderson":
+                options.update(warmup=self.warmup, step_cap=self.step_cap)
+            return options
+        if self.route == "host":
+            return {
+                "evaluations": self.newton_steps,
+                "relaxation": self.relaxation,
+                "tolerance": self.kernel_tolerance,
+            }
+        if self.route == "host_krylov":
+            return {}
+        raise ValueError(f"unknown forward solve route {self.route!r}")
+
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> ForwardSolvePolicy:
         """Restore a policy while refusing missing or additional fields."""
@@ -111,6 +148,21 @@ def declared_forward_solve_policy(
         raise KeyError(
             f"Nova {nova_version!r} has no declared forward solve policy"
         ) from error
+
+
+def resolve_forward_solve_policy(
+    *,
+    route: SolveRoute | None = None,
+    overrides: Mapping[str, JsonScalar] | None = None,
+    nova_version: str = NOVA_VERSION,
+) -> ForwardSolvePolicy:
+    """Resolve one route and its explicit deviations from the sole default table."""
+
+    policy = declared_forward_solve_policy(nova_version)
+    deviations = dict(overrides or {})
+    if route is not None:
+        deviations["route"] = route
+    return replace(policy, **deviations) if deviations else policy
 
 
 @dataclass(frozen=True, slots=True)
@@ -277,4 +329,5 @@ __all__ = [
     "ResolvedForwardSolveDefaults",
     "SolveRoute",
     "declared_forward_solve_policy",
+    "resolve_forward_solve_policy",
 ]

@@ -199,9 +199,9 @@ class _FixedDesignNull2D:
 
     Strict-interior ring geometry is immutable.  One tensor spline supplies the
     centre-relative cyclic sign count, the stationary-point polish, the value,
-    the gradient, and the Hessian type.  A local quadratic remains available
-    only for non-tensor-product compatibility; it is never the production
-    admission authority on a complete structured map.
+    the gradient, and the Hessian type.  Non-tensor carriers use their authored
+    nodal values for the same containment count and use a local quadratic only
+    to place the seed within an admitted ring.
     """
 
     locator: Null2D
@@ -210,10 +210,15 @@ class _FixedDesignNull2D:
     spline_vertical: jax.Array = field(repr=False)
     spline_shape: tuple[int, int]
     structured: bool
+    extremum_polarity: int | None
 
     @classmethod
-    def from_locator(cls, locator: Null2D) -> _FixedDesignNull2D:
+    def from_locator(
+        cls, locator: Null2D, extremum_polarity: int | None = None
+    ) -> _FixedDesignNull2D:
         """Precompute immutable ring geometry and compatibility fit weights."""
+        if extremum_polarity not in (-1, 1, None):
+            raise ValueError("extremum polarity must be either -1 or 1")
         local = np.asarray(locator.local_coordinate_stencil, dtype=np.float64)
         radial = local[..., 0]
         vertical = local[..., 1]
@@ -246,6 +251,7 @@ class _FixedDesignNull2D:
             spline_vertical=jnp.asarray(vertical_axis, dtype=locator.fit_dtype),
             spline_shape=spline_shape,
             structured=structured,
+            extremum_polarity=extremum_polarity,
         )
 
     @property
@@ -264,7 +270,7 @@ class _FixedDesignNull2D:
         return self.locator.fit_dtype
 
     def _local_fit_census(self, psi):
-        """Retain the fixed-SVD compatibility read for irregular test grids."""
+        """Fit local quadratic seeds without deciding which rings contain nulls."""
         sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
         coefficient = jnp.einsum("...ij,...j->...i", self.fit_weight, sampled)
         determinant = (
@@ -472,6 +478,7 @@ class _FixedDesignNull2D:
             "candidate": candidates,
             "ring_crossing_count": crossing_count,
             "ring_admitted_mask": ring_mask,
+            "ring_resolution_limited": crossing_count == 2,
             "polish_converged": polish["converged"],
             "requested_displacement": requested_displacement,
             "cell_width": cell_width,
@@ -508,36 +515,69 @@ class _FixedDesignNull2D:
             "retained_spline_hessian_determinant": retain(hessian_determinant),
             "retained_requested_displacement": retain(displacement),
             "retained_root_uncertainty": retain(root_uncertainty),
+            "spline_authored": jnp.asarray(True),
         }
 
     def _compatibility_census(self, psi):
-        """Adapt the irregular-grid local fit to the census telemetry schema."""
-        candidates, masks = self._local_fit_census(psi)
-        count = jnp.sum(masks, axis=1, dtype=jnp.int32)
-        capacity = jnp.full(count.shape, self.locator.maxsize, dtype=jnp.int32)
-        retained_count = jnp.minimum(count, capacity)
+        """Use nodal containment and local seeds on non-tensor carriers."""
+        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
+        crossing_count = self.locator.crossing_count(sampled)
+        ring_masks = jnp.stack((crossing_count == 0, crossing_count == 4))
+        raw_count = jnp.sum(ring_masks, axis=1, dtype=jnp.int32)
+        capacity = jnp.full(raw_count.shape, self.locator.maxsize, dtype=jnp.int32)
         retained_index = jnp.stack(
             [
                 jnp.where(mask, size=self.locator.maxsize, fill_value=0)[0]
-                for mask in masks
+                for mask in ring_masks
             ]
         )
+        retained = self.locator(psi)
         retained_slot = jnp.arange(self.locator.maxsize)[None, :]
-        retained_valid = retained_slot < retained_count[:, None]
-        retained = candidates[retained_index]
+        contained = retained_slot < jnp.minimum(raw_count, capacity)[:, None]
+        finite_seed = jnp.all(jnp.isfinite(retained), axis=-1)
+        expected_type = jnp.asarray(((1.0,), (0.0,)), dtype=retained.dtype)
+        type_agrees = retained[..., 3] == expected_type
+        retained_valid = contained & finite_seed & type_agrees
         retained = jnp.where(retained_valid[..., None], retained, 0.0)
+        retained_count = jnp.sum(retained_valid, axis=1, dtype=jnp.int32)
+        source_origin = self.locator.stencil[:, 0].astype(jnp.int32)[retained_index]
+        retained_origin = jnp.where(retained_valid, source_origin, 0)
+        candidates = retained.reshape((-1, retained.shape[-1]))
+        empty_mask = jnp.zeros(self.locator.maxsize, dtype=bool)
+        representative_mask = jnp.stack(
+            (
+                jnp.concatenate((retained_valid[0], empty_mask)),
+                jnp.concatenate((empty_mask, retained_valid[1])),
+            )
+        )
+        local_candidate, local_fit_mask = self._local_fit_census(psi)
         return {
             "candidate": candidates,
-            "representative_mask": masks,
-            "raw_ring_count": count,
-            "polished_count": count,
-            "typed_count": count,
-            "same_root_count": count,
+            "ring_crossing_count": crossing_count,
+            "ring_admitted_mask": ring_masks,
+            "ring_resolution_limited": crossing_count == 2,
+            "local_fit_candidate": local_candidate,
+            "local_fit_mask": local_fit_mask,
+            "unresolved_local_fit_mask": local_fit_mask & ~ring_masks,
+            "representative_mask": representative_mask,
+            "source_origin_index": self.locator.stencil[:, 0].astype(jnp.int32),
+            "raw_ring_count": raw_count,
+            "polished_count": retained_count,
+            "typed_count": retained_count,
+            "same_root_count": retained_count,
             "retained_count": retained_count,
             "capacity": capacity,
-            "overflow": count > capacity,
+            "overflow": raw_count > capacity,
             "retained_candidate": retained,
             "retained_valid": retained_valid,
+            "retained_representative_origin_index": retained_origin,
+            "retained_representative_origin_rz": jnp.where(
+                retained_valid[..., None],
+                self.locator.physical_origin[retained_index],
+                0.0,
+            ),
+            "retained_multiplicity": retained_valid.astype(jnp.int32),
+            "spline_authored": jnp.asarray(False),
         }
 
     @jax.jit
@@ -564,10 +604,24 @@ class _FixedDesignNull2D:
 
     @jax.jit
     def __call__(self, psi):
-        """Return fixed-capacity extrema and saddles from the spline census."""
+        """Return fixed-capacity, polarity-consistent extrema and saddles."""
         census = self.candidate_census(psi)
+        extremum_valid = (
+            jnp.ones_like(census["retained_valid"][0])
+            if self.extremum_polarity is None
+            else census["retained_candidate"][0, :, 3]
+            == jnp.asarray(
+                self.extremum_polarity,
+                dtype=census["retained_candidate"].dtype,
+            )
+        )
+        admitted = (
+            census["retained_valid"]
+            .at[0]
+            .set(census["retained_valid"][0] & extremum_valid)
+        )
         return jnp.where(
-            census["retained_valid"][..., None],
+            admitted[..., None],
             census["retained_candidate"],
             jnp.full_like(census["retained_candidate"], jnp.nan),
         )
@@ -583,6 +637,7 @@ class _FixedDesignNull2D:
         return children, {
             "spline_shape": self.spline_shape,
             "structured": self.structured,
+            "extremum_polarity": self.extremum_polarity,
         }
 
     @classmethod
@@ -733,7 +788,7 @@ class ForwardFluxOperator:
             max(self.grid.null.maxsize, _PRODUCTION_STATIONARY_POINT_CAPACITY)
         )
         self._fixed_design_topology = Topology(
-            _FixedDesignNull2D.from_locator(production_locator),
+            _FixedDesignNull2D.from_locator(production_locator, self.polarity),
             self.wall.null,
             **topology_geometry,
         )

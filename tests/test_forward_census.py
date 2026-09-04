@@ -354,48 +354,75 @@ def test_forward_census_bank_rows_do_not_overflow():
 
 
 def test_forward_census_exact_diverted_oracle():
-    """The coarse closed-form field admits its axis and saddle with telemetry."""
+    """The certificate ladder resolves only nulls contained by its nodal rings."""
     from benchmarks.solovev_certificate import AXIS_M, X_POINT_M, _case, _exact_state
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
     carrier_case, source_case, exact = _case("diverted-jump-bearing")
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        -110,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
-    )
-    oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
-    )
-    coefficients = empty_operator.coupling_current_moments(exact_physical)
-    exact_internal = oracle_fixture._internal_flux_image(empty_operator, coefficients)
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - exact_internal
-    )
-    _masks, state = operator.read(jnp.asarray(oracle_state))
-    grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
-    census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
-    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
 
-    assert len(machine.node) == 136
-    np.testing.assert_allclose(np.asarray(state.axis), AXIS_M, atol=pitch)
-    np.testing.assert_allclose(np.asarray(state.x_point), X_POINT_M, atol=pitch)
-    assert bool(state.diverted)
-    assert not np.any(np.asarray(census["overflow"]))
-    if operator._fixed_design_topology.grid.structured:
-        valid = np.asarray(census["retained_valid"])
-        gradient = np.asarray(census["retained_spline_gradient_norm"])[valid]
-        determinant = np.asarray(census["retained_spline_hessian_determinant"])[valid]
-        assert np.all(np.isfinite(gradient))
-        assert np.all(np.isfinite(determinant))
-        assert np.all(np.abs(determinant) > 0.0)
-    else:
-        np.testing.assert_array_equal(census["candidate_count"], [4, 1])
+    def read_exact(requested_cells):
+        machine = oracle_fixture.cached_machine(
+            carrier_case,
+            requested_cells,
+            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        )
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, oracle_state
+        )
+        coefficients = empty_operator.coupling_current_moments(exact_physical)
+        exact_internal = oracle_fixture._internal_flux_image(
+            empty_operator, coefficients
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, oracle_state - exact_internal
+        )
+        _masks, state = operator.read(jnp.asarray(oracle_state))
+        grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
+        census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+        return machine, operator, state, census
+
+    coarse_machine, coarse_operator, coarse_state, coarse_census = read_exact(-110)
+    coarse_pitch = float(np.sqrt(np.median(np.asarray(coarse_machine.area))))
+    coarse_grid = coarse_operator._fixed_design_topology.grid
+    nearest_saddle_cell = int(
+        np.argmin(
+            np.linalg.norm(
+                np.asarray(coarse_grid.locator.physical_origin) - X_POINT_M,
+                axis=1,
+            )
+        )
+    )
+
+    assert len(coarse_machine.node) == 136
+    assert not coarse_grid.structured
+    assert not bool(coarse_census["spline_authored"])
+    np.testing.assert_allclose(np.asarray(coarse_state.axis), AXIS_M, atol=coarse_pitch)
+    assert np.all(np.isnan(np.asarray(coarse_state.x_point)))
+    assert not bool(coarse_state.diverted)
+    np.testing.assert_array_equal(coarse_census["raw_ring_count"], [2, 1])
+    np.testing.assert_array_equal(coarse_census["candidate_count"], [2, 0])
+    assert int(coarse_census["ring_crossing_count"][nearest_saddle_cell]) == 2
+    assert bool(coarse_census["ring_resolution_limited"][nearest_saddle_cell])
+    assert not np.any(np.asarray(coarse_census["overflow"]))
+
+    fine_machine, fine_operator, fine_state, fine_census = read_exact(-300)
+    fine_pitch = float(np.sqrt(np.median(np.asarray(fine_machine.area))))
+
+    assert len(fine_machine.node) == 342
+    assert not fine_operator._fixed_design_topology.grid.structured
+    assert not bool(fine_census["spline_authored"])
+    np.testing.assert_allclose(np.asarray(fine_state.axis), AXIS_M, atol=fine_pitch)
+    np.testing.assert_allclose(
+        np.asarray(fine_state.x_point), X_POINT_M, atol=fine_pitch
+    )
+    assert bool(fine_state.diverted)
+    np.testing.assert_array_equal(fine_census["candidate_count"], [1, 1])
+    assert not np.any(np.asarray(fine_census["overflow"]))
 
 
 def test_forward_census_refuses_polish_outside_detected_cell():

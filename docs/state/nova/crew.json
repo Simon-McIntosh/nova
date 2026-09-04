@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:05:23",
+  "updated": "2026-09-04T09:10:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1615,6 +1615,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-gate-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-limiter-polish-scout",
         "harness": "codex",
         "role": "investigate",
@@ -1654,6 +1663,15 @@
       },
       {
         "id": "nia-oracle-repair-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-perf-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -87544,6 +87562,242 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T065733042854-fsa-cold-seed-raster-repair",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-cold-seed-raster-repair",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/forward_operator.py, nova/equilibrium/forward.py and tests/test_cold_seed_portfolio_raster.py in which coupling_current_moments returns zero radial and vertical coefficients for zero first moments when moment_geometry is None and raises a ValueError naming the missing geometry only when nonzero first moments are supplied without it, cold_seed_portfolio therefore completes on a raster operator built without moment geometry, a new CPU test proves both branches on a small raster operator plus that the hex-operator result is bit-identical to before (asserted against the existing path), the seven referee node IDs green plus tests/test_raster_flux_receipt.py green on CPU with logs, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Make ForwardProfile.cold_seed_portfolio build on an operator whose moment_geometry is None, as the persisted 33 by 33 MAST raster carrier's operator is, so the cold-portfolio control of the coil-edit warm-start measurement can run (defect: forward.py near line 570 calls ForwardFluxOperator.coupling_current_moments, forward_operator.py near line 820, which dereferences self.moment_geometry.second_moment with no None guard while the raster path guards None at forward.py 1038 plus 1149 and forward_operator.py 442, 515 plus 664, traceback in ~/.config/reckon/crew/runs/r-20260904T054255696439-fsa-warm-start-converging-codex/logs/coil-edit-converging-1262272.log, reuse map: the uniform-disc seed carries zero first moments so the second-moment inversion is the identity on zero, current_moment_image plus external as the neutral seed composition, the persisted carrier loader in benchmarks/coil_edit_latency.py _prepare_case as the reproduction, tests/test_raster_flux_receipt.py for a raster-operator fixture)",
+          "id": "fsa-cold-seed-raster-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065733042854-fsa-cold-seed-raster-repair/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_cold_seed_portfolio_raster.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-cold-seed-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:57:44Z",
+        "completed_at": "2026-09-04T07:07:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 588,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 588,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f14573fe081caef9a6b9cd0fd18c321168ef1daf",
+        "commits": [
+          "799f4354f33a37812d8aba842d720db05a2e6462"
+        ],
+        "changed_lines": {
+          "added": 144,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 uv run --no-sync pytest -p no:cacheprovider -q tests/test_cold_seed_portfolio_raster.py tests/test_raster_flux_receipt.py <seven referee node IDs>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065733042854-fsa-cold-seed-raster-repair/logs/cpu-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065733042854-fsa-cold-seed-raster-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b35-8714-70d0-a289-40e1fcc78a0b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4279552,
+            "cached_input_tokens_cumulative": 4279552,
+            "input_tokens": 4435130,
+            "input_tokens_cumulative": 4435130,
+            "output_tokens": 15909,
+            "output_tokens_cumulative": 15909,
+            "reasoning_output_tokens": 4419,
+            "reasoning_output_tokens_cumulative": 4419
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 127444,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 138244,
+              "external_wait": null,
+              "log_age_seconds": 132474,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 132520,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2383,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 4783,
+              "external_wait": null,
+              "log_age_seconds": 3881,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 3937,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 260,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The retained line-of-sight suite cannot be green without changing tests/test_limiter_line_of_sight.py; which is outside this node's exclusive write scope; and the complete connectivity-file run did not finish inside the time fence. The implementation and scoped artifacts are committed and held unmerged for lead review.",
+              "elapsed_seconds": 3860,
+              "external_wait": null,
+              "log_age_seconds": 540,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[9165374a8f19b3286028279fc7f3798adcc38f2f",
+                "a75615f6d1eb4ffad18fd0ba5aa8d4368276714d]; changed_paths: [nova/equilibrium/connectivity_boundary.py",
+                "tests/test_limiter_spline_minimum.py",
+                "tests/test_connectivity_boundary.py",
+                "docs/figures/limiter-spline-minimum/mast-rows.json",
+                "docs/figures/limiter-spline-minimum/mast-rows.png]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-limiter-spline-minimum-prototype",
+              "phase": "complete",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T055306005644-nia-limiter-spline-minimum-prototype",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 567,
+              "terminal_at": "2026-09-04T06:48:12Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-limiter-spline-minimum-prototype"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 20328,
+          "peak_input_tokens": 8714682
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -87632,6 +87886,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1542
+    "_version": 1545
   }
 }

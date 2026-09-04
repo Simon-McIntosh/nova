@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="20">
-<meta name="plan-impl" content="0.35">
+<meta name="plan-version" content="22">
+<meta name="plan-impl" content="0.38">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 </head>
@@ -119,6 +119,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260904T085800000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T08:58:00+02:00">
     <div class="r-comment-body">NODE C2 LANDED (fsa-raster-receipt-codex, codex, worker commit 385ea608 merged at ff92e9d8; forward_operator.py, forward.py, tests/test_raster_flux_receipt.py, benchmarks/receipt_raster_check.py, receipt docs/figures/forward-solve-api/raster-receipt.json plus raster-receipt/flux-and-labels.png from H200 job 1262276). The persisted 33 by 33 MAST raster is built once at operator construction; every production receipt publishes psi, psi_N and the four domain labels on all 1089 nodes with a separatrix polyline read from the global spline (141 vertices on the banked arm) in place of the zero-ray read; direct psi and psi_N relative errors 1.80e-15 and 1.45e-15; compile calls 1 without and 1 with the leaf; median walls 6.005 and 6.077 s (delta +72 ms); existing receipt fields bit-identical (asserted); tests/test_raster_flux_receipt.py 2 passed, referees 9 passed. The worker parked because tests/test_solve_receipt_topology.py's 21985 fixture fails production convergence on the base before any receipt assertion (2.07e-3 against 1e-8) and because the H200 receipt's frozen-six arm records converging_mast_arm=false at 3.26e-3; both are convergence findings on main after the census repair and the pre-settlement default, not receipt defects, and are handed to the attribution node on solver-convergence-regression. The run promoted on its delivered work. With forward.py and forward_operator.py released, the cold-seed raster repair (node B's blocker) is dispatched now. Evidence anchor docs/evidence/archive/forward-solve-api-landed.html#raster-receipt. impl 0.35.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260904T065733042854-fsa-cold-seed-raster-repair" data-who="fsa-cold-seed-x" data-when="2026-09-04T07:07:32Z">
+    <div class="r-comment-body"><p>coupling_current_moments tolerates a None moment geometry for zero first moments and refuses nonzero ones with a named error; cold_seed_portfolio builds on the raster carrier; tests plus referees green; merged at 9f84f35f</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260904T091100000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T09:11:00+02:00">
+    <div class="r-comment-body">COLD-SEED REPAIR LANDED (fsa-cold-seed-raster-repair, codex, worker commit 799f4354 merged at 9f84f35f; forward_operator.py +12, tests/test_cold_seed_portfolio_raster.py +132). coupling_current_moments now returns zero radial and vertical coefficients for zero first moments when the operator carries no moment geometry and raises a ValueError naming the missing geometry only when nonzero first moments are supplied without it, so cold_seed_portfolio builds its uniform-disc seed on the persisted 33 by 33 raster carrier; the hex-operator result is asserted bit-identical to before; the new test, tests/test_raster_flux_receipt.py and the seven referee node IDs green on CPU (logs/cpu-gate.log). The node B measurement is redispatched on main at 9f84f35f as fsa-warm-start-measure with the driver already merged at ee266f16: twenty edits of one position coil on 22086/43 mixed, warm start against the cold-portfolio control, one H200 job.</div>
 </div>
 </section>
 </main>

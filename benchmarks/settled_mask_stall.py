@@ -9,9 +9,11 @@ rebuilt terminal against that cache before freezing the terminal residual mask.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 from importlib.util import module_from_spec, spec_from_file_location
 import json
+import os
 from pathlib import Path
 import platform
 import subprocess
@@ -62,11 +64,22 @@ DEFAULT_BASELINE = (
     / "docs/figures/solver-convergence-regression"
     / "settled-mask-stall/current-measurement.json"
 )
+DEFAULT_PRODUCTION_OUTPUT = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "settled-mask-stall/production/production-path.json"
+)
+DEFAULT_PRODUCTION_REPORT = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/production-path/"
+    "production-path-damping.md"
+)
 TARGETS = ((21985, 51), (21986, 46), (21989, 55), (22086, 43))
 SMOOTH_NEWTON_STEPS = 8
 SMOOTH_GMRES_ITERATIONS = 40
 SMOOTH_RELAXATION = 0.5
 SMOOTH_STEP_CAP = 10.0
+PRODUCTION_GMRES_ITERATIONS = 30
+PRODUCTION_PATH_FRACTIONS = tuple(np.linspace(0.0, 1.0, 8))
 FINITE_DIFFERENCE_RELATIVE_STEPS = (1.0e-2, 1.0e-4, 1.0e-6)
 EXPECTED_GRID_CELLS = 33 * 33
 
@@ -219,6 +232,316 @@ def _termination_name(value: Any) -> str:
         return FixedPointTerminationReason(reason_value).name.lower()
     except ValueError:
         return f"unknown_{reason_value}"
+
+
+class _ProductionTraceCollector:
+    """Group solver-owned linear and promotion callbacks by active-set trip."""
+
+    def __init__(self, *, step_cap: float, relaxation: float) -> None:
+        self.step_cap = step_cap
+        self.relaxation = relaxation
+        self._linear_actions: list[dict[str, Any]] = []
+        self._newton_steps: list[dict[str, Any]] = []
+        self.trips: list[dict[str, Any]] = []
+        self._global_step = 0
+
+    def linear_action(
+        self,
+        qualification,
+        projected_condition,
+        conditioning_applied,
+        condition_baseline,
+        unconditioned_step,
+        conditioned_step,
+        achieved_reduction,
+        requested_tolerance,
+        residual_vector,
+        nonlinear_residual,
+    ) -> None:
+        raw = np.asarray(unconditioned_step, dtype=np.float64).reshape(-1)
+        conditioned = np.asarray(conditioned_step, dtype=np.float64).reshape(-1)
+        residual = np.asarray(residual_vector, dtype=np.float64).reshape(-1)
+        raw_sup = float(np.max(np.abs(raw)))
+        raw_l2 = float(np.linalg.norm(raw))
+        conditioned_sup = float(np.max(np.abs(conditioned)))
+        residual_sup = float(np.max(np.abs(residual)))
+        cap = self.step_cap * self.relaxation * residual_sup
+        cap_factor = min(1.0, cap / max(conditioned_sup, np.finfo(float).tiny))
+        reduction = float(np.asarray(achieved_reduction))
+        baseline = float(np.asarray(condition_baseline))
+        projected = float(np.asarray(projected_condition))
+        nonlinear = float(np.asarray(nonlinear_residual))
+        trust_threshold = float(np.sqrt(np.finfo(raw.dtype).eps))
+        eligible_without_trust = bool(
+            np.isfinite(projected)
+            and np.isfinite(baseline)
+            and projected
+            > fixed_point._PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT * baseline
+            and nonlinear > np.finfo(raw.dtype).eps ** 0.25
+        )
+        trusted = bool(reduction <= trust_threshold)
+        applied = bool(np.asarray(conditioning_applied))
+        self._linear_actions.append(
+            {
+                "qualification": fixed_point.KrylovActionQualification(
+                    int(np.asarray(qualification))
+                ).name.lower(),
+                "projected_condition": projected,
+                "condition_baseline": baseline,
+                "conditioning_eligible_without_linear_trust": (eligible_without_trust),
+                "conditioning_applied": applied,
+                "sqrt_epsilon_trust_threshold": trust_threshold,
+                "sqrt_epsilon_bypass_engaged": bool(
+                    eligible_without_trust and trusted and not applied
+                ),
+                "achieved_krylov_relative_residual": reduction,
+                "requested_krylov_relative_tolerance": float(
+                    np.asarray(requested_tolerance)
+                ),
+                "raw_newton_direction_sup": raw_sup,
+                "raw_newton_direction_l2": raw_l2,
+                "conditioned_direction_sup_before_step_cap": conditioned_sup,
+                "step_cap_bound_sup": cap,
+                "step_cap_factor": cap_factor,
+                "nonlinear_residual": nonlinear,
+            }
+        )
+
+    def inner_iteration(
+        self,
+        iteration,
+        residual_before,
+        residual_after,
+        proposed_step_norm,
+        accepted,
+        decision,
+        krylov_qualification,
+        applied_factor,
+        krylov_reduction,
+        krylov_tolerance,
+    ) -> None:
+        if not self._linear_actions:
+            raise RuntimeError(
+                "inner iteration arrived without a linear-action receipt"
+            )
+        primary, *auxiliary = self._linear_actions
+        self._linear_actions.clear()
+        proposed = float(np.asarray(proposed_step_norm))
+        ladder_factor = float(np.asarray(applied_factor))
+        raw_sup = primary["raw_newton_direction_sup"]
+        self._global_step += 1
+        self._newton_steps.append(
+            {
+                "global_step": self._global_step,
+                "iteration_in_trip": int(np.asarray(iteration)) + 1,
+                "residual_before": float(np.asarray(residual_before)),
+                "residual_after": float(np.asarray(residual_after)),
+                "raw_newton_direction_sup": raw_sup,
+                "proposed_step_sup_after_step_cap": proposed,
+                "step_cap_factor": primary["step_cap_factor"],
+                "merit_ladder_factor": ladder_factor,
+                "effective_raw_direction_fraction": (
+                    proposed * ladder_factor / max(raw_sup, np.finfo(float).tiny)
+                ),
+                "accepted": bool(np.asarray(accepted)),
+                "decision": fixed_point.InnerIterationDecision(
+                    int(np.asarray(decision))
+                ).name.lower(),
+                "krylov_qualification": fixed_point.KrylovActionQualification(
+                    int(np.asarray(krylov_qualification))
+                ).name.lower(),
+                "achieved_krylov_relative_residual": float(
+                    np.asarray(krylov_reduction)
+                ),
+                "requested_krylov_relative_tolerance": float(
+                    np.asarray(krylov_tolerance)
+                ),
+                "linear_action": primary,
+                "auxiliary_linear_actions": auxiliary,
+            }
+        )
+
+    def active_set_trip(
+        self, active, trip_index, mask_difference, live_residual, inner_iterations
+    ) -> None:
+        if not bool(np.asarray(active)):
+            return
+        if self._linear_actions:
+            raise RuntimeError(
+                "unpaired linear-action receipts remain at trip boundary"
+            )
+        self.trips.append(
+            {
+                "trip": int(np.asarray(trip_index)) + 1,
+                "mask_difference": int(np.asarray(mask_difference)),
+                "live_residual": float(np.asarray(live_residual)),
+                "attempted_newton_promotions": int(np.asarray(inner_iterations)),
+                "newton_steps": self._newton_steps,
+            }
+        )
+        self._newton_steps = []
+
+    def finish(self) -> None:
+        if self._linear_actions or self._newton_steps:
+            raise RuntimeError(
+                "production trace ended with callbacks outside an active-set trip"
+            )
+
+
+@contextmanager
+def _production_trace_hooks(collector: _ProductionTraceCollector):
+    """Observe the production solver without changing its numerical values."""
+
+    original_qualified = fixed_point._qualified_krylov_step
+    original_inner = fixed_point._print_inner_iteration
+    original_trip = fixed_point._print_active_set_trip
+
+    def observed_qualified(*args, **kwargs):
+        result = original_qualified(*args, **kwargs)
+        residual_vector = args[1]
+        nonlinear_residual = args[2]
+        jax.debug.callback(
+            collector.linear_action,
+            result.qualification,
+            result.projected_condition,
+            result.conditioning_applied,
+            result.condition_baseline,
+            result.unconditioned_step,
+            result.step,
+            result.achieved_reduction,
+            result.requested_tolerance,
+            residual_vector,
+            nonlinear_residual,
+            ordered=True,
+        )
+        return result
+
+    fixed_point._qualified_krylov_step = observed_qualified
+    fixed_point._print_inner_iteration = collector.inner_iteration
+    fixed_point._print_active_set_trip = collector.active_set_trip
+    try:
+        yield
+    finally:
+        fixed_point._qualified_krylov_step = original_qualified
+        fixed_point._print_inner_iteration = original_inner
+        fixed_point._print_active_set_trip = original_trip
+
+
+class _WholeStepPathCollector:
+    """Retain true and second-order residuals along accepted Newton steps."""
+
+    def __init__(self) -> None:
+        self.steps: list[dict[str, Any]] = []
+
+    def record(
+        self,
+        accepted,
+        recovery_activated,
+        applied_factor,
+        step_sup,
+        fractions,
+        actual_residuals,
+        linear_model_residuals,
+        quadratic_model_residuals,
+    ) -> None:
+        if not bool(np.asarray(accepted)):
+            return
+        actual = np.asarray(actual_residuals, dtype=np.float64)
+        linear = np.asarray(linear_model_residuals, dtype=np.float64)
+        quadratic = np.asarray(quadratic_model_residuals, dtype=np.float64)
+        self.steps.append(
+            {
+                "step": len(self.steps) + 1,
+                "accepted": True,
+                "recovery_activated": bool(np.asarray(recovery_activated)),
+                "applied_factor": float(np.asarray(applied_factor)),
+                "accepted_step_sup": float(np.asarray(step_sup)),
+                "samples": [
+                    {
+                        "fraction": float(fraction),
+                        "actual_relative_residual": float(actual_value),
+                        "linear_model_relative_residual": float(linear_value),
+                        "quadratic_model_relative_residual": float(quadratic_value),
+                        "actual_minus_quadratic": float(actual_value - quadratic_value),
+                    }
+                    for fraction, actual_value, linear_value, quadratic_value in zip(
+                        np.asarray(fractions, dtype=np.float64),
+                        actual,
+                        linear,
+                        quadratic,
+                        strict=True,
+                    )
+                ],
+                "full_step_actual_residual": float(actual[-1]),
+                "full_step_quadratic_prediction": float(quadratic[-1]),
+                "full_step_absolute_model_error": float(
+                    abs(actual[-1] - quadratic[-1])
+                ),
+            }
+        )
+
+
+@contextmanager
+def _whole_step_path_hooks(collector: _WholeStepPathCollector):
+    """Sample the frozen residual without modifying promotion selection."""
+
+    original_promotion = fixed_point._backtracked_promotion
+    fractions = jnp.asarray(PRODUCTION_PATH_FRACTIONS, dtype=jnp.float64)
+
+    def observed_promotion(*args, **kwargs):
+        result = original_promotion(*args, **kwargs)
+        map_fn, _model_map_fn, state = args[:3]
+        accepted_step = result.state - state
+
+        def residual_vector(candidate):
+            return map_fn(candidate) - candidate
+
+        residual_at_origin, first_directional = jax.jvp(
+            residual_vector, (state,), (accepted_step,)
+        )
+
+        def first_directional_at(candidate):
+            return jax.jvp(residual_vector, (candidate,), (accepted_step,))[1]
+
+        _first_at_origin, second_directional = jax.jvp(
+            first_directional_at, (state,), (accepted_step,)
+        )
+
+        def sampled(fraction):
+            candidate = state + fraction * accepted_step
+            actual_mapped = map_fn(candidate)
+            linear_residual = residual_at_origin + fraction * first_directional
+            quadratic_residual = (
+                linear_residual + 0.5 * fraction * fraction * second_directional
+            )
+            linear_mapped = candidate + linear_residual
+            quadratic_mapped = candidate + quadratic_residual
+            return (
+                fixed_point._relative_residual(actual_mapped, candidate),
+                fixed_point._relative_residual(linear_mapped, candidate),
+                fixed_point._relative_residual(quadratic_mapped, candidate),
+            )
+
+        actual, linear, quadratic = jax.lax.map(sampled, fractions)
+        jax.debug.callback(
+            collector.record,
+            result.accepted,
+            result.recovery_activated,
+            result.applied_factor,
+            jnp.max(jnp.abs(accepted_step)),
+            fractions,
+            actual,
+            linear,
+            quadratic,
+            ordered=True,
+        )
+        return result
+
+    fixed_point._backtracked_promotion = observed_promotion
+    try:
+        yield
+    finally:
+        fixed_point._backtracked_promotion = original_promotion
 
 
 def _active_set_summary(result, banked: dict[str, Any]) -> dict[str, Any]:
@@ -1517,6 +1840,779 @@ def measure_repair(*, operands: Path, baseline: Path, output: Path) -> dict[str,
     return render_repair(measurement=after_path, baseline=baseline, output=output)
 
 
+def _bitwise_bank_comparison(result, banked: dict[str, Any]) -> dict[str, Any]:
+    """Compare one executed active-set history with its persisted bank row."""
+    iterations = int(np.asarray(result.active_set_iterations))
+    residuals = np.asarray(result.active_set_residuals, dtype=np.float64)[:iterations]
+    differences = np.asarray(result.active_set_mask_differences, dtype=np.int64)[
+        :iterations
+    ]
+    residuals_exact = bool(
+        residuals.shape == banked["active_set_residuals"].shape
+        and np.array_equal(residuals, banked["active_set_residuals"])
+    )
+    differences_exact = bool(
+        differences.shape == banked["active_set_mask_differences"].shape
+        and np.array_equal(differences, banked["active_set_mask_differences"])
+    )
+    terminal_exact = bool(
+        float(np.asarray(result.residual)) == float(banked["terminal_residual"])
+    )
+    reason_exact = _termination_name(result.termination_reason) == str(
+        banked["termination_reason"]
+    )
+    return {
+        "all_exact": bool(
+            residuals_exact and differences_exact and terminal_exact and reason_exact
+        ),
+        "active_set_residuals_exact": residuals_exact,
+        "active_set_mask_differences_exact": differences_exact,
+        "terminal_residual_exact": terminal_exact,
+        "termination_reason_exact": reason_exact,
+        "measured_active_set_residuals": residuals.tolist(),
+        "measured_active_set_mask_differences": differences.tolist(),
+    }
+
+
+def _production_path_solve(profile, seed, target_current, banked) -> dict[str, Any]:
+    """Run one branch through the public production path with live trace hooks."""
+    collector = _ProductionTraceCollector(
+        step_cap=reachability.STEP_CAP,
+        relaxation=reachability.RELAXATION,
+    )
+    with _production_trace_hooks(collector):
+        branch = profile.solve_branch(
+            seed,
+            jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+            route="newton_krylov",
+            target_current=target_current,
+            tolerance=reachability.FIXED_POINT_CRITERION,
+            newton_steps=reachability.NEWTON_STEPS,
+            gmres_iterations=PRODUCTION_GMRES_ITERATIONS,
+            warmup=reachability.WARMUP_SWEEPS,
+            relaxation=reachability.RELAXATION,
+            step_cap=reachability.STEP_CAP,
+            stream_active_set=True,
+            stream_inner_iterations=True,
+        )
+        branch.equilibrium.flux.block_until_ready()
+    collector.finish()
+    result = branch.equilibrium.fixed_point
+    iterations = int(np.asarray(result.active_set_iterations))
+    if len(collector.trips) != iterations:
+        raise AssertionError(
+            "production trace trip count does not match the solver receipt: "
+            f"callbacks={len(collector.trips)}, result={iterations}"
+        )
+    flattened = [step for trip in collector.trips for step in trip["newton_steps"]]
+    for trip in collector.trips:
+        for step in trip["newton_steps"]:
+            step["trip"] = trip["trip"]
+            step["mask_difference_after_trip"] = trip["mask_difference"]
+    return {
+        "configuration": {
+            "route": "ForwardProfile.solve_branch(newton_krylov)",
+            "newton_steps": reachability.NEWTON_STEPS,
+            "gmres_iterations": PRODUCTION_GMRES_ITERATIONS,
+            "warmup": reachability.WARMUP_SWEEPS,
+            "relaxation": reachability.RELAXATION,
+            "step_cap": reachability.STEP_CAP,
+            "convergence_tolerance": reachability.FIXED_POINT_CRITERION,
+        },
+        "result": _active_set_summary(result, banked)["measured"],
+        "bitwise_bank_comparison_at_gmres_30": _bitwise_bank_comparison(result, banked),
+        "trips": collector.trips,
+        "newton_steps": flattened,
+        "sqrt_epsilon_bypass_count": sum(
+            step["linear_action"]["sqrt_epsilon_bypass_engaged"] for step in flattened
+        ),
+        "conditioning_applied_count": sum(
+            step["linear_action"]["conditioning_applied"] for step in flattened
+        ),
+        "terminal_result_conditioning_count_scope": (
+            "FixedPointResult retains the final active-set trip's inner count; "
+            "the grouped per-step callback count is authoritative for this route"
+        ),
+    }
+
+
+def _whole_step_residual_path(profile, template, banked, target_current):
+    """Sample eight points along every accepted frozen-mask Newton step."""
+    requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    state = _full_terminal_state(profile, template, banked)
+    mask = profile.operator.residual_shadow_mask(state, requested_class)
+    shadowed_map = profile.operator.flux_map_with_shadow(
+        requested_class=requested_class, target_current=target_current
+    )
+
+    def frozen_map(candidate):
+        return shadowed_map(candidate, mask)
+
+    collector = _WholeStepPathCollector()
+    with _whole_step_path_hooks(collector):
+        smooth = _smooth_solve(frozen_map, state)
+    if len(collector.steps) != smooth["accepted_promotions"]:
+        raise AssertionError(
+            "whole-step path count does not match accepted frozen promotions: "
+            f"paths={len(collector.steps)}, accepted={smooth['accepted_promotions']}"
+        )
+    maximum_error = max(
+        step["full_step_absolute_model_error"] for step in collector.steps
+    )
+    return {
+        "fractions": list(PRODUCTION_PATH_FRACTIONS),
+        "model": (
+            "second-order directional Taylor model of the exact frozen residual "
+            "vector, normalized with the production relative-sup residual"
+        ),
+        "frozen_solve": smooth,
+        "steps": collector.steps,
+        "maximum_full_step_absolute_model_error": maximum_error,
+        "newton_consistent_at_1e_3": bool(maximum_error <= 1.0e-3),
+    }
+
+
+def _repair_full_solve_exact(row: dict[str, Any]) -> bool:
+    active = row["full_active_set"]
+    bank = active["bank"]
+    measured = active["measured"]
+    return bool(
+        bank["terminal_residual"] == measured["terminal_residual"]
+        and bank["active_set_iterations"] == measured["active_set_iterations"]
+        and bank["termination_reason"] == measured["termination_reason"]
+        and bank["active_set_residuals"] == measured["active_set_residuals"]
+        and bank["active_set_mask_differences"]
+        == measured["active_set_mask_differences"]
+    )
+
+
+def _mechanism_layers(
+    identity: str,
+    production: dict[str, Any],
+    repair_row: dict[str, Any],
+    whole_path: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Name each measured damping or residual-consistency layer."""
+    steps = production["newton_steps"]
+    linear = [step["linear_action"] for step in steps]
+    reductions = [item["achieved_krylov_relative_residual"] for item in linear]
+    thresholds = [item["sqrt_epsilon_trust_threshold"] for item in linear]
+    mask_differences = [trip["mask_difference"] for trip in production["trips"]]
+    frozen = repair_row["frozen_mask"]["after"]
+    frozen_cap_fraction = float(frozen["raw_to_proposed_step_fraction"])
+    frozen_ladder = [
+        float(value)
+        for value in frozen["applied_factors"]
+        if value is not None and np.isfinite(value)
+    ]
+    production_cap = [float(step["step_cap_factor"]) for step in steps]
+    production_ladder = [float(step["merit_ladder_factor"]) for step in steps]
+    repair_active = repair_row["full_active_set"]["measured"]
+    repair_exact = _repair_full_solve_exact(repair_row)
+    gmres_layer = bool(
+        repair_exact
+        and not repair_active["converged"]
+        and production["sqrt_epsilon_bypass_count"] > 0
+        and production["result"]["terminal_residual"]
+        != repair_active["terminal_residual"]
+    )
+    cap_layer = bool(
+        frozen_cap_fraction < 1.0 - 1.0e-12
+        or any(value < 1.0 - 1.0e-12 for value in production_cap)
+    )
+    ladder_layer = bool(
+        any(value < 1.0 - 1.0e-12 for value in frozen_ladder)
+        or any(value < 1.0 - 1.0e-12 for value in production_ladder)
+    )
+    mask_layer = any(value != 0 for value in mask_differences)
+    residual_layer = bool(
+        whole_path is not None and not whole_path["newton_consistent_at_1e_3"]
+    )
+    layers = [
+        {
+            "name": "bank_route_gmres_budget_too_small_for_sqrt_epsilon_bypass",
+            "active": gmres_layer,
+            "evidence": (
+                f"held bank replay pins GMRES {reachability.GMRES_ITERATIONS}, "
+                "its terminal inner receipt records conditioning "
+                f"{repair_active['krylov_conditioning_count']} times and remains "
+                f"at {repair_active['terminal_residual']:.6e}; "
+                f"the public production budget GMRES {PRODUCTION_GMRES_ITERATIONS} "
+                f"reaches {min(reductions):.6e} to {max(reductions):.6e} against "
+                f"sqrt(eps) {min(thresholds):.6e}, bypasses "
+                f"{production['sqrt_epsilon_bypass_count']} of {len(steps)} "
+                f"directions and ends at "
+                f"{production['result']['terminal_residual']:.6e}"
+            ),
+            "repair": (
+                "stop overriding the public GMRES-30 production budget with the "
+                "bank driver's GMRES-12 constant, or adapt the bank route until "
+                "the recomputed linear residual reaches sqrt(eps)"
+            ),
+            "owner": "nova equilibrium forward solver",
+        },
+        {
+            "name": "step_cap",
+            "active": cap_layer,
+            "evidence": (
+                "frozen-mask first proposed/raw direction fraction "
+                f"{frozen_cap_fraction:.6f}; production cap factors "
+                f"{production_cap}"
+            ),
+            "repair": (
+                "make the cap conditional on the measured nonlinear model error "
+                "or enlarge it while leaving the merit ladder as the acceptance "
+                "authority"
+            ),
+            "owner": "nova equilibrium forward solver",
+        },
+        {
+            "name": "merit_ladder",
+            "active": ladder_layer,
+            "evidence": (
+                f"frozen-mask ladder factors {frozen_ladder}; production ladder "
+                f"factors {production_ladder}"
+            ),
+            "repair": (
+                "repair the model-trust or merit prediction at the first refused "
+                "full step; retain strict decrease and best-iterate retention"
+            ),
+            "owner": "nova equilibrium globalization",
+        },
+        {
+            "name": "mask_motion",
+            "active": mask_layer,
+            "evidence": f"per-trip mask differences {mask_differences}",
+            "repair": (
+                "relinearize on each changed partition and carry no conditioning "
+                "decision across a mask change"
+            ),
+            "owner": "nova equilibrium active-set reconciliation",
+        },
+        {
+            "name": "residual_not_newton_consistent_at_1e_3",
+            "active": residual_layer,
+            "evidence": (
+                "not measured on this row"
+                if whole_path is None
+                else "maximum actual-versus-quadratic full-step residual error "
+                f"{whole_path['maximum_full_step_absolute_model_error']:.6e}"
+            ),
+            "repair": (
+                "split accepted steps at topology or support hand-offs, or make "
+                "the residual and its Jacobian use one locally consistent read "
+                "across the complete step"
+            ),
+            "owner": "nova equilibrium residual and topology seam",
+        },
+    ]
+    active_names = [layer["name"] for layer in layers if layer["active"]]
+    preferred = {
+        "21985/51": "residual_not_newton_consistent_at_1e_3",
+        "21986/46": "step_cap",
+        "21989/55": "step_cap",
+        "22086/43": ("bank_route_gmres_budget_too_small_for_sqrt_epsilon_bypass"),
+    }[identity]
+    primary = preferred if preferred in active_names else active_names[0]
+    return {"primary": primary, "active_layers": active_names, "layers": layers}
+
+
+def _draw_production_path(rows: list[dict[str, Any]], figure_path: Path) -> None:
+    figure, axes = plt.subplots(
+        len(rows), 4, figsize=(18.0, 13.0), constrained_layout=True
+    )
+    for row_index, row in enumerate(rows):
+        production = row["production_path"]
+        trips = production["trips"]
+        steps = production["newton_steps"]
+        identity = row["identity"]
+        trip_axis, krylov_axis, norm_axis, factor_axis = axes[row_index]
+
+        trip_numbers = [trip["trip"] for trip in trips]
+        trip_axis.semilogy(
+            trip_numbers,
+            [trip["live_residual"] for trip in trips],
+            "o-",
+            color="#087e8b",
+        )
+        trip_axis.set_ylabel(identity + "\nactive-set residual")
+        trip_axis.set_xlabel("active-set trip")
+        trip_axis.grid(alpha=0.25)
+        mask_axis = trip_axis.twinx()
+        mask_axis.bar(
+            trip_numbers,
+            [trip["mask_difference"] for trip in trips],
+            color="#f9c74f",
+            alpha=0.28,
+        )
+        mask_axis.set_ylabel("mask difference")
+
+        step_numbers = [step["global_step"] for step in steps]
+        reductions = [step["achieved_krylov_relative_residual"] for step in steps]
+        bypass = [
+            step["linear_action"]["sqrt_epsilon_bypass_engaged"] for step in steps
+        ]
+        colors = ["#2a9d8f" if flag else "#e76f51" for flag in bypass]
+        krylov_axis.semilogy(step_numbers, reductions, color="#6c757d", lw=0.8)
+        krylov_axis.scatter(step_numbers, reductions, c=colors, s=24)
+        krylov_axis.axhline(
+            np.sqrt(np.finfo(np.float64).eps), color="black", ls="--", lw=0.8
+        )
+        krylov_axis.set_xlabel("production Newton step")
+        krylov_axis.set_ylabel("GMRES relative residual")
+        krylov_axis.grid(alpha=0.25)
+
+        norm_axis.semilogy(
+            step_numbers,
+            [step["raw_newton_direction_sup"] for step in steps],
+            "o-",
+            label="raw",
+            color="#9b5de5",
+        )
+        norm_axis.semilogy(
+            step_numbers,
+            [step["proposed_step_sup_after_step_cap"] for step in steps],
+            "s-",
+            label="proposed",
+            color="#087e8b",
+        )
+        norm_axis.set_xlabel("production Newton step")
+        norm_axis.set_ylabel("direction sup norm")
+        norm_axis.grid(alpha=0.25)
+
+        factor_axis.plot(
+            step_numbers,
+            [step["step_cap_factor"] for step in steps],
+            "o-",
+            label="step cap",
+        )
+        factor_axis.plot(
+            step_numbers,
+            [step["merit_ladder_factor"] for step in steps],
+            "s-",
+            label="merit ladder",
+        )
+        factor_axis.plot(
+            step_numbers,
+            [step["effective_raw_direction_fraction"] for step in steps],
+            "^-",
+            label="effective/raw",
+        )
+        factor_axis.set_ylim(-0.02, 1.05)
+        factor_axis.set_xlabel("production Newton step")
+        factor_axis.set_ylabel("multiplicative factor")
+        factor_axis.grid(alpha=0.25)
+
+    axes[0, 2].legend(fontsize=8)
+    axes[0, 3].legend(fontsize=8)
+    figure.suptitle(
+        "Production active-set route: mask motion, GMRES trust, cap and merit",
+        fontsize=13,
+    )
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+
+
+def _draw_whole_step_path(path: dict[str, Any], figure_path: Path) -> None:
+    figure, axes = plt.subplots(2, 4, figsize=(16.0, 7.5), constrained_layout=True)
+    for axis, step in zip(axes.flat, path["steps"], strict=True):
+        fractions = [sample["fraction"] for sample in step["samples"]]
+        axis.semilogy(
+            fractions,
+            [sample["actual_relative_residual"] for sample in step["samples"]],
+            "o-",
+            label="actual",
+            color="#e76f51",
+        )
+        axis.semilogy(
+            fractions,
+            [sample["quadratic_model_relative_residual"] for sample in step["samples"]],
+            "s--",
+            label="quadratic model",
+            color="#277da1",
+        )
+        axis.set_title(f"Newton step {step['step']}")
+        axis.set_xlabel("fraction of accepted step")
+        axis.set_ylabel("relative residual")
+        axis.grid(alpha=0.25)
+    axes.flat[0].legend(fontsize=8)
+    figure.suptitle(
+        "21985/51 frozen mask: whole-step residual versus second-order model",
+        fontsize=13,
+    )
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+
+
+def _write_production_report(receipt: dict[str, Any], report: Path) -> None:
+    lines = [
+        "# Production-path damping diagnosis",
+        "",
+        (
+            f"Measured `{receipt['source_commit']}` on "
+            f"{', '.join(receipt['runtime']['devices'])} through "
+            "`ForwardProfile.solve_branch(newton_krylov)` at GMRES 30. The "
+            "repair-tip bank-seed receipt is reused separately to preserve its "
+            "exact GMRES-12 bank identity and frozen-mask GMRES-40 comparison."
+        ),
+        "",
+        (
+            "| row | repair full solve exact to bank | production GMRES-30 "
+            "bypass | production conditioning | frozen proposed/raw | primary "
+            "mechanism |"
+        ),
+        "|---|---:|---:|---:|---:|---|",
+    ]
+    for row in receipt["rows"]:
+        production = row["production_path"]
+        frozen = row["repair_reference"]["frozen_mask"]["after"]
+        lines.append(
+            f"| {row['identity']} | "
+            f"{row['repair_reference']['full_active_set_bitwise_exact_to_bank']} | "
+            f"{production['sqrt_epsilon_bypass_count']} / "
+            f"{len(production['newton_steps'])} | "
+            f"{production['conditioning_applied_count']} / "
+            f"{len(production['newton_steps'])} | "
+            f"{frozen['raw_to_proposed_step_fraction']:.6f} | "
+            f"`{row['mechanisms']['primary']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            (
+                "The held repair changes none of the three exact bank histories: "
+                f"{receipt['verdict']['repair_full_solve_bitwise_exact_count']} of "
+                "four rows are bitwise exact (21986/46, 21989/55, 22086/43), "
+                "while 21985/51 moves but still does not converge. Overall "
+                f"convergence remains {receipt['verdict']['repair_converged_count']} "
+                "of four on the bank driver's explicit GMRES-12 route. This is "
+                "not the public GMRES-30 production result: that route converges "
+                f"{receipt['verdict']['production_gmres_30_converged_count']} of "
+                "four, including 22086/43 at machine precision."
+            ),
+            "",
+            "## Per-row production trace",
+            "",
+        ]
+    )
+    for row in receipt["rows"]:
+        production = row["production_path"]
+        lines.extend(
+            [
+                f"### {row['identity']} pure",
+                "",
+                (
+                    f"Primary mechanism: `{row['mechanisms']['primary']}`. Active "
+                    "layers: "
+                    + ", ".join(
+                        f"`{name}`" for name in row["mechanisms"]["active_layers"]
+                    )
+                    + "."
+                ),
+                "",
+                "| trip | Newton | GMRES rel. residual | bypass | raw sup | "
+                "proposed sup | cap factor | merit factor | effective/raw | "
+                "mask difference |",
+                "|---:|---:|---:|:---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for step in production["newton_steps"]:
+            lines.append(
+                f"| {step['trip']} | {step['global_step']} | "
+                f"{step['achieved_krylov_relative_residual']:.6e} | "
+                f"{step['linear_action']['sqrt_epsilon_bypass_engaged']} | "
+                f"{step['raw_newton_direction_sup']:.6e} | "
+                f"{step['proposed_step_sup_after_step_cap']:.6e} | "
+                f"{step['step_cap_factor']:.6f} | "
+                f"{step['merit_ladder_factor']:.6f} | "
+                f"{step['effective_raw_direction_fraction']:.6f} | "
+                f"{step['mask_difference_after_trip']} |"
+            )
+        lines.extend(["", "Measured layers and repairs:", ""])
+        for layer in row["mechanisms"]["layers"]:
+            verdict = "active" if layer["active"] else "inactive"
+            lines.append(
+                f"- `{layer['name']}` — {verdict}. {layer['evidence']}. Repair: "
+                f"{layer['repair']}. Owner: {layer['owner']}."
+            )
+        lines.append("")
+    path = receipt["rows"][0].get("whole_step_residual_path")
+    if path is not None:
+        lines.extend(
+            [
+                "## 21985/51 whole-step residual",
+                "",
+                (
+                    "All eight frozen-mask promotions use factor 1.0. The table "
+                    "therefore samples each complete accepted step, rather than "
+                    "extrapolating the directional derivative at its origin."
+                ),
+                "",
+                "| step | start actual | full-step actual | quadratic prediction | "
+                "absolute error |",
+                "|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for step in path["steps"]:
+            lines.append(
+                f"| {step['step']} | "
+                f"{step['samples'][0]['actual_relative_residual']:.6e} | "
+                f"{step['full_step_actual_residual']:.6e} | "
+                f"{step['full_step_quadratic_prediction']:.6e} | "
+                f"{step['full_step_absolute_model_error']:.6e} |"
+            )
+        lines.extend(
+            [
+                "",
+                (
+                    "Maximum full-step actual-versus-quadratic error is "
+                    f"{path['maximum_full_step_absolute_model_error']:.6e}; "
+                    "Newton-consistent at the 1e-3 level: "
+                    f"{path['newton_consistent_at_1e_3']}."
+                ),
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## Evidence authority",
+            "",
+            f"- Production trace: `{receipt['figures']['production_path']}`.",
+            f"- Whole-step trace: `{receipt['figures']['whole_step_residual']}`.",
+            (
+                f"- Exact operands: `{receipt['evidence_inputs']['operands']}` "
+                f"(SHA-256 `{receipt['evidence_inputs']['operands_sha256']}`)."
+            ),
+            (
+                "- Held repair receipt: "
+                f"`{receipt['evidence_inputs']['repair_receipt']}` (SHA-256 "
+                f"`{receipt['evidence_inputs']['repair_receipt_sha256']}`)."
+            ),
+            (
+                "- No `nova/` file was changed; instrumentation is confined to "
+                "`benchmarks/settled_mask_stall.py`."
+            ),
+            (
+                "- The production per-step callback count is authoritative for "
+                "conditioning engagement. The returned active-set "
+                "`FixedPointResult` retains only the final inner solve's count; "
+                "on 21989/55 it reports zero while the grouped trace records four "
+                "earlier condition-damped directions. Repairing that aggregate "
+                "telemetry is outside this node's `nova/` write fence."
+            ),
+            "",
+        ]
+    )
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("\n".join(lines), encoding="utf-8")
+
+
+def measure_production_path(
+    *, operands: Path, repair: Path, output: Path, report: Path
+) -> dict[str, Any]:
+    """Measure the remaining production damping on the conditioning repair tip."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    banked = _load_banked_rows(operands)
+    repair_data = json.loads(repair.read_text(encoding="utf-8"))
+    repair_by_identity = {row["identity"]: row for row in repair_data["rows"]}
+    response_cache, carrier_evidence = _persisted_response_cache(
+        response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
+    )
+    selected = {
+        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
+        for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
+    }
+    rows = []
+    for key in TARGETS:
+        identity = f"{key[0]}/{key[1]}"
+        print(f"PRODUCTION-PATH {identity}", flush=True)
+        selected_row, qualification = selected[key]
+        case, context = _mast_case_from_selection(
+            SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            case, context, response_cache
+        )
+        if int(policy["section_kernel_evaluations_this_shot"]) != 0:
+            raise RuntimeError("profile rebuild entered the direct response builder")
+        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+        seed = jnp.asarray(passive_case["state"])
+        production = _production_path_solve(profile, seed, target_current, banked[key])
+        whole_path = (
+            _whole_step_residual_path(
+                profile,
+                jnp.asarray(seed),
+                banked[key],
+                target_current,
+            )
+            if key == (21985, 51)
+            else None
+        )
+        repair_row = repair_by_identity[identity]
+        repair_reference = {
+            **repair_row,
+            "full_active_set_bitwise_exact_to_bank": _repair_full_solve_exact(
+                repair_row
+            ),
+        }
+        row = {
+            "identity": identity,
+            "production_path": production,
+            "repair_reference": repair_reference,
+            "whole_step_residual_path": whole_path,
+        }
+        row["mechanisms"] = _mechanism_layers(
+            identity, production, repair_row, whole_path
+        )
+        rows.append(row)
+        print(
+            "PRODUCTION-PATH-DONE "
+            + json.dumps(
+                {
+                    "identity": identity,
+                    "bypass": production["sqrt_epsilon_bypass_count"],
+                    "conditioning": production["conditioning_applied_count"],
+                    "steps": len(production["newton_steps"]),
+                    "mechanism": row["mechanisms"]["primary"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
+    production_figure = output.with_name("production-path.png")
+    whole_path_figure = output.with_name("whole-step-residual-21985-51.png")
+    _draw_production_path(rows, production_figure)
+    _draw_whole_step_path(rows[0]["whole_step_residual_path"], whole_path_figure)
+    repair_exact_count = sum(
+        row["repair_reference"]["full_active_set_bitwise_exact_to_bank"] for row in rows
+    )
+    repair_converged_count = sum(
+        row["repair_reference"]["full_active_set"]["measured"]["converged"]
+        for row in rows
+    )
+    receipt = {
+        "artifact": "production active-set damping diagnosis",
+        "source_commit": _source_revision(),
+        "runtime": {
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+            "scheduler": {
+                "job_id": os.environ.get("SLURM_JOB_ID"),
+                "node": os.environ.get("SLURMD_NODENAME"),
+                "partition": os.environ.get("SLURM_JOB_PARTITION"),
+                "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+            },
+        },
+        "evidence_inputs": {
+            "operands": str(operands),
+            "operands_sha256": _sha256(operands),
+            "repair_receipt": str(repair),
+            "repair_receipt_sha256": _sha256(repair),
+            "response_carrier": carrier_evidence,
+            "persistent_compilation_cache": cache.receipt(),
+        },
+        "measurement_contract": {
+            "targets": [list(key) for key in TARGETS],
+            "production_route": "ForwardProfile.solve_branch(newton_krylov)",
+            "production_gmres_iterations": PRODUCTION_GMRES_ITERATIONS,
+            "held_bank_replay_gmres_iterations": reachability.GMRES_ITERATIONS,
+            "sqrt_epsilon_threshold": float(np.sqrt(np.finfo(np.float64).eps)),
+            "whole_step_fractions": list(PRODUCTION_PATH_FRACTIONS),
+            "whole_step_model": (
+                "second-order directional Taylor model of the exact frozen "
+                "residual vector at each accepted-step origin"
+            ),
+            "repair_comparison": (
+                "reuse the held repair-tip H200 receipt for the exact bank-seed "
+                f"GMRES-{reachability.GMRES_ITERATIONS} solve and frozen-mask "
+                "GMRES-40 contraction"
+            ),
+        },
+        "figures": {
+            "production_path": str(production_figure),
+            "whole_step_residual": str(whole_path_figure),
+        },
+        "report": str(report),
+        "rows": rows,
+        "verdict": {
+            "repair_full_solve_bitwise_exact_count": repair_exact_count,
+            "repair_full_solve_row_count": len(rows),
+            "repair_converged_count": repair_converged_count,
+            "production_gmres_30_converged_count": sum(
+                row["production_path"]["result"]["converged"] for row in rows
+            ),
+            "production_gmres_30_bypass_count": sum(
+                row["production_path"]["sqrt_epsilon_bypass_count"] for row in rows
+            ),
+            "production_gmres_30_newton_step_count": sum(
+                len(row["production_path"]["newton_steps"]) for row in rows
+            ),
+            "primary_mechanisms": {
+                row["identity"]: row["mechanisms"]["primary"] for row in rows
+            },
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    _write_production_report(receipt, report)
+    return receipt
+
+
+def render_production_path(
+    *, measurement: Path, output: Path, report: Path
+) -> dict[str, Any]:
+    """Re-render a completed device measurement without rerunning the solver."""
+    receipt = json.loads(measurement.read_text(encoding="utf-8"))
+    for row in receipt["rows"]:
+        row["production_path"]["terminal_result_conditioning_count_scope"] = (
+            "FixedPointResult retains the final active-set trip's inner count; "
+            "the grouped per-step callback count is authoritative for this route"
+        )
+        row["mechanisms"] = _mechanism_layers(
+            row["identity"],
+            row["production_path"],
+            row["repair_reference"],
+            row.get("whole_step_residual_path"),
+        )
+    production_figure = output.with_name("production-path.png")
+    whole_path_figure = output.with_name("whole-step-residual-21985-51.png")
+    _draw_production_path(receipt["rows"], production_figure)
+    _draw_whole_step_path(
+        receipt["rows"][0]["whole_step_residual_path"], whole_path_figure
+    )
+    receipt["figures"] = {
+        "production_path": str(production_figure),
+        "whole_step_residual": str(whole_path_figure),
+    }
+    receipt["report"] = str(report)
+    receipt["measurement_contract"]["held_bank_replay_gmres_iterations"] = (
+        reachability.GMRES_ITERATIONS
+    )
+    receipt["verdict"]["production_gmres_30_converged_count"] = sum(
+        row["production_path"]["result"]["converged"] for row in receipt["rows"]
+    )
+    receipt["verdict"]["primary_mechanisms"] = {
+        row["identity"]: row["mechanisms"]["primary"] for row in receipt["rows"]
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    _write_production_report(receipt, report)
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="action", required=True)
@@ -1538,6 +2634,23 @@ def main() -> None:
     render_parser.add_argument("--measurement", type=Path, required=True)
     render_parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     render_parser.add_argument("--output", type=Path, default=DEFAULT_REPAIR_OUTPUT)
+    production_parser = subparsers.add_parser("production-path")
+    production_parser.add_argument("--operands", type=Path, default=DEFAULT_OPERANDS)
+    production_parser.add_argument("--repair", type=Path, default=DEFAULT_REPAIR_OUTPUT)
+    production_parser.add_argument(
+        "--output", type=Path, default=DEFAULT_PRODUCTION_OUTPUT
+    )
+    production_parser.add_argument(
+        "--report", type=Path, default=DEFAULT_PRODUCTION_REPORT
+    )
+    render_production_parser = subparsers.add_parser("render-production-path")
+    render_production_parser.add_argument("--measurement", type=Path, required=True)
+    render_production_parser.add_argument(
+        "--output", type=Path, default=DEFAULT_PRODUCTION_OUTPUT
+    )
+    render_production_parser.add_argument(
+        "--report", type=Path, default=DEFAULT_PRODUCTION_REPORT
+    )
     arguments = parser.parse_args()
     if arguments.action == "measure":
         result = measure(
@@ -1562,11 +2675,26 @@ def main() -> None:
             output=arguments.output,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
-    else:
+    elif arguments.action == "render-repair":
         result = render_repair(
             measurement=arguments.measurement,
             baseline=arguments.baseline,
             output=arguments.output,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    elif arguments.action == "production-path":
+        result = measure_production_path(
+            operands=arguments.operands,
+            repair=arguments.repair,
+            output=arguments.output,
+            report=arguments.report,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    else:
+        result = render_production_path(
+            measurement=arguments.measurement,
+            output=arguments.output,
+            report=arguments.report,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
 

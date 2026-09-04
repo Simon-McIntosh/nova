@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T06:50:58",
+  "updated": "2026-09-04T06:53:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -84600,6 +84600,237 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T214824918852-nia-bank-regeneration-corrected-read",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-bank-regeneration-corrected-read",
+        "node_definition": {
+          "done_when": "One H200 job (one CPU, one H200, persistent compilation cache, SLURM polled in the foreground with sleep 120 between checks and the manifest written before the wait) regenerates docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json with a nova axis position field on every row, a per-row change table docs/figures/null-identification-authority/bank-corrected-read.json plus png comparing every field above with the 8678047a rows (expected: 21985/51 axes at R about 0.90 m, the four 21986/46 and 21989/55 rows no longer binding wall node 10 with their class and axis qualification stated, the eight agreeing rows unchanged or with every change quantified), the twelve overlay panels regenerated through benchmarks/bank_efit_overlay.py so the Nova binding contour is judged against the EFIT LCFS on every row, the focused-suite constants in tests/test_topology_domain_partition.py and tests/test_topology_o_qualification.py re-baselined only if the partitions moved and stated per constant, and the seven referee tests green in the worktree, committed with a conventional subject and body",
+          "estimated_hours": null,
+          "goal": "Regenerate the twelve-row MAST bank on the H200 through the exact bank producer with the connected admission and line-of-sight limiter rules now on main (merges f4a1b9b5 and b2a7a046), and report per row what the corrected read changed against the 8678047a bank: admitted axis position, selected saddle, binding limiter point, boundary flux, class against EFIT, trip-1 mask difference, terminal residual, trip count and termination reason, with the axis banked per row this time (plan section 2 done-when and section 3's re-solve of the four rows, reuse map: docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py and benchmarks/bank_revision_reproduction.py as the producer and route, the previous regeneration's recipe and raw operands under /home/ITER/mcintos/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/, the persisted MAST carrier, the persistent compilation cache)",
+          "id": "nia-bank-regeneration-corrected-read",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "docs/figures/null-identification-authority/",
+            "docs/figures/solver-convergence-regression/bank-efit-overlays/",
+            "tests/test_topology_domain_partition.py",
+            "tests/test_topology_o_qualification.py",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "c-nia-bank",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:48:32Z",
+        "completed_at": "2026-09-04T04:23:28.987Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 23689,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 23696,
+        "stalled": true,
+        "time_budget": "120m",
+        "base_sha": "b2a7a0460b5cc708ea531d74331c32260b14b58f",
+        "commits": [
+          "63b5048086c27ca5414a34089dc4e567ca7b083e"
+        ],
+        "changed_lines": {
+          "added": 3499,
+          "removed": 7440,
+          "files": 13
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1262210 (1h11m, EXIT_MARKER=0) then tests/test_efit_topology_corroboration.py 10 passed, focused constants 11 passed unchanged, seven referees 9 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/logs/h200-bank-regeneration.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/manifest.md",
+        "scope_changed": true,
+        "session_id": "83111cd9-e95c-43b0-ab90-caba95cc737e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 209028,
+            "cache_creation_input_tokens_cumulative": 209028,
+            "cache_read_input_tokens": 4308713,
+            "cache_read_input_tokens_cumulative": 4308713,
+            "inference_geo": "not_available",
+            "input_tokens": 42,
+            "input_tokens_cumulative": 42,
+            "output_tokens": 12993,
+            "output_tokens_cumulative": 12993,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.8278686000000002,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.8278686000000002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 94493,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 105293,
+              "log_age_seconds": 99524,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 99569,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3617,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the H200 capture job 1262181 has not completed within this node's 60-minute time fence; and its current single-combination progress (44.5s allocation+carrier setup; then >24 minutes with no solve-finish) makes it very unlikely to complete the remaining ~7 solve_arm combinations before the SLURM job's own 3-hour cap either; without a design change to the driver's per-trip state-recovery method. Resume path for a subsequent dispatch: (1) `squeue -j 1262181` / `sacct -j 1262181 --format=JobID; State; ExitCode; Elapsed`; (2) read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/logs/h200-capture.log for EXIT_MARKER and progress (grep 'STAGE\\|HEARTBEAT' \u2014 heartbeats alone with no advancing STAGE lines mean it is still stuck on the same combination); (3) if EXIT_MARKER=0 in that log; the raw capture JSON is at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/raw-presettlement-mast.json \u2014 run; from a worktree carrying benchmarks/acceptance_presettlement_remedy.py (this file; unmodified): `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <that raw path> --referee-log <a referee log> --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; which writes docs/figures/solver-convergence-regression/remedy-presettlement/mast/{remedy-presettlement.json; remedy-presettlement.png}; then commit benchmarks/acceptance_presettlement_remedy.py plus those two files with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer before considering the node done); (4) if the job is still running past its own 3-hour cap or fails; the driver needs the redesign described under follow_ons before resubmitting; since resubmitting unchanged will very likely repeat the same multi-hour stall.",
+              "elapsed_seconds": 7217,
+              "log_age_seconds": 6351,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (driver is uncommitted in this worktree; committing an unvalidated driver before the H200 measurement it exists to produce is against the node's own evidence gate",
+                "which requires the receipt to exist first)"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 6363,
+              "terminal_at": "2026-09-03T20:02:25Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1733,
+              "log_age_seconds": 1417,
+              "log_fresh": false,
+              "manifest_commits": [
+                "34b647df; changed_paths: benchmarks/diiid_vacuum_from_description.py (new)",
+                "docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json (new)"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T204023896859-dvf-vacuum-field-reproduction/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260903T204023896859-dvf-vacuum-field-reproduction --gate <verdict> --commit 34b647df; changed_paths: benchmarks/diiid_vacuum_from_description.py (new) --commit docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json (new)",
+              "node": "dvf-vacuum-field-reproduction",
+              "phase": "complete",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T204023896859-dvf-vacuum-field-reproduction",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 1430,
+              "terminal_at": "2026-09-03T21:24:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-vacuum-field-reproduction"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 446.149,
+          "generated_tokens": 12993,
+          "generation_seconds": 158.321,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 22.8,
+          "machine_seconds": 287.828,
+          "peak_input_tokens": 228259,
+          "tokens_per_second": 82.07,
+          "wall_tokens_per_second": 29.12
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -84618,6 +84849,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1494
+    "_version": 1495
   }
 }

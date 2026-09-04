@@ -15,7 +15,7 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-03">
+<meta name="plan-modified" content="2026-09-04">
 <meta name="plan-effort-hours" content="28.0">
 <meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="59">
 <meta name="plan-impl" content="0.833">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -143,6 +143,11 @@
     <h4 class="r-fu-title">Reduced-oracle wall bound missed on rigel by fixture construction cost (foreign-owner: gs-absolute-accuracy-gates)</h4>
     <div class="r-fu-body">Pointer only — the work belongs to the plan owning scripts/analytic_oracle_fixtures. tests/test_solovev_recovery_gates.py::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point passes numerically but takes 77-87 s on rigel against its 60 s bound; the rigel phase profile attributes 54.0 of 58.2 s of build_machine to _flux_blocks calling polygon_analytic_flux_moments once per source polygon (~/.config/reckon/crew/reports/nova/pta-build-machine-cost/). The carrier topology read costs about 4 s and the HEX_RING slot assignment 14 ms. Exemption: foreign-owner.</div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
+    </article>
+<article class="r-fu" data-id="f-pta-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19-relaunch" data-written-at="2026-09-04" data-recommends-skill="/reckon-ship plasma-cell-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Regenerate the replay operands on the current bank with the review&#x27;s fields</h4>
+    <div class="r-fu-body">After nia-bank-regeneration-repaired-census-2 lands on null-identification-authority: one H200 node regenerates docs/figures/topology-visual-corroboration/mast-topology-operands.npz and its metadata on main through the landed producer, adding per-row trip counts, the producer commit and base revision, asserting section_kernel_evaluations_this_shot == 0 in the job log, and comparing every row's termination label and residual against the bank it replays; the review's five HOLD items close on that receipt. The pta-schema4-producer-repair-verify pointer is disposed as handed off at drain.</div>
+    <pre class="r-fu-prompt">/reckon-ship plasma-cell-topology-authority</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -307,6 +312,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260903T182200000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T20:22:00+02:00">
     <div class="r-comment-body">CACHE-IDENTITY REVIEW of the schema-4 producer repair (run r-20260902T163323361856-pta-schema4-producer-repair, commits 7a285cd9 and 66db7675), requested by this session's coordinator and parked here because that session had ended when the verdict was ready. VERDICT HOLD (report ~/.config/reckon/crew/reports/nova/scr-schema4-cache-identity-review.md, reviewer on the claude backend). Condition 2 (polygon source, bitwise reproduction of both 22086/43 rows) PASSES. Condition 1 partial: terminal residuals match bit-for-bit on 12 of 12 rows against efit-topology-corroboration.json at 8678047a, termination reasons on 11 of 12, but 22086/43 pure reads active_set_stagnated in the regenerated metadata versus active_set_settled in the corroboration file at the identical residual 4.8001875929238176e-4, and trip counts cannot be checked because the regenerated metadata carries no per-row trip-count field. Condition 3: carrier identity 1d2c4a2b unchanged (PASS); the section_kernel_evaluations_this_shot == 0 assertion appears nowhere in regenerate-1261550.log (42 lines read in full); mast-topology-operands.metadata.json records neither the producer commit nor the base revision. To lift the hold: resolve the 22086/43 pure label disagreement, add a per-row trip-count field, make the kernel-evaluation assertion assertable and quoted from the log, and record producer commit plus base revision in the metadata. The bank on main is still the 10-row fa286c13 file; the regenerated bank exists only in the unmerged worktree. The producer-repair pointer and its dead verify run (codex quota, 2026-09-02 20:14) remain unpromoted for this plan's owner.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T163323361856-pta-schema4-producer-repair" data-who="pta-perf" data-when="2026-09-02T18:09:44Z">
+    <div class="r-comment-body"><p>Producer constructs the replay MomentGeometry from the cells when the operator carries none (7a285cd9) and the twelve-row MAST replay operands were regenerated on the 8678047a bank (66db7675); independent review verdict HOLD on five items (termination label on 22086/43 pure, trip counts and provenance absent from the metadata, kernel-count assertion absent from the log, not landed); recovered by the S19 coordinator on the lead's authority after the s18-pta session ended</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260904T093300000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T09:33:00+02:00">
+    <div class="r-comment-body">STRANDED WORK RECOVERED ON THE LEAD'S AUTHORITY 2026-09-04 09:25 (the s18-pta session ended with two runs live; the S19 coordinator triaged them with each commit judged by its own show --stat, never by the range diff, because the worktree base bf8cf796 sits 94 commits behind main and the range diff inverts all of main's work). pta-schema4-producer-repair (worker commits 7a285cd9, generate_topology_visuals.py +14 minus 2, and 66db7675, the twelve-row MAST replay operands regenerated on the 8678047a bank) is promoted into the ledger with its own regeneration gate; the independent review scr-schema4-cache-identity-review (HOLD, five items: the 22086/43 pure termination label active_set_stagnated against active_set_settled at the same residual; no trip-count field in the operand metadata; no section_kernel_evaluations_this_shot assertion in the job log; no producer-commit or base-revision field in the metadata; not landed) is the binding record. TREATMENT: the producer fix 7a285cd9 merges cleanly onto main and is landed at f050487a (main had not touched the file since bf8cf796); the operand refresh 66db7675 is deliberately NOT merged, because the corroboration bank it matched has since moved (f07ee0c5, and the repaired-census rebank in flight), so the twelve-row replay operands are regenerated against the current bank by a follow-on node once nia-bank-regeneration-repaired-census-2 lands, with the metadata carrying trip counts, producer commit and base revision, the kernel-count assertion written to the job log, and the termination label compared row by row against the bank it replays; that node answers review items 1 to 5 together. pta-schema4-producer-repair-verify (review-only, member pta-review-a) died on the codex usage limit after 64 stream events with no verdict; its limit resets 2026-09-08 and reckon refuses to promote a blocked run whose session is recoverable, so the pointer is left as it is (recorded at drain as handed off) and its verdict is superseded by the review above.</div>
 </div>
 </section>
 </main>

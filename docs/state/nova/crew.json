@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:10:27",
+  "updated": "2026-09-04T09:31:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1157,6 +1157,15 @@
           "gpt-5.6-sol": "01a06236-1e9e-7b10-8ad0-d2ce93e5c352"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "fsa-warm-measure-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "fsa-warm-start",
@@ -87798,6 +87807,122 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-schema4-producer-repair",
+        "node_definition": {
+          "done_when": "The producer fix is committed with a body naming the AttributeError at generate_topology_visuals.py:304 and the chosen construction; the regenerated mast-topology-operands.npz and mast-topology-operands.metadata.json are committed with the producer commit, base revision, carrier semantic identity 1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994 and SLURM job id in the body; the manifest census lists per row the cell count, per_cell_flux_values length, current_cell_polygons shape and atomic_node_signed_flux length (eleven populated rows, 21986/46 mixed unavailable with NoQualifiedAxisError); solver_qualification.marginal_solver_basin is true only for 21978/35 pure and 22086/43 pure; the two previously banked 22086/43 rows' per-cell flux, polygons and labels are bitwise unchanged (state the comparison); the per-row domain-label difference against the preserved baseline bank is stated for every row; JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python benchmarks/topology_mask_replay.py reports 0 of 42 on 22086/43 mixed, log cited; if the job fails again, stop with a NEEDS-HELP brief quoting the traceback rather than resubmitting a third time",
+          "estimated_hours": 4.0,
+          "goal": "Deliver the twelve-row schema-4 MAST operand bank (mast-topology-operands.npz with metadata) regenerated on the H200 through a repaired docs/figures/topology-visual-corroboration/generate_topology_visuals.py whose _mast_rows obtains each row's current cell polygons when profile.operator.moment_geometry is None \u2014 constructing MomentGeometry.from_cells from the machine's plasma cell polygons as nova/equilibrium/forward_operator.py does, or building the forward profile with linear moments as the pinned 22086 regeneration did, with the two already-banked 22086/43 rows reproducing bitwise \u2014 using the preserved recipe ~/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration/regenerate_all_rows.sbatch, polling squeue every 120 seconds with no start deadline, harvested with bank_census.py --inject-qualification",
+          "id": "pta-schema4-producer-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "180m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+            "docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pta-perf",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T16:33:35Z",
+        "completed_at": "2026-09-02T18:09:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5769,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5769,
+        "stalled": false,
+        "time_budget": "180m",
+        "base_sha": "bf8cf796b0429d60c434df953995542e022826ba",
+        "commits": [
+          "7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+          "66db76756800f06a28e61332ba6948130bcf6da3"
+        ],
+        "changed_lines": {
+          "added": 236,
+          "removed": 11,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 regeneration job 1261550 (regenerate-1261550.log EXIT_MARKER=0) with path-scoped ruff and py_compile",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-schema4-bank-regeneration/regenerate-1261550.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060d6-e103-7f71-9114-d8247246ed9e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5434368,
+            "cached_input_tokens_cumulative": 8854272,
+            "input_tokens": 5373060,
+            "input_tokens_cumulative": 9016705,
+            "output_tokens": 24325,
+            "output_tokens_cumulative": 30206,
+            "reasoning_output_tokens": 9061,
+            "reasoning_output_tokens_cumulative": 10521
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 40727,
+          "peak_input_tokens": 17870977
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -87886,6 +88011,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1545
+    "_version": 1547
   }
 }

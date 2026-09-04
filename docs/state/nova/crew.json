@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:11:53",
+  "updated": "2026-09-04T18:17:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -94550,6 +94550,183 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T161153967353-fsa-diiid-match-test-message-alignment",
+        "plan": "forward-solve-api",
+        "section": "\u00a72",
+        "node": "fsa-diiid-match-test-message-alignment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 980,
+                "cached_input_tokens": 343757,
+                "input_tokens": 344793,
+                "output_tokens": 1565,
+                "reasoning_output_tokens": 185,
+                "total_tokens": 346358,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to tests/test_diiid_forward_gs_match.py, the whole file green on CPU with its log (UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_diiid_forward_gs_match.py), the manifest quoting the old and new assertion",
+          "estimated_hours": null,
+          "goal": "Align the one pre-existing assertion-text mismatch in tests/test_diiid_forward_gs_match.py with the message benchmarks/diiid_forward_gs_match.py actually raises (the test expects the phrase changed the exact class-margin operand while the producer raises changed the class-margin operand beyond, found by the route-request migration node whose secondary DIII-D smoke read 15 passed plus this one mismatch, log ~/.config/reckon/crew/runs/r-20260904T154835153711-fsa-route-requests-replay-gsmatch-certificate/logs/diiid-smoke.log), asserting the mechanism the message names rather than an exact string where the test's intent allows, with no change to the producer",
+          "id": "fsa-diiid-match-test-message-alignment",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T161153967353-fsa-diiid-match-test-message-alignment/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-test-fix-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T16:12:03Z",
+        "completed_at": "2026-09-04T16:16:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 262,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 262,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "4740006149698cd1bc3e41c2470be3d9a2880441",
+        "commits": [
+          "0cde921a9875a2a63234a2c8990d740a9aaf85a5"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_diiid_forward_gs_match.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T161153967353-fsa-diiid-match-test-message-alignment/logs/test_diiid_forward_gs_match.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T161153967353-fsa-diiid-match-test-message-alignment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d31-02dd-76f1-b412-fed5950cfadc",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 35641,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 38041,
+              "external_wait": null,
+              "log_age_seconds": 37139,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 37195,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/fsa-diiid-match-test-message-alignment",
+          "session_id": "01a06d31-02dd-76f1-b412-fed5950cfadc",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T16:16:25Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -94666,6 +94843,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1636
+    "_version": 1637
   }
 }

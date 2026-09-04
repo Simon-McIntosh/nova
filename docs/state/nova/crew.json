@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:41:07",
+  "updated": "2026-09-04T12:04:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1646,6 +1646,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-census-proto-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-census-spline-x",
         "harness": "codex",
         "role": "implement",
@@ -1721,6 +1730,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b3e-f042-7fe3-a18f-ca68486237fc"
         },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-polish-measure-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-04"
       },
       {
@@ -89864,6 +89882,200 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T085646278854-scr-settled-mask-stall-root-cause-2",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-settled-mask-stall-root-cause-2",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/attribution/settled-mask-stall.md plus receipt docs/figures/solver-convergence-regression/settled-mask-stall/stall-diagnosis.json with figures recording per row: (a) whether pure Newton-Krylov on the frozen mask at GMRES 40 contracts or floors with the residual per Newton step, (b) the Jacobian consistency check, the directional finite-difference derivative of the residual along the Newton direction against the Jacobian-vector product with the relative disagreement attributed by residual component (source term through psi_N, boundary flux read, limiter point, clip geometry, external field), (c) the residual decomposed at the stall by cell region using the 1089-cell grid stencil (core, boundary cells adjacent to the separatrix or limiter, private flux) and by term, (d) the accepted-factor and step-norm trajectory, (e) the same rows on the candidate tip, and a named mechanism per row with the evidence that rules the alternatives out (missing derivative through the topology read, non-smooth residual from a local-support read, inexact-Newton cap, damping collapse, saddle mis-selection) together with the repair each implies; the driver committed at benchmarks/settled_mask_stall.py, no nova/ change, the manifest written before any SLURM wait",
+          "estimated_hours": null,
+          "goal": "Finish the settled-mask stall diagnosis begun in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-settled-mask-stall-root-cause (uncommitted driver benchmarks/settled_mask_stall.py, four H200 attempts whose logs sit under its docs/figures/solver-convergence-regression/settled-mask-stall/, the last two failing only in the diagnostic cell-region classifier because operator.topology.connectivity_rings carries 961 centre-first rings while the residual and label vectors carry 1089 cells): use operator.grid.null.stencil as the boundary-adjacency authority after asserting shape (1089, ring_width) with centre-first indexing, keep the 961-cell topology-reader subset separately visible in the receipt, record that the centroid-current carrier has no moment geometry instead of fabricating a clipped-support result, and complete the paired measurement on the four pure rows (21985/51, 21986/46, 21989/55, 22086/43) restarted from their banked terminal states with the settled mask frozen, on current main and on the polish-support candidate tip 0dce5fe1c9593cd5d6d6f24755f0a5a71c3197e1 (lead direction 2026-09-04: the stall on a settled mask is a smooth-solve contraction failure whose cause must be found here, reuse map: the previous attempt's driver to be re-derived rather than copied blindly, the per-trip telemetry in docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, the cached exact operands in ~/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz, newton_krylov in nova/equilibrium/fixed_point.py, the persistent compilation cache wired at e04970ad, SLURM jobs on betelgeuse under reservation gpu_0003_grpA polled in the foreground because a backgrounded wait ends the worker's turn)",
+          "id": "scr-settled-mask-stall-root-cause-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T085646278854-scr-settled-mask-stall-root-cause-2/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "benchmarks/settled_mask_stall.py",
+            "docs/figures/solver-convergence-regression/settled-mask-stall/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-stall-x2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T08:57:02Z",
+        "completed_at": "2026-09-04T10:00:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3831,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3831,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "b64ed3abb386532dc21dc4e6fcd89030fa71c66a",
+        "commits": [
+          "73ba3dcee33f48f65c166a739004de75f829f1b3"
+        ],
+        "changed_lines": {
+          "added": 19220,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/settled_mask_stall.py on the H200, paired jobs, receipts current-measurement.json and candidate-measurement.json",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/solver-convergence-regression/settled-mask-stall/current-measurement.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T085646278854-scr-settled-mask-stall-root-cause-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ba2-c039-7512-bf85-edf07165b9b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29660288,
+            "cached_input_tokens_cumulative": 29660288,
+            "input_tokens": 30034863,
+            "input_tokens_cumulative": 30034863,
+            "output_tokens": 74661,
+            "output_tokens_cumulative": 74661,
+            "reasoning_output_tokens": 20663,
+            "reasoning_output_tokens_cumulative": 20663
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 9537,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 11937,
+              "external_wait": null,
+              "log_age_seconds": 11035,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 11091,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 5400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: waiting in the foreground for SLURM job 1262412 to finish",
+              "elapsed_seconds": 2660,
+              "external_wait": null,
+              "log_age_seconds": 79,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[]; changed_paths: []"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T081201061587-pta-replay-operands-current-bank/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T081201061587-pta-replay-operands-current-bank/manifest.md; resolve the blocker before resuming the run",
+              "node": "pta-replay-operands-current-bank",
+              "phase": "starting",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T081201061587-pta-replay-operands-current-bank",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 1864,
+              "terminal_at": "2026-09-04T08:25:49Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/pta-replay-operands-current-bank"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 95324,
+          "peak_input_tokens": 59695151
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -89980,6 +90192,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1574
+    "_version": 1577
   }
 }

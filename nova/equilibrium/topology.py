@@ -776,6 +776,14 @@ class Topology(Pytree):
                 data_x,
                 self.polish_valid,
             )
+        published_stationary = jnp.stack((data_o, data_x))
+        published_stationary = published_stationary.at[:, :2].set(
+            polish_receipt["selected_position_rz"]
+        )
+        published_stationary = published_stationary.at[:, 2].set(
+            polish_receipt["selected_value"]
+        )
+        data_o, data_x = published_stationary
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])

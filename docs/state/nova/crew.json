@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:15:02",
+  "updated": "2026-09-04T23:18:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1811,6 +1811,15 @@
       },
       {
         "id": "nia-candidate3-measure-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-candidate3-measure-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -97843,6 +97852,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1679
+    "_version": 1680
   }
 }

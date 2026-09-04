@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T17:12:33",
+  "updated": "2026-09-04T17:28:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1184,6 +1184,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "fsa-request-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "fsa-traced-bitwise",
         "harness": "codex",
         "role": "implement",
@@ -1762,6 +1771,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b3f-bba0-7420-b129-69217491fd4e"
         },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-integration-x3",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-04"
       },
       {
@@ -2415,6 +2433,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "scr-elimination-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "scr-mechanism",
         "harness": "codex",
         "role": "implement",
@@ -2454,6 +2481,15 @@
       },
       {
         "id": "scr-prodpath-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-solver-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -2584,6 +2620,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-wiring-test-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "seam-scout",
@@ -93480,6 +93525,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1619
+    "_version": 1624
   }
 }

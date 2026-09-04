@@ -1,0 +1,1181 @@
+{
+  "artifacts": {
+    "figures": [
+      "docs/figures/diiid-vertical-force-balance/d3d_shot_00000c4a7b-frame-179.png",
+      "docs/figures/diiid-vertical-force-balance/d3d_shot_0003ff34e7-frame-44.png",
+      "docs/figures/diiid-vertical-force-balance/d3d_shot_001554e054-frame-144.png",
+      "docs/figures/diiid-vertical-force-balance/d3d_shot_002495e835-frame-146.png",
+      "docs/figures/diiid-vertical-force-balance/d3d_shot_0040ca9bdc-frame-137.png"
+    ],
+    "receipt": "docs/figures/diiid-vertical-force-balance/residual-decomposition.json"
+  },
+  "cost": {
+    "device": "cpu",
+    "wall_seconds": 1227.2013203762472
+  },
+  "displacement_authority": {
+    "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+    "sha256": "298f36f1093fdaca4e3430e569af061d97475f9c14922857c88d831563a0288b"
+  },
+  "measurement": "exact clipped-cell plasma tare plus persisted-description coil tare, gauge removal and zero-fit source decomposition",
+  "persisted_description": {
+    "circuit_count": 19,
+    "coil_count": 24,
+    "dd_version": "4.1.1",
+    "ohmic_connections_sha256": "e8a181eacc8a113394360332241f3dbe39255d6aa5424e40bcbbcfee1c40a781",
+    "ohmic_connections_shape": [
+      7,
+      43
+    ],
+    "passive_loop_count": 47,
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+    "response": {
+      "coils": [
+        {
+          "coil": "F1A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F2A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F3A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F4A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F5A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F6A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F7A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F8A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F9A",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F1B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F2B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F3B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F4B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F5B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F6B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F7B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F8B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "F9B",
+          "elements": 1,
+          "signed_turn_sum": 1.0
+        },
+        {
+          "coil": "ECOILA",
+          "elements": 48,
+          "signed_turn_sum": 48.0
+        },
+        {
+          "coil": "ECOILB",
+          "elements": 48,
+          "signed_turn_sum": 48.0
+        },
+        {
+          "coil": "E567UP",
+          "elements": 6,
+          "signed_turn_sum": 6.0
+        },
+        {
+          "coil": "E567DN",
+          "elements": 6,
+          "signed_turn_sum": 6.0
+        },
+        {
+          "coil": "E89UP",
+          "elements": 7,
+          "signed_turn_sum": 7.0
+        },
+        {
+          "coil": "E89DN",
+          "elements": 7,
+          "signed_turn_sum": 7.0
+        }
+      ],
+      "dd_version": "4.1.1",
+      "entry": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+      "kernel": "nova.biot.polygon.polygon_greens"
+    },
+    "sha256": "b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e",
+    "supply_count": 19
+  },
+  "physics": {
+    "additive_gauges_removed": 5,
+    "coefficients_fitted": 0,
+    "coil_tare": "all 24 persisted pf_active polygons driven through the recorded circuit relation",
+    "decomposition_is_diagnostic_only": true,
+    "passive_currents_assumed_a": 0.0,
+    "passive_reason": "the persisted 47-loop vessel supplies geometry and resistance but no measured loop-current state",
+    "plasma_tare": "exact clipped-cell current zeroth, radial and vertical moments"
+  },
+  "records": [
+    {
+      "current_drive": {
+        "coefficients_fitted_in_this_measurement": 0,
+        "currents_a_turn": [
+          -213941.27204266575,
+          -154259.75904653734,
+          -37943.71476353333,
+          174293.3817305049,
+          170777.03004522275,
+          -160826.30815836383,
+          -294670.3275203894,
+          109580.46203081467,
+          948.0003451753873,
+          -216856.42415888442,
+          -96723.97193316958,
+          282.88282964390237,
+          55979.25829545002,
+          91667.00577358343,
+          -218010.79791504587,
+          -171239.11870676558,
+          116854.60663593584,
+          -89164.59029842634,
+          -39662.1497811554,
+          -79324.2995623108,
+          -39662.1497811554,
+          -39662.1497811554,
+          -41474.50207550461,
+          -41471.69873424301
+        ],
+        "ohmic_effective_gains": {
+          "E567DN": 1.0,
+          "E567UP": 1.0,
+          "E89DN": 1.0456240764323717,
+          "E89UP": 1.0456947569496173,
+          "ECOILB": 2.0
+        },
+        "ohmic_source": "recorded same-frame ECOILA channel",
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ]
+      },
+      "decomposition_fraction_sum": 1.0,
+      "decomposition_fractions": {
+        "conductor_localised": 0.3776857672192516,
+        "smooth_first_order_r_z": 0.6213427426690744,
+        "vessel_following": 0.0009714901116739434
+      },
+      "detectable_patches": [
+        {
+          "absolute_cell_current_a": 60789.82494841816,
+          "absolute_wall_tangent_alignment": 0.9526125843904754,
+          "area_m2": 0.0624218754924368,
+          "cell_count": 47,
+          "centroid_r_m": 0.9661596225882538,
+          "centroid_wall_distance_m": 0.2011707477312041,
+          "centroid_z_m": -1.4298646153999166,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 3.8689411690557876,
+          "signed_current_a": 60789.82494841816
+        },
+        {
+          "absolute_cell_current_a": 120318.38461563502,
+          "absolute_wall_tangent_alignment": 0.8700831506355511,
+          "area_m2": 0.05843750046100467,
+          "cell_count": 44,
+          "centroid_r_m": 0.9624173215011305,
+          "centroid_wall_distance_m": 0.1802930723430373,
+          "centroid_z_m": 1.414208437051751,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 4.405754261100003,
+          "signed_current_a": 120318.38461563502
+        },
+        {
+          "absolute_cell_current_a": 104467.30542341064,
+          "absolute_wall_tangent_alignment": 0.7217990961265687,
+          "area_m2": 0.1062500008381903,
+          "cell_count": 80,
+          "centroid_r_m": 0.8939501376041752,
+          "centroid_wall_distance_m": 0.13190870284617515,
+          "centroid_z_m": 0.09025906027533115,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 57.65110063855599,
+          "signed_current_a": -104467.30542341064
+        },
+        {
+          "absolute_cell_current_a": 10192.088337107614,
+          "absolute_wall_tangent_alignment": 0.9999998796092988,
+          "area_m2": 0.035859375282889225,
+          "cell_count": 27,
+          "centroid_r_m": 1.6889520949218633,
+          "centroid_wall_distance_m": 0.2542240585030699,
+          "centroid_z_m": -1.498601667390981,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 6.044107661212035,
+          "signed_current_a": -10192.088337107614
+        },
+        {
+          "absolute_cell_current_a": 331128.6051328015,
+          "absolute_wall_tangent_alignment": 0.9804152715238557,
+          "area_m2": 0.14476562614203428,
+          "cell_count": 109,
+          "centroid_r_m": 2.3696323815791582,
+          "centroid_wall_distance_m": 0.29393414576323523,
+          "centroid_z_m": 1.1305803507229544,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3485597690427737,
+          "signed_current_a": -331128.6051328015
+        },
+        {
+          "absolute_cell_current_a": 207991.61562211366,
+          "absolute_wall_tangent_alignment": 0.9864038933930528,
+          "area_m2": 0.12085937595344147,
+          "cell_count": 91,
+          "centroid_r_m": 2.3776680356844886,
+          "centroid_wall_distance_m": 0.3796200793968911,
+          "centroid_z_m": -1.1384135583473722,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.383878173662437,
+          "signed_current_a": -207991.61562211366
+        }
+      ],
+      "dipole_field_and_axis_response": {
+        "assumptions": [
+          "axisymmetric field uses B_R = -(1/R) dpsi_total/dZ and B_Z = (1/R) dpsi_total/dR",
+          "the normalised dipole basis has scales std(R) and std(Z) on the complete 65 by 65 grid",
+          "the elongated plasma translates rigidly and locally, with linear vertical force balance",
+          "the local EFIT-label dB_R/dZ at its magnetic axis is the restoring stiffness",
+          "R-Z coupling, nonlinear shape response, active feedback and vessel-current feedback are omitted"
+        ],
+        "implied_vertical_axis_displacement_m": 0.00020191851597199735,
+        "radial_field_from_vertical_dipole_t": 0.000942865936513,
+        "vertical_axis_stiffness_t_per_m": 4.6695367781118176,
+        "vertical_field_from_radial_dipole_t": 0.1025770682147702
+      },
+      "exact_clipped_plasma_current_a": 1269983.444569158,
+      "exterior_current_accounting": {
+        "conductor_patch_current_l1_a_turn": 856229.0928312086,
+        "detectable_patch_count": 6,
+        "native_unclaimed_ampere_turns_l1": 860882.7920124228,
+        "non_gs_apparent_ampere_turns_l1": 850360.1196159787,
+        "non_gs_to_native_unclaimed_ratio": 0.9877768814825,
+        "reliable_profile_surfaces": 19,
+        "vessel_patch_current_l1_a_turn": 2202.407845912257
+      },
+      "figure": "docs/figures/diiid-vertical-force-balance/d3d_shot_00000c4a7b-frame-179.png",
+      "fraction_definition": "smooth is its orthogonal flux-energy fraction; the orthogonal remainder is allocated between the landed vessel/conductor patch classes in proportion to their absolute patch current",
+      "frame": 179,
+      "gauge_free_fractional_rms": 0.09980751249317593,
+      "gauge_free_residual_rms_wb_per_radian": 0.01830950019053903,
+      "gauge_removed_wb_per_radian": -0.12286741811515464,
+      "label_gs_inconsistency": {
+        "banked_full_precision": 0.08323658669934644,
+        "field_unit": "fraction of interior drive sup",
+        "name": "EFIT label under unchanged Nova interior operator",
+        "norm": "relative interior Grad-Shafranov sup at stride one",
+        "value": 0.0832365867
+      },
+      "observed_axis_displacement_m": 1.2852496134717988,
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "spatial_decomposition": {
+        "basis": "normalised first-order radial and vertical modes",
+        "lowest_order_energy_fraction": 0.6213427426690744,
+        "lowest_order_rms_wb_per_radian": 0.014432517880660323,
+        "orthogonality_relative_error": 2.3515368722558996e-16,
+        "radial_coefficient_wb_per_radian": 0.014430358068048054,
+        "remainder_rms_wb_per_radian": 0.011266775264101471,
+        "residual_rms_wb_per_radian": 0.01830950019053903,
+        "vertical_coefficient_wb_per_radian": 0.00024967659782273966
+      },
+      "time_ms": 3740.0,
+      "verdict": {
+        "classification": "inside-label-gs-inconsistency",
+        "headline": "Residual source is inside label GS inconsistency",
+        "reason": "non-GS accounting carries 98.8% of the exterior apparent current; all 24 known poloidal coils are already present"
+      }
+    },
+    {
+      "current_drive": {
+        "coefficients_fitted_in_this_measurement": 0,
+        "currents_a_turn": [
+          -107985.15134415339,
+          -185620.0728704684,
+          -37146.80308438931,
+          160906.85772611835,
+          183984.585209852,
+          -220704.39174812325,
+          -102545.97968608861,
+          203561.54529380132,
+          -130795.05053201188,
+          -160068.58491494798,
+          -115141.66436183994,
+          -44702.532135104535,
+          159173.20545595133,
+          115757.84222953836,
+          -223574.41727170654,
+          -72211.68895947601,
+          89593.95244718046,
+          -118435.65379546606,
+          -13479.304562449106,
+          -26958.609124898212,
+          -13479.304562449106,
+          -13479.304562449106,
+          -14095.238108280086,
+          -14094.2853840615
+        ],
+        "ohmic_effective_gains": {
+          "E567DN": 1.0,
+          "E567UP": 1.0,
+          "E89DN": 1.0456240764323717,
+          "E89UP": 1.0456947569496173,
+          "ECOILB": 2.0
+        },
+        "ohmic_source": "recorded same-frame ECOILA channel",
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ]
+      },
+      "decomposition_fraction_sum": 1.0,
+      "decomposition_fractions": {
+        "conductor_localised": 0.6214366757859321,
+        "smooth_first_order_r_z": 0.3736995331458411,
+        "vessel_following": 0.004863791068226834
+      },
+      "detectable_patches": [
+        {
+          "absolute_cell_current_a": 92566.04351338088,
+          "absolute_wall_tangent_alignment": 0.948992409635937,
+          "area_m2": 0.057109375450527286,
+          "cell_count": 43,
+          "centroid_r_m": 0.9543640351995583,
+          "centroid_wall_distance_m": 0.1901136761989761,
+          "centroid_z_m": -1.3932864022812879,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 4.852468041165254,
+          "signed_current_a": 92566.04351338088
+        },
+        {
+          "absolute_cell_current_a": 126021.78244672736,
+          "absolute_wall_tangent_alignment": 0.8724377349235088,
+          "area_m2": 0.05843750046100467,
+          "cell_count": 44,
+          "centroid_r_m": 0.9649010675933588,
+          "centroid_wall_distance_m": 0.18404264808121532,
+          "centroid_z_m": 1.4217660412642368,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 4.170720018669633,
+          "signed_current_a": 126021.78244672736
+        },
+        {
+          "absolute_cell_current_a": 95278.85760805092,
+          "absolute_wall_tangent_alignment": 0.9999999854340453,
+          "area_m2": 0.11421875090105457,
+          "cell_count": 86,
+          "centroid_r_m": 0.8938459595020554,
+          "centroid_wall_distance_m": 0.14900405804555206,
+          "centroid_z_m": 0.04291367809886849,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 75.39276276158674,
+          "signed_current_a": -95278.85760805092
+        },
+        {
+          "absolute_cell_current_a": 13383.345381505502,
+          "absolute_wall_tangent_alignment": 0.9999986385370715,
+          "area_m2": 0.043828125345753505,
+          "cell_count": 33,
+          "centroid_r_m": 1.689130955770004,
+          "centroid_wall_distance_m": 0.25396784426669244,
+          "centroid_z_m": -1.4983436625069992,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 5.3709269004830285,
+          "signed_current_a": -13383.345381505502
+        },
+        {
+          "absolute_cell_current_a": 8457.167485216229,
+          "absolute_wall_tangent_alignment": 0.7075430453648115,
+          "area_m2": 0.04117187532479874,
+          "cell_count": 31,
+          "centroid_r_m": 1.6899640450422,
+          "centroid_wall_distance_m": 0.32977993299616976,
+          "centroid_z_m": 1.4979847743863106,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 5.567145365553569,
+          "signed_current_a": -8457.167485216229
+        },
+        {
+          "absolute_cell_current_a": 114634.8316548058,
+          "absolute_wall_tangent_alignment": 0.9808296642029105,
+          "area_m2": 0.11023437586962244,
+          "cell_count": 83,
+          "centroid_r_m": 2.3697862667671696,
+          "centroid_wall_distance_m": 0.2939723870764665,
+          "centroid_z_m": 1.1303564408386475,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3489952134837013,
+          "signed_current_a": -114634.8316548058
+        },
+        {
+          "absolute_cell_current_a": 85035.50179590104,
+          "absolute_wall_tangent_alignment": 0.9816833566313554,
+          "area_m2": 0.09828125077532604,
+          "cell_count": 74,
+          "centroid_r_m": 2.3784470271857754,
+          "centroid_wall_distance_m": 0.37876619524381167,
+          "centroid_z_m": -1.135470267364365,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.37050717841999,
+          "signed_current_a": -85035.50179590104
+        }
+      ],
+      "dipole_field_and_axis_response": {
+        "assumptions": [
+          "axisymmetric field uses B_R = -(1/R) dpsi_total/dZ and B_Z = (1/R) dpsi_total/dR",
+          "the normalised dipole basis has scales std(R) and std(Z) on the complete 65 by 65 grid",
+          "the elongated plasma translates rigidly and locally, with linear vertical force balance",
+          "the local EFIT-label dB_R/dZ at its magnetic axis is the restoring stiffness",
+          "R-Z coupling, nonlinear shape response, active feedback and vessel-current feedback are omitted"
+        ],
+        "implied_vertical_axis_displacement_m": 0.0007148369237446221,
+        "radial_field_from_vertical_dipole_t": 0.0025838791749907895,
+        "vertical_axis_stiffness_t_per_m": 3.614641450605718,
+        "vertical_field_from_radial_dipole_t": 0.025390190257814516
+      },
+      "exact_clipped_plasma_current_a": 1262182.1417456078,
+      "exterior_current_accounting": {
+        "conductor_patch_current_l1_a_turn": 549243.2792012497,
+        "detectable_patch_count": 7,
+        "native_unclaimed_ampere_turns_l1": 555636.4803010499,
+        "non_gs_apparent_ampere_turns_l1": 550101.7785921381,
+        "non_gs_to_native_unclaimed_ratio": 0.9900389878902245,
+        "reliable_profile_surfaces": 19,
+        "vessel_patch_current_l1_a_turn": 4298.755866451115
+      },
+      "figure": "docs/figures/diiid-vertical-force-balance/d3d_shot_0003ff34e7-frame-44.png",
+      "fraction_definition": "smooth is its orthogonal flux-energy fraction; the orthogonal remainder is allocated between the landed vessel/conductor patch classes in proportion to their absolute patch current",
+      "frame": 44,
+      "gauge_free_fractional_rms": 0.039031932613892456,
+      "gauge_free_residual_rms_wb_per_radian": 0.0057624001127007905,
+      "gauge_removed_wb_per_radian": -0.0409103762864948,
+      "label_gs_inconsistency": {
+        "banked_full_precision": 0.08323658669934644,
+        "field_unit": "fraction of interior drive sup",
+        "name": "EFIT label under unchanged Nova interior operator",
+        "norm": "relative interior Grad-Shafranov sup at stride one",
+        "value": 0.0832365867
+      },
+      "observed_axis_displacement_m": 0.2860301089852325,
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "spatial_decomposition": {
+        "basis": "normalised first-order radial and vertical modes",
+        "lowest_order_energy_fraction": 0.3736995331458411,
+        "lowest_order_rms_wb_per_radian": 0.003522611007971551,
+        "orthogonality_relative_error": 2.4730148127053045e-15,
+        "radial_coefficient_wb_per_radian": 0.00345970483950431,
+        "remainder_rms_wb_per_radian": 0.004560314325281938,
+        "residual_rms_wb_per_radian": 0.0057624001127007905,
+        "vertical_coefficient_wb_per_radian": 0.0006627448505969735
+      },
+      "time_ms": 1080.0,
+      "verdict": {
+        "classification": "inside-label-gs-inconsistency",
+        "headline": "Residual source is inside label GS inconsistency",
+        "reason": "non-GS accounting carries 99.0% of the exterior apparent current; all 24 known poloidal coils are already present"
+      }
+    },
+    {
+      "current_drive": {
+        "coefficients_fitted_in_this_measurement": 0,
+        "currents_a_turn": [
+          -134964.94168998557,
+          -69046.6081091864,
+          -66023.20316844061,
+          88945.64719302196,
+          75801.65621447656,
+          -187640.92990851612,
+          -187656.48673657098,
+          -10687.7380979131,
+          27292.325634590525,
+          -138396.68029230883,
+          -57347.63806173275,
+          -80955.80607277947,
+          -88642.65094027366,
+          265931.468843278,
+          -135306.03734620207,
+          -291636.7340791313,
+          180237.99411009465,
+          2247.8991756052706,
+          1823.763453106396,
+          3647.526906212792,
+          1823.763453106396,
+          1823.763453106396,
+          1907.0998808296874,
+          1906.9709762854882
+        ],
+        "ohmic_effective_gains": {
+          "E567DN": 1.0,
+          "E567UP": 1.0,
+          "E89DN": 1.0456240764323717,
+          "E89UP": 1.0456947569496173,
+          "ECOILB": 2.0
+        },
+        "ohmic_source": "recorded same-frame ECOILA channel",
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ]
+      },
+      "decomposition_fraction_sum": 1.0,
+      "decomposition_fractions": {
+        "conductor_localised": 0.18461301475433134,
+        "smooth_first_order_r_z": 0.8149906064078932,
+        "vessel_following": 0.0003963788377754382
+      },
+      "detectable_patches": [
+        {
+          "absolute_cell_current_a": 146079.18539534707,
+          "absolute_wall_tangent_alignment": 0.9679529608978236,
+          "area_m2": 0.05976562547148205,
+          "cell_count": 45,
+          "centroid_r_m": 0.9797892168580178,
+          "centroid_wall_distance_m": 0.21520313157565535,
+          "centroid_z_m": -1.474342578170027,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.555225445060313,
+          "signed_current_a": 146079.18539534707
+        },
+        {
+          "absolute_cell_current_a": 55458.580081183216,
+          "absolute_wall_tangent_alignment": 0.8684030782819652,
+          "area_m2": 0.0624218754924368,
+          "cell_count": 47,
+          "centroid_r_m": 0.9603347002050013,
+          "centroid_wall_distance_m": 0.17712016287138702,
+          "centroid_z_m": 1.4078314341023026,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 4.566117905511729,
+          "signed_current_a": 55458.580081183216
+        },
+        {
+          "absolute_cell_current_a": 96157.32255835507,
+          "absolute_wall_tangent_alignment": 0.9999996952847188,
+          "area_m2": 0.13148437603726051,
+          "cell_count": 99,
+          "centroid_r_m": 0.8940374985958365,
+          "centroid_wall_distance_m": 0.15233918287024872,
+          "centroid_z_m": -0.19718750110558544,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 90.77474482255653,
+          "signed_current_a": -96157.32255835507
+        },
+        {
+          "absolute_cell_current_a": 288457.79392166744,
+          "absolute_wall_tangent_alignment": 0.856562964043062,
+          "area_m2": 0.13546875106869263,
+          "cell_count": 102,
+          "centroid_r_m": 2.382501685723727,
+          "centroid_wall_distance_m": 0.37338765993357265,
+          "centroid_z_m": -1.117410230828567,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3079145680365574,
+          "signed_current_a": -288457.79392166744
+        },
+        {
+          "absolute_cell_current_a": 182418.3055780094,
+          "absolute_wall_tangent_alignment": 0.995559898631487,
+          "area_m2": 0.11421875090105457,
+          "cell_count": 86,
+          "centroid_r_m": 2.3729544794188686,
+          "centroid_wall_distance_m": 0.2911943536031687,
+          "centroid_z_m": 1.1170282521202979,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.31623176692743,
+          "signed_current_a": -182418.3055780094
+        }
+      ],
+      "dipole_field_and_axis_response": {
+        "assumptions": [
+          "axisymmetric field uses B_R = -(1/R) dpsi_total/dZ and B_Z = (1/R) dpsi_total/dR",
+          "the normalised dipole basis has scales std(R) and std(Z) on the complete 65 by 65 grid",
+          "the elongated plasma translates rigidly and locally, with linear vertical force balance",
+          "the local EFIT-label dB_R/dZ at its magnetic axis is the restoring stiffness",
+          "R-Z coupling, nonlinear shape response, active feedback and vessel-current feedback are omitted"
+        ],
+        "implied_vertical_axis_displacement_m": 0.0009940685465145217,
+        "radial_field_from_vertical_dipole_t": 0.004622837551046935,
+        "vertical_axis_stiffness_t_per_m": 4.6504213087275295,
+        "vertical_field_from_radial_dipole_t": 0.014457095190511521
+      },
+      "exact_clipped_plasma_current_a": 991164.5678669947,
+      "exterior_current_accounting": {
+        "conductor_patch_current_l1_a_turn": 787028.2579894138,
+        "detectable_patch_count": 5,
+        "native_unclaimed_ampere_turns_l1": 790604.7921947498,
+        "non_gs_apparent_ampere_turns_l1": 785273.6060236061,
+        "non_gs_to_native_unclaimed_ratio": 0.9932568253775137,
+        "reliable_profile_surfaces": 19,
+        "vessel_patch_current_l1_a_turn": 1689.812316934456
+      },
+      "figure": "docs/figures/diiid-vertical-force-balance/d3d_shot_001554e054-frame-144.png",
+      "fraction_definition": "smooth is its orthogonal flux-energy fraction; the orthogonal remainder is allocated between the landed vessel/conductor patch classes in proportion to their absolute patch current",
+      "frame": 144,
+      "gauge_free_fractional_rms": 0.016712216586535492,
+      "gauge_free_residual_rms_wb_per_radian": 0.0026084361847655488,
+      "gauge_removed_wb_per_radian": 0.0052399729259131654,
+      "label_gs_inconsistency": {
+        "banked_full_precision": 0.08323658669934644,
+        "field_unit": "fraction of interior drive sup",
+        "name": "EFIT label under unchanged Nova interior operator",
+        "norm": "relative interior Grad-Shafranov sup at stride one",
+        "value": 0.0832365867
+      },
+      "observed_axis_displacement_m": 0.438452489415544,
+      "shot": "d3d_shot_001554e054.parquet",
+      "spatial_decomposition": {
+        "basis": "normalised first-order radial and vertical modes",
+        "lowest_order_energy_fraction": 0.8149906064078932,
+        "lowest_order_rms_wb_per_radian": 0.0023548135044021068,
+        "orthogonality_relative_error": 1.2672503063205137e-15,
+        "radial_coefficient_wb_per_radian": -0.002017537447749388,
+        "remainder_rms_wb_per_radian": 0.0011219593082994201,
+        "residual_rms_wb_per_radian": 0.0026084361847655488,
+        "vertical_coefficient_wb_per_radian": -0.0012143678550766302
+      },
+      "time_ms": 3240.0,
+      "verdict": {
+        "classification": "inside-label-gs-inconsistency",
+        "headline": "Residual source is inside label GS inconsistency",
+        "reason": "non-GS accounting carries 99.3% of the exterior apparent current; all 24 known poloidal coils are already present"
+      }
+    },
+    {
+      "current_drive": {
+        "coefficients_fitted_in_this_measurement": 0,
+        "currents_a_turn": [
+          -182900.32604484167,
+          -168920.51925475898,
+          -11590.184320282191,
+          34116.893696174964,
+          166529.82982706468,
+          -257558.78917994795,
+          -241128.19760233167,
+          116738.78307632451,
+          -86302.77883397065,
+          -159552.92195388163,
+          -122944.34408235224,
+          -166791.75125110103,
+          123720.50510244817,
+          197839.67291904057,
+          -206997.8556786885,
+          -383510.75551754097,
+          173712.27337931472,
+          -4867.8692578931805,
+          -15438.2849589549,
+          -30876.5699179098,
+          -15438.2849589549,
+          -15438.2849589549,
+          -16143.733637873278,
+          -16142.642451906993
+        ],
+        "ohmic_effective_gains": {
+          "E567DN": 1.0,
+          "E567UP": 1.0,
+          "E89DN": 1.0456240764323717,
+          "E89UP": 1.0456947569496173,
+          "ECOILB": 2.0
+        },
+        "ohmic_source": "recorded same-frame ECOILA channel",
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ]
+      },
+      "decomposition_fraction_sum": 1.0,
+      "decomposition_fractions": {
+        "conductor_localised": 0.51439767521121,
+        "smooth_first_order_r_z": 0.4834590354676596,
+        "vessel_following": 0.0021432893211304465
+      },
+      "detectable_patches": [
+        {
+          "absolute_cell_current_a": 130339.15856334812,
+          "absolute_wall_tangent_alignment": 0.9553691076301557,
+          "area_m2": 0.05843750046100467,
+          "cell_count": 44,
+          "centroid_r_m": 0.9659667227383578,
+          "centroid_wall_distance_m": 0.20171391535437974,
+          "centroid_z_m": -1.4305416266029511,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 3.860869485023411,
+          "signed_current_a": 130339.15856334812
+        },
+        {
+          "absolute_cell_current_a": 96566.93811550716,
+          "absolute_wall_tangent_alignment": 0.9028371004759134,
+          "area_m2": 0.05578125044004991,
+          "cell_count": 42,
+          "centroid_r_m": 0.976772472522972,
+          "centroid_wall_distance_m": 0.2035394155413515,
+          "centroid_z_m": 1.4600668946987727,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 2.557320131383555,
+          "signed_current_a": 96566.93811550716
+        },
+        {
+          "absolute_cell_current_a": 116979.6615590419,
+          "absolute_wall_tangent_alignment": 0.9999996219270249,
+          "area_m2": 0.10226562580675817,
+          "cell_count": 77,
+          "centroid_r_m": 0.8937271642780895,
+          "centroid_wall_distance_m": 0.15262846082502807,
+          "centroid_z_m": -0.12502187953361965,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 89.81167750566101,
+          "signed_current_a": -116979.6615590419
+        },
+        {
+          "absolute_cell_current_a": 394430.4978001989,
+          "absolute_wall_tangent_alignment": 0.9115465133090721,
+          "area_m2": 0.14210937612107954,
+          "cell_count": 107,
+          "centroid_r_m": 2.381471611962334,
+          "centroid_wall_distance_m": 0.37453804402294355,
+          "centroid_z_m": -1.121715172895613,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3071909881669381,
+          "signed_current_a": -394430.4978001989
+        },
+        {
+          "absolute_cell_current_a": 255164.57212997013,
+          "absolute_wall_tangent_alignment": 0.9966496822104581,
+          "area_m2": 0.12750000100582837,
+          "cell_count": 96,
+          "centroid_r_m": 2.3712301608519843,
+          "centroid_wall_distance_m": 0.2924870475909622,
+          "centroid_z_m": 1.1239458364321502,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.320929508940057,
+          "signed_current_a": -255164.57212997013
+        }
+      ],
+      "dipole_field_and_axis_response": {
+        "assumptions": [
+          "axisymmetric field uses B_R = -(1/R) dpsi_total/dZ and B_Z = (1/R) dpsi_total/dR",
+          "the normalised dipole basis has scales std(R) and std(Z) on the complete 65 by 65 grid",
+          "the elongated plasma translates rigidly and locally, with linear vertical force balance",
+          "the local EFIT-label dB_R/dZ at its magnetic axis is the restoring stiffness",
+          "R-Z coupling, nonlinear shape response, active feedback and vessel-current feedback are omitted"
+        ],
+        "implied_vertical_axis_displacement_m": 2.6141182632540092e-05,
+        "radial_field_from_vertical_dipole_t": 0.00019271905332121552,
+        "vertical_axis_stiffness_t_per_m": 7.3722392758666615,
+        "vertical_field_from_radial_dipole_t": 0.03686859820078701
+      },
+      "exact_clipped_plasma_current_a": 1632614.0682548524,
+      "exterior_current_accounting": {
+        "conductor_patch_current_l1_a_turn": 1023013.9631684135,
+        "detectable_patch_count": 5,
+        "native_unclaimed_ampere_turns_l1": 1030100.7632616443,
+        "non_gs_apparent_ampere_turns_l1": 1017494.0760516402,
+        "non_gs_to_native_unclaimed_ratio": 0.9877616951082658,
+        "reliable_profile_surfaces": 19,
+        "vessel_patch_current_l1_a_turn": 4262.489914492549
+      },
+      "figure": "docs/figures/diiid-vertical-force-balance/d3d_shot_002495e835-frame-146.png",
+      "fraction_definition": "smooth is its orthogonal flux-energy fraction; the orthogonal remainder is allocated between the landed vessel/conductor patch classes in proportion to their absolute patch current",
+      "frame": 146,
+      "gauge_free_fractional_rms": 0.03251169962794686,
+      "gauge_free_residual_rms_wb_per_radian": 0.007225823585402394,
+      "gauge_removed_wb_per_radian": -0.04599524625750616,
+      "label_gs_inconsistency": {
+        "banked_full_precision": 0.08323658669934644,
+        "field_unit": "fraction of interior drive sup",
+        "name": "EFIT label under unchanged Nova interior operator",
+        "norm": "relative interior Grad-Shafranov sup at stride one",
+        "value": 0.0832365867
+      },
+      "observed_axis_displacement_m": 0.3755045726893921,
+      "shot": "d3d_shot_002495e835.parquet",
+      "spatial_decomposition": {
+        "basis": "normalised first-order radial and vertical modes",
+        "lowest_order_energy_fraction": 0.4834590354676596,
+        "lowest_order_rms_wb_per_radian": 0.00502420319004989,
+        "orthogonality_relative_error": 3.145493740475758e-15,
+        "radial_coefficient_wb_per_radian": 0.0050239600010897395,
+        "remainder_rms_wb_per_radian": 0.005193256087701612,
+        "residual_rms_wb_per_radian": 0.007225823585402394,
+        "vertical_coefficient_wb_per_radian": -4.94328064940337e-05
+      },
+      "time_ms": 3180.0,
+      "verdict": {
+        "classification": "inside-label-gs-inconsistency",
+        "headline": "Residual source is inside label GS inconsistency",
+        "reason": "non-GS accounting carries 98.8% of the exterior apparent current; all 24 known poloidal coils are already present"
+      }
+    },
+    {
+      "current_drive": {
+        "coefficients_fitted_in_this_measurement": 0,
+        "currents_a_turn": [
+          -177235.03600582798,
+          -168819.4297996969,
+          -3699.849366051145,
+          30402.918887046984,
+          160368.47642151953,
+          -248254.59847940976,
+          -251114.6062236416,
+          113456.58188212222,
+          -86963.56528970835,
+          -155923.79314822573,
+          -122700.78732322874,
+          -168624.5253673442,
+          124455.81976733531,
+          195552.29817320945,
+          -195397.95104914592,
+          -400016.2822751922,
+          181435.72068643174,
+          -8023.48603523933,
+          -12993.137435159646,
+          -25986.274870319292,
+          -12993.137435159646,
+          -12993.137435159646,
+          -13586.85569227224,
+          -13585.937330597679
+        ],
+        "ohmic_effective_gains": {
+          "E567DN": 1.0,
+          "E567UP": 1.0,
+          "E89DN": 1.0456240764323717,
+          "E89UP": 1.0456947569496173,
+          "ECOILB": 2.0
+        },
+        "ohmic_source": "recorded same-frame ECOILA channel",
+        "order": [
+          "F1A",
+          "F2A",
+          "F3A",
+          "F4A",
+          "F5A",
+          "F6A",
+          "F7A",
+          "F8A",
+          "F9A",
+          "F1B",
+          "F2B",
+          "F3B",
+          "F4B",
+          "F5B",
+          "F6B",
+          "F7B",
+          "F8B",
+          "F9B",
+          "ECOILA",
+          "ECOILB",
+          "E567UP",
+          "E567DN",
+          "E89UP",
+          "E89DN"
+        ]
+      },
+      "decomposition_fraction_sum": 1.0,
+      "decomposition_fractions": {
+        "conductor_localised": 0.7112155792699476,
+        "smooth_first_order_r_z": 0.28561659620965424,
+        "vessel_following": 0.003167824520398184
+      },
+      "detectable_patches": [
+        {
+          "absolute_cell_current_a": 130812.56354623513,
+          "absolute_wall_tangent_alignment": 0.9550941474618281,
+          "area_m2": 0.05843750046100467,
+          "cell_count": 44,
+          "centroid_r_m": 0.9656025569169661,
+          "centroid_wall_distance_m": 0.2013295640724592,
+          "centroid_z_m": -1.429336632825245,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 3.899682129558024,
+          "signed_current_a": 130812.56354623513
+        },
+        {
+          "absolute_cell_current_a": 93921.29859555505,
+          "absolute_wall_tangent_alignment": 0.8996056438076576,
+          "area_m2": 0.061093750481959426,
+          "cell_count": 46,
+          "centroid_r_m": 0.9769594569895638,
+          "centroid_wall_distance_m": 0.2035940256005059,
+          "centroid_z_m": 1.4603210157156654,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 2.54284857346241,
+          "signed_current_a": 93921.29859555505
+        },
+        {
+          "absolute_cell_current_a": 114200.7193514645,
+          "absolute_wall_tangent_alignment": 0.9999995422019271,
+          "area_m2": 0.10226562580675817,
+          "cell_count": 77,
+          "centroid_r_m": 0.8937433481729874,
+          "centroid_wall_distance_m": 0.15261572109394406,
+          "centroid_z_m": -0.13682592798304405,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 86.80923734004725,
+          "signed_current_a": -114200.7193514645
+        },
+        {
+          "absolute_cell_current_a": 406836.3327499508,
+          "absolute_wall_tangent_alignment": 0.9018697592036107,
+          "area_m2": 0.1434375011315569,
+          "cell_count": 108,
+          "centroid_r_m": 2.3816596457715686,
+          "centroid_wall_distance_m": 0.3742856321509374,
+          "centroid_z_m": -1.1208486466876022,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3057323494890407,
+          "signed_current_a": -406836.3327499508
+        },
+        {
+          "absolute_cell_current_a": 260919.11205652897,
+          "absolute_wall_tangent_alignment": 0.998516545553093,
+          "area_m2": 0.12882812601630575,
+          "cell_count": 97,
+          "centroid_r_m": 2.371510438768057,
+          "centroid_wall_distance_m": 0.29223144414362956,
+          "centroid_z_m": 1.1227405856420674,
+          "classification": "conductor-shaped",
+          "detectable_above_tare_floor": true,
+          "principal_axis_elongation": 1.3183259674908503,
+          "signed_current_a": -260919.11205652897
+        }
+      ],
+      "dipole_field_and_axis_response": {
+        "assumptions": [
+          "axisymmetric field uses B_R = -(1/R) dpsi_total/dZ and B_Z = (1/R) dpsi_total/dR",
+          "the normalised dipole basis has scales std(R) and std(Z) on the complete 65 by 65 grid",
+          "the elongated plasma translates rigidly and locally, with linear vertical force balance",
+          "the local EFIT-label dB_R/dZ at its magnetic axis is the restoring stiffness",
+          "R-Z coupling, nonlinear shape response, active feedback and vessel-current feedback are omitted"
+        ],
+        "implied_vertical_axis_displacement_m": 2.5080310674748145e-05,
+        "radial_field_from_vertical_dipole_t": 0.00015728178270853728,
+        "vertical_axis_stiffness_t_per_m": 6.2711257746458,
+        "vertical_field_from_radial_dipole_t": 0.022050257903244865
+      },
+      "exact_clipped_plasma_current_a": 1628298.509662359,
+      "exterior_current_accounting": {
+        "conductor_patch_current_l1_a_turn": 1035346.7366952224,
+        "detectable_patch_count": 5,
+        "native_unclaimed_ampere_turns_l1": 1042778.6583448707,
+        "non_gs_apparent_ampere_turns_l1": 1030943.9231110102,
+        "non_gs_to_native_unclaimed_ratio": 0.9886507696152461,
+        "reliable_profile_surfaces": 19,
+        "vessel_patch_current_l1_a_turn": 4611.536748089842
+      },
+      "figure": "docs/figures/diiid-vertical-force-balance/d3d_shot_0040ca9bdc-frame-137.png",
+      "fraction_definition": "smooth is its orthogonal flux-energy fraction; the orthogonal remainder is allocated between the landed vessel/conductor patch classes in proportion to their absolute patch current",
+      "frame": 137,
+      "gauge_free_fractional_rms": 0.025540944934166157,
+      "gauge_free_residual_rms_wb_per_radian": 0.005639486670126551,
+      "gauge_removed_wb_per_radian": -0.04313526871035478,
+      "label_gs_inconsistency": {
+        "banked_full_precision": 0.08323658669934644,
+        "field_unit": "fraction of interior drive sup",
+        "name": "EFIT label under unchanged Nova interior operator",
+        "norm": "relative interior Grad-Shafranov sup at stride one",
+        "value": 0.0832365867
+      },
+      "observed_axis_displacement_m": 0.3115689270610047,
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "spatial_decomposition": {
+        "basis": "normalised first-order radial and vertical modes",
+        "lowest_order_energy_fraction": 0.28561659620965424,
+        "lowest_order_rms_wb_per_radian": 0.0030139170411378207,
+        "orthogonality_relative_error": 7.229569225863206e-16,
+        "radial_coefficient_wb_per_radian": 0.003013645413337545,
+        "remainder_rms_wb_per_radian": 0.0047665620704732325,
+        "residual_rms_wb_per_radian": 0.005639486670126551,
+        "vertical_coefficient_wb_per_radian": -4.046298963909945e-05
+      },
+      "time_ms": 3000.0,
+      "verdict": {
+        "classification": "inside-label-gs-inconsistency",
+        "headline": "Residual source is inside label GS inconsistency",
+        "reason": "non-GS accounting carries 98.9% of the exterior apparent current; all 24 known poloidal coils are already present"
+      }
+    }
+  ],
+  "selection_authority": {
+    "frame_count": 5,
+    "path": "docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+    "sha256": "3ca5c22a4babf7cc45b1231859e5fc75366fca7b7d951e3b4978c684ca729f63"
+  },
+  "verdict_counts": {
+    "candidate-physical-source": 0,
+    "inside-label-gs-inconsistency": 5
+  }
+}

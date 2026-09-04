@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="constraint-augmented-newton-krylov">
+  <meta name="plan-title"     content="Constraint-augmented Newton–Krylov — diagnostic placement authority wired into the forward solve">
+  <meta name="plan-summary"   content="Wireable constraint-plus-compensating-unknown pairs in the forward Newton–Krylov solve: magnetics centroid, Thomson edge crossings, Shafranov shift.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="18.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,convergence,mast">
+  <meta name="plan-depends-on" content="solver-convergence-regression">
+  <title>Constraint-augmented Newton–Krylov | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s1">§1 — Why the forward solve needs constraints it can be handed</h2>
+<p>The free-boundary forward solve prescribes the coil circuit currents and the flux-function profiles and asks for the flux
+map. Along at least one direction that problem is ill-posed by physics: an elongated plasma's vertical position is fixed by
+the prescribed currents only through a near-singular balance. The measurement on solver-convergence-regression put the
+smallest singular value of the frozen-mask Jacobian at three to four ten-thousandths of the largest on 21986/46 and 21989/55,
+with the direction 70 to 74 percent the rigid vertical shift; along it the residual barely changes while the plasma moves,
+Newton walks, and every damping layer we had was holding that walk. The real machine does not run on prescribed currents
+either. Its position controller reads a measurement and drives a circuit. The lead's ruling (2026-09-04, decision
+<code>vertical-mode-elimination-by-constraint</code> on solver-convergence-regression) is to constrain the position as an inner
+problem with a compensating radial-field current and then solve the position away with the outer condition that the
+compensating current vanishes, so no reference position is ever imposed.</p>
+<p>That construction is not specific to the vertical mode. Every diagnostic that knows where the plasma is carries placement
+authority the currents cannot supply, and every one of them enters the solve the same way: one scalar (or small-vector)
+constraint on the state, paired with one compensating unknown whose flux image the solve already knows how to form. Where a
+diagnostic is trusted, its constraint is imposed and the compensating unknown becomes an output that says what the prescribed
+inputs missed. Where nothing is trusted, the constraint is used as a change of variables and solved away. The solver must be
+built so that adding such a pair is a wiring step, never a solver change. The lead's direction of 2026-09-04 names three
+constraints to wire, in the order of their immediate applicability, and asks that the Shafranov shift be among them.</p>
+
+<h2 id="s2">§2 — The constraint interface</h2>
+<p>A constraint is a pair. The residual half is a functional <code>g(ψ, u)</code> of the flux state and of the vector
+<code>u</code> of compensating unknowns, differentiable through the same Jacobian-vector product the Newton–Krylov step already
+uses, fixed-shape under <code>jit</code> and <code>vmap</code>. The unknown half is one compensating quantity per scalar
+constraint whose effect on the state is a known flux image: a circuit current (its column of the response matrix), a profile
+amplitude (the source term's derivative with respect to it), or a multiplier when the constraint is a projection rather than a
+physical actuator. The augmented system <code>[F(ψ, u); g(ψ, u)] = 0</code> is square, and <code>newton_krylov</code> solves
+it as it solves <code>F</code> today: the Krylov space sees the extra rows and columns through the augmented JVP, the merit
+ladder, best-iterate retention, the own-mask and pre-settlement acceptance and the trusted-Krylov admission are unchanged, and
+the receipt gains one row per constraint carrying its residual, the compensating value, and the constraint's projection onto
+the Jacobian's smallest singular direction so a constraint that fixes a soft mode is seen doing so.</p>
+<p>Three invariants decide whether the interface is right. With no constraints registered the solve is bit-identical to the
+current one. Registering <code>N</code> constraints changes the compiled program's shape once, statically, and never traces per
+constraint at run time. And the same registered constraint can be imposed (its target supplied) or eliminated (its
+compensating unknown driven to a prescribed value by an outer scalar solve) without the inner solve knowing which. The
+elimination mode is the general form of the vertical route: an outer root-find over the constraint's target whose equation is
+that the compensating quantity equals its prescribed value, secant or Newton on that scalar with a bounded iteration count and
+the inner solve warm-started between outer iterates, whose derivative is the stiffness the inner problem cannot resolve.</p>
+
+<h2 id="s3">§3 — The constraint library, in order of applicability</h2>
+<p><strong>Vertical position from the plasma itself (immediate).</strong> The current centroid height, or the axis height, with
+the up-down antisymmetric combination of the radial-field circuits as the compensating current. Its inner form is the prototype
+in flight on solver-convergence-regression (commit <code>6ae142d5</code>, held) and its eliminated form is followup
+<code>f-scr-003</code> there. This plan's first deliverable is to route that pair through the interface of §2 rather than leave
+it a special case in <code>ForwardProfile.solve</code>.</p>
+<p><strong>Current centroid from magnetics (immediate where the reconstruction publishes it).</strong> When the magnetics know
+the plasma's current centroid well, both components, <code>R</code> and <code>Z</code>, are imposed with the radial-field and
+vertical-field circuit combinations as the two compensating currents. The compensating currents then measure the
+inconsistency between the prescribed circuit currents and the field that holds the plasma where the magnetics say it is, which
+is the DIII-D question (diiid-vertical-force-balance) asked as a solver output rather than a tare study.</p>
+<p><strong>Thomson scattering edge crossings (more abstract, immediately applicable).</strong> A Thomson channel is a point on a
+line of sight where the electron density and temperature are measured; the channel at which the profile falls to the edge
+locates the separatrix's crossing of that chord, on one or both sides of the plasma. Each measured crossing point
+<code>x_c</code> gives the constraint <code>ψ_N(x_c) − 1 = 0</code>, differentiable through the normalised flux, with a shaping
+circuit current or a profile amplitude as the compensating unknown. Two channels on one chord fix the plasma's width and
+position along that chord; chords at different heights fix the elongation and the vertical position; the constraints have
+remarkable placement authority because they read the plasma edge directly rather than inferring it from external field
+moments. On MAST the bank carries EFIT's LCFS per row, from which synthetic Thomson crossings along the real chord geometry are
+built for the prototype, so the constraint is measured against a known answer before any measured profile is used.</p>
+<p><strong>Shafranov shift, β<sub>p</sub> + l<sub>i</sub>/2 (the one the lead asked for with a smile).</strong> The Shafranov
+integral of the external magnetics fixes the combination of poloidal beta and internal inductance, which is a constraint on the
+scale and shape of the pressure and current profiles rather than on position. Its compensating unknown is a profile amplitude,
+the pressure gradient scale or the <code>ff'</code> scale, whose derivative the source term already carries. It closes the loop
+between the flux-function extraction and the magnetics without fitting anything.</p>
+
+<h2 id="s4">§4 — Deliverables and done-when</h2>
+<p><strong>A. The interface.</strong> <code>newton_krylov</code> and <code>ForwardProfile.solve</code> accept a static tuple of
+constraint pairs; with an empty tuple the solve is bit-identical on the seven referee node IDs and on the bank rows; a CPU test
+registers two synthetic constraints (a linear functional with a circuit-current unknown and a nonlinear functional with a
+multiplier) and proves the augmented system converges quadratically on a fixture, that the receipt rows are populated, and
+that registering the pairs changes the compiled program's shape once. <strong>B. The vertical pair through the interface.</strong>
+The held prototype's centroid constraint is re-expressed as a registered pair with no behaviour change on its measured rows,
+and the elimination outer solve of <code>f-scr-003</code> runs through the same interface. <strong>C. The Thomson prototype.</strong>
+Synthetic edge crossings along MAST's Thomson chord geometry from EFIT's LCFS on the twelve bank rows; constrained solves
+imposed with two, four and eight crossings; per row the placement error of the axis, the saddle and the boundary against EFIT
+with and without the constraints, the compensating currents, the residual and convergence on the production route; the
+statement of how many crossings place the plasma to within a cell. <strong>D. The Shafranov pair.</strong> The
+β<sub>p</sub> + l<sub>i</sub>/2 constraint with a profile amplitude as its unknown, measured on the same rows against the values
+the bank's extracted profiles imply. <strong>E. The magnetics centroid pair</strong> on the DIII-D gate frames where the
+reconstruction publishes the centroid, reported as compensating currents beside the tare study's residual decomposition.
+Every deliverable ships its receipt under <code>docs/figures/constraint-augmented-newton-krylov/</code> and the cumulative
+evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylov-landed.html</code>.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">§</span> Decisions</h2>
+  <div class="r-dec" data-key="compensating-unknown-class" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">For a position constraint, is the compensating unknown a physical circuit current (the radial-field or vertical-field combination), a multiplier on the constraint's flux image, or either per constraint?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="circuit-current">physical circuit current, so the output is the current the machine would have driven</button>
+      <button class="r-opt" data-value="multiplier">a multiplier, so no actuator is assumed</button>
+      <button class="r-opt" data-value="per-constraint">registered per constraint, both forms supported by the interface</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+  <div class="r-dec" data-key="thomson-crossing-source" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which edge definition supplies the Thomson crossing used as the constraint target: the channel where density falls to a stated fraction of its core value, the steepest gradient, or the reconstruction's own separatrix marker on the chord?</p>
+    <p class="r-dec-rat"></p>
+  </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">§</span> Followups</h2>
+  <article class="r-fu" data-id="f-cank-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19-relaunch" data-written-at="2026-09-04">
+    <h4 class="r-fu-title">Wire the interface, route the vertical pair through it, then prototype the Thomson crossings</h4>
+    <div class="r-fu-body">Order: §4 A once the vertical-position constraint prototype and the step-cap repair on solver-convergence-regression release <code>fixed_point.py</code> and <code>forward.py</code>; §4 B in the same node as the elimination followup <code>f-scr-003</code> where possible; §4 C on the H200 with synthetic crossings from the bank's EFIT LCFS and MAST's Thomson chord geometry; §4 D and E after. Every node is held for the lead until its receipt is read; the solver shape is the lead's decision.</div>
+    <pre class="r-fu-prompt">/reckon-ship constraint-augmented-newton-krylov</pre>
+  </article>
+</section>
+
+</main>
+</body>
+</html>

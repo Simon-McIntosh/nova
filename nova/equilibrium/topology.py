@@ -386,12 +386,14 @@ class Topology(Pytree):
 
     @jax.jit
     def o_point_index(self, vmap_o, polarity, qualified=None):
-        """Return primary o-point index."""
+        """Return the primary O-point index, or ``-1`` when none qualifies."""
         o_psi = vmap_o[:, 2]
         score = jnp.asarray(polarity * o_psi, dtype=self.grid.fit_dtype)
         if qualified is None:
             qualified = jnp.isfinite(vmap_o[:, 0])
-        return jnp.argmax(jnp.where(qualified, score, -jnp.inf))
+        admitted = jnp.any(qualified)
+        selected = jnp.argmax(jnp.where(qualified, score, -jnp.inf))
+        return jnp.where(admitted, selected, -1)
 
     def o_point_data(self, vmap_o, polarity, qualified=None):
         """Return primary o-point data."""
@@ -403,11 +405,13 @@ class Topology(Pytree):
 
     @jax.jit
     def o_point_qualification(self, vmap_o, polarity, qualified=None):
-        """Return provisional O data and whether a candidate is qualified."""
+        """Return selected O data or an explicit all-NaN empty selection."""
         if qualified is None:
             qualified = jnp.isfinite(vmap_o[:, 0])
+        admitted = jnp.any(qualified)
         index = self.o_point_index(vmap_o, polarity, qualified)
-        return AxisQualification(vmap_o[index], jnp.any(qualified))
+        data = jnp.where(admitted, vmap_o[index], jnp.full_like(vmap_o[0], jnp.nan))
+        return AxisQualification(data, admitted)
 
     @jax.jit
     def o_point(self, psi_grid, polarity):
@@ -655,8 +659,8 @@ class Topology(Pytree):
         )
         seed_material = inside_material | seedable
         material_cell_count = jnp.sum(inside_material)
-        connection_floor = _MATERIAL_CONNECTED_FRACTION * jnp.maximum(
-            material_cell_count, 1
+        connection_floor = jnp.maximum(
+            jnp.floor(_MATERIAL_CONNECTED_FRACTION * material_cell_count), 1
         )
 
         def qualify(data_o):

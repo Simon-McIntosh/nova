@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:38:52",
+  "updated": "2026-09-04T13:43:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -90990,6 +90990,136 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T112702397502-nia-resolution-gate-calibration",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-resolution-gate-calibration",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/resolution-gate/resolution-gate-calibration.md with one table row per oracle rung and per MAST map giving pitch, minor radius, cells per minor radius, X-point curvature scale with its cell count, and whether the ring count resolves the axis and the saddle, a figure of resolved against unresolved on the two axes (cells per minor radius, cells per curvature scale), the smallest resolving values observed, a recommended pair of floors with the margin they leave on the MAST bank, and the resolution receipt fields a solve should publish, no nova/ change, the report written before the fence",
+          "estimated_hours": null,
+          "goal": "Calibrate a resolution gate for stationary-point identification by measuring on CPU, for each Solovev oracle rung (136, 342, 551 plus 1076 cells) and each of the twelve MAST 33 by 33 maps, the cell pitch, the minor radius of the closed boundary, the cells per minor radius, the X-point curvature scale (the length over which the flux departs from its saddle value by the local Hessian, from the analytic field on the oracle and from the spline on MAST) and its cell count, together with which rungs and maps resolve the axis and the saddle by the ring sign count so the floors below which a null must be reported unresolved are set from measurement (lead question 2026-09-04 whether the coarse-grid failure is a limitation of the ring count, whether runs should be limited to meshes fine enough for the features under study and whether a minimum number of cells per minor radius is the criterion, coordinator's provisional floors 8 cells per minor radius and 3 cells per X-point curvature scale, reuse map: the containment census held at 0b563ba3 in worktree ~/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-forward-census-containment-prototype-3 read-only for the ring counts per rung, the oracle fixtures under scripts/analytic_oracle_fixtures/, the cached MAST operands under ~/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz, the bank docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json for the EFIT boundary plus X-point per row, no nova/ change)",
+          "id": "nia-resolution-gate-calibration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112702397502-nia-resolution-gate-calibration/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-gate/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-resolution-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:27:12Z",
+        "completed_at": "2026-09-04T11:42:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 915,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 915,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "00c442370ecc7ef4987004a3a0f02acb92eabe94",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112702397502-nia-resolution-gate-calibration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c2c-38b7-7b73-aae4-badcb11fec8b",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 18551,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 20951,
+              "external_wait": null,
+              "log_age_seconds": 20049,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 20105,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only calibration; report, figure, receipt and logs under ~/.config/reckon/crew/reports/nova/resolution-gate/",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -91106,6 +91236,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1591
+    "_version": 1592
   }
 }

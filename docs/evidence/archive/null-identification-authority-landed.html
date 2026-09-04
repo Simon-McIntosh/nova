@@ -335,6 +335,29 @@
     deduplication by root uncertainty, fixed shapes with pre-capacity counts and multiplicity published.</p>
   </section>
 
+  <section id="resolution-gate">
+    <h2>Calibration, 2026-09-04: a resolution gate for the containment census</h2>
+    <p>Report <code>~/.config/reckon/crew/reports/nova/resolution-gate/resolution-gate-calibration.md</code> with receipt and
+    figure. Sixteen maps (four Solov'ev rungs, twelve MAST bank maps) measured for cells per minor radius (radial pitch, closed
+    boundary) and cells per limiting X-point curvature scale (the quadratic distance traversing the axis-to-saddle flux span
+    along the saddle Hessian's principal direction with the smaller count).</p>
+    <table>
+      <caption>Support against resolution by the ring sign count</caption>
+      <thead><tr><th scope="col">Map</th><th scope="col">Cells per minor radius</th><th scope="col">Cells per X scale</th><th scope="col">Axis</th><th scope="col">Saddle</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Solov'ev 136 cells</th><td>3.04</td><td>0.42</td><td>resolved</td><td>unresolved (ring count 2)</td></tr>
+        <tr><th scope="row">Solov'ev 342 cells</th><td>5.01</td><td>0.70</td><td>resolved</td><td>resolved</td></tr>
+        <tr><th scope="row">Solov'ev 551 and 1076 cells</th><td>6.47, 9.15</td><td>0.90, 1.27</td><td>resolved</td><td>resolved</td></tr>
+        <tr><th scope="row">MAST bank, twelve maps</th><td>9.25 to 9.79</td><td>5.51 to 9.97</td><td>12 of 12</td><td>12 of 12</td></tr>
+      </tbody>
+    </table>
+    <p>Floors recommended by measurement: 3.0 radial cells per minor radius (an observed lower calibration, since no unresolved
+    axis exists) and 0.6 directional cells per limiting X curvature scale (between the unresolved 0.42 and the resolving 0.70),
+    leaving the MAST bank margins of 6.25 and 4.91 cells. The ring count is the instrument that reveals the limit, not the
+    defect. The report specifies the per-map resolution receipt a solve publishes, ending in the booleans axis_resolved,
+    saddle_resolved, resolution_certified and the joint convergence_and_topology_certified.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

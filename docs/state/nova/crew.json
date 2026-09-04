@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T16:18:49",
+  "updated": "2026-09-04T16:48:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -525,6 +525,15 @@
           "gpt-5.6-sol": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "cank-interface-design-x",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "cank-thomson-scout",
@@ -1688,6 +1697,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b36-3718-7c90-8766-702c3aa635e6"
         },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-candidate2-gate-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-04"
       },
       {
@@ -92964,6 +92982,189 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T143226377752-cank-constraint-interface-design",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a72",
+        "node": "cank-constraint-interface-design",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3791,
+                "cached_input_tokens": 148601,
+                "input_tokens": 152493,
+                "output_tokens": 6199,
+                "reasoning_output_tokens": 3631,
+                "total_tokens": 158692,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/cank/constraint-interface-design.md carrying the protocol as a code sketch, a table of where constraint rows enter the Newton\u2013Krylov system, the mask interaction rule, the generalised elimination, the vmap consequence, the file-by-file change list against main 8df13859 with file:line anchors for every touched function, a recommended landing order with the reason for each, every claim about existing code cited by file:line, read-only with no repository change",
+          "estimated_hours": null,
+          "goal": "Design the constraint interface for the active-set Newton\u2013Krylov forward solve so that additional equilibrium constraints wire in as data rather than as solver edits (lead mandate 2026-09-04 on plan constraint-augmented-newton-krylov \u00a72 plus \u00a74: vertical current centroid from magnetics, Thomson scattering separatrix crossings on the DIII-D competition corpus, Shafranov shift through beta_p plus l_i/2, each an extra residual row with its compensating unknown or multiplier), by reading the vertical-position constraint prototype at 6ae142d5 in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-position-constraint-prototype, the elimination commit e6b11552 in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination, ForwardProfile.solve plus the residual assembly in nova/equilibrium/forward.py, forward_operator.py plus fixed_point.py on main 8df13859, the forward-solve-api plan \u00a71 request type, so that the report proposes the typed constraint protocol (residual, Jacobian-vector action, compensating unknown, target, tolerance), where the rows join the Krylov system, how the active-set mask interacts with constraint rows, how the eliminated outer scalar solve generalises to several constraints, the batching consequence on the H200 (constraint rows must vmap over a batch of equilibria), the file-by-file change list with estimated sizes, plus the order in which the three library constraints should land",
+          "id": "cank-constraint-interface-design",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T143226377752-cank-constraint-interface-design/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "cank-interface-design-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T14:32:34Z",
+        "completed_at": "2026-09-04T14:48:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 942,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 942,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8df13859ac23838b27279e8b7e505ebf21bc11cd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T143226377752-cank-constraint-interface-design/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06cd5-eeea-7403-a23c-7ad27ebfb78c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8312064,
+            "cached_input_tokens_cumulative": 8312064,
+            "input_tokens": 8542902,
+            "input_tokens_cumulative": 8542902,
+            "output_tokens": 42913,
+            "output_tokens_cumulative": 42913,
+            "reasoning_output_tokens": 20603,
+            "reasoning_output_tokens_cumulative": 20603
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 29673,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 32073,
+              "external_wait": null,
+              "log_age_seconds": 31171,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 31227,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 63516,
+          "peak_input_tokens": 16854966
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only design scout; the report under reports/nova/cank/ is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-constraint-interface-design",
+          "session_id": "01a06cd5-eeea-7403-a23c-7ad27ebfb78c",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T14:48:16Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -93080,6 +93281,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1612
+    "_version": 1615
   }
 }

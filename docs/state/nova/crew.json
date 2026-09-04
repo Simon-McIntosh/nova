@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:17:10",
+  "updated": "2026-09-04T18:24:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1707,6 +1707,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-attribution-x4",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-bank-x",
         "harness": "codex",
         "role": "implement",
@@ -1795,9 +1804,11 @@
         "id": "nia-integration-x3",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06d0c-79bf-79d1-b7f8-ec0f0edd911b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06d0c-79bf-79d1-b7f8-ec0f0edd911b"
+        },
         "created": "2026-09-04"
       },
       {
@@ -94841,8 +94852,22 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904162358",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T16:23:58Z",
+        "closed_at": "2026-09-04T16:24:42Z",
+        "held_seconds": 44,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
       }
     ],
-    "_version": 1637
+    "_version": 1641
   }
 }

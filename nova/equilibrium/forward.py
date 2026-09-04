@@ -91,6 +91,7 @@ from nova.equilibrium.conservation import (
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
+from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
 from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.moment import (
     CurrentIntegralSupport,
@@ -143,6 +144,7 @@ __all__ = [
     "ForwardDomainLabel",
     "ForwardEquilibrium",
     "ForwardLabelledFlux",
+    "ForwardRasterFlux",
     "ForwardPerturbedSeedReceipt",
     "ForwardPortfolio",
     "ForwardProfile",
@@ -237,6 +239,19 @@ class ForwardLabelledFlux(NamedTuple):
     domain_label: jax.Array
 
 
+class ForwardRasterFlux(NamedTuple):
+    """Exact rectangular current image and its consumer-facing topology."""
+
+    radius: jax.Array
+    height: jax.Array
+    shape: jax.Array
+    psi: jax.Array
+    psi_norm: jax.Array
+    domain_label: jax.Array
+    separatrix: jax.Array
+    separatrix_vertex_count: jax.Array
+
+
 class ForwardEquilibrium(NamedTuple):
     """Converged equilibrium and the receipts that qualify it."""
 
@@ -252,6 +267,7 @@ class ForwardEquilibrium(NamedTuple):
     rotation: RotationRecord
     continuation: ContinuationLedger
     finite: FiniteCheck
+    raster_flux: ForwardRasterFlux | None = None
     labelled_flux: ForwardLabelledFlux | None = None
 
 
@@ -739,7 +755,13 @@ class ForwardProfile:
         saddle_flux = neutral[saddle_index]
         return jnp.asarray(saddle_flux + polarity * flux_span * normalized)
 
-    def observe(self, flux, current=None, target_current=None) -> ForwardEquilibrium:
+    def observe(
+        self,
+        flux,
+        current=None,
+        target_current=None,
+        prescribed_current=None,
+    ) -> ForwardEquilibrium:
         """Return the full receipt of one flux map without iterating it.
 
         ``fixed_point`` reports the residual of the supplied map alone, so a
@@ -748,7 +770,12 @@ class ForwardProfile:
         """
         residual = jnp.max(
             jnp.abs(
-                self.operator.residual(flux, current, target_current=target_current)
+                self.operator.residual(
+                    flux,
+                    current,
+                    target_current=target_current,
+                    prescribed_current=prescribed_current,
+                )
             )
         )
         scale = jnp.maximum(jnp.max(jnp.abs(flux)), 1.0e-30)
@@ -757,7 +784,13 @@ class ForwardProfile:
             residual=residual / scale,
             trace=jnp.atleast_1d(residual / scale),
         )
-        return self._receipt(jnp.asarray(flux), history, target_current=target_current)
+        return self._receipt(
+            jnp.asarray(flux),
+            history,
+            target_current=target_current,
+            current=current,
+            prescribed_current=prescribed_current,
+        )
 
     def integral_observation(self, flux, target_current=None) -> IntegralObservation:
         """Return the integral observations of one flux map.
@@ -1127,38 +1160,7 @@ class ForwardProfile:
         self, flux: jax.Array, masks: DomainMasks, topology: ForwardTopologyState
     ) -> ForwardLabelledFlux:
         """Return the complete consumer map from the terminal topology read."""
-
-        def map_domain(domain):
-            labels = jnp.full(domain.shape, int(ForwardDomainLabel.OPEN), jnp.int8)
-            labels = jnp.where(
-                domain == int(PlasmaDomain.CORE),
-                int(ForwardDomainLabel.CORE),
-                labels,
-            )
-            labels = jnp.where(
-                domain == int(PlasmaDomain.PRIVATE_FLUX),
-                int(ForwardDomainLabel.PRIVATE_FLUX),
-                labels,
-            )
-            return jnp.where(
-                domain == int(PlasmaDomain.EXCLUDED_MATERIAL),
-                int(ForwardDomainLabel.WALL_SHADOW),
-                labels,
-            )
-
-        if self.operator.moment_geometry is None:
-            rings = jnp.asarray(self.operator.topology.connectivity_rings)
-            centre = rings[:, 0]
-            interior = map_domain(masks.label[centre])
-            labels = (
-                jnp.full(
-                    (self.lattice.node_count,), int(ForwardDomainLabel.OPEN), jnp.int8
-                )
-                .at[centre]
-                .set(interior)
-            )
-        else:
-            labels = map_domain(masks.label)
+        labels = self._domain_labels(masks)
         psi = jnp.asarray(flux)[: self.lattice.node_count]
         if psi.shape != masks.psi_norm.shape or psi.shape != labels.shape:
             raise ValueError(
@@ -1177,12 +1179,102 @@ class ForwardProfile:
             domain_label=labels,
         )
 
+    @staticmethod
+    def _map_domain_labels(domain: jax.Array) -> jax.Array:
+        """Map internal plasma domains onto the stable consumer vocabulary."""
+        labels = jnp.full(domain.shape, int(ForwardDomainLabel.OPEN), jnp.int8)
+        labels = jnp.where(
+            domain == int(PlasmaDomain.CORE), int(ForwardDomainLabel.CORE), labels
+        )
+        labels = jnp.where(
+            domain == int(PlasmaDomain.PRIVATE_FLUX),
+            int(ForwardDomainLabel.PRIVATE_FLUX),
+            labels,
+        )
+        return jnp.where(
+            domain == int(PlasmaDomain.EXCLUDED_MATERIAL),
+            int(ForwardDomainLabel.WALL_SHADOW),
+            labels,
+        )
+
+    def _domain_labels(self, masks: DomainMasks) -> jax.Array:
+        """Return one domain label for every persisted raster node."""
+        if self.operator.moment_geometry is not None:
+            return self._map_domain_labels(masks.label)
+        rings = jnp.asarray(self.operator.topology.connectivity_rings)
+        centre = rings[:, 0]
+        interior = self._map_domain_labels(masks.label[centre])
+        return (
+            jnp.full((self.lattice.node_count,), int(ForwardDomainLabel.OPEN), jnp.int8)
+            .at[centre]
+            .set(interior)
+        )
+
+    def _raster_separatrix(
+        self,
+        psi: jax.Array,
+        topology: ForwardTopologyState,
+    ) -> tuple[jax.Array, jax.Array]:
+        """Trace and pack the unit-normalized global-spline contour."""
+        radius, height, shape = self.operator.raster_geometry()
+        values = jnp.asarray(psi).reshape(shape).T
+        contour = traced_spline_contour(
+            values,
+            radius,
+            height,
+            topology.boundary_flux,
+        )
+        segment = contour["segment_endpoints_rz"].reshape((-1, 2, 2))
+        segment_valid = contour["segment_valid"].reshape((-1,))
+        capacity = segment_valid.size
+        source = jnp.nonzero(segment_valid, size=capacity, fill_value=0)[0]
+        packed = segment[source, 0]
+        vertex_count = jnp.sum(segment_valid, dtype=jnp.int32)
+        valid = jnp.arange(capacity) < vertex_count
+        angle = jnp.arctan2(
+            packed[:, 1] - topology.axis[1],
+            packed[:, 0] - topology.axis[0],
+        )
+        ordering = jnp.argsort(jnp.where(valid, angle, jnp.inf))
+        packed = packed[ordering]
+        return jnp.where(valid[:, None], packed, jnp.nan), vertex_count
+
+    def _raster_flux(
+        self,
+        current_moments: CellCurrentMoments,
+        masks: DomainMasks,
+        topology: ForwardTopologyState,
+        *,
+        current=None,
+        prescribed_current=None,
+    ) -> ForwardRasterFlux:
+        """Return the exact current image on the machine's fixed raster."""
+        radius, height, shape = self.operator.raster_geometry()
+        psi = self.operator.raster_image(
+            current_moments,
+            current=current,
+            prescribed_current=prescribed_current,
+        )
+        separatrix, vertex_count = self._raster_separatrix(psi, topology)
+        return ForwardRasterFlux(
+            radius=radius,
+            height=height,
+            shape=jnp.asarray(shape, dtype=jnp.int32),
+            psi=psi,
+            psi_norm=(psi - topology.axis_flux) / topology.flux_span,
+            domain_label=self._domain_labels(masks),
+            separatrix=separatrix,
+            separatrix_vertex_count=vertex_count,
+        )
+
     def _receipt(
         self,
         flux: jax.Array,
         history: fixed_point.FixedPointResult,
         requested_class=None,
         target_current=None,
+        current=None,
+        prescribed_current=None,
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
         current_moments, support_integrals, masks, topology, amplitude = (
@@ -1218,6 +1310,13 @@ class ForwardProfile:
                 cell_current=jnp.all(jnp.isfinite(cell_current)),
                 moments=jnp.all(jnp.isfinite(moments.stack())),
                 conservation=jnp.all(jnp.isfinite(jnp.stack([*conservation[:-1]]))),
+            ),
+            raster_flux=self._raster_flux(
+                current_moments,
+                masks,
+                topology,
+                current=current,
+                prescribed_current=prescribed_current,
             ),
             labelled_flux=self._labelled_flux(flux, masks, topology),
         )
@@ -1295,6 +1394,8 @@ class ForwardProfile:
                 prescribed_current,
             ),
             target_current=target_current,
+            current=current,
+            prescribed_current=prescribed_current,
         )
 
     def _solve_host_krylov(
@@ -1354,6 +1455,8 @@ class ForwardProfile:
                 prescribed_current,
             ),
             target_current=target_current,
+            current=current,
+            prescribed_current=prescribed_current,
         )
 
     def _solve_accelerated(
@@ -1416,7 +1519,14 @@ class ForwardProfile:
                     **options,
                 },
             )
-        return self._receipt(history.state, history, requested_class, target_current)
+        return self._receipt(
+            history.state,
+            history,
+            requested_class,
+            target_current,
+            current,
+            prescribed_current,
+        )
 
     def solve(
         self,

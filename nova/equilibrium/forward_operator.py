@@ -417,6 +417,16 @@ class ForwardFluxOperator:
             self.inside_material = jnp.ones(self.grid.node_number, dtype=bool)
         else:
             self.inside_material = jnp.asarray(self.inside_material, dtype=bool)
+        try:
+            raster_radius, raster_height = _structured_grid_axes(self.grid.coordinate)
+        except ValueError:
+            self._raster_radius = None
+            self._raster_height = None
+            self._raster_shape = None
+        else:
+            self._raster_radius = jnp.asarray(raster_radius, dtype=jnp.float64)
+            self._raster_height = jnp.asarray(raster_height, dtype=jnp.float64)
+            self._raster_shape = (raster_radius.size, raster_height.size)
         if self.area.shape != (self.grid.node_number,):
             raise ValueError("area must carry one control area per grid node")
         if (
@@ -583,6 +593,22 @@ class ForwardFluxOperator:
             jnp.asarray(height, dtype=jnp.float64),
             (radius.size, height.size),
         )
+
+    def raster_geometry(self) -> tuple[jax.Array, jax.Array, tuple[int, int]]:
+        """Return the rectangular receipt geometry cached with the operator."""
+        if self._raster_shape is None:
+            raise ValueError("raster receipts require a tensor-product forward grid")
+        return self._raster_radius, self._raster_height, self._raster_shape
+
+    def raster_image(
+        self,
+        current_moments: CellCurrentMoments,
+        current=None,
+        prescribed_current=None,
+    ) -> jax.Array:
+        """Evaluate the grid from the exact conductor and plasma currents."""
+        external = self.external(current, prescribed_current)[: self.grid.node_number]
+        return external + self.grid.internal(current_moments)
 
     def connectivity_axis_seed(self, axis) -> tuple[jax.Array, jax.Array]:
         """Return the owning axis cell and the material mask used by its flood."""

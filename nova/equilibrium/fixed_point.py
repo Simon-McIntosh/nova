@@ -456,6 +456,7 @@ class FixedPointResult(NamedTuple):
     inner_iteration_step_cap_factors: jax.Array | float = float("nan")
     trajectory_state: jax.Array | float = float("nan")
     trajectory_residual: jax.Array | float = float("nan")
+    row_jvp_projections: jax.Array | tuple[()] = ()
 
 
 class KinkAwareResult(NamedTuple):
@@ -740,7 +741,8 @@ def _projected_krylov_condition(
     residual_vector: jax.Array,
     *,
     krylov_dimension: int,
-) -> tuple[jax.Array, jax.Array]:
+    return_direction: bool = False,
+) -> tuple[jax.Array, jax.Array] | tuple[jax.Array, jax.Array, jax.Array]:
     """Measure the rectangular Arnoldi projection condition at one iteration.
 
     The fixed-shape, twice-orthogonalised Arnoldi construction matches the
@@ -799,7 +801,7 @@ def _projected_krylov_condition(
         basis_valid = basis_valid.at[column + 1].set(next_valid)
         return basis, hessenberg, basis_valid
 
-    _basis, hessenberg, basis_valid = jax.lax.fori_loop(
+    basis, hessenberg, basis_valid = jax.lax.fori_loop(
         0,
         krylov_dimension,
         arnoldi_column,
@@ -814,10 +816,22 @@ def _projected_krylov_condition(
     median = singular_values[median_index]
     condition = largest / jnp.maximum(smallest, jnp.finfo(smallest.dtype).tiny)
     spectral_baseline = largest / jnp.maximum(median, jnp.finfo(median.dtype).tiny)
-    return (
+    measurement = (
         jnp.where(active_columns > 0, condition, 1.0),
         jnp.where(active_columns > 0, spectral_baseline, 1.0),
     )
+    if not return_direction:
+        return measurement
+    _left, _values, right = jnp.linalg.svd(hessenberg, full_matrices=False)
+    coordinates = right[smallest_index]
+    direction = coordinates @ basis[:-1]
+    direction_norm = jnp.linalg.norm(direction)
+    direction = jnp.where(
+        (active_columns > 0) & jnp.isfinite(direction_norm) & (direction_norm > 0.0),
+        direction / jnp.maximum(direction_norm, jnp.finfo(direction.dtype).tiny),
+        jnp.zeros_like(direction),
+    )
+    return (*measurement, direction)
 
 
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
@@ -3436,6 +3450,7 @@ def newton_krylov(
     model_trust_selection: bool | None = None,
     own_mask_acceptance: bool | None = None,
     presettlement_incumbent_scoring: bool = True,
+    row_jvp_observers: tuple[Callable[[jax.Array, jax.Array], jax.Array], ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3566,6 +3581,32 @@ def newton_krylov(
             presettlement_incumbent_scoring=presettlement_incumbent_scoring,
             precision=precision,
         )
+    if row_jvp_observers:
+        telemetry_map = map_fn
+        if carry_shadows:
+            terminal_shadow = jnp.ravel(shadow_mask_fn(result.state))
+
+            def telemetry_map(state):
+                return shadowed_map_fn(state, terminal_shadow)
+
+        mapped, tangent = jax.linearize(telemetry_map, result.state)
+
+        def linear_action(vector):
+            return vector - tangent(vector)
+
+        _condition, _baseline, soft_direction = _projected_krylov_condition(
+            linear_action,
+            mapped - result.state,
+            krylov_dimension=gmres_iterations,
+            return_direction=True,
+        )
+        projections = jnp.concatenate(
+            tuple(
+                jnp.ravel(observer(result.state, soft_direction))
+                for observer in row_jvp_observers
+            )
+        )
+        result = result._replace(row_jvp_projections=projections)
     if checkpoint_path is not None:
         checkpoint = Path(checkpoint_path)
         jax.debug.callback(

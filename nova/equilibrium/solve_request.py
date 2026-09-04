@@ -11,6 +11,7 @@ from nova import __version__ as NOVA_VERSION
 if TYPE_CHECKING:
     import jax
 
+    from nova.equilibrium.constraint import ConstraintPair, ConstraintRecord
     from nova.equilibrium.forward import ForwardEquilibrium
     from nova.equilibrium.forward_operator import ForwardTopologyState
     from nova.equilibrium.observation import ConstraintPinSet
@@ -181,10 +182,9 @@ class ExplicitSolveSeed:
 class ForwardSolveRequest:
     """Physical inputs and one fully resolved policy for a forward solve.
 
-    ``constraint_pairs`` reserves a static tuple boundary for typed augmented
-    constraints.  The current implementation accepts the existing validation
-    ``constraint_pins`` and refuses a non-empty augmented tuple until that
-    solver contract lands, so the two meanings cannot be conflated.
+    ``constraint_pairs`` is the static tuple boundary for typed augmented
+    constraints.  Existing ``constraint_pins`` remain post-solve validation
+    claims, so the two meanings cannot be conflated.
     """
 
     carrier_identity: str
@@ -194,7 +194,7 @@ class ForwardSolveRequest:
     route: SolveRoute
     target_current: object | None = None
     constraint_pins: ConstraintPinSet | None = None
-    constraint_pairs: tuple[object, ...] = ()
+    constraint_pairs: tuple[ConstraintPair, ...] = ()
     current: object | None = None
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()
@@ -318,6 +318,12 @@ class ForwardSolveReceipt:
         """Return the terminal equilibrium under its domain-specific name."""
 
         return self.terminal_state
+
+    @property
+    def constraints(self) -> tuple[ConstraintRecord, ...]:
+        """Return terminal augmented-row records in request tuple order."""
+
+        return self.terminal_state.constraints
 
 
 __all__ = [

@@ -1,0 +1,426 @@
+{
+  "method": {
+    "backend": "cpu",
+    "prototype": "fixed-shape wall segments split at crossed grid knots, four derivative bins per spline piece, 32 fixed bisection trips, plus 420 equal-arc reachability samples",
+    "map_authority": "one complete-map C2 tensor spline for axis, wall position, wall value, and class operand",
+    "exact_wall_flux": "not present in bank; exact g_wall remains an independent runtime residual only",
+    "baseline_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052935150166-nia-limiter-polish-support-trace/logs/limiter-spline-support-cpu.json",
+    "current_measurement_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/logs/mast-rows-generation.log"
+  },
+  "summary": {
+    "rows_total": 12,
+    "rows_measured": 8,
+    "rows_missing_terminal_flux": 1,
+    "rows_without_reconstructed_reachable_wall": 3,
+    "maximum_position_shift_m": 0.006529633653856677,
+    "maximum_absolute_flux_shift": 3.559779113898598e-06,
+    "maximum_absolute_class_margin_shift": 2.7806929415730153e-06,
+    "class_sign_changes": 0
+  },
+  "rows": [
+    {
+      "row": 0,
+      "identity": "21978/35",
+      "arm": "pure",
+      "flux_source": "corrected-regeneration",
+      "status": "measured",
+      "axis_m": [
+        0.9065553241517899,
+        0.0061541719075445395
+      ],
+      "x_point_m": [
+        0.5692051659257467,
+        1.2415843591251357
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.19524440169334412,
+          -0.046144426181843556
+        ],
+        "flux": -0.09313620780465685,
+        "class_margin": 0.028312189777004393
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.19524440169334412,
+          0.0
+        ],
+        "flux": -0.09323799244148462,
+        "class_margin": 0.02842979868932516
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.19524440169334412,
+          -0.046144426181843556
+        ],
+        "flux": -0.09313620780465685,
+        "class_margin": 0.028312189777004393,
+        "reachable_wall_node_count": 0,
+        "reachable_fixed_sample_count": 1,
+        "minimum_bracket_count": 0
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 1,
+      "identity": "21978/35",
+      "arm": "mixed",
+      "flux_source": "corrected-regeneration",
+      "status": "no-reachable-wall-under-reconstruction"
+    },
+    {
+      "row": 2,
+      "identity": "21983/35",
+      "arm": "pure",
+      "flux_source": "corrected-regeneration",
+      "status": "measured",
+      "axis_m": [
+        0.9024454351902631,
+        0.03410992085258406
+      ],
+      "x_point_m": [
+        0.5521984949229969,
+        1.255809941635274
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.19524440169334412,
+          -0.0063503472498454994
+        ],
+        "flux": -0.12120290907046496,
+        "class_margin": 0.026965295901848263
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.19524440169334412,
+          0.0
+        ],
+        "flux": -0.12120524508300762,
+        "class_margin": 0.026967854908723
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.19524440169334412,
+          -0.010258868680818267
+        ],
+        "flux": -0.12120348228321015,
+        "class_margin": 0.0269659238331324,
+        "reachable_wall_node_count": 0,
+        "reachable_fixed_sample_count": 3,
+        "minimum_bracket_count": 0
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.003908521430972768,
+        "flux_shift": -5.732127451862912e-07,
+        "class_margin_shift": 6.27931284136185e-07
+      }
+    },
+    {
+      "row": 3,
+      "identity": "21983/35",
+      "arm": "mixed",
+      "flux_source": "pre-rejection-terminal-flux-fallback",
+      "status": "no-reachable-wall-under-reconstruction"
+    },
+    {
+      "row": 4,
+      "identity": "21985/51",
+      "arm": "pure",
+      "flux_source": "pre-rejection-terminal-flux-fallback",
+      "status": "measured",
+      "axis_m": [
+        0.8972152375413631,
+        0.020693307774372848
+      ],
+      "x_point_m": [
+        0.5610174735737847,
+        1.1348990718389924
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.19524440169334412,
+          -0.016788502334674944
+        ],
+        "flux": -0.2466456251476146,
+        "class_margin": 0.023646938235766968
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.19524440169334412,
+          -0.017023669567044264
+        ],
+        "flux": -0.24664562083037178,
+        "class_margin": 0.02364693486338737
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.19524440169334412,
+          -0.010258868680818267
+        ],
+        "flux": -0.2466491849267285,
+        "class_margin": 0.02364971892870854,
+        "reachable_wall_node_count": 0,
+        "reachable_fixed_sample_count": 5,
+        "minimum_bracket_count": 1
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.006529633653856677,
+        "flux_shift": -3.559779113898598e-06,
+        "class_margin_shift": 2.7806929415730153e-06
+      }
+    },
+    {
+      "row": 5,
+      "identity": "21985/51",
+      "arm": "mixed",
+      "flux_source": "pre-rejection-terminal-flux-fallback",
+      "status": "measured",
+      "axis_m": [
+        0.8974342791555001,
+        0.04370716354278279
+      ],
+      "x_point_m": [
+        0.5689403883800612,
+        1.1566764420744962
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03837056264484039,
+        "class_margin": -0.1317462426318144
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.0383705626448404,
+        "class_margin": -0.1317462426318144
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03837056264484039,
+        "class_margin": -0.1317462426318144,
+        "reachable_wall_node_count": 5,
+        "reachable_fixed_sample_count": 108,
+        "minimum_bracket_count": 1
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 6,
+      "identity": "21986/46",
+      "arm": "pure",
+      "flux_source": "corrected-regeneration",
+      "status": "measured",
+      "axis_m": [
+        0.9136430614845759,
+        0.05418100113031881
+      ],
+      "x_point_m": [
+        0.6213905561888718,
+        1.1462909775400032
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03272693713149664,
+        "class_margin": -0.13349330792527409
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03272693713149666,
+        "class_margin": -0.13349330792527409
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03272693713149664,
+        "class_margin": -0.13349330792527409,
+        "reachable_wall_node_count": 5,
+        "reachable_fixed_sample_count": 109,
+        "minimum_bracket_count": 1
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 7,
+      "identity": "21986/46",
+      "arm": "mixed",
+      "flux_source": "unavailable",
+      "status": "no-terminal-flux"
+    },
+    {
+      "row": 8,
+      "identity": "21989/55",
+      "arm": "pure",
+      "flux_source": "corrected-regeneration",
+      "status": "measured",
+      "axis_m": [
+        0.912524128553985,
+        0.026146059535128427
+      ],
+      "x_point_m": [
+        0.583232762578935,
+        1.1461253854158444
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03148666323794023,
+        "class_margin": -0.13769505275190802
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.031486663237940304,
+        "class_margin": -0.13769505275190802
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.03148666323794023,
+        "class_margin": -0.13769505275190802,
+        "reachable_wall_node_count": 5,
+        "reachable_fixed_sample_count": 108,
+        "minimum_bracket_count": 1
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 9,
+      "identity": "21989/55",
+      "arm": "mixed",
+      "flux_source": "pre-rejection-terminal-flux-fallback",
+      "status": "measured",
+      "axis_m": [
+        0.9135493865923756,
+        0.04299122337661629
+      ],
+      "x_point_m": [
+        0.5888234914747954,
+        1.159275651097069
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.030975902267392524,
+        "class_margin": -0.13280398445117414
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.030975902267392497,
+        "class_margin": -0.13280398445117414
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.030975902267392524,
+        "class_margin": -0.13280398445117414,
+        "reachable_wall_node_count": 5,
+        "reachable_fixed_sample_count": 108,
+        "minimum_bracket_count": 1
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 10,
+      "identity": "22086/43",
+      "arm": "pure",
+      "flux_source": "corrected-regeneration",
+      "status": "measured",
+      "axis_m": [
+        0.9019314019461325,
+        0.020162281686438396
+      ],
+      "x_point_m": [
+        0.5867707117584365,
+        1.2190875698682875
+      ],
+      "local_quadratic": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.017398559333603274,
+        "class_margin": -0.09998919108609328
+      },
+      "scout_spline_reference": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.017398559333603292,
+        "class_margin": -0.09998919108609328
+      },
+      "knot_split_spline_minimum": {
+        "position_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "flux": -0.017398559333603274,
+        "class_margin": -0.09998919108609328,
+        "reachable_wall_node_count": 5,
+        "reachable_fixed_sample_count": 100,
+        "minimum_bracket_count": 2
+      },
+      "prototype_minus_local": {
+        "position_shift_m": 0.0,
+        "flux_shift": 0.0,
+        "class_margin_shift": 0.0
+      }
+    },
+    {
+      "row": 11,
+      "identity": "22086/43",
+      "arm": "mixed",
+      "flux_source": "corrected-regeneration",
+      "status": "no-reachable-wall-under-reconstruction"
+    }
+  ]
+}

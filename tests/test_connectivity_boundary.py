@@ -282,7 +282,14 @@ def test_typed_saddle_selector_masks_points_outside_wall_polygon():
         rtol=0.0,
         atol=0.0,
     )
-    assert float(diagnostic["selected_x_normalized_flux_operand"]) == pytest.approx(1.2)
+    surface = cb.fit_tensor_spline(jnp.asarray(rg), jnp.asarray(zg), jnp.asarray(psi))
+    spline_x_level = (
+        surface(candidates[1, 0], candidates[1, 1]) - diagnostic["axis_flux"]
+    ) / diagnostic["outward_flux_span"]
+    assert float(diagnostic["selected_x_normalized_flux_operand"]) == pytest.approx(
+        float(spline_x_level)
+    )
+    assert float(diagnostic["selected_x_normalized_flux_operand"]) != pytest.approx(1.2)
     assert int(diagnostic["reachable_wall_node_count"]) > 0
     assert np.isfinite(float(diagnostic["limiter_flux"]))
     assert float(diagnostic["wall_normalized_flux_operand"]) == pytest.approx(
@@ -296,89 +303,47 @@ def test_typed_saddle_selector_masks_points_outside_wall_polygon():
 
 
 def test_reachable_wall_minimum_is_refined_along_polyline():
-    """The reachable ring minimum moves off-node while a lower shadowed node loses."""
+    """The reachable wall minimum returns one spline position and value."""
     configure_dtypes()
     rg = jnp.linspace(0.0, 4.0, 9)
     zg = jnp.linspace(-1.0, 1.0, 7)
     rr, zz = jnp.meshgrid(rg, zg)
     psi = (rr - 2.25) ** 2 + zz**2 + 1.0
-    wall_r = jnp.asarray([0.0, 1.0, 2.0, 3.0, 4.0, 0.0])
-    wall_z = jnp.zeros_like(wall_r)
-    wall_psi = (wall_r - 2.25) ** 2 + 1.0
-    wall_psi = wall_psi.at[4].set(0.1)
-    reachable = jnp.asarray([False, True, True, True, False, False])
+    wall_r = jnp.asarray([0.0, 4.0, 4.0, 0.0])
+    wall_z = jnp.asarray([-1.0, -1.0, 1.0, 1.0])
+    inside = jnp.ones_like(psi, dtype=bool)
+    region = inside
+    surface = cb.fit_tensor_spline(rg, zg, psi)
+    axis_r = jnp.asarray(2.25)
+    axis_z = jnp.asarray(0.0)
+    axis_flux = surface(axis_r, axis_z)
+    exact_wall_flux = surface(wall_r, wall_z).at[1].add(-100.0)
 
-    refined = cb._reachable_wall_limiter_point(
+    refined = cb._select_reachable_wall_limiter(
         psi,
         rg,
         zg,
+        inside,
         wall_r,
         wall_z,
-        wall_psi,
-        reachable,
-        jnp.asarray(0.0),
-        exact_nodes=True,
+        exact_wall_flux,
+        region,
+        axis_flux,
+        surface,
+        axis_r,
+        axis_z,
     )
 
-    assert int(refined["node_index"]) == 2
-    assert float(refined["node_arc"]) == pytest.approx(2.0)
-    assert float(refined["shift"]) == pytest.approx(0.25)
-    assert float(refined["arc"]) == pytest.approx(2.25)
     assert float(refined["r"]) == pytest.approx(2.25)
-    assert float(refined["z"]) == pytest.approx(0.0)
-    assert float(refined["psi"]) == pytest.approx(1.0)
-    assert float(refined["distance"]) == pytest.approx(1.0)
+    assert abs(float(refined["z"])) == pytest.approx(1.0)
+    assert float(refined["psi"]) == pytest.approx(2.0)
+    assert float(surface(refined["r"], refined["z"])) == pytest.approx(
+        float(refined["psi"])
+    )
     assert bool(refined["flux_from_global_surface"])
-
-    node_only = cb._reachable_wall_limiter_point(
-        psi,
-        rg,
-        zg,
-        wall_r,
-        wall_z,
-        wall_psi,
-        reachable.at[1].set(False).at[3].set(False),
-        jnp.asarray(0.0),
-        exact_nodes=True,
-    )
-    assert float(node_only["shift"]) == 0.0
-    assert float(node_only["psi"]) == pytest.approx(1.0625)
-    assert not bool(node_only["flux_from_global_surface"])
-
-    compiled = jax.jit(
-        cb._reachable_wall_limiter_point, static_argnames=("exact_nodes",)
-    )(
-        psi,
-        rg,
-        zg,
-        wall_r,
-        wall_z,
-        wall_psi,
-        reachable,
-        jnp.asarray(0.0),
-        exact_nodes=True,
-    )
-    np.testing.assert_allclose(compiled["r"], refined["r"], rtol=0.0, atol=0.0)
-    batched = jax.vmap(
-        lambda field, exact_flux, mask, axis_flux: cb._reachable_wall_limiter_point(
-            field,
-            rg,
-            zg,
-            wall_r,
-            wall_z,
-            exact_flux,
-            mask,
-            axis_flux,
-            exact_nodes=True,
-        )
-    )(
-        jnp.stack((psi, psi + 1.0)),
-        jnp.stack((wall_psi, wall_psi + 1.0)),
-        jnp.stack((reachable, reachable)),
-        jnp.asarray([0.0, 1.0]),
-    )
-    np.testing.assert_allclose(
-        batched["r"], [2.25, 2.25], rtol=0.0, atol=np.spacing(2.25)
+    assert float(refined["wall_flux_residual_max"]) == pytest.approx(100.0)
+    assert float(refined["psi"]) != pytest.approx(
+        float(exact_wall_flux[int(refined["node_index"])]), abs=1.0e-3
     )
 
 
@@ -578,18 +543,18 @@ def _newton_saddle(fn, r0, z0, h=1e-6, iters=60):
 
 
 def test_wall_termination_binds_at_exact_tangency():
-    """A limited push terminates at the interpolated wall tangency.
-
-    With the exact node flux supplied (the campaign ``g_wall`` GEMM path) the
-    binding flux reproduces the confined-most wall value to round-off.
-    """
+    """A limited push terminates at the common-spline wall tangency."""
     psi, rg, zg, axis, lr, lz, inside = _limited_field()
     wall_r, wall_z = _dense_wall(lr, lz)
     wall_psi = _psi_limited(wall_r, wall_z)
     grid = _Grid(rg, zg, inside, lr, lz)
     grid.wall_r, grid.wall_z = wall_r, wall_z
     out = cb.host_boundary_read(psi, grid, axis, wall_psi=wall_psi)
-    truth = wall_psi.max()
+    surface = cb.fit_tensor_spline(jnp.asarray(rg), jnp.asarray(zg), jnp.asarray(psi))
+    _, dense_r, dense_z = cb._sample_wall_polyline(
+        jnp.asarray(wall_r), jnp.asarray(wall_z), 100_000
+    )
+    truth = float(jnp.max(surface(dense_r, dense_z)))
     span = abs(out.psi_axis - truth)
     assert out.found and not out.is_diverted
     assert abs(out.psi_bnd - truth) / span < 1e-12

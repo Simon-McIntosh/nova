@@ -59,7 +59,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 5
+CACHE_SCHEMA_REVISION = 6
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 
@@ -318,6 +318,55 @@ def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
     }
 
 
+def _attempted_terminal_geometry(profile, state) -> dict[str, np.ndarray]:
+    """Capture the terminal flux grid before topology qualification can raise."""
+
+    operator = profile.operator
+    physical = jnp.asarray(state)[: operator.physical_node_number]
+    grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+    radius, height, shape = operator.connectivity_grid_axes()
+    radial_count, vertical_count = shape
+    return {
+        "radius": np.asarray(radius),
+        "height": np.asarray(height),
+        "flux": np.asarray(grid_flux).reshape((radial_count, vertical_count)).T,
+        "wall": np.asarray(operator.wall.coordinate, dtype=float),
+    }
+
+
+def _candidate_table_status(profile, state) -> dict[str, dict[str, int | bool]]:
+    """Serialize raw O- and X-candidate census capacity for one terminal map."""
+
+    operator = profile.operator
+    physical = jnp.asarray(state)[: operator.physical_node_number]
+    grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+    status = jax.device_get(
+        operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+    )
+    count = np.asarray(status["candidate_count"], dtype=int)
+    capacity = np.asarray(status["capacity"], dtype=int)
+    truncated = np.asarray(status["truncated"], dtype=bool)
+    if count.shape != (2,) or capacity.shape != (2,) or truncated.shape != (2,):
+        raise RuntimeError("candidate-table status must describe one O and one X row")
+    return {
+        name: {
+            "candidate_count": int(count[index]),
+            "capacity": int(capacity[index]),
+            "truncated": bool(truncated[index]),
+        }
+        for index, name in enumerate(("o_point", "x_point"))
+    }
+
+
+def _unavailable_candidate_table_status() -> dict[str, dict[str, None]]:
+    """Represent census absence explicitly for legacy or synthetic operands."""
+
+    return {
+        name: {"candidate_count": None, "capacity": None, "truncated": None}
+        for name in ("o_point", "x_point")
+    }
+
+
 def _carrier_semantic_identity(carrier_evidence: dict[str, Any]) -> str:
     """Return the persisted response carrier's semantic cache identity."""
 
@@ -366,6 +415,9 @@ def _write_operand_cache(
             )
         }
         metadata_row["failure_exception_class"] = row.get("failure_exception_class")
+        metadata_row["candidate_table_status"] = row.get(
+            "candidate_table_status", _unavailable_candidate_table_status()
+        )
         metadata_row["active_set_iterations"] = int(row.get("active_set_iterations", 0))
         metadata_rows.append(metadata_row)
         for name in (
@@ -582,6 +634,25 @@ def _build_arm_operand(
         "efit_x_points": efit_x_points,
         "efit_axis": np.full(2, np.nan) if efit_axis is None else efit_axis,
     } | _active_set_receipt(active_set_result)
+    operator = getattr(profile, "operator", None)
+    has_terminal_census = operator is not None and all(
+        hasattr(operator, name)
+        for name in (
+            "physical_node_number",
+            "topology",
+            "connectivity_grid_axes",
+            "wall",
+            "_fixed_design_topology",
+        )
+    )
+    attempted_geometry = (
+        _attempted_terminal_geometry(profile, state) if has_terminal_census else None
+    )
+    candidate_table_status = (
+        _candidate_table_status(profile, state)
+        if has_terminal_census
+        else _unavailable_candidate_table_status()
+    )
     try:
         geometry = reachability._grid_geometry(profile, state)
         _masks, topology = profile.operator.read(state)
@@ -594,15 +665,24 @@ def _build_arm_operand(
             "termination_reason": exception_class,
             "failure_exception_class": exception_class,
             "nova_achieved_class": None,
-            "radius": np.empty(0),
-            "height": np.empty(0),
-            "flux": np.empty((0, 0)),
+            "radius": (
+                attempted_geometry["radius"] if attempted_geometry else np.empty(0)
+            ),
+            "height": (
+                attempted_geometry["height"] if attempted_geometry else np.empty(0)
+            ),
+            "flux": (
+                attempted_geometry["flux"] if attempted_geometry else np.empty((0, 0))
+            ),
             "axis": np.full(2, np.nan),
-            "wall": np.empty((0, 2)),
+            "wall": (
+                attempted_geometry["wall"] if attempted_geometry else np.empty((0, 2))
+            ),
             "binding_flux": np.asarray(np.nan),
             "selected_saddle": np.full(2, np.nan),
             "limiter_coordinate": np.full(2, np.nan),
             "class_margin": np.asarray(np.nan),
+            "candidate_table_status": candidate_table_status,
         }
     return common | {
         "converged": arm_result.converged,
@@ -619,6 +699,7 @@ def _build_arm_operand(
         "selected_saddle": post_cutover["selected_saddle"],
         "limiter_coordinate": post_cutover["limiter_coordinate"],
         "class_margin": post_cutover["class_margin"],
+        "candidate_table_status": candidate_table_status,
     }
 
 
@@ -795,6 +876,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         ],
         "active_set_mask_differences": active_set_mask_differences.tolist(),
         "active_set_cycle_damping_activations": active_set_cycle_damping.tolist(),
+        "candidate_table_status": operand.get("candidate_table_status"),
     }
     failure_exception_class = operand.get("failure_exception_class")
     if failure_exception_class is not None:
@@ -816,6 +898,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "nova_achieved_class": None,
             "nova_post_cutover_class_margin": None,
             "nova_post_cutover_class_margin_nonfinite": None,
+            "nova_boundary_flux_wb": None,
             "label_agreement": None,
             "rms_threshold_eligible": False,
             "binding_to_efit_lcfs_sup_m": None,
@@ -906,6 +989,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             if np.isneginf(margin)
             else None
         ),
+        "nova_boundary_flux_wb": _strict_value(operand.get("binding_flux")),
         "label_agreement": comparison.topology_class_agreement,
         "rms_threshold_eligible": bool(
             qualified_terminal

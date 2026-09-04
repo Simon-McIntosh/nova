@@ -233,6 +233,32 @@
     and paid about eleven minutes of compilation per pure-arm solve.</p>
   </section>
 
+  <section id="presettlement-solovev">
+    <h2>Pre-settlement acceptance measured on the sixteen exact Solov'ev rows: positive on the diverted case</h2>
+    <p><strong>Receipt:</strong> <code>docs/figures/solver-convergence-regression/remedy-presettlement/solovev/solovev-certificate.json</code>
+    with one part file per row (H200 jobs 1262192 and 1262251 on the prototype base <code>fff05974</code>; the driver flag is
+    committed at <code>fe1dc1c0</code> and the aggregate at <code>036af36d</code> in the measurement worktree, held with
+    the prototype). All fourteen locked recovery bounds still reproduce.</p>
+    <table>
+      <caption>Qualified rows against the 1e-12 terminal-residual bound, banked certificate against the remedy</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">Cells</th><th scope="col">Banked residual</th><th scope="col">Remedied residual</th><th scope="col">Trips</th><th scope="col">Axis read</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">diverted-jump-bearing</th><td>136</td><td>2.4e-15 (qualified)</td><td>2.4e-15 (qualified)</td><td>1</td><td>no qualified axis, both fields</td></tr>
+        <tr><th scope="row">diverted-jump-bearing</th><td>342</td><td>3.1e-2</td><td><strong>1.9e-15 (qualified)</strong></td><td>5</td><td>admitted, axis error 16.0 mm, saddle 13.0 mm</td></tr>
+        <tr><th scope="row">diverted-jump-bearing</th><td>551</td><td>9.0e-5</td><td><strong>3.8e-18 (qualified)</strong></td><td>3</td><td>no qualified axis, both fields</td></tr>
+        <tr><th scope="row">diverted-jump-bearing</th><td>1076</td><td>4.9e-19 (qualified)</td><td>1.5e-18 (qualified)</td><td>3</td><td>admitted, 5.7 mm and 6.9 mm</td></tr>
+        <tr><th scope="row">three static cases</th><td>135 to 1072</td><td>4.4e-3 to 1.8e-2</td><td>4.8e-3 to 1.8e-2 (unchanged)</td><td>3 to 5</td><td>admitted, axis errors 2.4 to 18.3 mm</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Where the case has an X-point, scoring pre-settlement candidates on the incumbent partition converts the two
+    stalling rows to machine precision and leaves the two already-converged rows converged: 4 of 16 qualified against
+    2. The twelve static rows, which have no X-point and settle against the wall, do not move, so their stall is a
+    different mechanism from the one this remedy addresses. On MAST the same remedy recovers the banked acceptance but
+    not the mask re-opening, because the trip-1 partition has changed. Two diverted rows still read no axis on the
+    exact field itself, the oracle admission defect owned by null-identification-authority.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

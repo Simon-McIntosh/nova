@@ -1,0 +1,668 @@
+{
+  "analytic_flux_regions": {
+    "all_carrier_cells": {
+      "absolute_rms_wb": 0.029722373032380595,
+      "absolute_sup_wb": 0.06840231617790804,
+      "cell_count": 551,
+      "finite_cell_count": 551,
+      "measurement_status": "finite",
+      "relative_rms": 0.25719221957137045,
+      "relative_sup": 0.5918956572697912
+    },
+    "closed_flux_region": {
+      "absolute_rms_wb": 0.031087095652296632,
+      "absolute_sup_wb": 0.06840231617790804,
+      "cell_count": 427,
+      "finite_cell_count": 427,
+      "measurement_status": "finite",
+      "relative_rms": 0.2690013722030622,
+      "relative_sup": 0.5918956572697912
+    },
+    "scrape_off_layer": {
+      "absolute_rms_wb": 0.021822360885448634,
+      "absolute_sup_wb": 0.03000079905147577,
+      "cell_count": 65,
+      "finite_cell_count": 65,
+      "measurement_status": "finite",
+      "relative_rms": 0.18883221155664426,
+      "relative_sup": 0.2596014823095608
+    },
+    "separatrix_band": {
+      "absolute_rms_wb": 0.027044880811355924,
+      "absolute_sup_wb": 0.03323832854934851,
+      "cell_count": 59,
+      "finite_cell_count": 59,
+      "measurement_status": "finite",
+      "relative_rms": 0.23402347169043256,
+      "relative_sup": 0.2876163180219899
+    }
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.1854234030470252,
+    "lock_wait_seconds": 1.889187842607498e-05,
+    "semantic_key": "59c99b3f6a59f905",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+    "store_seconds": 0.0
+  },
+  "case": "strong-rotation-compact-static",
+  "characteristic_pitch_m": 0.024685173632217606,
+  "derivative_support_cells": 456,
+  "figure": {
+    "filesystem_path": "docs/figures/solver-convergence-regression/remedy-presettlement/solovev/strong-rotation-compact-static-production-route-cells-500.png",
+    "project_absolute_src": "/nova/figures/solver-convergence-regression/remedy-presettlement/solovev/strong-rotation-compact-static-production-route-cells-500.png",
+    "sha256": "de7df991d78e73828f8c68bbec040ef6ecab8750f10da7f0327e07de9f18e661"
+  },
+  "geometry": {
+    "boundary_flux_error_wb": 0.033019607262528124,
+    "exact_topology": {
+      "axis_flux_wb": 0.11556482183603782,
+      "axis_rz_m": [
+        0.8997496314702947,
+        -8.27463098040937e-16
+      ],
+      "boundary_flux_wb": -1.9619315937483006e-16,
+      "class": "limited",
+      "flux_span_wb": -0.11556482183603801,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": null
+    },
+    "magnetic_axis_position_error_m": 0.005953308016388956,
+    "root_topology": {
+      "axis_flux_wb": 0.08140960577574516,
+      "axis_rz_m": [
+        0.8941265060251941,
+        -0.0009715682507775904
+      ],
+      "boundary_flux_wb": -0.03301960726252832,
+      "class": "limited",
+      "flux_span_wb": -0.11442921303827347,
+      "read_status": "qualified_axis",
+      "x_point_rz_m": null
+    },
+    "x_point_position_error_m": null
+  },
+  "lane": {
+    "cpu_count": 1,
+    "elapsed_seconds": 965.4766833670437,
+    "execution": "slurm",
+    "exit_marker": "SOLOVEV_ROW_EXIT=0",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1262251",
+    "threaded_settings": {
+      "mkl_num_threads": null,
+      "numexpr_num_threads": null,
+      "omp_num_threads": null,
+      "openblas_num_threads": null,
+      "xla_flags": null
+    }
+  },
+  "norms": {
+    "gradient": {
+      "two_pitch_boundary_band": {
+        "component_count": 326,
+        "finite_component_count": 326,
+        "measurement_status": "finite",
+        "rms": 0.341540050802918,
+        "sup": 3.2423808941552323,
+        "support_cells": 163
+      },
+      "whole_domain": {
+        "component_count": 912,
+        "finite_component_count": 912,
+        "measurement_status": "finite",
+        "rms": 0.20559641821504862,
+        "sup": 3.2423808941552323,
+        "support_cells": 456
+      }
+    },
+    "hessian": {
+      "two_pitch_boundary_band": {
+        "component_count": 652,
+        "finite_component_count": 652,
+        "measurement_status": "finite",
+        "rms": 21.457711945970637,
+        "sup": 279.99170045058474,
+        "support_cells": 163
+      },
+      "whole_domain": {
+        "component_count": 1824,
+        "finite_component_count": 1824,
+        "measurement_status": "finite",
+        "rms": 12.829645125060088,
+        "sup": 279.99170045058474,
+        "support_cells": 456
+      }
+    },
+    "psi": {
+      "two_pitch_boundary_band": {
+        "component_count": 258,
+        "finite_component_count": 258,
+        "measurement_status": "finite",
+        "rms": 0.02778185524370408,
+        "sup": 0.06840231617790804,
+        "support_cells": 258
+      },
+      "whole_domain": {
+        "component_count": 551,
+        "finite_component_count": 551,
+        "measurement_status": "finite",
+        "rms": 0.029722373032380595,
+        "sup": 0.06840231617790804,
+        "support_cells": 551
+      }
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "realised_cells": 551,
+  "requested_cells": -500,
+  "solver": {
+    "call": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form, oracle budgets as keywords)",
+    "gmres_iterations": 30,
+    "lambda_amplitude_history": {
+      "samples": [
+        {
+          "amplitude": 0.8993125456277968,
+          "state": "seed"
+        },
+        {
+          "amplitude": 0.9373030776929707,
+          "state": "terminal"
+        }
+      ],
+      "sampling": "seed and terminal production-seam states; intermediate amplitudes are not exposed by FixedPointResult",
+      "terminal_policy": "declared_scalar_current",
+      "terminal_rescaled": true
+    },
+    "newton_steps": 10,
+    "presettlement_incumbent_scoring": true,
+    "production_telemetry": {
+      "accepted_newton_promotions": 20,
+      "attempted_newton_promotions": 40,
+      "configured_controls": {
+        "continue_globalization_state": "production default enabled",
+        "continue_newton_trajectory": "production default enabled",
+        "own_mask_acceptance": "production default enabled",
+        "retain_outer_best_iterate": "production default enabled",
+        "stop_on_active_set_stagnation": "production default enabled",
+        "strict_active_set_settlement": "production default enabled"
+      },
+      "converged": false,
+      "exposed_terminal_trip_promotions": 10,
+      "finite_residual_trace": [
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776,
+        0.00602928163565776
+      ],
+      "finite_trace_indices": [
+        0,
+        31,
+        32,
+        63,
+        64,
+        95,
+        96,
+        127,
+        128,
+        159,
+        160,
+        191,
+        192,
+        223,
+        224,
+        255,
+        256,
+        287,
+        288,
+        319
+      ],
+      "globalisation_decisions": [
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 1,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 2,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 3,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 4,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 5,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 6,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 7,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 8,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 9,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        },
+        {
+          "accepted": false,
+          "applied_factor": 0.0,
+          "decision": "sufficient_decrease_refused",
+          "iteration": 10,
+          "krylov_qualification": "accepted",
+          "krylov_reduction": 2.8163893310669963e-17,
+          "krylov_tolerance": 1e-05,
+          "proposed_step_norm": 0.0004901779113474503,
+          "residual_after": 0.00602928163565776,
+          "residual_before": 0.00602928163565776
+        }
+      ],
+      "krylov_action_qualification": "accepted",
+      "per_trip_residual_history": [
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.006030351138966288,
+          "mask_difference_cells": 35,
+          "trip": 1
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.006029282219639295,
+          "mask_difference_cells": 0,
+          "trip": 2
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.00602928163565776,
+          "mask_difference_cells": 0,
+          "trip": 3
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.00602928163565776,
+          "mask_difference_cells": 0,
+          "trip": 4
+        }
+      ],
+      "promotion_globalisation": [
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1e+56,
+          "promotion": 1,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000001e+62,
+          "promotion": 2,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000001e+68,
+          "promotion": 3,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000001e+74,
+          "promotion": 4,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000001e+80,
+          "promotion": 5,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000003e+86,
+          "promotion": 6,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000005e+92,
+          "promotion": 7,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000006e+98,
+          "promotion": 8,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000006e+104,
+          "promotion": 9,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        },
+        {
+          "backtrack_count": 6,
+          "continuation_activated": true,
+          "continuation_outcome": "refused",
+          "continuation_radius": [
+            1.4901161193847656e-08,
+            1.4901161193847656e-08
+          ],
+          "model_rebuild_activated": true,
+          "model_rebuild_damping": 1.0000000000000007e+110,
+          "promotion": 10,
+          "steepest_descent_activated": true,
+          "steepest_descent_scale": 0.0
+        }
+      ],
+      "source_continuation": {
+        "common_sol": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        },
+        "private_flux": {
+          "active": false,
+          "continuity": "undeclared",
+          "decay_width": null,
+          "domain": "undeclared",
+          "form": "undeclared",
+          "support": 0.0,
+          "truncated_fraction": 0.0
+        }
+      },
+      "telemetry_scope": "active-set residuals cover every production trip; detailed inner globalisation arrays describe the terminal frozen-mask trip exposed by FixedPointResult",
+      "termination": "active_set_settled",
+      "trip_count": 4
+    },
+    "qualification": "unqualified",
+    "qualification_bound": 1e-12,
+    "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+    "requested_seed_class": "limited",
+    "route": "profile.solve newton_krylov",
+    "seed": {
+      "anchor_available": true,
+      "anchor_m": [
+        1.090344375446285,
+        0.0014919721311752246
+      ],
+      "branch_index": 0,
+      "construction": "current_centroid_disc",
+      "current_centroid_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "current_target_provenance": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "current_centroid_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "declared_current_a": 251245.90891804622,
+        "quadrature_current_a": 251245.90891804622,
+        "quadrature_nodes": 512,
+        "quadrature_relative_closure": 0.0
+      },
+      "declared_axis_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "declared_boundary_m": [
+        1.090344375446285,
+        0.0014919721311752246
+      ],
+      "factory": "profile.cold_seed_portfolio",
+      "plasma_current_a": 251245.90891804622,
+      "requested_class": "limited",
+      "seed_radius_m": 0.18257506240510613,
+      "state_sha256_binary64": "2ce49db1ffb425e942d97d48207228c21f862925b37ef2a9dc3b4c490a8d6dfc",
+      "stored_flux_samples_used": false,
+      "supported_cell_count": 173
+    },
+    "solve_wall_seconds": 942.7078958591446,
+    "target_current_a": 251245.90891804622,
+    "target_current_argument": "Ip_closed_form",
+    "terminal_fixed_point_residual": 0.00602928163565776,
+    "terminal_fixed_point_residual_status": "finite",
+    "termination": "active_set_settled"
+  },
+  "stage_wall_seconds": {
+    "accuracy_scoring": 0.3689682316035032,
+    "case_and_machine": 0.20195856038480997,
+    "figure_render": 0.9531252393499017,
+    "operator_and_seed": 19.718332038260996,
+    "production_solve": 942.7078958591446
+  }
+}

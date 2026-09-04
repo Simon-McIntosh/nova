@@ -22,8 +22,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="62">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="63">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-commits" content="4e0d9588,0e79227d,1926a170,9e7c76b4,fff05974">
 <meta name="plan-artifacts" content="docs/evidence/archive/solver-convergence-regression-landed.html,docs/research/convergence-stall-handoff.html,docs/figures/solver-convergence-regression/backend-divergence.json,docs/figures/solver-convergence-regression/true-pin-reproduction.json,docs/figures/solver-convergence-regression/root-cause.json,docs/figures/solver-convergence-regression/null-polish-attribution.json,docs/figures/solver-convergence-regression/remedy-krylov-depth.json,docs/figures/solver-convergence-regression/remedy-deflation.json,docs/figures/solver-convergence-regression/remedy-anderson.json,docs/figures/solver-convergence-regression/remedy-vertical-pin.json,docs/figures/solver-convergence-regression/remedy-nonmonotone.json,docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.json,docs/figures/solver-convergence-regression/bank-rebaseline.json,docs/figures/solver-convergence-regression/bank-rebaseline-regen.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/evidence/mast-bank-efit-overlays.html,benchmarks/bank_efit_overlay.py">
 </head>
@@ -227,6 +227,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260903T194804754130-scr-remedy-presettlement-mast-harvest" data-who="c-scr-measure-mast" data-when="2026-09-04T04:45:42.908Z">
     <div class="r-comment-body"><p>NEGATIVE: presettlement incumbent scoring recovers the banked trips 2 and 3 but the mask never re-opens and 22086/43 pure settles at 4.7652e-4 in 7 trips against 4.8002e-4; 21978/35 pure bit-identical; receipt banked on main as data, driver held with the prototype</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260904T070000000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T07:00:00+02:00">
+    <div class="r-comment-body">LANDED section 4 node 2 (scr-remedy-presettlement-solovev-run; H200 jobs 1262192 and 1262251, 3 h plus 1 h 56 min, one part per row; driver flag fe1dc1c0 and aggregate 036af36d held in the measurement worktree on the prototype base fff05974, the receipt and its sixteen parts banked on main as data under docs/figures/solver-convergence-regression/remedy-presettlement/solovev/). POSITIVE ON THE DIVERTED CASE: with presettlement_incumbent_scoring=True the sixteen-row production-route certificate qualifies 4 rows against the banked 2. All four diverted-jump-bearing rows reach machine precision (136 cells 2.380e-15 in 1 trip, 342 cells 1.887e-15 in 5 trips from the banked 3.079e-2, 551 cells 3.836e-18 in 3 trips from 8.994e-5, 1076 cells 1.458e-18 in 3 trips), the two stalling rows converting without touching the two that already converged. The twelve static rows (no X-point, wall-bound boundary) are unchanged at 4.8e-3 to 1.8e-2, so their settlement is a different mechanism. All fourteen locked recovery bounds reproduce. The 136 and 551 diverted rows still read no qualified axis on both the numeric and the exact field (the oracle admission defect on null-identification-authority section 4, under repair), so the joint qualification would count them differently. TAKEN WITH THE MAST RESULT (node 3, negative on the corrected partition): the remedy does what the decision asked where the partition is the one the acceptance was refusing on, and the MAST arms now wait on the identification repair before the remedy can be judged there. The merge of the prototype (default on or opt-in) is the lead's call; the referees are green either way.</div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

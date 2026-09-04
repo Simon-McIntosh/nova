@@ -1,0 +1,36 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1157, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1139, in main
+    capture(
+    ~~~~~~~^
+        arguments.source_root,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        arguments.cache,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 743, in capture
+    components = _component_measurement(setup)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 470, in _component_measurement
+    "support_partition_with_clips": measure(support_partition),
+                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 418, in measure
+    executable, compile_calls, compile_wall = _compile_counted(function, seed)
+                                              ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 154, in _compile_counted
+    executable = jax.jit(function).lower(argument).compile()
+                 ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 393, in support_partition
+    return operator._support_partition(state, requested)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/docs/figures/polish-support-performance/shared-spline/.baseline-source/nova/equilibrium/forward_operator.py", line 865, in _support_partition
+    raise ValueError("moment geometry is required for current moments")
+ValueError: moment geometry is required for current moments
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

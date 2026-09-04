@@ -112,7 +112,11 @@
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>Node B (warm start on a converging arm with a boundary-coupled circuit) and node C2 (the rectangular raster receipt built once with the machine) are not yet landed; their partial worktrees from the codex outage are kept for redispatch.</li>
+      <li>Node B: the warm-start sweep driver is on main at <code>ee266f16</code> (twenty edits of one position coil on
+      22086/43 mixed, each seeded from the previous terminal state, a cold-portfolio control per edit). Its H200 receipt is
+      not yet banked: the cold portfolio dies on the persisted raster carrier because
+      <code>coupling_current_moments</code> dereferences an absent moment geometry (jobs 1262270, 1262272); the repair node
+      and the re-measurement follow. Node C2 (the rectangular raster receipt built once with the machine) is in flight.</li>
       <li>Sections 1 to 4 (the request and receipt types, route migration, transport defaults,
       agent guidance) wait on solve-default-wiring and on the acceptance decision that fixes which
       acceptance becomes the declared default.</li>

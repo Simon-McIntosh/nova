@@ -133,14 +133,36 @@
     census admission repair and the pre-settlement default; an attribution node runs the fixture at the three revisions.</p>
   </section>
 
+  <section id="warm-start-converging">
+    <h2>Node B — warm starts on a converging arm are neither fast nor reliable (negative, merged)</h2>
+    <p><strong>Commits:</strong> driver <code>ee266f16</code> and <code>dba819ad</code> (keep every finite terminal state), receipt
+    <code>e526e230</code>; receipt <code>docs/figures/forward-solve-api/coil-edit-latency-converging.json</code> with figure
+    (H200 job 1262323, 22086/43 mixed from the corrected bank, P4 upper edited in two-percent steps to plus and minus twenty
+    percent, each edit seeded from the previous terminal state, cold-portfolio control on four edits).</p>
+    <table>
+      <caption>Twenty warm edits against the section's targets</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Edits converged</th><td>8 of 20 (4 active-set settled, 5 cycle detected, 3 budget exhausted)</td></tr>
+        <tr><th scope="row">Median warm per-edit wall</th><td>32.46 s (range 3.73 to 52.19 s) against the below-100 ms target: FAIL</td></tr>
+        <tr><th scope="row">Median cold-control wall</th><td>18.41 s; warm to cold median ratio 1.76</td></tr>
+        <tr><th scope="row">Trips per edit</th><td>2 to 16, median 8.5</td></tr>
+        <tr><th scope="row">Maximum LCFS displacement</th><td>509 mm</td></tr>
+        <tr><th scope="row">Compile</th><td>count 1, executable identity constant, 19 of 19 process-cache hits after the first edit, 2 persistent-cache hits (318 s of compile saved)</td></tr>
+        <tr><th scope="row">Cold controls</th><td>terminate internally as converged at residuals 2.9e-10 to 7.3e-9, yet 0 of 4 pass the boolean receipt qualification</td></tr>
+      </tbody>
+    </table>
+    <p>The API half holds: an edit never recompiles. The physics half does not: a two-percent coil edit on a converging arm
+    moves the boundary by up to half a metre and most warm re-solves cycle or stall, and warm seeding is slower than the cold
+    portfolio. Both section gates (interactive latency, every edit converged) stay closed on this receipt; the convergence
+    failures are solver-convergence-regression's, alongside the 21985 attribution.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>Node B: the warm-start sweep driver is on main at <code>ee266f16</code> (twenty edits of one position coil on
-      22086/43 mixed, each seeded from the previous terminal state, a cold-portfolio control per edit). Its H200 receipt is
-      not yet banked: the cold portfolio dies on the persisted raster carrier because
-      <code>coupling_current_moments</code> dereferences an absent moment geometry (jobs 1262270, 1262272); the repair node
-      and the re-measurement follow. Node C2 landed at ff92e9d8 (anchor raster-receipt).</li>
+      <li>Node B landed negative (anchor warm-start-converging) after the cold-seed repair at 9f84f35f; node C2 landed at
+      ff92e9d8 (anchor raster-receipt).</li>
       <li>Sections 1 to 4 (the request and receipt types, route migration, transport defaults,
       agent guidance) wait on solve-default-wiring and on the acceptance decision that fixes which
       acceptance becomes the declared default.</li>

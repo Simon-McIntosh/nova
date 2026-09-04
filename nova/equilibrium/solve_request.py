@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, fields, replace
+import os
+from pathlib import Path
+import socket
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Mapping
 
@@ -19,6 +22,18 @@ if TYPE_CHECKING:
 
 SolveRoute = Literal["host", "host_krylov", "picard", "anderson", "newton_krylov"]
 JsonScalar = str | int | float | bool | None
+
+
+def default_forward_compilation_cache_root() -> Path:
+    """Return a per-user, per-host root on the runtime temporary filesystem."""
+
+    temporary_root = Path(os.environ.get("TMPDIR") or "/tmp").expanduser().resolve()
+    return (
+        temporary_root
+        / "nova-forward-cache"
+        / f"user-{os.getuid()}"
+        / f"host-{socket.gethostname()}"
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -243,6 +258,7 @@ class ResolvedForwardSolveDefaults:
     nova_version: str
     policy: ForwardSolvePolicy
     deviations: tuple[tuple[str, JsonScalar], ...]
+    compilation_cache_directory: str | None
 
     @classmethod
     def from_policy(
@@ -250,6 +266,7 @@ class ResolvedForwardSolveDefaults:
         policy: ForwardSolvePolicy,
         *,
         nova_version: str = NOVA_VERSION,
+        compilation_cache_directory: str | None = None,
     ) -> ResolvedForwardSolveDefaults:
         """Compare one resolved policy with its version's declared defaults."""
 
@@ -265,6 +282,7 @@ class ResolvedForwardSolveDefaults:
             nova_version=nova_version,
             policy=policy,
             deviations=deviations,
+            compilation_cache_directory=compilation_cache_directory,
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -274,15 +292,24 @@ class ResolvedForwardSolveDefaults:
             "nova_version": self.nova_version,
             "policy": self.policy.to_dict(),
             "deviations": dict(self.deviations),
+            "compilation_cache_directory": self.compilation_cache_directory,
         }
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> ResolvedForwardSolveDefaults:
         """Restore a resolved-defaults block after JSON transport."""
 
-        expected = {"nova_version", "policy", "deviations"}
+        expected = {
+            "nova_version",
+            "policy",
+            "deviations",
+            "compilation_cache_directory",
+        }
         if set(payload) != expected:
-            raise ValueError("resolved defaults need version, policy, and deviations")
+            raise ValueError(
+                "resolved defaults need version, policy, deviations, "
+                "and cache directory"
+            )
         policy_payload = payload["policy"]
         deviation_payload = payload["deviations"]
         if not isinstance(policy_payload, Mapping) or not isinstance(
@@ -290,7 +317,14 @@ class ResolvedForwardSolveDefaults:
         ):
             raise TypeError("policy and deviations must be mappings")
         policy = ForwardSolvePolicy.from_dict(policy_payload)
-        restored = cls.from_policy(policy, nova_version=str(payload["nova_version"]))
+        cache_directory = payload["compilation_cache_directory"]
+        if cache_directory is not None and not isinstance(cache_directory, str):
+            raise TypeError("compilation cache directory must be a string or null")
+        restored = cls.from_policy(
+            policy,
+            nova_version=str(payload["nova_version"]),
+            compilation_cache_directory=cache_directory,
+        )
         if dict(restored.deviations) != dict(deviation_payload):
             raise ValueError("resolved-default deviations disagree with the policy")
         return restored
@@ -335,5 +369,6 @@ __all__ = [
     "ResolvedForwardSolveDefaults",
     "SolveRoute",
     "declared_forward_solve_policy",
+    "default_forward_compilation_cache_root",
     "resolve_forward_solve_policy",
 ]

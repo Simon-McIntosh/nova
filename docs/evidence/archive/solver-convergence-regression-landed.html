@@ -442,6 +442,44 @@
     identification finding on the vertical-mode row.</p>
   </section>
 
+  <section id="step-cap">
+    <h2>The step cap gated on model error, and the undamped control (merged at e930710c)</h2>
+    <p><strong>Commits:</strong> <code>cef5026a</code> (cap and relinearisation in <code>fixed_point.py</code>, with tests) and
+    <code>6ba68a66</code> (undamped control), merged at <code>e930710c</code>; receipt
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/undamped/four-rows.json</code> (H200, persistent cache
+    runtime-0745ecebea4cb264e054). The step cap now activates only after an accepted step whose smooth-merit decrease disagreed
+    with the linear model by more than a quarter; the first Newton proposal on every partition is uncapped; and a mask change
+    resets the carried conditioning and model-error state before relinearising. Acceptance, strict decrease, best-iterate
+    retention, pre-settlement scoring and trusted-Krylov admission are unchanged and the seven referee tests pass.</p>
+    <table>
+      <caption>Frozen-mask control with no damping at all: eight raw factor-one Newton steps per row</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Terminal residual, undamped</th><th scope="col">Largest raw step, sup norm</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>5.24e-3</td><td>0.31</td></tr>
+        <tr><th scope="row">21986/46 (vertical mode)</th><td>2.81e-1</td><td>1.96</td></tr>
+        <tr><th scope="row">21989/55 (vertical mode)</th><td>1.82e-1</td><td>1.83</td></tr>
+        <tr><th scope="row">22086/43</th><td>5.60e-16</td><td>0.012</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Production route with the repaired cap, beside the public-route receipt</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Repaired cap</th><th scope="col">Cap activations</th><th scope="col">Public-route receipt</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>6.40e-4, 8 trips, settled, diverted</td><td>5</td><td>9.70e-4, 5 trips, cycle detected</td></tr>
+        <tr><th scope="row">21986/46</th><td>1.35e-3, 4 trips, settled, diverted</td><td>0</td><td>1.31e-3, 8 trips, settled</td></tr>
+        <tr><th scope="row">21989/55</th><td>7.33e-4, 6 trips, settled, limited</td><td>3</td><td>7.00e-4, 9 trips, settled, limited</td></tr>
+        <tr><th scope="row">22086/43</th><td>4.93e-16, 3 trips, converged</td><td>0</td><td>7.21e-15, 3 trips, converged</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Removing every damping device answers the lead's question directly: the two vertical-mode rows diverge without it, with
+    raw steps of two in the sup norm, so damping is not the cause of their stall and cannot be dropped. The row with nothing
+    singular converges to machine precision either way. The repaired cap leaves the vertical rows where the public route left
+    them, at the same residual floor with fewer trips, which confirms that the remaining three-of-four stall is the solver shape,
+    not the acceptance rule. Their remedy is the vertical-mode elimination in flight; the one-read-per-trip restructure addresses
+    the 21985/51 model error separately.</p>
+  </section>
+
   <section id="vertical-constraint">
     <h2>The vertical constraint converges both vertical-mode rows (prototype, held for the lead)</h2>
     <p><strong>Commits:</strong> <code>6ae142d5</code> (optional vertical centroid constraint in <code>forward.py</code> and

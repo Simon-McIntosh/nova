@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T15:56:52",
+  "updated": "2026-09-04T16:18:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2371,6 +2371,15 @@
       },
       {
         "id": "scr-default-on-2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-elimination-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -92574,6 +92583,387 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T131612829384-scr-step-cap-and-mask-relinearisation",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-step-cap-and-mask-relinearisation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3749,
+                "cached_input_tokens": 863358,
+                "input_tokens": 867208,
+                "output_tokens": 1889,
+                "reasoning_output_tokens": 254,
+                "total_tokens": 869097,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/fixed_point.py, tests/test_fixed_point.py, tests/test_step_cap_model_error.py, benchmarks/settled_mask_stall.py and docs/figures/solver-convergence-regression/settled-mask-stall/undamped/, held unmerged, in which the cap engages only when the measured model error of the previous accepted step exceeds a stated fraction (or the cap is enlarged with the reason stated) while strict decrease, best-iterate retention, the own-mask and pre-settlement acceptance and the trusted-Krylov admission stay bit-identical on the seven referee node IDs, the relinearisation on a partition change is pinned by a CPU test, and a receipt docs/figures/solver-convergence-regression/settled-mask-stall/undamped/four-rows.json plus png from the H200 records per row the frozen-mask residual per step with all damping off, the raw step norms taken, the terminal residual, and the production-route solve with the repaired cap beside the public-route receipt (residual, trips, termination, class), with the seven referee node IDs and tests/test_fixed_point.py green on CPU with logs, the manifest written before the SLURM wait",
+          "estimated_hours": null,
+          "goal": "Remove the second damping layer named by the production-path diagnosis in nova/equilibrium/fixed_point.py: a step cap conditional on the measured nonlinear model error (or enlarged) with the merit ladder kept as the sole acceptance authority, relinearisation on each changed partition carrying no conditioning decision across a mask change, plus the lead's undamped control measured on the H200, (a) the four frozen-mask rows with every damping layer off (no cap, no ladder, factor one), (b) the four rows through the production route with the repaired cap from their bank seeds beside the public-route receipt docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json (production-path report ~/.config/reckon/crew/reports/nova/production-path/production-path-damping.md: cap factors 0.03 to 0.5 with raw directions growing to sup 6 to 140 on 21986/46 plus 21989/55, ladder factors halving behind it, mask motion 5, 32, 0, 35, 35 on 21985/51, reuse map: benchmarks/settled_mask_stall.py frozen-mask plus production drivers, the vertical-mode receipt docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json which says the two capped rows sit on a near-null vertical direction so their undamped steps are expected to run along it, the persistent compilation cache wired at e04970ad, one or two SLURM jobs on betelgeuse under reservation gpu_0003_grpA polled in the foreground because a backgrounded wait ends the worker's turn, with nova/equilibrium/forward.py plus forward_operator.py held by another live node, never edited here)",
+          "id": "scr-step-cap-and-mask-relinearisation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T131612829384-scr-step-cap-and-mask-relinearisation/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py",
+            "tests/test_step_cap_model_error.py",
+            "benchmarks/settled_mask_stall.py",
+            "docs/figures/solver-convergence-regression/settled-mask-stall/undamped/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-stepcap-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T13:16:23Z",
+        "completed_at": "2026-09-04T14:13:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3423,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3423,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "a8031d21e5868ade9ea739d76d9a706bbc061c52",
+        "commits": [
+          "cef5026a58da8758385997aee21e6c357efad6da",
+          "6ba68a66f21e8d8a3cc1d4873849d983772fdd97"
+        ],
+        "changed_lines": {
+          "added": 1982,
+          "removed": 25,
+          "files": 6
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_fixed_point.py tests/test_step_cap_model_error.py <seven referee node IDs>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T131612829384-scr-step-cap-and-mask-relinearisation/logs/cpu-after-2.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T131612829384-scr-step-cap-and-mask-relinearisation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c90-3224-73c3-8ab8-ab0c0c1b4790",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28026752,
+            "cached_input_tokens_cumulative": 28026752,
+            "input_tokens": 28395341,
+            "input_tokens_cumulative": 28395341,
+            "output_tokens": 58206,
+            "output_tokens_cumulative": 58206,
+            "reasoning_output_tokens": 15579,
+            "reasoning_output_tokens_cumulative": 15579
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 25102,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 27502,
+              "external_wait": null,
+              "log_age_seconds": 26600,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 26656,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 73785,
+          "peak_input_tokens": 56422093
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation",
+          "session_id": "01a06c90-3224-73c3-8ab8-ab0c0c1b4790",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T14:13:26Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T135335152255-cank-thomson-signal-inventory",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a73",
+        "node": "cank-thomson-signal-inventory",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1153,
+                "cached_input_tokens": 926435,
+                "input_tokens": 927644,
+                "output_tokens": 1557,
+                "reasoning_output_tokens": 110,
+                "total_tokens": 929201,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/thomson/diiid-competition-thomson-inventory.md with a table of the competition's Thomson channels (count, positions or chord geometry, quantities, time sampling) with the corpus paths and the ambix reader entry points that expose them, an example per gate frame of the channels along a chord with the density profile and where the edge falls, the derivation proposed for a crossing point with its uncertainty, the typed contract for crossing points that Nova consumes, whether MAST chord geometry is available for the calibration arm, and any gap (signal absent for a frame, no edge marker, unknown units) named, no nova/ change, the report written before the fence",
+          "estimated_hours": null,
+          "goal": "Inventory what the DIII-D competition dataset carries for Thomson scattering so the edge-crossing constraint can be built on it: the channel positions plus chord geometry (scattering volume coordinates, line of sight), the quantities per channel (electron density, temperature, their uncertainties), the time base against the equilibrium frames, how a plasma-edge crossing is marked or must be derived from the profile along the chord, units plus sign conventions, and the typed crossing-point contract Nova should consume in COCOS 17, read through the imas-ambix corpus reader at ~/Code/imas-ambix which owns the corpus and the challenge conventions (reuse map: the five gate frames in docs/figures/gs-absolute-accuracy/efit-reproduction.json and their competition rows, the COCOS resolution report ~/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md for the boundary contract, the MAST Thomson chord geometry if present in the imasdb machine descriptions for the calibration arm, no nova/ change)",
+          "id": "cank-thomson-signal-inventory",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T135335152255-cank-thomson-signal-inventory/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/thomson/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "cank-thomson-scout",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T13:53:44Z",
+        "completed_at": "2026-09-04T14:15:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1308,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1308,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9202c1f0f054b7fcced643f34ecc1c7fb856a904",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T135335152255-cank-thomson-signal-inventory/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06cb2-6287-7773-9c70-435d7c0202be",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9513984,
+            "cached_input_tokens_cumulative": 9513984,
+            "input_tokens": 10033654,
+            "input_tokens_cumulative": 10033654,
+            "output_tokens": 43051,
+            "output_tokens_cumulative": 43051,
+            "reasoning_output_tokens": 12477,
+            "reasoning_output_tokens_cumulative": 12477
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 27342,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 29742,
+              "external_wait": null,
+              "log_age_seconds": 28840,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 28896,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55528,
+          "peak_input_tokens": 19547638
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only inventory under ~/.config/reckon/crew/reports/nova/thomson/ with the five-frame measurement JSON beside the manifest",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-thomson-signal-inventory",
+          "session_id": "01a06cb2-6287-7773-9c70-435d7c0202be",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T14:15:32Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -92690,6 +93080,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1609
+    "_version": 1612
   }
 }

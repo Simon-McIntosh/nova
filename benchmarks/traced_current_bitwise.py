@@ -50,13 +50,13 @@ def _numeric_difference(left: np.ndarray, right: np.ndarray) -> tuple[float, flo
     """Return field-scale absolute and relative differences, matching NaNs."""
     left_float = left.astype(np.float64, copy=False)
     right_float = right.astype(np.float64, copy=False)
-    matching_nonfinite = (~np.isfinite(left_float)) & (~np.isfinite(right_float))
-    incompatible_nonfinite = np.logical_xor(
-        np.isfinite(left_float), np.isfinite(right_float)
-    ) | (
-        (~np.isfinite(left_float))
-        & (~np.isfinite(right_float))
-        & (left_float != right_float)
+    matching_nonfinite = (
+        (np.isnan(left_float) & np.isnan(right_float))
+        | (np.isposinf(left_float) & np.isposinf(right_float))
+        | (np.isneginf(left_float) & np.isneginf(right_float))
+    )
+    incompatible_nonfinite = (~np.isfinite(left_float) | ~np.isfinite(right_float)) & (
+        ~matching_nonfinite
     )
     if np.any(incompatible_nonfinite):
         return float("inf"), float("inf")
@@ -261,7 +261,7 @@ def run(output: Path, carrier_path: Path) -> dict[str, Any]:
     maximum_flux_relative = max(
         row["maximum_relative_difference"] for row in flux_fields
     )
-    bit_identical = coil_edit._tree_bit_identical(omitted, traced)
+    bit_identical = all(row["bit_identical"] for row in fields)
     bound_passes = bool(maximum_flux_relative <= FLUX_RELATIVE_BOUND)
     receipt = {
         "schema": "nova.traced-current-bitwise",

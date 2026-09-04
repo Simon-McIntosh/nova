@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T06:30:17",
+  "updated": "2026-09-04T06:48:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -84257,6 +84257,164 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-remedy-presettlement-mast-harvest",
+        "node_definition": {
+          "done_when": "Receipt docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.json plus png recording for both arms and both acceptance settings the per-trip residual, mask difference, mode contraction, selected O and X positions and boundary flux, the terminal residual, trip count and termination reason, with the verdict stated against the banked 4.8002e-4 in 7 trips (target about 6e-12) and the trip-4 and trip-5 re-opening classified as re-selection, boundary-flux move or acceptance event, driver benchmarks/acceptance_presettlement_remedy.py committed with a conventional subject and body, no nova/ change, the manifest written before any wait begins",
+          "estimated_hours": null,
+          "goal": "Harvest the pre-settlement incumbent-mask acceptance measurement on 22086/43 pure and 21978/35 pure whose H200 capture job 1262181 (presettlement-mast-capture) your previous turn submitted before the account limit ended it: copy the driver you wrote, still uncommitted at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast/benchmarks/acceptance_presettlement_remedy.py, into this worktree, wait for the job in the foreground (squeue and sacct, sleep 60 between checks, up to 50 minutes), read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/logs/h200-capture.log for EXIT_MARKER and the raw output the sbatch at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/capture_presettlement_mast.sbatch names, afterwards running your compile step to produce the receipt and figure (plan section 4 node 3, resubmitting once from this worktree with the manifest written first if the job failed)",
+          "id": "scr-remedy-presettlement-mast-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/acceptance_presettlement_remedy.py",
+            "docs/figures/solver-convergence-regression/remedy-presettlement/mast/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "c-scr-measure-mast",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:48:11Z",
+        "completed_at": "2026-09-04T04:45:42.908Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 32242,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 32251,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "fff05974635f31994879d26627f6184a48be0bc5",
+        "commits": [
+          "679d088c35d477a5496037ee745d540e7af6bf95"
+        ],
+        "changed_lines": {
+          "added": 1080,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1262252 (42 min, EXIT_MARKER=0) one solve per arm per setting; tests/test_presettlement_incumbent_scoring.py 5 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/logs/h200-capture.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "0347e161-26f9-4a0b-9169-75069872e37e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 317747,
+            "cache_creation_input_tokens_cumulative": 317747,
+            "cache_read_input_tokens": 11307968,
+            "cache_read_input_tokens_cumulative": 11307968,
+            "inference_geo": "not_available",
+            "input_tokens": 72,
+            "input_tokens_cumulative": 72,
+            "output_tokens": 20707,
+            "output_tokens_cumulative": 20707,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.7397956000000008,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.7397956000000008
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 87271,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 98071,
+              "log_age_seconds": 92302,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 92347,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 382.837,
+          "generated_tokens": 20707,
+          "generation_seconds": 319.906,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 34.2,
+          "machine_seconds": 62.931,
+          "peak_input_tokens": 342167,
+          "tokens_per_second": 64.73,
+          "wall_tokens_per_second": 54.09
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -84275,6 +84433,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1491
+    "_version": 1492
   }
 }

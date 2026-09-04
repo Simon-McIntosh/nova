@@ -90,12 +90,29 @@
     </table>
   </section>
 
+  <section id="traced-current-bitwise">
+    <h2>The omitted-constant versus traced prescribed current: roundoff</h2>
+    <p><strong>Commit:</strong> <code>5b203a42</code> merged at <code>bf199860</code>; driver
+    <code>benchmarks/traced_current_bitwise.py</code>, receipt
+    <code>docs/figures/forward-solve-api/traced-current-bitwise.json</code> (H200 job 1262261, MAST 22086/43, the
+    prescribed vector byte-identical to the stored 101-circuit vector).</p>
+    <table>
+      <caption>Omitted constant against traced data, same solve</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Receipt fields compared</th><td>122, of which 42 differ bitwise; receipt digests c94ad10e against 71086046</td></tr>
+        <tr><th scope="row">Flux fields (20)</th><td>maximum absolute difference 5.33e-15, maximum relative 3.00e-15, 333 times inside the preregistered 1e-12 bound</td></tr>
+        <tr><th scope="row">Terminal state</th><td>both settled after 7 trips and 12 fixed iterations at residuals 4.8001875929253843e-4 and 4.8001875929241540e-4</td></tr>
+        <tr><th scope="row">Wall</th><td>184.34 s omitted, 183.77 s traced</td></tr>
+        <tr><th scope="row">Verdict</th><td>ROUND_OFF: the traced path may become the default</td></tr>
+      </tbody>
+    </table>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>Node B (warm start on a converging arm with a boundary-coupled circuit), node C2 (the
-      rectangular raster receipt built once with the machine) and the bitwise-magnitude
-      measurement are in flight under the S19 relaunch; their receipts land as anchors here.</li>
+      <li>Node B (warm start on a converging arm with a boundary-coupled circuit) and node C2 (the rectangular raster receipt built once with the machine) are not yet landed; their partial worktrees from the codex outage are kept for redispatch.</li>
       <li>Sections 1 to 4 (the request and receipt types, route migration, transport defaults,
       agent guidance) wait on solve-default-wiring and on the acceptance decision that fixes which
       acceptance becomes the declared default.</li>

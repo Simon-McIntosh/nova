@@ -70,6 +70,9 @@ __all__ = [
     "PrescribedCurrentField",
 ]
 
+_PRODUCTION_STATIONARY_POINT_CAPACITY = 30
+"""Candidate slots retained by the topology reader used by forward solves."""
+
 
 @jax.jit
 def axis_cell_seed(coordinate, axis, inside_material):
@@ -236,34 +239,16 @@ class _FixedDesignNull2D:
         return self.locator.fit_dtype
 
     @jax.jit
-    def __call__(self, psi):
-        """Return extrema and saddles from fixed quadratic fit matrices."""
+    def _candidate_census(self, psi):
+        """Fit every stencil and return supported stationary-point candidates."""
         sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
-        sign = sampled[:, 1:] > sampled[:, :1]
-        crossing_count = jnp.sum(sign != jnp.roll(sign, 1, axis=1), axis=1)
-        number = jnp.asarray([jnp.sum(crossing_count == kind) for kind in (0, 4)])
-        index = jnp.stack(
-            [
-                jnp.where(
-                    crossing_count == kind,
-                    size=self.locator.maxsize,
-                    fill_value=0,
-                )[0]
-                for kind in (0, 4)
-            ]
-        )
-        coefficient = jnp.einsum(
-            "...ij,...j->...i", self.fit_weight[index], sampled[index]
-        )
+        coefficient = jnp.einsum("...ij,...j->...i", self.fit_weight, sampled)
         determinant = (
             4.0 * coefficient[..., 0] * coefficient[..., 1] - coefficient[..., 4] ** 2
         )
-        root_floor = jnp.asarray(1.0e-30, dtype=coefficient.dtype)
-        safe_determinant = jnp.where(
-            jnp.abs(determinant) < root_floor,
-            jnp.where(determinant < 0.0, -root_floor, root_floor),
-            determinant,
-        )
+        determinant_floor = jnp.asarray(1.0e-12, coefficient.dtype)
+        nonsingular = jnp.abs(determinant) >= determinant_floor
+        safe_determinant = jnp.where(nonsingular, determinant, 1.0)
         local_radial = (
             coefficient[..., 4] * coefficient[..., 3]
             - 2.0 * coefficient[..., 1] * coefficient[..., 2]
@@ -280,29 +265,61 @@ class _FixedDesignNull2D:
             + coefficient[..., 4] * local_radial * local_vertical
             + coefficient[..., 5]
         )
+        support = jnp.max(jnp.abs(self.locator.local_coordinate_stencil), axis=1)
+        supported = (
+            nonsingular
+            & (jnp.abs(local_radial) <= support[:, 0])
+            & (jnp.abs(local_vertical) <= support[:, 1])
+        )
         kind = jnp.where(
-            jnp.abs(determinant) < jnp.asarray(1.0e-12, coefficient.dtype),
-            jnp.nan,
+            determinant < 0.0,
+            0.0,
             jnp.where(
-                determinant < 0.0,
-                0.0,
+                (coefficient[..., 0] > 0.0) & (coefficient[..., 1] > 0.0),
+                -1.0,
                 jnp.where(
-                    (coefficient[..., 0] > 0.0) & (coefficient[..., 1] > 0.0),
-                    -1.0,
-                    jnp.where(
-                        (coefficient[..., 0] < 0.0) & (coefficient[..., 1] < 0.0),
-                        1.0,
-                        jnp.nan,
-                    ),
+                    (coefficient[..., 0] < 0.0) & (coefficient[..., 1] < 0.0),
+                    1.0,
+                    jnp.nan,
                 ),
             ),
         )
-        origin = self.locator.physical_origin[index]
-        scale = self.locator.physical_scale[index]
+        origin = self.locator.physical_origin
+        scale = self.locator.physical_scale
         physical = origin + jnp.stack((local_radial, local_vertical), axis=-1) * scale
-        result = jnp.concatenate(
-            (physical, local_flux[..., None], kind[..., None]), axis=-1
+        result = jnp.column_stack((physical, local_flux, kind))
+        finite = supported & jnp.all(jnp.isfinite(result), axis=1)
+        masks = jnp.stack((finite & (kind != 0.0), finite & (kind == 0.0)))
+        return result, masks
+
+    @jax.jit
+    def candidate_table_status(self, psi):
+        """Report whether fitted stationary points exceeded the retained table."""
+        _candidates, masks = self._candidate_census(psi)
+        counts = jnp.sum(masks, axis=1, dtype=jnp.int32)
+        capacity = jnp.full(counts.shape, self.locator.maxsize, dtype=jnp.int32)
+        return {
+            "candidate_count": counts,
+            "capacity": capacity,
+            "truncated": counts > capacity,
+        }
+
+    @jax.jit
+    def __call__(self, psi):
+        """Return extrema and saddles from fixed quadratic fit matrices."""
+        candidates, masks = self._candidate_census(psi)
+        number = jnp.sum(masks, axis=1, dtype=jnp.int32)
+        index = jnp.stack(
+            [
+                jnp.where(
+                    mask,
+                    size=self.locator.maxsize,
+                    fill_value=0,
+                )[0]
+                for mask in masks
+            ]
         )
+        result = candidates[index]
         position = jnp.arange(1, self.locator.maxsize + 1)
         return jnp.where(
             position[None, :, None] <= number[:, None, None],
@@ -449,8 +466,11 @@ class ForwardFluxOperator:
             "connectivity_edge_weight": jnp.asarray(edge_weight),
         }
         self.topology = Topology(self.grid.null, self.wall.null, **topology_geometry)
+        production_locator = self.grid.null.with_capacity(
+            max(self.grid.null.maxsize, _PRODUCTION_STATIONARY_POINT_CAPACITY)
+        )
         self._fixed_design_topology = Topology(
-            _FixedDesignNull2D.from_locator(self.grid.null),
+            _FixedDesignNull2D.from_locator(production_locator),
             self.wall.null,
             **topology_geometry,
         )
@@ -600,7 +620,8 @@ class ForwardFluxOperator:
             material,
             requested_class,
         )
-        admitted = initial.axis_admitted & result.axis_admitted
+        same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
+        admitted = result.axis_admitted & (~initial.axis_admitted | same_axis)
         return result.masks, result.state, result.connected, admitted
 
     def _current(self, current) -> jax.Array:

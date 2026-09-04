@@ -1,6 +1,6 @@
 """Fixed-shape field-null categorization kernels."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -110,6 +110,28 @@ class Null2D(NullBase):
     def fit_dtype(self):
         """Return the local-fit dtype, which is the ladder of every flux read."""
         return jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
+
+    def with_capacity(self, maxsize: int):
+        """Return the same geometric locator with a different table capacity."""
+        if maxsize < 1:
+            raise ValueError("null candidate capacity must be at least one")
+        return replace(self, maxsize=maxsize)
+
+    @jax.jit
+    def candidate_table_status(self, psi):
+        """Report raw extremum/saddle counts and fixed-table truncation."""
+        psi_stencil = jnp.asarray(psi, dtype=self.fit_dtype)[self.stencil]
+        crossing_count = self.crossing_count(psi_stencil)
+        counts = jnp.asarray(
+            [jnp.sum(crossing_count == null_type) for null_type in (0, 4)],
+            dtype=jnp.int32,
+        )
+        capacity = jnp.full(counts.shape, self.maxsize, dtype=jnp.int32)
+        return {
+            "candidate_count": counts,
+            "capacity": capacity,
+            "truncated": counts > capacity,
+        }
 
     @jax.jit
     def __call__(self, psi):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -188,7 +189,7 @@ def test_disjoint_axis_arms_admit_the_confined_cluster(arm):
     assert abs(axis[0] - 0.90) <= cell_pitch
 
 
-def _single_axis_operator() -> ForwardFluxOperator:
+def _single_axis_operator(*, inside_material=None) -> ForwardFluxOperator:
     """A minimal forward operator whose flux map admits without any rescue."""
     radius = np.linspace(1.05, 2.35, 17)
     height = np.linspace(-0.72, 0.72, 19)
@@ -218,8 +219,90 @@ def _single_axis_operator() -> ForwardFluxOperator:
         ),
         external_current=jnp.zeros(1),
         area=jnp.asarray(lattice.cell_area),
+        inside_material=inside_material,
         use_linear_moments=False,
     )
+
+
+def test_production_reader_retains_the_full_coarse_grid_candidate_census():
+    """Forward reads must not inherit the five-slot exploratory locator table."""
+    operator = _single_axis_operator()
+
+    assert operator.grid.null.maxsize == 5
+    assert operator._fixed_design_topology.grid.locator.maxsize == 30
+
+
+def test_empty_o_qualification_has_a_sentinel_index_and_nan_data():
+    """No candidate must never masquerade as whichever entry occupies row zero."""
+    topology, _coordinate = _material_fixture()
+    candidates = jnp.asarray(
+        np.vstack((np.array([1.0, 0.0, 2.0, 0.0]), np.full((4, 4), np.nan)))
+    )
+    qualified = jnp.zeros(5, dtype=bool)
+
+    assert int(topology.o_point_index(candidates, 1, qualified)) == -1
+    selection = topology.o_point_qualification(candidates, 1, qualified)
+    assert not bool(selection.admitted)
+    assert np.all(np.isnan(np.asarray(selection.data)))
+
+
+def test_candidate_table_reports_more_extrema_than_its_capacity():
+    """A fixed table publishes truncation instead of silently hiding extrema."""
+    topology, coordinate = _material_fixture()
+    parity = np.indices((7, 7)).sum(axis=0) % 2
+    flux = np.where(parity, 1.0, -1.0).reshape(coordinate.shape[0])
+
+    status = topology.grid.candidate_table_status(jnp.asarray(flux))
+
+    assert int(status["candidate_count"][0]) > topology.grid.maxsize
+    assert bool(status["truncated"][0])
+    assert int(status["capacity"][0]) == topology.grid.maxsize
+
+
+def test_independent_second_pass_rescues_an_empty_first_qualification():
+    """An independently seeded second pass may recover an empty first pass."""
+    initial = SimpleNamespace(
+        axis_admitted=jnp.asarray(False),
+        state=SimpleNamespace(axis=jnp.full(2, jnp.nan)),
+    )
+    recovered_state = SimpleNamespace(axis=jnp.asarray([1.7, 0.0]))
+    recovered = SimpleNamespace(
+        axis_admitted=jnp.asarray(True),
+        state=recovered_state,
+        masks="masks",
+        connected="connected",
+    )
+
+    class _QualificationSequence:
+        def __init__(self):
+            self.calls = 0
+
+        def read_qualification(self, *_args):
+            result = initial if self.calls == 0 else recovered
+            self.calls += 1
+            return result
+
+        @staticmethod
+        def split_flux_map(physical):
+            return physical, jnp.empty(0)
+
+        @staticmethod
+        def grid(_grid_flux):
+            return jnp.asarray([[1.7, 0.0, 1.0, 1.0]]), jnp.empty((0, 4))
+
+    operator = object.__new__(ForwardFluxOperator)
+    operator._fixed_design_topology = _QualificationSequence()
+    operator.polarity = 1
+    operator.inside_material = jnp.asarray([True])
+    operator._material_centroid = jnp.asarray([1.7, 0.0])
+    operator.grid = SimpleNamespace(coordinate=jnp.asarray([[1.7, 0.0]]))
+
+    masks, state, connected, admitted = operator._fixed_design_read(jnp.asarray([0.0]))
+
+    assert masks == "masks"
+    assert connected == "connected"
+    assert bool(admitted)
+    np.testing.assert_array_equal(np.asarray(state.axis), [1.7, 0.0])
 
 
 def test_second_pass_never_changes_an_already_qualified_axis():

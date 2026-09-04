@@ -63,7 +63,7 @@ with skip_import("jax"):
     from nova.equilibrium.forward_operator import ForwardTopologyState
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
     from nova.equilibrium.source import DomainProfile, ForwardSource
-    from nova.equilibrium.topology import TopologyClass
+    from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
     from nova.jax.config import configure_dtypes
 
 P_PRIME = -3.0e5
@@ -258,17 +258,16 @@ def converged(machine):
 
 
 @pytest.fixture(scope="module")
-def unavailable_diverted_branch(machine):
-    """Return a diverted request on the fixture that only supports a limiter."""
+def qualified_limited_terminal(machine, converged):
+    """Return an admitted limited seed with its diverted-pinned topology read."""
 
     profile, seed, _vacuum = machine
-    return profile.solve_branch(
-        seed,
-        TopologyClass.DIVERTED,
-        route="picard",
-        evaluations=1,
-        tolerance=np.inf,
+    _masks, pinned_topology = profile.operator.read(seed, TopologyClass.DIVERTED)
+    terminal = converged._replace(
+        flux=seed,
+        topology=pinned_topology,
     )
+    return profile, seed, terminal
 
 
 @pytest.fixture(scope="module")
@@ -299,26 +298,26 @@ def _with_direct_samples(profile, seed):
     )
 
 
-def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
-    """Interior rings and every LCFS crossing use their direct moment rule."""
+def test_solve_path_current_moments_match_profile_owned_support(machine):
+    """Solve moments equal direct integration on profile-owned support."""
     profile, seed, _vacuum = machine
     operator, seed = _with_direct_samples(profile, seed)
     masks, topology = operator.read(seed)
     geometry = operator.moment_geometry
-    shared_flux = operator.shared_node_flux(seed)
-    clipped = geometry.atomic_mesh.traced_clip(
-        operator.polarity * (shared_flux - topology.boundary_flux)
-    )
+    profile_support = geometry.atomic_mesh.traced_clip(
+        jnp.ones(
+            len(geometry.atomic_mesh.node_coordinates),
+            dtype=jnp.asarray(seed).dtype,
+        )
+    ).qualify(masks.profile_participation)
     sample_flux = operator.sample_node_flux(seed)
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
     direct = operator.support_current_moments(
         operator.source.core,
         masks.psi_norm,
         sample_psi_norm,
-        clipped,
+        profile_support,
     )
-    closed_branch = masks.core | masks.common_sol
-    direct = type(direct)(*(jnp.where(closed_branch, entry, 0.0) for entry in direct))
     radial_second, vertical_second, cross_second = geometry.second_moment.T
     determinant = radial_second * vertical_second - cross_second**2
     expected = (
@@ -332,15 +331,14 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     for observed, direct in zip(actual, expected, strict=True):
         np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
 
-    crossing_closed = np.asarray(clipped.boundary & (masks.core | masks.common_sol))
-    crossing_unqualified = np.asarray(
-        clipped.boundary & ~(masks.core | masks.common_sol)
+    participating = np.asarray(masks.profile_participation)
+    np.testing.assert_array_equal(
+        np.asarray(profile_support.vertex_count > 0), participating
     )
-    assert crossing_closed.sum() > 0
-    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_closed]) == int(
-        crossing_closed.sum()
+    np.testing.assert_array_equal(
+        np.asarray(actual.cell_current)[~participating],
+        np.zeros((~participating).sum()),
     )
-    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_unqualified]) == 0
 
 
 def test_unclipped_support_uses_the_own_node_profile_for_every_cell(machine):
@@ -483,14 +481,36 @@ def test_the_receipt_records_an_untouched_absolute_source(converged):
     assert not bool(normalisation.rescaled)
 
 
-def test_no_current_appears_outside_the_declared_support(converged):
-    """Only the labelled core carries source current."""
+def test_current_uses_profile_support_and_pointwise_open_selection(machine, converged):
+    """Geometry owns support while flux selects the open profile pointwise."""
+    profile, _seed, _vacuum = machine
+    domains = converged.domains
+    cell_current = np.asarray(converged.cell_current)
+    point_current = np.asarray(
+        profile.operator.source.cell_current(
+            profile.operator.radius,
+            profile.operator.area,
+            domains,
+        )
+    )
+    participating = np.asarray(domains.profile_participation)
+    open_field_line = np.asarray(domains.open_field_line)
     ledger = converged.ledger
+
+    assert open_field_line.any()
+    np.testing.assert_array_equal(
+        cell_current[~participating], np.zeros((~participating).sum())
+    )
+    np.testing.assert_array_equal(
+        point_current[open_field_line], np.zeros(open_field_line.sum())
+    )
     assert abs(float(ledger.core)) > 1.0e5
-    assert float(ledger.common_sol) == 0.0
+    assert float(ledger.common_sol) != 0.0
     assert float(ledger.private_flux) == 0.0
     assert float(ledger.excluded_material) == 0.0
-    np.testing.assert_allclose(ledger.total, ledger.core, rtol=1e-12)
+    np.testing.assert_allclose(
+        ledger.total, ledger.core + ledger.common_sol, rtol=1e-12
+    )
     np.testing.assert_allclose(
         converged.moments.plasma_current, ledger.core, rtol=1e-12
     )
@@ -510,11 +530,24 @@ def test_the_topology_read_publishes_every_domain(converged):
 
 
 def test_a_terminal_class_contradiction_stays_in_its_branch_receipt(
-    unavailable_diverted_branch,
+    qualified_limited_terminal,
+    monkeypatch,
 ):
     """A contradicted diverted pin is reported instead of becoming limited."""
 
-    branch = unavailable_diverted_branch
+    profile, seed, terminal = qualified_limited_terminal
+    monkeypatch.setattr(
+        type(profile),
+        "_solve_accelerated",
+        lambda _profile, *_args, **_options: terminal,
+    )
+    branch = profile.solve_branch(
+        seed,
+        TopologyClass.DIVERTED,
+        route="picard",
+        evaluations=1,
+        tolerance=np.inf,
+    )
     assert int(branch.requested_class) == int(TopologyClass.DIVERTED)
     assert not bool(branch.equilibrium.topology.diverted)
     assert np.isnan(float(branch.equilibrium.topology.class_margin))
@@ -523,15 +556,20 @@ def test_a_terminal_class_contradiction_stays_in_its_branch_receipt(
     assert not bool(branch.topology_consistent)
 
 
-def test_an_unavailable_requested_class_is_explicitly_non_converged(
-    unavailable_diverted_branch,
-):
-    """Even an unbounded residual tolerance cannot qualify an absent saddle."""
+def test_an_unavailable_requested_class_is_explicitly_non_converged(machine):
+    """A terminal state without a qualified axis fails closed before a receipt."""
 
-    branch = unavailable_diverted_branch
-    assert not np.all(np.isfinite(np.asarray(branch.equilibrium.topology.x_point)))
-    assert not bool(branch.converged)
-    assert int(branch.iterations) == 1
+    profile, seed, _vacuum = machine
+    with pytest.raises(
+        NoQualifiedAxisError, match="no qualified magnetic-axis candidate"
+    ):
+        profile.solve_branch(
+            seed,
+            TopologyClass.DIVERTED,
+            route="picard",
+            evaluations=1,
+            tolerance=np.inf,
+        )
 
 
 def test_the_conservation_receipt_meets_its_registered_tolerances(converged):

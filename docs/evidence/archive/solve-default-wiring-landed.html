@@ -128,6 +128,17 @@
     the schema test and the seven referee IDs, 15 green, plus 11 current-pin propagation cases.</p>
   </section>
 
+  <section id="default-wiring-test">
+    <h2>The fail-closed default-wiring test (merged at d3669921)</h2>
+    <p><strong>Commit:</strong> <code>31ed5d2d</code>, <code>tests/test_default_wiring.py</code> in the default lane. For each of the
+    seven production entry points it constructs the route with no options and asserts from the receipt's resolved-defaults block
+    that current pin, settled exit, own-mask acceptance, continuation, best-iterate retention, stagnation stop, exact kernels,
+    cached machine and compilation cache resolved on, and that no launcher passes a solver-control keyword past the public seam:
+    69 green, 63 receipt cells plus 6 launcher-boundary checks, in 32 s on CPU. Fail-closed proof: in a scratch copy with the
+    current pin removed from the version-keyed table, the first current-pin cell failed and the run exited 1. The wiring audit
+    against main reads 63 of 63 production cells DEFAULT-ON. With this the plan's two sections are landed.</p>
+  </section>
+
 </main>
 </body>
 </html>

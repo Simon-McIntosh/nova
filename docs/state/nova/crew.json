@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T19:09:56",
+  "updated": "2026-09-04T19:31:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1977,6 +1977,24 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06ab0-634b-7683-8abe-70a384d0c11f"
         },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-tip-diagnosis-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-wall-perf-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-04"
       },
       {
@@ -95145,6 +95163,393 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T162436664899-nia-candidate2-trip-attribution-3",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-candidate2-trip-attribution-3",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2481,
+                "cached_input_tokens": 357956,
+                "input_tokens": 360493,
+                "output_tokens": 2177,
+                "reasoning_output_tokens": 306,
+                "total_tokens": 362670,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to docs/figures/polish-support-performance/candidate-2/ holding profile-candidate.json completed with all component rows, profile-main.json, trip-count-attribution.json with the two intermediate-tip solves, the paired figure plus the driver copies used, together with the report ~/.config/reckon/crew/reports/nova/integration/candidate-2/trip-attribution.md carrying the ranked per-component difference table with calls per trip on both arms, the trip-count attribution naming the held tip that doubles the trips with its residual plus class, the commit attribution of each added cost with file:line, the repair recommendation with an estimated saving, the SLURM job id plus log paths, persistent cache hit or miss per component on both arms, the manifest written before the SLURM wait begins, no source change",
+          "estimated_hours": null,
+          "goal": "Finish the paired per-trip attribution of the integrated candidate f001ce58 against main 8df13859 plus attribute the trip doubling it exposed: the previous node (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-2, commit 2e1f88c1, report ~/.config/reckon/crew/reports/nova/integration/candidate-2/trip-attribution.md) measured in one H200 job the main production solve of 22086/43 pure at 41.33 s median with 7 active-set trips plus 84 attempted promotions, the candidate at 124.70 s with 14 trips plus 168 attempted promotions (3.02 times main), all 13 main component rows complete in its profile-main.json, the candidate raw production checkpoint durable in its profile-candidate.json, but the copied driver asserted exactly 7 trips so the candidate component probes never started, so this node copies that worktree's candidate-2 directory (profile-main.json, profile-candidate.json, trip_quantum_profile.py, fine_component_profile.py, run_profile.sh, render_pair.py) into its own, converts the trip-count assertion into a structured observation, adds the resume mode that validates plus reuses the candidate raw production checkpoint, runs only the candidate component probes, renders the paired receipt plus figure, plus in the same single SLURM job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache wired at e04970ad adds two production solves of 22086/43 pure at the intermediate tips main 8df13859 merged with e32fefa2 and main 8df13859 merged with 80412c82 (each a detached checkout created with git worktree add plus git merge under the run's own directory, .venv a symlink to /home/ITER/mcintos/Code/nova/.venv) recording trips, terminal residual, termination plus class, because the earlier receipt docs/figures/polish-support-performance/main-vs-candidate.json at 0dce5fe1 had trips inside launch spread so the doubling entered with the class repair, the shared spline or the containment census, polled in the foreground because a backgrounded wait ends the worker's turn, so that the report carries the ranked per-component difference table with calls per trip on both arms, the trip-count attribution to one held tip, the commit attribution of each added cost with file:line, plus the cheapest repair inside the candidate's own files with an estimated saving (coordinator's adjudication 2026-09-04: the 7 to 14 trip doubling is a behaviour change to attribute, never an accepted characteristic)",
+          "id": "nia-candidate2-trip-attribution-3",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "docs/figures/polish-support-performance/candidate-2/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-2/trip-attribution.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-attribution-x4",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T16:24:47Z",
+        "completed_at": "2026-09-04T17:14:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3005,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3005,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "f001ce588d9ad3bde8387907e109dbf1226fff7c",
+        "commits": [
+          "e7b6f6615cd0abfd790f3f6f245d07b16c4a00be"
+        ],
+        "changed_lines": {
+          "added": 8098,
+          "removed": 0,
+          "files": 11
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "artifact validator over the paired receipts (13 of 13 component rows on both arms, unique held tip) plus scoped ruff plus bash -n, evidence node with no source change",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3/artifact-validation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d3c-ac0e-7be2-8e77-66f8555a2dbf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28237312,
+            "cached_input_tokens_cumulative": 28237312,
+            "input_tokens": 28627482,
+            "input_tokens_cumulative": 28627482,
+            "output_tokens": 71059,
+            "output_tokens_cumulative": 71059,
+            "reasoning_output_tokens": 21264,
+            "reasoning_output_tokens_cumulative": 21264
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 36405,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 38805,
+              "external_wait": null,
+              "log_age_seconds": 37903,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 37959,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 92323,
+          "peak_input_tokens": 56864794
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3",
+          "session_id": "01a06d3c-ac0e-7be2-8e77-66f8555a2dbf",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T17:14:52Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T170519266088-sdw-default-wiring-test-2",
+        "plan": "solve-default-wiring",
+        "section": "\u00a72",
+        "node": "sdw-default-wiring-test-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1350,
+                "cached_input_tokens": 392246,
+                "input_tokens": 393652,
+                "output_tokens": 6177,
+                "reasoning_output_tokens": 1000,
+                "total_tokens": 399829,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to tests/test_default_wiring.py, green in the default lane on main with its log, one table in the manifest listing each production entry point beside the receipt field asserted for each default, the scratch-copy regression proof quoted (which default was removed, the assertion that failed), the wiring audit rerun against main quoted as DEFAULT-ON in every production cell, no source change",
+          "estimated_hours": null,
+          "goal": "Write the fail-closed default-wiring test of solve-default-wiring \u00a72 now that its prerequisites are on main (the typed request plus receipt seam at a675c63f, the public solve resolving every omitted option through the version-keyed table at 563e8b59, the oracle rebaseline plus topology visual routes on the public solve at e0846d0b, the replay, DIII-D match plus Solov'ev certificate producers on typed requests at 2e0b3251, so the wiring audit reads 63 of 63 cells DEFAULT-ON): one module in the default pytest lane that, for each of the seven production entry points (ForwardProfile.solve plus routes, exact bank replay, topology visuals, EFIT parity slice, DIII-D Grad-Shafranov match, Solov'ev oracle plus rebaseline, Solov'ev certificate), constructs the route's request with no options plus asserts from the receipt's resolved_defaults block (never internal state) that current pin, settled exit, own-mask acceptance, continuation, best-iterate retention, stagnation stop, exact kernels, cached machine plus compilation cache resolved on, plus that every launcher passes no solver-control keyword past the public seam, with the fail-closed shape proved once in a scratch copy inside the run directory by removing one default from the table plus watching the test fail (never committed), reuse map: tests/test_route_default_wiring.py plus tests/test_forward_profile_defaults.py plus tests/test_route_solve_requests.py on main, the audit ~/.config/reckon/crew/runs/r-20260904T154707089677-sdw-forwardprofile-solve-defaults/worktree-wiring-audit.md, no source change",
+          "id": "sdw-default-wiring-test-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T170519266088-sdw-default-wiring-test-2/manifest.md",
+          "plan": "solve-default-wiring",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_default_wiring.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sdw-wiring-test-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T17:05:29Z",
+        "completed_at": "2026-09-04T17:16:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 674,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 674,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4fc811c75faeaf3e1ff4dcdd7ce841231e70a68d",
+        "commits": [
+          "31ed5d2d5edc3e23b8dc2cbd289d312413bd54ae"
+        ],
+        "changed_lines": {
+          "added": 263,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_default_wiring.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T170519266088-sdw-default-wiring-test-2/default-lane.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T170519266088-sdw-default-wiring-test-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d61-ee33-7361-8ffd-bbb43460c2fb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4827008,
+            "cached_input_tokens_cumulative": 4827008,
+            "input_tokens": 4961853,
+            "input_tokens_cumulative": 4961853,
+            "output_tokens": 26387,
+            "output_tokens_cumulative": 26387,
+            "reasoning_output_tokens": 12311,
+            "reasoning_output_tokens_cumulative": 12311
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 38847,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 41247,
+              "external_wait": null,
+              "log_age_seconds": 40345,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 40401,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38698,
+          "peak_input_tokens": 9788861
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/sdw-default-wiring-test-2",
+          "session_id": "01a06d61-ee33-7361-8ffd-bbb43460c2fb",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T17:16:43Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -95275,6 +95680,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1646
+    "_version": 1650
   }
 }

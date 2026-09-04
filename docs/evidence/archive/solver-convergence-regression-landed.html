@@ -259,6 +259,28 @@
     exact field itself, the oracle admission defect owned by null-identification-authority.</p>
   </section>
 
+  <section id="presettlement-default">
+    <h2>Pre-settlement acceptance becomes the production default (merged at f0f1112f)</h2>
+    <p><strong>Commits:</strong> the prototype <code>fff05974</code> and the default flip <code>6df09cec</code>, merged together at
+    <code>f0f1112f</code> on the lead's decision <code>presettlement-acceptance-default</code>. <code>newton_krylov</code> declares
+    <code>presettlement_incumbent_scoring=True</code>; the per-trip carry is unchanged, the default is inert when no own-mask
+    acceptance route is inferred, and an explicit <code>own_mask_acceptance=False</code> with the scoring on stays a
+    <code>ValueError</code>.</p>
+    <table>
+      <caption>Referee surface after the flip (CPU)</caption>
+      <thead><tr><th scope="col">Lane</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">tests/test_presettlement_incumbent_scoring.py</th><td>5 passed (the default-off identity test is now the explicit-False test)</td></tr>
+        <tr><th scope="row">Seven referee node IDs (nine cases) plus three paired new-default cases</th><td>12 passed; the three induced-mask referees pass <code>presettlement_incumbent_scoring=False</code> explicitly with their assertions unchanged</td></tr>
+        <tr><th scope="row">tests/test_fixed_point.py</th><td>40 passed</td></tr>
+      </tbody>
+    </table>
+    <p>The paired cases assert that a pre-settlement candidate decreasing the incumbent-mask residual is accepted, that strict
+    decrease and best-iterate retention hold, and that the induced-mask refusal resumes once the mask has settled. The first
+    attempt parked when the flip broke the three referees; the answer (pin explicitly, pair, change no predicate) went out as a
+    redispatch after the codex resume was refused by the budget hold.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

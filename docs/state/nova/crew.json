@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T07:24:06",
+  "updated": "2026-09-04T07:32:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1550,6 +1550,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-limiter-polish-scout",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-oracle-repair",
         "harness": "codex",
         "role": "implement",
@@ -2078,6 +2087,15 @@
       },
       {
         "id": "sdw-parity-current-2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "sdw-parity-current-3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -85823,6 +85841,160 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T051215684251-scr-presettlement-default-on-paired",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-presettlement-default-on-paired",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/fixed_point.py, tests/test_presettlement_incumbent_scoring.py, tests/test_own_mask_acceptance.py and tests/test_fixed_point.py in which newton_krylov's presettlement_incumbent_scoring default is True with the per-trip carry unchanged and the default inert when no own-mask acceptance route is requested so smooth solves never raise, the default-off bit-identity test becomes an explicit False test, each of the three referee tests whose premise is induced-mask scoring before settlement passes presettlement_incumbent_scoring=False explicitly with its assertions untouched and gains a paired test on the same fixture under the new default asserting that a pre-settlement candidate decreasing the residual on the incumbent mask is accepted, that strict decrease and best-iterate retention hold, and that the induced-mask refusal resumes once the mask has settled, no eligibility predicate and no change to the carry initialisation, with tests/test_presettlement_incumbent_scoring.py, the seven referee node IDs plus the three paired cases, and tests/test_fixed_point.py green on CPU (logs with exit 0 and passed counts), the manifest naming each pinned referee and its pair, committed with a conventional subject and body, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Land pre-settlement incumbent-mask scoring as the production acceptance default on the prototype base fff05974 with the referee surface pinned in both directions (locked decision presettlement-acceptance-default, the previous attempt's uncommitted work in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-presettlement-default-on showing that three of the nine referee cases encode induced-mask scoring before settlement)",
+          "id": "scr-presettlement-default-on-paired",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T051215684251-scr-presettlement-default-on-paired/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_presettlement_incumbent_scoring.py",
+            "tests/test_own_mask_acceptance.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "scr-default-on-2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T05:12:26Z",
+        "completed_at": "2026-09-04T05:27:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 926,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 926,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fff05974635f31994879d26627f6184a48be0bc5",
+        "commits": [
+          "6df09cec2a6fd7bb8903dd7f5c8c3d126ae7f946"
+        ],
+        "changed_lines": {
+          "added": 70,
+          "removed": 26,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider <seven referee node IDs> <three paired cases>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T051215684251-scr-presettlement-default-on-paired/logs/referees-and-pairs.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T051215684251-scr-presettlement-default-on-paired/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ad5-1df0-7750-9483-0ec772149d33",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6168320,
+            "cached_input_tokens_cumulative": 6168320,
+            "input_tokens": 6324619,
+            "input_tokens_cumulative": 6324619,
+            "output_tokens": 23560,
+            "output_tokens_cumulative": 23560,
+            "reasoning_output_tokens": 8282,
+            "reasoning_output_tokens_cumulative": 8282
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 121126,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 131926,
+              "external_wait": null,
+              "log_age_seconds": 126156,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 126202,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 31842,
+          "peak_input_tokens": 12492939
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -85883,6 +86055,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1513
+    "_version": 1516
   }
 }

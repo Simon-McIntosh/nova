@@ -21,6 +21,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import RectBivariateSpline
 
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.efit_forward_parity_slice import (
@@ -50,6 +51,16 @@ DEFAULT_OPERANDS = Path(
 DEFAULT_OUTPUT = (
     ROOT
     / "docs/figures/solver-convergence-regression/settled-mask-stall/measurement.json"
+)
+DEFAULT_REPAIR_OUTPUT = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "settled-mask-stall/repair/stall-repair.json"
+)
+DEFAULT_BASELINE = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "settled-mask-stall/current-measurement.json"
 )
 TARGETS = ((21985, 51), (21986, 46), (21989, 55), (22086, 43))
 SMOOTH_NEWTON_STEPS = 8
@@ -123,6 +134,11 @@ def _load_banked_rows(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
                 continue
             prefix = f"arm_{index:02d}"
             selected[key] = dict(row) | {
+                "radius": np.asarray(stored[f"{prefix}_radius"], dtype=np.float64),
+                "height": np.asarray(stored[f"{prefix}_height"], dtype=np.float64),
+                "terminal_state": np.asarray(
+                    stored[f"{prefix}_flux"], dtype=np.float64
+                ),
                 "active_set_residuals": np.asarray(
                     stored[f"{prefix}_active_set_residuals"], dtype=np.float64
                 ),
@@ -194,6 +210,76 @@ def _norm_summary(values: Any) -> dict[str, float | int | None]:
         "l2": float(np.linalg.norm(usable)) if usable.size else None,
         "sup": float(np.max(np.abs(usable))) if usable.size else None,
     }
+
+
+def _termination_name(value: Any) -> str:
+    """Return the stable host label for one fixed-point termination value."""
+    reason_value = int(np.asarray(value))
+    try:
+        return FixedPointTerminationReason(reason_value).name.lower()
+    except ValueError:
+        return f"unknown_{reason_value}"
+
+
+def _active_set_summary(result, banked: dict[str, Any]) -> dict[str, Any]:
+    """Pair one production active-set result with its banked comparator."""
+    iterations = int(np.asarray(result.active_set_iterations))
+    return {
+        "bank": {
+            "terminal_residual": float(banked["terminal_residual"]),
+            "active_set_iterations": int(banked["active_set_iterations"]),
+            "termination_reason": str(banked["termination_reason"]),
+            "converged": bool(banked["converged"]),
+            "active_set_residuals": banked["active_set_residuals"].tolist(),
+            "active_set_mask_differences": banked[
+                "active_set_mask_differences"
+            ].tolist(),
+        },
+        "measured": {
+            "terminal_residual": float(np.asarray(result.residual)),
+            "active_set_iterations": iterations,
+            "termination_reason": _termination_name(result.termination_reason),
+            "converged": bool(np.asarray(result.converged)),
+            "active_set_residuals": _array(
+                result.active_set_residuals, limit=iterations
+            ),
+            "active_set_mask_differences": _array(
+                result.active_set_mask_differences, limit=iterations
+            ),
+            "krylov_conditioning_count": int(
+                np.asarray(result.krylov_conditioning_count)
+            ),
+            "maximum_projected_krylov_condition": _strict_float(
+                result.maximum_projected_krylov_condition
+            ),
+        },
+    }
+
+
+def _full_terminal_state(profile, template: Any, banked: dict[str, Any]) -> jax.Array:
+    """Restore the cached grid witness and its interpolated wall samples."""
+    grid_flux = banked["terminal_state"]
+    radius = banked["radius"]
+    height = banked["height"]
+    lattice = profile.lattice
+    if grid_flux.shape != (height.size, radius.size):
+        raise RuntimeError("cached grid flux does not match its coordinate axes")
+    if tuple(lattice.shape) != (radius.size, height.size):
+        raise RuntimeError("cached grid does not match the rebuilt profile lattice")
+
+    state = np.asarray(template, dtype=np.float64).copy()
+    grid_count = int(lattice.node_count)
+    wall = np.asarray(profile.operator.wall.coordinate, dtype=np.float64)
+    physical_count = int(profile.operator.physical_node_number)
+    if state.ndim != 1 or state.size != physical_count:
+        raise RuntimeError("cached witness has an unsupported solver-state tail")
+    if physical_count != grid_count + len(wall):
+        raise RuntimeError("rebuilt profile has an unsupported wall-state layout")
+
+    spline = RectBivariateSpline(radius, height, grid_flux.T, kx=3, ky=3, s=0)
+    state[:grid_count] = grid_flux.T.reshape(-1)
+    state[grid_count:physical_count] = spline.ev(wall[:, 0], wall[:, 1])
+    return jnp.asarray(state, dtype=jnp.asarray(template).dtype)
 
 
 def _relative_disagreement(observed: Any, expected: Any) -> float:
@@ -550,11 +636,7 @@ def _smooth_solve(frozen_map, state) -> dict[str, Any]:
         stream_inner_iterations=True,
     )
     result.state.block_until_ready()
-    reason_value = int(np.asarray(result.termination_reason))
-    try:
-        reason = FixedPointTerminationReason(reason_value).name.lower()
-    except ValueError:
-        reason = f"unknown_{reason_value}"
+    reason = _termination_name(result.termination_reason)
     residuals_before = _array(result.inner_iteration_residuals_before)
     residuals_after = _array(result.inner_iteration_residuals_after)
     proposed_step_norms = _array(result.inner_iteration_proposed_step_norms)
@@ -638,10 +720,11 @@ def _measure_row(
         observed.portfolio.branches,
     )
     production = branch.equilibrium.fixed_point
-    state = branch.equilibrium.flux
-    state.block_until_ready()
+    production_state = branch.equilibrium.flux
+    production_state.block_until_ready()
     validation = _bank_validation(production, banked, require_match=require_bank_match)
     requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    state = _full_terminal_state(profile, production_state, banked)
     mask = profile.operator.residual_shadow_mask(state, requested_class)
     shadowed_map = profile.operator.flux_map_with_shadow(
         requested_class=requested_class, target_current=target_current
@@ -674,6 +757,7 @@ def _measure_row(
     return {
         "identity": f"{int(selected_row['shot'])}/{int(selected_row['slice_index'])}",
         "bank_validation": validation,
+        "active_set_solve": _active_set_summary(production, banked),
         "candidate_table_status": table,
         "terminal_topology": {
             "axis": _array(topology.axis),
@@ -1218,6 +1302,221 @@ def combine(
     return receipt
 
 
+def _frozen_repair_summary(row: dict[str, Any]) -> dict[str, Any]:
+    """Reduce one frozen-mask solve to its contraction and step receipt."""
+    smooth = row["frozen_mask_smooth_solve"]
+    initial = float(smooth["initial_residual"])
+    terminal = float(smooth["terminal_residual"])
+    raw_step = float(row["jacobian_consistency"]["direction"]["sup"])
+    proposed_step = float(smooth["proposed_step_norms"][0])
+    residuals_after = _finite_values(smooth["residuals_after"])
+    residuals_before = _finite_values(smooth["residuals_before"])
+    linear_reductions = _finite_values(smooth["krylov_reductions"])
+    trust_threshold = float(np.sqrt(np.finfo(np.float64).eps))
+    return {
+        "initial_residual": initial,
+        "terminal_residual": terminal,
+        "eight_step_contraction_ratio": terminal / initial,
+        "residuals_per_newton_step": [initial, *residuals_after],
+        "stepwise_contraction_ratios": [
+            after / before
+            for before, after in zip(residuals_before, residuals_after, strict=True)
+        ],
+        "raw_newton_direction_sup": raw_step,
+        "first_proposed_step_sup": proposed_step,
+        "raw_to_proposed_step_fraction": proposed_step
+        / max(raw_step, np.finfo(np.float64).tiny),
+        "accepted_promotions": int(smooth["accepted_promotions"]),
+        "attempted_promotions": int(smooth["attempted_promotions"]),
+        "applied_factors": smooth["applied_factors"],
+        "linear_residual_reductions": smooth["krylov_reductions"],
+        "linear_residual_trust_threshold": trust_threshold,
+        "linear_model_trusted_per_step": [
+            reduction <= trust_threshold for reduction in linear_reductions
+        ],
+        "all_linear_models_trusted": bool(linear_reductions)
+        and all(reduction <= trust_threshold for reduction in linear_reductions),
+    }
+
+
+def _draw_repair(rows: list[dict[str, Any]], figure_path: Path) -> None:
+    """Plot frozen contraction, admitted fractions, and active-set outcomes."""
+    figure, axes = plt.subplots(
+        len(rows), 3, figsize=(14.5, 12.5), constrained_layout=True
+    )
+    colors = {"before": "#9b5de5", "after": "#087e8b"}
+    for row_index, row in enumerate(rows):
+        residual_axis, fraction_axis, active_axis = axes[row_index]
+        for key, label in (("before", "banked guard"), ("after", "repaired guard")):
+            values = row["frozen_mask"][key]["residuals_per_newton_step"]
+            residual_axis.semilogy(
+                range(len(values)),
+                values,
+                marker="o",
+                color=colors[key],
+                label=label,
+            )
+        residual_axis.axhline(1.0e-8, color="black", lw=0.8, ls="--")
+        residual_axis.set_ylabel(row["identity"] + "\nrelative residual")
+        residual_axis.set_xlabel("frozen-mask Newton step")
+        residual_axis.grid(alpha=0.25)
+
+        fractions = [
+            row["frozen_mask"][key]["raw_to_proposed_step_fraction"]
+            for key in ("before", "after")
+        ]
+        fraction_axis.bar((0, 1), fractions, color=(colors["before"], colors["after"]))
+        fraction_axis.set_xticks((0, 1), ("before", "after"))
+        fraction_axis.set_ylabel("proposed / raw Newton direction")
+        fraction_axis.set_ylim(0.0, max(1.05, 1.1 * max(fractions)))
+        fraction_axis.grid(axis="y", alpha=0.25)
+
+        active = row["full_active_set"]
+        residuals = [active[key]["terminal_residual"] for key in ("bank", "measured")]
+        active_axis.bar((0, 1), residuals, color=(colors["before"], colors["after"]))
+        active_axis.set_yscale("log")
+        active_axis.set_xticks(
+            (0, 1),
+            (
+                f"bank\n{active['bank']['active_set_iterations']} trips",
+                f"repair\n{active['measured']['active_set_iterations']} trips",
+            ),
+        )
+        active_axis.set_ylabel("full active-set terminal residual")
+        bank_reason = (
+            active["bank"]["termination_reason"]
+            .removeprefix("active_set_")
+            .replace("_", " ")
+        )
+        measured_reason = (
+            active["measured"]["termination_reason"]
+            .removeprefix("active_set_")
+            .replace("_", " ")
+        )
+        active_axis.set_title(
+            f"bank: {bank_reason}\nrepair: {measured_reason}",
+            fontsize=8,
+        )
+        active_axis.grid(axis="y", alpha=0.25)
+
+    axes[0, 0].legend(fontsize=8)
+    figure.suptitle(
+        "Projected-conditioning repair: frozen Newton contraction and full solve",
+        fontsize=13,
+    )
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+
+
+def render_repair(*, measurement: Path, baseline: Path, output: Path) -> dict[str, Any]:
+    """Render a repair receipt from one completed device measurement."""
+    after_path = measurement
+    measured = json.loads(after_path.read_text(encoding="utf-8"))
+    baseline_data = json.loads(baseline.read_text(encoding="utf-8"))
+    baseline_by_identity = {row["identity"]: row for row in baseline_data["rows"]}
+    attribution_ratios = {
+        "21985/51": 0.919426,
+        "21986/46": 0.996959,
+        "21989/55": 0.990372,
+        "22086/43": 0.773444,
+    }
+    rows = []
+    for after_row in measured["rows"]:
+        identity = after_row["identity"]
+        before = _frozen_repair_summary(baseline_by_identity[identity])
+        after = _frozen_repair_summary(after_row)
+        expected = attribution_ratios[identity]
+        rows.append(
+            {
+                "identity": identity,
+                "attribution_contraction_ratio": expected,
+                "baseline_matches_attribution": bool(
+                    np.isclose(
+                        before["eight_step_contraction_ratio"],
+                        expected,
+                        rtol=0.0,
+                        atol=5.0e-7,
+                    )
+                ),
+                "frozen_mask": {"before": before, "after": after},
+                "full_active_set": after_row["active_set_solve"],
+            }
+        )
+    figure_path = output.with_suffix(".png")
+    _draw_repair(rows, figure_path)
+    receipt = {
+        "artifact": "projected Krylov conditioning repair",
+        "source_commit": _source_revision(),
+        "measurement_source_commit": measured["source_commit"],
+        "baseline_source_commit": baseline_data["source_commit"],
+        "runtime": measured["runtime"],
+        "evidence_inputs": {
+            **measured["evidence_inputs"],
+            "baseline_measurement": str(baseline),
+            "baseline_measurement_sha256": _sha256(baseline),
+            "after_measurement": str(after_path),
+            "after_measurement_sha256": _sha256(after_path),
+            "fixed_point_source_sha256": _sha256(
+                ROOT / "nova/equilibrium/fixed_point.py"
+            ),
+        },
+        "measurement_contract": {
+            **measured["measurement_contract"],
+            "comparison": (
+                "same cached terminal state and frozen residual mask before and "
+                "after the linear-residual-conditioned discriminator"
+            ),
+            "full_active_set_start": (
+                "each production solve starts from the persisted bank seed and "
+                "retains every terminal verdict"
+            ),
+        },
+        "figure": str(figure_path),
+        "rows": rows,
+        "verdict": {
+            "all_baselines_match_attribution": all(
+                row["baseline_matches_attribution"] for row in rows
+            ),
+            "all_trusted_linear_directions_admitted_to_merit_ladder": all(
+                row["frozen_mask"]["after"]["all_linear_models_trusted"] for row in rows
+            ),
+            "all_raw_to_proposed_fractions_improved": all(
+                row["frozen_mask"]["after"]["raw_to_proposed_step_fraction"]
+                > row["frozen_mask"]["before"]["raw_to_proposed_step_fraction"]
+                for row in rows
+            ),
+            "all_frozen_residuals_improve_on_baseline": all(
+                row["frozen_mask"]["after"]["eight_step_contraction_ratio"]
+                < row["frozen_mask"]["before"]["eight_step_contraction_ratio"]
+                for row in rows
+            ),
+            "full_active_set_converged_count": sum(
+                row["full_active_set"]["measured"]["converged"] for row in rows
+            ),
+            "full_active_set_row_count": len(rows),
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return receipt
+
+
+def measure_repair(*, operands: Path, baseline: Path, output: Path) -> dict[str, Any]:
+    """Remeasure the repair and compare it with the frozen banked diagnosis."""
+    after_path = output.with_name("after-measurement.json")
+    measure(
+        operands=operands,
+        output=after_path,
+        source_label="projected-conditioning repair",
+        require_bank_match=False,
+    )
+    return render_repair(measurement=after_path, baseline=baseline, output=output)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="action", required=True)
@@ -1231,6 +1530,14 @@ def main() -> None:
     combine_parser.add_argument("--candidate", type=Path, required=True)
     combine_parser.add_argument("--output", type=Path, required=True)
     combine_parser.add_argument("--report", type=Path)
+    repair_parser = subparsers.add_parser("repair")
+    repair_parser.add_argument("--operands", type=Path, default=DEFAULT_OPERANDS)
+    repair_parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    repair_parser.add_argument("--output", type=Path, default=DEFAULT_REPAIR_OUTPUT)
+    render_parser = subparsers.add_parser("render-repair")
+    render_parser.add_argument("--measurement", type=Path, required=True)
+    render_parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    render_parser.add_argument("--output", type=Path, default=DEFAULT_REPAIR_OUTPUT)
     arguments = parser.parse_args()
     if arguments.action == "measure":
         result = measure(
@@ -1240,12 +1547,26 @@ def main() -> None:
             require_bank_match=not arguments.allow_bank_drift,
         )
         print(json.dumps({"rows": len(result["rows"])}, sort_keys=True))
-    else:
+    elif arguments.action == "combine":
         result = combine(
             arguments.current,
             arguments.candidate,
             arguments.output,
             arguments.report,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    elif arguments.action == "repair":
+        result = measure_repair(
+            operands=arguments.operands,
+            baseline=arguments.baseline,
+            output=arguments.output,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    else:
+        result = render_repair(
+            measurement=arguments.measurement,
+            baseline=arguments.baseline,
+            output=arguments.output,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
 

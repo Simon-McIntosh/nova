@@ -164,6 +164,30 @@
     whether the inner loops run to their static budgets after settlement.</p>
   </section>
 
+  <section id="outer-loop-trace">
+    <h2>The looped trips cost twelve times the standalone trip for the same work (merged at 63ef993e)</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/</code> (profile.json,
+    outer-iterations.csv, the persisted callback event stream, figure; H200 job 1262779). Ordered timestamps delimit every
+    iteration of the compiled active-set loop of the production solve of 22086/43 pure.</p>
+    <table>
+      <caption>Active iterations of the compiled loop, identical counted work each (12 promotions, 156 linear actions, 72 grades)</caption>
+      <thead><tr><th scope="col">Iteration</th><th scope="col">Wall</th><th scope="col">Promotions accepted</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">initial frozen solve (outside the loop)</th><td>0.38 s, the one-trip program</td><td></td></tr>
+        <tr><th scope="row">1, 2, 3</th><td>3.37, 3.38, 3.82 s</td><td>12, 12, 12</td></tr>
+        <tr><th scope="row">4</th><td>5.61 s</td><td>12</td></tr>
+        <tr><th scope="row">5, 6</th><td>12.19, 12.24 s</td><td>5, 0</td></tr>
+        <tr><th scope="row">7 to 23 (inactive)</th><td>0.026 s in total</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The conditional skip of inactive iterations works, so a while-loop exit saves nothing material. The cost is that the
+    same trip, compiled inside the outer loop, runs 9 to 32 times slower than compiled alone, and slows further as the trip
+    index grows while its counted work stays constant. The repair does not need to explain the compiler: drive every trip as
+    one dispatch of the common fast executable with an explicit carry, from the host, until settlement, keeping the trip
+    executable vmap-able over a batch with per-lane active masks. Upper bound: 41 s to about 3 s per solve.</p>
+  </section>
+
 </main>
 </body>
 </html>

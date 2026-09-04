@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -91,6 +91,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T220137473070" data-who="coordinator" data-when="2026-09-04T22:02:00Z">
     <div class="r-comment-body"><p>Host profile landed (commit <code>e8fcaa4c</code> merged at <code>f63a64a4</code>, receipts <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/</code>, report <code>~/.config/reckon/crew/reports/nova/millisecond/production-solve-host-profile.md</code>, H200 job 1262767): the warm production solve is one Python dispatch, and the compiled runtime owns 99.99 percent of its 41.13 s; the wrapper costs 0.5 ms per trip and the transfers 0.1 ms. The active-set loop is a <code>fori_loop</code> over the active-set budget at <code>fixed_point.py:3387</code> with a compiled conditional skipping inactive iterations. So the 15-fold gap between the 0.38 s one-trip program and 5.88 s per reported trip is inside the executable's outer loop. Dispatched <code>msc-compiled-outer-loop-iteration-trace</code>: ordered timestamps at each outer iteration, active flag, promotions and linear actions per iteration, the inner budgets both programs resolve, to say whether inactive iterations still pay for their body, whether the inner loops run to static budgets after settlement, and what an active iteration costs beside the one-trip program.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T224816656853" data-who="coordinator" data-when="2026-09-04T22:48:00Z">
+    <div class="r-comment-body"><p>The trip cost is named (per-iteration trace merged at <code>63ef993e</code>, receipts <code>docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/</code>, report <code>~/.config/reckon/crew/reports/nova/millisecond/compiled-outer-loop-trace.md</code>, H200 job 1262779, 58 ordered callback events persisted as they arrived). The production solve's initial frozen solve outside the loop (<code>fixed_point.py:3193</code>) is the fast one-trip program at 0.38 s. The six active iterations inside the compiled <code>fori_loop</code> (<code>fixed_point.py:3387</code>) cost 3.4, 3.4, 3.8, 5.6, 12.2 and 12.2 s for identical counted work, 12 promotions, 156 linear actions and 72 grades each, a median 12.4 times the one-trip program and growing with the trip index; the 17 inactive iterations cost 0.026 s in total, so the conditional skip works and a while-loop exit would save nothing material. The solve budget resolves active_set 24, Newton 12, GMRES 12, ladder 6 on both programs. Repair dispatched as <code>msc-common-trip-executable</code>: one common trip executable with an explicit carry, trips driven from the host until settlement (each a single dispatch costing the sub-millisecond wrapper the host profile measured), replacing the fused loop, vmap-able over a batch with per-lane active masks so batched solves stay on the GPU, gated on bit identity against the fused solve, the nine referees and the four-row public-route receipt, with the per-solve wall measured before and after. The upper bound is 41 s to about 3 s per solve; the elimination walk and the candidate remeasure both inherit it.</p></div>
 </div>
 </section>
 </main>

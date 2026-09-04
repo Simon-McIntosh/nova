@@ -198,6 +198,34 @@
     candidates), so the X read on those rows is not yet a complete census.</p>
   </section>
 
+  <section id="limiter-polish-support">
+    <h2>Scout, 2026-09-04: the limiter tangency is polished on a local support</h2>
+    <p>Report <code>~/.config/reckon/crew/reports/nova/triage/limiter-polish-support.md</code>, on main at <code>f0f1112f</code>.
+    The classification limiter's field value reads the common C2 tensor spline only after its position has been chosen by a
+    cyclic three-node quadratic along the wall arc; any reachable exact wall node wins over the 420 equal-arc spline samples; the
+    hard-boundary wall operand is a separate nodal minimum on exact wall flux; <code>psi_axis</code> is a bilinear read. The
+    census polish substitutes a seven-point local quadratic value after a split-spline position, and the candidate census decides
+    existence, capacity and ranking on local stencils before any spline polish. The separatrix, the cell clips, the accepted
+    X candidates and the axis already read one tensor spline.</p>
+    <table>
+      <caption>CPU support-sensitivity measurement on the banked rows (spline samples standing in for the exact wall flux)</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Binding point, local quadratic (m)</th><th scope="col">Binding point, spline minimum (m)</th><th scope="col">Shift (m)</th><th scope="col">Class margin, local / spline</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure</th><td>(0.19524, −0.04614)</td><td>(0.19524, 0.00000)</td><td>0.04614</td><td>0.028312 / 0.028430</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>(0.19524, −0.00635)</td><td>(0.19524, 0.00000)</td><td>0.00635</td><td>0.026965 / 0.026968</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td>(0.19524, −0.01679)</td><td>(0.19524, −0.01702)</td><td>0.00024</td><td>0.023647 / 0.023647</td></tr>
+        <tr><th scope="row">21985/51 mixed, 21986/46 pure, 21989/55 pure and mixed, 22086/43 pure</th><td colspan="2">(0.2800, 1.6835) on both reads</td><td>0</td><td>unchanged, −0.100 to −0.138</td></tr>
+        <tr><th scope="row">21978/35 mixed, 21983/35 mixed, 22086/43 mixed</th><td colspan="4">no reachable wall under the cached reconstruction</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td colspan="4">no terminal flux in either operand capture</td></tr>
+      </tbody>
+    </table>
+    <p>Eight comparable rows, zero class-sign changes, binding point moved up to 46 mm. The design adopted minimises the signed
+    normalised outward flux of one complete-map tensor spline over the reachable wall polyline by fixed-shape per-segment
+    bracketing, with position and value from the same spline and both wall operands consuming one record; two prototypes are
+    dispatched and held for the lead (the wall minimum in <code>connectivity_boundary.py</code>; the census values in
+    <code>flux_surface_connectivity.py</code> and <code>topology.py</code>).</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

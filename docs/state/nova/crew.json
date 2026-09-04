@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T07:32:14",
+  "updated": "2026-09-04T07:51:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -892,6 +892,15 @@
         "session_model": "gpt-5.6-sol"
       },
       {
+        "id": "dvf-cocos-scout",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "dvf-residual",
         "harness": "codex",
         "role": "implement",
@@ -1097,6 +1106,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "fsa-raster-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "fsa-receipt-topology",
         "harness": "codex",
         "role": "implement",
@@ -1137,6 +1155,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "fsa-warm-start-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "gaa-evidence",
@@ -1550,9 +1577,36 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-bank-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-census-spline-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-limiter-polish-scout",
         "harness": "codex",
         "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-limiter-spline-x",
+        "harness": "codex",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -85995,6 +86049,147 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T052935150166-nia-limiter-polish-support-trace",
+        "plan": "null-identification-authority",
+        "section": "\u00a73",
+        "node": "nia-limiter-polish-support-trace",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/triage/limiter-polish-support.md with a file:line table of every local-support evaluation on the limiter, tangency, sub-panel and census paths stating for each whether its POSITION or its FIELD VALUE comes off the spline, the wall_psi sampling rule, the concrete design for the spline-restricted wall minimum (per-segment bracketing, fixed-shape jit-safe, how the class margin then reads), the named pinning tests, the CPU measurement the prototype node runs (binding point position, flux plus class margin under the local quadratic versus the spline minimum per row), no nova/ change, the report written before the fence",
+          "estimated_hours": null,
+          "goal": "Trace every place the limiter tangency point, its sub-panel refinement plus the stationary-point census are evaluated on a LOCAL support (the cyclic three-node quadratic along the wall arc in connectivity_boundary.py _refine_wall_minimum_position line 689, the nodal wall_psi sampling it minimises, the stencil sign-count census in stencil_nulls.py with its quadratic fit matrices, any bilinear read of psi) instead of the common global C2 tensor spline that polishes the O plus X points (flux_surface_connectivity.py polish_stationary_points line 871), defines the separatrix (traced_spline_contour line 1230) plus the cell clips, with a design for polishing the wall tangency as the one-dimensional minimum of that same spline restricted to the wall polyline (lead mandate 2026-09-04: the earlier X-point resolution defect had the same root cause, a local cell support incompatible with spline-polished stationary points, while putting topology on the separatrix's own map improved stability, so the sub-panel limiter refinement is suspected of still using local support) with the pinning tests plus the cheapest CPU measurement on the twelve banked MAST rows named (reuse map: the line-of-sight veto merged at b2a7a046, the census repair at 82949087, the triage reports limiter-point-selection.md plus stationary-point-census.md under ~/.config/reckon/crew/reports/nova/triage/, the cached per-row operands under ~/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/ plus the run logs of r-20260904T043020189632)",
+          "id": "nia-limiter-polish-support-trace",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052935150166-nia-limiter-polish-support-trace/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "nia-limiter-polish-scout",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T05:29:49Z",
+        "completed_at": "2026-09-04T05:49:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1158,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1158,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f0f1112f3b4ca9758d2be3ae58e2c8da96ba96ed",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052935150166-nia-limiter-polish-support-trace/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ae5-0914-76b1-bf48-bb81170dd979",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9226112,
+            "cached_input_tokens_cumulative": 9226112,
+            "input_tokens": 9563350,
+            "input_tokens_cumulative": 9563350,
+            "output_tokens": 35692,
+            "output_tokens_cumulative": 35692,
+            "reasoning_output_tokens": 8130,
+            "reasoning_output_tokens_cumulative": 8130
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 122167,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 132967,
+              "external_wait": null,
+              "log_age_seconds": 127197,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 127243,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 43822,
+          "peak_input_tokens": 18789462
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only investigation; the report and the CPU prototype live under the reports and run directories",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -86055,6 +86250,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1516
+    "_version": 1523
   }
 }

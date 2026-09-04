@@ -19,6 +19,7 @@ import math
 import os
 from pathlib import Path
 import platform
+import re
 import socket
 import subprocess
 import time
@@ -51,13 +52,20 @@ DEFAULT_TRACE = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/trip-quantum-trace"
 )
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+PRIOR_FULL_SOLVE_LOG = DEFAULT_REPORT.parent / "trip-quantum-slurm.log"
+PRIOR_FULL_SOLVE_JOB = "1262501"
 SOURCE_RECEIPT = ROOT / "docs/figures/polish-support-performance/raw-main.json"
+ACTIVE_SET_AUTHORITY = (
+    ROOT / "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json"
+)
 REFERENCE_SHOT = 22086
 REFERENCE_SLICE = 43
-ACTIVE_SET_TRIPS = 24
+ACTIVE_SET_TRIP_BUDGET = 24
+EXPECTED_ACTIVE_SET_TRIPS = 7
 LINE_SEARCH_GRADES_PER_UPDATE = 6
 SCAN_ITERATION_SECONDS = 7.6e-6
-PRODUCTION_FULL_TRIPS = 24
+SPLINE_FITS_PER_TOPOLOGY_READ = 63
+TOPOLOGY_READS_PER_OUTER_RESIDUAL = 4
 
 
 def _sha256(path: Path) -> str:
@@ -66,6 +74,54 @@ def _sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _active_set_authority() -> dict[str, Any]:
+    payload = json.loads(ACTIVE_SET_AUTHORITY.read_text(encoding="utf-8"))
+    matches = [
+        row
+        for row in payload["rows"]
+        if row.get("identity") == f"{REFERENCE_SHOT}/{REFERENCE_SLICE}"
+        and row.get("arm") == "pure"
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"expected one active-set authority row, found {len(matches)}"
+        )
+    row = matches[0]
+    trips = int(row["active_set_iterations"])
+    if trips != EXPECTED_ACTIVE_SET_TRIPS:
+        raise RuntimeError(f"active-set authority changed from 7 to {trips}")
+    return {
+        "path": str(ACTIVE_SET_AUTHORITY.relative_to(ROOT)),
+        "sha256": _sha256(ACTIVE_SET_AUTHORITY),
+        "identity": row["identity"],
+        "arm": row["arm"],
+        "active_set_iterations": trips,
+        "termination_reason": row["termination_reason"],
+    }
+
+
+def _prior_full_solve_evidence() -> dict[str, Any]:
+    text = PRIOR_FULL_SOLVE_LOG.read_text(encoding="utf-8")
+    samples = [
+        float(value)
+        for value in re.findall(
+            r"SAMPLE_DONE name=production_trip index=\d+/\d+ wall_s=([0-9.]+)",
+            text,
+        )
+    ]
+    if len(samples) != 3:
+        raise RuntimeError(f"expected three prior full-solve samples, found {samples}")
+    return {
+        "job_id": PRIOR_FULL_SOLVE_JOB,
+        "log_path": str(PRIOR_FULL_SOLVE_LOG),
+        "log_sha256": _sha256(PRIOR_FULL_SOLVE_LOG),
+        "warm_solve_wall_s": samples,
+        "median_warm_solve_wall_s": float(np.median(samples)),
+        "minimum_warm_solve_wall_s": min(samples),
+        "maximum_warm_solve_wall_s": max(samples),
+    }
 
 
 def _strict(value: Any) -> Any:
@@ -166,6 +222,22 @@ def _control_flow_census(
         "fixed_scan_trip_compiled_branch_sum": compiled,
         "dynamic_while_primitives": while_primitives // 2,
     }
+
+
+def _callback_census(function: Callable, arguments: tuple[Any, ...]) -> dict[str, int]:
+    closed = jax.make_jaxpr(function)(*arguments)
+    counts: dict[str, int] = {}
+
+    def visit(jaxpr) -> None:
+        for equation in jaxpr.eqns:
+            name = equation.primitive.name
+            if "callback" in name:
+                counts[name] = counts.get(name, 0) + 1
+            for child in _nested_jaxprs(equation.params):
+                visit(child)
+
+    visit(closed.jaxpr)
+    return counts
 
 
 def _compile_probe(
@@ -346,7 +418,7 @@ def _production_program(profile: Any, target_current: float):
             gmres_iterations=parity.GMRES_ITERATIONS,
             relaxation=parity.RELAXATION,
             step_cap=parity.STEP_CAP,
-            active_set_steps=ACTIVE_SET_TRIPS,
+            active_set_steps=ACTIVE_SET_TRIP_BUDGET,
         )
 
     return requested, one_trip
@@ -662,6 +734,27 @@ def _topology_breakdown(
     )
 
 
+def _evaluation_census(
+    probes: dict[str, Any], trace: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    rows = {}
+    for name, probe in probes.items():
+        region = trace["regions"][name]
+        control_flow = probe["control_flow"]
+        rows[name] = {
+            "gpu_compute_launches_per_evaluation": region["gpu_compute_launch_count"],
+            "gpu_transfers_per_evaluation": region["gpu_transfer_count"],
+            "fixed_scan_trip_lower_bound_per_evaluation": control_flow[
+                "fixed_scan_trip_lower_bound"
+            ],
+            "fixed_scan_trip_compiled_branch_sum_per_evaluation": control_flow[
+                "fixed_scan_trip_compiled_branch_sum"
+            ],
+            "dynamic_while_primitives": control_flow["dynamic_while_primitives"],
+        }
+    return rows
+
+
 def _ranked_bottlenecks(
     components: list[dict[str, Any]], topology: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -709,6 +802,16 @@ def _ranked_bottlenecks(
 
 def _write_report(receipt: dict[str, Any], output: Path) -> None:
     counts = receipt["trip"]["counts"]
+    prior_full_solve = receipt["trip"]["prior_full_solve"]
+    prior_trip_wall = (
+        prior_full_solve["median_warm_solve_wall_s"] / counts["active_set_trips"]
+    )
+    callback_sync = receipt["host_callback_or_sync"]
+    host_sync_row = next(
+        row
+        for row in receipt["trip"]["component_breakdown"]
+        if row["component"] == "host_dispatch_or_device_sync"
+    )
     lines = [
         "# H200 active-set trip quantum",
         "",
@@ -721,7 +824,19 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
             "line-search grades "
             f"({counts['residual_evaluation_equivalents_per_trip']:.0f} "
             "residual-evaluation "
-            "equivalents)."
+            "equivalents). The solve returned "
+            f"**{counts['active_set_trips']} active-set trips**; the source "
+            "performance receipt's count of 24 is the attempted-Newton-promotion "
+            "count, not the active-set trip unit."
+        ),
+        (
+            f"The profiling denominator preserves job `{PRIOR_FULL_SOLVE_JOB}` as "
+            "independent full-solve evidence: its three synchronized warm solves "
+            "span "
+            f"{prior_full_solve['minimum_warm_solve_wall_s']:.6f} "
+            "to "
+            f"{prior_full_solve['maximum_warm_solve_wall_s']:.6f} s, with "
+            f"{prior_trip_wall:.6f} s per active-set trip."
         ),
         "",
         "## Additive trip attribution",
@@ -754,6 +869,10 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
         )
     floor = receipt["trip"]["scan_latency_floor"]
     trace = receipt["profiler_trace"]["regions"]["production_trip"]
+    forward_census = receipt["evaluation_census"]["forward_evaluation"]
+    forward_branch_scan_sum = forward_census[
+        "fixed_scan_trip_compiled_branch_sum_per_evaluation"
+    ]
     compute_launches_per_trip = (
         trace["gpu_compute_launch_count"] / counts["active_set_trips"]
     )
@@ -777,6 +896,35 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
                 "while-loop trips are listed separately and are not guessed into "
                 "the floor."
             ),
+            (
+                "One operator forward evaluation launches "
+                f"**{forward_census['gpu_compute_launches_per_evaluation']} GPU "
+                "compute kernels** and contains at least "
+                f"**{forward_census['fixed_scan_trip_lower_bound_per_evaluation']} "
+                "fixed scan trips** ("
+                f"{forward_branch_scan_sum} "
+                "when all compiled conditional branches are summed). The reuse-map "
+                f"census assigns {TOPOLOGY_READS_PER_OUTER_RESIDUAL} topology reads "
+                "to an outer residual evaluation and "
+                f"{SPLINE_FITS_PER_TOPOLOGY_READ} tensor-spline fits to each "
+                "topology read."
+            ),
+            "",
+            "| evaluation | GPU compute launches | transfers | fixed scan lower "
+            "bound | compiled-branch scan sum |",
+            "|---|---:|---:|---:|---:|",
+        ]
+    )
+    for name, row in receipt["evaluation_census"].items():
+        lines.append(
+            f"| {name.replace('_', ' ')} | "
+            f"{row['gpu_compute_launches_per_evaluation']} | "
+            f"{row['gpu_transfers_per_evaluation']} | "
+            f"{row['fixed_scan_trip_lower_bound_per_evaluation']} | "
+            f"{row['fixed_scan_trip_compiled_branch_sum_per_evaluation']} |"
+        )
+    lines.extend(
+        [
             "",
             "## Ranked bottlenecks and implied repairs",
             "",
@@ -789,6 +937,18 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
         )
     lines.extend(
         [
+            "",
+            "## Host callbacks and synchronization",
+            "",
+            (
+                "The closed production jaxpr contains "
+                f"**{callback_sync['closed_jaxpr_callback_primitive_count']} host "
+                "callback primitives**. Every timed and traced invocation ends in "
+                "one `jax.block_until_ready` device synchronization. The profiler "
+                "subtraction bounds host dispatch plus final synchronization at "
+                f"{host_sync_row['wall_s_per_trip']:.6f} s/trip "
+                f"({100.0 * host_sync_row['share_of_trip']:.2f}%)."
+            ),
             "",
             "## Measurement boundaries",
             "",
@@ -819,6 +979,8 @@ def run(
         cache_root, minimum_compile_seconds=0.0
     )
     case, profile, target_current, carrier, policy = _profile_and_seed()
+    active_set_authority = _active_set_authority()
+    prior_full_solve = _prior_full_solve_evidence()
     reference = case["reference"]
     if (
         int(reference["shot"]) != REFERENCE_SHOT
@@ -827,12 +989,13 @@ def run(
         raise RuntimeError(f"unexpected production arm {reference}")
     state = jnp.asarray(case["state"])
     requested, production = _production_program(profile, target_current)
+    callback_census = _callback_census(production, (state,))
     production_executable, production_probe = _compile_probe(
         "production_trip", production, (state,), repeats
     )
     result = _ready(production_executable(state))
     counts = _counts(result)
-    if counts["active_set_trips"] != ACTIVE_SET_TRIPS:
+    if counts["active_set_trips"] != active_set_authority["active_set_iterations"]:
         raise RuntimeError(
             f"production program executed {counts['active_set_trips']} trips"
         )
@@ -847,6 +1010,7 @@ def run(
         probes[name] = probe
     trace_path = _profile_trace(trace_root, executables)
     trace = _trace_summary(trace_path)
+    evaluation_census = _evaluation_census(probes, trace)
     full_solve_wall = production_probe["steady"]["median_s"]
     trip_wall = full_solve_wall / counts["active_set_trips"]
     production_trace = trace["regions"]["production_trip"]
@@ -862,6 +1026,12 @@ def run(
     scan_floor = scan_lower_per_trip * SCAN_ITERATION_SECONDS
     source = json.loads(SOURCE_RECEIPT.read_text(encoding="utf-8"))
     full_wall = float(source["solve"]["median_warm_wall_s"])
+    performance_receipt_count = int(source["solve"]["trips"])
+    if performance_receipt_count != counts["newton_updates_total"]:
+        raise RuntimeError(
+            "performance receipt count does not match Newton promotion count: "
+            f"{performance_receipt_count} != {counts['newton_updates_total']}"
+        )
     receipt = {
         "schema": "nova.trip_quantum_profile",
         "schema_version": 1,
@@ -876,6 +1046,14 @@ def run(
         "scheduler": _scheduler(),
         "runtime": _runtime(),
         "persistent_compilation_cache": cache.receipt(),
+        "reuse_map_inputs": {
+            "topology_reads_per_outer_residual_evaluation": (
+                TOPOLOGY_READS_PER_OUTER_RESIDUAL
+            ),
+            "tensor_spline_fits_per_topology_read": SPLINE_FITS_PER_TOPOLOGY_READ,
+            "scan_iteration_latency_s": SCAN_ITERATION_SECONDS,
+            "persistent_compilation_cache_wiring_revision": "e04970ad",
+        },
         "production_identity": {
             "reference": reference,
             "arm": "pure",
@@ -886,20 +1064,25 @@ def run(
                 "newton_steps": parity.NEWTON_STEPS,
                 "gmres_iterations": parity.GMRES_ITERATIONS,
                 "warmup_sweeps": parity.WARMUP_SWEEPS,
-                "active_set_steps": ACTIVE_SET_TRIPS,
+                "active_set_step_budget": ACTIVE_SET_TRIP_BUDGET,
                 "tolerance": parity.FIXED_POINT_CRITERION,
             },
         },
         "trip": {
             "wall_s": trip_wall,
             "measured_full_solve_wall_s": full_solve_wall,
+            "prior_full_solve": prior_full_solve,
             "full_solve_reference": {
                 "source": str(SOURCE_RECEIPT.relative_to(ROOT)),
                 "sha256": _sha256(SOURCE_RECEIPT),
                 "revision": source["revision"],
-                "active_set_trips": source["solve"]["trips"],
+                "active_set_authority": active_set_authority,
+                "performance_receipt_count": performance_receipt_count,
+                "performance_receipt_count_unit": "attempted Newton promotions",
+                "performance_receipt_count_is_not_active_set_trips": True,
                 "median_warm_wall_s": full_wall,
-                "arithmetic_wall_s_per_trip": full_wall / PRODUCTION_FULL_TRIPS,
+                "arithmetic_wall_s_per_active_set_trip": full_wall
+                / active_set_authority["active_set_iterations"],
             },
             "counts": counts,
             "component_breakdown": components,
@@ -919,12 +1102,15 @@ def run(
             },
         },
         "direct_probes": probes,
+        "evaluation_census": evaluation_census,
         "production_trip_probe": production_probe,
         "profiler_trace": trace,
         "ranked_bottlenecks": _ranked_bottlenecks(components, topology),
         "host_callback_or_sync": {
-            "closed_jaxpr_callback_primitive_count": 0,
+            "closed_jaxpr_callback_primitive_count": sum(callback_census.values()),
+            "closed_jaxpr_callback_primitives": callback_census,
             "final_sync": "jax.block_until_ready on each timed and traced result",
+            "device_syncs_per_timed_or_traced_invocation": 1,
             "note": (
                 "the production route disables streaming callbacks; profiler GPU "
                 "compute and transfer wall are subtracted from the synchronized "
@@ -941,6 +1127,7 @@ def run(
 
 def preflight() -> None:
     configure_dtypes()
+    active_set_authority = _active_set_authority()
     case, profile, target_current, _carrier, _policy = _profile_and_seed()
     state = jnp.asarray(case["state"])
     requested, production = _production_program(profile, target_current)
@@ -955,6 +1142,7 @@ def preflight() -> None:
             {
                 "status": "preflight_complete",
                 "reference": case["reference"],
+                "active_set_authority": active_set_authority,
                 "programs": sorted(shaped),
                 "jax_enable_x64": bool(jax.config.jax_enable_x64),
             },

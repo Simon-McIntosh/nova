@@ -105,15 +105,16 @@ def test_isolated_wall_candidate_loses_to_connected_trimmed_owner(compiled):
 
 @pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
 def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled):
-    """The committed top-notch axis produces a named fail-closed result."""
+    """The committed axis produces a named fail-closed result when unqualified."""
     topology, _coordinate = _topology_fixture()
     with np.load(OPERANDS, allow_pickle=False) as stored:
-        wall_notch = stored["row_04_selected_o"][0]
+        committed_axis = stored["row_04_selected_o"][0]
+    # Replay bank 52cad98a follows corroboration bank ed9bb793.
     np.testing.assert_allclose(
-        wall_notch, [0.36626597682950957, -1.932135898814253], atol=5.0e-9
+        committed_axis, [0.8971361974180511, 0.023242799865682073], atol=5.0e-9
     )
     vmap_o = jnp.asarray(
-        np.vstack((np.r_[wall_notch, 10.0, 0.0], np.full((4, 4), np.nan))),
+        np.vstack((np.r_[committed_axis, 10.0, 0.0], np.full((4, 4), np.nan))),
         dtype=jnp.float64,
     )
     qualified = jnp.zeros(5, dtype=bool)

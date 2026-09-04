@@ -476,8 +476,15 @@ def _read_operand_cache(
                 f"intermediate operand cache is stale: expected {expected}, "
                 f"observed {observed}"
             )
-        if int(metadata.get("arm_count", -1)) != 12:
-            raise RuntimeError("intermediate operand cache does not carry twelve arms")
+        arm_count = int(metadata.get("arm_count", -1))
+        if not 0 < arm_count <= 12:
+            raise RuntimeError(
+                f"intermediate operand cache carries an invalid arm count: {arm_count}"
+            )
+        if len(metadata.get("rows", ())) != arm_count:
+            raise RuntimeError(
+                "intermediate operand cache metadata does not match its arm count"
+            )
         rows: list[dict[str, Any]] = []
         for index, metadata_row in enumerate(metadata["rows"]):
             prefix = f"arm_{index:02d}"
@@ -504,28 +511,67 @@ def _read_operand_cache(
     return rows
 
 
+def _completed_identity_count(rows: list[dict[str, Any]]) -> int:
+    """Return the number of complete two-arm identities in a cache prefix."""
+
+    if len(rows) % 2:
+        raise RuntimeError("checkpointed operands end inside an identity")
+    for offset in range(0, len(rows), 2):
+        pair = rows[offset : offset + 2]
+        identities = {str(row.get("identity")) for row in pair}
+        arms = {str(row.get("arm")) for row in pair}
+        if len(identities) != 1 or arms != {"pure", "mixed"}:
+            raise RuntimeError(
+                "checkpointed operands do not contain one pure/mixed arm pair "
+                f"at rows {offset} and {offset + 1}"
+            )
+    return len(rows) // 2
+
+
 def _build_operand_cache(
-    response_cache, carrier_evidence: dict[str, Any]
+    response_cache,
+    carrier_evidence: dict[str, Any],
+    existing_rows: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
-    """Run each production arm once and persist its exact corroboration operands."""
+    """Run missing identities and checkpoint each completed two-arm operand pair."""
 
     reachability = _reachability_module()
     selected = select_slices_by_shot(DECOMPOSITION_BANK)
-    rows: list[dict[str, Any]] = []
-    for selected_row, qualification in selected:
+    rows = list(existing_rows or ())
+    completed_identity_count = _completed_identity_count(rows)
+    expected_prefix = [
+        f"{int(selected_row['shot'])}/{int(selected_row['slice_index'])}"
+        for selected_row, _qualification in selected[:completed_identity_count]
+    ]
+    observed_prefix = [
+        str(rows[offset]["identity"]) for offset in range(0, len(rows), 2)
+    ]
+    if observed_prefix != expected_prefix:
+        raise RuntimeError(
+            "checkpointed identity prefix does not match the selected MAST cohort: "
+            f"expected {expected_prefix}, observed {observed_prefix}"
+        )
+    if rows:
+        print(
+            f"resuming operand cache after {completed_identity_count} identities "
+            f"and {len(rows)} arms",
+            flush=True,
+        )
+
+    checkpoint_written = False
+    for selected_row, qualification in selected[completed_identity_count:]:
         shot = int(selected_row["shot"])
         slice_index = int(selected_row["slice_index"])
         print(f"solving MAST {shot}/{slice_index}", flush=True)
         started = time.perf_counter()
         try:
-            rows.extend(
-                _build_identity_operands(
-                    reachability,
-                    response_cache,
-                    selected_row,
-                    qualification,
-                )
+            identity_rows = _build_identity_operands(
+                reachability,
+                response_cache,
+                selected_row,
+                qualification,
             )
+            rows.extend(identity_rows)
         finally:
             jax.clear_caches()
             gc.collect()
@@ -535,7 +581,17 @@ def _build_operand_cache(
             "released compilation caches",
             flush=True,
         )
-    _write_operand_cache(rows, carrier_evidence)
+        if (
+            len(identity_rows) == 2
+            and {str(row.get("identity")) for row in identity_rows}
+            == {f"{shot}/{slice_index}"}
+            and {str(row.get("arm")) for row in identity_rows} == {"pure", "mixed"}
+        ):
+            _write_operand_cache(rows, carrier_evidence)
+            checkpoint_written = True
+            print(f"checkpointed {len(rows)} of 12 arms to {CACHE_PATH}", flush=True)
+    if not checkpoint_written:
+        _write_operand_cache(rows, carrier_evidence)
     print(f"wrote exact operand cache {CACHE_PATH}", flush=True)
     return rows
 
@@ -1058,11 +1114,17 @@ def run() -> dict[str, Any]:
     if CACHE_PATH.exists():
         try:
             operand_rows = _read_operand_cache(carrier_evidence)
-            cache_reused = True
-            print(f"reusing exact operand cache {CACHE_PATH}", flush=True)
         except RuntimeError as error:
             print(f"rejecting stale operand cache: {error}", flush=True)
             operand_rows = _build_operand_cache(response_cache, carrier_evidence)
+        else:
+            cache_reused = True
+            if len(operand_rows) == 12:
+                print(f"reusing exact operand cache {CACHE_PATH}", flush=True)
+            else:
+                operand_rows = _build_operand_cache(
+                    response_cache, carrier_evidence, operand_rows
+                )
     else:
         operand_rows = _build_operand_cache(response_cache, carrier_evidence)
 

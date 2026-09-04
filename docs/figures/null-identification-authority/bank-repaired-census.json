@@ -1,0 +1,1040 @@
+{
+  "after_revision": "078482d942c4237a0f0dd8389c02670e0d48d9eb",
+  "artifact": "MAST repaired-census bank against the f07ee0c5 bank",
+  "before_revision": "f07ee0c5",
+  "candidate_table_summary": {
+    "o_truncated_rows": [],
+    "rows_banked": 12,
+    "x_truncated_rows": [
+      "21978/35 pure",
+      "21978/35 mixed",
+      "21989/55 pure",
+      "21989/55 mixed",
+      "22086/43 pure",
+      "22086/43 mixed"
+    ]
+  },
+  "changed_row_count": 12,
+  "changed_rows": [
+    "21978/35 pure",
+    "21978/35 mixed",
+    "21983/35 pure",
+    "21983/35 mixed",
+    "21985/51 pure",
+    "21985/51 mixed",
+    "21986/46 pure",
+    "21986/46 mixed",
+    "21989/55 pure",
+    "21989/55 mixed",
+    "22086/43 pure",
+    "22086/43 mixed"
+  ],
+  "declared_arm_count": 12,
+  "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+  "rows": [
+    {
+      "active_set_iterations": {
+        "after": 3,
+        "before": 4
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.0037396810764175527,
+        "distance_before_m": 0.015188064994628896,
+        "efit_m": [
+          0.9045118689537048,
+          0.0004183934652246535
+        ],
+        "nova_after_m": [
+          0.9065715904831593,
+          0.003539733205531276
+        ],
+        "nova_before_m": [
+          0.9030348052779694,
+          0.015534464422285375
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.19524440169334412,
+          -0.04850628261859798
+        ],
+        "before_m": [
+          0.19524440169334412,
+          -0.046144426181843556
+        ],
+        "displacement_m": 0.0023618564367544267
+      },
+      "boundary_flux_wb": {
+        "after": -0.06944603626787987,
+        "before": -0.06884701907496345
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 25,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 34,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": true,
+        "before": "diverted"
+      },
+      "efit_label": "diverted",
+      "identity": "21978/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5685255405438062,
+          1.2390654261879772
+        ],
+        "before_m": [
+          0.5628642390682692,
+          1.2634901482388117
+        ],
+        "displacement_m": 0.02507224325140127
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.0029974764384111193,
+        "before": 0.0024506488565450104
+      },
+      "termination": {
+        "after": "active_set_cycle_detected",
+        "before": "active_set_cycle_detected",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": 2,
+        "before": 29
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.02746949724877051,
+        "distance_before_m": 0.0292153428820896,
+        "efit_m": [
+          0.9045118689537048,
+          0.0004183934652246535
+        ],
+        "nova_after_m": [
+          0.9035153450433918,
+          0.02786980907892999
+        ],
+        "nova_before_m": [
+          0.9035484164982237,
+          0.029617845841666424
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.06562508080310325,
+        "before": -0.06476589540675863
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 23,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 33,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": true,
+        "before": "diverted"
+      },
+      "efit_label": "diverted",
+      "identity": "21978/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5615808562216046,
+          1.2819551708231136
+        ],
+        "before_m": [
+          0.5745728038817767,
+          1.2639235916546951
+        ],
+        "displacement_m": 0.022224503398537248
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.0012713070637531015,
+        "before": 7.50780096762432e-12
+      },
+      "termination": {
+        "after": "iteration_budget_exhausted",
+        "before": "converged",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 5,
+        "before": 11
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.027292857599320503,
+        "distance_before_m": 0.029383021617268336,
+        "efit_m": [
+          0.9043859839439392,
+          0.004791049286723137
+        ],
+        "nova_after_m": [
+          0.9025584095625726,
+          0.032022649456697715
+        ],
+        "nova_before_m": [
+          0.9024454351902632,
+          0.034109920852584345
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.19524440169334412,
+          -0.011747042758665359
+        ],
+        "before_m": [
+          0.19524440169334412,
+          -0.006350347249883273
+        ],
+        "displacement_m": 0.005396695508782086
+      },
+      "boundary_flux_wb": {
+        "after": -0.0983972873236968,
+        "before": -0.0966902950243118
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 21,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 28,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": true,
+        "before": "diverted"
+      },
+      "efit_label": "diverted",
+      "identity": "21983/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5294946121842712,
+          1.2896631084670336
+        ],
+        "before_m": [
+          0.5500433858036208,
+          1.2681617763767705
+        ],
+        "displacement_m": 0.02974154298140992
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.0036153260526382647,
+        "before": 0.0003685576871064815
+      },
+      "termination": {
+        "after": "active_set_cycle_detected",
+        "before": "active_set_settled",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": 1,
+        "before": 41
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.036219100749415256,
+        "distance_before_m": null,
+        "efit_m": [
+          0.9043859839439392,
+          0.004791049286723137
+        ],
+        "nova_after_m": [
+          0.9027715025314195,
+          0.04097414905532949
+        ],
+        "nova_before_m": null
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.19524440169334412,
+          -0.0006819983412843095
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.09573965077959595,
+        "before": null
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 21,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 27,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": null,
+        "before": null
+      },
+      "efit_label": "diverted",
+      "identity": "21983/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5379020133226977,
+          1.2891877650881471
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.004035926862603041,
+        "before": null
+      },
+      "termination": {
+        "after": "iteration_budget_exhausted",
+        "before": "NoQualifiedAxisError",
+        "failure_after": null,
+        "failure_before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 12,
+        "before": 1
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.01873593635120384,
+        "distance_before_m": null,
+        "efit_m": [
+          0.8993120789527893,
+          0.004633639473468065
+        ],
+        "nova_after_m": [
+          0.8971361974180511,
+          0.023242799865682073
+        ],
+        "nova_before_m": null
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.21372133023905351,
+        "before": null
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 18,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 25,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": null,
+        "before": null
+      },
+      "efit_label": "diverted",
+      "identity": "21985/51",
+      "selected_saddle": {
+        "after_m": [
+          0.5610989050128365,
+          1.1550314358653346
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "terminal_residual": {
+        "after": 0.00339859040460876,
+        "before": null
+      },
+      "termination": {
+        "after": "active_set_settled",
+        "before": "NoQualifiedAxisError",
+        "failure_after": null,
+        "failure_before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": 35,
+        "before": 0
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.016715376313895223,
+        "distance_before_m": null,
+        "efit_m": [
+          0.8993120789527893,
+          0.004633639473468065
+        ],
+        "nova_after_m": [
+          0.8980918246759667,
+          0.021304415844562052
+        ],
+        "nova_before_m": null
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.21377838659628037,
+        "before": null
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 18,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 29,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": null,
+        "before": null
+      },
+      "efit_label": "diverted",
+      "identity": "21985/51",
+      "selected_saddle": {
+        "after_m": [
+          0.5506172417197256,
+          1.171476499322636
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "terminal_residual": {
+        "after": 0.0020736761044596575,
+        "before": null
+      },
+      "termination": {
+        "after": "iteration_budget_exhausted",
+        "before": "NoQualifiedAxisError",
+        "failure_after": null,
+        "failure_before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 16,
+        "before": 16
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.025395472731902947,
+        "distance_before_m": 0.020764329340370015,
+        "efit_m": [
+          0.9118046164512634,
+          0.0794563964009285
+        ],
+        "nova_after_m": [
+          0.9136539972796212,
+          0.05412835214503442
+        ],
+        "nova_before_m": [
+          0.9132432863202905,
+          0.058741966600344926
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.18517967985920197,
+        "before": -0.03253991931153417
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 20,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 30,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": false,
+        "before": "limited"
+      },
+      "efit_label": "diverted",
+      "identity": "21986/46",
+      "selected_saddle": {
+        "after_m": [
+          0.6107480226057648,
+          1.1421472883099502
+        ],
+        "before_m": [
+          0.6131284784036216,
+          1.1601077079835256
+        ],
+        "displacement_m": 0.0181174845013458
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "terminal_residual": {
+        "after": 0.005891455685358932,
+        "before": 0.005889860956811716
+      },
+      "termination": {
+        "after": "active_set_iteration_budget_exhausted",
+        "before": "active_set_iteration_budget_exhausted",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": 3,
+        "before": 37
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.030974904854965568,
+        "distance_before_m": null,
+        "efit_m": [
+          0.9118046164512634,
+          0.0794563964009285
+        ],
+        "nova_after_m": [
+          0.9138925514764273,
+          0.04855194270724766
+        ],
+        "nova_before_m": null
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.18803944819756552,
+        "before": null
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 20,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 29,
+            "capacity": 30,
+            "truncated": false
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": null,
+        "before": null
+      },
+      "efit_label": "diverted",
+      "identity": "21986/46",
+      "selected_saddle": {
+        "after_m": [
+          0.6100124742800892,
+          1.1296717665605136
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "terminal_residual": {
+        "after": 0.005487702473131911,
+        "before": null
+      },
+      "termination": {
+        "after": "iteration_budget_exhausted",
+        "before": "NoQualifiedAxisError",
+        "failure_after": null,
+        "failure_before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 16,
+        "before": 9
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.027218103083473638,
+        "distance_before_m": 0.018420671880654164,
+        "efit_m": [
+          0.9149412512779236,
+          0.010957644321024418
+        ],
+        "nova_after_m": [
+          0.9138182316024713,
+          0.03815256962467518
+        ],
+        "nova_before_m": [
+          0.9119630142961731,
+          0.02913596264300505
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.20323046277151366,
+        "before": -0.031540916373092455
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 19,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 35,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": false,
+        "before": "limited"
+      },
+      "efit_label": "diverted",
+      "identity": "21989/55",
+      "selected_saddle": {
+        "after_m": [
+          0.5792639617179477,
+          1.173737533201991
+        ],
+        "before_m": [
+          0.5842964495427876,
+          1.1514741226390253
+        ],
+        "displacement_m": 0.02282510424077703
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "terminal_residual": {
+        "after": 0.0029679538126672015,
+        "before": 0.000920711818042524
+      },
+      "termination": {
+        "after": "active_set_iteration_budget_exhausted",
+        "before": "active_set_settled",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": 37,
+        "before": 37
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.021214332272910048,
+        "distance_before_m": null,
+        "efit_m": [
+          0.9149412512779236,
+          0.010957644321024418
+        ],
+        "nova_after_m": [
+          0.9125723574832081,
+          0.03203930070696315
+        ],
+        "nova_before_m": null
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.20594837492781862,
+        "before": null
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 19,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 36,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": null,
+        "before": null
+      },
+      "efit_label": "diverted",
+      "identity": "21989/55",
+      "selected_saddle": {
+        "after_m": [
+          0.5728336859156682,
+          1.1818890224213945
+        ],
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "terminal_residual": {
+        "after": 0.002998178235528507,
+        "before": null
+      },
+      "termination": {
+        "after": "iteration_budget_exhausted",
+        "before": "NoQualifiedAxisError",
+        "failure_after": null,
+        "failure_before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 7,
+        "before": 7
+      },
+      "arm": "pure",
+      "axis": {
+        "distance_after_m": 0.017004997459482623,
+        "distance_before_m": 0.017050633468681336,
+        "efit_m": [
+          0.9052576422691345,
+          0.0034392368979752064
+        ],
+        "nova_after_m": [
+          0.9019330968584681,
+          0.02011608721239092
+        ],
+        "nova_before_m": [
+          0.9019314019461326,
+          0.020162281686438594
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.1242223694237914,
+        "before": -0.12422236950062966
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 22,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 39,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": true,
+        "before": "diverted"
+      },
+      "efit_label": "diverted",
+      "identity": "22086/43",
+      "selected_saddle": {
+        "after_m": [
+          0.5917516875565209,
+          1.219749197600917
+        ],
+        "before_m": [
+          0.5923840472283124,
+          1.2202558665995356
+        ],
+        "displacement_m": 0.0008103037878903794
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "terminal_residual": {
+        "after": 0.0004788269350422851,
+        "before": 0.00048001875929238176
+      },
+      "termination": {
+        "after": "active_set_settled",
+        "before": "active_set_settled",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": 29,
+        "before": 29
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "distance_after_m": 0.02148997305701005,
+        "distance_before_m": 0.02148997305701005,
+        "efit_m": [
+          0.9052576422691345,
+          0.0034392368979752064
+        ],
+        "nova_after_m": [
+          0.9016135226490096,
+          0.024617984126865743
+        ],
+        "nova_before_m": [
+          0.9016135226490096,
+          0.024617984126865743
+        ]
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": {
+        "after": -0.12229070716268065,
+        "before": -0.12239191397875912
+      },
+      "candidate_table_status": {
+        "after": {
+          "o_point": {
+            "candidate_count": 22,
+            "capacity": 30,
+            "truncated": false
+          },
+          "x_point": {
+            "candidate_count": 41,
+            "capacity": 30,
+            "truncated": true
+          }
+        },
+        "before": null
+      },
+      "changed": true,
+      "class_against_efit": {
+        "after": "diverted",
+        "agreement_after": true,
+        "agreement_before": true,
+        "before": "diverted"
+      },
+      "efit_label": "diverted",
+      "identity": "22086/43",
+      "selected_saddle": {
+        "after_m": [
+          0.564816849749112,
+          1.2580221561476006
+        ],
+        "before_m": [
+          0.5853011730723614,
+          1.2333806492436519
+        ],
+        "displacement_m": 0.03204389746127606
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "terminal_residual": {
+        "after": 1.7364758673167596e-14,
+        "before": 1.7364758673167596e-14
+      },
+      "termination": {
+        "after": "converged",
+        "before": "converged",
+        "failure_after": null,
+        "failure_before": null
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null
+      }
+    }
+  ],
+  "scheduler_job_id": 1262289,
+  "terminal_category_counts": {
+    "after": {
+      "budget_exhausted": 7,
+      "converged": 1,
+      "other": 2,
+      "raising": 0,
+      "settled": 2
+    },
+    "before": {
+      "budget_exhausted": 1,
+      "converged": 2,
+      "other": 1,
+      "raising": 5,
+      "settled": 3
+    }
+  }
+}

@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -331,6 +331,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260904T114200000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T11:42:00+02:00">
     <div class="r-comment-body">LANDED TOGETHER AT a439bdec: the regenerated replay operands 52cad98a and the aligned expectations af662670 (pta-replay-operand-expectations, codex; tests/test_topology_domain_partition.py, tests/test_topology_o_qualification.py, tests/test_split_polish_nulls.py, +16 minus 7, each rewritten expectation naming the bank revision it reads; 26 passed on CPU in 249 s, referees green). The schema-4 cache-identity review's HOLD is closed on this receipt: labels, trip counts, residuals and polygons exact, provenance in the metadata, kernel count asserted per row, operands on main. One flake to record for the test-health item: the untouched tests/test_split_polish_nulls.py::test_dimensionless_polish_receipts_are_rescaling_invariant failed once in the first three-file run and passed on the identical rerun, so it is a nondeterministic assertion on main, not a change here. The section-4 work of this plan is complete except the verify pointer's disposition at drain. impl 0.9.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T161311799441" data-who="coordinator" data-when="2026-09-04T16:14:00Z">
+    <div class="r-comment-body"><p>Finding from the forward-solve-api route migration (2026-09-04): the topology mask replay route now raises <code>StaleOperandCacheError</code> on main because <code>mast-topology-operands.metadata.json</code> records source authority <code>sha256:5b145295…</code> while the current source authority is <code>sha256:738333…</code>, moved by the census and polish landings since the operands were generated. The replay's request wiring is in place (bare public policy emitted), but no replay can execute until the operands are regenerated on the current authority, which is the regeneration followup already open here; it should run once the integration candidate merges and the bank is rebanked on the public route, so the operands and the bank share one authority.</p></div>
 </div>
 </section>
 </main>

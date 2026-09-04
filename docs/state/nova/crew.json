@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:10:50",
+  "updated": "2026-09-04T18:11:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1194,6 +1194,15 @@
       },
       {
         "id": "fsa-routes-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "fsa-test-fix-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -94657,6 +94666,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1635
+    "_version": 1636
   }
 }

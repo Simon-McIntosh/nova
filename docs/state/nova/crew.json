@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T08:55:14",
+  "updated": "2026-09-04T09:02:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1597,6 +1597,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-bank-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-census-spline-x",
         "harness": "codex",
         "role": "implement",
@@ -2070,6 +2079,15 @@
           "gpt-5.6-sol": "01a03e2e-1bad-7df0-93f5-49418c4cb7df"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "scr-attribution-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "scr-bank-efit-overlays",
@@ -86985,6 +87003,392 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T064438308811-nia-split-polish-expectations",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-split-polish-expectations",
+        "node_definition": {
+          "done_when": "Worktree commit confined to tests/test_split_polish_nulls.py, held unmerged beside the prototype, with the file green on CPU (15 passed, log with exit 0), no assertion deleted, each of the four rewritten assertions carrying a one-line comment stating the mechanism it now pins in place of the superseded one, tests/test_census_spline_value_authority.py plus the seven referee node IDs still green, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Update the four assertions in tests/test_split_polish_nulls.py that encode the split-spline position plus seven-point local value as the published authority so they state the tensor-spline authority the held prototype a3fa8b9b establishes (test_one_step_refines_only_the_two_census_selected_nulls, test_dimensionless_polish_receipts_are_rescaling_invariant, test_accepted_unmoved_polish_preserves_census_value_bits, test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation), each test's intent preserved (fixed-slot refinement of the two selected nulls, rescaling invariance of the dimensionless receipts, bit-stable handling of an unmoved polish, the MAST unmoved saddle's misrepresentation report) while the value they pin is the common-map value with the split plus local results checked as evidence fields (reuse map: the prototype's tests/test_census_spline_value_authority.py for the receipt field names spline_authored, complete_map, local_value_evidence, local_value_consistent, the run logs of r-20260904T054952654422 naming the four failing assertions plus their messages)",
+          "id": "nia-split-polish-expectations",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T064438308811-nia-split-polish-expectations/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "nia-split-polish-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:44:51Z",
+        "completed_at": "2026-09-04T06:57:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 741,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 741,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "a3fa8b9bec05c777047c0f890c1e58c6d26db91c",
+        "commits": [
+          "eacfbdd1f63866c2c259cb9ce386113a0cb64fd4"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_split_polish_nulls.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T064438308811-nia-split-polish-expectations/logs/authority-and-referees.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T064438308811-nia-split-polish-expectations/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b29-ba78-7390-955e-d879bbea3ae5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6636416,
+            "cached_input_tokens_cumulative": 6636416,
+            "input_tokens": 6814312,
+            "input_tokens_cumulative": 6814312,
+            "output_tokens": 20879,
+            "output_tokens_cumulative": 20879,
+            "reasoning_output_tokens": 7951,
+            "reasoning_output_tokens_cumulative": 7951
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 126670,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 137470,
+              "external_wait": null,
+              "log_age_seconds": 131701,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 131746,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1609,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 4009,
+              "external_wait": null,
+              "log_age_seconds": 3107,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 3163,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 28830,
+          "peak_input_tokens": 13450728
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T065016774984-nia-line-of-sight-expectations",
+        "plan": "null-identification-authority",
+        "section": "\u00a73",
+        "node": "nia-line-of-sight-expectations",
+        "node_definition": {
+          "done_when": "Worktree commit confined to tests/test_limiter_line_of_sight.py, held unmerged beside the prototype, with the file green on CPU (6 passed, log with exit 0), the test's intent preserved (a notch flux forced more extreme than the X-point still loses to the visible wall) and a one-line comment stating that the tangency is the spline minimum along the visible fin rather than a wall node, the seven referee node IDs still green, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Update tests/test_limiter_line_of_sight.py::test_notch_flux_forced_more_extreme_than_x_point_still_loses so it asserts the continuous visible-fin tangency the held prototype a75615f6 produces at (1.1, 0.05) on the common tensor spline, or the shadow exclusion alone, in place of the superseded node-biased coordinate (1.1, 0.0) at line 215 (reuse map: the prototype's tests/test_limiter_spline_minimum.py for the receipt fields, the run logs of r-20260904T055306005644 naming the failing assertion plus its message, the four other tests of the file which already pass)",
+          "id": "nia-line-of-sight-expectations",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065016774984-nia-line-of-sight-expectations/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_limiter_line_of_sight.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "nia-los-expect-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:50:32Z",
+        "completed_at": "2026-09-04T06:56:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 353,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 353,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a75615f6d1eb4ffad18fd0ba5aa8d4368276714d",
+        "commits": [
+          "7ab0af43f660d35a89adc62facc33562aef55a50"
+        ],
+        "changed_lines": {
+          "added": 2,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -q tests/test_limiter_line_of_sight.py -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065016774984-nia-line-of-sight-expectations/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065016774984-nia-line-of-sight-expectations/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b2e-ed66-7482-b322-0422d90974e9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3352704,
+            "cached_input_tokens_cumulative": 3352704,
+            "input_tokens": 3487423,
+            "input_tokens_cumulative": 3487423,
+            "output_tokens": 9889,
+            "output_tokens_cumulative": 9889,
+            "reasoning_output_tokens": 2815,
+            "reasoning_output_tokens_cumulative": 2815
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 127011,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 137811,
+              "external_wait": null,
+              "log_age_seconds": 132042,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 132087,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1950,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 4350,
+              "external_wait": null,
+              "log_age_seconds": 3448,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 3504,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 12704,
+          "peak_input_tokens": 6840127
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -87073,6 +87477,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1537
+    "_version": 1541
   }
 }

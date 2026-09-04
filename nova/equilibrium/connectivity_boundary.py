@@ -37,9 +37,9 @@ Method (the connectivity read, re-expressed on device):
   normalised flux ordering, so whichever obstruction is reached first closes
   the boundary.  The divertor legs are open branches the closed axis-region
   never floods, so the lobe — and the radii read off it — are unaffected.  The
-  Boolean class and its signed margin use that same pair unless an exact
-  comparator candidate table and wall extremum are supplied.  In that case only
-  the class operands are replaced; the connectivity boundary remains unchanged.
+  Boolean class and its signed margin use that same pair.  When comparator
+  candidates are supplied, their positions select the saddle while its value,
+  the axis value, and the reachable wall minimum all come from one tensor spline.
   Typed saddles outside the wall polygon are masked before selection.  The wall
   operand is then selected from the wall touched by the axis component
   immediately inside that saddle, so private-region wall extrema cannot compete.
@@ -83,15 +83,9 @@ from nova.equilibrium.stencil_nulls import (
     xpoint_candidates,
 )
 from nova.equilibrium.labels import LCFS_ANGLES, N_XPOINT_SLOTS
-from nova.geometry.select import (
-    length_2d,
-    traced_quadratic_wall,
-    wall_coordinate,
-    wall_length,
-)
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import Precision, resolve_precision
-from nova.linalg.tensor_spline import fit_tensor_spline
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 
 def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
@@ -205,6 +199,14 @@ _PRE_SADDLE_OFFSET_FRACTION = 2.0e-4
 # Fixed arc samples expose reachable sub-segment wall runs even when a machine's
 # exact GEMM wall nodes are sparse, without data-dependent compaction.
 _WALL_REACHABILITY_SAMPLES = 420
+
+# Each wall segment is first split at every crossed tensor-spline grid knot.
+# Four derivative bins within each polynomial piece expose every along-segment
+# minimum of a bicubic restriction. Twelve bisections put the root within
+# 2.1e-5 m even on the widest supported piece while retaining fixed shapes.
+_WALL_DERIVATIVE_BINS = 4
+_WALL_MINIMUM_BISECTION_STEPS = 12
+_SUPPLIED_WALL_SPLINE_RELATIVE_TOLERANCE = 5.0e-2
 
 # Coarse-grid offsets probed around the preceding binding level.  The asymmetric
 # upper reach covers both sides of the two-sided flood mean while retaining the
@@ -686,135 +688,6 @@ def _sample_wall_polyline(wall_r, wall_z, sample_count):
     return arc, sample_r, sample_z
 
 
-def _refine_wall_minimum_position(wall_r, wall_z, wall_psi, reachable, psi_axis):
-    """Locate the reachable wall minimum with a cyclic three-node quadratic.
-
-    The selected node and its two ring neighbours define the local
-    least-squares quadratic, mirroring the fixed-ring stationary refinement
-    used for grid nulls.  The stationary position is clipped to reachable
-    adjacent segments, preserving a fixed-shape masked reduction.  This fit
-    determines position only; it is not a field interpolant.
-    """
-    node_count = wall_r.shape[0]
-    closed = (wall_r[0] == wall_r[-1]) & (wall_z[0] == wall_z[-1])
-    unique_count = node_count - closed.astype(jnp.int32)
-    node_indices = jnp.arange(node_count, dtype=jnp.int32)
-    eligible = reachable & (node_indices < unique_count) & jnp.isfinite(wall_psi)
-    distance = jnp.abs(wall_psi - psi_axis)
-    selected = _argmin_exact(jnp.where(eligible, distance, jnp.inf))
-    previous = jnp.mod(selected - 1, unique_count)
-    following = jnp.mod(selected + 1, unique_count)
-
-    left_length = jnp.hypot(
-        wall_r[selected] - wall_r[previous], wall_z[selected] - wall_z[previous]
-    )
-    right_length = jnp.hypot(
-        wall_r[following] - wall_r[selected], wall_z[following] - wall_z[selected]
-    )
-
-    cluster_r = jnp.stack((wall_r[previous], wall_r[selected], wall_r[following]))
-    cluster_z = jnp.stack((wall_z[previous], wall_z[selected], wall_z[following]))
-    cluster_distance = jnp.stack(
-        (distance[previous], distance[selected], distance[following])
-    )
-    cluster_arc = length_2d(cluster_r, cluster_z, array_namespace=jnp)
-    coefficients = traced_quadratic_wall(cluster_arc, cluster_distance)
-    stationary_arc = wall_length(coefficients, array_namespace=jnp)
-    lower_arc = jnp.where(eligible[previous], 0.0, left_length)
-    upper_arc = jnp.where(eligible[following], left_length + right_length, left_length)
-    stationary_arc = jnp.clip(stationary_arc, lower_arc, upper_arc)
-    stationary_shift = stationary_arc - left_length
-    refined_distance = (
-        coefficients[0] * stationary_arc**2
-        + coefficients[1] * stationary_arc
-        + coefficients[2]
-    )
-    node_value = distance[selected]
-    refinement_valid = (
-        jnp.any(eligible)
-        & eligible[previous]
-        & eligible[following]
-        & (coefficients[0] > 0.0)
-        & (left_length > 0.0)
-        & (right_length > 0.0)
-        & (refined_distance <= node_value)
-    )
-    shift = jnp.where(refinement_valid, stationary_shift, 0.0)
-
-    refined_cluster_arc = left_length + shift
-    refined_r, refined_z = wall_coordinate(
-        refined_cluster_arc,
-        cluster_r,
-        cluster_z,
-        cluster_arc,
-        array_namespace=jnp,
-    )
-
-    segment_lengths = jnp.hypot(
-        jnp.roll(wall_r, -1) - wall_r,
-        jnp.roll(wall_z, -1) - wall_z,
-    )
-    arc_nodes = jnp.concatenate(
-        [jnp.zeros((1,), dtype=wall_r.dtype), jnp.cumsum(segment_lengths[:-1])]
-    )
-    perimeter = jnp.sum(segment_lengths)
-    refined_arc = jnp.mod(arc_nodes[selected] + shift, perimeter)
-    has_reachable = jnp.any(eligible)
-    nan = jnp.asarray(jnp.nan, dtype=wall_r.dtype)
-    return {
-        "reachable": eligible,
-        "node_index": selected,
-        "node_arc": jnp.where(has_reachable, arc_nodes[selected], nan),
-        "node_r": jnp.where(has_reachable, wall_r[selected], nan),
-        "node_z": jnp.where(has_reachable, wall_z[selected], nan),
-        "node_psi": jnp.where(has_reachable, wall_psi[selected], nan),
-        "arc": jnp.where(has_reachable, refined_arc, nan),
-        "r": jnp.where(has_reachable, refined_r, nan),
-        "z": jnp.where(has_reachable, refined_z, nan),
-        "shift": jnp.where(has_reachable, shift, nan),
-        "valid": has_reachable,
-    }
-
-
-def _reachable_wall_limiter_point(
-    psi2d,
-    rg,
-    zg,
-    wall_r,
-    wall_z,
-    wall_psi,
-    reachable,
-    psi_axis,
-    *,
-    exact_nodes,
-    global_surface=None,
-):
-    """Return a position-refined limiter point with globally sourced flux.
-
-    Exact campaign wall flux selects the nearest node and locates the local
-    along-wall stationary position.  When that position moves between nodes,
-    its field value comes from the global C2 tensor spline fitted to the whole
-    grid, never from the local position fit or a per-cell reconstruction.
-    """
-    point = _refine_wall_minimum_position(wall_r, wall_z, wall_psi, reachable, psi_axis)
-    if global_surface is None:
-        global_surface = fit_tensor_spline(rg, zg, psi2d)
-    global_surface_flux = global_surface(point["r"], point["z"])
-    between_nodes = point["valid"] & ((point["shift"] != 0.0) | (not exact_nodes))
-    refined_flux = jnp.where(between_nodes, global_surface_flux, point["node_psi"])
-    point = dict(point)
-    point.update(
-        {
-            "psi": jnp.where(point["valid"], refined_flux, jnp.nan),
-            "distance": jnp.where(
-                point["valid"], jnp.abs(refined_flux - psi_axis), jnp.inf
-            ),
-            "flux_from_global_surface": between_nodes,
-        }
-    )
-    return point
-
-
 def _select_reachable_wall_limiter(
     psi2d,
     rg,
@@ -828,8 +701,9 @@ def _select_reachable_wall_limiter(
     global_surface,
     axis_r,
     axis_z,
+    selected_wall=None,
 ):
-    """Select a limiter point over exact wall nodes and reachable sub-segments.
+    """Polish a wall candidate on the tensor spline over reachable wall pieces.
 
     A node or sample qualifies only when it BOTH touches the pre-saddle axis
     flood on the connectivity raster AND has an unobstructed straight
@@ -839,73 +713,275 @@ def _select_reachable_wall_limiter(
     wall notch whenever the notch is too fine for the raster to resolve; the
     sightline test uses the exact polyline instead, so it excludes that node
     regardless of raster resolution or how extreme its fitted flux is.
+    When ``selected_wall`` is supplied, its nearest segment is the local support.
+    Candidate discovery and ranking have
+    already happened in the topology census; the spline polish must not turn a
+    rejected wall extremum into a different accepted limiter elsewhere on the
+    wall.  The unseeded boundary read retains the complete polyline support.
+    Every supported segment is split at crossed radial and vertical spline knots,
+    then sampled with a fixed number of derivative bins per polynomial piece.
+    Negative-to-nonnegative along-wall derivative brackets are bisected with a
+    fixed trip count.  Eligible endpoints, corners, and equal-arc reachability
+    samples compete with all refined roots through one exact masked argmin.
     """
     node_reachable = _wall_nodes_touching_region(
         pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
     ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, wall_r, wall_z, wall_r, wall_z)
-    node_point = _reachable_wall_limiter_point(
-        psi2d,
-        rg,
-        zg,
-        wall_r,
-        wall_z,
-        wall_psi,
-        node_reachable,
-        psi_axis,
-        exact_nodes=True,
-        global_surface=global_surface,
-    )
-
+    node_reachable &= wall_r.shape[0] > 1
     sample_arc, sample_r, sample_z = _sample_wall_polyline(
         wall_r, wall_z, _WALL_REACHABILITY_SAMPLES
     )
     sample_reachable = _wall_nodes_touching_region(
         pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
     ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, sample_r, sample_z, wall_r, wall_z)
-    sample_psi = global_surface(sample_r, sample_z)
-    sample_point = _reachable_wall_limiter_point(
-        psi2d,
+    sample_reachable &= wall_r.shape[0] > 1
+
+    all_start = jnp.stack((wall_r, wall_z), axis=-1)
+    all_end = jnp.roll(all_start, -1, axis=0)
+    all_tangent = all_end - all_start
+    all_length_squared = jnp.sum(all_tangent**2, axis=-1)
+    if selected_wall is None:
+        segment_index = jnp.arange(wall_r.size, dtype=jnp.int32)
+        support_valid = jnp.asarray(True)
+    else:
+        selected_wall = jnp.asarray(selected_wall, dtype=wall_r.dtype)
+        support_valid = jnp.all(jnp.isfinite(selected_wall[:3]))
+        safe_selected = jnp.where(support_valid, selected_wall[:2], all_start[0])
+        selected_reachable = (
+            _wall_nodes_touching_region(
+                pre_saddle_region,
+                inside_limiter,
+                rg,
+                zg,
+                safe_selected[None, 0],
+                safe_selected[None, 1],
+            )[0]
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                safe_selected[None, 0],
+                safe_selected[None, 1],
+                wall_r,
+                wall_z,
+            )[0]
+        )
+        projection = jnp.sum(
+            (safe_selected[None, :] - all_start) * all_tangent, axis=-1
+        ) / jnp.where(all_length_squared > 0.0, all_length_squared, 1.0)
+        projection = jnp.clip(projection, 0.0, 1.0)
+        closest = all_start + projection[:, None] * all_tangent
+        distance_squared = jnp.sum((closest - safe_selected[None, :]) ** 2, axis=-1)
+        selected_segment = _argmin_exact(
+            jnp.where(all_length_squared > 0.0, distance_squared, jnp.inf)
+        )
+        selected_node = _argmin_exact(
+            (wall_r - safe_selected[0]) ** 2 + (wall_z - safe_selected[1]) ** 2
+        )
+        support_valid &= selected_reachable & node_reachable[selected_node]
+        segment_index = selected_segment[None]
+    start = all_start[segment_index]
+    end = all_end[segment_index]
+    tangent = end - start
+    segment_length = jnp.linalg.norm(tangent, axis=-1)
+    safe_radial_step = jnp.where(tangent[:, 0] != 0.0, tangent[:, 0], 1.0)
+    safe_vertical_step = jnp.where(tangent[:, 1] != 0.0, tangent[:, 1], 1.0)
+    radial_crossing = (rg[None, :] - start[:, 0, None]) / safe_radial_step[:, None]
+    vertical_crossing = (zg[None, :] - start[:, 1, None]) / safe_vertical_step[:, None]
+    radial_valid = (
+        (tangent[:, 0, None] != 0.0) & (radial_crossing > 0.0) & (radial_crossing < 1.0)
+    )
+    vertical_valid = (
+        (tangent[:, 1, None] != 0.0)
+        & (vertical_crossing > 0.0)
+        & (vertical_crossing < 1.0)
+    )
+    breakpoints = jnp.concatenate(
+        (
+            jnp.zeros((start.shape[0], 1), dtype=wall_r.dtype),
+            jnp.where(radial_valid, radial_crossing, jnp.inf),
+            jnp.where(vertical_valid, vertical_crossing, jnp.inf),
+            jnp.ones((start.shape[0], 1), dtype=wall_r.dtype),
+        ),
+        axis=1,
+    )
+    breakpoints = jnp.sort(breakpoints, axis=1)
+    lower = breakpoints[:, :-1]
+    upper = breakpoints[:, 1:]
+    interval_valid = (
+        jnp.isfinite(upper)
+        & (upper > lower)
+        & (segment_length[:, None] > 0)
+        & support_valid
+    )
+    fraction = jnp.linspace(0.0, 1.0, _WALL_DERIVATIVE_BINS + 1, dtype=wall_r.dtype)
+    parameter = lower[..., None] + (upper - lower)[..., None] * fraction
+    parameter = jnp.where(interval_valid[..., None], parameter, 0.0)
+    points = start[:, None, None, :] + parameter[..., None] * tangent[:, None, None, :]
+    safe_point = jnp.stack((axis_r, axis_z))
+    evaluation_points = jnp.where(interval_valid[..., None, None], points, safe_point)
+    flat_points = points.reshape(-1, 2)
+    flat_evaluation_points = evaluation_points.reshape(-1, 2)
+    endpoint_reachable = _wall_nodes_touching_region(
+        pre_saddle_region,
+        inside_limiter,
         rg,
         zg,
-        sample_r,
-        sample_z,
-        sample_psi,
-        sample_reachable,
-        psi_axis,
-        exact_nodes=False,
-        global_surface=global_surface,
+        flat_points[:, 0],
+        flat_points[:, 1],
+    ) & _wall_nodes_in_line_of_sight(
+        axis_r,
+        axis_z,
+        flat_points[:, 0],
+        flat_points[:, 1],
+        wall_r,
+        wall_z,
     )
-    # Exact GEMM nodes are the stronger field authority and win whenever the
-    # reachable partition contains one.  Global-surface samples fill only a
-    # reachable sub-segment run whose sparse exact endpoints are both absent.
-    use_node = node_point["valid"]
-    selected = {
-        key: jnp.where(use_node, node_point[key], sample_point[key])
-        for key in (
-            "node_index",
-            "node_arc",
-            "node_r",
-            "node_z",
-            "node_psi",
-            "arc",
-            "r",
-            "z",
-            "psi",
-            "distance",
-            "shift",
-            "valid",
-            "flux_from_global_surface",
+    endpoint_reachable = (
+        endpoint_reachable.reshape(parameter.shape) & interval_valid[..., None]
+    )
+    evaluation = global_surface.evaluate(
+        flat_evaluation_points[:, 0], flat_evaluation_points[:, 1]
+    )
+    endpoint_value = evaluation.value.reshape(parameter.shape)
+    gradient = jnp.stack(
+        (evaluation.radial_derivative, evaluation.vertical_derivative), axis=-1
+    ).reshape(points.shape)
+    derivative = jnp.sum(gradient * tangent[:, None, None, :], axis=-1)
+    bracket = (
+        endpoint_reachable[..., :-1]
+        & endpoint_reachable[..., 1:]
+        & (derivative[..., :-1] <= 0.0)
+        & (derivative[..., 1:] >= 0.0)
+    )
+    root_lower = parameter[..., :-1]
+    root_upper = parameter[..., 1:]
+
+    def refine_root(_iteration, bounds):
+        root_lo, root_hi = bounds
+        middle = 0.5 * (root_lo + root_hi)
+        middle_point = (
+            start[:, None, None, :] + middle[..., None] * tangent[:, None, None, :]
         )
-    }
-    selected.update(
-        {
-            "reachable": node_reachable,
-            "reachable_samples": sample_reachable,
-            "sample_arc": sample_arc,
-            "selected_from_exact_nodes": use_node,
-        }
+        middle_point = jnp.where(bracket[..., None], middle_point, safe_point)
+        middle_evaluation = global_surface.evaluate(
+            middle_point[..., 0], middle_point[..., 1]
+        )
+        middle_derivative = (
+            middle_evaluation.radial_derivative * tangent[:, None, None, 0]
+            + middle_evaluation.vertical_derivative * tangent[:, None, None, 1]
+        )
+        move_lower = middle_derivative < 0.0
+        return (
+            jnp.where(move_lower, middle, root_lo),
+            jnp.where(move_lower, root_hi, middle),
+        )
+
+    root_lower, root_upper = jax.lax.fori_loop(
+        0,
+        _WALL_MINIMUM_BISECTION_STEPS,
+        refine_root,
+        (root_lower, root_upper),
     )
-    return selected
+    root_parameter = 0.5 * (root_lower + root_upper)
+    root_points = (
+        start[:, None, None, :] + root_parameter[..., None] * tangent[:, None, None, :]
+    )
+    root_evaluation_points = jnp.where(bracket[..., None], root_points, safe_point)
+    root_value = global_surface(
+        root_evaluation_points[..., 0], root_evaluation_points[..., 1]
+    )
+
+    edge = jnp.concatenate((psi2d[0], psi2d[-1], psi2d[:, 0], psi2d[:, -1]))
+    psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]
+    span_safe = jnp.where(
+        jnp.abs(psi_out - psi_axis) < 1.0e-30, 1.0e-30, psi_out - psi_axis
+    )
+    endpoint_score = jnp.where(
+        endpoint_reachable, (endpoint_value - psi_axis) / span_safe, jnp.inf
+    ).reshape(-1)
+    root_score = jnp.where(
+        bracket, (root_value - psi_axis) / span_safe, jnp.inf
+    ).reshape(-1)
+    all_segment_length = jnp.linalg.norm(all_tangent, axis=-1)
+    all_segment_end = jnp.cumsum(all_segment_length)
+    sample_segment = jnp.clip(
+        jnp.searchsorted(all_segment_end, sample_arc, side="right"),
+        0,
+        wall_r.size - 1,
+    )
+    sample_supported = jnp.any(
+        sample_segment[:, None] == segment_index[None, :], axis=-1
+    )
+    sample_eligible = sample_reachable & sample_supported & support_valid
+    sample_evaluation_r = jnp.where(sample_eligible, sample_r, axis_r)
+    sample_evaluation_z = jnp.where(sample_eligible, sample_z, axis_z)
+    sample_value = global_surface(sample_evaluation_r, sample_evaluation_z)
+    sample_score = jnp.where(
+        sample_eligible, (sample_value - psi_axis) / span_safe, jnp.inf
+    )
+    scores = jnp.concatenate((endpoint_score, root_score, sample_score))
+    candidate_points = jnp.concatenate(
+        (
+            flat_points,
+            root_points.reshape(-1, 2),
+            jnp.stack((sample_r, sample_z), axis=-1),
+        ),
+        axis=0,
+    )
+    candidate_arcs = jnp.concatenate(
+        (
+            (all_segment_end - all_segment_length)[segment_index, None, None]
+            + parameter * segment_length[:, None, None],
+            (all_segment_end - all_segment_length)[segment_index, None, None]
+            + root_parameter * segment_length[:, None, None],
+            sample_arc[None, :],
+        ),
+        axis=None,
+    )
+    selected = _argmin_exact(scores)
+    valid = jnp.isfinite(scores[selected])
+    point = candidate_points[selected]
+    point_evaluation = jnp.where(valid, point, safe_point)
+    point_flux = global_surface(point_evaluation[0], point_evaluation[1])
+    nearest_node = _argmin_exact((wall_r - point[0]) ** 2 + (wall_z - point[1]) ** 2)
+    node_arc = all_segment_end - all_segment_length
+    nan = jnp.asarray(jnp.nan, dtype=wall_r.dtype)
+    exact_evaluation_r = jnp.where(wall_r.shape[0] > 1, wall_r, axis_r)
+    exact_evaluation_z = jnp.where(wall_r.shape[0] > 1, wall_z, axis_z)
+    exact_surface_flux = global_surface(exact_evaluation_r, exact_evaluation_z)
+    wall_flux_present = jnp.isfinite(wall_psi)
+    wall_psi_safe = jnp.where(wall_flux_present, wall_psi, exact_surface_flux)
+    wall_flux_residual_safe = wall_psi_safe - exact_surface_flux
+    wall_flux_residual = jnp.where(wall_flux_present, wall_flux_residual_safe, jnp.nan)
+    wall_flux_residual_max = jnp.where(
+        jnp.any(wall_flux_present),
+        jnp.max(jnp.where(wall_flux_present, jnp.abs(wall_flux_residual_safe), 0.0)),
+        jnp.nan,
+    )
+    return {
+        "reachable": node_reachable,
+        "reachable_samples": sample_reachable,
+        "sample_arc": sample_arc,
+        "node_index": nearest_node,
+        "node_arc": jnp.where(valid, node_arc[nearest_node], nan),
+        "node_r": jnp.where(valid, wall_r[nearest_node], nan),
+        "node_z": jnp.where(valid, wall_z[nearest_node], nan),
+        "node_psi": jnp.where(valid, exact_surface_flux[nearest_node], nan),
+        "arc": jnp.where(valid, candidate_arcs[selected], nan),
+        "r": jnp.where(valid, point[0], nan),
+        "z": jnp.where(valid, point[1], nan),
+        "psi": jnp.where(valid, point_flux, nan),
+        "distance": jnp.where(valid, jnp.abs(point_flux - psi_axis), jnp.inf),
+        "shift": jnp.where(
+            valid, candidate_arcs[selected] - node_arc[nearest_node], nan
+        ),
+        "valid": valid,
+        "flux_from_global_surface": valid,
+        "selected_from_exact_nodes": jnp.asarray(False),
+        "minimum_bracket_count": jnp.sum(bracket, dtype=jnp.int32),
+        "wall_flux_residual": wall_flux_residual,
+        "wall_flux_residual_max": wall_flux_residual_max,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -929,6 +1005,7 @@ def _read_ingredients(
     use_doubling,
     classification_x=None,
     classification_wall=None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -938,9 +1015,10 @@ def _read_ingredients(
     a temperature-controlled softmin and the core mask a sigmoid).  Returns the
     normalised flux ``u``, the flood binding ``s_flood``, the two sub-grid
     binding candidates ``u_wall_c`` / ``u_x_c`` (``inf`` when absent), the class
-    operands, and the X-candidate diagnostics. ``classification_x`` carries an
-    exact candidate table and ``classification_wall`` its selected wall
-    extremum; they must be supplied together and affect only the class read.
+    operands, and the X-candidate diagnostics. ``classification_x`` carries a
+    candidate table whose positions define the pre-saddle reachable wall, while
+    ``classification_wall`` retains the supplied extremum for shadow diagnostics;
+    they must be supplied together.
     The typed table stays fixed-shape while candidates outside the polygon
     described by ``wall_r`` / ``wall_z`` are made ineligible.
     """
@@ -951,7 +1029,8 @@ def _read_ingredients(
     nr = rg.shape[0]
     n_iter = nr + nz  # flood-fill saturation count (≥ the region grid diameter)
 
-    psi_axis = _bilerp(psi2d, rg, zg, axis_r, axis_z)
+    global_surface = fit_tensor_spline(rg, zg, psi2d) if surface is None else surface
+    psi_axis = global_surface(axis_r, axis_z)
     edge = jnp.concatenate([psi2d[0, :], psi2d[-1, :], psi2d[:, 0], psi2d[:, -1]])
     psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]
     span = psi_out - psi_axis
@@ -1132,35 +1211,6 @@ def _read_ingredients(
     for _ in range(3):  # unrolled — the separatrix saddle sits at the region edge
         flood_adjacent = _dilate4(flood_adjacent)
 
-    # --- sub-grid wall tangency ------------------------------------------------
-    # The confined-most flux the closed surface reaches on the wall, read SUB-GRID
-    # (the cell mean carries the sub-cell wall-position error a tangency is
-    # sensitive to): the minimum interpolated ψ_N over the wall boundary points
-    # adjacent to the axis region.  Computed for EVERY slice; on a diverted plasma
-    # the reachable wall sits OUTSIDE the separatrix so this overshoots and loses
-    # the confined-most min to the saddle below — no class switch needed.
-    ar_idx = jnp.arange(nr, dtype=rg.dtype)
-    az_idx = jnp.arange(nz, dtype=zg.dtype)
-    wj = jnp.clip(jnp.round(jnp.interp(wall_r, rg, ar_idx)), 0, nr - 1)
-    wi = jnp.clip(jnp.round(jnp.interp(wall_z, zg, az_idx)), 0, nz - 1)
-    reachable = reach[wi.astype(jnp.int32), wj.astype(jnp.int32)]
-    global_surface = fit_tensor_spline(rg, zg, psi2d)
-    wall_global_flux = global_surface(wall_r, wall_z)
-    u_wall_global = (wall_global_flux - psi_axis) / span_safe
-    # Exact node flux (campaign g_wall) is authoritative where provided; the
-    # global C2 tensor surface supplies the fallback.  A length-1 NaN sentinel
-    # broadcasts to "all global-surface" while a per-node finite array reads each
-    # tangency EXACTLY (no O(Δ²) floor at the lean point).  Sanitise the exact
-    # branch to a finite value BEFORE the select so the NaN sentinel never
-    # poisons the gradient (the jnp.where NaN-VJP trap).
-    wall_psi_finite = jnp.isfinite(wall_psi)
-    wall_psi_safe = jnp.where(wall_psi_finite, wall_psi, psi_axis)
-    u_wall_exact = (wall_psi_safe - psi_axis) / span_safe
-    u_wall_pts = jnp.where(wall_psi_finite, u_wall_exact, u_wall_global)
-    u_wall = jnp.min(jnp.where(reachable, u_wall_pts, jnp.inf))
-    u_wall_valid = jnp.any(reachable) & jnp.isfinite(u_wall)
-    u_wall_c = jnp.where(u_wall_valid, u_wall, jnp.inf)
-
     # --- sub-grid X-point saddle at the binding (the diverted separatrix) -------
     # Classify saddles on the whole grid, then keep only those that (a) lie inside
     # the wall (xpoint_candidates ANDs inside_limiter), (b) sit in the flood-rejoin
@@ -1209,33 +1259,15 @@ def _read_ingredients(
     x_bind_state = jnp.where(x_bind_valid, xc["state"][kbind], 0)
     u_x_c = jnp.where(x_bind_valid, u_x[kbind], jnp.inf)
 
-    # Exact candidate data can replace the class operands without changing the
-    # connectivity binding.  Its wall operand is selected from the pre-saddle
-    # axis component rather than trusting a whole-polygon extremum.
+    # Exact candidate positions can replace the class saddle selection.  Their
+    # values are re-read from the same complete-map spline as the polished
+    # connectivity candidates and wall restriction.
     if classification_x is None or classification_wall is None:
-        class_u_wall = u_wall_c
         class_u_x = u_x_c
         class_x_valid = x_bind_valid
         class_x_state = x_bind_state
         class_wall_shadowed = jnp.asarray(False)
-        class_wall = {
-            "reachable": reachable,
-            "node_index": _argmin_exact(jnp.where(reachable, u_wall_pts, jnp.inf)),
-            "node_arc": jnp.asarray(jnp.nan, dtype=rg.dtype),
-            "node_r": jnp.asarray(jnp.nan, dtype=rg.dtype),
-            "node_z": jnp.asarray(jnp.nan, dtype=zg.dtype),
-            "node_psi": jnp.asarray(jnp.nan, dtype=psi2d.dtype),
-            "arc": jnp.asarray(jnp.nan, dtype=rg.dtype),
-            "r": jnp.asarray(jnp.nan, dtype=rg.dtype),
-            "z": jnp.asarray(jnp.nan, dtype=zg.dtype),
-            "psi": jnp.asarray(jnp.nan, dtype=psi2d.dtype),
-            "distance": jnp.asarray(jnp.inf, dtype=psi2d.dtype),
-            "shift": jnp.asarray(jnp.nan, dtype=rg.dtype),
-            "valid": u_wall_valid,
-            "flux_from_global_surface": jnp.asarray(False),
-            "reachable_samples": jnp.zeros((_WALL_REACHABILITY_SAMPLES,), dtype=bool),
-            "selected_from_exact_nodes": jnp.asarray(False),
-        }
+        wall_region = reach
     else:
         supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
         supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
@@ -1244,7 +1276,10 @@ def _read_ingredients(
             supplied_x[:, 0], supplied_x[:, 1], wall_r, wall_z
         )
         supplied_x_valid = supplied_x_present & supplied_x_inside_wall
-        supplied_x_flux = jnp.where(supplied_x_valid, supplied_x[:, 2], psi_axis)
+        supplied_x_r = jnp.where(supplied_x_valid, supplied_x[:, 0], axis_r)
+        supplied_x_z = jnp.where(supplied_x_valid, supplied_x[:, 1], axis_z)
+        supplied_x_surface_flux = global_surface(supplied_x_r, supplied_x_z)
+        supplied_x_flux = jnp.where(supplied_x_valid, supplied_x_surface_flux, psi_axis)
         supplied_x_level = (supplied_x_flux - psi_axis) / span_safe
         class_x_index = _argmin_exact(
             jnp.where(supplied_x_valid, supplied_x_level, jnp.inf)
@@ -1262,7 +1297,10 @@ def _read_ingredients(
             axis_z,
             class_u_x,
         )
-        class_wall = _select_reachable_wall_limiter(
+        wall_region = pre_saddle_region
+
+    if wall_r.shape[0] > 1:
+        wall_arguments = (
             psi2d,
             rg,
             zg,
@@ -1270,24 +1308,71 @@ def _read_ingredients(
             wall_r,
             wall_z,
             wall_psi,
-            pre_saddle_region,
+            wall_region,
             psi_axis,
             global_surface,
             axis_r,
             axis_z,
         )
+        if classification_wall is None:
+            class_wall = _select_reachable_wall_limiter(*wall_arguments)
+        else:
+            supplied_wall_surface_flux = global_surface(
+                supplied_wall[0], supplied_wall[1]
+            )
+            supplied_wall_scale = jnp.maximum(
+                jnp.abs(supplied_wall_surface_flux), jnp.abs(span_safe)
+            )
+            supplied_wall_matches_surface = (
+                jnp.abs(supplied_wall[2] - supplied_wall_surface_flux)
+                <= _SUPPLIED_WALL_SPLINE_RELATIVE_TOLERANCE * supplied_wall_scale
+            )
+            class_wall = jax.lax.cond(
+                supplied_wall_matches_surface,
+                lambda: _select_reachable_wall_limiter(
+                    *wall_arguments, selected_wall=supplied_wall
+                ),
+                lambda: _select_reachable_wall_limiter(*wall_arguments),
+            )
+        wall_level = (class_wall["psi"] - psi_axis) / span_safe
+        u_wall_c = jnp.where(class_wall["valid"], wall_level, jnp.inf)
+    else:
+        coordinate_nan = jnp.asarray(jnp.nan, dtype=rg.dtype)
+        flux_nan = jnp.asarray(jnp.nan, dtype=psi2d.dtype)
+        class_wall = {
+            "reachable": jnp.zeros_like(wall_r, dtype=bool),
+            "reachable_samples": jnp.zeros((_WALL_REACHABILITY_SAMPLES,), dtype=bool),
+            "sample_arc": jnp.full(
+                (_WALL_REACHABILITY_SAMPLES,), jnp.nan, dtype=rg.dtype
+            ),
+            "node_index": jnp.asarray(0, dtype=jnp.int32),
+            "node_arc": coordinate_nan,
+            "node_r": coordinate_nan,
+            "node_z": coordinate_nan,
+            "node_psi": flux_nan,
+            "arc": coordinate_nan,
+            "r": coordinate_nan,
+            "z": coordinate_nan,
+            "psi": flux_nan,
+            "distance": jnp.asarray(jnp.inf, dtype=psi2d.dtype),
+            "shift": coordinate_nan,
+            "valid": jnp.asarray(False),
+            "flux_from_global_surface": jnp.asarray(False),
+            "selected_from_exact_nodes": jnp.asarray(False),
+            "minimum_bracket_count": jnp.asarray(0, dtype=jnp.int32),
+            "wall_flux_residual": jnp.full_like(wall_r, jnp.nan, dtype=psi2d.dtype),
+            "wall_flux_residual_max": flux_nan,
+        }
+        u_wall_c = jnp.asarray(jnp.inf, dtype=psi2d.dtype)
+    class_u_wall = u_wall_c
+
+    if classification_x is not None and classification_wall is not None:
         supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
         supplied_wall_index = _argmin_exact(
             (wall_r - supplied_wall[0]) ** 2 + (wall_z - supplied_wall[1]) ** 2
         )
         class_wall_shadowed = (
             supplied_wall_valid & ~class_wall["reachable"][supplied_wall_index]
-        )
-        refined_wall_level = (class_wall["psi"] - psi_axis) / span_safe
-        class_u_wall = jnp.where(
-            class_wall["valid"],
-            refined_wall_level,
-            jnp.inf,
         )
 
     return {
@@ -1310,6 +1395,8 @@ def _read_ingredients(
         "class_x_state": class_x_state,
         "class_wall_shadowed": class_wall_shadowed,
         "class_wall": class_wall,
+        "wall_flux_residual": class_wall["wall_flux_residual"],
+        "wall_flux_residual_max": class_wall["wall_flux_residual_max"],
         "class_x_inside_wall": supplied_x_inside_wall
         if classification_x is not None
         else jnp.ones((_K_XCAND,), dtype=bool),
@@ -1346,6 +1433,7 @@ def traced_boundary_read(
     use_doubling: bool = True,
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -1353,18 +1441,17 @@ def traced_boundary_read(
     grid coordinates; ``inside_limiter`` the ``(nz, nr)`` boolean wall (raster)
     mask; ``(axis_r, axis_z)`` the read's axis (the current centroid, in metres).
     ``wall_r``/``wall_z`` are the wall boundary sample points (all wall units
-    densified) — used for the SUB-GRID binding flux (see below); omit them to fall
-    back to the cell-level flood binding.  ``wall_psi`` is the EXACT node flux
-    (the campaign ``g_wall`` GEMM) aligned with those points; each finite entry
-    reads its exact flux instead of a reconstructed grid value.  The sentinel
-    NaN default evaluates the global C2 tensor surface at every wall node.
+    densified) used for the spline-restricted binding flux; omit them to fall back
+    to the cell-level flood binding. ``wall_psi`` is the independently evaluated
+    node flux aligned with those points. It is reported only as a residual against
+    the global tensor spline and cannot select or value the binding point.
     ``classification_x`` and ``classification_wall`` optionally supply the
     exact saddle table and whole-polygon wall extremum used by the Boolean
     topology read. Typed saddles outside the ``wall_r`` / ``wall_z`` polygon are
-    masked before selection. The wall operand is independently selected and
-    refined on the wall reachable from the pre-saddle axis component. Their
-    normalised flux difference defines ``class_margin``; they do not change
-    ``s_star``, ``psi_bnd``, radii, or the connected core.
+    masked before selection. The wall operand is selected from the wall reachable
+    from the pre-saddle axis component, and that same spline value feeds both the
+    hard boundary and class read. Their normalised flux difference defines
+    ``class_margin``.
 
     Returns a dict of fixed-shape arrays: ``found`` (bool — a valid closed
     axis-enclosing level exists), ``psi_axis``, ``psi_out``, ``psi_bnd`` (the
@@ -1391,6 +1478,7 @@ def traced_boundary_read(
         use_doubling,
         classification_x,
         classification_wall,
+        surface,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -1534,6 +1622,9 @@ def traced_boundary_read(
         "limiter_selected_from_exact_nodes": ing["class_wall"][
             "selected_from_exact_nodes"
         ],
+        "wall_flux_residual": ing["wall_flux_residual"],
+        "wall_flux_residual_max": ing["wall_flux_residual_max"],
+        "limiter_minimum_bracket_count": ing["class_wall"]["minimum_bracket_count"],
         "binding_u_wall": u_wall_c,
         "binding_u_xpoint": u_x_c,
         "x_candidate_count": ing["x_candidate_count"],
@@ -1658,6 +1749,9 @@ def traced_margin_candidate_diagnostics(
         "limiter_flux": refined_wall["psi"],
         "limiter_axis_flux_distance": refined_wall["distance"],
         "limiter_refinement_shift": refined_wall["shift"],
+        "wall_flux_residual": ing["wall_flux_residual"],
+        "wall_flux_residual_max": ing["wall_flux_residual_max"],
+        "limiter_minimum_bracket_count": refined_wall["minimum_bracket_count"],
         "limiter_flux_from_global_surface": refined_wall["flux_from_global_surface"],
         "limiter_selected_from_exact_nodes": refined_wall["selected_from_exact_nodes"],
         "connectivity_candidates": connectivity_table,
@@ -1709,6 +1803,7 @@ def traced_smooth_boundary_read(
     use_doubling: bool = True,
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -1762,6 +1857,7 @@ def traced_smooth_boundary_read(
         use_doubling,
         classification_x,
         classification_wall,
+        surface,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -1985,6 +2081,7 @@ def _smooth_read_at_stencil_axis(
         wall_z,
         wall_psi,
         temperature,
+        surface=spline,
     )
     out = dict(out)
     out["axis_r"] = jnp.where(axis_polished, ax_r, jnp.nan)
@@ -2080,9 +2177,9 @@ def host_boundary_read(
 
     ``grid`` is an any equilibrium grid (supplies
     ``rg``/``zg``/``inside_limiter`` and the multi-unit wall nodes).  ``wall_psi``
-    is the exact node flux (``grid.wall_flux(i_pf, i_cell)``) aligned with the
-    grid's wall nodes; pass it to read the tangency exactly (the campaign
-    ``g_wall`` GEMM) instead of bilinear off the grid.  ``lcfs_norm=1.0`` reports
+    is the independently evaluated node flux (``grid.wall_flux(i_pf, i_cell)``)
+    aligned with the grid's wall nodes; pass it to retain the campaign GEMM
+    residual against the tensor-spline wall read. ``lcfs_norm=1.0`` reports
     the ring AT the separatrix (the ``lcfs_contour(clip_legs=True)`` convention
     used by the disc pushout); the 0.999 default reads a hair inside.
     """

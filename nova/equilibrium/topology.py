@@ -29,6 +29,7 @@ from nova.equilibrium.flux_surface_connectivity import (
 )
 from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 _MATERIAL_CONNECTED_FRACTION = 0.01
 """Minimum share of the material grid an O candidate's component must reach.
@@ -534,6 +535,7 @@ class Topology(Pytree):
         inside,
         saddle_cut=False,
         saddle=None,
+        surface: TensorBSpline | None = None,
     ):
         """Return the closed, in-material hex component containing the axis.
 
@@ -571,6 +573,7 @@ class Topology(Pytree):
                 boundary_flux,
                 axis_flux,
                 shared_edges,
+                surface=surface,
             )
             inward_link = hex_edge_admissibility(
                 flux,
@@ -579,6 +582,7 @@ class Topology(Pytree):
                 component_flux,
                 axis_flux,
                 shared_edges,
+                surface=surface,
             )
             coordinate = self.connectivity_coordinate.reshape(
                 (radial_count, vertical_count, 2)
@@ -634,7 +638,14 @@ class Topology(Pytree):
 
     @jax.jit
     def qualified_o_candidates(
-        self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material
+        self,
+        vmap_o,
+        vmap_x,
+        data_w,
+        polarity,
+        psi_grid,
+        inside_material,
+        surface: TensorBSpline | None = None,
     ):
         """Return O candidates whose flood reaches the confined material.
 
@@ -676,6 +687,7 @@ class Topology(Pytree):
                 seed_material,
                 jnp.equal(data_b[2], data_x[2]),
                 data_x[:2],
+                surface,
             )
             governed_size = jnp.sum(component & inside_material)
             governed_connection = governed_size >= connection_floor
@@ -729,6 +741,21 @@ class Topology(Pytree):
         different questions and no longer the same cells.
         """
         psi_grid, psi_wall = self.split_flux_map(psi)
+        structured = bool(
+            self.connectivity_radius.size and self.connectivity_height.size
+        )
+        if structured:
+            radial_count = self.connectivity_radius.shape[0]
+            vertical_count = self.connectivity_height.shape[0]
+            flux = psi_grid.reshape((radial_count, vertical_count)).T
+            surface = fit_tensor_spline(
+                self.connectivity_radius,
+                self.connectivity_height,
+                flux,
+            )
+        else:
+            flux = psi_grid[self.polish_gather]
+            surface = None
         vmap_o, vmap_x = self.grid(psi_grid)
         data_w = self.wall(psi_wall, polarity)
         qualified_o = self.qualified_o_candidates(
@@ -738,6 +765,7 @@ class Topology(Pytree):
             polarity,
             psi_grid,
             inside_material,
+            surface,
         )
         selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
         data_o = selection.data
@@ -751,10 +779,7 @@ class Topology(Pytree):
             boundary_is_xpoint = jnp.asarray(requested_class) == int(
                 TopologyClass.DIVERTED
             )
-        if self.connectivity_radius.size and self.connectivity_height.size:
-            radial_count = self.connectivity_radius.shape[0]
-            vertical_count = self.connectivity_height.shape[0]
-            flux = psi_grid.reshape((radial_count, vertical_count)).T
+        if structured:
             data_o, data_x, polish_receipt = polish_census_stationary_points(
                 flux,
                 self.connectivity_radius,
@@ -763,9 +788,9 @@ class Topology(Pytree):
                 polarity,
                 data_o,
                 data_x,
+                surface=surface,
             )
         else:
-            flux = psi_grid[self.polish_gather]
             data_o, data_x, polish_receipt = polish_census_stationary_points(
                 flux,
                 self.polish_radial,
@@ -776,6 +801,14 @@ class Topology(Pytree):
                 data_x,
                 self.polish_valid,
             )
+        published_stationary = jnp.stack((data_o, data_x))
+        published_stationary = published_stationary.at[:, :2].set(
+            polish_receipt["selected_position_rz"]
+        )
+        published_stationary = published_stationary.at[:, 2].set(
+            polish_receipt["selected_value"]
+        )
+        data_o, data_x = published_stationary
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])
@@ -788,6 +821,7 @@ class Topology(Pytree):
             inside_material,
             boundary_is_xpoint,
             data_x[:2],
+            surface,
         )
         masks = classify_domains(
             psi_norm,

@@ -1,0 +1,44 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+E0904 13:34:04.181283 3933456 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_one_newton_trip for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0904 13:34:37.978936 3930346 slow_operation_alarm.cc:140] The operation took 2m33.797715027s
+
+********************************
+[Compiling module jit_one_newton_trip for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1157, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1139, in main
+    capture(
+    ~~~~~~~^
+        arguments.source_root,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        arguments.cache,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 748, in capture
+    topology = _topology_measurement(operands)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 651, in _topology_measurement
+    read_one(field, axis, saddle, interface)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 614, in read_one
+    admitted_axis, admitted_saddle, _receipt = polish_census_stationary_points(
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        field,
+        ^^^^^^
+    ...<6 lines>...
+        surface=surface,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+TypeError: polish_census_stationary_points() got an unexpected keyword argument 'surface'
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

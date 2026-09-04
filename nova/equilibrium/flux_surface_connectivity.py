@@ -71,7 +71,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4 as _dilate4
 from nova.linalg.split_spline import fit_split_spline
-from nova.linalg.tensor_spline import fit_tensor_spline
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 
 _SQRT2 = 2.0**0.5
@@ -299,6 +299,7 @@ def hex_edge_admissibility(
     shared_edge_rz: jnp.ndarray,
     stationary_steps: int = 8,
     edge_values: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> jnp.ndarray:
     """Return a fixed-shape mask for hex links open at ``level``.
 
@@ -339,7 +340,7 @@ def hex_edge_admissibility(
         open_link = jnp.max(side * (samples - level), axis=-1) > strict_tolerance
         return open_link.at[:, 0].set(True)
 
-    spline = fit_tensor_spline(radial, vertical, values)
+    spline = fit_tensor_spline(radial, vertical, values) if surface is None else surface
 
     edge_start = shared_edge_rz[..., 0, :]
     edge_end = shared_edge_rz[..., 1, :]
@@ -925,14 +926,14 @@ def _census_local_values(
     census_position: jnp.ndarray,
     evaluation_position: jnp.ndarray,
 ) -> jnp.ndarray:
-    """Evaluate the census's local quadratic at two selected positions.
+    """Evaluate local census quadratics as confidence evidence.
 
     ``Null2D`` assigns each candidate to a centre-first, six-neighbour cluster
     and fits a quadratic in locally normalised coordinates. Recovering the
     same six axial offsets around that centre reproduce the interpolation on
-    the raster and on the carrier's half-offset embedding. An unchanged position
-    is replaced by the original census value by the caller, preserving its
-    exact bits.
+    the raster and on the carrier's half-offset embedding. These values measure
+    agreement with the admitting census; they do not author a published
+    stationary-point position or field value.
     """
     radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
     coordinates = jnp.stack((radial_grid, vertical_grid), axis=-1).reshape((-1, 2))
@@ -994,8 +995,9 @@ def polish_census_stationary_points(
     selected_saddle: jnp.ndarray,
     sample_valid: jnp.ndarray | None = None,
     execute: jnp.ndarray = True,
+    surface: TensorBSpline | None = None,
 ) -> tuple[jnp.ndarray, jnp.ndarray, dict[str, jnp.ndarray]]:
-    """Apply one fit-qualified Newton step to census-selected nulls.
+    """Apply fit-qualified tensor-spline polish to census-selected nulls.
 
     Candidate production, ranking, and count are complete before this function
     receives its two fixed slots.  Stationarity is measured by the fitted
@@ -1015,16 +1017,18 @@ def polish_census_stationary_points(
     and the active coefficient count is evaluated separately at each slot.
 
     A seed already below that fitted-gradient floor takes zero active updates.
-    Every other valid seed receives exactly one bounded Newton update. Fit-value
+    Every other valid seed receives the shared fixed-cap Newton polish. Fit-value
     consistency has its own dimensionless floor: the larger of the
     normalized sample RMS and ``n_active * condition_number * eps``.  It is not
     divided by cell pitch because it bounds a value rather than a gradient.
-    Thus gradient stationarity cannot admit a representation that materially
-    disagrees with the census interpolation. An accepted fit changes only the
-    position: its selected value is evaluated by the census's local quadratic,
-    while the split fit's proposed value remains diagnostic. A fit or result
-    outside the finite, Hessian-type, stationarity, and value-consistency gates
-    retains the complete census row while preserving the attempted receipt.
+    The difference from the census interpolation remains explicit confidence
+    evidence but cannot override the complete map. The split fit and the
+    seven-point census quadratic remain evidence only. For a complete structured map,
+    an accepted result takes both its position and value from the map's global
+    tensor spline. Unsupported sparse or half-offset carriers retain their
+    census rows without claiming a polish. A fit or result outside the finite,
+    Hessian-type, and stationarity gates retains the complete census row while
+    preserving the attempted receipt.
     """
     values = jnp.asarray(values)
     radial = jnp.asarray(radial, dtype=values.dtype)
@@ -1042,7 +1046,7 @@ def polish_census_stationary_points(
         & jnp.isfinite(interface_value)
         & jnp.all(jnp.where(sample_valid, jnp.isfinite(values), True))
     )
-    spline = fit_split_spline(
+    evidence_spline = fit_split_spline(
         radial,
         vertical,
         values,
@@ -1050,8 +1054,37 @@ def polish_census_stationary_points(
         valid=sample_valid,
         execute=finite_fit,
     )
+    tensor_supported = (
+        radial.ndim == 1
+        and vertical.ndim == 1
+        and radial.size >= 4
+        and vertical.size >= 4
+    )
+    if tensor_supported:
+        authority_spline = (
+            fit_tensor_spline(
+                radial,
+                vertical,
+                jnp.where(sample_valid, values, 0.0),
+            )
+            if surface is None
+            else surface
+        )
+        complete_map = jnp.all(sample_valid) & jnp.all(jnp.isfinite(values))
+    else:
+        inactive_axis = jnp.arange(4, dtype=values.dtype)
+        authority_spline = fit_tensor_spline(
+            inactive_axis,
+            inactive_axis,
+            jnp.zeros((4, 4), dtype=values.dtype),
+        )
+        complete_map = jnp.asarray(False)
     selected = jnp.stack((selected_extremum, selected_saddle))
-    valid = spline.fit_executed & jnp.all(jnp.isfinite(selected[:, :3]), axis=-1)
+    valid = (
+        evidence_spline.fit_executed
+        & complete_map
+        & jnp.all(jnp.isfinite(selected[:, :3]), axis=-1)
+    )
     radial_grid, vertical_grid = _coordinate_grids(radial, vertical)
     radial_min = jnp.min(jnp.where(sample_valid, radial_grid, jnp.inf))
     radial_max = jnp.max(jnp.where(sample_valid, radial_grid, -jnp.inf))
@@ -1061,26 +1094,26 @@ def polish_census_stationary_points(
         radial_max - radial_min,
         vertical_max - vertical_min,
     )
-    coordinate_span = jnp.where(spline.fit_executed, coordinate_span, 1.0)
+    coordinate_span = jnp.where(evidence_spline.fit_executed, coordinate_span, 1.0)
     field_min = jnp.min(jnp.where(sample_valid, values, jnp.inf))
     field_max = jnp.max(jnp.where(sample_valid, values, -jnp.inf))
     field_scale = jnp.maximum(field_max - field_min, jnp.finfo(values.dtype).tiny)
-    field_scale = jnp.where(spline.fit_executed, field_scale, 1.0)
-    seed_evaluation = spline.evaluate(selected[:, 0], selected[:, 1])
+    field_scale = jnp.where(evidence_spline.fit_executed, field_scale, 1.0)
+    seed_evaluation = authority_spline.evaluate(selected[:, 0], selected[:, 1])
     (
         seed_active_count,
         _seed_value_basis_norm,
         seed_derivative_basis_norm,
-    ) = spline.scaled_basis_receipt(selected[:, 0], selected[:, 1])
+    ) = evidence_spline.scaled_basis_receipt(selected[:, 0], selected[:, 1])
     normalized_cell_pitch = (
         _minimum_cell_pitch(radial, vertical, sample_valid) / coordinate_span
     )
     representation_floor = (
-        spline.sample_rms_residual / field_scale / normalized_cell_pitch
+        evidence_spline.sample_rms_residual / field_scale / normalized_cell_pitch
     )
     seed_roundoff_floor = (
         seed_active_count.astype(values.dtype)
-        * spline.condition_number
+        * evidence_spline.condition_number
         * jnp.finfo(values.dtype).eps
         * seed_derivative_basis_norm
         * coordinate_span
@@ -1098,10 +1131,10 @@ def polish_census_stationary_points(
         & (seed_normalized_gradient <= seed_stationarity_tolerance)
     )
     attempted = polish_stationary_points(
-        spline,
+        authority_spline,
         selected[:, :2],
         valid & ~seed_stationary,
-        stationary_steps=1,
+        stationary_steps=8,
     )
     seed_hessian = jnp.stack(
         (
@@ -1148,30 +1181,32 @@ def polish_census_stationary_points(
         "in_domain": jnp.where(seed_stationary, valid, attempted["in_domain"]),
     }
     normalized_gradient = attempted["gradient_norm"] * coordinate_span / field_scale
-    active_count, value_basis_norm, derivative_basis_norm = spline.scaled_basis_receipt(
-        attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
+    active_count, value_basis_norm, derivative_basis_norm = (
+        evidence_spline.scaled_basis_receipt(
+            attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
+        )
     )
     roundoff_floor = (
         active_count.astype(values.dtype)
-        * spline.condition_number
+        * evidence_spline.condition_number
         * jnp.finfo(values.dtype).eps
         * derivative_basis_norm
         * coordinate_span
     )
     stationarity_tolerance = jnp.maximum(roundoff_floor, representation_floor)
     normalized_value_change = jnp.abs(attempted["value"] - selected[:, 2]) / field_scale
-    normalized_sample_rms = spline.sample_rms_residual / field_scale
+    normalized_sample_rms = evidence_spline.sample_rms_residual / field_scale
     representation_adequate = normalized_sample_rms <= normalized_value_change
     value_consistency_tolerance = jnp.maximum(
-        spline.sample_rms_residual / field_scale,
+        evidence_spline.sample_rms_residual / field_scale,
         active_count.astype(values.dtype)
-        * spline.condition_number
+        * evidence_spline.condition_number
         * jnp.finfo(values.dtype).eps
         * value_basis_norm,
     )
     expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)
     converged = (
-        spline.solve_converged
+        evidence_spline.solve_converged
         & valid
         & attempted["in_domain"]
         & jnp.isfinite(attempted["value"])
@@ -1179,9 +1214,8 @@ def polish_census_stationary_points(
         & jnp.all(jnp.isfinite(attempted["hessian"]), axis=(-2, -1))
         & (attempted["hessian_type"] == expected_hessian_type)
         & (normalized_gradient <= stationarity_tolerance)
-        & (normalized_value_change <= value_consistency_tolerance)
     )
-    census_value = _census_local_values(
+    local_value_evidence = _census_local_values(
         values,
         radial,
         vertical,
@@ -1189,17 +1223,20 @@ def polish_census_stationary_points(
         selected[:, :2],
         attempted["position_rz"],
     )
-    position_unchanged = jnp.all(attempted["position_rz"] == selected[:, :2], axis=-1)
-    census_value = jnp.where(position_unchanged, selected[:, 2], census_value)
     polished = selected.at[:, :2].set(attempted["position_rz"])
-    polished = polished.at[:, 2].set(census_value)
+    polished = polished.at[:, 2].set(attempted["value"])
     retained = jnp.where(converged[:, None], polished, selected)
+    evidence_evaluation = evidence_spline.evaluate(
+        attempted["position_rz"][:, 0], attempted["position_rz"][:, 1]
+    )
     receipt = attempted | {
         "converged": converged,
-        "fit_attempted": jnp.broadcast_to(spline.fit_executed, valid.shape),
-        "fit_converged": jnp.broadcast_to(spline.solve_converged, valid.shape),
-        "fit_iterations": jnp.broadcast_to(spline.solve_iterations, valid.shape),
-        "fit_residual": jnp.broadcast_to(spline.solve_residual, valid.shape),
+        "fit_attempted": jnp.broadcast_to(evidence_spline.fit_executed, valid.shape),
+        "fit_converged": jnp.broadcast_to(evidence_spline.solve_converged, valid.shape),
+        "fit_iterations": jnp.broadcast_to(
+            evidence_spline.solve_iterations, valid.shape
+        ),
+        "fit_residual": jnp.broadcast_to(evidence_spline.solve_residual, valid.shape),
         "interface_value": jnp.broadcast_to(interface_value, valid.shape),
         "stationarity_tolerance": jnp.broadcast_to(stationarity_tolerance, valid.shape),
         "roundoff_floor": roundoff_floor,
@@ -1208,14 +1245,21 @@ def polish_census_stationary_points(
         "derivative_basis_norm": derivative_basis_norm,
         "value_basis_norm": value_basis_norm,
         "sample_rms_residual": jnp.broadcast_to(
-            spline.sample_rms_residual, valid.shape
+            evidence_spline.sample_rms_residual, valid.shape
         ),
         "seed_normalized_gradient": seed_normalized_gradient,
         "normalized_gradient": normalized_gradient,
         "normalized_value_change": normalized_value_change,
         "value_consistency_tolerance": value_consistency_tolerance,
+        "local_value_consistent": (
+            normalized_value_change <= value_consistency_tolerance
+        ),
         "seed_stationary": seed_stationary,
-        "fit_value": attempted["value"],
+        "fit_value": evidence_evaluation.value,
+        "local_value_evidence": local_value_evidence,
+        "spline_value": attempted["value"],
+        "spline_authored": converged,
+        "complete_map": jnp.broadcast_to(complete_map, valid.shape),
         "representation_adequate": representation_adequate,
         "value_replaced": jnp.zeros(valid.shape, dtype=bool),
         "census_position_rz": selected[:, :2],
@@ -1234,6 +1278,7 @@ def traced_spline_contour(
     level: jnp.ndarray,
     bisection_steps: int = 40,
     saddle_steps: int = 8,
+    surface: TensorBSpline | None = None,
 ) -> dict[str, jnp.ndarray]:
     """Extract fixed-capacity cubic contour arcs from a global tensor spline.
 
@@ -1258,7 +1303,7 @@ def traced_spline_contour(
     radial = jnp.asarray(radial, dtype=values.dtype)
     vertical = jnp.asarray(vertical, dtype=values.dtype)
     level = jnp.asarray(level, dtype=values.dtype)
-    spline = fit_tensor_spline(radial, vertical, values)
+    spline = fit_tensor_spline(radial, vertical, values) if surface is None else surface
 
     corners = jnp.stack(
         (

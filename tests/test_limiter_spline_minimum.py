@@ -287,7 +287,13 @@ def test_diverted_mast_row_polishes_only_its_census_wall_candidate():
     classification_x = classification_x.at[0].set(
         jnp.r_[saddle, surface(saddle[0], saddle[1]), 0.0]
     )
-    classification_wall = jnp.r_[wall_point, surface(wall_point[0], wall_point[1])]
+    spline_wall_flux = surface(wall_point[0], wall_point[1])
+    census_wall_scale = jnp.maximum(
+        jnp.abs(spline_wall_flux), jnp.ptp(jnp.asarray(field))
+    )
+    classification_wall = jnp.r_[
+        wall_point, spline_wall_flux + 1.0e-2 * census_wall_scale
+    ]
     result = cb._read_ingredients(
         jnp.asarray(field),
         jnp.asarray(radial),

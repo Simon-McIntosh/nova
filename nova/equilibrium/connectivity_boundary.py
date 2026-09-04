@@ -206,6 +206,7 @@ _WALL_REACHABILITY_SAMPLES = 420
 # 2.1e-5 m even on the widest supported piece while retaining fixed shapes.
 _WALL_DERIVATIVE_BINS = 4
 _WALL_MINIMUM_BISECTION_STEPS = 12
+_SUPPLIED_WALL_SPLINE_RELATIVE_TOLERANCE = 5.0e-2
 
 # Coarse-grid offsets probed around the preceding binding level.  The asymmetric
 # upper reach covers both sides of the two-sided flood mean while retaining the
@@ -764,7 +765,6 @@ def _select_reachable_wall_limiter(
                 wall_z,
             )[0]
         )
-        support_valid &= selected_reachable
         projection = jnp.sum(
             (safe_selected[None, :] - all_start) * all_tangent, axis=-1
         ) / jnp.where(all_length_squared > 0.0, all_length_squared, 1.0)
@@ -774,6 +774,10 @@ def _select_reachable_wall_limiter(
         selected_segment = _argmin_exact(
             jnp.where(all_length_squared > 0.0, distance_squared, jnp.inf)
         )
+        selected_node = _argmin_exact(
+            (wall_r - safe_selected[0]) ** 2 + (wall_z - safe_selected[1]) ** 2
+        )
+        support_valid &= selected_reachable & node_reachable[selected_node]
         segment_index = selected_segment[None]
     start = all_start[segment_index]
     end = all_end[segment_index]
@@ -1318,11 +1322,9 @@ def _read_ingredients(
             supplied_wall_scale = jnp.maximum(
                 jnp.abs(supplied_wall_surface_flux), jnp.abs(span_safe)
             )
-            supplied_wall_matches_surface = jnp.isclose(
-                supplied_wall[2],
-                supplied_wall_surface_flux,
-                rtol=1.0e-10,
-                atol=1.0e-12 * supplied_wall_scale,
+            supplied_wall_matches_surface = (
+                jnp.abs(supplied_wall[2] - supplied_wall_surface_flux)
+                <= _SUPPLIED_WALL_SPLINE_RELATIVE_TOLERANCE * supplied_wall_scale
             )
             class_wall = jax.lax.cond(
                 supplied_wall_matches_surface,

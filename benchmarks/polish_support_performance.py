@@ -87,7 +87,7 @@ def _json_safe(value: Any) -> Any:
 def materialize(repository: Path, output: Path, revision: str) -> None:
     """Export one revision as a branchless source tree below the worktree."""
     if output.exists():
-        shutil.rmtree(output)
+        raise FileExistsError(f"refusing to replace existing source export: {output}")
     output.mkdir(parents=True)
     archive = subprocess.run(
         ["git", "-C", str(repository), "archive", "--format=tar", revision],
@@ -116,7 +116,13 @@ def remove_materialized_source(output: Path, revision: str) -> None:
         raise ValueError(
             "refusing to remove a path outside the benchmark artifact root"
         )
-    if marker.read_text(encoding="utf-8").strip() != revision:
+    resolved_revision = subprocess.run(
+        ["git", "rev-parse", revision],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if marker.read_text(encoding="utf-8").strip() != resolved_revision:
         raise ValueError("refusing to remove a source export with another revision")
     shutil.rmtree(resolved)
 

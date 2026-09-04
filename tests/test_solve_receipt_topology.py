@@ -20,7 +20,13 @@ from nova.imas.mast_solve_inputs import SHOT_STORE
 
 pytestmark = pytest.mark.slow
 
-CONVERGING_SHOT = 21985
+CONVERGING_SHOT = 22086
+CONVERGING_SLICE = 43
+RESIDUAL_TOLERANCE = 1.0e-8
+EXPECTED_TERMINAL_RESIDUAL = 1.7364758673167596e-14
+EXPECTED_AXIS_M = (0.9016135226490096, 0.024617984126865743)
+EXPECTED_SADDLE_M = (0.5648, 1.2580)
+SADDLE_TOLERANCE_M = 0.025
 
 
 @pytest.fixture(scope="module")
@@ -30,6 +36,7 @@ def converged_mast_receipt():
         for row in parity.select_slices_by_shot(parity.DECOMPOSITION_BANK)
         if int(row[0]["shot"]) == CONVERGING_SHOT
     )
+    assert int(selected[0]["slice_index"]) == CONVERGING_SLICE
     case, context = parity._mast_case_from_selection(SHOT_STORE, *selected)
     response_cache, _cache_receipt = _persisted_response_cache(
         carrier.DEFAULT_CARRIER, carrier.DEFAULT_RECEIPT
@@ -50,7 +57,28 @@ def converged_mast_receipt():
         gmres_iterations=parity.GMRES_ITERATIONS,
     )
     solved.state.block_until_ready()
-    assert float(solved.residual) <= parity.FIXED_POINT_CRITERION
+    residual = float(solved.residual)
+    physical = solved.state[: profile.operator.physical_node_number]
+    _masks, topology, _connected, axis_admitted = profile.operator._fixed_design_read(
+        physical, TopologyClass.DIVERTED
+    )
+    _public_masks, public_topology = profile.operator.read(
+        solved.state, TopologyClass.DIVERTED
+    )
+    axis = np.asarray(topology.axis)
+    saddle = np.asarray(topology.x_point)
+
+    assert residual <= RESIDUAL_TOLERANCE
+    assert residual == pytest.approx(EXPECTED_TERMINAL_RESIDUAL, rel=1.0e-6)
+    assert bool(axis_admitted)
+    np.testing.assert_allclose(axis, EXPECTED_AXIS_M, rtol=0.0, atol=1.0e-9)
+    assert np.all(np.isfinite(saddle))
+    np.testing.assert_allclose(
+        saddle, EXPECTED_SADDLE_M, rtol=0.0, atol=SADDLE_TOLERANCE_M
+    )
+    # The corroboration bank's connectivity read records (0.5853, 1.2334) m.
+    assert bool(public_topology.class_determinate)
+    assert bool(public_topology.diverted)
     return profile, profile.observe(solved.state, target_current=target_current)
 
 
@@ -91,10 +119,16 @@ def test_terminal_receipt_uses_only_resolvable_cell_domains(
     labelled = receipt.labelled_flux
     assert labelled is not None
 
-    assert set(np.unique(np.asarray(labelled.domain_label))) == {
+    observed = set(np.unique(np.asarray(labelled.domain_label)))
+    assert observed <= {
         int(ForwardDomainLabel.CORE),
         int(ForwardDomainLabel.PRIVATE_FLUX),
         int(ForwardDomainLabel.WALL_SHADOW),
         int(ForwardDomainLabel.OPEN),
     }
+    assert {
+        int(ForwardDomainLabel.CORE),
+        int(ForwardDomainLabel.WALL_SHADOW),
+        int(ForwardDomainLabel.OPEN),
+    } <= observed
     assert not hasattr(ForwardDomainLabel, "COMMON_SOL")

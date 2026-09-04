@@ -85,7 +85,7 @@ from nova.equilibrium.stencil_nulls import (
 from nova.equilibrium.labels import LCFS_ANGLES, N_XPOINT_SLOTS
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import Precision, resolve_precision
-from nova.linalg.tensor_spline import fit_tensor_spline
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 
 def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
@@ -1005,6 +1005,7 @@ def _read_ingredients(
     use_doubling,
     classification_x=None,
     classification_wall=None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -1028,7 +1029,7 @@ def _read_ingredients(
     nr = rg.shape[0]
     n_iter = nr + nz  # flood-fill saturation count (≥ the region grid diameter)
 
-    global_surface = fit_tensor_spline(rg, zg, psi2d)
+    global_surface = fit_tensor_spline(rg, zg, psi2d) if surface is None else surface
     psi_axis = global_surface(axis_r, axis_z)
     edge = jnp.concatenate([psi2d[0, :], psi2d[-1, :], psi2d[:, 0], psi2d[:, -1]])
     psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]
@@ -1432,6 +1433,7 @@ def traced_boundary_read(
     use_doubling: bool = True,
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -1476,6 +1478,7 @@ def traced_boundary_read(
         use_doubling,
         classification_x,
         classification_wall,
+        surface,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -1800,6 +1803,7 @@ def traced_smooth_boundary_read(
     use_doubling: bool = True,
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -1853,6 +1857,7 @@ def traced_smooth_boundary_read(
         use_doubling,
         classification_x,
         classification_wall,
+        surface,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -2076,6 +2081,7 @@ def _smooth_read_at_stencil_axis(
         wall_z,
         wall_psi,
         temperature,
+        surface=spline,
     )
     out = dict(out)
     out["axis_r"] = jnp.where(axis_polished, ax_r, jnp.nan)

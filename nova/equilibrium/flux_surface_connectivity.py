@@ -71,7 +71,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4 as _dilate4
 from nova.linalg.split_spline import fit_split_spline
-from nova.linalg.tensor_spline import fit_tensor_spline
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 
 _SQRT2 = 2.0**0.5
@@ -299,6 +299,7 @@ def hex_edge_admissibility(
     shared_edge_rz: jnp.ndarray,
     stationary_steps: int = 8,
     edge_values: jnp.ndarray | None = None,
+    surface: TensorBSpline | None = None,
 ) -> jnp.ndarray:
     """Return a fixed-shape mask for hex links open at ``level``.
 
@@ -339,7 +340,7 @@ def hex_edge_admissibility(
         open_link = jnp.max(side * (samples - level), axis=-1) > strict_tolerance
         return open_link.at[:, 0].set(True)
 
-    spline = fit_tensor_spline(radial, vertical, values)
+    spline = fit_tensor_spline(radial, vertical, values) if surface is None else surface
 
     edge_start = shared_edge_rz[..., 0, :]
     edge_end = shared_edge_rz[..., 1, :]
@@ -994,6 +995,7 @@ def polish_census_stationary_points(
     selected_saddle: jnp.ndarray,
     sample_valid: jnp.ndarray | None = None,
     execute: jnp.ndarray = True,
+    surface: TensorBSpline | None = None,
 ) -> tuple[jnp.ndarray, jnp.ndarray, dict[str, jnp.ndarray]]:
     """Apply fit-qualified tensor-spline polish to census-selected nulls.
 
@@ -1059,10 +1061,14 @@ def polish_census_stationary_points(
         and vertical.size >= 4
     )
     if tensor_supported:
-        authority_spline = fit_tensor_spline(
-            radial,
-            vertical,
-            jnp.where(sample_valid, values, 0.0),
+        authority_spline = (
+            fit_tensor_spline(
+                radial,
+                vertical,
+                jnp.where(sample_valid, values, 0.0),
+            )
+            if surface is None
+            else surface
         )
         complete_map = jnp.all(sample_valid) & jnp.all(jnp.isfinite(values))
     else:
@@ -1272,6 +1278,7 @@ def traced_spline_contour(
     level: jnp.ndarray,
     bisection_steps: int = 40,
     saddle_steps: int = 8,
+    surface: TensorBSpline | None = None,
 ) -> dict[str, jnp.ndarray]:
     """Extract fixed-capacity cubic contour arcs from a global tensor spline.
 
@@ -1296,7 +1303,7 @@ def traced_spline_contour(
     radial = jnp.asarray(radial, dtype=values.dtype)
     vertical = jnp.asarray(vertical, dtype=values.dtype)
     level = jnp.asarray(level, dtype=values.dtype)
-    spline = fit_tensor_spline(radial, vertical, values)
+    spline = fit_tensor_spline(radial, vertical, values) if surface is None else surface
 
     corners = jnp.stack(
         (

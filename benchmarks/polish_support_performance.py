@@ -31,11 +31,12 @@ from typing import Any
 import numpy as np
 
 
-BASELINE_REVISION = "9a49568c"
-CANDIDATE_REVISION = "795aaf8bf86ec2836fc39ee8180fdf37aa380c77"
+BASELINE_REVISION = "e2aaf78853a70b51b339981e6b6f65c97fa84614"
+CANDIDATE_REVISION = "HEAD"
 REFERENCE_SHOT = 22086
 MEASURED_SOLVE_LAUNCHES = 5
 MEASURED_BATCH_LAUNCHES = 5
+MEASURED_COMPONENT_LAUNCHES = 5
 DEFAULT_OPERANDS = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
     "bank-regeneration-raw-20260902/current-operands.npz"
@@ -44,12 +45,14 @@ DEFAULT_CACHE = Path(
     "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance"
 )
 DEFAULT_OUTPUT = Path(
-    "docs/figures/polish-support-performance/repair/main-vs-repaired.json"
+    "docs/figures/polish-support-performance/shared-spline/main-vs-shared.json"
 )
 DEFAULT_FIGURE = Path(
-    "docs/figures/polish-support-performance/repair/main-vs-repaired.png"
+    "docs/figures/polish-support-performance/shared-spline/main-vs-shared.png"
 )
-FIGURE_IDENTITY = "/nova/figures/polish-support-performance/repair/main-vs-repaired.png"
+FIGURE_IDENTITY = (
+    "/nova/figures/polish-support-performance/shared-spline/main-vs-shared.png"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -109,7 +112,7 @@ def remove_materialized_source(output: Path, revision: str) -> None:
     """Remove only the guarded branchless source export made by this driver."""
     resolved = output.resolve()
     expected_parent = (
-        Path.cwd() / "docs/figures/polish-support-performance/repair"
+        Path.cwd() / "docs/figures/polish-support-performance/shared-spline"
     ).resolve()
     marker = resolved / ".measurement-revision"
     if resolved.name != ".baseline-source" or resolved.parent != expected_parent:
@@ -258,14 +261,16 @@ def _gpu_identity() -> dict[str, Any]:
     }
 
 
-def _solve_measurement() -> dict[str, Any]:
+def _solve_measurement(setup=None) -> dict[str, Any]:
     import jax.numpy as jnp
 
     from benchmarks import efit_forward_parity_slice as parity
     from benchmarks.receipt_raster_check import _profile_and_seed
     from nova.equilibrium.topology import TopologyClass
 
-    case, profile, target_current, carrier_receipt, policy = _profile_and_seed()
+    if setup is None:
+        setup = _profile_and_seed()
+    case, profile, target_current, carrier_receipt, policy = setup
     if int(case["reference"]["shot"]) != REFERENCE_SHOT:
         raise RuntimeError("the frozen-six solve arm changed identity")
     seed = jnp.asarray(case["state"])
@@ -337,6 +342,135 @@ def _solve_measurement() -> dict[str, Any]:
                 float(class_read["limiter_z"]),
             ],
             "saddle_rz": np.asarray(topology.x_point, dtype=np.float64).tolist(),
+        },
+    }
+
+
+def _component_measurement(setup) -> dict[str, Any]:
+    """Profile one production Newton trip and its topology components."""
+    import inspect
+
+    import jax.numpy as jnp
+
+    from benchmarks import efit_forward_parity_slice as parity
+    from nova.equilibrium.flux_surface_connectivity import (
+        fit_tensor_spline,
+        polish_census_stationary_points,
+    )
+    from nova.equilibrium.topology import TopologyClass
+
+    case, profile, target_current, _carrier_receipt, _policy = setup
+    seed = jnp.asarray(case["state"])
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    operator = profile.operator
+    physical_number = operator.physical_node_number
+    connectivity_radius, connectivity_height, connectivity_shape = (
+        operator.connectivity_grid_axes()
+    )
+
+    def tensor_fit(state):
+        physical = state[:physical_number]
+        grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+        radial_count, vertical_count = connectivity_shape
+        field = grid_flux.reshape((radial_count, vertical_count)).T
+        return fit_tensor_spline(
+            connectivity_radius, connectivity_height, field
+        ).coefficients
+
+    def topology_qualification(state):
+        physical = state[:physical_number]
+        return operator._fixed_design_topology.read_qualification(
+            physical,
+            operator.polarity,
+            operator.inside_material,
+            requested,
+        )
+
+    def fixed_design_read(state):
+        return operator._fixed_design_read(state[:physical_number], requested)
+
+    def support_partition(state):
+        return operator._support_partition(state, requested)
+
+    def shadow_read(state):
+        return operator.residual_shadow_components(state, requested)
+
+    residual_map = profile.flux_map(
+        requested_class=requested,
+        target_current=target_current,
+    )
+
+    def one_newton_trip(state):
+        return profile.solve_branch(
+            state,
+            requested,
+            target_current=target_current,
+            route="newton_krylov",
+            tolerance=parity.FIXED_POINT_CRITERION,
+            warmup=0,
+            newton_steps=1,
+            gmres_iterations=parity.GMRES_ITERATIONS,
+            relaxation=parity.RELAXATION,
+            step_cap=parity.STEP_CAP,
+        )
+
+    def measure(function: Callable) -> dict[str, Any]:
+        executable, compile_calls, compile_wall = _compile_counted(function, seed)
+        _first, first_wall = _timed(executable, seed)
+        warm_walls = []
+        for _ in range(MEASURED_COMPONENT_LAUNCHES):
+            _result, wall = _timed(executable, seed)
+            warm_walls.append(wall)
+        return {
+            "compile_count": compile_calls,
+            "compile_wall_s": compile_wall,
+            "first_call_wall_s": first_wall,
+            "warm_wall_s": warm_walls,
+            "median_warm_wall_s": float(statistics.median(warm_walls)),
+            "warm_spread": _spread(warm_walls),
+        }
+
+    grid_flux, _wall_flux = operator.topology.split_flux_map(seed[:physical_number])
+    candidate_capacity = int(
+        operator._fixed_design_topology.grid(grid_flux)[0].shape[0]
+    )
+    accepts_shared_surface = (
+        "surface" in inspect.signature(polish_census_stationary_points).parameters
+    )
+    fits_per_topology_read = 1 if accepts_shared_surface else 2 * candidate_capacity + 3
+    topology_reads_per_fixed_design_read = 2
+    fixed_design_reads_per_residual_evaluation = 2
+    fits_per_residual_evaluation = (
+        fits_per_topology_read
+        * topology_reads_per_fixed_design_read
+        * fixed_design_reads_per_residual_evaluation
+    )
+    return {
+        "reference": case["reference"],
+        "fit_census": {
+            "candidate_capacity": candidate_capacity,
+            "fits_per_candidate_component": 2,
+            "fits_after_candidate_census": 3,
+            "fits_per_topology_read": fits_per_topology_read,
+            "topology_reads_per_fixed_design_read": (
+                topology_reads_per_fixed_design_read
+            ),
+            "fixed_design_reads_per_residual_evaluation": (
+                fixed_design_reads_per_residual_evaluation
+            ),
+            "tensor_spline_fits_per_residual_evaluation": (
+                fits_per_residual_evaluation
+            ),
+            "shared_surface_api": accepts_shared_surface,
+        },
+        "components": {
+            "tensor_spline_fit": measure(tensor_fit),
+            "topology_qualification": measure(topology_qualification),
+            "fixed_design_read": measure(fixed_design_read),
+            "support_partition_with_clips": measure(support_partition),
+            "residual_shadow_read": measure(shadow_read),
+            "residual_evaluation": measure(residual_map),
+            "one_newton_trip": measure(one_newton_trip),
         },
     }
 
@@ -485,6 +619,7 @@ def _topology_measurement(operand_path: Path) -> dict[str, Any]:
             jnp.asarray(1.0, dtype=field.dtype),
             selected_axis,
             selected_saddle,
+            surface=surface,
         )
         wall_flux = surface(wall[:, 0], wall[:, 1])
         read = traced_boundary_read(
@@ -502,6 +637,7 @@ def _topology_measurement(operand_path: Path) -> dict[str, Any]:
             wall[:, 0],
             wall[:, 1],
             wall_flux,
+            surface=surface,
         )
         return {
             "axis_rz": admitted_axis[:2],
@@ -594,6 +730,7 @@ def capture(
     import jaxlib
 
     from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+    from benchmarks.receipt_raster_check import _profile_and_seed
 
     configure_dtypes()
     _events, snapshot = _cache_watch()
@@ -601,8 +738,12 @@ def capture(
     cache_configuration = configure_persistent_compilation_cache(
         cache, minimum_compile_seconds=0.0
     )
+    setup = _profile_and_seed()
+    before_components = snapshot()
+    components = _component_measurement(setup)
+    after_components = snapshot()
     before_solve = snapshot()
-    solve = _solve_measurement()
+    solve = _solve_measurement(setup)
     after_solve = snapshot()
     topology = _topology_measurement(operands)
     after_topology = snapshot()
@@ -625,10 +766,12 @@ def capture(
         },
         "persistent_compilation_cache": cache_configuration.receipt(),
         "cache_events": {
+            "component_profile": _cache_delta(before_components, after_components),
             "solve": _cache_delta(before_solve, after_solve),
             "topology": _cache_delta(after_solve, after_topology),
             "total": after_topology,
         },
+        "per_trip_profile": components,
         "solve": solve,
         "topology_read": topology,
     }
@@ -679,6 +822,20 @@ def _measure_verdicts(
     )
     candidate_class = cand_solve.get(
         "achieved_class_name", class_names[int(cand_solve["achieved_class"])]
+    )
+    base_profile = baseline["per_trip_profile"]
+    candidate_profile = candidate["per_trip_profile"]
+    base_residual = base_profile["components"]["residual_evaluation"]
+    candidate_residual = candidate_profile["components"]["residual_evaluation"]
+    residual_spread = max(
+        base_residual["warm_spread"]["range_s"],
+        candidate_residual["warm_spread"]["range_s"],
+    )
+    base_trip = base_profile["components"]["one_newton_trip"]
+    candidate_trip = candidate_profile["components"]["one_newton_trip"]
+    trip_spread = max(
+        base_trip["warm_spread"]["range_s"],
+        candidate_trip["warm_spread"]["range_s"],
     )
     return {
         "solve_compile_count": {
@@ -754,6 +911,32 @@ def _measure_verdicts(
             == cand_topology["vmap"]["compile_count"]
             == 1,
         },
+        "tensor_spline_fits_per_residual_evaluation": {
+            "baseline": base_profile["fit_census"][
+                "tensor_spline_fits_per_residual_evaluation"
+            ],
+            "candidate": candidate_profile["fit_census"][
+                "tensor_spline_fits_per_residual_evaluation"
+            ],
+            "candidate_fits_per_topology_read": candidate_profile["fit_census"][
+                "fits_per_topology_read"
+            ],
+            "required_fits_per_topology_read": 1,
+            "inside_launch_spread": candidate_profile["fit_census"][
+                "fits_per_topology_read"
+            ]
+            == 1,
+        },
+        "residual_evaluation_wall": _wall_verdict(
+            base_residual["median_warm_wall_s"],
+            candidate_residual["median_warm_wall_s"],
+            residual_spread,
+        ),
+        "one_newton_trip_wall": _wall_verdict(
+            base_trip["median_warm_wall_s"],
+            candidate_trip["median_warm_wall_s"],
+            trip_spread,
+        ),
     }
 
 
@@ -762,12 +945,12 @@ def _figure(receipt: dict[str, Any], output: Path) -> None:
 
     baseline = receipt["measurements"]["main"]
     candidate = receipt["measurements"]["candidate"]
-    figure, axes = plt.subplots(1, 2, figsize=(9.5, 4.0), constrained_layout=True)
+    figure, axes = plt.subplots(1, 3, figsize=(13.5, 4.0), constrained_layout=True)
     solve = [
         baseline["solve"]["warm_launch_wall_s"],
         candidate["solve"]["warm_launch_wall_s"],
     ]
-    axes[0].boxplot(solve, tick_labels=["main", "candidate"], showmeans=True)
+    axes[0].boxplot(solve, tick_labels=["main", "shared"], showmeans=True)
     axes[0].set_ylabel("warm solve wall [s]")
     axes[0].set_title("Frozen-six production solve")
 
@@ -783,11 +966,28 @@ def _figure(receipt: dict[str, Any], output: Path) -> None:
         candidate["topology_read"]["vmap"]["median_warm_wall_s_per_map"],
     ]
     axes[1].bar(x - width / 2, base_values, width, label="main")
-    axes[1].bar(x + width / 2, candidate_values, width, label="candidate")
+    axes[1].bar(x + width / 2, candidate_values, width, label="shared")
     axes[1].set_xticks(x, labels)
     axes[1].set_ylabel("topology wall per map [s]")
     axes[1].set_title("Eleven-map topology read")
     axes[1].legend()
+    profile_labels = ["residual", "one trip"]
+    base_profile = baseline["per_trip_profile"]["components"]
+    candidate_profile = candidate["per_trip_profile"]["components"]
+    base_profile_values = [
+        base_profile["residual_evaluation"]["median_warm_wall_s"],
+        base_profile["one_newton_trip"]["median_warm_wall_s"],
+    ]
+    candidate_profile_values = [
+        candidate_profile["residual_evaluation"]["median_warm_wall_s"],
+        candidate_profile["one_newton_trip"]["median_warm_wall_s"],
+    ]
+    axes[2].bar(x - width / 2, base_profile_values, width, label="main")
+    axes[2].bar(x + width / 2, candidate_profile_values, width, label="shared")
+    axes[2].set_xticks(x, profile_labels)
+    axes[2].set_ylabel("warm wall [s]")
+    axes[2].set_title("One-trip component profile")
+    axes[2].legend()
     gate = receipt["gate"]
     scheduler = receipt["scheduler"]
     figure.suptitle(
@@ -883,6 +1083,9 @@ def combine(
             "both_solve_arms_diverted": verdicts["solve_achieved_class"][
                 "both_diverted"
             ],
+            "one_tensor_spline_fit_per_topology_read": verdicts[
+                "tensor_spline_fits_per_residual_evaluation"
+            ]["inside_launch_spread"],
             "passes": bool(
                 verdicts["solve_median_warm_wall"]["inside_launch_spread"]
                 and verdicts["topology_batch_compile_count"]["inside_launch_spread"]
@@ -890,6 +1093,9 @@ def combine(
                 and baseline["solve"]["converged"]
                 and candidate["solve"]["converged"]
                 and verdicts["solve_achieved_class"]["both_diverted"]
+                and verdicts["tensor_spline_fits_per_residual_evaluation"][
+                    "inside_launch_spread"
+                ]
             ),
         },
         "figure": FIGURE_IDENTITY,

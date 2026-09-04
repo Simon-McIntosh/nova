@@ -313,6 +313,28 @@
     raise were exact roots of false topologies.</p>
   </section>
 
+  <section id="x-census-consistency">
+    <h2>Scout, 2026-09-04: the saddle-table overflow is duplicates and border-ring fits, not saddles</h2>
+    <p>Report <code>~/.config/reckon/crew/reports/nova/x-census/x-census-consistency.md</code>, twelve terminal maps replayed on
+    CPU from the cached operands with the production counts reproduced exactly. The production census fits a quadratic on every
+    stencil, admits any fit whose stationary point lies inside the stencil's support, and keeps the first thirty in stencil order
+    with no ranking or deduplication; a second detector with clustering runs on the same map inside the connectivity read.</p>
+    <table>
+      <caption>Twelve maps, saddle and extremum candidates</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Saddles</th><th scope="col">Extrema</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Production fits</th><td>386 (25 to 41 per map)</td><td>248 (18 to 25 per map)</td></tr>
+        <tr><th scope="row">One-pitch clusters</th><td>8 to 9 per map; 5 to 7 spline-confirmed, 1 to 3 unsupported, all 23 unsupported on the first complete ring beside the dropped border</td><td>116; 107 confirmed, 9 unsupported vacuum fits</td></tr>
+        <tr><th scope="row">Spline-orbit sign-count prototype</th><td>77 origins admitted, 77 negative-Hessian roots, 75 distinct (5 to 7 per map)</td><td>109 origins, 107 positive-Hessian roots; exactly one core extremum per row, 10 to 34 mm from EFIT's axis, the rest at in-grid coil conductors</td></tr>
+        <tr><th scope="row">Boundary cells</th><td colspan="2">incomplete rings dropped (961 of 1089 origins); the spurious ring is the first complete ring at index 1 or 31</td></tr>
+        <tr><th scope="row">Truncation and the chosen primary X</th><td colspan="2">in all six overflowing rows the root nearest EFIT and the root nearest the selected saddle survive inside the first thirty slots, so the incomplete census and the two-detector split, not the cut itself, are the defect</td></tr>
+      </tbody>
+    </table>
+    <p>Design adopted under the lead's decisions: one tensor spline per map, the Kuijper sign count on spline-sampled ring orbits
+    admitting one cell per null, polish on the same spline confined to the cell width of the seed, Hessian classification,
+    deduplication by root uncertainty, fixed shapes with pre-capacity counts and multiplicity published.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

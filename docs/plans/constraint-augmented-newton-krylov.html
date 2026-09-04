@@ -4,24 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="constraint-augmented-newton-krylov">
-  <meta name="plan-title"     content="Constraint-augmented Newton–Krylov — diagnostic placement authority wired into the forward solve">
-  <meta name="plan-summary"   content="Wireable constraint-plus-compensating-unknown pairs in the forward Newton–Krylov solve: magnetics centroid, Thomson edge crossings, Shafranov shift.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="constraint-augmented-newton-krylov">
+  <meta name="plan-title" content="Constraint-augmented Newton–Krylov — diagnostic placement authority wired into the forward solve">
+  <meta name="plan-summary" content="Wireable constraint-plus-compensating-unknown pairs in the forward Newton–Krylov solve: magnetics centroid, Thomson edge crossings, Shafranov shift.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="18.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S19">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,convergence,mast">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,convergence,mast">
   <meta name="plan-depends-on" content="solver-convergence-regression">
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -82,8 +84,15 @@ locates the separatrix's crossing of that chord, on one or both sides of the pla
 circuit current or a profile amplitude as the compensating unknown. Two channels on one chord fix the plasma's width and
 position along that chord; chords at different heights fix the elongation and the vertical position; the constraints have
 remarkable placement authority because they read the plasma edge directly rather than inferring it from external field
-moments. On MAST the bank carries EFIT's LCFS per row, from which synthetic Thomson crossings along the real chord geometry are
-built for the prototype, so the constraint is measured against a known answer before any measured profile is used.</p>
+moments. <strong>The development target is the DIII-D competition dataset</strong> (lead direction 2026-09-04): the
+competition provides Thomson scattering channels as one of its signals, so the constraint is developed on those channels, on
+the competition's own chord geometry, with the goal of placing the competition equilibria from the signals the competition
+supplies. imas-ambix owns the corpus reading and the challenge conventions, so the Thomson channel signals, their chord
+geometry and their units cross the boundary as typed crossing points in COCOS 17 and Nova consumes them; the first node is a
+scout that inventories what the competition dataset carries for Thomson (channels, chord geometry, quantities, time base,
+edge definition) through the ambix reader. MAST's bank, which carries EFIT's LCFS per row, supplies synthetic crossings along
+MAST's chord geometry as the calibration against a known answer before any measured profile is used, and stays the secondary
+target.</p>
 <p><strong>Shafranov shift, β<sub>p</sub> + l<sub>i</sub>/2 (the one the lead asked for with a smile).</strong> The Shafranov
 integral of the external magnetics fixes the combination of poloidal beta and internal inductance, which is a constraint on the
 scale and shape of the pressure and current profiles rather than on position. Its compensating unknown is a profile amplitude,
@@ -97,11 +106,16 @@ registers two synthetic constraints (a linear functional with a circuit-current 
 multiplier) and proves the augmented system converges quadratically on a fixture, that the receipt rows are populated, and
 that registering the pairs changes the compiled program's shape once. <strong>B. The vertical pair through the interface.</strong>
 The held prototype's centroid constraint is re-expressed as a registered pair with no behaviour change on its measured rows,
-and the elimination outer solve of <code>f-scr-003</code> runs through the same interface. <strong>C. The Thomson prototype.</strong>
-Synthetic edge crossings along MAST's Thomson chord geometry from EFIT's LCFS on the twelve bank rows; constrained solves
-imposed with two, four and eight crossings; per row the placement error of the axis, the saddle and the boundary against EFIT
-with and without the constraints, the compensating currents, the residual and convergence on the production route; the
-statement of how many crossings place the plasma to within a cell. <strong>D. The Shafranov pair.</strong> The
+and the elimination outer solve of <code>f-scr-003</code> runs through the same interface. <strong>C. The Thomson constraint on the DIII-D competition dataset.</strong>
+C0, a read-only scout through the imas-ambix reader of what the competition dataset carries for Thomson scattering (channel
+positions and chord geometry, the quantities per channel, time base, how the edge is marked or must be derived, units and
+convention) with the typed crossing-point contract Nova consumes in COCOS 17. C1, edge crossings on the five DIII-D gate frames
+from the competition's Thomson channels, constrained solves imposed with the available crossings on the production route, per
+frame the placement error of the axis, the saddle and the boundary against the competition label with and without the
+constraints, the compensating currents, the residual and convergence, and the statement of how many crossings place the
+plasma to within a cell, so the competition equilibria are placed from the signals the competition supplies. C2, the MAST
+calibration: synthetic crossings along MAST's Thomson chord geometry from EFIT's LCFS on the twelve bank rows, imposed with
+two, four and eight crossings, the same measures, as the check against a known answer. <strong>D. The Shafranov pair.</strong> The
 β<sub>p</sub> + l<sub>i</sub>/2 constraint with a profile amplitude as its unknown, measured on the same rows against the values
 the bank's extracted profiles imply. <strong>E. The magnetics centroid pair</strong> on the DIII-D gate frames where the
 reconstruction publishes the centroid, reported as compensating currents beside the tare study's residual decomposition.
@@ -109,31 +123,40 @@ Every deliverable ships its receipt under <code>docs/figures/constraint-augmente
 evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylov-landed.html</code>.</p>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
-  <h2><span class="sec">§</span> Decisions</h2>
-  <div class="r-dec" data-key="compensating-unknown-class" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">For a position constraint, is the compensating unknown a physical circuit current (the radial-field or vertical-field combination), a multiplier on the constraint's flux image, or either per constraint?</p>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="compensating-unknown-class" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">For a position constraint, is the compensating unknown a physical circuit current (the radial-field or vertical-field combination), a multiplier on the constraint&#x27;s flux image, or either per constraint?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="circuit-current">physical circuit current, so the output is the current the machine would have driven</button>
       <button class="r-opt" data-value="multiplier">a multiplier, so no actuator is assumed</button>
       <button class="r-opt" data-value="per-constraint">registered per constraint, both forms supported by the interface</button>
-    </p>
+      </p>
     <p class="r-dec-rat"></p>
-  </div>
-  <div class="r-dec" data-key="thomson-crossing-source" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">Which edge definition supplies the Thomson crossing used as the constraint target: the channel where density falls to a stated fraction of its core value, the steepest gradient, or the reconstruction's own separatrix marker on the chord?</p>
+    </div>
+<div class="r-dec" data-key="thomson-crossing-source" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which edge definition supplies the Thomson crossing used as the constraint target: the channel where density falls to a stated fraction of its core value, the steepest gradient, or the reconstruction&#x27;s own separatrix marker on the chord?</p>
     <p class="r-dec-rat"></p>
-  </div>
+    </div>
+<div class="r-dec" data-key="thomson-target-dataset" data-choice="diiid-competition-primary-mast-calibration" data-by="Simon McIntosh" data-when="2026-09-04T13:53:01+00:00">
+    <p class="r-dec-q">thomson-target-dataset</p>
+    <p class="r-dec-rat">Lead 2026-09-04 16:05: the DIII-D competition dataset provides Thomson scattering channels as one of its signals, so the Thomson edge-crossing constraint is developed focused on that goal, placing the competition equilibria from the signals the competition supplies; the MAST bank with EFIT&#x27;s LCFS supplies the synthetic calibration against a known answer and stays secondary. Corpus reading and conventions cross the imas-ambix boundary as typed crossing points in COCOS 17.</p>
+    </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
-  <h2><span class="sec">§</span> Followups</h2>
-  <article class="r-fu" data-id="f-cank-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19-relaunch" data-written-at="2026-09-04">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cank-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19-relaunch" data-written-at="2026-09-04" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Wire the interface, route the vertical pair through it, then prototype the Thomson crossings</h4>
     <div class="r-fu-body">Order: §4 A once the vertical-position constraint prototype and the step-cap repair on solver-convergence-regression release <code>fixed_point.py</code> and <code>forward.py</code>; §4 B in the same node as the elimination followup <code>f-scr-003</code> where possible; §4 C on the H200 with synthetic crossings from the bank's EFIT LCFS and MAST's Thomson chord geometry; §4 D and E after. Every node is held for the lead until its receipt is read; the solver shape is the lead's decision.</div>
     <pre class="r-fu-prompt">/reckon-ship constraint-augmented-newton-krylov</pre>
-  </article>
+    </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260904T160500000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T16:05:00+02:00">
+    <div class="r-comment-body">LEAD 2026-09-04 16:05: include the DIII-D competition dataset for the Thomson edge crossings; the competition provides Thomson channels as one of its signals and the development is focused on that goal. Recorded as decision thomson-target-dataset and folded into section 3 and deliverable C: C0 is a read-only scout through the ambix reader of the competition's Thomson signals (channels, chord geometry, quantities, time base, edge marking, units), C1 places the five DIII-D gate frames from the competition's own channels with the compensating currents, residual, convergence and placement error against the label reported, and C2 keeps the MAST synthetic crossings as the calibration against a known answer. The scout C0 is dispatchable now (read-only, no solver file), ahead of the interface node that waits on the solver files.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

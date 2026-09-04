@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T14:35:12",
+  "updated": "2026-09-04T14:51:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1612,6 +1612,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "mcs-profile-x4",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "mcs-quantum-remeasure",
         "harness": "codex",
         "role": "implement",
@@ -2402,6 +2411,15 @@
       },
       {
         "id": "scr-stepcap-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-vconstraint-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -91635,6 +91653,162 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T123306247283-fsa-solve-budget-drift-inventory",
+        "plan": "forward-solve-api",
+        "section": "\u00a71",
+        "node": "fsa-solve-budget-drift-inventory",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1171,
+                "cached_input_tokens": 808836,
+                "input_tokens": 810108,
+                "output_tokens": 1759,
+                "reasoning_output_tokens": 508,
+                "total_tokens": 811867,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/route-budgets/solve-budget-drift-inventory.md with one table row per pinned knob giving file:line, the knob, its value, the public default it shadows, the route or receipt it drives and whether that route feeds a banked receipt on main, a count of distinct GMRES and Newton budgets in use, the routes whose receipts on main were produced under a budget other than production's, and the recommended single source (which type carries the budgets, which call sites read it, and the default-wiring test that fails when a route pins its own), no nova/ change, the report written before the fence",
+          "estimated_hours": null,
+          "goal": "Inventory every place a forward-solve budget or route knob is pinned outside the public request (newton_steps, gmres_iterations, tolerances, step cap, warmup, relaxation, acceptance flags, seed policy, trip budget) across nova/, benchmarks/, docs/figures producers and tests, with the value each pins and the route it drives, so the request-type work of section 1 has the drift map it consumes (the bank producer reached newton_krylov through benchmarks/efit_forward_parity_slice.py GMRES_ITERATIONS = 12 while ForwardProfile.solve_branch's PerturbedSeedPolicy carries 30 and the newton_krylov kernel default is 8, with 24, 30 and 40 pinned in other benchmarks, so the corroboration bank measured a stricter route than production for the whole sprint, reuse map: the production-path report ~/.config/reckon/crew/reports/nova/production-path/production-path-damping.md, the capability-wiring audit ~/.config/reckon/crew/reports/nova/capability-wiring-audit.md, nova/equilibrium/forward.py policies near lines 350 plus 415, nova/equilibrium/fixed_point.py newton_krylov near line 1936)",
+          "id": "fsa-solve-budget-drift-inventory",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T123306247283-fsa-solve-budget-drift-inventory/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/route-budgets/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "fsa-budget-audit",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T12:33:17Z",
+        "completed_at": "2026-09-04T12:50:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1049,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1049,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f280b81d18de5af659b1a11fddd2f200af3fe5a5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T123306247283-fsa-solve-budget-drift-inventory/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c68-b984-7dc2-8acd-aa964ca7cc78",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 22515,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 24915,
+              "external_wait": null,
+              "log_age_seconds": 24013,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 24069,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only inventory under ~/.config/reckon/crew/reports/nova/route-budgets/",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/fsa-solve-budget-drift-inventory",
+          "session_id": "01a06c68-b984-7dc2-8acd-aa964ca7cc78",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T12:50:46Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -91751,6 +91925,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1600
+    "_version": 1603
   }
 }

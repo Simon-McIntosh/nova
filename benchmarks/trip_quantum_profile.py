@@ -147,9 +147,7 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _ready(value: Any) -> Any:
-    leaves = jax.tree.leaves(value)
-    if leaves:
-        jax.block_until_ready(leaves[0])
+    jax.block_until_ready(value)
     return value
 
 

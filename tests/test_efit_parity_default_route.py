@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+
+import pytest
 
 from benchmarks import efit_forward_parity_slice as parity
 
@@ -90,3 +93,73 @@ def test_named_diagnostic_flag_selects_absolute_source_replay(monkeypatch) -> No
             (21986,),
         )
     ]
+
+
+def test_raising_diagnostic_replay_writes_failure_receipt(
+    monkeypatch, tmp_path: Path
+) -> None:
+    class CompilationCache:
+        def receipt(self) -> dict:
+            return {
+                "directory": "/cache/runtime-test",
+                "version_key": "runtime-test",
+            }
+
+    monkeypatch.setattr(
+        parity,
+        "run",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            RuntimeError("the closest-state replay changed the bounded solve")
+        ),
+    )
+    monkeypatch.setattr(
+        parity,
+        "configure_persistent_compilation_cache",
+        lambda _root: CompilationCache(),
+    )
+    monkeypatch.setattr(
+        parity,
+        "_diagnostic_frames",
+        lambda _bank, _shots: [{"shot": 21978, "slice_index": 35}],
+    )
+    monkeypatch.setattr(
+        parity,
+        "_execution_environment",
+        lambda: {
+            "jax_backend": "cpu",
+            "device_kinds": ["test-device"],
+            "device_count": 1,
+            "slurm_job_id": "test-job",
+        },
+    )
+    monkeypatch.setattr(parity, "_source_revision", lambda: "test-revision")
+
+    with pytest.raises(
+        RuntimeError, match="the closest-state replay changed the bounded solve"
+    ):
+        parity.main(
+            [
+                "--absolute-source-replay",
+                "--shot",
+                "21978",
+                "--output",
+                str(tmp_path),
+            ]
+        )
+
+    receipt = json.loads((tmp_path / parity.FROZEN_SCORECARD_RECEIPT_NAME).read_text())
+    assert receipt["execution_contract"]["invocation_route"] == (
+        "absolute_source_replay_diagnostic"
+    )
+    assert receipt["status"] == "failed"
+    assert receipt["failure"] == {
+        "exception_class": "RuntimeError",
+        "message": "the closest-state replay changed the bounded solve",
+    }
+    assert receipt["frame"] == {"shot": 21978, "slice_index": 35}
+    assert receipt["backend"]["slurm_job_id"] == "test-job"
+    assert receipt["source_revision"] == "test-revision"
+    assert receipt["compilation_cache"] == {
+        "directory": "/cache/runtime-test",
+        "version_key": "runtime-test",
+    }

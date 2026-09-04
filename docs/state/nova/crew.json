@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T12:25:49",
+  "updated": "2026-09-04T12:50:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1705,6 +1705,15 @@
       },
       {
         "id": "nia-los-expect-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-oracle-expect-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -90210,6 +90219,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1579
+    "_version": 1580
   }
 }

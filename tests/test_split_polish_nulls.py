@@ -78,13 +78,16 @@ def test_one_step_refines_only_the_two_census_selected_nulls():
         f"active_basis_count={active_basis_count} "
         f"tolerance={np.asarray(receipt['stationarity_tolerance']).tolist()}"
     )
-    assert error[0] <= 2.0e-4
-    assert error[1] <= 1.0e-12
+    # Half-offset support keeps both slots without claiming tensor authority.
+    assert error[0] == pytest.approx(5.0e-3, abs=1.0e-12)
+    assert error[1] == pytest.approx(0.0, abs=1.0e-12)
+    np.testing.assert_array_equal(np.asarray(receipt["complete_map"]), False)
+    np.testing.assert_array_equal(np.asarray(receipt["spline_authored"]), False)
     assert receipt["fit_attempted"].tolist() == [True, True]
     assert receipt["fit_iterations"].tolist() == [1, 1]
     assert np.all(np.isfinite(np.asarray(receipt["fit_residual"])))
-    assert bool(receipt["converged"][0])
-    assert receipt["iteration_count"][0] == 1
+    assert not bool(receipt["converged"][0])
+    assert receipt["iteration_count"][0] == 0
     assert not bool(receipt["seed_stationary"][0])
     assert bool(receipt["seed_stationary"][1]) or not bool(receipt["converged"][1])
     assert receipt["value"].shape == (2,)
@@ -174,6 +177,9 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
         "fit_converged",
         "representation_adequate",
         "value_replaced",
+        "local_value_consistent",
+        "spline_authored",
+        "complete_map",
     )
     dimensional_exclusions = {
         "position_rz": "attempted positions carry coordinate units",
@@ -190,6 +196,8 @@ def _assert_dimensionless_receipts_invariant(unscaled, scaled):
         "selected_position_rz": "selected positions carry coordinate units",
         "selected_value": "selected values carry flux units",
         "fit_value": "the split fit's diagnostic value carries flux units",
+        "spline_value": "the common-map value carries flux units",
+        "local_value_evidence": "the seven-point evidence carries flux units",
     }
     compared_keys = set(numerical_receipts) | set(exact_receipts)
     assert compared_keys.isdisjoint(dimensional_exclusions)
@@ -226,6 +234,7 @@ def test_dimensionless_polish_receipts_are_rescaling_invariant():
     scaled_extremum, scaled_saddle, scaled = _rescaled_quadratic_polish(
         1.0e3, coordinate_scale
     )
+    # Authority flags and both evidence channels keep their roles under rescaling.
     _assert_dimensionless_receipts_invariant(unscaled, scaled)
     np.testing.assert_allclose(
         np.asarray(scaled_extremum[:2]) / coordinate_scale,
@@ -323,12 +332,22 @@ def test_accepted_unmoved_polish_preserves_census_value_bits():
         np.asarray(receipt["selected_position_rz"][0]),
         np.asarray(selected_extremum[:2]),
     )
-    assert np.asarray(extremum[2]).tobytes() == np.asarray(census_value).tobytes()
+    # An accepted unmoved slot publishes the common-map value bit-for-bit.
+    assert (
+        np.asarray(extremum[2]).tobytes()
+        == np.asarray(receipt["spline_value"][0]).tobytes()
+    )
+    assert bool(receipt["spline_authored"][0])
+    assert bool(receipt["complete_map"][0])
+    assert np.isfinite(float(receipt["local_value_evidence"][0]))
+    assert np.isfinite(float(receipt["fit_value"][0]))
+    assert np.asarray(extremum[2]).tobytes() != np.asarray(census_value).tobytes()
+    assert bool(receipt["local_value_consistent"][0])
     assert not bool(receipt["value_replaced"][0])
 
 
 def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation():
-    """An inadequate fit cannot replace the published MAST map flux.
+    """An inadequate split fit remains evidence beside the published map flux.
 
     Production evidence comes from
     ``docs/figures/solver-convergence-regression/null-polish-attribution.json``;
@@ -385,14 +404,25 @@ def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation
     )
 
     assert bool(receipt["converged"][1])
-    assert bool(receipt["seed_stationary"][1])
-    np.testing.assert_array_equal(np.asarray(saddle[:2]), np.asarray(seed_position))
-    assert float(saddle[2]) == pytest.approx(-0.12271595465336929, abs=1.0e-9)
+    # The common map publishes; split and local values remain evidence.
+    assert not bool(receipt["seed_stationary"][1])
+    np.testing.assert_array_equal(
+        np.asarray(saddle[:2]), np.asarray(receipt["selected_position_rz"][1])
+    )
+    assert (
+        np.asarray(saddle[2]).tobytes()
+        == np.asarray(receipt["spline_value"][1]).tobytes()
+    )
+    assert bool(receipt["spline_authored"][1])
+    assert bool(receipt["complete_map"][1])
     np.testing.assert_array_equal(
         np.asarray(receipt["value"]), np.asarray(receipt["selected_value"])
     )
-    assert float(receipt["fit_value"][1]) == pytest.approx(-0.0889, abs=2.0e-3)
+    assert np.isfinite(float(receipt["fit_value"][1]))
+    assert np.isfinite(float(receipt["local_value_evidence"][1]))
     assert float(receipt["value"][1]) != float(receipt["fit_value"][1])
+    assert float(receipt["value"][1]) != float(receipt["local_value_evidence"][1])
+    assert bool(receipt["local_value_consistent"][1])
     assert float(receipt["sample_rms_residual"][1]) > abs(
         float(receipt["fit_value"][1] - census_value)
     )

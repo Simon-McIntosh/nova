@@ -147,6 +147,63 @@ def _strict_floats(values: Any, count: int) -> list[float] | None:
     return finite.tolist() if finite.size else None
 
 
+def _solve_contract_module():
+    """Load the request contract without changing the shadow revision imports."""
+
+    try:
+        from nova.equilibrium import solve_request
+
+        return solve_request
+    except ModuleNotFoundError:
+        module_name = "bank_forward_solve_contract"
+        if module_name in sys.modules:
+            return sys.modules[module_name]
+        source = ROOT / "nova/equilibrium/solve_request.py"
+        spec = spec_from_file_location(module_name, source)
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"cannot load forward solve contract {source}")
+        module = module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+
+def _bank_solve_request(
+    profile,
+    initial,
+    target_current: float,
+    *,
+    carrier_identity: str,
+):
+    """Declare the exact replay budget against the installed public policy."""
+
+    from benchmarks.efit_forward_parity_slice import (
+        FIXED_POINT_CRITERION,
+        GMRES_ITERATIONS,
+        NEWTON_STEPS,
+        RELAXATION,
+        STEP_CAP,
+        WARMUP_SWEEPS,
+    )
+
+    contract = _solve_contract_module()
+    return contract.ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=contract.ExplicitSolveSeed(initial),
+        policy_overrides={
+            "newton_steps": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+            "kernel_tolerance": FIXED_POINT_CRITERION,
+            "qualification_tolerance": FIXED_POINT_CRITERION,
+        },
+        target_current=target_current,
+    )
+
+
 def _stationary_point_polish_receipt(operator, state) -> dict[str, Any] | None:
     """Return the final qualified O/X polish attempt when the revision exposes it."""
     from nova.equilibrium.topology import TopologyClass, require_qualified_axis
@@ -228,33 +285,34 @@ def _solve_pure_arm(
     seed,
     target_current: float,
     corroboration,
+    *,
+    carrier_identity: str,
 ) -> dict[str, Any]:
     import jax
     import jax.numpy as jnp
 
-    from benchmarks.efit_forward_parity_slice import (
-        FIXED_POINT_CRITERION,
-        GMRES_ITERATIONS,
-        NEWTON_STEPS,
-        RELAXATION,
-        STEP_CAP,
-        WARMUP_SWEEPS,
-    )
     from nova.equilibrium.fixed_point import FixedPointTerminationReason
     from nova.equilibrium.topology import TopologyClass
 
     initial = jnp.stack((seed, seed))
+    request = _bank_solve_request(
+        profile,
+        initial,
+        target_current,
+        carrier_identity=carrier_identity,
+    )
+    policy = request.policy
     started = time.perf_counter()
     portfolio = profile.solve_portfolio(
-        initial,
-        route="newton_krylov",
-        target_current=target_current,
-        tolerance=FIXED_POINT_CRITERION,
-        newton_steps=NEWTON_STEPS,
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
+        request.seed_policy.resolve(profile),
+        route=request.route,
+        target_current=request.target_current,
+        tolerance=policy.qualification_tolerance,
+        newton_steps=policy.newton_steps,
+        gmres_iterations=policy.gmres_iterations,
+        warmup=policy.warmup,
+        relaxation=policy.relaxation,
+        step_cap=policy.step_cap,
     )
     portfolio.branches.equilibrium.flux.block_until_ready()
     elapsed = time.perf_counter() - started
@@ -295,12 +353,15 @@ def _solve_pure_arm(
         "topology_qualification_polish_receipt": polish_receipt,
         "solve_wall_seconds_including_compilation": elapsed,
         "solver": {
-            "fixed_point_tolerance": FIXED_POINT_CRITERION,
-            "newton_steps": NEWTON_STEPS,
-            "gmres_iterations": GMRES_ITERATIONS,
-            "warmup_sweeps": WARMUP_SWEEPS,
-            "relaxation": RELAXATION,
-            "step_cap": STEP_CAP,
+            "fixed_point_tolerance": policy.kernel_tolerance,
+            "newton_steps": policy.newton_steps,
+            "gmres_iterations": policy.gmres_iterations,
+            "warmup_sweeps": policy.warmup,
+            "relaxation": policy.relaxation,
+            "step_cap": policy.step_cap,
+            "resolved_defaults": _solve_contract_module()
+            .ResolvedForwardSolveDefaults.from_policy(policy)
+            .to_dict(),
         },
     }
 
@@ -395,6 +456,7 @@ def capture(
                 jnp.asarray(passive_case["state"]),
                 abs(float(reference["plasma_current_a"])),
                 corroboration,
+                carrier_identity=(f"mast:{target[0]}:{target[1]}:bank-revision-pure"),
             ),
         }
         jax.clear_caches()

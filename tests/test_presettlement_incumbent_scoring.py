@@ -87,9 +87,9 @@ def test_presettlement_scoring_accepts_what_induced_scoring_refuses(compiled):
     assert bool(presettlement.accepted_newton_promotions)
 
 
-def test_presettlement_incumbent_scoring_defaults_to_induced_mask_scoring():
-    default = _solve(False)
-    unspecified = _newton_krylov_inner(
+def test_presettlement_incumbent_scoring_false_preserves_induced_mask_scoring():
+    expected = _solve(False)
+    explicit = _newton_krylov_inner(
         lambda state: _shadowed_map(state, _frozen_mask(state)),
         jnp.zeros(1),
         newton_steps=1,
@@ -102,17 +102,19 @@ def test_presettlement_incumbent_scoring_defaults_to_induced_mask_scoring():
         acceptance_shadow_mask_fn=_induced_mask,
         acceptance_shadowed_map_fn=_shadowed_map,
         own_mask_acceptance=True,
+        presettlement_incumbent_scoring=False,
     )
-    np.testing.assert_array_equal(default.state, unspecified.state)
-    np.testing.assert_array_equal(default.residual, unspecified.residual)
+    np.testing.assert_array_equal(expected.state, explicit.state)
+    np.testing.assert_array_equal(expected.residual, explicit.residual)
 
 
-def test_presettlement_incumbent_scoring_requires_own_mask_acceptance():
+def test_presettlement_incumbent_scoring_rejects_disabled_own_mask_acceptance():
     with pytest.raises(ValueError, match="own-mask acceptance"):
         newton_krylov(
             lambda state: state,
             jnp.zeros(1),
             newton_steps=1,
+            own_mask_acceptance=False,
             presettlement_incumbent_scoring=True,
         )
 

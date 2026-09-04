@@ -3206,7 +3206,7 @@ def newton_krylov(
     continue_globalization_state: bool = True,
     model_trust_selection: bool | None = None,
     own_mask_acceptance: bool | None = None,
-    presettlement_incumbent_scoring: bool = False,
+    presettlement_incumbent_scoring: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3258,7 +3258,8 @@ def newton_krylov(
     this solver used before induced-mask scoring.  A trip whose preceding
     trip left the mask unchanged keeps induced-mask scoring.  The strict
     residual-decrease requirement, best-iterate retention, and the induced-
-    mask referees are unaffected; disabled by default.
+    mask referees are unaffected.  It is enabled by default for state-dependent
+    active-set solves and is inert when own-mask acceptance is not requested.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -3285,7 +3286,7 @@ def newton_krylov(
         raise ValueError("own-mask acceptance requires promoted shadow masks")
     if use_own_mask_acceptance and admissibility_fn is not None:
         raise ValueError("own-mask acceptance is unavailable for manifold advance")
-    if presettlement_incumbent_scoring and not use_own_mask_acceptance:
+    if presettlement_incumbent_scoring and own_mask_acceptance is False:
         raise ValueError("presettlement incumbent scoring requires own-mask acceptance")
     options = {
         "newton_steps": newton_steps,

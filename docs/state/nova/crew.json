@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T12:04:07",
+  "updated": "2026-09-04T12:25:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1655,6 +1655,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-census-proto-x3",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-census-spline-x",
         "harness": "codex",
         "role": "implement",
@@ -2222,6 +2231,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "scr-conditioning-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "scr-default-on",
@@ -90192,6 +90210,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1577
+    "_version": 1579
   }
 }

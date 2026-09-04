@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T10:37:17",
+  "updated": "2026-09-04T10:50:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1750,6 +1750,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06ab0-634b-7683-8abe-70a384d0c11f"
         },
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-xcensus-scout",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-04"
       },
       {
@@ -89132,6 +89141,162 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T081643683507-fsa-receipt-test-contract-2",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-receipt-test-contract-2",
+        "node_definition": {
+          "done_when": "Worktree commit confined to tests/test_solve_receipt_topology.py with the file green on CPU in one captured log (about 15 minutes, its wall time stated), the converged assertion requiring residual, axis admission, finite saddle within tolerance and the public read's determinate diverted class together, the seven referee node IDs green, the manifest naming the arm and the two reads' saddle values, written before the test runs",
+          "estimated_hours": null,
+          "goal": "Finish the receipt-test contract change begun in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/fsa-receipt-test-contract (uncommitted edit of tests/test_solve_receipt_topology.py, re-derive rather than copy blindly): the test describes an arm as converged only when the terminal residual passes 1e-8 AND the non-raising _fixed_design_read admits the axis AND the public profile.operator.read(solved.state, TopologyClass.DIVERTED) returns class_determinate with the diverted class, on the repaired-census arm 22086/43 mixed (expected residual 1.7364758673167596e-14, axis (0.9016135226490096, 0.024617984126865743) m, the receipt's own saddle read within 25 mm of (0.5648, 1.2580) m with a one-line comment that the corroboration bank records (0.5853, 1.2334) m for the same converged state from its connectivity read, a difference the polish-support integration is expected to remove) in place of the 21985/51 fixture whose old pass was a root of an inadmissible three-cell branch (attribution ~/.config/reckon/crew/reports/nova/attribution/solve-receipt-21985.md, the previous attempt's two failures in ~/.config/reckon/crew/runs/r-20260904T073821798688-fsa-receipt-test-contract/: a corroboration-saddle mismatch followed by an AttributeError because the raw TopologyState has no class_determinate, both answered above)",
+          "id": "fsa-receipt-test-contract-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T081643683507-fsa-receipt-test-contract-2/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_solve_receipt_topology.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-receipt-contract-2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T08:17:07Z",
+        "completed_at": "2026-09-04T08:48:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1884,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1884,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e6a83802b0e3fcc4e9ab9a90a31ea9010a365634",
+        "commits": [
+          "40ae9a3865bd96dc147246779f085cdafc06cde6"
+        ],
+        "changed_lines": {
+          "added": 37,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 uv run --no-sync pytest -p no:cacheprovider -q tests/test_solve_receipt_topology.py <seven referee node IDs>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T081643683507-fsa-receipt-test-contract-2/logs/cpu-gate-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T081643683507-fsa-receipt-test-contract-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b7e-3769-71c0-96a3-9ea1e11a28b5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9678848,
+            "cached_input_tokens_cumulative": 9678848,
+            "input_tokens": 9890699,
+            "input_tokens_cumulative": 9890699,
+            "output_tokens": 16084,
+            "output_tokens_cumulative": 16084,
+            "reasoning_output_tokens": 2862,
+            "reasoning_output_tokens_cumulative": 2862
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 7142,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 9542,
+              "external_wait": null,
+              "log_age_seconds": 8640,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 8696,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 18946,
+          "peak_input_tokens": 19569547
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -89234,6 +89399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1563
+    "_version": 1565
   }
 }

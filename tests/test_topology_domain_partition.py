@@ -78,8 +78,10 @@ def _cached_partition(row: int, *, compiled: bool):
 @pytest.mark.parametrize(
     ("row", "component_counts"),
     [
-        pytest.param(0, (250, 38), id="21978-35-pure"),
-        pytest.param(1, (244, 36), id="21978-35-mixed"),
+        # Replay bank 52cad98a follows corroboration bank ed9bb793.
+        pytest.param(0, (160, 0), id="21978-35-pure"),
+        # Replay bank 52cad98a follows corroboration bank ed9bb793.
+        pytest.param(1, (162, 0), id="21978-35-mixed"),
     ],
 )
 @pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])

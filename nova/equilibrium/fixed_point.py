@@ -572,6 +572,8 @@ class _ActiveSetIterationState(NamedTuple):
     iterations: jax.Array
     attempted_promotions: jax.Array
     accepted_promotions: jax.Array
+    conditioning_count: jax.Array
+    maximum_condition: jax.Array
     active: jax.Array
     converged: jax.Array
     cycle_detected: jax.Array
@@ -3054,6 +3056,12 @@ def _active_set_newton_krylov(
         accepted_promotions=jnp.asarray(
             first_result.accepted_newton_promotions, dtype=jnp.int32
         ),
+        conditioning_count=jnp.asarray(
+            first_result.krylov_conditioning_count, dtype=jnp.int32
+        ),
+        maximum_condition=jnp.asarray(
+            first_result.maximum_projected_krylov_condition, dtype=initial.dtype
+        ),
         active=first_active,
         converged=first_converged,
         cycle_detected=first_cycle,
@@ -3141,6 +3149,19 @@ def _active_set_newton_krylov(
                         inner_result.accepted_newton_promotions, dtype=jnp.int32
                     )
                 ),
+                conditioning_count=(
+                    carry.conditioning_count
+                    + jnp.asarray(
+                        inner_result.krylov_conditioning_count, dtype=jnp.int32
+                    )
+                ),
+                maximum_condition=jnp.maximum(
+                    carry.maximum_condition,
+                    jnp.asarray(
+                        inner_result.maximum_projected_krylov_condition,
+                        dtype=initial.dtype,
+                    ),
+                ),
                 active=active,
                 converged=converged,
                 cycle_detected=cycle_detected,
@@ -3179,6 +3200,8 @@ def _active_set_newton_krylov(
         residual=outer.live_residual,
         attempted_newton_promotions=outer.attempted_promotions,
         accepted_newton_promotions=outer.accepted_promotions,
+        krylov_conditioning_count=outer.conditioning_count,
+        maximum_projected_krylov_condition=outer.maximum_condition,
         converged=outer.converged,
         termination_reason=jnp.asarray(reason, dtype=jnp.int32),
         active_set_iterations=outer.iterations,

@@ -36,6 +36,7 @@ from nova.equilibrium.boundary_comparison import (
     compare_closed_boundaries,
 )
 from nova.equilibrium.observation import ConstraintViolationError
+from nova.equilibrium.forward import PerturbedSeedPolicy
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.imas.mast_efit_referee import read_efit_referee
@@ -62,6 +63,7 @@ SELECTION_COMMIT = "80706f89"
 CACHE_SCHEMA_REVISION = 6
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
+PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
 
 
 class _ObservedProfile:
@@ -76,6 +78,7 @@ class _ObservedProfile:
 
     def solve_portfolio(self, *args, **kwargs):
         kwargs["stream_active_set"] = True
+        kwargs["gmres_iterations"] = PUBLIC_ROUTE_POLICY.gmres_iterations
         self.portfolio = self._profile.solve_portfolio(*args, **kwargs)
         return self.portfolio
 

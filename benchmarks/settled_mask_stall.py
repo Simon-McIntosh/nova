@@ -35,7 +35,9 @@ from benchmarks.efit_forward_parity_slice import (
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium import fixed_point
 from nova.equilibrium.fixed_point import FixedPointTerminationReason
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.forward import PerturbedSeedPolicy
+from nova.equilibrium.observation import ConstraintViolationError
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
     configure_dtypes,
@@ -73,12 +75,17 @@ DEFAULT_PRODUCTION_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/production-path/"
     "production-path-damping.md"
 )
+DEFAULT_PUBLIC_ROUTE_OUTPUT = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "settled-mask-stall/public-route/four-rows.json"
+)
 TARGETS = ((21985, 51), (21986, 46), (21989, 55), (22086, 43))
 SMOOTH_NEWTON_STEPS = 8
 SMOOTH_GMRES_ITERATIONS = 40
 SMOOTH_RELAXATION = 0.5
 SMOOTH_STEP_CAP = 10.0
-PRODUCTION_GMRES_ITERATIONS = 30
+PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
 PRODUCTION_PATH_FRACTIONS = tuple(np.linspace(0.0, 1.0, 8))
 FINITE_DIFFERENCE_RELATIVE_STEPS = (1.0e-2, 1.0e-4, 1.0e-6)
 EXPECTED_GRID_CELLS = 33 * 33
@@ -161,6 +168,10 @@ def _load_banked_rows(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
                 "active_set_cycle_damping_activations": np.asarray(
                     stored[f"{prefix}_active_set_cycle_damping_activations"],
                     dtype=np.int64,
+                ),
+                "axis": np.asarray(stored[f"{prefix}_axis"], dtype=np.float64),
+                "selected_saddle": np.asarray(
+                    stored[f"{prefix}_selected_saddle"], dtype=np.float64
                 ),
             }
     missing = sorted(set(TARGETS) - set(selected))
@@ -576,6 +587,52 @@ def _active_set_summary(result, banked: dict[str, Any]) -> dict[str, Any]:
                 result.maximum_projected_krylov_condition
             ),
         },
+    }
+
+
+def _terminal_topology(profile, state) -> dict[str, Any]:
+    """Return the admitted production topology at one terminal state."""
+    try:
+        _masks, topology = profile.operator.read(state)
+        geometry = bank_producer._post_cutover_geometry(profile, state, topology)
+    except (NoQualifiedAxisError, ConstraintViolationError) as error:
+        return {
+            "axis_admitted": False,
+            "admitted_axis_m": None,
+            "saddle_admitted": False,
+            "admitted_saddle_m": None,
+            "achieved_class": None,
+            "failure_exception_class": type(error).__name__,
+        }
+    axis = np.asarray(topology.axis, dtype=np.float64)
+    saddle = np.asarray(geometry["selected_saddle"], dtype=np.float64)
+    achieved_class = geometry["achieved_class"]
+    return {
+        "axis_admitted": bool(np.all(np.isfinite(axis))),
+        "admitted_axis_m": axis.tolist(),
+        "saddle_admitted": bool(
+            achieved_class == "diverted" and np.all(np.isfinite(saddle))
+        ),
+        "admitted_saddle_m": (saddle.tolist() if np.all(np.isfinite(saddle)) else None),
+        "achieved_class": achieved_class,
+        "failure_exception_class": None,
+    }
+
+
+def _bank_topology(banked: dict[str, Any]) -> dict[str, Any]:
+    """Return topology fields retained beside a pinned-budget bank row."""
+    axis = np.asarray(banked["axis"], dtype=np.float64)
+    saddle = np.asarray(banked["selected_saddle"], dtype=np.float64)
+    achieved_class = banked.get("nova_achieved_class")
+    return {
+        "axis_admitted": bool(np.all(np.isfinite(axis))),
+        "admitted_axis_m": axis.tolist() if np.all(np.isfinite(axis)) else None,
+        "saddle_admitted": bool(
+            achieved_class == "diverted" and np.all(np.isfinite(saddle))
+        ),
+        "admitted_saddle_m": (saddle.tolist() if np.all(np.isfinite(saddle)) else None),
+        "achieved_class": achieved_class,
+        "failure_exception_class": banked.get("failure_exception_class"),
     }
 
 
@@ -1031,7 +1088,7 @@ def _measure_row(
         target_current=target_current,
         tolerance=reachability.FIXED_POINT_CRITERION,
         newton_steps=reachability.NEWTON_STEPS,
-        gmres_iterations=reachability.GMRES_ITERATIONS,
+        gmres_iterations=PUBLIC_ROUTE_POLICY.gmres_iterations,
         warmup=reachability.WARMUP_SWEEPS,
         relaxation=reachability.RELAXATION,
         step_cap=reachability.STEP_CAP,
@@ -1888,7 +1945,7 @@ def _production_path_solve(profile, seed, target_current, banked) -> dict[str, A
             target_current=target_current,
             tolerance=reachability.FIXED_POINT_CRITERION,
             newton_steps=reachability.NEWTON_STEPS,
-            gmres_iterations=PRODUCTION_GMRES_ITERATIONS,
+            gmres_iterations=PUBLIC_ROUTE_POLICY.gmres_iterations,
             warmup=reachability.WARMUP_SWEEPS,
             relaxation=reachability.RELAXATION,
             step_cap=reachability.STEP_CAP,
@@ -1909,30 +1966,53 @@ def _production_path_solve(profile, seed, target_current, banked) -> dict[str, A
         for step in trip["newton_steps"]:
             step["trip"] = trip["trip"]
             step["mask_difference_after_trip"] = trip["mask_difference"]
+    callback_conditioning_count = sum(
+        step["linear_action"]["conditioning_applied"] for step in flattened
+    )
+    callback_maximum_condition = max(
+        step["linear_action"]["projected_condition"] for step in flattened
+    )
+    result_conditioning_count = int(np.asarray(result.krylov_conditioning_count))
+    result_maximum_condition = float(
+        np.asarray(result.maximum_projected_krylov_condition)
+    )
+    if result_conditioning_count != callback_conditioning_count:
+        raise AssertionError(
+            "whole-solve conditioning count disagrees with the per-step trace: "
+            f"result={result_conditioning_count}, "
+            f"callbacks={callback_conditioning_count}"
+        )
+    if not np.isclose(
+        result_maximum_condition,
+        callback_maximum_condition,
+        rtol=1.0e-12,
+        atol=0.0,
+    ):
+        raise AssertionError(
+            "whole-solve maximum condition disagrees with the per-step trace: "
+            f"result={result_maximum_condition}, callbacks={callback_maximum_condition}"
+        )
     return {
         "configuration": {
             "route": "ForwardProfile.solve_branch(newton_krylov)",
             "newton_steps": reachability.NEWTON_STEPS,
-            "gmres_iterations": PRODUCTION_GMRES_ITERATIONS,
+            "gmres_iterations": PUBLIC_ROUTE_POLICY.gmres_iterations,
             "warmup": reachability.WARMUP_SWEEPS,
             "relaxation": reachability.RELAXATION,
             "step_cap": reachability.STEP_CAP,
             "convergence_tolerance": reachability.FIXED_POINT_CRITERION,
         },
         "result": _active_set_summary(result, banked)["measured"],
+        "terminal_topology": _terminal_topology(profile, branch.equilibrium.flux),
         "bitwise_bank_comparison_at_gmres_30": _bitwise_bank_comparison(result, banked),
         "trips": collector.trips,
         "newton_steps": flattened,
         "sqrt_epsilon_bypass_count": sum(
             step["linear_action"]["sqrt_epsilon_bypass_engaged"] for step in flattened
         ),
-        "conditioning_applied_count": sum(
-            step["linear_action"]["conditioning_applied"] for step in flattened
-        ),
-        "terminal_result_conditioning_count_scope": (
-            "FixedPointResult retains the final active-set trip's inner count; "
-            "the grouped per-step callback count is authoritative for this route"
-        ),
+        "conditioning_applied_count": callback_conditioning_count,
+        "maximum_projected_krylov_condition": callback_maximum_condition,
+        "terminal_result_conditioning_count_scope": "whole active-set solve",
     }
 
 
@@ -2037,7 +2117,8 @@ def _mechanism_layers(
                 "its terminal inner receipt records conditioning "
                 f"{repair_active['krylov_conditioning_count']} times and remains "
                 f"at {repair_active['terminal_residual']:.6e}; "
-                f"the public production budget GMRES {PRODUCTION_GMRES_ITERATIONS} "
+                "the public production budget GMRES "
+                f"{PUBLIC_ROUTE_POLICY.gmres_iterations} "
                 f"reaches {min(reductions):.6e} to {max(reductions):.6e} against "
                 f"sqrt(eps) {min(thresholds):.6e}, bypasses "
                 f"{production['sqrt_epsilon_bypass_count']} of {len(steps)} "
@@ -2395,12 +2476,10 @@ def _write_production_report(receipt: dict[str, Any], report: Path) -> None:
                 "`benchmarks/settled_mask_stall.py`."
             ),
             (
-                "- The production per-step callback count is authoritative for "
-                "conditioning engagement. The returned active-set "
-                "`FixedPointResult` retains only the final inner solve's count; "
-                "on 21989/55 it reports zero while the grouped trace records four "
-                "earlier condition-damped directions. Repairing that aggregate "
-                "telemetry is outside this node's `nova/` write fence."
+                "- The returned active-set `FixedPointResult` aggregates "
+                "conditioning count and maximum projected condition over every "
+                "frozen-mask solve. Both are checked against the production "
+                "per-step callback trace before this receipt is written."
             ),
             "",
         ]
@@ -2521,7 +2600,7 @@ def measure_production_path(
         "measurement_contract": {
             "targets": [list(key) for key in TARGETS],
             "production_route": "ForwardProfile.solve_branch(newton_krylov)",
-            "production_gmres_iterations": PRODUCTION_GMRES_ITERATIONS,
+            "production_gmres_iterations": PUBLIC_ROUTE_POLICY.gmres_iterations,
             "held_bank_replay_gmres_iterations": reachability.GMRES_ITERATIONS,
             "sqrt_epsilon_threshold": float(np.sqrt(np.finfo(np.float64).eps)),
             "whole_step_fractions": list(PRODUCTION_PATH_FRACTIONS),
@@ -2575,8 +2654,7 @@ def render_production_path(
     receipt = json.loads(measurement.read_text(encoding="utf-8"))
     for row in receipt["rows"]:
         row["production_path"]["terminal_result_conditioning_count_scope"] = (
-            "FixedPointResult retains the final active-set trip's inner count; "
-            "the grouped per-step callback count is authoritative for this route"
+            "whole active-set solve"
         )
         row["mechanisms"] = _mechanism_layers(
             row["identity"],
@@ -2610,6 +2688,202 @@ def render_production_path(
         encoding="utf-8",
     )
     _write_production_report(receipt, report)
+    return receipt
+
+
+def _draw_public_route_comparison(
+    rows: list[dict[str, Any]], figure_path: Path
+) -> None:
+    """Plot pinned-bank and public-route residual histories for four rows."""
+    figure, axes = plt.subplots(2, 2, figsize=(11.5, 8.0), constrained_layout=True)
+    for axis, row in zip(axes.flat, rows, strict=True):
+        bank = row["bank_pinned_budget"]
+        public = row["public_route"]
+        bank_result = bank["result"]
+        public_result = public["result"]
+        bank_residuals = bank_result["active_set_residuals"]
+        public_residuals = public_result["active_set_residuals"]
+        axis.semilogy(
+            np.arange(1, len(bank_residuals) + 1),
+            bank_residuals,
+            "o--",
+            color="#e76f51",
+            label=f"bank GMRES {bank['configuration']['gmres_iterations']}",
+        )
+        axis.semilogy(
+            np.arange(1, len(public_residuals) + 1),
+            public_residuals,
+            "o-",
+            color="#087e8b",
+            label=f"public GMRES {public['configuration']['gmres_iterations']}",
+        )
+        axis.axhline(
+            reachability.FIXED_POINT_CRITERION,
+            color="#343a40",
+            linewidth=0.9,
+            linestyle=":",
+            label="tolerance",
+        )
+        topology = public["terminal_topology"]
+        axis.set_title(
+            f"{row['identity']} pure\n"
+            f"{public_result['termination_reason']} · "
+            f"{topology['achieved_class']}"
+        )
+        axis.set_xlabel("active-set trip")
+        axis.set_ylabel("relative residual")
+        axis.grid(alpha=0.25)
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="outside lower center", ncol=3)
+    figure.suptitle("Pinned bank budget versus the public Newton–Krylov route")
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+
+
+def measure_public_route(*, operands: Path, output: Path) -> dict[str, Any]:
+    """Re-solve four bank seeds through the public branch budget."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    banked = _load_banked_rows(operands)
+    response_cache, carrier_evidence = _persisted_response_cache(
+        response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
+    )
+    selected = {
+        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
+        for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
+    }
+    rows = []
+    for key in TARGETS:
+        identity = f"{key[0]}/{key[1]}"
+        print(f"PUBLIC-ROUTE {identity}", flush=True)
+        selected_row, qualification = selected[key]
+        case, context = _mast_case_from_selection(
+            SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            case, context, response_cache
+        )
+        if int(policy["section_kernel_evaluations_this_shot"]) != 0:
+            raise RuntimeError("profile rebuild entered the direct response builder")
+        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+        seed = jnp.asarray(passive_case["state"])
+        measured = _production_path_solve(profile, seed, target_current, banked[key])
+        bank_result = {
+            "terminal_residual": float(banked[key]["terminal_residual"]),
+            "active_set_iterations": int(banked[key]["active_set_iterations"]),
+            "termination_reason": str(banked[key]["termination_reason"]),
+            "converged": bool(banked[key]["converged"]),
+            "active_set_residuals": banked[key]["active_set_residuals"].tolist(),
+            "active_set_mask_differences": banked[key][
+                "active_set_mask_differences"
+            ].tolist(),
+        }
+        public_route = {
+            "configuration": measured["configuration"],
+            "result": measured["result"],
+            "terminal_topology": measured["terminal_topology"],
+            "conditioning_trace": {
+                "count": measured["conditioning_applied_count"],
+                "maximum_projected_condition": measured[
+                    "maximum_projected_krylov_condition"
+                ],
+                "result_scope": measured["terminal_result_conditioning_count_scope"],
+            },
+        }
+        row = {
+            "identity": identity,
+            "arm": "pure",
+            "bank_pinned_budget": {
+                "configuration": {
+                    "route": "ForwardProfile.solve_branch(newton_krylov)",
+                    "gmres_iterations": reachability.GMRES_ITERATIONS,
+                },
+                "result": bank_result,
+                "terminal_topology": _bank_topology(banked[key]),
+            },
+            "public_route": public_route,
+        }
+        rows.append(row)
+        print(
+            "PUBLIC-ROUTE-DONE "
+            + json.dumps(
+                {
+                    "identity": identity,
+                    "residual": public_route["result"]["terminal_residual"],
+                    "termination": public_route["result"]["termination_reason"],
+                    "trips": public_route["result"]["active_set_iterations"],
+                    "class": public_route["terminal_topology"]["achieved_class"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
+    figure_path = output.with_suffix(".png")
+    _draw_public_route_comparison(rows, figure_path)
+    receipt = {
+        "artifact": "public-route four-row corroboration",
+        "source_commit": _source_revision(),
+        "runtime": {
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+            "scheduler": {
+                "job_id": os.environ.get("SLURM_JOB_ID"),
+                "node": os.environ.get("SLURMD_NODENAME"),
+                "partition": os.environ.get("SLURM_JOB_PARTITION"),
+                "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+            },
+        },
+        "evidence_inputs": {
+            "operands": str(operands),
+            "operands_sha256": _sha256(operands),
+            "response_carrier": carrier_evidence,
+            "persistent_compilation_cache": cache.receipt(),
+        },
+        "measurement_contract": {
+            "targets": [list(key) for key in TARGETS],
+            "seed": "persisted pure-arm bank seed for each row",
+            "route": "ForwardProfile.solve_branch(newton_krylov)",
+            "bank_pinned_gmres_iterations": reachability.GMRES_ITERATIONS,
+            "public_route_gmres_iterations": (PUBLIC_ROUTE_POLICY.gmres_iterations),
+            "conditioning_authority": (
+                "FixedPointResult whole-active-set aggregate checked against "
+                "the per-step callback trace"
+            ),
+        },
+        "figure": str(figure_path),
+        "rows": rows,
+        "verdict": {
+            "row_count": len(rows),
+            "bank_converged_count": sum(
+                row["bank_pinned_budget"]["result"]["converged"] for row in rows
+            ),
+            "public_route_converged_count": sum(
+                row["public_route"]["result"]["converged"] for row in rows
+            ),
+            "all_public_axes_admitted": all(
+                row["public_route"]["terminal_topology"]["axis_admitted"]
+                for row in rows
+            ),
+            "all_public_saddles_admitted": all(
+                row["public_route"]["terminal_topology"]["saddle_admitted"]
+                for row in rows
+            ),
+            "all_public_classes_diverted": all(
+                row["public_route"]["terminal_topology"]["achieved_class"] == "diverted"
+                for row in rows
+            ),
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
     return receipt
 
 
@@ -2651,6 +2925,11 @@ def main() -> None:
     render_production_parser.add_argument(
         "--report", type=Path, default=DEFAULT_PRODUCTION_REPORT
     )
+    public_route_parser = subparsers.add_parser("public-route")
+    public_route_parser.add_argument("--operands", type=Path, default=DEFAULT_OPERANDS)
+    public_route_parser.add_argument(
+        "--output", type=Path, default=DEFAULT_PUBLIC_ROUTE_OUTPUT
+    )
     arguments = parser.parse_args()
     if arguments.action == "measure":
         result = measure(
@@ -2690,11 +2969,17 @@ def main() -> None:
             report=arguments.report,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
-    else:
+    elif arguments.action == "render-production-path":
         result = render_production_path(
             measurement=arguments.measurement,
             output=arguments.output,
             report=arguments.report,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    else:
+        result = measure_public_route(
+            operands=arguments.operands,
+            output=arguments.output,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
 

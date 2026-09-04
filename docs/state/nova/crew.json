@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T08:09:46",
+  "updated": "2026-09-04T08:43:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1095,6 +1095,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "fsa-cold-seed-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "fsa-raster-receipt",
@@ -86496,6 +86505,159 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T054952654422-nia-census-value-spline-authority-prototype",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-census-value-spline-authority-prototype",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/flux_surface_connectivity.py, nova/equilibrium/topology.py and tests/test_census_spline_value_authority.py, held unmerged, in which every accepted O and X position and value published by polish_census_stationary_points equals direct evaluation of one complete-map tensor spline (asserted by a new test on a synthetic field and on the 136-cell diverted exact oracle with the value error against the closed form stated beside the previous local-quadratic value error), the split-spline fit and the seven-point local value are removed from the accepted-point path or retained only as admission evidence with the test proving they no longer set the published value, tests/test_flux_surface_connectivity.py, tests/test_topology_o_qualification.py, tests/test_topology_domain_partition.py, tests/test_stationary_point_admission.py, tests/test_oracle_axis_admission.py and tests/test_solovev_recovery_gates.py green on CPU with any pre-existing failure named against the base, the seven referee node IDs green, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Prototype the accepted O plus X stationary points of polish_census_stationary_points in nova/equilibrium/flux_surface_connectivity.py so both their position and their field value come from the common complete-map C2 tensor spline (fit_tensor_spline, the surface polish_stationary_points already uses) in place of the split-spline position with the seven-point local quadratic value substituted at lines 1184 to 1195, keeping the local ring plus multi-scale fits as admission plus confidence evidence only, with the Topology read in nova/equilibrium/topology.py consuming the spline-authored values (lead mandate 2026-09-04 on sub-cell refinement support, prototype held unmerged for the lead, authority inventory in /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/limiter-polish-support.md rows for flux_surface_connectivity.py 920 to 1226 plus topology.py 731 to 779, reuse map: polish_stationary_points at line 871 plus its three pinned tests in tests/test_flux_surface_connectivity.py, the census repair merged at 82949087, the Solovev exact oracle fixture under scripts/analytic_oracle_fixtures/ as the closed-form reference for the value error, the candidate census tests tests/test_stationary_point_admission.py plus tests/test_oracle_axis_admission.py)",
+          "id": "nia-census-value-spline-authority-prototype",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T054952654422-nia-census-value-spline-authority-prototype/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_census_spline_value_authority.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-census-spline-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T05:50:11Z",
+        "completed_at": "2026-09-04T06:42:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3128,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3128,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dfd9c48e575705d679b313c9859759f96bd6222e",
+        "commits": [
+          "a3fa8b9bec05c777047c0f890c1e58c6d26db91c"
+        ],
+        "changed_lines": {
+          "added": 271,
+          "removed": 40,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_census_spline_value_authority.py <six required files> <seven referee node IDs>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T054952654422-nia-census-value-spline-authority-prototype/logs/after-required-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T054952654422-nia-census-value-spline-authority-prototype/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06af7-adec-7880-b445-1122da217022",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 21131264,
+            "cached_input_tokens_cumulative": 21131264,
+            "input_tokens": 21363558,
+            "input_tokens_cumulative": 21363558,
+            "output_tokens": 41631,
+            "output_tokens_cumulative": 41631,
+            "reasoning_output_tokens": 13712,
+            "reasoning_output_tokens_cumulative": 13712
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 123389,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 134189,
+              "external_wait": null,
+              "log_age_seconds": 128419,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 128465,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55343,
+          "peak_input_tokens": 42494822
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -86560,16 +86722,16 @@
         "backend": "codex",
         "purpose": "resume",
         "opened_at": "2026-09-04T05:56:59Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-04T06:12:00Z",
+        "held_seconds": 901,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T07:38:00+02:00",
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 1527
+    "_version": 1530
   }
 }

@@ -226,6 +226,31 @@
     <code>flux_surface_connectivity.py</code> and <code>topology.py</code>).</p>
   </section>
 
+  <section id="census-spline-authority">
+    <h2>§4 — Census O and X values authored by the common tensor spline (prototype, held for the lead)</h2>
+    <p><strong>Commit:</strong> worker <code>a3fa8b9b</code>, held unmerged in the worktree
+    <code>nia-census-value-spline-authority-prototype</code> (<code>flux_surface_connectivity.py</code> +118 −40,
+    <code>topology.py</code> +8, <code>tests/test_census_spline_value_authority.py</code> +185). Accepted census O and X slots on a
+    complete structured map now take both position and value from <code>fit_tensor_spline</code> through the shared eight-trip
+    <code>polish_stationary_points</code>; the split spline supplies conditioning evidence only, the seven-point local quadratic
+    supplies <code>local_value_evidence</code> only and cannot override the map; <code>Topology.read_qualification</code>
+    publishes the selected position and value from the receipt; sparse or half-offset carriers keep their census rows with
+    <code>spline_authored=false</code> rather than claiming a polish.</p>
+    <table>
+      <caption>Value error against the closed form on the 136-cell diverted exact oracle</caption>
+      <thead><tr><th scope="col">Point</th><th scope="col">Seven-point local quadratic</th><th scope="col">Complete-map tensor spline</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">O-point</th><td>5.4760534768324726e-05</td><td>4.6059150495339485e-09</td></tr>
+        <tr><th scope="row">X-point</th><td>2.4701043884848842e-05</td><td>9.504811857242907e-10</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Gate (CPU):</strong> new authority tests 3 passed; the six required files plus the seven referee node IDs 60 passed
+    after against 57 before. <strong>Owed before merge:</strong> four assertions in <code>tests/test_split_polish_nulls.py</code>
+    encode the superseded split-spline and local-value authority (one-step refinement of the two selected nulls, rescaling
+    invariance of the dimensionless receipts, census-value bit preservation on an unmoved polish, the MAST unmoved saddle
+    keeping its census flux); they are updated in a separately scoped node.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

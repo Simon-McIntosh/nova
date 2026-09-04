@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:00:59",
+  "updated": "2026-09-04T13:08:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1574,6 +1574,15 @@
           "gpt-5.6-sol": "01a060e0-f4b6-79c3-8096-2ec4bbb9b475"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "mcs-profile-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "mcs-quantum-remeasure",
@@ -90758,6 +90767,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1584
+    "_version": 1585
   }
 }

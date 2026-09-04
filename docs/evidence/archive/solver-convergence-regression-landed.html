@@ -507,6 +507,35 @@
     which stays as it is. The solver shape is the lead's decision; nothing is merged.</p>
   </section>
 
+  <section id="one-read-per-trip">
+    <h2>One topology read per trip, and the trip cost is not the read (merged at 72ae8431)</h2>
+    <p><strong>Commits:</strong> <code>acfefa64</code> (partition, census and masks frozen at one read per active-set trip in
+    <code>fixed_point.py</code> and <code>forward_operator.py</code>, with a read-counting test), <code>fcf6c4a0</code> (the profiler
+    compares promotion counts across profiles instead of pinning one), <code>0331bb94</code> (receipts); receipts
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code> and
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/one-read/four-rows.json</code> (H200 job 1262715). The
+    four bank rows are unchanged to the last digit against the repaired-cap production receipt, so the reads inside a trip were
+    redundant and their removal is behaviour-preserving.</p>
+    <table>
+      <caption>22086/43 pure on the H200, per active-set trip, isolated component probes scaled by exact call counts</caption>
+      <thead><tr><th scope="col">Component</th><th scope="col">Calls per trip</th><th scope="col">Wall per trip</th><th scope="col">Share</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Host dispatch, device sync or fused remainder</th><td></td><td>5.63 s</td><td>96.6 percent</td></tr>
+        <tr><th scope="row">Jacobian-vector product</th><td>144</td><td>78 ms</td><td>1.3 percent</td></tr>
+        <tr><th scope="row">Forward evaluation</th><td>84 (12 primal, 72 line-search grades)</td><td>50 ms</td><td>0.9 percent</td></tr>
+        <tr><th scope="row">Topology read</th><td>1</td><td>39 ms</td><td>0.7 percent</td></tr>
+        <tr><th scope="row">GMRES orthogonalisation and line search</th><td></td><td>30 ms</td><td>0.5 percent</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The per-trip wall is flat, 5.83 s against 5.85 s, so the earlier attribution of 63 percent of a trip to the topology read
+    was an extrapolation of per-call cost by an assumed call count and is withdrawn: with one read per trip the read is under one
+    percent. The fused production program costs about thirty times the sum of its isolated parts. Candidates that fit a flat
+    cost are recompilation per trip, dynamic while loops running far more iterations than the static census counts, and the 126
+    Jacobi SVDs per trip from the split-spline condition numbers and the projected-Krylov Hessenberg, which are also what crashes
+    the CUPTI replay. A device-trace and ablation node on millisecond-converged-solve measures which.</p>
+  </section>
+
   <section id="vertical-elimination">
     <h2>The first elimination attempt does not drive the compensating current to zero (negative receipt, held)</h2>
     <p><strong>Commits:</strong> <code>e6b11552</code> (off-by-default outer secant over the target centroid on the constrained

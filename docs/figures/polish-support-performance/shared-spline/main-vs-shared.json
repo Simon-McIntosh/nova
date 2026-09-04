@@ -1,0 +1,2023 @@
+{
+  "comparison": {
+    "candidate_revision": "5e4bb7f10e410ee03e149ee9f2ef1583947c91b6",
+    "main_revision": "e2aaf78853a70b51b339981e6b6f65c97fa84614",
+    "same_eleven_map_operand": true,
+    "same_frozen_six_arm": true,
+    "same_gpu_device": true,
+    "same_h200_job": false,
+    "same_h200_node": true,
+    "same_persisted_carrier": true
+  },
+  "figure": "/nova/figures/polish-support-performance/shared-spline/main-vs-shared.png",
+  "gate": {
+    "both_solve_arms_converged": false,
+    "both_solve_arms_diverted": true,
+    "eager_jit_vmap_agreement": true,
+    "one_tensor_spline_fit_per_topology_read": true,
+    "passes": false,
+    "production_solve_remains_fast": false,
+    "topology_read_remains_gpu_batchable": true
+  },
+  "measurements": {
+    "candidate": {
+      "cache_events": {
+        "component_profile": {
+          "hits": 0,
+          "saved_seconds": 0.0
+        },
+        "solve": {
+          "hits": 1,
+          "saved_seconds": -0.029998144134879112
+        },
+        "topology": {
+          "hits": 40,
+          "saved_seconds": -0.5302253412082791
+        },
+        "total": {
+          "hits": 41,
+          "saved_seconds": -0.5602234853431582
+        }
+      },
+      "captured_at": "2026-09-04T13:48:45.731131+00:00",
+      "per_trip_profile": {
+        "components": {
+          "fixed_design_read": {
+            "compile_count": 1,
+            "compile_wall_s": 22.158295433036983,
+            "first_call_wall_s": 0.18174392450600863,
+            "median_warm_wall_s": 0.06388705503195524,
+            "warm_spread": {
+              "maximum_s": 0.06434889603406191,
+              "median_absolute_deviation_s": 0.00010323431342840195,
+              "minimum_s": 0.06378382071852684,
+              "range_s": 0.0005650753155350685,
+              "standard_deviation_s": 0.00020221185972459378
+            },
+            "warm_wall_s": [
+              0.06434889603406191,
+              0.06399912294000387,
+              0.06388705503195524,
+              0.06383399665355682,
+              0.06378382071852684
+            ]
+          },
+          "one_newton_trip": {
+            "compile_count": 1,
+            "compile_wall_s": 379.7864613523707,
+            "first_call_wall_s": 8.325044986791909,
+            "median_warm_wall_s": 6.654962371103466,
+            "warm_spread": {
+              "maximum_s": 6.715015899389982,
+              "median_absolute_deviation_s": 0.03755439072847366,
+              "minimum_s": 6.604982111603022,
+              "range_s": 0.1100337877869606,
+              "standard_deviation_s": 0.04057989713424496
+            },
+            "warm_wall_s": [
+              6.715015899389982,
+              6.617407980374992,
+              6.604982111603022,
+              6.681775514036417,
+              6.654962371103466
+            ]
+          },
+          "published_domain_read": {
+            "compile_count": 1,
+            "compile_wall_s": 30.607038279064,
+            "first_call_wall_s": 0.7776500657200813,
+            "median_warm_wall_s": 0.05732860788702965,
+            "warm_spread": {
+              "maximum_s": 0.05983272474259138,
+              "median_absolute_deviation_s": 0.0005777450278401375,
+              "minimum_s": 0.05659368261694908,
+              "range_s": 0.0032390421256422997,
+              "standard_deviation_s": 0.0011686475550166842
+            },
+            "warm_wall_s": [
+              0.05983272474259138,
+              0.05732860788702965,
+              0.05675086285918951,
+              0.05659368261694908,
+              0.057847450487315655
+            ]
+          },
+          "residual_evaluation": {
+            "compile_count": 1,
+            "compile_wall_s": 16.920328826643527,
+            "first_call_wall_s": 0.06706413067877293,
+            "median_warm_wall_s": 0.03963395766913891,
+            "warm_spread": {
+              "maximum_s": 0.045848689042031765,
+              "median_absolute_deviation_s": 0.0001028403639793396,
+              "minimum_s": 0.03940714988857508,
+              "range_s": 0.006441539153456688,
+              "standard_deviation_s": 0.00250401424282183
+            },
+            "warm_wall_s": [
+              0.03973679803311825,
+              0.039599454030394554,
+              0.03963395766913891,
+              0.03940714988857508,
+              0.045848689042031765
+            ]
+          },
+          "residual_shadow_read": {
+            "compile_count": 1,
+            "compile_wall_s": 15.984481781721115,
+            "first_call_wall_s": 0.06386903580278158,
+            "median_warm_wall_s": 0.038203248754143715,
+            "warm_spread": {
+              "maximum_s": 0.038418298587203026,
+              "median_absolute_deviation_s": 9.499490261077881e-06,
+              "minimum_s": 0.03819374926388264,
+              "range_s": 0.0002245493233203888,
+              "standard_deviation_s": 8.891843935837116e-05
+            },
+            "warm_wall_s": [
+              0.038418298587203026,
+              0.03832077421247959,
+              0.03819374926388264,
+              0.03820126783102751,
+              0.038203248754143715
+            ]
+          },
+          "tensor_spline_fit": {
+            "compile_count": 1,
+            "compile_wall_s": 0.9042854523286223,
+            "first_call_wall_s": 0.029649967327713966,
+            "median_warm_wall_s": 0.0010549742728471756,
+            "warm_spread": {
+              "maximum_s": 0.0011159926652908325,
+              "median_absolute_deviation_s": 2.5111250579357147e-05,
+              "minimum_s": 0.001017051748931408,
+              "range_s": 9.894091635942459e-05,
+              "standard_deviation_s": 3.369724090296055e-05
+            },
+            "warm_wall_s": [
+              0.0011159926652908325,
+              0.0010549742728471756,
+              0.001017051748931408,
+              0.0010800855234265327,
+              0.0010428763926029205
+            ]
+          },
+          "topology_qualification": {
+            "compile_count": 1,
+            "compile_wall_s": 21.85347526334226,
+            "first_call_wall_s": 0.07767290342599154,
+            "median_warm_wall_s": 0.03963190317153931,
+            "warm_spread": {
+              "maximum_s": 0.05122915096580982,
+              "median_absolute_deviation_s": 0.00025677960366010666,
+              "minimum_s": 0.0393751235678792,
+              "range_s": 0.011854027397930622,
+              "standard_deviation_s": 0.004653991869292845
+            },
+            "warm_wall_s": [
+              0.03963190317153931,
+              0.03944877628237009,
+              0.05122915096580982,
+              0.0448768800124526,
+              0.0393751235678792
+            ]
+          }
+        },
+        "fit_census": {
+          "candidate_capacity": 30,
+          "fits_after_candidate_census": 3,
+          "fits_per_candidate_component": 2,
+          "fits_per_topology_read": 1,
+          "fixed_design_reads_per_residual_evaluation": 2,
+          "shared_surface_api": true,
+          "tensor_spline_fits_per_residual_evaluation": 4,
+          "topology_reads_per_fixed_design_read": 2
+        },
+        "reference": {
+          "machine": "MAST",
+          "plasma_current_a": 933034.875,
+          "qualification_before_attribution": {
+            "declared_boundary_to_map_saddle_limit": 0.01,
+            "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+            "passes": true,
+            "stored_lcfs_contour_limit": 0.006,
+            "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+            "typed_saddle_candidate_count": 2,
+            "typed_saddle_resolved": true
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "source_coordinate": {
+            "axis_wb": 0.3423115953376666,
+            "boundary_wb": -0.1292985047045701,
+            "support_nodes": 243
+          },
+          "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+          "span_wb": 1.5839675751331153,
+          "time_s": 0.22999998927116394
+        }
+      },
+      "persistent_compilation_cache": {
+        "directory": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/shared-spline-1262631/shared/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 0.0,
+        "root": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/shared-spline-1262631/shared",
+        "runtime_identity": {
+          "backend": "gpu",
+          "backend_version": "PJRT C API\ncuda 12090",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "NVIDIA H200 NVL",
+              "platform": "gpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-0745ecebea4cb264e054"
+      },
+      "revision": "5e4bb7f10e410ee03e149ee9f2ef1583947c91b6",
+      "runtime": {
+        "gpu": {
+          "cuda_visible_devices": "0",
+          "jax_device": "cuda:0",
+          "jax_platform": "gpu",
+          "visible_devices": [
+            "NVIDIA H200 NVL, GPU-c661dc81-7fa4-e485-2687-12e4cf30b5e5, 595.58.03, 143771"
+          ]
+        },
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "jaxlib": "0.11.0",
+        "python": "3.14.2",
+        "slurm_cpus_per_task": "1",
+        "slurm_job_id": "1262631",
+        "tmpdir": "/tmp"
+      },
+      "schema": "nova.polish_support_performance.raw",
+      "schema_version": 1,
+      "solve": {
+        "achieved_class": 1,
+        "achieved_class_name": "diverted",
+        "carrier": {
+          "carrier": {
+            "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+            "frozen_reference_count": 6,
+            "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+            "response_shape": [
+              1126,
+              101
+            ],
+            "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+            "size_bytes": 645864,
+            "stored_circuit_count": 101,
+            "warm_load_seconds": 0.005207405425608158
+          },
+          "loaded_from_persisted_carrier": true,
+          "named_cache_only_check": {
+            "command": [
+              "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+              "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure-2/benchmarks/mast_response_carrier_warm.py",
+              "check",
+              "--carrier",
+              "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+              "--receipt",
+              "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+            ],
+            "direct_green_operator_builder_entries": 0,
+            "passes": true,
+            "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.029161 direct_builders=0 verdict=PASS"
+          }
+        },
+        "compile_count": 1,
+        "compile_wall_s": 391.29142238385975,
+        "converged": false,
+        "field_policy": {
+          "active_circuit_count": 13,
+          "active_mapping": [
+            {
+              "centroid_separation_m": 3.020663818271642e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 50319.66623454681,
+              "family": "p2_inner_lower",
+              "filament_turn_multiplier_sum": 0.9999960064888,
+              "raw_current_a": 50319.8671875,
+              "stored_circuit": 4
+            },
+            {
+              "centroid_separation_m": 4.610138552976278e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 50267.518005302176,
+              "family": "p2_inner_upper",
+              "filament_turn_multiplier_sum": 0.9999960064888,
+              "raw_current_a": 50267.71875,
+              "stored_circuit": 2
+            },
+            {
+              "centroid_separation_m": 3.794706373301994e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 33416.35546875,
+              "family": "p2_outer_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 33416.35546875,
+              "stored_circuit": 5
+            },
+            {
+              "centroid_separation_m": 3.882122250270243e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 33341.1796875,
+              "family": "p2_outer_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 33341.1796875,
+              "stored_circuit": 3
+            },
+            {
+              "centroid_separation_m": 1.2310483904636694e-07,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 46.641414642333984,
+              "family": "p3_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 46.641414642333984,
+              "stored_circuit": 7
+            },
+            {
+              "centroid_separation_m": 1.1378064254653142e-07,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 29.57099151611328,
+              "family": "p3_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 29.57099151611328,
+              "stored_circuit": 6
+            },
+            {
+              "centroid_separation_m": 0.002284428762164253,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -185195.33400285762,
+              "family": "p4_lower",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -185195.171875,
+              "stored_circuit": 9
+            },
+            {
+              "centroid_separation_m": 0.003039636783399228,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -185433.83421165083,
+              "family": "p4_upper",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -185433.671875,
+              "stored_circuit": 8
+            },
+            {
+              "centroid_separation_m": 0.0022829440191137885,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -138175.5897147773,
+              "family": "p5_lower",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -138175.46875,
+              "stored_circuit": 11
+            },
+            {
+              "centroid_separation_m": 0.0022872695201792835,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -138157.0271985269,
+              "family": "p5_upper",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -138156.90625,
+              "stored_circuit": 10
+            },
+            {
+              "centroid_separation_m": 5.527338696549878e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 926.8552856445312,
+              "family": "p6_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 926.8552856445312,
+              "stored_circuit": 13
+            },
+            {
+              "centroid_separation_m": 1.4493967305635352e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -554.8970947265625,
+              "family": "p6_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": -554.8970947265625,
+              "stored_circuit": 12
+            },
+            {
+              "centroid_separation_m": 2.5307005105576235e-06,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -8325233.859375,
+              "family": "sol",
+              "filament_turn_multiplier_sum": 328.0,
+              "raw_current_a": -25381.810546875,
+              "stored_circuit": 1
+            }
+          ],
+          "active_mapping_recomputed_for_shot": true,
+          "all_currents_prescribed": true,
+          "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+          "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+          "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+          "passive_or_vessel_circuit_count": 88,
+          "passive_registry_maximum_separation_m": 0.0,
+          "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+          "policy": "explicit prescribed-current response matrix",
+          "response_input_digests": {
+            "algorithm": "sha256",
+            "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+            "inputs": {
+              "fcoil_ang1": {
+                "dtype": "<f4",
+                "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_ang2": {
+                "dtype": "<f4",
+                "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_circ": {
+                "dtype": "<f8",
+                "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_height": {
+                "dtype": "<f4",
+                "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_n": {
+                "dtype": "<f4",
+                "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+                "shape": [
+                  101
+                ]
+              },
+              "fcoil_r": {
+                "dtype": "<f4",
+                "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_turns": {
+                "dtype": "<f4",
+                "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_width": {
+                "dtype": "<f4",
+                "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_xmult": {
+                "dtype": "<f4",
+                "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_z": {
+                "dtype": "<f4",
+                "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+                "shape": [
+                  938
+                ]
+              },
+              "gridr": {
+                "dtype": "<f4",
+                "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+                "shape": [
+                  65
+                ]
+              },
+              "gridz": {
+                "dtype": "<f4",
+                "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+                "shape": [
+                  65
+                ]
+              },
+              "limiterr": {
+                "dtype": "<f4",
+                "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+                "shape": [
+                  37
+                ]
+              },
+              "limiterz": {
+                "dtype": "<f4",
+                "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+                "shape": [
+                  37
+                ]
+              },
+              "resolved_response_targets": {
+                "dtype": "<f8",
+                "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+                "shape": [
+                  1126,
+                  2
+                ]
+              }
+            }
+          },
+          "response_matrix_reused": true,
+          "response_shape": [
+            1126,
+            101
+          ],
+          "section_kernel_evaluations": 938,
+          "section_kernel_evaluations_this_shot": 0,
+          "stored_circuit_count": 101,
+          "stored_field_closure_rms_wb": 1.4749858092671266e-16,
+          "stored_field_closure_sup_wb": 8.881784197001252e-16
+        },
+        "first_call_wall_s": 95.75760115683079,
+        "median_warm_wall_s": 95.02001290302724,
+        "reference": {
+          "machine": "MAST",
+          "plasma_current_a": 933034.875,
+          "qualification_before_attribution": {
+            "declared_boundary_to_map_saddle_limit": 0.01,
+            "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+            "passes": true,
+            "stored_lcfs_contour_limit": 0.006,
+            "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+            "typed_saddle_candidate_count": 2,
+            "typed_saddle_resolved": true
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "source_coordinate": {
+            "axis_wb": 0.3423115953376666,
+            "boundary_wb": -0.1292985047045701,
+            "support_nodes": 243
+          },
+          "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+          "span_wb": 1.5839675751331153,
+          "time_s": 0.22999998927116394
+        },
+        "solver": {
+          "gmres_iterations": 12,
+          "newton_promotions": 12,
+          "registered_tolerance": 1e-08,
+          "requested_class": "diverted",
+          "route": "ForwardProfile.solve_branch newton_krylov",
+          "target_current_a": 933034.875
+        },
+        "terminal_class_operands": {
+          "axis_flux": 0.3416334996406385,
+          "class_margin": null,
+          "normalized_saddle_flux": 0.4346019426364051,
+          "normalized_wall_flux": null,
+          "saddle_rz": [
+            0.5906737987124926,
+            1.220507828878397
+          ],
+          "wall_candidate_rz": [
+            null,
+            null
+          ],
+          "wall_candidate_shadowed": true,
+          "wall_candidate_valid": false
+        },
+        "terminal_residual": 0.0011126080468837009,
+        "topology_consistent": true,
+        "trips": 24,
+        "warm_launch_spread": {
+          "maximum_s": 95.22593211010098,
+          "median_absolute_deviation_s": 0.15074573457241058,
+          "minimum_s": 94.84834395721555,
+          "range_s": 0.377588152885437,
+          "standard_deviation_s": 0.14577440864274485
+        },
+        "warm_launch_wall_s": [
+          94.90732186846435,
+          94.84834395721555,
+          95.22593211010098,
+          95.17075863759965,
+          95.02001290302724
+        ]
+      },
+      "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure-2",
+      "topology_read": {
+        "agreement": {
+          "eager_vs_jit": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          },
+          "eager_vs_vmap": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          },
+          "jit_vs_vmap": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          }
+        },
+        "jit": {
+          "compile_count": 1,
+          "first_call_wall_s": 31.465668014250696,
+          "median_wall_s_per_map": 0.019859327469021082,
+          "spread": {
+            "maximum_s": 0.021112490445375443,
+            "median_absolute_deviation_s": 0.0004936479963362217,
+            "minimum_s": 0.016022137366235256,
+            "range_s": 0.005090353079140186,
+            "standard_deviation_s": 0.0016704570295630525
+          },
+          "wall_s_per_map": [
+            31.465668014250696,
+            0.021112490445375443,
+            0.019608289934694767,
+            0.019233793951570988,
+            0.016075379215180874,
+            0.016022137366235256,
+            0.019463185220956802,
+            0.020450481213629246,
+            0.020110365003347397,
+            0.020135304890573025,
+            0.020144938491284847
+          ],
+          "warm_wall_s_per_map": [
+            0.021112490445375443,
+            0.019608289934694767,
+            0.019233793951570988,
+            0.016075379215180874,
+            0.016022137366235256,
+            0.019463185220956802,
+            0.020450481213629246,
+            0.020110365003347397,
+            0.020135304890573025,
+            0.020144938491284847
+          ]
+        },
+        "kernel": "polish_census_stationary_points followed by traced_boundary_read with the spline-restricted reachable-wall minimum",
+        "operand": {
+          "arm_count": 11,
+          "sha256": "42adaac7151f0c16eb48c6220e97ee7e2e6c20a9f1f7b4599726bbb148903d90",
+          "source": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/current-operands.npz",
+          "valid_arm_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        "selected_outputs": {
+          "axis_rz": [
+            [
+              0.9030348052779694,
+              0.015534464422285375
+            ],
+            [
+              0.9035484164982237,
+              0.029617845841666424
+            ],
+            [
+              0.9026962819489609,
+              0.041253865717225426
+            ],
+            [
+              0.9025204841929998,
+              0.04409401401380532
+            ],
+            [
+              0.20201557778505919,
+              0.9877791828005655
+            ],
+            [
+              0.37406412031730546,
+              -1.9211019565107106
+            ],
+            [
+              0.9132439941184266,
+              0.05878049033375055
+            ],
+            [
+              0.9133203168601668,
+              0.04216590397658018
+            ],
+            [
+              0.9130231996578791,
+              0.04744263981008275
+            ],
+            [
+              0.9019314019461326,
+              0.020162281686438594
+            ],
+            [
+              0.9016135226490096,
+              0.024617984126865743
+            ]
+          ],
+          "binding_point_rz": [
+            [
+              0.19524440169334412,
+              -0.046144426181843556
+            ],
+            [
+              0.19524440169334412,
+              -0.03125
+            ],
+            [
+              0.19524440169334412,
+              0.0
+            ],
+            [
+              0.19524440169334412,
+              0.0
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              0.19524440169334412,
+              0.025626688820206134
+            ],
+            [
+              0.19524440169334412,
+              0.03125
+            ],
+            [
+              0.19524440169334412,
+              0.03125
+            ],
+            [
+              0.19524440169334412,
+              -0.010258868680818267
+            ],
+            [
+              0.19524440169334412,
+              -0.010258868680818267
+            ]
+          ],
+          "class_margin": [
+            0.028018822632619456,
+            0.03279623743480281,
+            0.02832094037791444,
+            0.029094739553318594,
+            null,
+            null,
+            0.050455124710098054,
+            0.03959266982783777,
+            0.041255479336378686,
+            0.03986876105804649,
+            0.041666603616654585
+          ],
+          "saddle_rz": [
+            [
+              0.5628642390682692,
+              1.2634901482388117
+            ],
+            [
+              0.5745728038817767,
+              1.2639235916546951
+            ],
+            [
+              0.5519882544121029,
+              1.272313868980589
+            ],
+            [
+              0.5526865426840635,
+              1.2743472087241114
+            ],
+            [
+              0.5554440365321776,
+              -1.1188504565862138
+            ],
+            [
+              0.5424844830714627,
+              -1.0975066858069535
+            ],
+            [
+              0.6192157086901403,
+              1.174453758683143
+            ],
+            [
+              0.5880968559376076,
+              1.1589439080042145
+            ],
+            [
+              0.5897718401840847,
+              1.1624392892547324
+            ],
+            [
+              0.5923840472283124,
+              1.2202558665995356
+            ],
+            [
+              0.5853011730723614,
+              1.2333806492436519
+            ]
+          ]
+        },
+        "vmap": {
+          "compile_count": 1,
+          "first_batch_wall_s": 64.27424482721835,
+          "median_warm_wall_s_per_map": 0.005021073770794002,
+          "spread_per_map": {
+            "maximum_s": 0.005095813000066714,
+            "median_absolute_deviation_s": 2.802798355167562e-05,
+            "minimum_s": 0.004966173659671436,
+            "range_s": 0.0001296393403952772,
+            "standard_deviation_s": 4.4818026127890945e-05
+          },
+          "warm_batch_wall_s": [
+            0.05605394300073385,
+            0.05554011929780245,
+            0.055231811478734016,
+            0.054932028986513615,
+            0.0546279102563858
+          ],
+          "warm_wall_s_per_map": [
+            0.005095813000066714,
+            0.005049101754345677,
+            0.005021073770794002,
+            0.004993820816955783,
+            0.004966173659671436
+          ]
+        }
+      }
+    },
+    "main": {
+      "cache_events": {
+        "component_profile": {
+          "hits": 0,
+          "saved_seconds": 0.0
+        },
+        "solve": {
+          "hits": 1,
+          "saved_seconds": -0.017840922810137272
+        },
+        "topology": {
+          "hits": 40,
+          "saved_seconds": -0.5046725803986192
+        },
+        "total": {
+          "hits": 41,
+          "saved_seconds": -0.5225135032087564
+        }
+      },
+      "captured_at": "2026-09-04T12:33:50.704544+00:00",
+      "per_trip_profile": {
+        "components": {
+          "fixed_design_read": {
+            "compile_count": 1,
+            "compile_wall_s": 23.28766439948231,
+            "first_call_wall_s": 0.10123158618807793,
+            "median_warm_wall_s": 0.06380206067115068,
+            "warm_spread": {
+              "maximum_s": 0.07050307746976614,
+              "median_absolute_deviation_s": 0.0001765294000506401,
+              "minimum_s": 0.06358590070158243,
+              "range_s": 0.006917176768183708,
+              "standard_deviation_s": 0.0027159503956970836
+            },
+            "warm_wall_s": [
+              0.06385879404842854,
+              0.06358590070158243,
+              0.06380206067115068,
+              0.07050307746976614,
+              0.06362553127110004
+            ]
+          },
+          "one_newton_trip": {
+            "compile_count": 1,
+            "compile_wall_s": 397.5696185771376,
+            "first_call_wall_s": 8.09545761719346,
+            "median_warm_wall_s": 6.605461493134499,
+            "warm_spread": {
+              "maximum_s": 6.641136810183525,
+              "median_absolute_deviation_s": 0.01147257536649704,
+              "minimum_s": 6.593988917768002,
+              "range_s": 0.04714789241552353,
+              "standard_deviation_s": 0.016746837832239597
+            },
+            "warm_wall_s": [
+              6.605461493134499,
+              6.622226636856794,
+              6.593988917768002,
+              6.60264319460839,
+              6.641136810183525
+            ]
+          },
+          "published_domain_read": {
+            "compile_count": 1,
+            "compile_wall_s": 31.59604322910309,
+            "first_call_wall_s": 0.8956434251740575,
+            "median_warm_wall_s": 0.057917254976928234,
+            "warm_spread": {
+              "maximum_s": 0.06676671840250492,
+              "median_absolute_deviation_s": 0.0005603786557912827,
+              "minimum_s": 0.05735687632113695,
+              "range_s": 0.00940984208136797,
+              "standard_deviation_s": 0.003517618961136618
+            },
+            "warm_wall_s": [
+              0.057917254976928234,
+              0.05790755059570074,
+              0.060674604028463364,
+              0.06676671840250492,
+              0.05735687632113695
+            ]
+          },
+          "residual_evaluation": {
+            "compile_count": 1,
+            "compile_wall_s": 17.431793078780174,
+            "first_call_wall_s": 0.06803890597075224,
+            "median_warm_wall_s": 0.03960023261606693,
+            "warm_spread": {
+              "maximum_s": 0.03982324432581663,
+              "median_absolute_deviation_s": 6.797164678573608e-05,
+              "minimum_s": 0.03952279035001993,
+              "range_s": 0.0003004539757966995,
+              "standard_deviation_s": 0.00010852928778909292
+            },
+            "warm_wall_s": [
+              0.03982324432581663,
+              0.03952279035001993,
+              0.03962727356702089,
+              0.03960023261606693,
+              0.0395322609692812
+            ]
+          },
+          "residual_shadow_read": {
+            "compile_count": 1,
+            "compile_wall_s": 16.754173904657364,
+            "first_call_wall_s": 0.06410794425755739,
+            "median_warm_wall_s": 0.03834487218409777,
+            "warm_spread": {
+              "maximum_s": 0.03845525160431862,
+              "median_absolute_deviation_s": 4.0718354284763336e-05,
+              "minimum_s": 0.038304153829813004,
+              "range_s": 0.00015109777450561523,
+              "standard_deviation_s": 6.262246652369841e-05
+            },
+            "warm_wall_s": [
+              0.03845525160431862,
+              0.03843718580901623,
+              0.038316414691507816,
+              0.03834487218409777,
+              0.038304153829813004
+            ]
+          },
+          "tensor_spline_fit": {
+            "compile_count": 1,
+            "compile_wall_s": 0.9366076402366161,
+            "first_call_wall_s": 0.0032234955579042435,
+            "median_warm_wall_s": 0.0010696910321712494,
+            "warm_spread": {
+              "maximum_s": 0.0011005066335201263,
+              "median_absolute_deviation_s": 3.081560134887695e-05,
+              "minimum_s": 0.0010216012597084045,
+              "range_s": 7.89053738117218e-05,
+              "standard_deviation_s": 2.9704362727580928e-05
+            },
+            "warm_wall_s": [
+              0.0011005066335201263,
+              0.0010696910321712494,
+              0.001033206470310688,
+              0.0010822536423802376,
+              0.0010216012597084045
+            ]
+          },
+          "topology_qualification": {
+            "compile_count": 1,
+            "compile_wall_s": 21.983551155775785,
+            "first_call_wall_s": 0.1127946637570858,
+            "median_warm_wall_s": 0.03959216922521591,
+            "warm_spread": {
+              "maximum_s": 0.03995382506400347,
+              "median_absolute_deviation_s": 3.245566040277481e-05,
+              "minimum_s": 0.03955971356481314,
+              "range_s": 0.0003941114991903305,
+              "standard_deviation_s": 0.000147996950139897
+            },
+            "warm_wall_s": [
+              0.03995382506400347,
+              0.03963548131287098,
+              0.0395708279684186,
+              0.03959216922521591,
+              0.03955971356481314
+            ]
+          }
+        },
+        "fit_census": {
+          "candidate_capacity": 30,
+          "fits_after_candidate_census": 3,
+          "fits_per_candidate_component": 2,
+          "fits_per_topology_read": 63,
+          "fixed_design_reads_per_residual_evaluation": 2,
+          "shared_surface_api": false,
+          "tensor_spline_fits_per_residual_evaluation": 252,
+          "topology_reads_per_fixed_design_read": 2
+        },
+        "reference": {
+          "machine": "MAST",
+          "plasma_current_a": 933034.875,
+          "qualification_before_attribution": {
+            "declared_boundary_to_map_saddle_limit": 0.01,
+            "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+            "passes": true,
+            "stored_lcfs_contour_limit": 0.006,
+            "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+            "typed_saddle_candidate_count": 2,
+            "typed_saddle_resolved": true
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "source_coordinate": {
+            "axis_wb": 0.3423115953376666,
+            "boundary_wb": -0.1292985047045701,
+            "support_nodes": 243
+          },
+          "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+          "span_wb": 1.5839675751331153,
+          "time_s": 0.22999998927116394
+        }
+      },
+      "persistent_compilation_cache": {
+        "directory": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/shared-spline-1262543/main/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 0.0,
+        "root": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/shared-spline-1262543/main",
+        "runtime_identity": {
+          "backend": "gpu",
+          "backend_version": "PJRT C API\ncuda 12090",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "NVIDIA H200 NVL",
+              "platform": "gpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-0745ecebea4cb264e054"
+      },
+      "revision": "e2aaf78853a70b51b339981e6b6f65c97fa84614",
+      "runtime": {
+        "gpu": {
+          "cuda_visible_devices": "0",
+          "jax_device": "cuda:0",
+          "jax_platform": "gpu",
+          "visible_devices": [
+            "NVIDIA H200 NVL, GPU-c661dc81-7fa4-e485-2687-12e4cf30b5e5, 595.58.03, 143771"
+          ]
+        },
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "jaxlib": "0.11.0",
+        "python": "3.14.2",
+        "slurm_cpus_per_task": "1",
+        "slurm_job_id": "1262543",
+        "tmpdir": "/tmp"
+      },
+      "schema": "nova.polish_support_performance.raw",
+      "schema_version": 1,
+      "solve": {
+        "achieved_class": 1,
+        "achieved_class_name": "diverted",
+        "carrier": {
+          "carrier": {
+            "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+            "frozen_reference_count": 6,
+            "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+            "response_shape": [
+              1126,
+              101
+            ],
+            "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+            "size_bytes": 645864,
+            "stored_circuit_count": 101,
+            "warm_load_seconds": 0.0051564425230026245
+          },
+          "loaded_from_persisted_carrier": true,
+          "named_cache_only_check": {
+            "command": [
+              "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+              "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure/docs/figures/polish-support-performance/shared-spline/.baseline-source/benchmarks/mast_response_carrier_warm.py",
+              "check",
+              "--carrier",
+              "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+              "--receipt",
+              "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+            ],
+            "direct_green_operator_builder_entries": 0,
+            "passes": true,
+            "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.020735 direct_builders=0 verdict=PASS"
+          }
+        },
+        "compile_count": 1,
+        "compile_wall_s": 399.5243098605424,
+        "converged": false,
+        "field_policy": {
+          "active_circuit_count": 13,
+          "active_mapping": [
+            {
+              "centroid_separation_m": 3.020663818271642e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 50319.66623454681,
+              "family": "p2_inner_lower",
+              "filament_turn_multiplier_sum": 0.9999960064888,
+              "raw_current_a": 50319.8671875,
+              "stored_circuit": 4
+            },
+            {
+              "centroid_separation_m": 4.610138552976278e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 50267.518005302176,
+              "family": "p2_inner_upper",
+              "filament_turn_multiplier_sum": 0.9999960064888,
+              "raw_current_a": 50267.71875,
+              "stored_circuit": 2
+            },
+            {
+              "centroid_separation_m": 3.794706373301994e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 33416.35546875,
+              "family": "p2_outer_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 33416.35546875,
+              "stored_circuit": 5
+            },
+            {
+              "centroid_separation_m": 3.882122250270243e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 33341.1796875,
+              "family": "p2_outer_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 33341.1796875,
+              "stored_circuit": 3
+            },
+            {
+              "centroid_separation_m": 1.2310483904636694e-07,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 46.641414642333984,
+              "family": "p3_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 46.641414642333984,
+              "stored_circuit": 7
+            },
+            {
+              "centroid_separation_m": 1.1378064254653142e-07,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 29.57099151611328,
+              "family": "p3_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 29.57099151611328,
+              "stored_circuit": 6
+            },
+            {
+              "centroid_separation_m": 0.002284428762164253,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -185195.33400285762,
+              "family": "p4_lower",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -185195.171875,
+              "stored_circuit": 9
+            },
+            {
+              "centroid_separation_m": 0.003039636783399228,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -185433.83421165083,
+              "family": "p4_upper",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -185433.671875,
+              "stored_circuit": 8
+            },
+            {
+              "centroid_separation_m": 0.0022829440191137885,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -138175.5897147773,
+              "family": "p5_lower",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -138175.46875,
+              "stored_circuit": 11
+            },
+            {
+              "centroid_separation_m": 0.0022872695201792835,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -138157.0271985269,
+              "family": "p5_upper",
+              "filament_turn_multiplier_sum": 1.0000008754432201,
+              "raw_current_a": -138156.90625,
+              "stored_circuit": 10
+            },
+            {
+              "centroid_separation_m": 5.527338696549878e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": 926.8552856445312,
+              "family": "p6_lower",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": 926.8552856445312,
+              "stored_circuit": 13
+            },
+            {
+              "centroid_separation_m": 1.4493967305635352e-08,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -554.8970947265625,
+              "family": "p6_upper",
+              "filament_turn_multiplier_sum": 1.0,
+              "raw_current_a": -554.8970947265625,
+              "stored_circuit": 12
+            },
+            {
+              "centroid_separation_m": 2.5307005105576235e-06,
+              "current_field": "efm/fcoil_c",
+              "effective_drive_a_turn": -8325233.859375,
+              "family": "sol",
+              "filament_turn_multiplier_sum": 328.0,
+              "raw_current_a": -25381.810546875,
+              "stored_circuit": 1
+            }
+          ],
+          "active_mapping_recomputed_for_shot": true,
+          "all_currents_prescribed": true,
+          "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+          "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+          "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+          "passive_or_vessel_circuit_count": 88,
+          "passive_registry_maximum_separation_m": 0.0,
+          "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+          "policy": "explicit prescribed-current response matrix",
+          "response_input_digests": {
+            "algorithm": "sha256",
+            "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+            "inputs": {
+              "fcoil_ang1": {
+                "dtype": "<f4",
+                "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_ang2": {
+                "dtype": "<f4",
+                "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_circ": {
+                "dtype": "<f8",
+                "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_height": {
+                "dtype": "<f4",
+                "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_n": {
+                "dtype": "<f4",
+                "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+                "shape": [
+                  101
+                ]
+              },
+              "fcoil_r": {
+                "dtype": "<f4",
+                "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_turns": {
+                "dtype": "<f4",
+                "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_width": {
+                "dtype": "<f4",
+                "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_xmult": {
+                "dtype": "<f4",
+                "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+                "shape": [
+                  938
+                ]
+              },
+              "fcoil_z": {
+                "dtype": "<f4",
+                "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+                "shape": [
+                  938
+                ]
+              },
+              "gridr": {
+                "dtype": "<f4",
+                "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+                "shape": [
+                  65
+                ]
+              },
+              "gridz": {
+                "dtype": "<f4",
+                "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+                "shape": [
+                  65
+                ]
+              },
+              "limiterr": {
+                "dtype": "<f4",
+                "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+                "shape": [
+                  37
+                ]
+              },
+              "limiterz": {
+                "dtype": "<f4",
+                "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+                "shape": [
+                  37
+                ]
+              },
+              "resolved_response_targets": {
+                "dtype": "<f8",
+                "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+                "shape": [
+                  1126,
+                  2
+                ]
+              }
+            }
+          },
+          "response_matrix_reused": true,
+          "response_shape": [
+            1126,
+            101
+          ],
+          "section_kernel_evaluations": 938,
+          "section_kernel_evaluations_this_shot": 0,
+          "stored_circuit_count": 101,
+          "stored_field_closure_rms_wb": 1.4749858092671266e-16,
+          "stored_field_closure_sup_wb": 8.881784197001252e-16
+        },
+        "first_call_wall_s": 96.0800514370203,
+        "median_warm_wall_s": 93.66272878739983,
+        "reference": {
+          "machine": "MAST",
+          "plasma_current_a": 933034.875,
+          "qualification_before_attribution": {
+            "declared_boundary_to_map_saddle_limit": 0.01,
+            "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+            "passes": true,
+            "stored_lcfs_contour_limit": 0.006,
+            "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+            "typed_saddle_candidate_count": 2,
+            "typed_saddle_resolved": true
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "source_coordinate": {
+            "axis_wb": 0.3423115953376666,
+            "boundary_wb": -0.1292985047045701,
+            "support_nodes": 243
+          },
+          "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+          "span_wb": 1.5839675751331153,
+          "time_s": 0.22999998927116394
+        },
+        "solver": {
+          "gmres_iterations": 12,
+          "newton_promotions": 12,
+          "registered_tolerance": 1e-08,
+          "requested_class": "diverted",
+          "route": "ForwardProfile.solve_branch newton_krylov",
+          "target_current_a": 933034.875
+        },
+        "terminal_class_operands": {
+          "axis_flux": 0.3416334996406384,
+          "class_margin": null,
+          "normalized_saddle_flux": 0.43460194263640495,
+          "normalized_wall_flux": null,
+          "saddle_rz": [
+            0.5906737987124928,
+            1.2205078288783973
+          ],
+          "wall_candidate_rz": [
+            null,
+            null
+          ],
+          "wall_candidate_shadowed": true,
+          "wall_candidate_valid": false
+        },
+        "terminal_residual": 0.0011126080468833416,
+        "topology_consistent": true,
+        "trips": 24,
+        "warm_launch_spread": {
+          "maximum_s": 94.6252525281161,
+          "median_absolute_deviation_s": 0.1271331189200282,
+          "minimum_s": 93.5355956684798,
+          "range_s": 1.0896568596363068,
+          "standard_deviation_s": 0.3947284920606663
+        },
+        "warm_launch_wall_s": [
+          94.6252525281161,
+          93.63802537880838,
+          93.85258888360113,
+          93.66272878739983,
+          93.5355956684798
+        ]
+      },
+      "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure/docs/figures/polish-support-performance/shared-spline/.baseline-source",
+      "topology_read": {
+        "agreement": {
+          "eager_vs_jit": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          },
+          "eager_vs_vmap": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          },
+          "jit_vs_vmap": {
+            "all_fields_pass": true,
+            "fields": {
+              "axis_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "binding_point_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "class_margin": {
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              },
+              "saddle_rz": {
+                "maximum_absolute_difference": 0.0,
+                "nonfinite_pattern_equal": true,
+                "passes_2e_12": true
+              }
+            }
+          }
+        },
+        "jit": {
+          "compile_count": 1,
+          "first_call_wall_s": 29.394817342981696,
+          "median_wall_s_per_map": 0.01961819874122739,
+          "spread": {
+            "maximum_s": 0.020277228206396103,
+            "median_absolute_deviation_s": 0.0005374192260205746,
+            "minimum_s": 0.01588018424808979,
+            "range_s": 0.0043970439583063126,
+            "standard_deviation_s": 0.0015949629517877655
+          },
+          "wall_s_per_map": [
+            29.394817342981696,
+            0.020277228206396103,
+            0.01926215924322605,
+            0.018999414518475533,
+            0.01588018424808979,
+            0.015893409959971905,
+            0.01937112770974636,
+            0.02025046106427908,
+            0.019865269772708416,
+            0.02007425297051668,
+            0.019870254211127758
+          ],
+          "warm_wall_s_per_map": [
+            0.020277228206396103,
+            0.01926215924322605,
+            0.018999414518475533,
+            0.01588018424808979,
+            0.015893409959971905,
+            0.01937112770974636,
+            0.02025046106427908,
+            0.019865269772708416,
+            0.02007425297051668,
+            0.019870254211127758
+          ]
+        },
+        "kernel": "polish_census_stationary_points followed by traced_boundary_read with the spline-restricted reachable-wall minimum",
+        "operand": {
+          "arm_count": 11,
+          "sha256": "42adaac7151f0c16eb48c6220e97ee7e2e6c20a9f1f7b4599726bbb148903d90",
+          "source": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/current-operands.npz",
+          "valid_arm_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        "selected_outputs": {
+          "axis_rz": [
+            [
+              0.9030348052779694,
+              0.015534464422285375
+            ],
+            [
+              0.9035484164982237,
+              0.029617845841666424
+            ],
+            [
+              0.9026962819489609,
+              0.041253865717225426
+            ],
+            [
+              0.9025204841929998,
+              0.04409401401380532
+            ],
+            [
+              0.20201557778505919,
+              0.9877791828005655
+            ],
+            [
+              0.37406412031730546,
+              -1.9211019565107106
+            ],
+            [
+              0.9132439941184266,
+              0.05878049033375055
+            ],
+            [
+              0.9133203168601668,
+              0.04216590397658018
+            ],
+            [
+              0.9130231996578791,
+              0.04744263981008275
+            ],
+            [
+              0.9019314019461326,
+              0.020162281686438594
+            ],
+            [
+              0.9016135226490096,
+              0.024617984126865743
+            ]
+          ],
+          "binding_point_rz": [
+            [
+              0.19524440169334412,
+              -0.046144426181843556
+            ],
+            [
+              0.19524440169334412,
+              -0.03125
+            ],
+            [
+              0.19524440169334412,
+              0.0
+            ],
+            [
+              0.19524440169334412,
+              0.0
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              0.19524440169334412,
+              0.025626688820206134
+            ],
+            [
+              0.19524440169334412,
+              0.03125
+            ],
+            [
+              0.19524440169334412,
+              0.03125
+            ],
+            [
+              0.19524440169334412,
+              -0.010258868680818267
+            ],
+            [
+              0.19524440169334412,
+              -0.010258868680818267
+            ]
+          ],
+          "class_margin": [
+            0.028018822632619456,
+            0.03279623743480281,
+            0.02832094037791444,
+            0.029094739553318594,
+            null,
+            null,
+            0.050455124710098054,
+            0.03959266982783777,
+            0.041255479336378686,
+            0.03986876105804649,
+            0.041666603616654585
+          ],
+          "saddle_rz": [
+            [
+              0.5628642390682692,
+              1.2634901482388117
+            ],
+            [
+              0.5745728038817767,
+              1.2639235916546951
+            ],
+            [
+              0.5519882544121029,
+              1.272313868980589
+            ],
+            [
+              0.5526865426840635,
+              1.2743472087241114
+            ],
+            [
+              0.5554440365321776,
+              -1.1188504565862138
+            ],
+            [
+              0.5424844830714627,
+              -1.0975066858069535
+            ],
+            [
+              0.6192157086901403,
+              1.174453758683143
+            ],
+            [
+              0.5880968559376076,
+              1.1589439080042145
+            ],
+            [
+              0.5897718401840847,
+              1.1624392892547324
+            ],
+            [
+              0.5923840472283124,
+              1.2202558665995356
+            ],
+            [
+              0.5853011730723614,
+              1.2333806492436519
+            ]
+          ]
+        },
+        "vmap": {
+          "compile_count": 1,
+          "first_batch_wall_s": 60.62532906141132,
+          "median_warm_wall_s_per_map": 0.004947667856785384,
+          "spread_per_map": {
+            "maximum_s": 0.005567955615168268,
+            "median_absolute_deviation_s": 7.2009607472203e-05,
+            "minimum_s": 0.004875658249313181,
+            "range_s": 0.0006922973658550869,
+            "standard_deviation_s": 0.00026298037053116213
+          },
+          "warm_batch_wall_s": [
+            0.054424346424639225,
+            0.05687152408063412,
+            0.06124751176685095,
+            0.053663057275116444,
+            0.05363224074244499
+          ],
+          "warm_wall_s_per_map": [
+            0.004947667856785384,
+            0.00517013855278492,
+            0.005567955615168268,
+            0.004878459752283313,
+            0.004875658249313181
+          ]
+        }
+      }
+    }
+  },
+  "raw_capture_sha256": {
+    "candidate": "c42dd76b1e1637022f640a5bf8816f642ddc69bae8b78b58c3e0d98555ff3cdf",
+    "main": "df20b3c919bfac20478e3247dff7fa4899389ac653d966f4df57d2cf9d078884"
+  },
+  "scheduler": {
+    "baseline": {
+      "elapsed": "01:00:08",
+      "exit_code": "0:0",
+      "finished_at": "2026-09-04T15:03:35",
+      "gpu_count": 1,
+      "job_id": "1262543",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "started_at": "2026-09-04T14:03:27",
+      "state": "TIMEOUT"
+    },
+    "candidate": {
+      "elapsed": "00:30:38",
+      "exit_code": "0:0",
+      "finished_at": "2026-09-04T15:49:13",
+      "gpu_count": 1,
+      "job_id": "1262631",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "started_at": "2026-09-04T15:18:35",
+      "state": "COMPLETED"
+    }
+  },
+  "schema": "nova.polish_support_performance",
+  "schema_version": 1,
+  "verdicts": {
+    "one_newton_trip_wall": {
+      "absolute_change_s": 0.04950087796896696,
+      "inside_launch_spread": true,
+      "pooled_launch_spread_s": 0.1100337877869606,
+      "relative_change": 0.007493931804827953
+    },
+    "residual_evaluation_wall": {
+      "absolute_change_s": 3.372505307197571e-05,
+      "inside_launch_spread": true,
+      "pooled_launch_spread_s": 0.006441539153456688,
+      "relative_change": 0.0008516377517007943
+    },
+    "solve_achieved_class": {
+      "baseline": "diverted",
+      "both_diverted": true,
+      "candidate": "diverted",
+      "inside_launch_spread": true,
+      "required": "diverted"
+    },
+    "solve_compile_count": {
+      "baseline": 1,
+      "candidate": 1,
+      "inside_launch_spread": true,
+      "relative_change": 0.0
+    },
+    "solve_first_call_wall": {
+      "absolute_change_s": -0.32245028018951416,
+      "inside_launch_spread": true,
+      "pooled_launch_spread_s": 1.0896568596363068,
+      "relative_change": -0.003356058571647182
+    },
+    "solve_median_warm_wall": {
+      "absolute_change_s": 1.357284115627408,
+      "inside_launch_spread": false,
+      "pooled_launch_spread_s": 1.0896568596363068,
+      "relative_change": 0.014491186976926937
+    },
+    "solve_terminal_residual": {
+      "baseline": 0.0011126080468833416,
+      "candidate": 0.0011126080468837009,
+      "inside_launch_spread": true,
+      "relative_change": 3.229390628336609e-13
+    },
+    "solve_trips": {
+      "baseline": 24,
+      "candidate": 24,
+      "inside_launch_spread": true,
+      "relative_change": 0.0
+    },
+    "tensor_spline_fits_per_residual_evaluation": {
+      "baseline": 252,
+      "candidate": 4,
+      "candidate_fits_per_topology_read": 1,
+      "inside_launch_spread": true,
+      "required_fits_per_topology_read": 1
+    },
+    "topology_batch_compile_count": {
+      "baseline": 1,
+      "candidate": 1,
+      "inside_launch_spread": true,
+      "relative_change": 0.0,
+      "required": 1
+    },
+    "topology_jit_wall_per_map": {
+      "absolute_change_s": 0.00024112872779369354,
+      "inside_launch_spread": true,
+      "pooled_launch_spread_s": 0.005090353079140186,
+      "relative_change": 0.012291073761372631
+    },
+    "topology_vmap_wall_per_map": {
+      "absolute_change_s": 7.34059140086174e-05,
+      "inside_launch_spread": true,
+      "pooled_launch_spread_s": 0.0006922973658550869,
+      "relative_change": 0.014836467631501631
+    }
+  }
+}

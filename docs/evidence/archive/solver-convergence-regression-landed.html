@@ -442,6 +442,33 @@
     identification finding on the vertical-mode row.</p>
   </section>
 
+  <section id="vertical-constraint">
+    <h2>The vertical constraint converges both vertical-mode rows (prototype, held for the lead)</h2>
+    <p><strong>Commits:</strong> <code>6ae142d5</code> (optional vertical centroid constraint in <code>forward.py</code> and
+    <code>forward_operator.py</code>, with its test) and <code>86486ee2</code> (receipt), held in worktree
+    <code>scr-vertical-position-constraint-prototype</code>; receipt
+    <code>docs/figures/solver-convergence-regression/vertical-mode/constraint/four-rows.json</code> (H200 job 1262625). Off by
+    default and bit-identical when off; when on, one multiplier and one equation pin the vertical current centroid to the seed's,
+    solved by the same Newton–Krylov on the public route, the multiplier reported as the equivalent current on the P6 pair.</p>
+    <table>
+      <caption>Bank seeds on the production route, free against constrained</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Free</th><th scope="col">Constrained</th><th scope="col">Compensating current</th><th scope="col">Jacobian ratio, free to constrained</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21986/46 (vertical mode)</th><td>1.84e-3, 5 trips, cycling</td><td>1.28e-14, 3 trips, converged</td><td>−4103 A</td><td>3.1e-4 to 4.5e-3</td></tr>
+        <tr><th scope="row">21989/55 (vertical mode)</th><td>6.87e-4, 16 trips, settled</td><td>3.48e-9, 7 trips, fixed point converged</td><td>+3022 A</td><td>4.3e-4 to 3.6e-3</td></tr>
+        <tr><th scope="row">21985/51 (control)</th><td>9.14e-4, 6 trips, stagnated</td><td>unconstrained</td><td></td><td></td></tr>
+        <tr><th scope="row">22086/43 (control)</th><td>3.38e-4, 7 trips, settled</td><td>unconstrained</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The two rows the null-direction measurement named converge once the vertical mode is closed, by eleven and five orders of
+    magnitude, in fewer trips. The compensating currents of three to four kiloamps on the radial-field pair measure the field the
+    prescribed currents miss to hold the plasma at the seed's height, and they are the outer equation of the elimination route
+    the lead chose: drive that current to zero by moving the target height, recovering the prescribed-current equilibrium with no
+    reference. The 21989/55 fixed point converges below the solver's own tolerance but above the branch qualification of 1e-10,
+    which stays as it is. The solver shape is the lead's decision; nothing is merged.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

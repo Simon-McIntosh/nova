@@ -358,6 +358,18 @@
     saddle_resolved, resolution_certified and the joint convergence_and_topology_certified.</p>
   </section>
 
+  <section id="shared-spline">
+    <h2>One tensor spline per topology read: correct, and not the cost (held)</h2>
+    <p>Commits <code>edf4dd21</code> to <code>ddfe29da</code> on the polish candidate, held; receipt
+    <code>docs/figures/polish-support-performance/shared-spline/main-vs-shared.json</code> (H200 job 1262631). A topology read
+    fitted the tensor spline 63 times and the residual performs four reads, 252 fits per evaluation; the shared object makes it 4,
+    asserted by a test that every consumer publishes direct evaluations of one spline. Against its polish parent on 22086/43 pure
+    the solve wall moved from 93.7 to 95.0 s at 24 trips with the residual identical, the kernel inside spread and eager, jit and
+    vmap agreeing at 2e-12. The spline fits were never the cost: the per-trip profile puts them at 3 ms of a 38 ms read whose
+    wall reachability takes 25 ms, and the read runs four times per residual evaluation. The speed condition is met by reading
+    the topology once per trip and making the wall minimum cheap, not by the fit count.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T16:52:53",
+  "updated": "2026-09-04T17:12:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2424,6 +2424,24 @@
           "gpt-5.6-sol": "01a05dcf-0a1e-7af0-a488-b5a905cdc1c7"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "scr-one-read-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-passive-field-x",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "scr-presettlement",
@@ -93462,6 +93480,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1617
+    "_version": 1619
   }
 }

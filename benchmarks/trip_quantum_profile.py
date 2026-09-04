@@ -48,10 +48,21 @@ DEFAULT_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/"
     "trip-quantum-profile.md"
 )
-DEFAULT_TRACE = Path(
+PARTIAL_TRACE = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/trip-quantum-trace"
+    "/plugins/profile/2026_09_04_14_30_40/perfetto_trace.json.gz"
 )
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+DEFAULT_TIMER_LOGS = (
+    (
+        "1262560",
+        DEFAULT_REPORT.parent / "trip-quantum-profile-3-slurm.log",
+    ),
+    (
+        "1262571",
+        DEFAULT_REPORT.parent / "trip-quantum-profile-4-slurm.log",
+    ),
+)
 PRIOR_FULL_SOLVE_LOG = DEFAULT_REPORT.parent / "trip-quantum-slurm.log"
 PRIOR_FULL_SOLVE_JOB = "1262501"
 SOURCE_RECEIPT = ROOT / "docs/figures/polish-support-performance/raw-main.json"
@@ -66,6 +77,7 @@ LINE_SEARCH_GRADES_PER_UPDATE = 6
 SCAN_ITERATION_SECONDS = 7.6e-6
 SPLINE_FITS_PER_TOPOLOGY_READ = 63
 TOPOLOGY_READS_PER_OUTER_RESIDUAL = 4
+SPLINE_CONDITION_SVDS_PER_FIT = 2
 
 
 def _sha256(path: Path) -> str:
@@ -163,6 +175,82 @@ def _distribution(samples: list[float]) -> dict[str, Any]:
         "median_absolute_deviation_s": float(
             np.median(np.abs(values - np.median(values)))
         ),
+    }
+
+
+def _timer_log(job_id: str, path: Path) -> dict[str, Any]:
+    samples: dict[str, list[float]] = {}
+    pattern = re.compile(
+        r"^SAMPLE_DONE name=(?P<name>[a-z_]+) index=\d+/\d+ "
+        r"wall_s=(?P<wall>[0-9.]+)$"
+    )
+    failure = None
+    dropped_activity_buffers = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = pattern.match(line)
+        if match:
+            samples.setdefault(match.group("name"), []).append(
+                float(match.group("wall"))
+            )
+        if "cusolverDnDgesvdj" in line:
+            failure = "cusolverDnDgesvdj failed during jit_one_trip profiler replay"
+        if "drop the buffer" in line:
+            dropped_activity_buffers = True
+    required = {
+        "production_trip",
+        "forward_evaluation",
+        "jacobian_vector_product",
+        "gmres_orthogonalisation",
+        "line_search",
+        "topology_read",
+        "candidate_census",
+        "spline_fits",
+        "flood_fills",
+        "wall_reachability",
+        "separatrix",
+    }
+    missing = sorted(required - samples.keys())
+    incomplete = sorted(name for name, values in samples.items() if len(values) != 3)
+    if missing or incomplete:
+        detail = f"missing={missing}, incomplete={incomplete}"
+        raise RuntimeError(f"timer log {path} is incomplete: {detail}")
+    if failure is None:
+        raise RuntimeError(f"timer log {path} does not retain the profiler failure")
+    return {
+        "job_id": job_id,
+        "log_path": str(path),
+        "log_sha256": _sha256(path),
+        "scheduler": {
+            "state": "FAILED",
+            "exit_code": "1:0",
+            "partition": "betelgeuse",
+            "node": "98dci4-gpu-0003",
+            "reservation": "gpu_0003_grpA",
+            "time_limit": "01:00:00",
+        },
+        "timings": {name: _distribution(values) for name, values in samples.items()},
+        "timing_phase_complete": True,
+        "profiler_replay_failure": failure,
+        "cupti_dropped_activity_buffers": dropped_activity_buffers,
+    }
+
+
+def _central_probes(
+    timer_runs: list[dict[str, Any]],
+    control_flow: dict[str, dict[str, int]],
+) -> dict[str, Any]:
+    names = timer_runs[0]["timings"].keys()
+    return {
+        name: {
+            "steady": _distribution(
+                [run["timings"][name]["median_s"] for run in timer_runs]
+            ),
+            "run_medians_s": {
+                run["job_id"]: run["timings"][name]["median_s"] for run in timer_runs
+            },
+            "control_flow": control_flow[name],
+        }
+        for name in names
     }
 
 
@@ -569,13 +657,61 @@ def _component_programs(
     }
 
 
+def _count_summary(
+    trips: int,
+    updates: int,
+    *,
+    accepted: int | None = None,
+    backtracks: list[int] | None = None,
+    recovery_activations: int | None = None,
+    model_rebuild_activations: int | None = None,
+    descent_activations: int | None = None,
+) -> dict[str, Any]:
+    line_grades = updates * LINE_SEARCH_GRADES_PER_UPDATE
+    jvp_count = updates * parity.GMRES_ITERATIONS
+    residual_evaluations = updates + line_grades
+    if trips <= 0:
+        raise RuntimeError("production solve reported no active-set trips")
+    return {
+        "active_set_trips": trips,
+        "newton_updates_total": updates,
+        "newton_updates_per_trip": updates / trips,
+        "accepted_newton_updates_total": accepted,
+        "accepted_newton_updates_per_trip": (
+            accepted / trips if accepted is not None else None
+        ),
+        "configured_gmres_iterations_per_update": parity.GMRES_ITERATIONS,
+        "gmres_jacobian_vector_products_total": jvp_count,
+        "gmres_jacobian_vector_products_per_trip": jvp_count / trips,
+        "fixed_line_search_grades_per_update": LINE_SEARCH_GRADES_PER_UPDATE,
+        "line_search_grades_total": line_grades,
+        "line_search_grades_per_trip": line_grades / trips,
+        "primal_residual_evaluations_total": updates,
+        "primal_residual_evaluations_per_trip": updates / trips,
+        "residual_evaluations_total": residual_evaluations,
+        "residual_evaluations_per_trip": residual_evaluations / trips,
+        "residual_evaluation_equivalents_total": updates + jvp_count + line_grades,
+        "residual_evaluation_equivalents_per_trip": (updates + jvp_count + line_grades)
+        / trips,
+        "promotion_backtrack_counts": backtracks,
+        "recovery_activations": recovery_activations,
+        "model_rebuild_activations": model_rebuild_activations,
+        "descent_activations": descent_activations,
+        "counting_contract": (
+            "residual evaluations count one primal residual for each Newton "
+            "update plus all six fixed line-search grades; configured GMRES "
+            "Jacobian-vector products are counted separately, and their sum is "
+            "reported only as residual-evaluation equivalents"
+        ),
+    }
+
+
 def _counts(result: Any) -> dict[str, Any]:
     history = result.equilibrium.fixed_point
     trips = int(np.asarray(history.active_set_iterations))
     updates = int(np.asarray(history.attempted_newton_promotions))
     accepted = int(np.asarray(history.accepted_newton_promotions))
     backtracks = np.asarray(history.promotion_backtrack_counts, dtype=np.int64)
-    used_backtracks = backtracks[:updates]
     recovery = np.asarray(history.promotion_recovery_activations, dtype=np.int64)[
         :updates
     ]
@@ -585,98 +721,61 @@ def _counts(result: Any) -> dict[str, Any]:
     descent = np.asarray(history.promotion_descent_activations, dtype=np.int64)[
         :updates
     ]
-    line_grades = updates * LINE_SEARCH_GRADES_PER_UPDATE
-    jvp_count = updates * parity.GMRES_ITERATIONS
-    if trips <= 0:
-        raise RuntimeError("production solve reported no active-set trips")
-    return {
-        "active_set_trips": trips,
-        "newton_updates_total": updates,
-        "newton_updates_per_trip": updates / trips,
-        "accepted_newton_updates_total": accepted,
-        "accepted_newton_updates_per_trip": accepted / trips,
-        "configured_gmres_iterations_per_update": parity.GMRES_ITERATIONS,
-        "gmres_jacobian_vector_products_total": jvp_count,
-        "gmres_jacobian_vector_products_per_trip": jvp_count / trips,
-        "fixed_line_search_grades_per_update": LINE_SEARCH_GRADES_PER_UPDATE,
-        "line_search_grades_total": line_grades,
-        "line_search_grades_per_trip": line_grades / trips,
-        "residual_evaluation_equivalents_total": updates + jvp_count + line_grades,
-        "residual_evaluation_equivalents_per_trip": (updates + jvp_count + line_grades)
-        / trips,
-        "promotion_backtrack_counts": used_backtracks.tolist(),
-        "recovery_activations": int(np.count_nonzero(recovery == 1)),
-        "model_rebuild_activations": int(np.count_nonzero(rebuild == 1)),
-        "descent_activations": int(np.count_nonzero(descent == 1)),
-        "counting_contract": (
-            "one primal residual for each Newton update, configured GMRES "
-            "actions, and all six fixed line-search grades; recovery-model "
-            "evaluations are reported separately by their activation counts"
-        ),
-    }
+    return _count_summary(
+        trips,
+        updates,
+        accepted=accepted,
+        backtracks=backtracks[:updates].tolist(),
+        recovery_activations=int(np.count_nonzero(recovery == 1)),
+        model_rebuild_activations=int(np.count_nonzero(rebuild == 1)),
+        descent_activations=int(np.count_nonzero(descent == 1)),
+    )
 
 
 def _attribution(
     trip_wall: float,
     counts: dict[str, Any],
     probes: dict[str, Any],
-    trace_region: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     median = {name: row["steady"]["median_s"] for name, row in probes.items()}
     updates = counts["newton_updates_per_trip"]
     jvp_count = counts["gmres_jacobian_vector_products_per_trip"]
-    grades = counts["line_search_grades_per_trip"]
-    topology_fraction = min(
-        median["topology_read"] / max(median["forward_evaluation"], 1.0e-30),
-        0.95,
+    residual_evaluations = counts["residual_evaluations_per_trip"]
+    topology_reads = residual_evaluations * TOPOLOGY_READS_PER_OUTER_RESIDUAL
+    line_search_exclusive = max(
+        median["line_search"]
+        - LINE_SEARCH_GRADES_PER_UPDATE * median["forward_evaluation"],
+        0.0,
     )
-    raw = {
-        "forward_evaluation": updates
-        * median["forward_evaluation"]
-        * (1.0 - topology_fraction),
-        "topology_read": (
-            updates * median["forward_evaluation"]
-            + jvp_count * median["jacobian_vector_product"]
-            + grades * median["forward_evaluation"]
-        )
-        * topology_fraction,
-        "jacobian_vector_product": jvp_count
-        * median["jacobian_vector_product"]
-        * (1.0 - topology_fraction),
+    attributed = {
+        "topology_read": topology_reads * median["topology_read"],
+        "forward_evaluation": residual_evaluations * median["forward_evaluation"],
+        "jacobian_vector_product": jvp_count * median["jacobian_vector_product"],
         "gmres_orthogonalisation": updates * median["gmres_orthogonalisation"],
-        "line_search": grades
-        * median["forward_evaluation"]
-        * (1.0 - topology_fraction),
+        "line_search": updates * line_search_exclusive,
     }
-    device_sum = sum(raw.values())
-    traced_compute = (
-        trace_region["summed_gpu_compute_wall_s"] / counts["active_set_trips"]
-    )
-    traced_transfer = (
-        trace_region["summed_gpu_transfer_wall_s"] / counts["active_set_trips"]
-    )
-    scale = traced_compute / max(device_sum, 1.0e-30)
-    attributed = {name: value * scale for name, value in raw.items()}
-    attributed["device_transfer"] = traced_transfer
+    directly_attributed = sum(attributed.values())
     attributed["host_dispatch_or_device_sync"] = max(
-        trip_wall - traced_compute - traced_transfer, 0.0
+        trip_wall - directly_attributed, 0.0
     )
     divisor = {
-        "forward_evaluation": updates,
-        "topology_read": updates + jvp_count + grades,
+        "forward_evaluation": residual_evaluations,
+        "topology_read": topology_reads,
         "jacobian_vector_product": jvp_count,
         "gmres_orthogonalisation": updates,
-        "line_search": grades,
-        "device_transfer": 1,
+        "line_search": updates,
         "host_dispatch_or_device_sync": 1,
     }
     rows = [
         {
             "component": name,
             "wall_s_per_trip": wall,
-            "wall_s_per_evaluation": median.get(
-                name, wall / max(divisor.get(name, 1), 1)
+            "wall_s_per_evaluation": (
+                line_search_exclusive
+                if name == "line_search"
+                else median.get(name, wall / max(divisor.get(name, 1), 1))
             ),
+            "raw_direct_probe_wall_s_per_evaluation": median.get(name),
             "share_of_trip": wall / trip_wall,
         }
         for name, wall in attributed.items()
@@ -684,16 +783,21 @@ def _attribution(
     return sorted(rows, key=lambda row: row["wall_s_per_trip"], reverse=True), {
         "method": (
             "direct synchronized probe medians multiplied by exact trip counts; "
-            "overlapping topology work is split from forward/JVP latency, device "
-            "semantic device terms are normalized to profiler-observed GPU compute "
-            "wall, transfers retain their profiler wall, and the nonnegative timer "
-            "remainder is host dispatch or final synchronization"
+            "the line-search row subtracts its six separately counted forward "
+            "grades, topology reads use the measured four-per-residual reuse-map "
+            "count, and the nonnegative timer remainder retains fused device work, "
+            "host dispatch, and final synchronization because CUPTI evidence failed"
         ),
-        "topology_fraction_of_forward_probe": topology_fraction,
-        "raw_device_component_sum_s": device_sum,
-        "profiler_gpu_compute_wall_s_per_trip": traced_compute,
-        "profiler_gpu_transfer_wall_s_per_trip": traced_transfer,
-        "normalization_scale": scale,
+        "topology_reads_per_trip": topology_reads,
+        "directly_attributed_wall_s_per_trip": directly_attributed,
+        "unattributed_timer_remainder_s_per_trip": attributed[
+            "host_dispatch_or_device_sync"
+        ],
+        "remainder_scope": (
+            "upper bound on host dispatch plus final synchronization; without a "
+            "complete profiler trace it also contains fused device work absent "
+            "from the isolated component model"
+        ),
     }
 
 
@@ -732,16 +836,17 @@ def _topology_breakdown(
     )
 
 
-def _evaluation_census(
-    probes: dict[str, Any], trace: dict[str, Any]
-) -> dict[str, dict[str, Any]]:
+def _evaluation_census(probes: dict[str, Any]) -> dict[str, dict[str, Any]]:
     rows = {}
     for name, probe in probes.items():
-        region = trace["regions"][name]
         control_flow = probe["control_flow"]
         rows[name] = {
-            "gpu_compute_launches_per_evaluation": region["gpu_compute_launch_count"],
-            "gpu_transfers_per_evaluation": region["gpu_transfer_count"],
+            "gpu_compute_launches_per_evaluation": None,
+            "gpu_transfers_per_evaluation": None,
+            "launch_count_status": (
+                "not captured: both CUPTI replays failed in cusolverDnDgesvdj "
+                "and the partial trace is unpromoted"
+            ),
             "fixed_scan_trip_lower_bound_per_evaluation": control_flow[
                 "fixed_scan_trip_lower_bound"
             ],
@@ -762,11 +867,22 @@ def _ranked_bottlenecks(
         {
             "bottleneck": "topology read: "
             + topology_row["component"].replace("_", " "),
-            "wall_s_per_trip": component["topology_read"]["wall_s_per_trip"]
-            * topology_row["share_of_topology"],
+            "wall_s_per_trip": component["topology_read"]["wall_s_per_trip"],
             "repair": (
-                "replace serial fixed-shape scans with fused or logarithmic "
-                "connectivity and reuse one topology partition across residual grades"
+                "land the shared TensorBSpline authority so each topology read fits "
+                "once rather than 63 times, then reuse one topology partition across "
+                "residual grades"
+            ),
+            "owner_plan": "null-identification-authority",
+        },
+        {
+            "bottleneck": "host, synchronization, or unmodelled fused-device remainder",
+            "wall_s_per_trip": component["host_dispatch_or_device_sync"][
+                "wall_s_per_trip"
+            ],
+            "repair": (
+                "move reconciliation under one compiled boundary and add a profiler "
+                "route that isolates solver-library replay from component timing"
             ),
             "owner_plan": "millisecond-converged-solve",
         },
@@ -777,7 +893,7 @@ def _ranked_bottlenecks(
                 "reuse or compress the linearized operator and reduce the Krylov "
                 "action budget before changing nonlinear acceptance"
             ),
-            "owner_plan": "projected-conditioning-repair",
+            "owner_plan": "solver-convergence-regression",
         },
         {
             "bottleneck": "line-search residual grades",
@@ -792,7 +908,7 @@ def _ranked_bottlenecks(
             "bottleneck": "GMRES orthogonalisation and qualification",
             "wall_s_per_trip": component["gmres_orthogonalisation"]["wall_s_per_trip"],
             "repair": "fuse Arnoldi reductions and avoid duplicated projections",
-            "owner_plan": "projected-conditioning-repair",
+            "owner_plan": "solver-convergence-regression",
         },
     ]
     return sorted(candidates, key=lambda row: row["wall_s_per_trip"], reverse=True)[:3]
@@ -800,49 +916,91 @@ def _ranked_bottlenecks(
 
 def _write_report(receipt: dict[str, Any], output: Path) -> None:
     counts = receipt["trip"]["counts"]
-    prior_full_solve = receipt["trip"]["prior_full_solve"]
-    prior_trip_wall = (
-        prior_full_solve["median_warm_solve_wall_s"] / counts["active_set_trips"]
-    )
+    prior = receipt["trip"]["prior_full_solve"]
+    prior_trip_wall = prior["median_warm_solve_wall_s"] / counts["active_set_trips"]
     callback_sync = receipt["host_callback_or_sync"]
     host_sync_row = next(
         row
         for row in receipt["trip"]["component_breakdown"]
         if row["component"] == "host_dispatch_or_device_sync"
     )
+    runs = receipt["timer_runs"]
+    run_trip_walls = [
+        run["timings"]["production_trip"]["median_s"] / counts["active_set_trips"]
+        for run in runs
+    ]
+    if len(runs) == 2:
+        timing_summary = (
+            "Jobs `1262560` and `1262571` independently completed every "
+            "device-synchronised timer for 22086/43 pure. Their production medians "
+            f"were **{runs[0]['timings']['production_trip']['median_s']:.6f} s** and "
+            f"**{runs[1]['timings']['production_trip']['median_s']:.6f} s**, or "
+            f"{run_trip_walls[0]:.6f} and {run_trip_walls[1]:.6f} s per active-set "
+            "trip. The profile uses the median of the two run medians: "
+            f"**{receipt['trip']['wall_s']:.6f} s/trip**."
+        )
+    else:
+        timing_summary = (
+            f"Job `{runs[0]['job_id']}` completed every device-synchronised timer "
+            "for 22086/43 pure. Its production median was "
+            f"**{runs[0]['timings']['production_trip']['median_s']:.6f} s**, or "
+            f"**{run_trip_walls[0]:.6f} s per active-set trip**."
+        )
     lines = [
         "# H200 active-set trip quantum",
         "",
+        timing_summary,
         (
-            f"Job `{receipt['scheduler']['job_id']}` measured one warm production "
-            f"trip for 22086/43 pure at **{receipt['trip']['wall_s']:.6f} s**. "
-            f"It executed {counts['newton_updates_per_trip']:.0f} Newton updates, "
-            f"{counts['gmres_jacobian_vector_products_per_trip']:.0f} configured "
-            f"GMRES JVPs, and {counts['line_search_grades_per_trip']:.0f} fixed "
-            "line-search grades "
-            f"({counts['residual_evaluation_equivalents_per_trip']:.0f} "
-            "residual-evaluation "
-            "equivalents). The solve returned "
-            f"**{counts['active_set_trips']} active-set trips**; the source "
-            "performance receipt's count of 24 is the attempted-Newton-promotion "
-            "count, not the active-set trip unit."
+            f"The solve executes **{counts['active_set_trips']} active-set trips**, "
+            f"**{counts['residual_evaluations_total']} residual evaluations** "
+            f"({counts['residual_evaluations_per_trip']:.3f}/trip: "
+            f"{counts['primal_residual_evaluations_total']} primal plus "
+            f"{counts['line_search_grades_total']} line-search grades), and "
+            f"**{counts['gmres_jacobian_vector_products_total']} Jacobian-vector "
+            "products** "
+            f"({counts['gmres_jacobian_vector_products_per_trip']:.3f}/trip). The "
+            "source receipt's count of 24 is the attempted-Newton-promotion count, "
+            "not the active-set trip count."
         ),
         (
-            f"The profiling denominator preserves job `{PRIOR_FULL_SOLVE_JOB}` as "
-            "independent full-solve evidence: its three synchronized warm solves "
-            "span "
-            f"{prior_full_solve['minimum_warm_solve_wall_s']:.6f} "
-            "to "
-            f"{prior_full_solve['maximum_warm_solve_wall_s']:.6f} s, with "
-            f"{prior_trip_wall:.6f} s per active-set trip."
+            f"Independent job `{PRIOR_FULL_SOLVE_JOB}` spans "
+            f"{prior['minimum_warm_solve_wall_s']:.6f} to "
+            f"{prior['maximum_warm_solve_wall_s']:.6f} s over three warm solves, "
+            f"or {prior_trip_wall:.6f} s/trip at its median."
         ),
-        "",
-        "## Additive trip attribution",
-        "",
-        "| rank | component | wall / trip [s] | share | "
-        "direct wall / evaluation [ms] |",
-        "|---:|---|---:|---:|---:|",
     ]
+    if len(runs) == 2:
+        lines.extend(
+            [
+                "",
+                "## Repeated device-synchronised timer medians",
+                "",
+                "| program | job 1262560 [ms] | job 1262571 [ms] | "
+                "profile centre [ms] |",
+                "|---|---:|---:|---:|",
+            ]
+        )
+        for name, probe in {
+            "production_trip": receipt["production_trip_probe"],
+            **receipt["direct_probes"],
+        }.items():
+            run_medians = probe["run_medians_s"]
+            lines.append(
+                f"| {name.replace('_', ' ')} | "
+                f"{1.0e3 * run_medians['1262560']:.6f} | "
+                f"{1.0e3 * run_medians['1262571']:.6f} | "
+                f"{1.0e3 * probe['steady']['median_s']:.6f} |"
+            )
+    lines.extend(
+        [
+            "",
+            "## Additive timer attribution",
+            "",
+            "| rank | component | wall / trip [s] | share | "
+            "direct wall / evaluation [ms] |",
+            "|---:|---|---:|---:|---:|",
+        ]
+    )
     for index, row in enumerate(receipt["trip"]["component_breakdown"], 1):
         lines.append(
             f"| {index} | {row['component'].replace('_', ' ')} | "
@@ -865,64 +1023,84 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
             f"{row['attributed_wall_s_per_trip']:.6f} | "
             f"{100.0 * row['share_of_topology']:.2f}% |"
         )
+    lines.extend(["", receipt["trip"]["topology_breakdown_method"] + "."])
     floor = receipt["trip"]["scan_latency_floor"]
-    trace = receipt["profiler_trace"]["regions"]["production_trip"]
     forward_census = receipt["evaluation_census"]["forward_evaluation"]
     forward_branch_scan_sum = forward_census[
         "fixed_scan_trip_compiled_branch_sum_per_evaluation"
     ]
-    compute_launches_per_trip = (
-        trace["gpu_compute_launch_count"] / counts["active_set_trips"]
-    )
-    transfers_per_trip = trace["gpu_transfer_count"] / counts["active_set_trips"]
     lines.extend(
         [
             "",
             "## Launch and scan floor",
             "",
             (
-                "The synchronized full-solve profiler interval contains "
-                f"**{compute_launches_per_trip:.1f} "
-                "GPU compute launches/trip** and "
-                f"{transfers_per_trip:.1f} "
-                "transfers/trip. The branch-minimum census contains "
-                f"**{floor['fixed_scan_trip_lower_bound_per_trip']:.1f} "
-                "fixed scan trips/trip as a lower bound**; at 7.6 µs each "
-                "their arithmetic floor is "
-                f"{floor['arithmetic_floor_s']:.6f} s, so measured trip wall is "
+                "GPU kernel-launch and transfer counts are **not available**: both "
+                "CUPTI replays failed before a complete interval was written. The "
+                "partial trace is unpromoted. The branch-minimum static census has "
+                f"**{floor['fixed_scan_trip_lower_bound_per_trip']:.1f} fixed scan "
+                "iterations/trip**; at 7.6 µs each, their arithmetic floor is "
+                f"{floor['arithmetic_floor_s']:.6f} s and measured trip wall is "
                 f"**{floor['measured_to_floor_ratio']:.2f}×** that floor. Dynamic "
-                "while-loop trips are listed separately and are not guessed into "
-                "the floor."
+                "while-loop iterations are not guessed into it."
             ),
             (
-                "One operator forward evaluation launches "
-                f"**{forward_census['gpu_compute_launches_per_evaluation']} GPU "
-                "compute kernels** and contains at least "
+                "One forward evaluation contains at least "
                 f"**{forward_census['fixed_scan_trip_lower_bound_per_evaluation']} "
-                "fixed scan trips** ("
-                f"{forward_branch_scan_sum} "
-                "when all compiled conditional branches are summed). The reuse-map "
-                f"census assigns {TOPOLOGY_READS_PER_OUTER_RESIDUAL} topology reads "
-                "to an outer residual evaluation and "
-                f"{SPLINE_FITS_PER_TOPOLOGY_READ} tensor-spline fits to each "
-                "topology read."
+                f"fixed scan iterations** ({forward_branch_scan_sum} when all "
+                "compiled branches are summed). The reuse-map census assigns "
+                f"{TOPOLOGY_READS_PER_OUTER_RESIDUAL} topology reads/residual and "
+                f"{SPLINE_FITS_PER_TOPOLOGY_READ} split-spline fits/read."
             ),
             "",
-            "| evaluation | GPU compute launches | transfers | fixed scan lower "
-            "bound | compiled-branch scan sum |",
+            "| evaluation | GPU launches | transfers | fixed scan lower bound | "
+            "compiled-branch scan sum |",
             "|---|---:|---:|---:|---:|",
         ]
     )
     for name, row in receipt["evaluation_census"].items():
+        launches = row["gpu_compute_launches_per_evaluation"] or "not captured"
+        transfers = row["gpu_transfers_per_evaluation"] or "not captured"
         lines.append(
-            f"| {name.replace('_', ' ')} | "
-            f"{row['gpu_compute_launches_per_evaluation']} | "
-            f"{row['gpu_transfers_per_evaluation']} | "
+            f"| {name.replace('_', ' ')} | {launches} | {transfers} | "
             f"{row['fixed_scan_trip_lower_bound_per_evaluation']} | "
             f"{row['fixed_scan_trip_compiled_branch_sum_per_evaluation']} |"
         )
+    svd = receipt["svd_census"]
+    replay = receipt["profiler_replay"]
+    if replay["failed_jobs"]:
+        profiler_summary = (
+            f"Both attempts failed in `{replay['failure_call']}` while replaying "
+            "`jit_one_trip`; job 1262571 also reported a dropped CUPTI buffer. "
+            "The retained Perfetto file is "
+            f"{replay['partial_trace']['size_bytes']:,} "
+            f"bytes at `{replay['partial_trace']['path']}` and has "
+            "`promoted: false`."
+        )
+    else:
+        profiler_summary = (
+            "The timer-only route did not request CUPTI replay, so kernel-launch "
+            "counts remain unavailable by construction."
+        )
     lines.extend(
         [
+            "",
+            "## Jacobi SVD replay finding",
+            "",
+            (
+                "The `cusolverDnDgesvdj` failure exposes production work, not "
+                "profiler setup alone. The dominant authored call site is "
+                "`nova.linalg.split_spline._conditioned_fit`: "
+                "`jnp.linalg.cond(normal)` runs once for each of the level and field "
+                "normal equations. At 63 fits/topology read and four reads/residual, "
+                "that is **"
+                f"{svd['split_spline_condition_svds_per_residual_evaluation']} "
+                "Jacobi SVDs/residual evaluation**. "
+                "`nova.equilibrium.fixed_point._projected_krylov_condition` owns one "
+                "additional singular-value-only SVD per Newton residual "
+                "linearisation."
+            ),
+            profiler_summary,
             "",
             "## Ranked bottlenecks and implied repairs",
             "",
@@ -941,21 +1119,22 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
             (
                 "The closed production jaxpr contains "
                 f"**{callback_sync['closed_jaxpr_callback_primitive_count']} host "
-                "callback primitives**. Every timed and traced invocation ends in "
-                "one `jax.block_until_ready` device synchronization. The profiler "
-                "subtraction bounds host dispatch plus final synchronization at "
+                "callback primitives**. Every timed invocation ends in one "
+                "`jax.block_until_ready` device synchronization. Without a complete "
+                "device trace, the timer remainder is "
                 f"{host_sync_row['wall_s_per_trip']:.6f} s/trip "
-                f"({100.0 * host_sync_row['share_of_trip']:.2f}%)."
+                f"({100.0 * host_sync_row['share_of_trip']:.2f}%). It is an upper "
+                "bound on host plus synchronization, not a pure-host measurement, "
+                "because it retains fused device work absent from the isolated model."
             ),
             "",
             "## Measurement boundaries",
             "",
-            "The component table is a count-scaled attribution of direct synchronized "
-            "probe medians to the exact fused trip wall; it is not a claim that "
-            "isolated probes add without fusion. The raw receipt retains the "
-            "normalization scale, every probe distribution, the trace digest, cache "
-            "identity, and control-flow "
-            "census. No `nova/` source was changed.",
+            "The additive table scales direct synchronized component medians by "
+            "exact evaluation counts. Isolated probes do not prove that the fused "
+            "program adds identically. The receipt preserves both raw timer "
+            "distributions, terminal-log hashes, the unpromoted trace identity, and "
+            "the static control-flow census. No `nova/` source was changed.",
             "",
         ]
     )
@@ -963,56 +1142,24 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
     output.write_text("\n".join(lines), encoding="utf-8")
 
 
-def run(
-    output: Path,
-    report: Path,
-    trace_root: Path,
-    cache_root: Path,
-    repeats: int,
+def _build_receipt(
+    *,
+    reference: dict[str, Any],
+    carrier: dict[str, Any],
+    policy: dict[str, Any],
+    active_set_authority: dict[str, Any],
+    counts: dict[str, Any],
+    probes: dict[str, Any],
+    production_probe: dict[str, Any],
+    callback_census: dict[str, int],
+    timer_runs: list[dict[str, Any]],
+    runtime: dict[str, Any],
+    cache_receipt: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    configure_dtypes()
-    _require_h200()
-    cache_root.mkdir(parents=True, exist_ok=True)
-    cache = configure_persistent_compilation_cache(
-        cache_root, minimum_compile_seconds=0.0
-    )
-    case, profile, target_current, carrier, policy = _profile_and_seed()
-    active_set_authority = _active_set_authority()
     prior_full_solve = _prior_full_solve_evidence()
-    reference = case["reference"]
-    if (
-        int(reference["shot"]) != REFERENCE_SHOT
-        or int(reference["slice_index"]) != REFERENCE_SLICE
-    ):
-        raise RuntimeError(f"unexpected production arm {reference}")
-    state = jnp.asarray(case["state"])
-    requested, production = _production_program(profile, target_current)
-    callback_census = _callback_census(production, (state,))
-    production_executable, production_probe = _compile_probe(
-        "production_trip", production, (state,), repeats
-    )
-    result = _ready(production_executable(state))
-    counts = _counts(result)
-    if counts["active_set_trips"] != active_set_authority["active_set_iterations"]:
-        raise RuntimeError(
-            f"production program executed {counts['active_set_trips']} trips"
-        )
-    component_programs = _component_programs(profile, state, requested, target_current)
-    executables: dict[str, tuple[Any, tuple[Any, ...]]] = {
-        "production_trip": (production_executable, (state,))
-    }
-    probes = {}
-    for name, (function, arguments) in component_programs.items():
-        executable, probe = _compile_probe(name, function, arguments, repeats)
-        executables[name] = (executable, arguments)
-        probes[name] = probe
-    trace_path = _profile_trace(trace_root, executables)
-    trace = _trace_summary(trace_path)
-    evaluation_census = _evaluation_census(probes, trace)
     full_solve_wall = production_probe["steady"]["median_s"]
     trip_wall = full_solve_wall / counts["active_set_trips"]
-    production_trace = trace["regions"]["production_trip"]
-    components, attribution = _attribution(trip_wall, counts, probes, production_trace)
+    components, attribution = _attribution(trip_wall, counts, probes)
     topology_wall = next(
         row["wall_s_per_trip"]
         for row in components
@@ -1023,32 +1170,45 @@ def run(
     scan_lower_per_trip = scan_lower / counts["active_set_trips"]
     scan_floor = scan_lower_per_trip * SCAN_ITERATION_SECONDS
     source = json.loads(SOURCE_RECEIPT.read_text(encoding="utf-8"))
-    full_wall = float(source["solve"]["median_warm_wall_s"])
+    source_wall = float(source["solve"]["median_warm_wall_s"])
     performance_receipt_count = int(source["solve"]["trips"])
     if performance_receipt_count != counts["newton_updates_total"]:
         raise RuntimeError(
             "performance receipt count does not match Newton promotion count: "
             f"{performance_receipt_count} != {counts['newton_updates_total']}"
         )
-    receipt = {
+    failed_profiler_jobs = [
+        run["job_id"] for run in timer_runs if run["profiler_replay_failure"]
+    ]
+    partial_trace = {
+        "path": str(PARTIAL_TRACE),
+        "exists": PARTIAL_TRACE.exists(),
+        "size_bytes": PARTIAL_TRACE.stat().st_size if PARTIAL_TRACE.exists() else None,
+        "sha256": _sha256(PARTIAL_TRACE) if PARTIAL_TRACE.exists() else None,
+        "promoted": False,
+        "reason": (
+            "production annotation ended in a CUDA failure and CUPTI reported "
+            "dropped activity events"
+        ),
+    }
+    return {
         "schema": "nova.trip_quantum_profile",
-        "schema_version": 1,
+        "schema_version": 2,
         "captured_at": datetime.now(UTC).isoformat(),
-        "source_revision": subprocess.check_output(
-            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
-        ).strip(),
+        "measurement_base_revision": "ce9915f6ea284c19201944ac9070275ea444403c",
         "driver": {
             "path": str(Path(__file__).relative_to(ROOT)),
             "sha256": _sha256(Path(__file__)),
+            "mode": "device-synchronised timers with offline structural census",
         },
-        "scheduler": _scheduler(),
-        "runtime": _runtime(),
-        "persistent_compilation_cache": cache.receipt(),
+        "timer_runs": timer_runs,
+        "assembly_runtime": runtime,
+        "persistent_compilation_cache": cache_receipt,
         "reuse_map_inputs": {
-            "topology_reads_per_outer_residual_evaluation": (
+            "topology_reads_per_residual_evaluation": (
                 TOPOLOGY_READS_PER_OUTER_RESIDUAL
             ),
-            "tensor_spline_fits_per_topology_read": SPLINE_FITS_PER_TOPOLOGY_READ,
+            "split_spline_fits_per_topology_read": SPLINE_FITS_PER_TOPOLOGY_READ,
             "scan_iteration_latency_s": SCAN_ITERATION_SECONDS,
             "persistent_compilation_cache_wiring_revision": "e04970ad",
         },
@@ -1069,6 +1229,10 @@ def run(
         "trip": {
             "wall_s": trip_wall,
             "measured_full_solve_wall_s": full_solve_wall,
+            "run_full_solve_medians_s": {
+                run["job_id"]: run["timings"]["production_trip"]["median_s"]
+                for run in timer_runs
+            },
             "prior_full_solve": prior_full_solve,
             "full_solve_reference": {
                 "source": str(SOURCE_RECEIPT.relative_to(ROOT)),
@@ -1078,14 +1242,20 @@ def run(
                 "performance_receipt_count": performance_receipt_count,
                 "performance_receipt_count_unit": "attempted Newton promotions",
                 "performance_receipt_count_is_not_active_set_trips": True,
-                "median_warm_wall_s": full_wall,
-                "arithmetic_wall_s_per_active_set_trip": full_wall
+                "median_warm_wall_s": source_wall,
+                "arithmetic_wall_s_per_active_set_trip": source_wall
                 / active_set_authority["active_set_iterations"],
             },
             "counts": counts,
             "component_breakdown": components,
             "component_attribution": attribution,
             "topology_breakdown": topology,
+            "topology_breakdown_method": (
+                "the directly timed candidate census, spline fit, flood fill, wall "
+                "reachability, and separatrix-exclusive medians are normalized to "
+                "partition the separately timed topology-read wall; these overlapping "
+                "isolated probes are relative attribution weights, not additive wall"
+            ),
             "scan_latency_floor": {
                 **production_probe["control_flow"],
                 "fixed_scan_trip_lower_bound_per_trip": scan_lower_per_trip,
@@ -1100,26 +1270,158 @@ def run(
             },
         },
         "direct_probes": probes,
-        "evaluation_census": evaluation_census,
+        "evaluation_census": _evaluation_census(probes),
         "production_trip_probe": production_probe,
-        "profiler_trace": trace,
+        "svd_census": {
+            "split_spline_condition_call_site": (
+                "nova/linalg/split_spline.py:_conditioned_fit jnp.linalg.cond(normal)"
+            ),
+            "condition_svds_per_split_spline_fit": SPLINE_CONDITION_SVDS_PER_FIT,
+            "split_spline_condition_svds_per_topology_read": (
+                SPLINE_FITS_PER_TOPOLOGY_READ * SPLINE_CONDITION_SVDS_PER_FIT
+            ),
+            "split_spline_condition_svds_per_residual_evaluation": (
+                SPLINE_FITS_PER_TOPOLOGY_READ
+                * SPLINE_CONDITION_SVDS_PER_FIT
+                * TOPOLOGY_READS_PER_OUTER_RESIDUAL
+            ),
+            "explicit_solver_svd_call_site": (
+                "nova/equilibrium/fixed_point.py:_projected_krylov_condition "
+                "jnp.linalg.svd(hessenberg, compute_uv=False)"
+            ),
+            "explicit_solver_svds_per_newton_residual_linearisation": 1,
+        },
+        "profiler_replay": {
+            "status": (
+                "failed_unpromoted" if failed_profiler_jobs else "not_requested"
+            ),
+            "failure_call": "cusolverDnDgesvdj",
+            "failed_jobs": failed_profiler_jobs,
+            "kernel_launch_counts_available": False,
+            "partial_trace": partial_trace,
+            "finding": (
+                "timer measurements completed before profiler replay failed inside the "
+                "production Jacobi-SVD path"
+                if failed_profiler_jobs
+                else "profiling was omitted from the timer-only measurement"
+            ),
+        },
         "ranked_bottlenecks": _ranked_bottlenecks(components, topology),
         "host_callback_or_sync": {
             "closed_jaxpr_callback_primitive_count": sum(callback_census.values()),
             "closed_jaxpr_callback_primitives": callback_census,
-            "final_sync": "jax.block_until_ready on each timed and traced result",
-            "device_syncs_per_timed_or_traced_invocation": 1,
+            "final_sync": "jax.block_until_ready on every timed result pytree",
+            "device_syncs_per_timed_invocation": 1,
             "note": (
-                "the production route disables streaming callbacks; profiler GPU "
-                "compute and transfer wall are subtracted from the synchronized "
-                "timer to bound host dispatch and final synchronization"
+                "the production route disables streaming callbacks; the timer "
+                "remainder bounds host dispatch and final synchronization but also "
+                "retains fused device work absent from the isolated timer model"
             ),
         },
     }
+
+
+def _write_outputs(receipt: dict[str, Any], output: Path, report: Path) -> None:
     _write_json(output, receipt)
     _write_report(receipt, report)
     print(f"PROFILE_WRITTEN={output}", flush=True)
     print(f"REPORT_WRITTEN={report}", flush=True)
+
+
+def assemble_existing(output: Path, report: Path) -> dict[str, Any]:
+    configure_dtypes()
+    timer_runs = [_timer_log(job_id, path) for job_id, path in DEFAULT_TIMER_LOGS]
+    case, profile, target_current, carrier, policy = _profile_and_seed()
+    active_set_authority = _active_set_authority()
+    reference = case["reference"]
+    state = jnp.asarray(case["state"])
+    requested, production = _production_program(profile, target_current)
+    component_programs = _component_programs(profile, state, requested, target_current)
+    programs = {"production_trip": (production, (state,)), **component_programs}
+    control_flow = {
+        name: _control_flow_census(function, arguments)
+        for name, (function, arguments) in programs.items()
+    }
+    all_probes = _central_probes(timer_runs, control_flow)
+    production_probe = all_probes.pop("production_trip")
+    source = json.loads(SOURCE_RECEIPT.read_text(encoding="utf-8"))
+    counts = _count_summary(
+        active_set_authority["active_set_iterations"],
+        int(source["solve"]["trips"]),
+    )
+    receipt = _build_receipt(
+        reference=reference,
+        carrier=carrier,
+        policy=policy,
+        active_set_authority=active_set_authority,
+        counts=counts,
+        probes=all_probes,
+        production_probe=production_probe,
+        callback_census=_callback_census(production, (state,)),
+        timer_runs=timer_runs,
+        runtime=_runtime(),
+        cache_receipt=source.get("persistent_compilation_cache"),
+    )
+    _write_outputs(receipt, output, report)
+    return receipt
+
+
+def run(
+    output: Path,
+    report: Path,
+    cache_root: Path,
+    repeats: int,
+) -> dict[str, Any]:
+    configure_dtypes()
+    _require_h200()
+    cache_root.mkdir(parents=True, exist_ok=True)
+    cache = configure_persistent_compilation_cache(
+        cache_root, minimum_compile_seconds=0.0
+    )
+    case, profile, target_current, carrier, policy = _profile_and_seed()
+    active_set_authority = _active_set_authority()
+    reference = case["reference"]
+    state = jnp.asarray(case["state"])
+    requested, production = _production_program(profile, target_current)
+    production_executable, production_probe = _compile_probe(
+        "production_trip", production, (state,), repeats
+    )
+    counts = _counts(_ready(production_executable(state)))
+    if counts["active_set_trips"] != active_set_authority["active_set_iterations"]:
+        raise RuntimeError(
+            f"production program executed {counts['active_set_trips']} trips"
+        )
+    probes = {}
+    for name, (function, arguments) in _component_programs(
+        profile, state, requested, target_current
+    ).items():
+        _executable, probes[name] = _compile_probe(name, function, arguments, repeats)
+    job_id = _scheduler()["job_id"] or "direct"
+    all_probes = {"production_trip": production_probe, **probes}
+    timer_run = {
+        "job_id": job_id,
+        "log_path": None,
+        "log_sha256": None,
+        "scheduler": _scheduler(),
+        "timings": {name: probe["steady"] for name, probe in all_probes.items()},
+        "timing_phase_complete": True,
+        "profiler_replay_failure": None,
+        "cupti_dropped_activity_buffers": False,
+    }
+    receipt = _build_receipt(
+        reference=reference,
+        carrier=carrier,
+        policy=policy,
+        active_set_authority=active_set_authority,
+        counts=counts,
+        probes=probes,
+        production_probe=production_probe,
+        callback_census=_callback_census(production, (state,)),
+        timer_runs=[timer_run],
+        runtime=_runtime(),
+        cache_receipt=cache.receipt(),
+    )
+    _write_outputs(receipt, output, report)
     return receipt
 
 
@@ -1155,18 +1457,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
-    parser.add_argument("--trace-root", type=Path, default=DEFAULT_TRACE)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument(
+        "--assemble-existing",
+        action="store_true",
+        help="assemble the two completed timer logs without a GPU rerun",
+    )
     arguments = parser.parse_args()
     if arguments.preflight:
         preflight()
+    elif arguments.assemble_existing:
+        assemble_existing(arguments.output, arguments.report)
     else:
         run(
             arguments.output,
             arguments.report,
-            arguments.trace_root,
             arguments.cache_root,
             arguments.repeats,
         )

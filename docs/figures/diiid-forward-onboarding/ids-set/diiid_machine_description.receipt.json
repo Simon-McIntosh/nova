@@ -1,19 +1,19 @@
 {
   "artifact": {
-    "content_sha256": "a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85",
+    "content_sha256": "b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e",
     "data_dictionary": "4.1.1",
     "ids_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
-    "manifest_digest": "sha256:d4bde025df48acc5a5275c4a5a320a45cb7405da1e4256d8db526308967a713f",
+    "manifest_digest": "sha256:1b3f8378758901f5a5489f0b90796faa6bb96d19fb9db0979e16c903e66b9b30",
     "manifest_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json",
     "manifest_valid": true,
-    "oci_tag": "dd-4.1.1-physical-a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85",
-    "physical_digest": "a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85",
+    "oci_tag": "dd-4.1.1-physical-b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e",
+    "physical_digest": "b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e",
     "round_trip": {
       "authored_leaf_count": 2256,
       "exact_equal": true,
       "maximum_absolute_difference": 0.0
     },
-    "semantic_identity": "sha256:7c5eab7053e986a1131494ec802735f27510a54c3fdc96a4298ed1d038a0d28d"
+    "semantic_identity": "sha256:85e3b93a1be56e48d48932c243c557ba236308465198cc7fcbcf38faa6d25b7c"
   },
   "data_dictionary_floor": {
     "declared_data_dictionary": "3.42.2",

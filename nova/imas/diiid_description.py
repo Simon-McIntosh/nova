@@ -955,6 +955,49 @@ def author_pf_active_circuits(
     }
 
 
+F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN = 1.0
+
+
+def correct_f_coil_bulk_element_turns(
+    pf_active_ids: Any,
+    *,
+    coil_names: tuple[str, ...] = F_COILS,
+) -> dict[str, float]:
+    """Rewrite each F-coil's single bulk-polygon element to one turn.
+
+    Every F-coil is authored as one element whose polygon is the bulk
+    winding-pack cross-section; the shipped F-coil channel already carries
+    total ampere-turns (``TurnConvention`` for ``F_COILS``: ``applied_
+    multiplier=1.0``). ``active_coil_response_from_imas`` multiplies the
+    driven current by ``turns_with_sign``, so authoring the physical turn
+    count there double-counts every F-coil's field by that turn count.
+    Setting ``turns_with_sign`` to one (preserving the original sign) makes
+    the response match the total-ampere-turns convention the row-derived
+    description and every solve already assume, without touching geometry.
+    """
+
+    coils = {str(coil.name).strip(): coil for coil in pf_active_ids.coil}
+    missing = sorted(set(coil_names) - set(coils))
+    if missing:
+        raise DiiidDescriptionError(f"F-coils are missing from pf_active: {missing}")
+    corrected: dict[str, float] = {}
+    for name in coil_names:
+        coil = coils[name]
+        if len(coil.element) != 1:
+            raise DiiidDescriptionError(
+                f"{name} must carry exactly one bulk-polygon element"
+            )
+        element = coil.element[0]
+        original = float(element.turns_with_sign)
+        if original == 0.0:
+            raise DiiidDescriptionError(f"{name} has a zero turns_with_sign")
+        element.turns_with_sign = math.copysign(
+            F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN, original
+        )
+        corrected[name] = original
+    return corrected
+
+
 @dataclass(frozen=True)
 class DiiidDatasetMachineDescription:
     """Competition geometry routed through Nova's static machine seam.
@@ -1542,6 +1585,7 @@ __all__ = [
     "DiiidDescriptionRegistry",
     "DiiidDatasetMachineDescription",
     "F_COILS",
+    "F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN",
     "F_COIL_CIRCUITS",
     "F_COIL_SUPPLIES",
     "CIRCUIT_DRIVEN_CONDUCTORS",
@@ -1561,6 +1605,7 @@ __all__ = [
     "active_coil_response_from_imas",
     "adjudicate_circuit_wiring",
     "author_pf_active_circuits",
+    "correct_f_coil_bulk_element_turns",
     "dataset_machine_description",
     "geometry_digest",
     "section_vertices",

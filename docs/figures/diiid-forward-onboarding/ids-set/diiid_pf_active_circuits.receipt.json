@@ -5,19 +5,63 @@
     "pf_passive_loops": 47,
     "poloidal_coils": 24
   },
+  "f_coil_turns_convention_correction": {
+    "corrected_turns_with_sign": 1.0,
+    "original_turns_with_sign_by_coil": {
+      "F1A": 58.0,
+      "F1B": 58.0,
+      "F2A": 58.0,
+      "F2B": 58.0,
+      "F3A": 58.0,
+      "F3B": 58.0,
+      "F4A": 58.0,
+      "F4B": 58.0,
+      "F5A": 58.0,
+      "F5B": 58.0,
+      "F6A": 55.0,
+      "F6B": 55.0,
+      "F7A": 55.0,
+      "F7B": 55.0,
+      "F8A": 58.0,
+      "F8B": 58.0,
+      "F9A": 55.0,
+      "F9B": 55.0
+    },
+    "reason": "the shipped F-coil channel already carries total ampere-turns and every solve applies no turns multiplier to the bulk winding-pack polygon; authoring the physical turn count on turns_with_sign double-counted each F-coil's field in active_coil_response_from_imas (response = turns_with_sign x polygon_greens)",
+    "verified": {
+      "F1A": 1.0,
+      "F1B": 1.0,
+      "F2A": 1.0,
+      "F2B": 1.0,
+      "F3A": 1.0,
+      "F3B": 1.0,
+      "F4A": 1.0,
+      "F4B": 1.0,
+      "F5A": 1.0,
+      "F5B": 1.0,
+      "F6A": 1.0,
+      "F6B": 1.0,
+      "F7A": 1.0,
+      "F7B": 1.0,
+      "F8A": 1.0,
+      "F8B": 1.0,
+      "F9A": 1.0,
+      "F9B": 1.0
+    }
+  },
   "identity": {
     "artifact_receipt_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_artifact.receipt.json",
     "identity_receipt_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.receipt.json"
   },
   "manifest": {
     "dd_version": "4.1.1",
-    "digest": "sha256:d4bde025df48acc5a5275c4a5a320a45cb7405da1e4256d8db526308967a713f",
+    "digest": "sha256:1b3f8378758901f5a5489f0b90796faa6bb96d19fb9db0979e16c903e66b9b30",
     "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json"
   },
   "measurement": "DIII-D pf_active circuits and pf_passive loops regeneration",
   "output": {
     "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
-    "sha256": "a0a4959e38797180667ba802083e7ac833c9b2654441ecef1cb0dc1063d36e85",
+    "sha256": "b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e",
     "size_bytes": 288217
   },
   "round_trip": {

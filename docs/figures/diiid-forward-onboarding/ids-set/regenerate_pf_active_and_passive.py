@@ -25,7 +25,9 @@ import numpy as np
 from nova.imas.diiid_description import (
     ALL_PF_ACTIVE_CIRCUITS,
     ALL_PF_ACTIVE_SUPPLIES,
+    F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN,
     author_pf_active_circuits,
+    correct_f_coil_bulk_element_turns,
 )
 from nova.imas.diiid_machine_ids import (
     IDS_NAMES,
@@ -153,6 +155,14 @@ def regenerate(output: Path = OUTPUT_IDS) -> dict[str, Any]:
         supplies=ALL_PF_ACTIVE_SUPPLIES,
         circuits=ALL_PF_ACTIVE_CIRCUITS,
     )
+    # The shipped F-coil channel already carries total ampere-turns and every
+    # solve applies no turns multiplier to the bulk winding-pack polygon, so
+    # the physical turn count the source writer copies onto turns_with_sign
+    # would double-count each F-coil's field by that turn count in
+    # active_coil_response_from_imas (response = turns_with_sign x
+    # polygon_greens). One turn per bulk element matches the convention the
+    # row-derived description and every solve already assume.
+    f_coil_turns_correction = correct_f_coil_bulk_element_turns(bundle.ids["pf_active"])
     pf_passive_description = build_pf_passive()
     pf_passive_description.validate()
     ids = {**bundle.ids, "pf_passive": pf_passive_description.pf_passive}
@@ -333,6 +343,25 @@ def regenerate(output: Path = OUTPUT_IDS) -> dict[str, Any]:
             "connections_matrix_shape_ohmic": list(
                 np.asarray(reopened["pf_active"].circuit[0].connections).shape
             ),
+        },
+        "f_coil_turns_convention_correction": {
+            "corrected_turns_with_sign": F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN,
+            "reason": (
+                "the shipped F-coil channel already carries total ampere-turns "
+                "and every solve applies no turns multiplier to the bulk "
+                "winding-pack polygon; authoring the physical turn count on "
+                "turns_with_sign double-counted each F-coil's field in "
+                "active_coil_response_from_imas (response = turns_with_sign x "
+                "polygon_greens)"
+            ),
+            "original_turns_with_sign_by_coil": f_coil_turns_correction,
+            "verified": {
+                str(name): float(coil.element[0].turns_with_sign)
+                for name, coil in (
+                    (str(c.name).strip(), c) for c in reopened["pf_active"].coil
+                )
+                if name in f_coil_turns_correction
+            },
         },
         "round_trip": round_trip,
         "identity": {

@@ -32,7 +32,7 @@ import numpy as np
 
 
 BASELINE_REVISION = "9a49568c"
-CANDIDATE_REVISION = "0dce5fe1c9593cd5d6d6f24755f0a5a71c3197e1"
+CANDIDATE_REVISION = "795aaf8bf86ec2836fc39ee8180fdf37aa380c77"
 REFERENCE_SHOT = 22086
 MEASURED_SOLVE_LAUNCHES = 5
 MEASURED_BATCH_LAUNCHES = 5
@@ -298,6 +298,7 @@ def _solve_measurement() -> dict[str, Any]:
     physical = equilibrium.flux[: profile.operator.physical_node_number]
     _masks, topology = profile.operator.read(equilibrium.flux)
     class_read = profile.operator._connectivity_read(physical, topology, classify=True)
+    achieved_class = TopologyClass(int(result.achieved_class))
     return {
         "reference": case["reference"],
         "carrier": carrier_receipt,
@@ -319,7 +320,8 @@ def _solve_measurement() -> dict[str, Any]:
         "trips": trips,
         "terminal_residual": residual,
         "converged": bool(residual <= parity.FIXED_POINT_CRITERION),
-        "achieved_class": int(result.achieved_class),
+        "achieved_class": int(achieved_class),
+        "achieved_class_name": achieved_class.name.lower(),
         "topology_consistent": bool(result.topology_consistent),
         "terminal_class_operands": {
             "class_margin": float(class_read["class_margin"]),
@@ -671,6 +673,13 @@ def _measure_verdicts(
         cand_topology["vmap"]["spread_per_map"]["range_s"],
     )
     residual_scale = max(abs(base_solve["terminal_residual"]), np.finfo(float).tiny)
+    class_names = {0: "limited", 1: "diverted"}
+    base_class = base_solve.get(
+        "achieved_class_name", class_names[int(base_solve["achieved_class"])]
+    )
+    candidate_class = cand_solve.get(
+        "achieved_class_name", class_names[int(cand_solve["achieved_class"])]
+    )
     return {
         "solve_compile_count": {
             "baseline": base_solve["compile_count"],
@@ -714,6 +723,13 @@ def _measure_verdicts(
                     atol=1.0e-15,
                 )
             ),
+        },
+        "solve_achieved_class": {
+            "baseline": base_class,
+            "candidate": candidate_class,
+            "required": "diverted",
+            "both_diverted": base_class == candidate_class == "diverted",
+            "inside_launch_spread": base_class == candidate_class,
         },
         "topology_jit_wall_per_map": _wall_verdict(
             float(statistics.median(base_jit_warm)),
@@ -776,7 +792,8 @@ def _figure(receipt: dict[str, Any], output: Path) -> None:
     scheduler = receipt["scheduler"]
     figure.suptitle(
         f"H200 job {scheduler['job_id']} · solve convergence "
-        f"{gate['both_solve_arms_converged']} · vmap compile count 1 / 1",
+        f"{gate['both_solve_arms_converged']} · diverted both "
+        f"{gate['both_solve_arms_diverted']} · vmap compile count 1 / 1",
         fontsize=10,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -863,12 +880,16 @@ def combine(
             "both_solve_arms_converged": bool(
                 baseline["solve"]["converged"] and candidate["solve"]["converged"]
             ),
+            "both_solve_arms_diverted": verdicts["solve_achieved_class"][
+                "both_diverted"
+            ],
             "passes": bool(
                 verdicts["solve_median_warm_wall"]["inside_launch_spread"]
                 and verdicts["topology_batch_compile_count"]["inside_launch_spread"]
                 and agreement
                 and baseline["solve"]["converged"]
                 and candidate["solve"]["converged"]
+                and verdicts["solve_achieved_class"]["both_diverted"]
             ),
         },
         "figure": FIGURE_IDENTITY,

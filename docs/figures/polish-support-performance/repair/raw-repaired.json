@@ -2,20 +2,20 @@
   "cache_events": {
     "solve": {
       "hits": 1,
-      "saved_seconds": -0.010156869888305664
+      "saved_seconds": -0.010088512673974037
     },
     "topology": {
       "hits": 40,
-      "saved_seconds": -0.5390487806871533
+      "saved_seconds": -0.5496731763705611
     },
     "total": {
       "hits": 41,
-      "saved_seconds": -0.549205650575459
+      "saved_seconds": -0.5597616890445352
     }
   },
-  "captured_at": "2026-09-04T09:42:20.062540+00:00",
+  "captured_at": "2026-09-04T10:45:50.639410+00:00",
   "persistent_compilation_cache": {
-    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/repair-1262444/repaired/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/repair-1262478/repaired/nova/jax-compilation/runtime-0745ecebea4cb264e054",
     "entry_key_fields": [
       "serialized computation",
       "jaxlib version",
@@ -42,7 +42,7 @@
     "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
     "maximum_bytes": 8589934592,
     "minimum_compile_seconds": 0.0,
-    "root": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/repair-1262444/repaired",
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance/repair-1262478/repaired",
     "runtime_identity": {
       "backend": "gpu",
       "backend_version": "PJRT C API\ncuda 12090",
@@ -67,14 +67,14 @@
     "selection": "explicit_per_recipe",
     "version_key": "runtime-0745ecebea4cb264e054"
   },
-  "revision": "4f2668b6",
+  "revision": "795aaf8bf86ec2836fc39ee8180fdf37aa380c77",
   "runtime": {
     "gpu": {
       "cuda_visible_devices": "0",
       "jax_device": "cuda:0",
       "jax_platform": "gpu",
       "visible_devices": [
-        "NVIDIA H200 NVL, GPU-c661dc81-7fa4-e485-2687-12e4cf30b5e5, 595.58.03, 143771"
+        "NVIDIA H200 NVL, GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3, 595.58.03, 143771"
       ]
     },
     "hostname": "98dci4-gpu-0003.iter.org",
@@ -83,13 +83,13 @@
     "jaxlib": "0.11.0",
     "python": "3.14.2",
     "slurm_cpus_per_task": "1",
-    "slurm_job_id": "1262444",
+    "slurm_job_id": "1262478",
     "tmpdir": "/tmp"
   },
   "schema": "nova.polish_support_performance.raw",
   "schema_version": 1,
   "solve": {
-    "achieved_class": 0,
+    "achieved_class": 1,
     "carrier": {
       "carrier": {
         "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
@@ -104,13 +104,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.005107244476675987
+        "warm_load_seconds": 0.004952353425323963
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
-          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-class-and-cost-repair/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-repaired-measure/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -119,11 +119,11 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021625 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.028829 direct_builders=0 verdict=PASS"
       }
     },
     "compile_count": 1,
-    "compile_wall_s": 387.3324063019827,
+    "compile_wall_s": 376.2121500466019,
     "converged": false,
     "field_policy": {
       "active_circuit_count": 13,
@@ -378,8 +378,8 @@
       "stored_field_closure_rms_wb": 1.4821494410218056e-16,
       "stored_field_closure_sup_wb": 1.1102230246251565e-15
     },
-    "first_call_wall_s": 97.59322197269648,
-    "median_warm_wall_s": 93.29075082950294,
+    "first_call_wall_s": 97.77277355175465,
+    "median_warm_wall_s": 94.7251567132771,
     "reference": {
       "machine": "MAST",
       "plasma_current_a": 933034.875,
@@ -412,40 +412,40 @@
       "target_current_a": 933034.875
     },
     "terminal_class_operands": {
-      "axis_flux": 0.3416334996406385,
-      "class_margin": -0.09959989785578516,
-      "normalized_saddle_flux": 0.43460194263640534,
-      "normalized_wall_flux": 0.3350020447806202,
+      "axis_flux": 0.3416334996406384,
+      "class_margin": null,
+      "normalized_saddle_flux": 0.43460194263640495,
+      "normalized_wall_flux": null,
       "saddle_rz": [
-        0.5906737987124929,
-        1.220507828878397
+        0.5906737987124928,
+        1.2205078288783973
       ],
       "wall_candidate_rz": [
-        0.2800000011920929,
-        1.683500051498413
+        null,
+        null
       ],
       "wall_candidate_shadowed": true,
-      "wall_candidate_valid": true
+      "wall_candidate_valid": false
     },
-    "terminal_residual": 0.0011126080468835213,
-    "topology_consistent": false,
+    "terminal_residual": 0.0011126080468833416,
+    "topology_consistent": true,
     "trips": 24,
     "warm_launch_spread": {
-      "maximum_s": 94.14364789705724,
-      "median_absolute_deviation_s": 0.8528970675542951,
-      "minimum_s": 92.1761179920286,
-      "range_s": 1.9675299050286412,
-      "standard_deviation_s": 0.8049635843779133
+      "maximum_s": 95.51175905484706,
+      "median_absolute_deviation_s": 0.34647127613425255,
+      "minimum_s": 94.08024994842708,
+      "range_s": 1.4315091064199805,
+      "standard_deviation_s": 0.49154442057026976
     },
     "warm_launch_wall_s": [
-      93.77765086758882,
-      94.14364789705724,
-      93.29075082950294,
-      92.20380352437496,
-      92.1761179920286
+      94.7251567132771,
+      94.37868543714285,
+      94.08024994842708,
+      94.95652369875461,
+      95.51175905484706
     ]
   },
-  "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-class-and-cost-repair",
+  "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-repaired-measure",
   "topology_read": {
     "agreement": {
       "eager_vs_jit": {
@@ -526,39 +526,39 @@
     },
     "jit": {
       "compile_count": 1,
-      "first_call_wall_s": 29.31320537533611,
-      "median_wall_s_per_map": 0.019359899684786797,
+      "first_call_wall_s": 28.191318159922957,
+      "median_wall_s_per_map": 0.019544195383787155,
       "spread": {
-        "maximum_s": 0.02026071399450302,
-        "median_absolute_deviation_s": 0.0006607696413993835,
-        "minimum_s": 0.015327167697250843,
-        "range_s": 0.004933546297252178,
-        "standard_deviation_s": 0.0017565450521305939
+        "maximum_s": 0.044868435710668564,
+        "median_absolute_deviation_s": 0.0010709171183407307,
+        "minimum_s": 0.015295338816940784,
+        "range_s": 0.02957309689372778,
+        "standard_deviation_s": 0.008706623561550358
       },
       "wall_s_per_map": [
-        29.31320537533611,
-        0.01997983083128929,
-        0.018811839632689953,
-        0.018611016683280468,
-        0.015339131467044353,
-        0.015327167697250843,
-        0.01907301787286997,
-        0.02006150782108307,
-        0.01979566365480423,
-        0.019646781496703625,
-        0.02026071399450302
+        28.191318159922957,
+        0.01982793491333723,
+        0.018724439665675163,
+        0.01844579353928566,
+        0.015295338816940784,
+        0.015595768578350544,
+        0.044868435710668564,
+        0.02058762777596712,
+        0.03245782386511564,
+        0.019619298167526722,
+        0.01946909260004759
       ],
       "warm_wall_s_per_map": [
-        0.01997983083128929,
-        0.018811839632689953,
-        0.018611016683280468,
-        0.015339131467044353,
-        0.015327167697250843,
-        0.01907301787286997,
-        0.02006150782108307,
-        0.01979566365480423,
-        0.019646781496703625,
-        0.02026071399450302
+        0.01982793491333723,
+        0.018724439665675163,
+        0.01844579353928566,
+        0.015295338816940784,
+        0.015595768578350544,
+        0.044868435710668564,
+        0.02058762777596712,
+        0.03245782386511564,
+        0.019619298167526722,
+        0.01946909260004759
       ]
     },
     "kernel": "polish_census_stationary_points followed by traced_boundary_read with the spline-restricted reachable-wall minimum",
@@ -735,28 +735,28 @@
     },
     "vmap": {
       "compile_count": 1,
-      "first_batch_wall_s": 48.82523971237242,
-      "median_warm_wall_s_per_map": 0.004810940474271774,
+      "first_batch_wall_s": 48.327299118973315,
+      "median_warm_wall_s_per_map": 0.004800767637789249,
       "spread_per_map": {
-        "maximum_s": 0.004853446036577225,
-        "median_absolute_deviation_s": 4.2820518667047676e-06,
-        "minimum_s": 0.004806658422405069,
-        "range_s": 4.678761417215521e-05,
-        "standard_deviation_s": 1.958830172462881e-05
+        "maximum_s": 0.004821343347430229,
+        "median_absolute_deviation_s": 2.7198852463202043e-06,
+        "minimum_s": 0.004796629517593167,
+        "range_s": 2.4713829837062143e-05,
+        "standard_deviation_s": 8.825629124305365e-06
       },
       "warm_batch_wall_s": [
-        0.05325219873338938,
-        0.05338790640234947,
-        0.05287746340036392,
-        0.052873242646455765,
-        0.05292034521698952
+        0.05303477682173252,
+        0.052808444015681744,
+        0.052790126763284206,
+        0.05276292469352484,
+        0.052838362753391266
       ],
       "warm_wall_s_per_map": [
-        0.0048411089757626705,
-        0.004853446036577225,
-        0.004807042127305811,
-        0.004806658422405069,
-        0.004810940474271774
+        0.004821343347430229,
+        0.004800767637789249,
+        0.004799102433025837,
+        0.004796629517593167,
+        0.004803487523035569
       ]
     }
   }

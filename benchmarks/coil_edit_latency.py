@@ -350,24 +350,22 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         )
     endpoint_current = base_current.copy()
     endpoint_current[circuit_index] *= 1.0 + SWEEP_FRACTIONS[0]
-    endpoint_map = profile.flux_map(
-        requested_class=TopologyClass.DIVERTED,
-        target_current=target_current,
-        prescribed_current=jnp.asarray(endpoint_current),
-    )
-    endpoint_seed = _margin_graded_newton_krylov(
-        endpoint_map,
-        profile.operator.topology_margin,
+    endpoint_seed = profile.solve_branch(
         mixed_seed.state,
+        TopologyClass.DIVERTED,
+        route="newton_krylov",
+        prescribed_current=jnp.asarray(endpoint_current),
+        target_current=target_current,
+        tolerance=parity.FIXED_POINT_CRITERION,
         newton_steps=parity.NEWTON_STEPS,
         gmres_iterations=parity.GMRES_ITERATIONS,
+        warmup=parity.WARMUP_SWEEPS,
+        relaxation=parity.RELAXATION,
+        step_cap=parity.STEP_CAP,
     )
-    jax.block_until_ready(endpoint_seed.state)
+    jax.block_until_ready(endpoint_seed)
     endpoint_residual = float(np.asarray(endpoint_seed.residual))
-    if (
-        not np.isfinite(endpoint_residual)
-        or endpoint_residual > parity.FIXED_POINT_CRITERION
-    ):
+    if not bool(np.asarray(endpoint_seed.converged)):
         raise RuntimeError(
             f"the minus-twenty-percent endpoint did not converge: "
             f"{endpoint_residual:.6g}"
@@ -383,7 +381,7 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(x_points[0])),
     )
     prepared = {
-        "initial": endpoint_seed.state,
+        "initial": endpoint_seed.equilibrium.flux,
         "cold_diverted_seed": cold.branches.flux[int(TopologyClass.DIVERTED)],
         "prescribed_current": jnp.asarray(base_current),
         "target_current": target_current,
@@ -402,7 +400,13 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
             "edit_fraction": float(SWEEP_FRACTIONS[0]),
             "terminal_residual": endpoint_residual,
             "converged": True,
-            "route": "margin-graded fixed-ladder Newton-Krylov preparation",
+            "trip_count": int(
+                np.asarray(endpoint_seed.equilibrium.fixed_point.active_set_iterations)
+            ),
+            "termination": _termination_name(
+                endpoint_seed.equilibrium.fixed_point.termination_reason
+            ),
+            "route": "production newton_krylov branch solve",
         },
         "reference": case["reference"],
         "policy": policy,

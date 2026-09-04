@@ -1,0 +1,280 @@
+"""Typed public inputs and provenance for one forward equilibrium solve."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, fields, replace
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Literal, Mapping
+
+from nova import __version__ as NOVA_VERSION
+
+if TYPE_CHECKING:
+    import jax
+
+    from nova.equilibrium.forward import ForwardEquilibrium
+    from nova.equilibrium.forward_operator import ForwardTopologyState
+    from nova.equilibrium.observation import ConstraintPinSet
+    from nova.equilibrium.source import ForwardSource
+
+SolveRoute = Literal["host", "host_krylov", "picard", "anderson", "newton_krylov"]
+JsonScalar = str | int | float | bool | None
+
+
+@dataclass(frozen=True, slots=True)
+class ForwardSolvePolicy:
+    """Every resolved numerical and acceptance choice for a forward solve."""
+
+    route: SolveRoute = "newton_krylov"
+    newton_steps: int = 10
+    gmres_iterations: int = 30
+    warmup: int = 0
+    relaxation: float = 0.5
+    step_cap: float = 10.0
+    active_set_steps: int = 16
+    kernel_tolerance: float = 1.0e-8
+    qualification_tolerance: float = 1.0e-10
+    current_pin: bool = True
+    settled_exit: bool = True
+    own_mask_acceptance: bool = True
+    continuation: bool = True
+    best_iterate_retention: bool = True
+    stagnation_stop: bool = True
+    exact_kernels: bool = True
+    cached_machine: bool = True
+    compilation_cache: bool = True
+
+    def __post_init__(self) -> None:
+        """Reject policies that cannot name a bounded numerical solve."""
+
+        if self.route not in {
+            "host",
+            "host_krylov",
+            "picard",
+            "anderson",
+            "newton_krylov",
+        }:
+            raise ValueError(f"unknown forward solve route {self.route!r}")
+        for name in (
+            "newton_steps",
+            "gmres_iterations",
+            "active_set_steps",
+        ):
+            if int(getattr(self, name)) < 1:
+                raise ValueError(f"{name} must be positive")
+        if self.warmup < 0:
+            raise ValueError("warmup cannot be negative")
+        for name in (
+            "relaxation",
+            "step_cap",
+            "kernel_tolerance",
+            "qualification_tolerance",
+        ):
+            if float(getattr(self, name)) <= 0.0:
+                raise ValueError(f"{name} must be positive")
+
+    def to_dict(self) -> dict[str, JsonScalar]:
+        """Return the JSON-native policy block written into receipts."""
+
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> ForwardSolvePolicy:
+        """Restore a policy while refusing missing or additional fields."""
+
+        expected = {item.name for item in fields(cls)}
+        received = set(payload)
+        if received != expected:
+            missing = sorted(expected - received)
+            extra = sorted(received - expected)
+            raise ValueError(
+                f"forward solve policy fields differ; missing={missing}, extra={extra}"
+            )
+        return cls(**dict(payload))
+
+
+# This is the sole declaration of public forward-solve defaults.  Its key is
+# the installed Nova package version; changing a value therefore belongs to a
+# Nova release and every resolved receipt retains both the values and that key.
+FORWARD_SOLVE_DEFAULTS: Mapping[str, ForwardSolvePolicy] = MappingProxyType(
+    {NOVA_VERSION: ForwardSolvePolicy()}
+)
+
+
+def declared_forward_solve_policy(
+    nova_version: str = NOVA_VERSION,
+) -> ForwardSolvePolicy:
+    """Return the immutable defaults declared for one installed Nova version."""
+
+    try:
+        return FORWARD_SOLVE_DEFAULTS[nova_version]
+    except KeyError as error:
+        raise KeyError(
+            f"Nova {nova_version!r} has no declared forward solve policy"
+        ) from error
+
+
+@dataclass(frozen=True, slots=True)
+class ExplicitSolveSeed:
+    """An explicitly supplied total-flux state used as the solve seed."""
+
+    state: object
+
+    def resolve(self, _profile: object) -> object:
+        """Return the state unchanged so its dtype and bytes remain authoritative."""
+
+        return self.state
+
+
+@dataclass(frozen=True, slots=True)
+class ForwardSolveRequest:
+    """Physical inputs and one fully resolved policy for a forward solve.
+
+    ``constraint_pairs`` reserves a static tuple boundary for typed augmented
+    constraints.  The current implementation accepts the existing validation
+    ``constraint_pins`` and refuses a non-empty augmented tuple until that
+    solver contract lands, so the two meanings cannot be conflated.
+    """
+
+    carrier_identity: str
+    source_profile: ForwardSource
+    seed_policy: ExplicitSolveSeed
+    policy: ForwardSolvePolicy
+    route: SolveRoute
+    target_current: object | None = None
+    constraint_pins: ConstraintPinSet | None = None
+    constraint_pairs: tuple[object, ...] = ()
+    current: object | None = None
+    prescribed_current: object | None = None
+    enforce: tuple[str, ...] = ()
+    compilation_cache_hit: bool = False
+
+    def __post_init__(self) -> None:
+        """Require a self-consistent, statically shaped request."""
+
+        if not self.carrier_identity:
+            raise ValueError("carrier_identity cannot be empty")
+        if self.route != self.policy.route:
+            raise ValueError("request route must equal its resolved policy route")
+        object.__setattr__(self, "constraint_pairs", tuple(self.constraint_pairs))
+        object.__setattr__(self, "enforce", tuple(self.enforce))
+
+    @classmethod
+    def from_defaults(
+        cls,
+        *,
+        carrier_identity: str,
+        source_profile: object,
+        seed_policy: ExplicitSolveSeed,
+        nova_version: str = NOVA_VERSION,
+        policy_overrides: Mapping[str, JsonScalar] | None = None,
+        **inputs: object,
+    ) -> ForwardSolveRequest:
+        """Build a request from the version-keyed declaration plus deviations."""
+
+        policy = declared_forward_solve_policy(nova_version)
+        if policy_overrides:
+            policy = replace(policy, **dict(policy_overrides))
+        return cls(
+            carrier_identity=carrier_identity,
+            source_profile=source_profile,
+            seed_policy=seed_policy,
+            policy=policy,
+            route=policy.route,
+            **inputs,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedForwardSolveDefaults:
+    """Versioned policy values and every deviation that actually ran."""
+
+    nova_version: str
+    policy: ForwardSolvePolicy
+    deviations: tuple[tuple[str, JsonScalar], ...]
+
+    @classmethod
+    def from_policy(
+        cls,
+        policy: ForwardSolvePolicy,
+        *,
+        nova_version: str = NOVA_VERSION,
+    ) -> ResolvedForwardSolveDefaults:
+        """Compare one resolved policy with its version's declared defaults."""
+
+        default = declared_forward_solve_policy(nova_version)
+        default_values = default.to_dict()
+        actual_values = policy.to_dict()
+        deviations = tuple(
+            (name, actual_values[name])
+            for name in actual_values
+            if actual_values[name] != default_values[name]
+        )
+        return cls(
+            nova_version=nova_version,
+            policy=policy,
+            deviations=deviations,
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        """Return the stable JSON receipt block."""
+
+        return {
+            "nova_version": self.nova_version,
+            "policy": self.policy.to_dict(),
+            "deviations": dict(self.deviations),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> ResolvedForwardSolveDefaults:
+        """Restore a resolved-defaults block after JSON transport."""
+
+        expected = {"nova_version", "policy", "deviations"}
+        if set(payload) != expected:
+            raise ValueError("resolved defaults need version, policy, and deviations")
+        policy_payload = payload["policy"]
+        deviation_payload = payload["deviations"]
+        if not isinstance(policy_payload, Mapping) or not isinstance(
+            deviation_payload, Mapping
+        ):
+            raise TypeError("policy and deviations must be mappings")
+        policy = ForwardSolvePolicy.from_dict(policy_payload)
+        restored = cls.from_policy(policy, nova_version=str(payload["nova_version"]))
+        if dict(restored.deviations) != dict(deviation_payload):
+            raise ValueError("resolved-default deviations disagree with the policy")
+        return restored
+
+
+@dataclass(frozen=True, slots=True)
+class ForwardSolveReceipt:
+    """Terminal forward state together with numerical and provenance telemetry."""
+
+    terminal_state: ForwardEquilibrium
+    qualified: jax.Array | bool
+    termination_reason: jax.Array | int
+    residual_history: jax.Array
+    mask_history: jax.Array
+    globalisation_decisions: tuple[jax.Array, jax.Array]
+    amplitude_history: jax.Array
+    topology_read: ForwardTopologyState | None
+    polish_receipt: Mapping[str, jax.Array] | None
+    compilation_cache_hit: bool
+    wall_seconds: float
+    resolved_defaults: ResolvedForwardSolveDefaults
+
+    @property
+    def equilibrium(self) -> ForwardEquilibrium:
+        """Return the terminal equilibrium under its domain-specific name."""
+
+        return self.terminal_state
+
+
+__all__ = [
+    "ExplicitSolveSeed",
+    "FORWARD_SOLVE_DEFAULTS",
+    "ForwardSolvePolicy",
+    "ForwardSolveReceipt",
+    "ForwardSolveRequest",
+    "ResolvedForwardSolveDefaults",
+    "SolveRoute",
+    "declared_forward_solve_policy",
+]

@@ -22,6 +22,11 @@ from nova.equilibrium.moment import (
     limiter_radial_extent,
 )
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, StencilMesh
+from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
+)
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -183,7 +188,12 @@ def _moment_seed(
     )
 
 
-def _solve(map_fn, seed) -> fixed_point.FixedPointResult:
+def _solve(
+    map_fn,
+    seed,
+) -> fixed_point.FixedPointResult:
+    """Retain the raw-kernel instrument used by isolated solver diagnostics."""
+
     history = fixed_point.newton_krylov(
         map_fn,
         jnp.asarray(seed),
@@ -193,6 +203,24 @@ def _solve(map_fn, seed) -> fixed_point.FixedPointResult:
     )
     jax.block_until_ready(history.state)
     return history
+
+
+def _solve_with_defaults(
+    profile: ForwardProfile,
+    seed,
+    *,
+    carrier_identity: str,
+    target_current: float,
+) -> ForwardSolveReceipt:
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.asarray(seed)),
+        target_current=target_current,
+    )
+    receipt = profile.solve(request)
+    jax.block_until_ready(receipt.equilibrium.flux)
+    return receipt
 
 
 def _history_receipt(history) -> dict[str, object]:
@@ -225,17 +253,20 @@ def _state_flux_fraction(state, oracle, grid_count: int, span: float) -> float:
 
 
 def _continuation(
+    profile: ForwardProfile,
     operator,
     seed: np.ndarray,
     moment_image: np.ndarray,
     oracle: np.ndarray,
     span: float,
-) -> tuple[fixed_point.FixedPointResult | None, list[dict[str, object]]]:
+    *,
+    carrier_identity: str,
+    target_current: float,
+) -> tuple[ForwardSolveReceipt | None, list[dict[str, object]]]:
     """Follow the plasma-source-strength branch from a nonempty moment state."""
-    full_map = operator.flux_map()
     exterior = np.asarray(operator.external())
     accepted_state = None
-    accepted_history = None
+    accepted_receipt = None
     log: list[dict[str, object]] = []
     for strength in CONTINUATION_STRENGTHS:
         initial = (
@@ -256,15 +287,17 @@ def _continuation(
             log.append(row)
             continue
 
-        def scaled_map(state):
-            return jnp.asarray(exterior) + strength * (
-                full_map(state) - jnp.asarray(exterior)
-            )
-
         started = perf_counter()
-        history = _solve(scaled_map, initial)
+        solve_receipt = _solve_with_defaults(
+            profile,
+            initial,
+            carrier_identity=carrier_identity,
+            target_current=strength * target_current,
+        )
+        history = solve_receipt.equilibrium.fixed_point
         row["seconds"] = perf_counter() - started
         row["history"] = _history_receipt(history)
+        row["resolved_defaults"] = solve_receipt.resolved_defaults.to_dict()
         terminal_masks, terminal_topology = operator.read(history.state)
         terminal_core = int(np.count_nonzero(np.asarray(terminal_masks.core)))
         row["terminal_core_cell_count"] = terminal_core
@@ -278,14 +311,14 @@ def _continuation(
             row["reason"] = "solver criterion or nonempty-core qualification failed"
             log.append(row)
             accepted_state = None
-            accepted_history = None
+            accepted_receipt = None
             continue
         log.append(row)
         accepted_state = history.state
-        accepted_history = history
+        accepted_receipt = solve_receipt
     if not log or log[-1]["source_strength"] != 1.0 or not log[-1]["accepted"]:
         return None, log
-    return accepted_history, log
+    return accepted_receipt, log
 
 
 def _conservation(receipt) -> dict[str, float]:
@@ -319,10 +352,10 @@ def _metric(value: float, absolute: float, floor: float) -> dict[str, float]:
     }
 
 
-def _measure_root(case, machine, operator, oracle, seed, history) -> dict[str, object]:
+def _measure_root(
+    case, machine, operator, profile, oracle, seed, history
+) -> dict[str, object]:
     span = TOTAL_FLUX_FACTOR * case.axis_flux
-    lattice = StencilMesh(machine.node, machine.stencil, machine.area)
-    profile = ForwardProfile(operator, lattice, newton_steps=NEWTON_STEPS)
     oracle_receipt = profile.observe(jnp.asarray(oracle))
     root_receipt = profile.observe(history.state)
     oracle_topology = oracle_receipt.topology
@@ -518,6 +551,8 @@ def measure_fixture(name: str) -> dict[str, object]:
     exact_internal = _internal_flux_image(empty_operator, exact_coefficients)
     prescribed_exterior = oracle - exact_internal
     operator = forward_operator(case, machine, prescribed_exterior)
+    lattice = StencilMesh(machine.node, machine.stencil, machine.area)
+    profile = ForwardProfile(operator, lattice)
     seed, moment_image, seed_receipt = _moment_seed(case, machine, operator)
     seed_receipt["oracle_state_sup_difference_fraction_of_span"] = _state_flux_fraction(
         seed, oracle, operator.grid.node_number, TOTAL_FLUX_FACTOR * case.axis_flux
@@ -531,7 +566,15 @@ def measure_fixture(name: str) -> dict[str, object]:
         flush=True,
     )
     started = perf_counter()
-    direct = _solve(operator.flux_map(), seed)
+    target_current = float(case.plasma_current())
+    carrier_identity = f"solovev:{name}:{machine.cache['semantic_key']}"
+    direct_solve = _solve_with_defaults(
+        profile,
+        seed,
+        carrier_identity=carrier_identity,
+        target_current=target_current,
+    )
+    direct = direct_solve.equilibrium.fixed_point
     direct_seconds = perf_counter() - started
     span = TOTAL_FLUX_FACTOR * case.axis_flux
     direct_flux_fraction = _state_flux_fraction(
@@ -541,6 +584,7 @@ def measure_fixture(name: str) -> dict[str, object]:
         **_history_receipt(direct),
         "seconds": direct_seconds,
         "oracle_flux_sup_fraction_of_span": direct_flux_fraction,
+        "resolved_defaults": direct_solve.resolved_defaults.to_dict(),
     }
     print(
         f"DIRECT fixture={name} residual={direct.residual:.17g} "
@@ -548,11 +592,18 @@ def measure_fixture(name: str) -> dict[str, object]:
         f"seconds={direct_seconds:.9g}",
         flush=True,
     )
-    continuation_history = None
+    continuation_solve = None
     continuation_log: list[dict[str, object]] = []
     if direct_flux_fraction > ORACLE_BASIN_FLUX_FRACTION:
-        continuation_history, continuation_log = _continuation(
-            operator, seed, moment_image, oracle, span
+        continuation_solve, continuation_log = _continuation(
+            profile,
+            operator,
+            seed,
+            moment_image,
+            oracle,
+            span,
+            carrier_identity=carrier_identity,
+            target_current=target_current,
         )
         for row in continuation_log:
             residual = row.get("history", {}).get("terminal_residual")
@@ -571,13 +622,13 @@ def measure_fixture(name: str) -> dict[str, object]:
             "continuation": continuation_log,
         },
     )
-    candidates = [("direct_moment_seed", direct)]
-    if continuation_history is not None:
-        candidates.append(("source_strength_continuation", continuation_history))
+    candidates = [("direct_moment_seed", direct_solve)]
+    if continuation_solve is not None:
+        candidates.append(("source_strength_continuation", continuation_solve))
     qualified = [
-        (route, history)
-        for route, history in candidates
-        if _history_receipt(history)["criterion_met"]
+        (route, solve_receipt)
+        for route, solve_receipt in candidates
+        if _history_receipt(solve_receipt.equilibrium.fixed_point)["criterion_met"]
     ]
     if not qualified:
         route, selected = candidates[0]
@@ -585,17 +636,20 @@ def measure_fixture(name: str) -> dict[str, object]:
         route, selected = min(
             qualified,
             key=lambda item: _state_flux_fraction(
-                item[1].state, oracle, operator.grid.node_number, span
+                item[1].equilibrium.flux, oracle, operator.grid.node_number, span
             ),
         )
-    measured = _measure_root(case, machine, operator, oracle, seed, selected)
+    selected_history = selected.equilibrium.fixed_point
+    measured = _measure_root(
+        case, machine, operator, profile, oracle, seed, selected_history
+    )
     root_path = OUTPUT / f"root-{name}.npz"
     np.savez(root_path, **measured.pop("arrays"))
     with np.load(root_path, allow_pickle=False) as stored:
         artifact_arrays = {
             key: _array_identity(np.asarray(stored[key])) for key in stored.files
         }
-    history_receipt = _history_receipt(selected)
+    history_receipt = _history_receipt(selected_history)
     terminal_topology = measured["root_topology"]
     receipt = {
         "fixture": name,
@@ -604,11 +658,12 @@ def measure_fixture(name: str) -> dict[str, object]:
         "state_size": len(oracle),
         "cache": machine.cache,
         "solver": {
-            "route": "undamped_newton_krylov",
+            "route": "forward_profile_default_newton_krylov",
             "criterion_unchanged": True,
             "criterion": SOLVER_CRITERION,
-            "newton_steps": NEWTON_STEPS,
-            "gmres_iterations": KRYLOV_ITERATIONS,
+            "newton_steps": selected.resolved_defaults.policy.newton_steps,
+            "gmres_iterations": selected.resolved_defaults.policy.gmres_iterations,
+            "resolved_defaults": selected.resolved_defaults.to_dict(),
             "selection": (
                 "lowest closed-form flux drift among independently seeded, "
                 "criterion-qualified direct and continuation roots"
@@ -619,7 +674,10 @@ def measure_fixture(name: str) -> dict[str, object]:
         "continuation": {
             "triggered": bool(continuation_log),
             "trigger_flux_fraction": ORACLE_BASIN_FLUX_FRACTION,
-            "map_definition": ("external + alpha*(production_map(state)-external)"),
+            "map_definition": (
+                "ForwardProfile.solve with target_current equal to alpha times "
+                "the declared Solovev current"
+            ),
             "accepted_steps": continuation_log,
         },
         "terminal_root": {

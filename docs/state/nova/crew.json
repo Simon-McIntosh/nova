@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T20:00:12",
+  "updated": "2026-09-04T20:06:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2528,6 +2528,15 @@
       },
       {
         "id": "scr-elimination-x3",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-fwd-test-repair-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -95943,6 +95952,173 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T170612520799-scr-forward-solve-test-failures-attribution",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-forward-solve-test-failures-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1350,
+                "cached_input_tokens": 392246,
+                "input_tokens": 393652,
+                "output_tokens": 6177,
+                "reasoning_output_tokens": 1000,
+                "total_tokens": 399829,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/attribution/forward-solve-failures/attribution.md with one row per checkout per test giving pass or fail plus the observed value, the flipping merge named per test with the mechanism quoted from its diff at file:line, a verdict per test (solver regression or stale expectation) with reasoning, the recommended repair with the file it touches, all logs under the same directory, read-only on the repository",
+          "estimated_hours": null,
+          "goal": "Attribute four pre-existing failures in tests/test_equilibrium_forward_solve.py found on main by the ForwardProfile-defaults node (its log ~/.config/reckon/crew/runs/r-20260904T154707089677-sdw-forwardprofile-solve-defaults/logs/base-shadow-failures.log): test_solve_path_current_moments_match_direct_stencil_and_clip (31 of 625 current-moment mismatches, maximum absolute difference 4.19), test_no_current_appears_outside_the_declared_support (common scrape-off-layer current 1070.79 A instead of zero), test_a_terminal_class_contradiction_stays_in_its_branch_receipt plus test_an_unavailable_requested_class_is_explicitly_non_converged (shared fixture raises NoQualifiedAxisError), by running the four node IDs once each in detached checkouts created with git worktree add under the run's own directory at main plus at the first parent of each merge of this session that touched the topology or solver path (census admission 82949087, cold-seed repair 9f84f35f, pre-settlement default f0f1112f, trusted Krylov c9b9b963, step cap e930710c, one read per trip 72ae8431, public defaults 563e8b59), each checkout's .venv a symlink to /home/ITER/mcintos/Code/nova/.venv, JAX_PLATFORMS=cpu, uv run --no-sync pytest -p no:cacheprovider, one log per checkout, so that the report names the merge that flipped each test, reads the failing assertion against the mechanism that merge introduced, plus states per test whether the solver regressed or the expectation went stale under the rule that a landed mechanism must not silently change accepted contracts, no source change",
+          "id": "scr-forward-solve-test-failures-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T170612520799-scr-forward-solve-test-failures-attribution/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/forward-solve-failures/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-solver-x3",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T17:06:21Z",
+        "completed_at": "2026-09-04T18:05:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3566,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3566,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4fc811c75faeaf3e1ff4dcdd7ce841231e70a68d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T170612520799-scr-forward-solve-test-failures-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d62-bbc5-7d92-8892-01e2e0b80c6d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 38900,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 41300,
+              "external_wait": null,
+              "log_age_seconds": 40398,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 40454,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only attribution; the report is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-forward-solve-test-failures-attribution",
+          "session_id": "01a06d62-bbc5-7d92-8892-01e2e0b80c6d",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T18:05:47Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -96087,6 +96263,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1657
+    "_version": 1659
   }
 }

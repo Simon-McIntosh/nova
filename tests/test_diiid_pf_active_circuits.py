@@ -8,12 +8,16 @@ import imas
 import numpy as np
 import pytest
 
+import math
+
 from nova.imas.diiid_description import (
     ALL_PF_ACTIVE_CIRCUITS,
     ALL_PF_ACTIVE_SUPPLIES,
     CIRCUIT_DRIVEN_CONDUCTORS,
+    F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN,
     F_COILS,
     author_pf_active_circuits,
+    correct_f_coil_bulk_element_turns,
 )
 from nova.imas.diiid_machine_ids import SOURCE_PATH, build_diiid_machine_ids
 from nova.imas.diiid_passive import LOOP_COUNT
@@ -104,6 +108,59 @@ def test_new_ohmic_coil_geometry_and_turns_match_netcdf_source(
         assert float(written_element.turns_with_sign) == float(
             source_element.turns_with_sign
         )
+
+
+@pytest.mark.parametrize("name", F_COILS)
+def test_f_coil_bulk_element_carries_total_ampere_turn_convention(
+    regenerated, netcdf_description_coils, name
+):
+    """The F-coil channel already carries total ampere-turns (TurnConvention:
+    applied_multiplier=1.0), so the bulk winding-pack element must drive with
+    turns_with_sign = 1 (sign preserved), not the physical turn count -- else
+    active_coil_response_from_imas double-counts the field by that count."""
+
+    written = regenerated["coils"][name]
+    source = netcdf_description_coils[name]
+    assert len(written.element) == 1
+    assert len(source.element) == 1
+    written_element = written.element[0]
+    source_element = source.element[0]
+
+    # geometry is untouched by the turns correction
+    assert int(written_element.geometry.geometry_type) == int(
+        source_element.geometry.geometry_type
+    )
+    assert np.array_equal(
+        np.asarray(written_element.geometry.outline.r, dtype=float),
+        np.asarray(source_element.geometry.outline.r, dtype=float),
+    )
+    assert np.array_equal(
+        np.asarray(written_element.geometry.outline.z, dtype=float),
+        np.asarray(source_element.geometry.outline.z, dtype=float),
+    )
+
+    # the source netCDF still carries the physical turn count (58 or 55);
+    # the persisted, corrected description carries exactly one signed turn
+    source_turns = float(source_element.turns_with_sign)
+    written_turns = float(written_element.turns_with_sign)
+    assert abs(source_turns) in (55.0, 58.0)
+    assert written_turns == math.copysign(
+        F_COIL_BULK_ELEMENT_TURNS_WITH_SIGN, source_turns
+    )
+
+    correction = regenerated["receipt"]["f_coil_turns_convention_correction"]
+    assert correction["original_turns_with_sign_by_coil"][name] == source_turns
+    assert correction["verified"][name] == written_turns
+
+
+def test_correct_f_coil_bulk_element_turns_rejects_multi_element_coil():
+    bundle = build_diiid_machine_ids()
+    pf_active = bundle.ids["pf_active"]
+    author_pf_active_circuits(pf_active)
+    coil = next(c for c in pf_active.coil if str(c.name).strip() == "F1A")
+    coil.element.resize(2)
+    with pytest.raises(Exception):
+        correct_f_coil_bulk_element_turns(pf_active)
 
 
 def test_new_coils_use_the_same_geometry_representation_as_existing_coils(regenerated):

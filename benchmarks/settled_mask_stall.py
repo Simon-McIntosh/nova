@@ -80,6 +80,16 @@ DEFAULT_PUBLIC_ROUTE_OUTPUT = (
     / "docs/figures/solver-convergence-regression"
     / "settled-mask-stall/public-route/four-rows.json"
 )
+DEFAULT_UNDAMPED_OUTPUT = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "settled-mask-stall/undamped/four-rows.json"
+)
+DEFAULT_VERTICAL_MODE = (
+    ROOT
+    / "docs/figures/solver-convergence-regression"
+    / "vertical-mode/jacobian-null-direction.json"
+)
 TARGETS = ((21985, 51), (21986, 46), (21989, 55), (22086, 43))
 SMOOTH_NEWTON_STEPS = 8
 SMOOTH_GMRES_ITERATIONS = 40
@@ -330,6 +340,9 @@ class _ProductionTraceCollector:
         applied_factor,
         krylov_reduction,
         krylov_tolerance,
+        model_error_fraction,
+        step_cap_activated,
+        step_cap_factor,
     ) -> None:
         if not self._linear_actions:
             raise RuntimeError(
@@ -340,6 +353,8 @@ class _ProductionTraceCollector:
         proposed = float(np.asarray(proposed_step_norm))
         ladder_factor = float(np.asarray(applied_factor))
         raw_sup = primary["raw_newton_direction_sup"]
+        cap_activated = bool(np.asarray(step_cap_activated))
+        measured_cap_factor = float(np.asarray(step_cap_factor))
         self._global_step += 1
         self._newton_steps.append(
             {
@@ -349,7 +364,9 @@ class _ProductionTraceCollector:
                 "residual_after": float(np.asarray(residual_after)),
                 "raw_newton_direction_sup": raw_sup,
                 "proposed_step_sup_after_step_cap": proposed,
-                "step_cap_factor": primary["step_cap_factor"],
+                "step_cap_activated": cap_activated,
+                "step_cap_factor": measured_cap_factor,
+                "model_error_fraction": _strict_float(model_error_fraction),
                 "merit_ladder_factor": ladder_factor,
                 "effective_raw_direction_fraction": (
                     proposed * ladder_factor / max(raw_sup, np.finfo(float).tiny)
@@ -2887,6 +2904,339 @@ def measure_public_route(*, operands: Path, output: Path) -> dict[str, Any]:
     return receipt
 
 
+def _undamped_frozen_solve(frozen_map, initial) -> dict[str, Any]:
+    """Take raw fixed-partition Newton directions without globalization."""
+
+    def take_step(state, _unused):
+        mapped, tangent = jax.linearize(frozen_map, state)
+        residual_vector = mapped - state
+
+        def residual_action(vector):
+            return vector - tangent(vector)
+
+        step, info = jax.scipy.sparse.linalg.gmres(
+            residual_action,
+            residual_vector,
+            tol=fixed_point._GMRES_RELATIVE_TOLERANCE,
+            maxiter=SMOOTH_GMRES_ITERATIONS,
+            restart=SMOOTH_GMRES_ITERATIONS,
+            solve_method="batched",
+        )
+        linear_residual = residual_vector - residual_action(step)
+        reduction = jnp.linalg.norm(linear_residual) / jnp.maximum(
+            jnp.linalg.norm(residual_vector),
+            jnp.finfo(residual_vector.dtype).tiny,
+        )
+        candidate = state + step
+        candidate_mapped = frozen_map(candidate)
+        observation = (
+            fixed_point._relative_residual(mapped, state),
+            fixed_point._relative_residual(candidate_mapped, candidate),
+            jnp.max(jnp.abs(step)),
+            jnp.asarray(info, dtype=jnp.int32),
+            reduction,
+        )
+        return candidate, observation
+
+    terminal, observations = jax.lax.scan(
+        take_step,
+        initial,
+        xs=None,
+        length=SMOOTH_NEWTON_STEPS,
+    )
+    terminal.block_until_ready()
+    residuals_before, residuals_after, step_norms, info, reductions = (
+        np.asarray(value) for value in observations
+    )
+    return {
+        "initial_residual": float(residuals_before[0]),
+        "residuals_before": residuals_before.tolist(),
+        "residuals_after": residuals_after.tolist(),
+        "residuals_per_step": [
+            {
+                "step": index + 1,
+                "before": float(before),
+                "after": float(after),
+            }
+            for index, (before, after) in enumerate(
+                zip(residuals_before, residuals_after, strict=True)
+            )
+        ],
+        "raw_step_norms_taken": step_norms.tolist(),
+        "gmres_info": info.tolist(),
+        "gmres_relative_residuals": reductions.tolist(),
+        "terminal_residual": float(residuals_after[-1]),
+        "finite": bool(
+            np.all(np.isfinite(residuals_after)) and np.all(np.isfinite(step_norms))
+        ),
+        "damping": {
+            "projected_conditioning": False,
+            "step_cap": False,
+            "merit_ladder": False,
+            "factors": [1.0] * SMOOTH_NEWTON_STEPS,
+        },
+    }
+
+
+def _draw_undamped_comparison(rows: list[dict[str, Any]], figure_path: Path) -> None:
+    """Plot raw fixed-partition steps beside repaired production histories."""
+    figure, axes = plt.subplots(
+        len(rows), 2, figsize=(13.0, 12.5), constrained_layout=True
+    )
+    for row_index, row in enumerate(rows):
+        frozen_axis, production_axis = axes[row_index]
+        undamped = row["frozen_mask_undamped"]
+        frozen_values = [undamped["initial_residual"], *undamped["residuals_after"]]
+        frozen_axis.semilogy(
+            range(len(frozen_values)),
+            frozen_values,
+            "o-",
+            color="#d1495b",
+            label="raw Newton, factor one",
+        )
+        frozen_axis.axhline(
+            reachability.FIXED_POINT_CRITERION,
+            color="#343a40",
+            linewidth=0.9,
+            linestyle=":",
+        )
+        frozen_axis.set_ylabel(row["identity"] + "\nrelative residual")
+        frozen_axis.set_xlabel("frozen-mask raw Newton step")
+        frozen_axis.grid(alpha=0.25)
+
+        repaired = row["production_route_repaired_cap"]["result"]
+        public = row["public_route_receipt"]
+        production_axis.semilogy(
+            range(1, len(public["active_set_residuals"]) + 1),
+            public["active_set_residuals"],
+            "o--",
+            color="#6c757d",
+            label="public receipt",
+        )
+        production_axis.semilogy(
+            range(1, len(repaired["active_set_residuals"]) + 1),
+            repaired["active_set_residuals"],
+            "o-",
+            color="#087e8b",
+            label="model-error cap",
+        )
+        production_axis.axhline(
+            reachability.FIXED_POINT_CRITERION,
+            color="#343a40",
+            linewidth=0.9,
+            linestyle=":",
+        )
+        production_axis.set_xlabel("production active-set trip")
+        production_axis.set_ylabel("relative residual")
+        production_axis.set_title(
+            f"{repaired['termination_reason']} · "
+            f"{row['production_route_repaired_cap']['terminal_topology']['achieved_class']}"
+        )
+        production_axis.grid(alpha=0.25)
+    axes[0, 0].legend(fontsize=8)
+    axes[0, 1].legend(fontsize=8)
+    figure.suptitle(
+        "Undamped frozen-mask control and model-error-triggered production cap"
+    )
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+
+
+def measure_undamped_control(
+    *,
+    operands: Path,
+    public_route: Path,
+    vertical_mode: Path,
+    output: Path,
+) -> dict[str, Any]:
+    """Measure raw frozen Newton and the repaired public production route."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    banked = _load_banked_rows(operands)
+    public_data = json.loads(public_route.read_text(encoding="utf-8"))
+    public_by_identity = {row["identity"]: row for row in public_data["rows"]}
+    vertical_data = json.loads(vertical_mode.read_text(encoding="utf-8"))
+    vertical_by_identity = {
+        row["identity"]: row["verdict"]
+        for row in vertical_data["rows"]
+        if row["arm"] == "pure"
+    }
+    response_cache, carrier_evidence = _persisted_response_cache(
+        response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
+    )
+    selected = {
+        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
+        for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
+    }
+    requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    rows = []
+    for key in TARGETS:
+        identity = f"{key[0]}/{key[1]}"
+        print(f"UNDAMPED-CONTROL {identity}", flush=True)
+        selected_row, qualification = selected[key]
+        case, context = _mast_case_from_selection(
+            SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            case, context, response_cache
+        )
+        if int(policy["section_kernel_evaluations_this_shot"]) != 0:
+            raise RuntimeError("profile rebuild entered the direct response builder")
+        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+        seed = jnp.asarray(passive_case["state"])
+        frozen_state = _full_terminal_state(profile, seed, banked[key])
+        mask = profile.operator.residual_shadow_mask(frozen_state, requested_class)
+        shadowed_map = profile.operator.flux_map_with_shadow(
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+
+        def frozen_map(candidate):
+            return shadowed_map(candidate, mask)
+
+        undamped = _undamped_frozen_solve(frozen_map, frozen_state)
+        production = _production_path_solve(
+            profile,
+            seed,
+            target_current,
+            banked[key],
+        )
+        public_result = public_by_identity[identity]["public_route"]
+        cap_steps = production["newton_steps"]
+        rows.append(
+            {
+                "identity": identity,
+                "arm": "pure",
+                "vertical_mode_evidence": vertical_by_identity[identity],
+                "frozen_mask_undamped": undamped,
+                "production_route_repaired_cap": {
+                    "result": production["result"],
+                    "terminal_topology": production["terminal_topology"],
+                    "step_cap_activation_count": sum(
+                        step["step_cap_activated"] for step in cap_steps
+                    ),
+                    "step_cap_factors": [step["step_cap_factor"] for step in cap_steps],
+                    "model_error_fractions": [
+                        step["model_error_fraction"] for step in cap_steps
+                    ],
+                    "newton_step_count": len(cap_steps),
+                },
+                "public_route_receipt": {
+                    "terminal_residual": public_result["result"]["terminal_residual"],
+                    "active_set_iterations": public_result["result"][
+                        "active_set_iterations"
+                    ],
+                    "termination_reason": public_result["result"]["termination_reason"],
+                    "converged": public_result["result"]["converged"],
+                    "active_set_residuals": public_result["result"][
+                        "active_set_residuals"
+                    ],
+                    "achieved_class": public_result["terminal_topology"][
+                        "achieved_class"
+                    ],
+                },
+            }
+        )
+        print(
+            "UNDAMPED-CONTROL-DONE "
+            + json.dumps(
+                {
+                    "identity": identity,
+                    "frozen_terminal": undamped["terminal_residual"],
+                    "production_terminal": production["result"]["terminal_residual"],
+                    "cap_activations": sum(
+                        step["step_cap_activated"] for step in cap_steps
+                    ),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
+    figure_path = output.with_suffix(".png")
+    _draw_undamped_comparison(rows, figure_path)
+    receipt = {
+        "artifact": "undamped frozen-mask control and repaired production cap",
+        "source_commit": _source_revision(),
+        "runtime": {
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+            "scheduler": {
+                "job_id": os.environ.get("SLURM_JOB_ID"),
+                "node": os.environ.get("SLURMD_NODENAME"),
+                "partition": os.environ.get("SLURM_JOB_PARTITION"),
+                "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+            },
+        },
+        "evidence_inputs": {
+            "operands": str(operands),
+            "operands_sha256": _sha256(operands),
+            "public_route_receipt": str(public_route),
+            "public_route_receipt_sha256": _sha256(public_route),
+            "vertical_mode_receipt": str(vertical_mode),
+            "vertical_mode_receipt_sha256": _sha256(vertical_mode),
+            "response_carrier": carrier_evidence,
+            "persistent_compilation_cache": cache.receipt(),
+        },
+        "measurement_contract": {
+            "targets": [list(key) for key in TARGETS],
+            "frozen_mask_steps": SMOOTH_NEWTON_STEPS,
+            "frozen_mask_gmres_iterations": SMOOTH_GMRES_ITERATIONS,
+            "frozen_mask_damping": {
+                "projected_conditioning": False,
+                "step_cap": False,
+                "merit_ladder": False,
+                "step_factor": 1.0,
+            },
+            "production_route": "ForwardProfile.solve_branch(newton_krylov)",
+            "production_gmres_iterations": PUBLIC_ROUTE_POLICY.gmres_iterations,
+            "step_cap_model_error_fraction": (
+                fixed_point._STEP_CAP_MODEL_ERROR_FRACTION
+            ),
+            "step_cap_authority": (
+                "previous accepted step actual-versus-linear merit error; "
+                "the nonlinear merit ladder remains sole acceptance authority"
+            ),
+            "partition_change": (
+                "relinearize on the changed frozen mask and reset projected "
+                "conditioning plus prior model-error state"
+            ),
+        },
+        "figure": str(figure_path),
+        "rows": rows,
+        "verdict": {
+            "row_count": len(rows),
+            "undamped_all_factors_one": all(
+                row["frozen_mask_undamped"]["damping"]["factors"]
+                == [1.0] * SMOOTH_NEWTON_STEPS
+                for row in rows
+            ),
+            "production_converged_count": sum(
+                row["production_route_repaired_cap"]["result"]["converged"]
+                for row in rows
+            ),
+            "public_receipt_converged_count": sum(
+                row["public_route_receipt"]["converged"] for row in rows
+            ),
+            "vertical_near_null_rows": [
+                row["identity"]
+                for row in rows
+                if row["vertical_mode_evidence"]["near_null_is_vertical_mode"]
+            ],
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="action", required=True)
@@ -2930,6 +3280,15 @@ def main() -> None:
     public_route_parser.add_argument(
         "--output", type=Path, default=DEFAULT_PUBLIC_ROUTE_OUTPUT
     )
+    undamped_parser = subparsers.add_parser("undamped-control")
+    undamped_parser.add_argument("--operands", type=Path, default=DEFAULT_OPERANDS)
+    undamped_parser.add_argument(
+        "--public-route", type=Path, default=DEFAULT_PUBLIC_ROUTE_OUTPUT
+    )
+    undamped_parser.add_argument(
+        "--vertical-mode", type=Path, default=DEFAULT_VERTICAL_MODE
+    )
+    undamped_parser.add_argument("--output", type=Path, default=DEFAULT_UNDAMPED_OUTPUT)
     arguments = parser.parse_args()
     if arguments.action == "measure":
         result = measure(
@@ -2976,9 +3335,17 @@ def main() -> None:
             report=arguments.report,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
-    else:
+    elif arguments.action == "public-route":
         result = measure_public_route(
             operands=arguments.operands,
+            output=arguments.output,
+        )
+        print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    else:
+        result = measure_undamped_control(
+            operands=arguments.operands,
+            public_route=arguments.public_route,
+            vertical_mode=arguments.vertical_mode,
             output=arguments.output,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))

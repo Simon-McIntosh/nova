@@ -140,9 +140,9 @@ def test_newton_stops_at_the_first_passing_promotion_and_pads_diagnostics():
     assert np.all(np.isnan(trace[4:]))
 
 
-def test_newton_reports_iteration_budget_exhaustion():
+def test_newton_reports_iteration_budget_exhaustion_after_uncapped_first_step():
     result = newton_krylov(
-        lambda state: jnp.ones_like(state),
+        jnp.cos,
         jnp.zeros(2),
         newton_steps=1,
         gmres_iterations=2,
@@ -826,7 +826,7 @@ def test_newton_stopping_is_jittable_and_does_not_require_picard_contraction():
 def test_vmap_stopping_runs_to_the_slowest_lane_with_per_lane_receipts():
     def solve(slope):
         return newton_krylov(
-            lambda state: slope * state + jnp.ones_like(state),
+            lambda state: slope * state**2 + jnp.ones_like(state),
             jnp.zeros(1),
             newton_steps=5,
             gmres_iterations=2,
@@ -836,17 +836,17 @@ def test_vmap_stopping_runs_to_the_slowest_lane_with_per_lane_receipts():
             convergence_tolerance=0.1,
         )
 
-    result = jax.jit(jax.vmap(solve))(jnp.asarray([0.0, 0.5]))
+    result = jax.jit(jax.vmap(solve))(jnp.asarray([0.0, 0.2]))
     np.testing.assert_array_equal(
-        np.asarray(result.attempted_newton_promotions), [1, 3]
+        np.asarray(result.attempted_newton_promotions), [1, 2]
     )
-    np.testing.assert_array_equal(np.asarray(result.accepted_newton_promotions), [1, 3])
+    np.testing.assert_array_equal(np.asarray(result.accepted_newton_promotions), [1, 2])
     np.testing.assert_array_equal(np.asarray(result.converged), [True, True])
-    assert int(np.max(np.asarray(result.attempted_newton_promotions))) == 3
+    assert int(np.max(np.asarray(result.attempted_newton_promotions))) == 2
     fast_trace, slow_trace = np.asarray(result.trace)
     assert np.all(np.isnan(fast_trace[4:]))
-    assert np.isfinite(slow_trace[11])
-    assert np.all(np.isnan(slow_trace[12:]))
+    assert np.isfinite(slow_trace[7])
+    assert np.all(np.isnan(slow_trace[8:]))
 
 
 @pytest.mark.parametrize(
@@ -973,8 +973,8 @@ def test_all_schemes_share_one_nonlinear_fixed_point():
     np.testing.assert_allclose(np.asarray(newton.state), target, atol=1e-8)
 
 
-def test_newton_step_is_capped_and_finite_on_a_near_singular_tangent():
-    """(I - J) nearly vanishes: the raw Krylov step explodes; the cap holds."""
+def test_newton_first_step_is_uncapped_on_an_exact_near_singular_model():
+    """An exact affine model admits its large first direction to the merit ladder."""
     epsilon = 1e-9
     offset = jnp.ones(DIMENSION)
 
@@ -993,9 +993,11 @@ def test_newton_step_is_capped_and_finite_on_a_near_singular_tangent():
     )
     state = np.asarray(result.state)
     assert np.all(np.isfinite(state))
-    # residual f = offset (norm 1); the relaxed step is 0.5, so the promoted
-    # state may move at most step_cap * 0.5 per component
-    assert np.max(np.abs(state)) <= 10.0 * 0.5 + 1e-12
+    np.testing.assert_allclose(state, 1.0 / epsilon, rtol=5.0e-8)
+    np.testing.assert_array_equal(result.inner_iteration_step_cap_activations, [0])
+    np.testing.assert_allclose(result.inner_iteration_step_cap_factors, [1.0])
+    np.testing.assert_allclose(result.inner_iteration_model_error_fractions, [0.0])
+    assert bool(result.converged)
 
 
 def test_vmap_batch_matches_per_slice_solves():

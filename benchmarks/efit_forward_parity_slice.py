@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import jax
@@ -3891,6 +3892,66 @@ def _execution_environment() -> dict[str, Any]:
     }
 
 
+def _source_revision() -> str:
+    """Return the repository revision that supplied this benchmark process."""
+    repository = Path(__file__).resolve().parents[1]
+    completed = subprocess.run(
+        ["git", "-C", str(repository), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _diagnostic_frames(
+    bank: Path, shots: tuple[int, ...] | None
+) -> list[dict[str, int]]:
+    """Identify the frozen frames selected for a diagnostic replay."""
+    return [
+        {
+            "shot": int(selected_row["shot"]),
+            "slice_index": int(selected_row["slice_index"]),
+        }
+        for selected_row, _qualification in _selected_frozen_slices(bank, shots)
+    ]
+
+
+def _write_absolute_source_failure_receipt(
+    bank: Path,
+    output: Path,
+    shots: tuple[int, ...] | None,
+    error: Exception,
+) -> Path:
+    """Persist the terminal failure of an absolute-source diagnostic replay."""
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    frames = _diagnostic_frames(bank, shots)
+    receipt = {
+        "receipt": "MAST passive-inclusive frozen-six forward scorecard",
+        "status": "failed",
+        "backend": _execution_environment(),
+        "compilation_cache": compilation_cache.receipt(),
+        "source_revision": _source_revision(),
+        "execution_contract": {
+            "invocation_route": "absolute_source_replay_diagnostic",
+        },
+        "frame": frames[0] if len(frames) == 1 else None,
+        "frames": frames,
+        "failure": {
+            "exception_class": type(error).__name__,
+            "message": str(error),
+        },
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    receipt_path = output / FROZEN_SCORECARD_RECEIPT_NAME
+    temporary_path = receipt_path.with_suffix(receipt_path.suffix + ".tmp")
+    temporary_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+    temporary_path.replace(receipt_path)
+    return receipt_path
+
+
 def _figure_src(path: Path) -> str:
     """Return a project-absolute figure identity when published under docs."""
     figures = Path("docs/figures").resolve()
@@ -4364,7 +4425,16 @@ def main(argv: list[str] | None = None) -> None:
     shots = tuple(arguments.shot) if arguments.shot else None
     if arguments.absolute_source_replay:
         output = arguments.output or DEFAULT_OUTPUT
-        receipt = run(arguments.store, arguments.bank, output, shots)
+        try:
+            receipt = run(arguments.store, arguments.bank, output, shots)
+        except Exception as error:
+            _write_absolute_source_failure_receipt(
+                arguments.bank,
+                output,
+                shots,
+                error,
+            )
+            raise
         aggregate = receipt["aggregate"]
         print(
             "PASSIVE_INCLUSIVE_FROZEN_SIX "

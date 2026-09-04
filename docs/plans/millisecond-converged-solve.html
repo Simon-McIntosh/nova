@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -82,6 +82,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T175317062386" data-who="coordinator" data-when="2026-09-04T17:55:00Z">
     <div class="r-comment-body"><p>The fused remainder is attributed (report <code>~/.config/reckon/crew/reports/nova/millisecond/trip-remainder-attribution.md</code>, receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json</code>, Perfetto trace kept under the report directory, merged at <code>610b04ce</code>; H200 job 1262726 on 22086/43 pure, baseline 41.05 s per solve, 5.86 s per trip). Ablation ladder on the same fused production invocation: with the projected-Krylov Arnoldi condition diagnostic at <code>fixed_point.py:808</code> replaced by a constant the whole solve takes <strong>0.754 s</strong>, a saving of 5.76 s per trip, 102 percent of the unexplained remainder; the fixed line-search grade ladder is 0.69 s per trip, the connectivity flood and reachability loops 0.07 s, the split-spline condition SVDs 0.02 s (rows overlap, not additive). Zero recompilations across three warm solves; 322 dynamic flood-fill loop iterations per read. With the diagnostic gone the remaining distance to the one-millisecond target is about 0.107 s per trip. Repair queued behind the live constraint-receipt node that holds fixed_point.py: reuse the Hessenberg GMRES already builds for the condition discriminator (or remove the second Arnoldi and its SVD from the hot path) while the trusted-Krylov admission keeps its decisions, verified by the nine referees and the four-row public-route receipt.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T201811862492" data-who="coordinator" data-when="2026-09-04T20:18:00Z">
+    <div class="r-comment-body"><p>Negative result on the first repair (six commits held in worktree <code>msc-projected-krylov-condition-from-gmres-hessenberg</code>, tip <code>25d4ec74</code>, receipt banked at <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-reuse/profile.json</code>, H200 job 1262745): five semantics-preserving ways of evaluating the condition ratio (the original projection, a GMRES-layout Hessenberg with device SVD, a Gram eigenspectrum, a host SVD callback, a fixed-sweep Jacobi spectrum) all leave the solve at 40.2 to 40.9 s, 5.77 s per trip against the 5.86 s baseline, while the constant ratio gives 0.754 s. The decision sequence is proven identical on a fixture with a refused direction and the 75-test gate is green, so the arithmetic of the spectrum is not the cost: what the ratio's data dependency does to the compiled program is (candidates: the Arnoldi's extra Jacobian-vector products survive only when the ratio is live, a conditional that serialises the trip, a materialised Krylov basis breaking fusion). Dispatched <code>msc-condition-discriminator-device-trace</code> on that tip: HLO op-count tables and complete device traces of the Jacobi variant against the constant, with a per-trip call census, to name the mechanism before another repair is written. Adopting a cheaper proxy or deferred telemetry would change the trusted-Krylov admission meaning and is the lead's call if the trace points there.</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T22:05:14",
+  "updated": "2026-09-04T22:13:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1718,6 +1718,15 @@
         "created": "2026-08-22"
       },
       {
+        "id": "msc-hessenberg-trace-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "msc-hessenberg-x",
         "harness": "codex",
         "role": "implement",
@@ -2581,6 +2590,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "scr-fwd-verify-h200-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "scr-fwd-verify-x",
         "harness": "codex",
         "role": "implement",
@@ -2703,6 +2721,15 @@
       },
       {
         "id": "scr-vertical-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "sdw-cache-abort-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -97048,6 +97075,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1668
+    "_version": 1671
   }
 }

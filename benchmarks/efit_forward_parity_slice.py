@@ -21,6 +21,7 @@ import argparse
 from dataclasses import dataclass, replace
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +67,11 @@ from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.imas.mast_passive_response import passive_sections
 from nova.imas.mast_vacuum_response import loop_response_matrix
 from nova.imas.parity_tolerances import ScorecardField, registered_tolerances
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 from nova.geometry.hexstencil import hex_stencil
 
 matplotlib.use("Agg")
@@ -114,7 +119,6 @@ PRESCRIBED_RESPONSE_INPUT_ARRAYS = (
     "fcoil_xmult",
 )
 GRID_STRIDE = 2
-REFERENCE_NATIVE_GRID_POINTS = 95
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
@@ -3745,7 +3749,7 @@ def _closest_passive_state(
 def _frozen_scorecard_figure(rows: list[dict[str, Any]], path: Path) -> None:
     """Plot the accepted residual sequence for each selected shot."""
     figure, axes = plt.subplots(2, 3, figsize=(11.2, 6.8), constrained_layout=True)
-    for axis, row in zip(axes.ravel(), rows, strict=True):
+    for axis, row in zip(axes.ravel(), rows, strict=False):
         values = np.asarray(row["accepted_residual_trajectory"], dtype=np.float64)
         displayed = np.maximum(values, FIXED_POINT_CRITERION / 10.0)
         axis.semilogy(
@@ -3764,6 +3768,8 @@ def _frozen_scorecard_figure(rows: list[dict[str, Any]], path: Path) -> None:
         axis.set_xlabel("Newton promotion")
         axis.set_ylabel("Fixed-point residual")
         axis.grid(True, which="both", alpha=0.25)
+    for axis in axes.ravel()[len(rows) :]:
+        axis.set_visible(False)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
@@ -3783,7 +3789,7 @@ def _constrained_scorecard_figure(
 ) -> None:
     """Compare constrained and banked residual reads on every frozen shot."""
     figure, axes = plt.subplots(2, 3, figsize=(11.2, 6.8), constrained_layout=True)
-    for axis, row in zip(axes.ravel(), rows, strict=True):
+    for axis, row in zip(axes.ravel(), rows, strict=False):
         shot = str(row["shot"])
         constrained = np.asarray(row["accepted_residual_trajectory"], dtype=float)
         banked = np.asarray(
@@ -3819,6 +3825,8 @@ def _constrained_scorecard_figure(
         axis.set_xlabel("Mapped evaluation")
         axis.set_ylabel("Fixed-point residual")
         axis.grid(True, which="both", alpha=0.2)
+    for axis in axes.ravel()[len(rows) :]:
+        axis.set_visible(False)
     axes[0, 0].legend(fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
@@ -3840,14 +3848,71 @@ def _baseline_by_shot(receipt: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return rows
 
 
+def _selected_frozen_slices(
+    bank: Path, shots: tuple[int, ...] | None
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Select an optional measured subset from the frozen reference cohort."""
+    selected = select_slices_by_shot(bank)
+    if shots is None:
+        return selected
+    requested = set(shots)
+    filtered = [row for row in selected if int(row[0]["shot"]) in requested]
+    found = {int(row[0]["shot"]) for row in filtered}
+    missing = requested - found
+    if missing:
+        raise ValueError(
+            "requested shots are absent from the frozen cohort: "
+            + ", ".join(str(shot) for shot in sorted(missing))
+        )
+    return filtered
+
+
+def _load_persisted_response_cache() -> tuple[dict[str, Any], dict[str, Any]]:
+    """Load the frozen response through its existing fail-closed carrier check."""
+    from benchmarks import mast_response_carrier_warm as response_carrier
+    from benchmarks.label_seed_residual_field import (
+        _persisted_response_cache as load_response_cache,
+    )
+
+    return load_response_cache(
+        response_carrier.DEFAULT_CARRIER,
+        response_carrier.DEFAULT_RECEIPT,
+    )
+
+
+def _execution_environment() -> dict[str, Any]:
+    """Describe the device and allocation that produced a scorecard."""
+    devices = jax.devices()
+    return {
+        "jax_backend": jax.default_backend(),
+        "device_kinds": [device.device_kind for device in devices],
+        "device_count": len(devices),
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+    }
+
+
+def _figure_src(path: Path) -> str:
+    """Return a project-absolute figure identity when published under docs."""
+    figures = Path("docs/figures").resolve()
+    try:
+        relative = path.resolve().relative_to(figures)
+    except ValueError:
+        return str(path)
+    return "/nova/figures/" + relative.as_posix()
+
+
 def run_current_constrained(
     store: Path,
     bank: Path,
     output: Path = CURRENT_CONSTRAINED_OUTPUT,
     baseline_directory: Path = DEFAULT_OUTPUT,
+    shots: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
     """Score the frozen-six MAST lane through the declared-current public seam."""
     configure_dtypes()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
     if output.resolve().is_relative_to(baseline_directory.resolve()):
         raise ValueError("the constrained output must be outside the banked directory")
     baseline_digests = _artifact_digests(baseline_directory)
@@ -3856,8 +3921,8 @@ def run_current_constrained(
         baseline_receipt_path.read_bytes()
     ).hexdigest()
     baseline = _baseline_by_shot(json.loads(baseline_receipt_path.read_text()))
-    selected = select_slices_by_shot(bank)
-    response_cache = None
+    selected = _selected_frozen_slices(bank, shots)
+    response_cache, carrier_evidence = _load_persisted_response_cache()
     shot_records = []
     figure_rows = []
     for selected_row, qualification in selected:
@@ -3865,29 +3930,10 @@ def run_current_constrained(
             store,
             selected_row,
             qualification,
-            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             mast_case, context, response_cache
         )
-        if response_cache is None:
-            prescribed = profile.operator.prescribed_current_field
-            response_cache = {
-                "response": np.asarray(prescribed.response, dtype=np.float64),
-                "input_digests": policy["response_input_digests"],
-                "audit": {
-                    name: policy[name]
-                    for name in (
-                        "stored_circuit_count",
-                        "active_circuit_count",
-                        "passive_or_vessel_circuit_count",
-                        "section_kernel_evaluations",
-                        "passive_registry_minimum_overlap_fraction",
-                        "passive_registry_maximum_separation_m",
-                    )
-                },
-            }
-
         reference = mast_case["reference"]
         target_current = abs(float(reference["plasma_current_a"]))
         solve, _official_trace, branch = _passive_inclusive_solve(
@@ -4023,8 +4069,10 @@ def run_current_constrained(
     _constrained_scorecard_figure(figure_rows, baseline, figure_path)
     receipt = {
         "receipt": "MAST current-constrained frozen-six forward scorecard",
-        "backend": "JAX_PLATFORMS=cpu required by invocation",
+        "backend": _execution_environment(),
+        "compilation_cache": compilation_cache.receipt(),
         "execution_contract": {
+            "invocation_route": "current_constrained_default",
             "selection": "identical frozen-six rows selected by the banked scorecard",
             "target_current": "abs(efm/plasma_current_c) on each selected row",
             "public_entry_point": "ForwardProfile.solve_branch(target_current=...)",
@@ -4032,6 +4080,7 @@ def run_current_constrained(
             "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
             "newton_promotions": NEWTON_STEPS,
         },
+        "response_carrier": carrier_evidence,
         "banked_artifact_integrity": {
             "directory": str(baseline_directory),
             "file_count": len(baseline_digests),
@@ -4059,21 +4108,26 @@ def run_current_constrained(
                 else "FAIL_CURRENT_CONSTRAINT_RECOVERS_NO_PLASMA_ROOTS"
             ),
         },
-        "figure_src": (
-            "/nova/figures/current-constrained-forward-solve/mast-constrained/"
-            + CURRENT_CONSTRAINED_FIGURE_NAME
-        ),
+        "figure_src": _figure_src(figure_path),
     }
     receipt_path = output / CURRENT_CONSTRAINED_RECEIPT_NAME
     receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     return receipt
 
 
-def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
+def run(
+    store: Path,
+    bank: Path,
+    output: Path,
+    shots: tuple[int, ...] | None = None,
+) -> dict[str, Any]:
     """Score one best-qualified passive-inclusive row from every frozen shot."""
     configure_dtypes()
-    selected = select_slices_by_shot(bank)
-    response_cache = None
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    selected = _selected_frozen_slices(bank, shots)
+    response_cache, carrier_evidence = _load_persisted_response_cache()
     shot_records = []
     figure_rows = []
     for selected_row, qualification in selected:
@@ -4081,29 +4135,10 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             store,
             selected_row,
             qualification,
-            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             mast_case, context, response_cache
         )
-        if response_cache is None:
-            prescribed = profile.operator.prescribed_current_field
-            response_cache = {
-                "response": np.asarray(prescribed.response, dtype=np.float64),
-                "input_digests": policy["response_input_digests"],
-                "audit": {
-                    name: policy[name]
-                    for name in (
-                        "stored_circuit_count",
-                        "active_circuit_count",
-                        "passive_or_vessel_circuit_count",
-                        "section_kernel_evaluations",
-                        "passive_registry_minimum_overlap_fraction",
-                        "passive_registry_maximum_separation_m",
-                    )
-                },
-            }
-
         solve, official_trace, branch = _passive_inclusive_solve(
             passive_case,
             context,
@@ -4235,8 +4270,10 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     _frozen_scorecard_figure(figure_rows, figure_path)
     receipt = {
         "receipt": "MAST passive-inclusive frozen-six forward scorecard",
-        "backend": "JAX_PLATFORMS=cpu required by invocation",
+        "backend": _execution_environment(),
+        "compilation_cache": compilation_cache.receipt(),
         "execution_contract": {
+            "invocation_route": "absolute_source_replay_diagnostic",
             "selection": "lowest worst-fraction qualified row per frozen shot",
             "reference_seed": "efm/psirz in total Wb",
             "normalization": "reference-declared axis and boundary anchors",
@@ -4244,6 +4281,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "route": "ForwardProfile.solve_branch newton_krylov",
             "newton_promotions": NEWTON_STEPS,
         },
+        "response_carrier": carrier_evidence,
         "path_audit": {
             "sensor_reads": 0,
             "whitening_matrices": 0,
@@ -4297,9 +4335,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
                 else "The passive-inclusive reference-seeded prescribed-anchor fixed point does not reproduce the frozen references within registered bounds."
             ),
         },
-        "figure_src": (
-            "/nova/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png"
-        ),
+        "figure_src": _figure_src(figure_path),
     }
     output.mkdir(parents=True, exist_ok=True)
     receipt_path = output / FROZEN_SCORECARD_RECEIPT_NAME
@@ -4307,34 +4343,47 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     return receipt
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Parse paths, score the frozen references and print the verdict."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--current-constrained", action="store_true")
-    arguments = parser.parse_args()
-    if arguments.current_constrained:
-        output = arguments.output or CURRENT_CONSTRAINED_OUTPUT
-        receipt = run_current_constrained(arguments.store, arguments.bank, output)
+    parser.add_argument(
+        "--absolute-source-replay",
+        action="store_true",
+        help="diagnostically replay the reference-seeded absolute-source route",
+    )
+    parser.add_argument(
+        "--shot",
+        action="append",
+        type=int,
+        help="run only the named shot from the frozen reference cohort",
+    )
+    arguments = parser.parse_args(argv)
+    shots = tuple(arguments.shot) if arguments.shot else None
+    if arguments.absolute_source_replay:
+        output = arguments.output or DEFAULT_OUTPUT
+        receipt = run(arguments.store, arguments.bank, output, shots)
         aggregate = receipt["aggregate"]
         print(
-            "CURRENT_CONSTRAINED_FROZEN_SIX "
+            "PASSIVE_INCLUSIVE_FROZEN_SIX "
             f"shots={aggregate['shot_count']} "
-            f"plasma_roots={aggregate['constrained_converged_plasma_roots']} "
-            f"registered_passes={aggregate['registered_tolerance_pass_count']} "
+            f"outcomes={aggregate['outcome_counts']} "
+            f"carried_passes={aggregate['all_carried_tolerances_pass_count']} "
             f"verdict={aggregate['verdict']}"
         )
         return
-    output = arguments.output or DEFAULT_OUTPUT
-    receipt = run(arguments.store, arguments.bank, output)
+    output = arguments.output or CURRENT_CONSTRAINED_OUTPUT
+    receipt = run_current_constrained(
+        arguments.store, arguments.bank, output, shots=shots
+    )
     aggregate = receipt["aggregate"]
     print(
-        "PASSIVE_INCLUSIVE_FROZEN_SIX "
+        "CURRENT_CONSTRAINED_FROZEN_SIX "
         f"shots={aggregate['shot_count']} "
-        f"outcomes={aggregate['outcome_counts']} "
-        f"carried_passes={aggregate['all_carried_tolerances_pass_count']} "
+        f"plasma_roots={aggregate['constrained_converged_plasma_roots']} "
+        f"registered_passes={aggregate['registered_tolerance_pass_count']} "
         f"verdict={aggregate['verdict']}"
     )
 

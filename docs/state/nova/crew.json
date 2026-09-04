@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T07:51:27",
+  "updated": "2026-09-04T07:56:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -895,9 +895,11 @@
         "id": "dvf-cocos-scout",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a06aec-7864-7533-8be7-a9a9d174af98"
+        },
         "created": "2026-09-04"
       },
       {
@@ -86190,6 +86192,160 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T052558910920-sdw-efit-parity-replay-fail-closed",
+        "plan": "solve-default-wiring",
+        "section": "\u00a71",
+        "node": "sdw-efit-parity-replay-fail-closed",
+        "node_definition": {
+          "done_when": "Worktree commit confined to benchmarks/efit_forward_parity_slice.py, tests/test_efit_parity_default_route.py and docs/figures/solve-default-wiring/efit-parity-default/ in which a raising flagged replay writes a receipt at the path the passing flagged receipt would occupy recording invocation_route=absolute_source_replay_diagnostic, status failed, the exception class and message, the frame, the SLURM job id, the source revision and the compilation-cache identity before exiting nonzero, one bounded H200 job on 21978/35 with the flag only (SLURM polled in the foreground, manifest written before the wait) banks that failure receipt beside current-constrained-frozen-six-scorecard.json, a new CPU test asserts that a raising replay produces the failure receipt, that test file and the seven referee node IDs green in the worktree with logs, the manifest stating that the 21986/46 NoQualifiedAxisError was the candidate-table truncation repaired on main at 82949087",
+          "estimated_hours": null,
+          "goal": "Make the retained absolute-source replay diagnostic of benchmarks/efit_forward_parity_slice.py fail closed with a serialized diagnostic failure receipt so the flagged route's terminal state can be banked beside the no-flag current-constrained receipt merged at 18db61cf (wiring item 3 closing measure, reuse map: your own route change at f51308d1 whose no-flag path is run_current_constrained, your two H200 jobs 1262262 and 1262263 whose flagged replays raised NoQualifiedAxisError on 21986/46 and a closest-state bitwise mismatch on 21978/35 with logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042719270402-sdw-efit-parity-current-default-codex/logs/, the bitwise replay invariant kept exactly as it is)",
+          "id": "sdw-efit-parity-replay-fail-closed",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052558910920-sdw-efit-parity-replay-fail-closed/manifest.md",
+          "plan": "solve-default-wiring",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "benchmarks/efit_forward_parity_slice.py",
+            "tests/test_efit_parity_default_route.py",
+            "docs/figures/solve-default-wiring/efit-parity-default/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sdw-parity-current",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T05:26:10Z",
+        "completed_at": "2026-09-04T05:53:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1657,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1657,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "9eff3e028e70a8592abe24afe8a778b490d157ac",
+        "commits": [
+          "07e0a45e5d9ac6c6df4f8da82e62e458f2c2c657",
+          "4204f44ee1aed928234e5dae315e2f87e90c1888"
+        ],
+        "changed_lines": {
+          "added": 227,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_efit_parity_default_route.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052558910920-sdw-efit-parity-replay-fail-closed/logs/default-route-after-format.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052558910920-sdw-efit-parity-replay-fail-closed/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06aac-1603-78a0-a70b-4baa05c3742f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6122112,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6242882,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 19297,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2636
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 121950,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 132750,
+              "external_wait": null,
+              "log_age_seconds": 126980,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 127026,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21933,
+          "peak_input_tokens": 12364994
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -86248,8 +86404,22 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904055659",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T05:56:59Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1523
+    "_version": 1526
   }
 }

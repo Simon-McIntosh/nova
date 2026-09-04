@@ -117,6 +117,28 @@
     9.7e-12 in six trips.</p>
   </section>
 
+  <section id="cocos-resolution">
+    <h2>§5 scout — the DIII-D COCOS from the sign tuple, and what the corpus does not carry</h2>
+    <p>Report <code>~/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md</code> with four machine-readable probes
+    under the run directory (five-frame measurement, flux-exponent probe, ambix loader probe, pf_active probe). Nothing fitted,
+    nothing changed.</p>
+    <table>
+      <caption>Per-quantity result on the five gate frames</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Evidence</th><th scope="col">Factor to COCOS 17</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">EFIT psi map</th><td>sigma_Bp = +1 on 5 of 5; the Grad-Shafranov current integral favours Wb/rad on 5 of 5 (ratios 1.067 to 1.156 against 0.170 to 0.184 for total Wb)</td><td>−2π, resolved</td></tr>
+        <tr><th scope="row">Plasma current, toroidal field proxy, F-coil, ECOILA and ohmic currents</th><td>positive Ip on 5 of 5; B0 positive on 2 and negative on 3; polarity audit cosines 0.944 to 0.953</td><td>+1, resolved</td></tr>
+        <tr><th scope="row">q95</th><td>positive on all five frames across both B0 polarities, so a signed reading gives COCOS 1 on the two positive-B0 frames and COCOS 5 on the three negative-B0 frames</td><td>unresolved; the ambix loader's blanket COCOS 5 negation yields an invalid signed tuple on frames 179 and 144</td></tr>
+        <tr><th scope="row">Stored EFIT p' and ff'</th><td>absent from all five gate Parquets (57 columns, none a profile); the DIII-D 200000.nc equilibrium profiles are not mapped to the hashed shots</td><td>derivative factor −1/(2π) conditional; comparison impossible, 0 of 5</td></tr>
+        <tr><th scope="row">Persisted pf_active description</th><td>geometry and wiring only: 24 coils, 19 circuits, 19 supplies, zero current samples</td><td>no convention applies; its response is COCOS 17 by construction</td></tr>
+      </tbody>
+    </table>
+    <p>Profiles extracted from the tared label by the Grad-Shafranov operator are negative p' on 18 to 19 of 19 surfaces per
+    frame (medians −6 kPa/Wb to −46 kPa/Wb) with projection floors of 1.5 to 2.1 percent, but there is no stored EFIT profile to
+    compare them with. Recommendation: the translation stays at the ambix corpus boundary, quantity-aware and fail-closed, with
+    q95 exposed as an unsigned magnitude until its signedness is proved and no prescribed profile synthesised from the label.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

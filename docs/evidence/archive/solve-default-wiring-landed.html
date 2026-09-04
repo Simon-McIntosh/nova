@@ -74,12 +74,12 @@
         <tr><th scope="row">Target current at the terminal state</th><td>874260.4375 A, reproduced exactly</td></tr>
         <tr><th scope="row">Terminal residual</th><td>2.4506488565449e-3, bounded nonconvergence; 0 of 1 registered passes</td></tr>
         <tr><th scope="row">Carrier</th><td>persisted response carrier, zero direct builder entries; persistent compilation cache identity recorded</td></tr>
-        <tr><th scope="row">Flagged replay on the same frame</th><td>not serialised: RuntimeError, the closest-state replay was not bitwise identical (job 1262263); on 21986/46 NoQualifiedAxisError from the five-slot candidate table since repaired at 82949087 (job 1262262)</td></tr>
+        <tr><th scope="row">Flagged replay on the same frame</th><td>fails closed since <code>07e0a45e</code> (merged at <code>237ac11c</code>): receipt <code>passive-inclusive-frozen-six-scorecard.json</code> from H200 job 1262266 records RuntimeError, the closest-state replay not bitwise identical, with the route, frame, job, source revision and cache identity; on 21986/46 the earlier NoQualifiedAxisError was the five-slot candidate table since repaired at 82949087</td></tr>
       </tbody>
     </table>
-    <p>The flagged route therefore has no receipt to sit beside the no-flag one. The follow-on node makes the diagnostic fail
-    closed, writing a failure receipt with the route, status, exception, frame, job, revision and cache identity, and banks it
-    from one more bounded H200 job on 21978/35; the bitwise replay invariant is not revised.</p>
+    <p>Both routes now leave a receipt on the same frame: the no-flag scorecard stayed byte-identical across the diagnostic job,
+    and the flagged scorecard states why the replay cannot reproduce the stored state. The bitwise replay invariant is not
+    revised; whether the diagnostic should survive at all is a later question for the plan.</p>
   </section>
 
   <section id="open-record">

@@ -22,8 +22,8 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-09-05">
+<meta name="plan-version" content="13">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -88,6 +88,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T213157689055" data-who="coordinator" data-when="2026-09-04T21:32:00Z">
     <div class="r-comment-body"><p>Device-trace comparison landed (report <code>~/.config/reckon/crew/reports/nova/millisecond/condition-discriminator-trace.md</code>, receipts banked at <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/</code>, H200 job 1262754) and it corrects two earlier readings. First, the constant-ratio ablation was not the same computation: with the ratio constant the solver settles a trip after 4 promotions and 56 linear actions instead of 12 and 156, so its 0.75 s solve came from a different, more permissive path, not from removing the spectrum arithmetic; the compiled HLO differs by 1 percent in every category and the exact evaluation costs 0.064 s per trip more, which is the whole removable arithmetic cost. The 98 percent attribution to the SVD is withdrawn. Second, and decisive: one compiled trip of 22086/43 pure costs 0.26 s of kernels plus 0.23 s of host gaps over 16,562 launches, about 0.49 s, while the production solve averages 5.77 s per trip. Roughly nine tenths of a production trip therefore lies outside the compiled trip, in the Python-level driver (active-set loop, per-trip topology read and relinearisation, receipt assembly, host transfers of state and history pytrees, or repeated dispatch of many small programs). Dispatched <code>msc-production-solve-host-profile</code>: cProfile with device synchronisation plus py-spy over one warm production solve, ranking host functions per trip and counting device-to-host transfers, to name the mechanism before another repair is written.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T220137473070" data-who="coordinator" data-when="2026-09-04T22:02:00Z">
+    <div class="r-comment-body"><p>Host profile landed (commit <code>e8fcaa4c</code> merged at <code>f63a64a4</code>, receipts <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/</code>, report <code>~/.config/reckon/crew/reports/nova/millisecond/production-solve-host-profile.md</code>, H200 job 1262767): the warm production solve is one Python dispatch, and the compiled runtime owns 99.99 percent of its 41.13 s; the wrapper costs 0.5 ms per trip and the transfers 0.1 ms. The active-set loop is a <code>fori_loop</code> over the active-set budget at <code>fixed_point.py:3387</code> with a compiled conditional skipping inactive iterations. So the 15-fold gap between the 0.38 s one-trip program and 5.88 s per reported trip is inside the executable's outer loop. Dispatched <code>msc-compiled-outer-loop-iteration-trace</code>: ordered timestamps at each outer iteration, active flag, promotions and linear actions per iteration, the inner budgets both programs resolve, to say whether inactive iterations still pay for their body, whether the inner loops run to static budgets after settlement, and what an active iteration costs beside the one-trip program.</p></div>
 </div>
 </section>
 </main>

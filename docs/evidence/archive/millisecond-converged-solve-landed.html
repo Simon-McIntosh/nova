@@ -151,6 +151,19 @@
     device synchronisation and py-spy, is the next measurement.</p>
   </section>
 
+  <section id="host-profile">
+    <h2>The host is not the cost: one dispatch, one compiled outer loop (merged)</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/</code> (synchronised cProfile,
+    native py-spy flame, transfer census; H200 job 1262767). The warm production solve of 22086/43 pure takes 41.13 s over seven
+    reported trips, and the compiled runtime owns 99.99 percent of it: the Python wrapper is 0.5 ms per trip and the
+    device-to-host transfers 0.1 ms per trip, 19 buffers and 17 kB. There is one Python dispatch for the whole solve; the
+    active-set loop is a <code>fori_loop</code> over the active-set budget at <code>fixed_point.py:3387</code> with a compiled
+    conditional skipping inactive iterations. So the gap between the 0.38 s one-trip program and the 5.88 s per trip of the full
+    solve lies inside the executable's outer loop, in what later iterations execute, which the next measurement records per
+    iteration with ordered timestamps: executed against active iterations, promotions and linear actions per iteration, and
+    whether the inner loops run to their static budgets after settlement.</p>
+  </section>
+
 </main>
 </body>
 </html>

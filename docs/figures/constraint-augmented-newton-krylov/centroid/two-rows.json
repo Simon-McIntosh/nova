@@ -1,0 +1,164 @@
+{
+  "receipt": "vertical current centroid through typed constraint pairs",
+  "source": {
+    "revision": "506c9fa971655a1bf0f33ccfdf4fa88651ddc47e",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "configuration": {
+    "route": "ForwardProfile.solve_branch public defaults",
+    "constraint_policy": "imposed",
+    "support": "all_domain",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    }
+  },
+  "inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "held_prototype": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-position-constraint-prototype/docs/figures/solver-convergence-regression/vertical-mode/constraint/four-rows.json",
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005278547294437885,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-constraint-interface-centroid-receipt/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.026166 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "identity": "21986/46",
+      "seed_vertical_centroid_m": 0.09889428493417936,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 130455.06566432705,
+        "position_scale_m": 4.0
+      },
+      "free": {
+        "qualified": false,
+        "topology_consistent": true,
+        "terminal_residual": 0.0013464194829426188,
+        "active_set_trips": 5,
+        "termination": "active_set_settled",
+        "vertical_centroid_m": 0.07003264120002886,
+        "vertical_target_m": null,
+        "vertical_error_m": null,
+        "compensating_current_a": null,
+        "scaled_constraint_residual": null,
+        "soft_mode_projection": null
+      },
+      "protocol": {
+        "qualified": false,
+        "topology_consistent": true,
+        "terminal_residual": 9.216672426749996e-09,
+        "active_set_trips": 2,
+        "termination": "converged",
+        "vertical_centroid_m": 0.09889428874969336,
+        "vertical_target_m": 0.09889428493417936,
+        "vertical_error_m": 3.815514001970222e-09,
+        "compensating_current_a": -4103.220272082495,
+        "scaled_constraint_residual": 9.538785004925554e-10,
+        "soft_mode_projection": 0.029604851911852078
+      },
+      "prototype": {
+        "converged": true,
+        "topology_consistent": true,
+        "terminal_residual": 1.2843962964247349e-14,
+        "active_set_trips": 3,
+        "termination": "converged",
+        "vertical_centroid_m": 0.0988942849341712,
+        "vertical_target_m": 0.09889428493417936,
+        "vertical_error_m": -8.1601392309949e-15,
+        "compensating_multiplier": -0.03145315551839532,
+        "compensating_current_a": -4103.223468502552
+      }
+    },
+    {
+      "identity": "21989/55",
+      "seed_vertical_centroid_m": 0.012586049153551352,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 143188.14849106473,
+        "position_scale_m": 4.0
+      },
+      "free": {
+        "qualified": false,
+        "topology_consistent": false,
+        "terminal_residual": 0.0007508047217838407,
+        "active_set_trips": 6,
+        "termination": "active_set_settled",
+        "vertical_centroid_m": 0.049003980766560484,
+        "vertical_target_m": null,
+        "vertical_error_m": null,
+        "compensating_current_a": null,
+        "scaled_constraint_residual": null,
+        "soft_mode_projection": null
+      },
+      "protocol": {
+        "qualified": false,
+        "topology_consistent": true,
+        "terminal_residual": 2.0622864318156213e-09,
+        "active_set_trips": 1,
+        "termination": "converged",
+        "vertical_centroid_m": 0.012586049393300996,
+        "vertical_target_m": 0.012586049153551352,
+        "vertical_error_m": 2.3974964374895436e-10,
+        "compensating_current_a": 3022.330810662079,
+        "scaled_constraint_residual": 5.993741093723859e-11,
+        "soft_mode_projection": -0.028989762148401377
+      },
+      "prototype": {
+        "converged": false,
+        "topology_consistent": true,
+        "terminal_residual": 3.484042879020775e-09,
+        "active_set_trips": 7,
+        "termination": "converged",
+        "vertical_centroid_m": 0.012586028636718443,
+        "vertical_target_m": 0.012586049153551358,
+        "vertical_error_m": -2.051683291488804e-08,
+        "compensating_multiplier": 0.021107378783090974,
+        "compensating_current_a": 3022.3264874503793
+      }
+    }
+  ],
+  "verdict": {
+    "row_count": 2,
+    "qualified_count": 0,
+    "prototype_current_max_abs_difference_a": 0.00432321169955685,
+    "prototype_residual_max_abs_difference": 9.216659582787031e-09
+  }
+}

@@ -211,8 +211,9 @@ def test_notch_flux_forced_more_extreme_than_x_point_still_loses():
     assert bool(result["wall_shadowed"])
     assert not bool(result["reachable_wall_node_mask"][_FIN_TARGET_INDEX])
     assert int(result["limiter_wall_node_index"]) != _FIN_TARGET_INDEX
+    # The tangency is the spline minimum along the visible fin, not a wall node.
     np.testing.assert_array_less(
-        np.abs(np.asarray(result["limiter_coordinate"]) - np.array([1.1, 0.0])).max(),
+        np.abs(np.asarray(result["limiter_coordinate"]) - np.array([1.1, 0.05])).max(),
         1.0e-6,
     )
 

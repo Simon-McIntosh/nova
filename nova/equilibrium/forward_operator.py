@@ -842,6 +842,18 @@ class ForwardFluxOperator:
         self, moments: CellCurrentMoments
     ) -> CellCurrentMoments:
         """Convert physical first moments to the fixed linear-basis vectors."""
+        if self.moment_geometry is None:
+            radial = np.asarray(moments.radial_moment)
+            vertical = np.asarray(moments.vertical_moment)
+            if np.any(radial != 0.0) or np.any(vertical != 0.0):
+                raise ValueError(
+                    "moment geometry is required for nonzero first current moments"
+                )
+            return CellCurrentMoments(
+                moments.cell_current,
+                jnp.zeros_like(moments.radial_moment),
+                jnp.zeros_like(moments.vertical_moment),
+            )
         second = jnp.asarray(
             self.moment_geometry.second_moment, dtype=moments.cell_current.dtype
         )

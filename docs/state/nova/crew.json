@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T20:06:17",
+  "updated": "2026-09-04T20:45:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1716,6 +1716,15 @@
         "role": "implement",
         "session_id": "01a02aee-69e2-7670-8cc3-04b66a6973b9",
         "created": "2026-08-22"
+      },
+      {
+        "id": "msc-hessenberg-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "msc-remainder-x",
@@ -96119,6 +96128,194 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T173741274409-cank-constraint-interface-centroid-receipt",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-constraint-interface-centroid-receipt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3521,
+                "cached_input_tokens": 453111,
+                "input_tokens": 456634,
+                "output_tokens": 1996,
+                "reasoning_output_tokens": 184,
+                "total_tokens": 458630,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/constraint.py, nova/equilibrium/forward.py, nova/equilibrium/forward_operator.py, nova/equilibrium/fixed_point.py, nova/equilibrium/solve_request.py, nova/equilibrium/__init__.py, tests/test_equilibrium_constraint_protocol.py, tests/test_constraint_active_set.py, tests/test_vertical_position_constraint.py, benchmarks/constraint_centroid_receipt.py and docs/figures/constraint-augmented-newton-krylov/centroid/, the nine referee node IDs with the two request tests with the constraint tests green with logs, one H200 job writing centroid/two-rows.json with png carrying the protocol's constrained solve beside the held prototype's residual, trips, compensating current on both rows beside the free solves, the manifest written before the SLURM wait begins, held unmerged for the lead",
+          "estimated_hours": null,
+          "goal": "Complete the constraint-interface delivery of constraint-augmented-newton-krylov \u00a74 A and B whose implementation is committed on this tip (00ef0610: typed ConstraintFunctional with CompensatingUnknown protocols, ConstraintBinding, the static ConstraintPair tuple on ForwardSolveRequest, ConstraintRecord rows on the receipt, false constraint-mask tails, generic row-JVP telemetry in fixed_point.newton_krylov, the CurrentCentroidConstraint with a circuit-current compensator, the two-row producer benchmarks/constraint_centroid_receipt.py, focused CPU gate 13 green) but whose H200 receipt never ran because the compute node's uv wrapper already injects --no-sync so an explicit uv run --no-sync is rejected before Python starts: produce the H200 receipt by launching the reserved payload with /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never a second environment, no sync) under the worktree PYTHONPATH, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp, partition betelgeuse, reservation gpu_0003_grpA with the persistent compilation cache wired at e04970ad, polled in the foreground because a backgrounded wait ends the worker's turn, so the producer writes docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json with its png comparing the protocol's constrained solve against the held prototype's residual, trips, compensating current (minus 4103 A on 21986/46, 3022 A on 21989/55 at the seed centroid) beside the free solves, with the gate recorded in the manifest being the nine referee node IDs (the seven, test_newton_trajectory_continuation::test_continuation_accumulates_contracting_segments_eager_and_jit, test_globalization_state_continuation::test_inner_decision_state_accumulates_across_segments) together with tests/test_forward_solve_request.py, tests/test_forward_profile_defaults.py, the constraint tests, fixing in scope whatever the receipt or the gate exposes",
+          "id": "cank-constraint-interface-centroid-receipt",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T173741274409-cank-constraint-interface-centroid-receipt/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/constraint.py",
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/solve_request.py",
+            "nova/equilibrium/__init__.py",
+            "tests/test_equilibrium_constraint_protocol.py",
+            "tests/test_constraint_active_set.py",
+            "tests/test_vertical_position_constraint.py",
+            "benchmarks/constraint_centroid_receipt.py",
+            "docs/figures/constraint-augmented-newton-krylov/centroid/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cank-interface-x2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T17:38:17Z",
+        "completed_at": "2026-09-04T18:43:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3910,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3910,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "00ef0610f08ade02cfb5c8023f1ca3b5a0b293de",
+        "commits": [
+          "506c9fa971655a1bf0f33ccfdf4fa88651ddc47e",
+          "eb77480be3163ba4a07049e7e01f932904b36a28"
+        ],
+        "changed_lines": {
+          "added": 198,
+          "removed": 8,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider the nine referee node IDs plus tests/test_forward_solve_request.py tests/test_forward_profile_defaults.py tests/test_equilibrium_constraint_protocol.py tests/test_constraint_active_set.py tests/test_vertical_position_constraint.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T173741274409-cank-constraint-interface-centroid-receipt/cpu-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T173741274409-cank-constraint-interface-centroid-receipt/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d7f-fb92-73b2-b45a-e74e830f882d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 40800,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 43200,
+              "external_wait": null,
+              "log_age_seconds": 42298,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 42354,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-constraint-interface-centroid-receipt",
+          "session_id": "01a06d7f-fb92-73b2-b45a-e74e830f882d",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T18:43:27Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -96263,6 +96460,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1659
+    "_version": 1661
   }
 }

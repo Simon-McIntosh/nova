@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="constraint-augmented-newton-krylov-landed">
+  <meta name="plan-title" content="Constraint-augmented Newton–Krylov — cumulative execution evidence">
+  <meta name="plan-summary" content="Receipts for the typed constraint interface on the forward solve and for each library constraint as it lands, beginning with the magnetics vertical current centroid.">
+  <meta name="plan-evidence-for" content="constraint-augmented-newton-krylov">
+  <meta name="plan-verifies" content="constraint-augmented-newton-krylov#s4">
+  <meta name="plan-informs" content="solver-convergence-regression">
+  <title>Constraint-augmented Newton–Krylov — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Constraint-augmented Newton–Krylov — cumulative execution evidence</h1>
+    <p class="lede">Each anchor records one landing of the constraint interface or of a library constraint: the commit, the
+    CPU contracts it proved, and the H200 receipt comparing the protocol's solve with the free solve and with any held
+    prototype it re-expresses. Receipt values keep their recorded precision.</p>
+  </header>
+
+  <section id="interface-and-centroid">
+    <h2>The typed constraint interface and the current-centroid row (merged at e7d90cc8)</h2>
+    <p><strong>Commits:</strong> <code>00ef0610</code> (interface and centroid row), <code>506c9fa9</code> (receipt renderer),
+    <code>eb77480b</code> (receipt); receipt <code>docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json</code>
+    and <code>two-rows.png</code> (H200 job 1262742, persistent cache runtime-0745ecebea4cb264e054). Design source: the
+    interface scout's report under <code>~/.config/reckon/crew/reports/nova/cank/</code>.</p>
+    <p><strong>What landed.</strong> <code>nova/equilibrium/constraint.py</code> declares a <code>ConstraintFunctional</code>
+    (observed value, residual, residual Jacobian-vector action, dual flux image, fixed row count), a
+    <code>CompensatingUnknown</code> in three typed forms (circuit current, multiplier, profile amplitude, so the class decision
+    stays open), and a <code>ConstraintBinding</code> (target, physical tolerance, numerical scale, initial unknown, payload,
+    imposed-or-eliminated policy). A static tuple of <code>ConstraintPair</code> rides on <code>ForwardSolveRequest</code>;
+    terminal <code>ConstraintRecord</code> rows are exposed on the receipt. <code>ForwardProfile</code> assembles the augmented
+    state, physical flux plus one normalised unknown per row, and appends permanently false mask tails so the active set never
+    drops a constraint row; <code>fixed_point.newton_krylov</code> gains only optional row-JVP telemetry and imports no
+    equilibrium semantics. The first library constraint is the magnetics vertical current centroid with a circuit-current
+    compensator on the P6 pair.</p>
+    <p><strong>CPU contracts (24 green, nine referees included):</strong> the empty tuple enters the existing solve body with
+    every leaf bit-identical; a linear circuit row and a nonlinear multiplier row converge with the authored residual JVPs and
+    the full augmented action agreeing with central differences; the constraint mask tail stays false across a flux-mask
+    transition; private compensating tails are stripped from the public flux state; a fixed-layout jit(vmap) compiles once.</p>
+    <table>
+      <caption>H200, the two vertical-mode bank rows: free, protocol-constrained, and the held prototype at 6ae142d5</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Free</th><th scope="col">Protocol</th><th scope="col">Held prototype</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21986/46</th><td>1.35e-3, 5 trips, settled</td><td>9.2e-9, 2 trips, converged, −4103.220 A</td><td>1.28e-14, 3 trips, converged, −4103.223 A</td></tr>
+        <tr><th scope="row">21989/55</th><td>7.51e-4, 6 trips, settled, inconsistent</td><td>2.1e-9, 1 trip, converged, +3022.331 A</td><td>3.48e-9, 7 trips, converged, +3022.326 A</td></tr>
+      </tbody>
+    </table>
+    <p>The protocol reproduces the held prototype's compensating currents to 4 mA in fewer trips; both protocol solves report
+    converged and topology-consistent, and both sit above the 1e-10 branch qualification (the protocol's kernel tolerance is
+    1e-8), so the receipt keeps qualified false rather than relabelling. The constraint is off by default; whether a constrained
+    solve becomes the production shape remains the lead's decision. Next in the library order: Thomson separatrix crossings on
+    the DIII-D competition frames, then the Shafranov shift.</p>
+  </section>
+</main>
+</body>
+</html>

@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -300,6 +300,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T192851809850" data-who="coordinator" data-when="2026-09-04T19:28:00Z">
     <div class="r-comment-body"><p>Class-reader repair landed into the candidate lineage: commit <code>9b17d333</code>, candidate advanced to <code>e3f2c501</code>. Rule now applied in <code>connectivity_boundary.py</code>: a spline-consistent supplied wall stays restricted to its supplied segment, and when that segment is shadowed the whole-wall rediscovery remains diagnostic and cannot bind the boundary or the class. On the reproduced 22086/43 trip-one state the base accepted a finite wall level of 0.3336 from rediscovered node 20 and read limited; after the repair the wall level is infinite, the X stays admitted, and the read is diverted and topology-consistent. Regression <code>tests/test_connectivity_class_reader.py</code> pins that state; the limiter, line-of-sight, connectivity and partition tests stay green (40). The mask-threshold consistency repair is still running; the paired H200 remeasure follows both.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T200601579044" data-who="coordinator" data-when="2026-09-04T20:06:00Z">
+    <div class="r-comment-body"><p>H200 validation lane landed at <code>70b4a687</code> (commit <code>624aa7a1</code>): <code>scripts/h200_test_lane/run.sh</code> submits one reserved H200 job with an explicit <code>cuda,cpu</code> platform, the persistent compilation cache and the shared environment's python, logging the wall and exit status; AGENTS.md states the two-lane policy (CPU for the fast lane and the bit-identity contracts that pin CPU arithmetic, H200 for any file over ten minutes, never weakening a CPU contract to make the GPU lane green). First measurement, receipt <code>docs/figures/test-lanes/h200-vs-cpu-forward-solve.json</code>: the whole forward-solve file at main runs in 1716 s on the H200 (29 tests, 21 passed) against a CPU run that had 13 of 29 done at 1355 s, so the lane is faster but not by the factor the solver enjoys, because these tests are compile- and host-bound at fixture size. Failures on the GPU: the four pre-existing stale contracts the held repair <code>ac945c19</code> re-expresses, plus four to attribute per device: a CPU-x64 quantisation-floor contract, a finite-difference derivative check at 0.061 against a 0.01 tolerance, and NoQualifiedAxisError in the vacuum second-fixed-point and the topology-portfolio jit-vmap tests. Next: complete the same file on CPU and on the H200 at one revision that includes the held repair to separate source fixes from device differences.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

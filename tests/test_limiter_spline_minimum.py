@@ -54,7 +54,7 @@ def _bowl_case(wall_r=None, wall_z=None):
     }
 
 
-def _select(case, exact_wall_flux=None, region=None):
+def _select(case, exact_wall_flux=None, region=None, selected_wall=None):
     return cb._select_reachable_wall_limiter(
         case["flux"],
         case["radial"],
@@ -68,6 +68,7 @@ def _select(case, exact_wall_flux=None, region=None):
         case["surface"],
         case["axis_r"],
         case["axis_z"],
+        selected_wall=selected_wall,
     )
 
 
@@ -117,6 +118,32 @@ def test_wall_spline_minimum_is_invariant_to_inserted_wall_nodes():
         rtol=0.0,
         atol=2.0e-12,
     )
+
+
+def test_selected_wall_keeps_restricted_minimum_bits():
+    """A supplied segment retains its previously selected tangency exactly."""
+    case = _bowl_case()
+    selected_r = jnp.asarray(2.0, dtype=case["wall_r"].dtype)
+    selected_z = jnp.asarray(-1.0, dtype=case["wall_z"].dtype)
+    selected_wall = jnp.stack(
+        (selected_r, selected_z, case["surface"](selected_r, selected_z))
+    )
+    result = _select(case, selected_wall=selected_wall)
+
+    actual_bits = np.asarray(
+        [result["r"], result["z"], result["psi"]], dtype=np.float64
+    ).view(np.uint64)
+    expected_bits = np.asarray(
+        [
+            4612248968380809216,
+            13830554455654793216,
+            4611686018427387911,
+        ],
+        dtype=np.uint64,
+    )
+    np.testing.assert_array_equal(actual_bits, expected_bits)
+    assert int(result["minimum_bracket_count"]) == 1
+    assert bool(result["valid"])
 
 
 def test_wall_spline_minimum_retains_reachable_subsegment_without_vertices():

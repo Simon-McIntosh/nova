@@ -721,26 +721,29 @@ def _select_reachable_wall_limiter(
     Every supported segment is split at crossed radial and vertical spline knots,
     then sampled with a fixed number of derivative bins per polynomial piece.
     Negative-to-nonnegative along-wall derivative brackets are bisected with a
-    fixed trip count.  Eligible endpoints, corners, and equal-arc reachability
-    samples compete with all refined roots through one exact masked argmin.
+    fixed trip count.  The complete-wall path lets eligible endpoints, corners,
+    equal-arc reachability samples, and refined roots compete through one exact
+    masked argmin.  The selected-wall path checks only its selected point,
+    nearest support node, segment samples, and refined roots.
     """
-    node_reachable = _wall_nodes_touching_region(
-        pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
-    ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, wall_r, wall_z, wall_r, wall_z)
-    node_reachable &= wall_r.shape[0] > 1
-    sample_arc, sample_r, sample_z = _sample_wall_polyline(
-        wall_r, wall_z, _WALL_REACHABILITY_SAMPLES
-    )
-    sample_reachable = _wall_nodes_touching_region(
-        pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
-    ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, sample_r, sample_z, wall_r, wall_z)
-    sample_reachable &= wall_r.shape[0] > 1
-
     all_start = jnp.stack((wall_r, wall_z), axis=-1)
     all_end = jnp.roll(all_start, -1, axis=0)
     all_tangent = all_end - all_start
     all_length_squared = jnp.sum(all_tangent**2, axis=-1)
+    sample_arc, sample_r, sample_z = _sample_wall_polyline(
+        wall_r, wall_z, _WALL_REACHABILITY_SAMPLES
+    )
     if selected_wall is None:
+        node_reachable = _wall_nodes_touching_region(
+            pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
+        ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, wall_r, wall_z, wall_r, wall_z)
+        node_reachable &= wall_r.shape[0] > 1
+        sample_reachable = _wall_nodes_touching_region(
+            pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
+        ) & _wall_nodes_in_line_of_sight(
+            axis_r, axis_z, sample_r, sample_z, wall_r, wall_z
+        )
+        sample_reachable &= wall_r.shape[0] > 1
         segment_index = jnp.arange(wall_r.size, dtype=jnp.int32)
         support_valid = jnp.asarray(True)
     else:
@@ -777,7 +780,31 @@ def _select_reachable_wall_limiter(
         selected_node = _argmin_exact(
             (wall_r - safe_selected[0]) ** 2 + (wall_z - safe_selected[1]) ** 2
         )
-        support_valid &= selected_reachable & node_reachable[selected_node]
+        selected_node_reachable = (
+            _wall_nodes_touching_region(
+                pre_saddle_region,
+                inside_limiter,
+                rg,
+                zg,
+                wall_r[selected_node, None],
+                wall_z[selected_node, None],
+            )[0]
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                wall_r[selected_node, None],
+                wall_z[selected_node, None],
+                wall_r,
+                wall_z,
+            )[0]
+        )
+        support_valid &= selected_reachable & selected_node_reachable
+        node_reachable = (
+            jnp.zeros_like(wall_r, dtype=bool)
+            .at[selected_node]
+            .set(selected_node_reachable & support_valid)
+        )
+        sample_reachable = jnp.zeros_like(sample_arc, dtype=bool)
         segment_index = selected_segment[None]
     start = all_start[segment_index]
     end = all_end[segment_index]
@@ -890,6 +917,28 @@ def _select_reachable_wall_limiter(
     root_value = global_surface(
         root_evaluation_points[..., 0], root_evaluation_points[..., 1]
     )
+    if selected_wall is None:
+        root_reachable = bracket
+    else:
+        flat_root_points = root_points.reshape(-1, 2)
+        root_reachable = (
+            _wall_nodes_touching_region(
+                pre_saddle_region,
+                inside_limiter,
+                rg,
+                zg,
+                flat_root_points[:, 0],
+                flat_root_points[:, 1],
+            )
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                flat_root_points[:, 0],
+                flat_root_points[:, 1],
+                wall_r,
+                wall_z,
+            )
+        ).reshape(bracket.shape) & bracket
 
     edge = jnp.concatenate((psi2d[0], psi2d[-1], psi2d[:, 0], psi2d[:, -1]))
     psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]
@@ -900,25 +949,28 @@ def _select_reachable_wall_limiter(
         endpoint_reachable, (endpoint_value - psi_axis) / span_safe, jnp.inf
     ).reshape(-1)
     root_score = jnp.where(
-        bracket, (root_value - psi_axis) / span_safe, jnp.inf
+        root_reachable, (root_value - psi_axis) / span_safe, jnp.inf
     ).reshape(-1)
     all_segment_length = jnp.linalg.norm(all_tangent, axis=-1)
     all_segment_end = jnp.cumsum(all_segment_length)
-    sample_segment = jnp.clip(
-        jnp.searchsorted(all_segment_end, sample_arc, side="right"),
-        0,
-        wall_r.size - 1,
-    )
-    sample_supported = jnp.any(
-        sample_segment[:, None] == segment_index[None, :], axis=-1
-    )
-    sample_eligible = sample_reachable & sample_supported & support_valid
-    sample_evaluation_r = jnp.where(sample_eligible, sample_r, axis_r)
-    sample_evaluation_z = jnp.where(sample_eligible, sample_z, axis_z)
-    sample_value = global_surface(sample_evaluation_r, sample_evaluation_z)
-    sample_score = jnp.where(
-        sample_eligible, (sample_value - psi_axis) / span_safe, jnp.inf
-    )
+    if selected_wall is None:
+        sample_segment = jnp.clip(
+            jnp.searchsorted(all_segment_end, sample_arc, side="right"),
+            0,
+            wall_r.size - 1,
+        )
+        sample_supported = jnp.any(
+            sample_segment[:, None] == segment_index[None, :], axis=-1
+        )
+        sample_eligible = sample_reachable & sample_supported & support_valid
+        sample_evaluation_r = jnp.where(sample_eligible, sample_r, axis_r)
+        sample_evaluation_z = jnp.where(sample_eligible, sample_z, axis_z)
+        sample_value = global_surface(sample_evaluation_r, sample_evaluation_z)
+        sample_score = jnp.where(
+            sample_eligible, (sample_value - psi_axis) / span_safe, jnp.inf
+        )
+    else:
+        sample_score = jnp.full_like(sample_arc, jnp.inf)
     scores = jnp.concatenate((endpoint_score, root_score, sample_score))
     candidate_points = jnp.concatenate(
         (

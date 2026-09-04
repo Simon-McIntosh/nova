@@ -427,8 +427,8 @@ def _parse_outer_rows() -> list[dict[str, Any]]:
             "active_at_entry": active,
             "active_after": bool(end["active"]),
             "outer_wall_s": (end["timestamp_ns"] - start["timestamp_ns"]) * 1.0e-9,
-            "active_body_wall_s": None,
-            "callback_envelope_s": None,
+            "inner_callback_delta_s": None,
+            "outer_minus_inner_callback_delta_s": None,
             "attempted_promotions": 0,
             "accepted_promotions": 0,
             "executed_receipt_rows": 0,
@@ -440,13 +440,15 @@ def _parse_outer_rows() -> list[dict[str, Any]]:
         if active:
             solve_start = events[1]
             solve_end = events[2]
-            active_wall = (
+            inner_callback_delta = (
                 solve_end["timestamp_ns"] - solve_start["timestamp_ns"]
             ) * 1.0e-9
             row.update(
                 {
-                    "active_body_wall_s": active_wall,
-                    "callback_envelope_s": row["outer_wall_s"] - active_wall,
+                    "inner_callback_delta_s": inner_callback_delta,
+                    "outer_minus_inner_callback_delta_s": (
+                        row["outer_wall_s"] - inner_callback_delta
+                    ),
                     "attempted_promotions": solve_end["attempted_promotions"],
                     "accepted_promotions": solve_end["accepted_promotions"],
                     "executed_receipt_rows": solve_end["executed_receipt_rows"],
@@ -490,7 +492,7 @@ def _write_table(path: Path, rows: list[dict[str, Any]]) -> None:
         "active_at_entry",
         "active_after",
         "outer_wall_s",
-        "active_body_wall_s",
+        "inner_callback_delta_s",
         "attempted_promotions",
         "accepted_promotions",
         "linear_actions",
@@ -564,36 +566,41 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             f"SLURM job `{receipt['scheduler']['job_id']}` traced the exact banked "
             f"MAST 22086/43 pure production invocation at "
             f"`{receipt['measurement_revision']}` on `{receipt['runtime']['host']}`. "
-            f"The compiled `fori_loop` executed **{counts['outer_iterations']} outer "
-            f"iterations**: **{counts['active_outer_iterations']} active** and "
-            f"**{counts['inactive_outer_iterations']} inactive**. The initial frozen-"
-            "mask solve executes before that loop, so the six active loop bodies plus "
-            "the initial solve are the seven trips in the production receipt."
+            f"The active-set budget has **{counts['active_set_budget_positions']} "
+            f"positions**: one initial frozen-mask solve followed by all "
+            f"**{counts['outer_iterations']} compiled loop iterations**. Of those "
+            f"loop iterations, **{counts['active_outer_iterations']} are active** and "
+            f"**{counts['inactive_outer_iterations']} are inactive**. The initial "
+            "solve plus the six active loop bodies are the seven trips in the "
+            "production receipt."
         ),
         "",
         "## Per-iteration evidence",
         "",
         (
-            "Ordered `jax.debug.callback` timestamps bracket each outer-body entry "
-            "and exit and each taken `solve_active` branch. These are instrumented "
-            "walls: callback ordering intentionally synchronizes the device, and the "
+            "Ordered `jax.debug.callback` timestamps delimit every outer-loop index. "
+            "Those outer deltas are instrumented walls; the loop-carried state keeps "
+            "the active rows sequential. The two callbacks placed inside "
+            "`solve_active` do not form barriers around pure operations, which XLA "
+            "may schedule before the first effect. Their small delta is reported only "
+            "as an ordering diagnostic and is not used as an active-body wall. The "
             "uninstrumented 41.1 s production receipt remains the total-wall authority."
         ),
         "",
-        "| outer | active in | active out | outer wall s | active body s | "
+        "| outer | active in | active out | outer wall s | inner callback delta s | "
         "promotions attempted/accepted | linear actions | line-search grades |",
         "|---:|:---:|:---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
-        active_wall = (
+        inner_callback_delta = (
             "—"
-            if row["active_body_wall_s"] is None
-            else f"{row['active_body_wall_s']:.6f}"
+            if row["inner_callback_delta_s"] is None
+            else f"{row['inner_callback_delta_s']:.6f}"
         )
         lines.append(
             f"| {row['outer_index']} | {str(row['active_at_entry']).lower()} | "
             f"{str(row['active_after']).lower()} | {row['outer_wall_s']:.6f} | "
-            f"{active_wall} | {row['attempted_promotions']}/"
+            f"{inner_callback_delta} | {row['attempted_promotions']}/"
             f"{row['accepted_promotions']} | {row['linear_actions']} | "
             f"{row['line_search_grades']} |"
         )
@@ -630,11 +637,16 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             "## What the loop executes",
             "",
             (
-                "The median active outer body is "
-                f"**{timing['active_body']['median_s']:.6f} "
-                f"s**, **{timing['active_to_one_trip_ratio']:.2f}×** the banked "
+                "The median active outer iteration is "
+                f"**{timing['active_outer']['median_s']:.6f} "
+                f"s**, **{timing['active_outer_to_one_trip_ratio']:.2f}×** the banked "
                 f"**{one_trip['synchronized_wall_s']:.6f} s** one-trip executable "
-                f"from job `{one_trip['job_id']}`. The uninstrumented production "
+                f"from job `{one_trip['job_id']}`. Active iterations range from "
+                f"**{timing['active_outer']['minimum_s']:.6f} s** "
+                f"({timing['minimum_active_to_one_trip_ratio']:.2f}×) "
+                f"to **{timing['active_outer']['maximum_s']:.6f} s** "
+                f"({timing['maximum_active_to_one_trip_ratio']:.2f}×). "
+                "The uninstrumented production "
                 f"receipt from job `{production['job_id']}` is "
                 f"**{production['wall_s']:.6f} s** for seven reported trips, "
                 f"**{production['wall_s_per_reported_trip']:.6f} s/trip**."
@@ -644,7 +656,8 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
                 "execute the compiled loop shell and conditional, but do not enter "
                 f"`solve_active`: their callback-delimited walls total "
                 f"**{timing['inactive_outer']['sum_s']:.6f} s** versus "
-                f"**{timing['active_body']['sum_s']:.6f} s** in active bodies. "
+                f"**{timing['active_outer']['sum_s']:.6f} s** across active "
+                "iterations. "
                 "Because two callbacks dominate such tiny inactive rows, that total "
                 "is an instrumentation upper bound, not a production saving claim."
             ),
@@ -667,9 +680,11 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
                 f"`fori_loop` at `{receipt['source_anchors']['outer_loop']}`, whose "
                 "body is guarded by "
                 f"`{receipt['source_anchors']['active_conditional']}`. "
-                "The callback rows show that the conditional skips inactive bodies; "
-                "the fifteenfold gap belongs to active inner solves in the looped "
-                "program, not to Python dispatch or inactive padding."
+                "The callback rows show that the conditional skips inactive bodies. "
+                f"The active loop iterations take "
+                f"{timing['active_outer_to_one_trip_ratio']:.2f}× the one-trip wall "
+                "at the median, so the production gap belongs to the looped program's "
+                "active iterations, not Python dispatch or inactive padding."
             ),
             (
                 "**Repair:** compile one common trip executable with an explicit "
@@ -782,16 +797,23 @@ def run(
         instrumented_summary["accepted_newton_promotions"] - active_accepted
     )
     banked_production, banked_one_trip = _banked_evidence()
-    active_body = _distribution(
-        [float(row["active_body_wall_s"]) for row in active_rows]
+    active_outer = _distribution([row["outer_wall_s"] for row in active_rows])
+    inner_callback_delta = _distribution(
+        [float(row["inner_callback_delta_s"]) for row in active_rows]
     )
     inactive_outer = _distribution([row["outer_wall_s"] for row in inactive_rows])
     common_trip_saving = sum(
         max(
-            float(row["active_body_wall_s"]) - banked_one_trip["synchronized_wall_s"],
+            row["outer_wall_s"] - banked_one_trip["synchronized_wall_s"],
             0.0,
         )
         for row in active_rows
+    )
+    minimum_active_ratio = (
+        active_outer["minimum_s"] / banked_one_trip["synchronized_wall_s"]
+    )
+    maximum_active_ratio = (
+        active_outer["maximum_s"] / banked_one_trip["synchronized_wall_s"]
     )
     receipt: dict[str, Any] = {
         "schema": "nova.compiled_outer_loop_trace",
@@ -846,6 +868,7 @@ def run(
             "timing_eligible_for_production_total": False,
         },
         "counts": {
+            "active_set_budget_positions": ACTIVE_SET_BUDGET,
             "outer_iterations": len(rows),
             "active_outer_iterations": len(active_rows),
             "inactive_outer_iterations": len(inactive_rows),
@@ -863,15 +886,19 @@ def run(
         },
         "outer_iterations": rows,
         "timing": {
-            "active_body": active_body,
+            "active_outer": active_outer,
+            "inner_callback_delta": inner_callback_delta,
             "inactive_outer": inactive_outer,
-            "active_to_one_trip_ratio": (
-                active_body["median_s"] / banked_one_trip["synchronized_wall_s"]
+            "active_outer_to_one_trip_ratio": (
+                active_outer["median_s"] / banked_one_trip["synchronized_wall_s"]
             ),
+            "minimum_active_to_one_trip_ratio": minimum_active_ratio,
+            "maximum_active_to_one_trip_ratio": maximum_active_ratio,
             "callback_contract": (
-                "ordered callbacks synchronize the device at each boundary; active "
-                "body deltas include callback overhead and inactive deltas are upper "
-                "bounds dominated by their two callbacks"
+                "ordered callbacks delimit each outer-loop index; inner callback "
+                "deltas are not body walls because XLA may schedule pure operations "
+                "before the first inner effect; inactive outer deltas are upper bounds "
+                "dominated by their two callbacks"
             ),
         },
         "banked_production": banked_production,
@@ -894,8 +921,10 @@ def run(
             "finding": (
                 "The one-trip budget executes only the initial solve outside the "
                 "compiled outer loop. Production's six subsequent active solves run "
-                "inside that loop and carry the fifteenfold wall; inactive loop "
-                "iterations take the conditional skip and do not execute inner work."
+                f"inside that loop and take {minimum_active_ratio:.2f} to "
+                f"{maximum_active_ratio:.2f} "
+                "one-trip walls each; inactive loop iterations take the conditional "
+                "skip and do not execute inner work."
             ),
             "repair": (
                 "Drive a common compiled trip executable with explicit state and "

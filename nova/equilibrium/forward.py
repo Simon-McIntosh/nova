@@ -71,12 +71,21 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Literal, NamedTuple
+import time
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import scipy.optimize
+
+from nova.equilibrium.solve_request import (
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+    SolveRoute,
+    declared_forward_solve_policy,
+)
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
@@ -153,10 +162,9 @@ __all__ = [
 ]
 
 #: Routes that drive the same map to the same fixed point.
-SolveRoute = Literal["host", "host_krylov", "picard", "anderson", "newton_krylov"]
-
 _HOST: tuple[str, ...] = ("host", "host_krylov")
 _ACCELERATED: tuple[str, ...] = ("picard", "anderson", "newton_krylov")
+_FORWARD_SOLVE_POLICY = declared_forward_solve_policy()
 
 
 def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
@@ -347,9 +355,9 @@ class PerturbedSeedPolicy:
     """Declared near-basin amplitudes and bounded pinned-solve budget."""
 
     relative_amplitudes: tuple[float, ...] = (1.0e-3, 1.0e-2, 5.0e-2)
-    newton_steps: int = 10
-    gmres_iterations: int = 30
-    tolerance: float = 1.0e-10
+    newton_steps: int = _FORWARD_SOLVE_POLICY.newton_steps
+    gmres_iterations: int = _FORWARD_SOLVE_POLICY.gmres_iterations
+    tolerance: float = _FORWARD_SOLVE_POLICY.qualification_tolerance
 
     def __post_init__(self) -> None:
         """Require a finite increasing ladder and positive solve controls."""
@@ -1528,6 +1536,130 @@ class ForwardProfile:
             prescribed_current,
         )
 
+    def _solve_request(self, request: ForwardSolveRequest) -> ForwardSolveReceipt:
+        """Resolve one typed request through the unchanged keyword solve path."""
+
+        if request.source_profile is not self.source:
+            raise ValueError("request source_profile must be this profile's source")
+        if request.constraint_pairs:
+            raise NotImplementedError(
+                "augmented constraint pairs are not available; use constraint_pins"
+            )
+        if not request.policy.current_pin and request.target_current is not None:
+            raise ValueError("target_current requires the current-pin policy")
+        if not request.policy.exact_kernels:
+            raise ValueError("the public forward solve requires exact kernels")
+
+        policy = request.policy
+        options: dict[str, object]
+        if request.route == "newton_krylov":
+            options = {
+                "newton_steps": policy.newton_steps,
+                "gmres_iterations": policy.gmres_iterations,
+                "warmup": policy.warmup,
+                "relaxation": policy.relaxation,
+                "step_cap": policy.step_cap,
+                "active_set_steps": policy.active_set_steps,
+                "convergence_tolerance": policy.kernel_tolerance,
+                "stop_on_active_set_stagnation": policy.stagnation_stop,
+                "stop_on_active_set_settlement": policy.settled_exit,
+                "retain_outer_best_iterate": policy.best_iterate_retention,
+                "continue_newton_trajectory": policy.continuation,
+                "continue_globalization_state": policy.continuation,
+                "own_mask_acceptance": policy.own_mask_acceptance,
+            }
+        elif request.route in {"picard", "anderson"}:
+            options = {
+                "evaluations": policy.newton_steps,
+                "relaxation": policy.relaxation,
+            }
+            if request.route == "anderson":
+                options.update(warmup=policy.warmup, step_cap=policy.step_cap)
+        elif request.route == "host":
+            options = {
+                "evaluations": policy.newton_steps,
+                "relaxation": policy.relaxation,
+                "tolerance": policy.kernel_tolerance,
+            }
+        else:
+            raise ValueError(
+                "typed host_krylov requests need an explicitly declared host policy"
+            )
+
+        started = time.perf_counter()
+        equilibrium = self.solve(
+            request.seed_policy.resolve(self),
+            route=request.route,
+            current=request.current,
+            target_current=request.target_current,
+            prescribed_current=request.prescribed_current,
+            enforce=request.enforce,
+            pins=request.constraint_pins,
+            **options,
+        )
+        wall_seconds = time.perf_counter() - started
+        history = equilibrium.fixed_point
+        residual = jnp.asarray(history.residual)
+        qualified = (
+            jnp.isfinite(residual)
+            & (residual <= policy.qualification_tolerance)
+            & jnp.asarray(equilibrium.finite.passed)
+        )
+        residual_history = (
+            history.active_set_residuals
+            if request.route == "newton_krylov"
+            else history.trace
+        )
+        mask_history = (
+            history.active_set_mask_differences
+            if request.route == "newton_krylov"
+            else history.shadow_mask_changes
+        )
+        amplitude = getattr(
+            getattr(equilibrium, "normalisation", None), "amplitude", None
+        )
+        amplitude_history = (
+            jnp.atleast_1d(amplitude) if amplitude is not None else jnp.empty((0,))
+        )
+        topology = getattr(equilibrium, "topology", None)
+        polish_receipt = self._terminal_polish_receipt(equilibrium)
+        return ForwardSolveReceipt(
+            terminal_state=equilibrium,
+            qualified=qualified,
+            termination_reason=history.termination_reason,
+            residual_history=residual_history,
+            mask_history=mask_history,
+            globalisation_decisions=(
+                history.inner_iteration_decisions,
+                history.inner_iteration_applied_factors,
+            ),
+            amplitude_history=amplitude_history,
+            topology_read=topology,
+            polish_receipt=polish_receipt,
+            compilation_cache_hit=request.compilation_cache_hit,
+            wall_seconds=wall_seconds,
+            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy),
+        )
+
+    def _terminal_polish_receipt(self, equilibrium) -> object | None:
+        """Read the stationary-point polish telemetry at the terminal state."""
+
+        topology = getattr(equilibrium, "topology", None)
+        carried = getattr(topology, "polish_receipt", None)
+        if carried is not None:
+            return carried
+        reader = getattr(self.operator, "_fixed_design_topology", None)
+        if topology is None or reader is None:
+            return None
+        physical = jnp.asarray(equilibrium.flux)[: self.operator.physical_node_number]
+        _seed, material = self.operator.connectivity_axis_seed(topology.axis)
+        qualification = reader.read_qualification(
+            physical,
+            self.operator.polarity,
+            material,
+        )
+        return qualification.polish_receipt
+
     def solve(
         self,
         initial_flux,
@@ -1539,7 +1671,7 @@ class ForwardProfile:
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         **options,
-    ) -> ForwardEquilibrium:
+    ) -> ForwardEquilibrium | ForwardSolveReceipt:
         """Return the equilibrium the prescribed source supports.
 
         The default route is the root find because the map does not contract
@@ -1567,6 +1699,21 @@ class ForwardProfile:
         moments inside every map evaluation and published in the result's
         normalisation record. Omitting it retains the absolute map.
         """
+        if isinstance(initial_flux, ForwardSolveRequest):
+            if (
+                route != "newton_krylov"
+                or current is not None
+                or target_current is not None
+                or prescribed_current is not None
+                or enforce
+                or pins is not None
+                or options
+            ):
+                raise TypeError(
+                    "a ForwardSolveRequest cannot be combined with solve keywords"
+                )
+            return self._solve_request(initial_flux)
+
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         if route == "host":
             equilibrium = self._solve_host(

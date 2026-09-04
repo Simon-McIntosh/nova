@@ -115,6 +115,19 @@
     checkout; the merged head is that combination and the §2 wiring test verifies it there.</p>
   </section>
 
+  <section id="public-solve-defaults">
+    <h2>The public solve reads its defaults from the one table (merged at 563e8b59)</h2>
+    <p><strong>Commit:</strong> <code>5327cf8c</code>. Every omitted option of <code>ForwardProfile.solve</code> and its routes
+    resolves through the version-keyed table in <code>solve_request.py</code>, translated to kernel options by the policy;
+    <code>forward.py</code> carries no literal public default, <code>PerturbedSeedPolicy</code> and the numerical factories read the
+    same table, and the persistent compilation cache is configured at the public boundary when the policy enables it while the
+    receipt's hit or miss stays an observation. A diagnostic absolute-source fixture must now declare its current-pin opt-out.</p>
+    <p><strong>Proof:</strong> a no-option keyword solve and a bare request give bit-identical fixed-point histories and terminal
+    flux, with resolved defaults nine of nine true and zero deviations; the wiring audit on the worktree moves the public solve
+    from five of nine to nine of nine, so all seven production entry points read DEFAULT-ON. Gate: three default-wiring cases,
+    the schema test and the seven referee IDs, 15 green, plus 11 current-pin propagation cases.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:32:53",
+  "updated": "2026-09-04T19:03:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -94948,6 +94948,185 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T154707089677-sdw-forwardprofile-solve-defaults",
+        "plan": "solve-default-wiring",
+        "section": "\u00a71",
+        "node": "sdw-forwardprofile-solve-defaults",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4362,
+                "cached_input_tokens": 301883,
+                "input_tokens": 306346,
+                "output_tokens": 2926,
+                "reasoning_output_tokens": 493,
+                "total_tokens": 309272,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/forward.py, nova/equilibrium/solve_request.py and tests/test_forward_profile_defaults.py, in which a CPU test proves a no-option keyword solve equals a bare-request solve bit for bit with resolved_defaults reporting all nine defaults on, the wiring audit rerun on the worktree reads 9 of 9 for the public solve, tests/test_forward_solve_request.py plus the seven referee node IDs plus every test the change touched green with logs, the manifest listing each test whose expectation moved with the reason",
+          "estimated_hours": null,
+          "goal": "Make ForwardProfile.solve plus its routes resolve every declared default on with no options, per solve-default-wiring \u00a71: the wiring audit on main (~/.config/reckon/crew/runs/r-20260904T151648756117-sdw-default-wiring-test/base-wiring-audit.md) reads the public solve at 5 of 9 cells DEFAULT-ON with the current pin, exact kernels, cached machine plus compilation cache still opt-in on the keyword path, while the typed seam merged at a675c63f (nova/equilibrium/solve_request.py, version-keyed default table, ForwardSolveRequest delegating to the keyword path) declares them on, so the keyword path's defaults are read from that one table (no second default declared anywhere in forward.py), a keyword-path solve with no options resolves identically to a bare request, the receipt's resolved-defaults block reports the nine defaults on, plus every existing test that relied on the opt-in default is re-expressed against the declared default rather than weakened (a fixture that needs the pin off says so explicitly), reuse map: the default table plus the request path in solve_request.py, ForwardProfile.solve plus PerturbedSeedPolicy in forward.py, the compilation cache wiring at e04970ad, fixed_point.py plus forward_operator.py held by the live one-read-per-trip node so neither is edited here",
+          "id": "sdw-forwardprofile-solve-defaults",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154707089677-sdw-forwardprofile-solve-defaults/manifest.md",
+          "plan": "solve-default-wiring",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/solve_request.py",
+            "tests/test_forward_profile_defaults.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sdw-profile-defaults-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T15:47:31Z",
+        "completed_at": "2026-09-04T17:02:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4502,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4502,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "38ca2b2d03b73272972d05205859a3fd62ba3d9f",
+        "commits": [
+          "5327cf8c9a462ce355b1abbc5a6e649ea75e88d0"
+        ],
+        "changed_lines": {
+          "added": 394,
+          "removed": 63,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_forward_profile_defaults.py tests/test_forward_solve_request.py plus the seven referee node IDs",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154707089677-sdw-forwardprofile-solve-defaults/logs/after-required-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154707089677-sdw-forwardprofile-solve-defaults/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d1a-8eb2-7d02-bc4c-fb023ca7afee",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 34164,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 36564,
+              "external_wait": null,
+              "log_age_seconds": 35662,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 35718,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/sdw-forwardprofile-solve-defaults",
+          "session_id": "01a06d1a-8eb2-7d02-bc4c-fb023ca7afee",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T17:02:33Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -95078,6 +95257,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1643
+    "_version": 1644
   }
 }

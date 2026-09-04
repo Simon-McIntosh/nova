@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-commits" content="9d6a5068,e04970ad,f51308d1,692b0b5a,18db61cf,07e0a45e,4204f44e,237ac11c">
 <meta name="plan-artifacts" content="docs/evidence/archive/solve-default-wiring-landed.html,docs/figures/solve-default-wiring/compile-cache/receipt.json,docs/figures/solve-default-wiring/compile-cache/process-1-receipt.json,docs/figures/solve-default-wiring/compile-cache/process-2-receipt.json">
 <meta name="plan-impl" content="0.4">
@@ -85,6 +85,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T155906928093" data-who="coordinator" data-when="2026-09-04T16:00:00Z">
     <div class="r-comment-body"><p>Route migrations landed: commit <code>384d759e</code> merged at <code>e0846d0b</code>. The Solov'ev oracle rebaseline (<code>scripts/oracle_rebaseline/measure.py</code>) and the mixed MAST and DIII-D topology visual solves (<code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code>) now go through <code>ForwardProfile.solve</code> on a request built from the declared table, their margin and reachability grading kept as reads of the returned receipt; the direct margin-graded kernel call is gone. Wiring audit rerun: 48 of 63 before, 63 of 63 DEFAULT-ON after, zero policy deviations across the Solov'ev, MAST and DIII-D requests; <code>tests/test_route_default_wiring.py</code> names all 27 route-default cells plus a private-kernel dispatch guard, 28 green. Gate caveat: the worktree was cut before the request seam merged, so its tests imported the seam from the main checkout's editable install; the merged head is exactly that combination, and the §2 wiring test verifies it there. §2 waits only on the live <code>sdw-forwardprofile-solve-defaults</code> node, after which the public solve itself reads 9 of 9.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T170350430094" data-who="coordinator" data-when="2026-09-04T17:04:00Z">
+    <div class="r-comment-body"><p>§1 closes: commit <code>5327cf8c</code> merged at <code>563e8b59</code>. Every omitted option of <code>ForwardProfile.solve</code>, <code>solve_branch</code>, <code>solve_portfolio</code>, <code>solve_batch</code> and <code>solve_diverted_perturbations</code> now resolves through the one version-keyed table in <code>solve_request.py</code> via the policy's kernel-option translation; forward.py carries no literal public default, <code>PerturbedSeedPolicy</code> and the numerical dataclass factories read the same table, the persistent compilation cache is configured at the public boundary when the policy enables it (the receipt's hit or miss stays an observation), and a diagnostic absolute-source fixture must declare its current-pin opt-out explicitly. CPU proof: a no-option keyword solve and a bare request give bit-identical fixed-point histories and terminal flux with resolved defaults 9 of 9 true and zero deviations. Wiring audit on the worktree: the public solve moves from 5 of 9 to 9 of 9, so all seven production entry points now read DEFAULT-ON. Gate 15 green plus the current-pin propagation cases. The §2 fail-closed test is now dispatchable. Finding for the topology owner: four failures in <code>tests/test_equilibrium_forward_solve.py</code> pre-exist on main (31 of 625 current-moment mismatches up to 4.19, 1071 A of current in the common scrape-off layer, and a NoQualifiedAxisError in a shared fixture), under attribution on solver-convergence-regression.</p></div>
 </div>
 </section>
 </main>

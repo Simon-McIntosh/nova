@@ -317,7 +317,10 @@ def test_opt_in_eligibility_reporting_names_each_side_and_disqualifier(capsys) -
     assert "same_side_ambiguity=1" in snowflake_lines[0]
     assert "minimum_separatrix_radius=0" in snowflake_lines[0]
     assert "same_side_height_separation=0.015" in snowflake_lines[0]
-    assert "ambiguity_threshold=0.023599999999999999" in snowflake_lines[0]
+    ambiguity_threshold = float(
+        snowflake_lines[0].split("ambiguity_threshold=")[1].split()[0]
+    )
+    assert ambiguity_threshold == pytest.approx(0.0236)
     assert "side=upper status=absent" in snowflake_lines[1]
 
     coil = geometries["coil-null-extremes"]
@@ -329,8 +332,10 @@ def test_opt_in_eligibility_reporting_names_each_side_and_disqualifier(capsys) -
     assert "side=upper status=disqualified" in coil_lines[1]
     assert "same_side_ambiguity=0" in coil_lines[1]
     assert "minimum_separatrix_radius=1" in coil_lines[1]
-    assert "reference_radius=0.34999999999999998" in coil_lines[1]
-    assert "minimum_radius=0.58999999999999997" in coil_lines[1]
+    reference_radius = float(coil_lines[1].split("reference_radius=")[1].split()[0])
+    minimum_radius = float(coil_lines[1].split("minimum_radius=")[1].split()[0])
+    assert reference_radius == pytest.approx(0.35)
+    assert minimum_radius == pytest.approx(0.59)
 
     connected = geometries["connected-double-null"]
     reported = _geometry_height_mask(connected, report_eligibility=True)

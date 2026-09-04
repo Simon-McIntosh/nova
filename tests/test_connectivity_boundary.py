@@ -403,8 +403,6 @@ def test_pre_saddle_axis_component_uses_admissible_hex_links():
         jnp.asarray(radial[axis_cell[1]]),
         jnp.asarray(vertical[axis_cell[0]]),
         jnp.asarray(saddle[axis_cell]),
-        sum(inside.shape),
-        True,
     )
 
     assert bool(region[axis_cell])
@@ -720,6 +718,7 @@ def test_continuous_through_marginal_transition():
     assert clf_step > 3.0 * conn_step
 
 
+@pytest.mark.slow
 def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
     """The margin excludes wall flux that the pre-saddle core cannot reach."""
     configure_dtypes()

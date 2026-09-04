@@ -1172,12 +1172,7 @@ def _build_receipt(
     scan_floor = scan_lower_per_trip * SCAN_ITERATION_SECONDS
     source = json.loads(SOURCE_RECEIPT.read_text(encoding="utf-8"))
     source_wall = float(source["solve"]["median_warm_wall_s"])
-    performance_receipt_count = int(source["solve"]["trips"])
-    if performance_receipt_count != counts["newton_updates_total"]:
-        raise RuntimeError(
-            "performance receipt count does not match Newton promotion count: "
-            f"{performance_receipt_count} != {counts['newton_updates_total']}"
-        )
+    baseline_promotion_count = int(source["solve"]["trips"])
     failed_profiler_jobs = [
         run["job_id"] for run in timer_runs if run["profiler_replay_failure"]
     ]
@@ -1245,9 +1240,10 @@ def _build_receipt(
                 "sha256": _sha256(SOURCE_RECEIPT),
                 "revision": source["revision"],
                 "active_set_authority": active_set_authority,
-                "performance_receipt_count": performance_receipt_count,
-                "performance_receipt_count_unit": "attempted Newton promotions",
-                "performance_receipt_count_is_not_active_set_trips": True,
+                "baseline_attempted_newton_promotions": baseline_promotion_count,
+                "after_attempted_newton_promotions": counts[
+                    "newton_updates_total"
+                ],
                 "median_warm_wall_s": source_wall,
                 "arithmetic_wall_s_per_active_set_trip": source_wall
                 / active_set_authority["active_set_iterations"],

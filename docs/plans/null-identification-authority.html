@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -315,6 +315,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T232740057866" data-who="coordinator" data-when="2026-09-04T23:26:00Z">
     <div class="r-comment-body"><p>The candidate-only raster test failure is attributed to the fixture, not the census (report <code>~/.config/reckon/crew/reports/nova/integration/candidate-3/raster-oracle-attribution.md</code>). Both analytic fixtures declare a maximum polarity while their fields have minima, at (1.7, 0) m and (1.7, ±0.31) m; the retired local-fit admission on main produced three fitted candidates for the same minimum from neighbouring stencils whose rings do not contain an extremum and admitted one without checking polarity, whereas the containment census finds exactly the one contained extremum per ring and refuses it on polarity, as the locked admission rule requires. The label oracle takes the production state as input and is not an independent null oracle. A read-only shadow with polarity-consistent fields and containment-selected stationary points admits both fixtures and matches 646 of 646 labels. Test-only repair dispatched on the candidate lineage as <code>nia-raster-oracle-fixture-repair</code>; the census is not weakened.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T234217473355" data-who="coordinator" data-when="2026-09-04T23:40:00Z">
+    <div class="r-comment-body"><p>Raster fixture repair landed into the candidate lineage: commit <code>4348eeaf</code>, candidate advanced to <code>45546dd9</code>. The two analytic fixtures now carry the polarity their fields have, and the label oracle selects stationary points by containment with the spline and deadband edge semantics; it asserts one O and no X on the limited fixture, two O and one X on the single-null fixture, the zero and four ring-crossing counts, the selected-root identity, and 646 of 646 labels bit-identical. The file is green on CPU (2 passed) and the census is unchanged. With this the candidate has no known failing test; its merge now waits only on the census compaction and the performance remeasure.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

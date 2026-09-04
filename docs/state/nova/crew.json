@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T10:08:34",
+  "updated": "2026-09-04T10:22:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1126,6 +1126,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "fsa-receipt-contract-2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "fsa-receipt-contract-x",
         "harness": "codex",
         "role": "implement",
@@ -1870,6 +1879,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "pta-replay-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "pta-review-a",
         "harness": "codex",
         "role": "review",
@@ -2190,6 +2208,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "scr-stall-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "sdw-compile-cache",
@@ -88754,8 +88781,22 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904081536",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T08:15:36Z",
+        "closed_at": "2026-09-04T08:17:00Z",
+        "held_seconds": 84,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
       }
     ],
-    "_version": 1555
+    "_version": 1560
   }
 }

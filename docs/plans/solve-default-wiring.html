@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="9d6a5068,e04970ad,f51308d1,692b0b5a,18db61cf,07e0a45e,4204f44e,237ac11c">
 <meta name="plan-artifacts" content="docs/evidence/archive/solve-default-wiring-landed.html,docs/figures/solve-default-wiring/compile-cache/receipt.json,docs/figures/solve-default-wiring/compile-cache/process-1-receipt.json,docs/figures/solve-default-wiring/compile-cache/process-2-receipt.json">
 <meta name="plan-impl" content="0.4">
@@ -82,6 +82,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T153532351668" data-who="coordinator" data-when="2026-09-04T15:36:00Z">
     <div class="r-comment-body"><p>The §2 test node parked, correctly: on main <code>ac0d29bd</code> the seven production entry points read 48 of 63 cells DEFAULT-ON with 15 gaps, because <code>scripts/oracle_rebaseline/measure.py</code> still calls the bare Newton–Krylov kernel without the current pin or the five active-set safeguards, and the mixed MAST and DIII-D routes in <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code> call the margin-graded kernel directly, bypassing settled exit, own-mask acceptance, continuation, best-iterate retention and the stagnation stop (audit <code>~/.config/reckon/crew/runs/r-20260904T151648756117-sdw-default-wiring-test/base-wiring-audit.md</code>). A fail-closed test cannot be green until those two routes sit on the public seam and the request-receipt contract of forward-solve-api §1 (node in flight) exists to read resolved defaults from. Order corrected: the two route migrations are dispatched now as <code>sdw-route-migrations-oracle-and-visuals</code>; the §2 test redispatches once they and the request seam land. The same node found two focused failures on main outside its scope, in test_newton_trajectory_continuation and test_globalization_state_continuation, now under attribution on solver-convergence-regression.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T155906928093" data-who="coordinator" data-when="2026-09-04T16:00:00Z">
+    <div class="r-comment-body"><p>Route migrations landed: commit <code>384d759e</code> merged at <code>e0846d0b</code>. The Solov'ev oracle rebaseline (<code>scripts/oracle_rebaseline/measure.py</code>) and the mixed MAST and DIII-D topology visual solves (<code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code>) now go through <code>ForwardProfile.solve</code> on a request built from the declared table, their margin and reachability grading kept as reads of the returned receipt; the direct margin-graded kernel call is gone. Wiring audit rerun: 48 of 63 before, 63 of 63 DEFAULT-ON after, zero policy deviations across the Solov'ev, MAST and DIII-D requests; <code>tests/test_route_default_wiring.py</code> names all 27 route-default cells plus a private-kernel dispatch guard, 28 green. Gate caveat: the worktree was cut before the request seam merged, so its tests imported the seam from the main checkout's editable install; the merged head is exactly that combination, and the §2 wiring test verifies it there. §2 waits only on the live <code>sdw-forwardprofile-solve-defaults</code> node, after which the public solve itself reads 9 of 9.</p></div>
 </div>
 </section>
 </main>

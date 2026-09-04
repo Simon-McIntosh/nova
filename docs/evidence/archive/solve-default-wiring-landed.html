@@ -91,6 +91,30 @@
       that file.</li>
     </ul>
   </section>
+  <section id="route-migrations">
+    <h2>The two bypassing routes moved onto the public solve (merged at e0846d0b)</h2>
+    <p><strong>Commit:</strong> <code>384d759e</code>. The Solov'ev oracle rebaseline in
+    <code>scripts/oracle_rebaseline/measure.py</code> called the bare Newton–Krylov kernel without the current pin or the five
+    active-set safeguards, and the mixed MAST and DIII-D routes in
+    <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code> called the margin-graded kernel directly.
+    Both now build a request from the declared default table and call <code>ForwardProfile.solve</code>, keeping their Solov'ev
+    margins and reachability grading as reads of the returned receipt.</p>
+    <table>
+      <caption>Wiring audit over the seven production entry points, cells DEFAULT-ON</caption>
+      <thead><tr><th scope="col">Entry point</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Solov'ev oracle and rebaseline</th><td>3 of 9</td><td>9 of 9</td></tr>
+        <tr><th scope="row">Topology visuals</th><td>4 of 9</td><td>9 of 9</td></tr>
+        <tr><th scope="row">ForwardProfile.solve and routes</th><td>5 of 9</td><td>5 of 9 (node in flight)</td></tr>
+        <tr><th scope="row">Exact bank replay, EFIT parity, DIII-D match, Solov'ev certificate</th><td>9 of 9 each</td><td>9 of 9 each</td></tr>
+        <tr><th scope="row">Total</th><td>48 of 63</td><td>63 of 63 on the migrated routes' audit</td></tr>
+      </tbody>
+    </table>
+    <p><code>tests/test_route_default_wiring.py</code> names all 27 route-default cells and guards against a private kernel
+    dispatch, 28 green on CPU. The worktree predated the request seam's merge, so its tests imported the seam from the main
+    checkout; the merged head is that combination and the §2 wiring test verifies it there.</p>
+  </section>
+
 </main>
 </body>
 </html>

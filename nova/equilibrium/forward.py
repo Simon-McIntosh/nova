@@ -71,6 +71,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum
+from pathlib import Path
 import time
 from typing import NamedTuple
 
@@ -86,6 +87,7 @@ from nova.equilibrium.solve_request import (
     ResolvedForwardSolveDefaults,
     SolveRoute,
     declared_forward_solve_policy,
+    default_forward_compilation_cache_root,
     resolve_forward_solve_policy,
 )
 
@@ -154,7 +156,6 @@ from nova.equilibrium.topology import TopologyClass
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import (
     configure_persistent_compilation_cache,
-    default_persistent_compilation_cache_root,
 )
 
 __all__ = [
@@ -1684,6 +1685,20 @@ class ForwardProfile:
         )
 
     @staticmethod
+    def _configure_solve_compilation_cache(enabled: bool) -> str | None:
+        """Select the node-local default unless the process named a cache."""
+
+        if not enabled:
+            return None
+        configured = jax.config.jax_compilation_cache_dir
+        if configured is not None:
+            return str(Path(configured).expanduser().resolve())
+        cache = configure_persistent_compilation_cache(
+            default_forward_compilation_cache_root()
+        )
+        return str(cache.directory)
+
+    @staticmethod
     def _resolve_solve_defaults(
         route: SolveRoute | None,
         options: dict[str, object],
@@ -1710,10 +1725,7 @@ class ForwardProfile:
         )
         if not policy.exact_kernels:
             raise ValueError("the public forward solve requires exact kernels")
-        if policy.compilation_cache:
-            configure_persistent_compilation_cache(
-                default_persistent_compilation_cache_root()
-            )
+        ForwardProfile._configure_solve_compilation_cache(policy.compilation_cache)
         resolved = (
             dict(policy.kernel_options()) if route is None and not options else {}
         )
@@ -1738,6 +1750,9 @@ class ForwardProfile:
                 "typed host_krylov requests need an explicitly declared host policy"
             )
 
+        cache_directory = self._configure_solve_compilation_cache(
+            policy.compilation_cache
+        )
         started = time.perf_counter()
         equilibrium = self.solve(
             request.seed_policy.resolve(self),
@@ -1751,7 +1766,7 @@ class ForwardProfile:
             current_pin=policy.current_pin,
             exact_kernels=policy.exact_kernels,
             cached_machine=policy.cached_machine,
-            compilation_cache=policy.compilation_cache,
+            compilation_cache=False,
             **policy.kernel_options(),
         )
         wall_seconds = time.perf_counter() - started
@@ -1802,7 +1817,10 @@ class ForwardProfile:
             polish_receipt=polish_receipt,
             compilation_cache_hit=request.compilation_cache_hit,
             wall_seconds=wall_seconds,
-            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy),
+            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
+                policy,
+                compilation_cache_directory=cache_directory,
+            ),
         )
 
     def _terminal_polish_receipt(self, equilibrium) -> object | None:

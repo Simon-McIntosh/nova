@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from inspect import signature
-from pathlib import Path
 
 import jax
 import numpy as np
@@ -71,24 +70,24 @@ def test_no_option_keyword_solve_matches_the_bare_request_bit_for_bit(
 ) -> None:
     profile = _newton_ready_profile()
     seed = np.zeros(4)
-    cache_roots: list[Path] = []
+    cache_requests: list[bool] = []
     kernel_options: list[dict[str, object]] = []
     original_newton_krylov = fixed_point.newton_krylov
 
-    def record_cache(root: Path) -> None:
-        cache_roots.append(root)
+    def record_cache(enabled: bool) -> str | None:
+        cache_requests.append(enabled)
+        if enabled:
+            return "/temporary-runtime/nova/jax-compilation/runtime-cpu"
+        return None
 
     def record_newton_krylov(*args: object, **options: object):
         kernel_options.append(options)
         return original_newton_krylov(*args, **options)
 
     monkeypatch.setattr(
-        "nova.equilibrium.forward.default_persistent_compilation_cache_root",
-        lambda: Path("/declared-cache-root"),
-    )
-    monkeypatch.setattr(
-        "nova.equilibrium.forward.configure_persistent_compilation_cache",
-        record_cache,
+        ForwardProfile,
+        "_configure_solve_compilation_cache",
+        staticmethod(record_cache),
     )
     monkeypatch.setattr(fixed_point, "newton_krylov", record_newton_krylov)
 
@@ -114,11 +113,14 @@ def test_no_option_keyword_solve_matches_the_bare_request_bit_for_bit(
             assert callable(kernel_options[1][name])
         else:
             assert kernel_options[0][name] == kernel_options[1][name]
-    assert cache_roots == [Path("/declared-cache-root")] * 2
+    assert cache_requests == [True, True, False]
 
     resolved = request_receipt.resolved_defaults
     assert resolved.policy == declared_forward_solve_policy()
     assert resolved.deviations == ()
+    assert resolved.compilation_cache_directory == (
+        "/temporary-runtime/nova/jax-compilation/runtime-cpu"
+    )
     assert all(getattr(resolved.policy, name) for name in DEFAULT_ON_FIELDS)
     assert sum(bool(getattr(resolved.policy, name)) for name in DEFAULT_ON_FIELDS) == 9
 

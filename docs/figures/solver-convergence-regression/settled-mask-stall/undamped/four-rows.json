@@ -1,0 +1,1357 @@
+{
+  "artifact": "undamped frozen-mask control and repaired production cap",
+  "evidence_inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "operands_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "public_route_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json",
+    "public_route_receipt_sha256": "e9894a15256357f94e776fa7f1d56ccd3ffa47f32078d8dce70a6b960e06bb17",
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.006104016676545143
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.025428 direct_builders=0 verdict=PASS"
+      }
+    },
+    "vertical_mode_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+    "vertical_mode_receipt_sha256": "46169cd5aa481a3d29203df3d0927e75ad3d35e2a7876a8f07210440018374f7"
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/settled-mask-stall/undamped/four-rows.png",
+  "measurement_contract": {
+    "frozen_mask_damping": {
+      "merit_ladder": false,
+      "projected_conditioning": false,
+      "step_cap": false,
+      "step_factor": 1.0
+    },
+    "frozen_mask_gmres_iterations": 40,
+    "frozen_mask_steps": 8,
+    "partition_change": "relinearize on the changed frozen mask and reset projected conditioning plus prior model-error state",
+    "production_gmres_iterations": 30,
+    "production_route": "ForwardProfile.solve_branch(newton_krylov)",
+    "step_cap_authority": "previous accepted step actual-versus-linear merit error; the nonlinear merit ladder remains sole acceptance authority",
+    "step_cap_model_error_fraction": 0.25,
+    "targets": [
+      [
+        21985,
+        51
+      ],
+      [
+        21986,
+        46
+      ],
+      [
+        21989,
+        55
+      ],
+      [
+        22086,
+        43
+      ]
+    ]
+  },
+  "rows": [
+    {
+      "arm": "pure",
+      "frozen_mask_undamped": {
+        "damping": {
+          "factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_ladder": false,
+          "projected_conditioning": false,
+          "step_cap": false
+        },
+        "finite": true,
+        "gmres_info": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gmres_relative_residuals": [
+          2.2147635706497885e-15,
+          1.1366404782888634e-12,
+          7.2241939025981225e-16,
+          1.5701427665232516e-15,
+          1.4331328050189784e-14,
+          1.8053131970344837e-15,
+          1.7686740584613045e-14,
+          4.055326592754349e-14
+        ],
+        "initial_residual": 0.008782395190283116,
+        "raw_step_norms_taken": [
+          0.038451938142290594,
+          0.31167409550036984,
+          0.25045778198140933,
+          0.21309325442518043,
+          0.06673227676362536,
+          0.04665146568097145,
+          0.05546012130836592,
+          0.06064519025861113
+        ],
+        "residuals_after": [
+          0.002666066835261766,
+          0.15646549652343666,
+          0.07757813057036204,
+          0.09171228474967838,
+          0.02047755851163768,
+          0.0027077612145059,
+          0.0029588279438543573,
+          0.005244225932313694
+        ],
+        "residuals_before": [
+          0.008782395190283116,
+          0.002666066835261766,
+          0.15646549652343666,
+          0.07757813057036204,
+          0.09171228474967838,
+          0.02047755851163768,
+          0.0027077612145059,
+          0.0029588279438543573
+        ],
+        "residuals_per_step": [
+          {
+            "after": 0.002666066835261766,
+            "before": 0.008782395190283116,
+            "step": 1
+          },
+          {
+            "after": 0.15646549652343666,
+            "before": 0.002666066835261766,
+            "step": 2
+          },
+          {
+            "after": 0.07757813057036204,
+            "before": 0.15646549652343666,
+            "step": 3
+          },
+          {
+            "after": 0.09171228474967838,
+            "before": 0.07757813057036204,
+            "step": 4
+          },
+          {
+            "after": 0.02047755851163768,
+            "before": 0.09171228474967838,
+            "step": 5
+          },
+          {
+            "after": 0.0027077612145059,
+            "before": 0.02047755851163768,
+            "step": 6
+          },
+          {
+            "after": 0.0029588279438543573,
+            "before": 0.0027077612145059,
+            "step": 7
+          },
+          {
+            "after": 0.005244225932313694,
+            "before": 0.0029588279438543573,
+            "step": 8
+          }
+        ],
+        "terminal_residual": 0.005244225932313694
+      },
+      "identity": "21985/51",
+      "production_route_repaired_cap": {
+        "model_error_fractions": [
+          0.501163320468327,
+          0.021715127535060476,
+          0.002678101699698861,
+          0.019708367004905483,
+          0.0012194394462956954,
+          0.0006107536493934194,
+          0.0011551925092096553,
+          0.0008250756153733288,
+          0.0006609859380741949,
+          0.0011381085356903292,
+          0.0009804228305922006,
+          0.0011091333438897173,
+          0.21497391465004345,
+          0.6514560498317057,
+          0.03701749626648127,
+          0.0010922328823546558,
+          0.0016090777429577823,
+          0.02301569389723031,
+          0.0008822345445235796,
+          0.001043622323185551,
+          0.0010625038173206521,
+          0.0011587768404608893,
+          0.0015450655729953415,
+          2.8364397980580873e-08,
+          0.042543464952088404,
+          0.021043866145090236,
+          0.3250668955122605,
+          0.02609611478508674,
+          0.0552060214000748,
+          0.014608204105796484,
+          0.007849375429897814,
+          0.003513228508155349,
+          9.620469691998991e-05,
+          0.009701015246314896,
+          0.003516671628824502,
+          0.0021692115021591926,
+          9.022376589034385e-06,
+          0.20381941192081146,
+          0.21945834091364289,
+          0.0009881757499060994,
+          0.0002999926900600398,
+          0.0026398118652252315,
+          0.0024827934017144187,
+          0.0017521469226673622,
+          0.001393700474576067,
+          0.02170513872148416,
+          0.001467556007402473,
+          0.0016064243147297622,
+          0.047504023829220726,
+          0.4774862014925266,
+          0.02887833533419909,
+          0.738179302979243,
+          0.04700161389533512,
+          0.005756044711413077,
+          0.013382704718870791,
+          0.0001018533795518096,
+          0.005510171667776801,
+          0.00561985937767195,
+          0.0011397850900373135,
+          8.795627055946509e-05,
+          0.003632320309597029,
+          0.003209088757384753,
+          0.0004143257155252392,
+          5.543325793032043e-06,
+          6.102269706348957e-08,
+          6.129601650544636e-08,
+          6.155118247031007e-08,
+          6.178909414718932e-08,
+          3.3129557242658004e-06,
+          4.806207707235459e-06,
+          9.822525788629248e-07,
+          2.6839155221137906e-05,
+          6.161256294853102e-07,
+          1.5632395171624656e-07,
+          4.274242419199107e-07,
+          4.092096330558388e-08,
+          9.357558768041753e-07,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "newton_step_count": 96,
+        "result": {
+          "active_set_iterations": 8,
+          "active_set_mask_differences": [
+            5,
+            32,
+            38,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.005046055105664317,
+            0.004462682881512947,
+            0.01063458117013526,
+            0.008365159982363504,
+            0.0009677841501320945,
+            0.0007327973195611164,
+            0.0006403313884678211,
+            0.0006403313884678211
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 19898.562156003263,
+          "terminal_residual": 0.0006403313884678211,
+          "termination_reason": "active_set_settled"
+        },
+        "step_cap_activation_count": 5,
+        "step_cap_factors": [
+          1.0,
+          0.1794241829732814,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.05954339744332317,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.037107579053894335,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.08748755499556789,
+          1.0,
+          0.057715344621375154,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.8947069371865959,
+            0.06430638579864535
+          ],
+          "admitted_saddle_m": [
+            0.5771730453744884,
+            1.1758531337025995
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "public_route_receipt": {
+        "achieved_class": "diverted",
+        "active_set_iterations": 5,
+        "active_set_residuals": [
+          0.005462507606076782,
+          0.004522156951447791,
+          0.002084452253948086,
+          0.0010598569631988777,
+          0.0009701783571271408
+        ],
+        "converged": false,
+        "terminal_residual": 0.0009701783571271408,
+        "termination_reason": "active_set_cycle_detected"
+      },
+      "vertical_mode_evidence": {
+        "largest_competing_projection_fraction": 0.055261015069766536,
+        "near_null_direction": false,
+        "near_null_is_vertical_mode": false,
+        "owner": null,
+        "rule": {
+          "alignment_separation": 0.1,
+          "near_null_relative_threshold": 0.001,
+          "vertical_alignment_threshold": 0.5
+        },
+        "smallest_to_largest_ratio": 0.007400964059873195,
+        "solver_shape": "none",
+        "vertical_projection_fraction": 0.7008373409724272
+      }
+    },
+    {
+      "arm": "pure",
+      "frozen_mask_undamped": {
+        "damping": {
+          "factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_ladder": false,
+          "projected_conditioning": false,
+          "step_cap": false
+        },
+        "finite": true,
+        "gmres_info": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gmres_relative_residuals": [
+          8.133297537692219e-12,
+          4.1189569719612083e-14,
+          1.5365815770169948e-14,
+          5.965615533353299e-14,
+          3.337232644771771e-15,
+          7.07762560353945e-14,
+          6.527206338415116e-15,
+          3.7985195253493275e-14
+        ],
+        "initial_residual": 0.009205832400384953,
+        "raw_step_norms_taken": [
+          1.2689086124413795,
+          1.5069266600289912,
+          1.8697399357385396,
+          1.9635275744466418,
+          1.4204757187582497,
+          1.5867553551419475,
+          1.0669571911318656,
+          0.8866868091960786
+        ],
+        "residuals_after": [
+          0.9525034541087961,
+          0.27379794286684156,
+          1.4377506879969726,
+          0.29722148197361187,
+          1.0286194917358544,
+          0.6124202019924676,
+          0.47072698223171894,
+          0.2812093324090289
+        ],
+        "residuals_before": [
+          0.009205832400384953,
+          0.9525034541087961,
+          0.27379794286684156,
+          1.4377506879969726,
+          0.29722148197361187,
+          1.0286194917358544,
+          0.6124202019924676,
+          0.47072698223171894
+        ],
+        "residuals_per_step": [
+          {
+            "after": 0.9525034541087961,
+            "before": 0.009205832400384953,
+            "step": 1
+          },
+          {
+            "after": 0.27379794286684156,
+            "before": 0.9525034541087961,
+            "step": 2
+          },
+          {
+            "after": 1.4377506879969726,
+            "before": 0.27379794286684156,
+            "step": 3
+          },
+          {
+            "after": 0.29722148197361187,
+            "before": 1.4377506879969726,
+            "step": 4
+          },
+          {
+            "after": 1.0286194917358544,
+            "before": 0.29722148197361187,
+            "step": 5
+          },
+          {
+            "after": 0.6124202019924676,
+            "before": 1.0286194917358544,
+            "step": 6
+          },
+          {
+            "after": 0.47072698223171894,
+            "before": 0.6124202019924676,
+            "step": 7
+          },
+          {
+            "after": 0.2812093324090289,
+            "before": 0.47072698223171894,
+            "step": 8
+          }
+        ],
+        "terminal_residual": 0.2812093324090289
+      },
+      "identity": "21986/46",
+      "production_route_repaired_cap": {
+        "model_error_fractions": [
+          0.028978235308793916,
+          0.025315501889180653,
+          0.01741850701409753,
+          0.014236564903290665,
+          0.043473720384570896,
+          0.0008355764555485106,
+          0.0011683598038756792,
+          0.002086402814902068,
+          0.002633837512836223,
+          3.3228751133764434e-05,
+          0.005095910136625325,
+          3.957207971975148e-08,
+          0.0027449695266202963,
+          7.831566039012245e-07,
+          2.1160394439078874e-06,
+          4.755771479238337e-06,
+          7.239413188241263e-06,
+          2.4333576203256375e-05,
+          2.023484610148592e-05,
+          2.016085660067358e-05,
+          1.8786734232631284e-05,
+          1.8297964054299306e-05,
+          1.7913003898857456e-05,
+          1.6691985252972815e-05,
+          1.5909809096885522e-05,
+          1.2564521958361551e-05,
+          1.0185199488425655e-05,
+          8.29010620591508e-06,
+          5.527808200904857e-06,
+          2.575041817950276e-06,
+          1.8451940381346324e-06,
+          1.15220510045207e-06,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "newton_step_count": 48,
+        "result": {
+          "active_set_iterations": 4,
+          "active_set_mask_differences": [
+            5,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0019683642269078686,
+            0.0014262291572317053,
+            0.0013530525770731878,
+            0.0013530525770731878
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 51700.359529924135,
+          "terminal_residual": 0.0013530525770731878,
+          "termination_reason": "active_set_settled"
+        },
+        "step_cap_activation_count": 0,
+        "step_cap_factors": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.9139608490670946,
+            0.05777591352821546
+          ],
+          "admitted_saddle_m": [
+            0.6114415419016879,
+            1.1434156488250158
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "public_route_receipt": {
+        "achieved_class": "diverted",
+        "active_set_iterations": 8,
+        "active_set_residuals": [
+          0.0025626687300446013,
+          0.0019818932150885075,
+          0.0019391552326979097,
+          0.001891036536283843,
+          0.0015918819610035418,
+          0.0013430472011386563,
+          0.0013083783796038666,
+          0.0013083783796038666
+        ],
+        "converged": false,
+        "terminal_residual": 0.0013083783796038666,
+        "termination_reason": "active_set_settled"
+      },
+      "vertical_mode_evidence": {
+        "largest_competing_projection_fraction": 0.12637125185278725,
+        "near_null_direction": true,
+        "near_null_is_vertical_mode": true,
+        "owner": "nova.equilibrium.forward.ForwardProfile.solve",
+        "rule": {
+          "alignment_separation": 0.1,
+          "near_null_relative_threshold": 0.001,
+          "vertical_alignment_threshold": 0.5
+        },
+        "smallest_to_largest_ratio": 0.00031153696584586515,
+        "solver_shape": "vertical_position_constraint_with_compensating_unknown",
+        "vertical_projection_fraction": 0.7431868313141167
+      }
+    },
+    {
+      "arm": "pure",
+      "frozen_mask_undamped": {
+        "damping": {
+          "factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_ladder": false,
+          "projected_conditioning": false,
+          "step_cap": false
+        },
+        "finite": true,
+        "gmres_info": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gmres_relative_residuals": [
+          1.3975924507170761e-13,
+          3.704160158804026e-14,
+          5.553017281533154e-16,
+          1.5252211335650275e-14,
+          1.1444232915005252e-15,
+          3.4551499441072833e-15,
+          1.1999471978360816e-15,
+          2.1623361949525297e-15
+        ],
+        "initial_residual": 0.00868279011749704,
+        "raw_step_norms_taken": [
+          0.5400318381160455,
+          1.1716450138930552,
+          1.363935486995601,
+          1.8272721958237297,
+          1.3454275008733476,
+          1.2272977231471813,
+          1.078861024701365,
+          0.4687704164820624
+        ],
+        "residuals_after": [
+          0.4588464772987506,
+          0.8717434481878827,
+          0.11986074074997348,
+          0.7613280082552186,
+          0.08997512785053623,
+          0.713452254311731,
+          0.15341993398129225,
+          0.1822601853303358
+        ],
+        "residuals_before": [
+          0.00868279011749704,
+          0.4588464772987506,
+          0.8717434481878827,
+          0.11986074074997348,
+          0.7613280082552186,
+          0.08997512785053623,
+          0.713452254311731,
+          0.15341993398129225
+        ],
+        "residuals_per_step": [
+          {
+            "after": 0.4588464772987506,
+            "before": 0.00868279011749704,
+            "step": 1
+          },
+          {
+            "after": 0.8717434481878827,
+            "before": 0.4588464772987506,
+            "step": 2
+          },
+          {
+            "after": 0.11986074074997348,
+            "before": 0.8717434481878827,
+            "step": 3
+          },
+          {
+            "after": 0.7613280082552186,
+            "before": 0.11986074074997348,
+            "step": 4
+          },
+          {
+            "after": 0.08997512785053623,
+            "before": 0.7613280082552186,
+            "step": 5
+          },
+          {
+            "after": 0.713452254311731,
+            "before": 0.08997512785053623,
+            "step": 6
+          },
+          {
+            "after": 0.15341993398129225,
+            "before": 0.713452254311731,
+            "step": 7
+          },
+          {
+            "after": 0.1822601853303358,
+            "before": 0.15341993398129225,
+            "step": 8
+          }
+        ],
+        "terminal_residual": 0.1822601853303358
+      },
+      "identity": "21989/55",
+      "production_route_repaired_cap": {
+        "model_error_fractions": [
+          0.6635215179971479,
+          0.06414201966395908,
+          0.6711456064170526,
+          0.16289561543272194,
+          0.03324498510018078,
+          0.005315234303228752,
+          0.003415603299717624,
+          0.0021143789450338586,
+          0.020469118115436967,
+          0.0034315954069466916,
+          0.0027369989270705744,
+          0.0023930695959507595,
+          0.023491864619673345,
+          0.18039241760730582,
+          0.0026990171600116985,
+          0.002664800073245899,
+          0.0010549363105287295,
+          0.032437769338596274,
+          0.002504823448634766,
+          0.018900910941681982,
+          0.02240101043104071,
+          0.015953458797332138,
+          0.0019892618674519093,
+          0.01892284945128941,
+          0.24436397728369444,
+          0.31623497840353837,
+          0.23469595963724793,
+          0.042520672854615395,
+          0.010063675667599165,
+          0.010257353633597123,
+          0.01219930649836962,
+          0.00928443966657188,
+          0.00509056097810454,
+          0.008094226644886779,
+          0.005222970204828325,
+          0.01120201077734169,
+          0.005446063539291574,
+          0.01790233886545148,
+          0.0068569809706252255,
+          0.00029746142376740957,
+          4.266095354637058e-05,
+          2.3475837473682567e-05,
+          1.0632026383121552e-05,
+          8.734986943638656e-06,
+          4.3632880174190275e-06,
+          4.6366452245596215e-06,
+          5.977471377761742e-06,
+          7.504971357933193e-06,
+          8.099484035406281e-06,
+          5.410515178215162e-06,
+          2.3782291987468685e-06,
+          8.847000257463398e-09,
+          6.6291120169327365e-09,
+          4.847538389639242e-07,
+          4.5296018697835825e-07,
+          2.478740031412134e-08,
+          1.756959191103487e-08,
+          1.2026761492367389e-08,
+          8.324450574834375e-09,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "newton_step_count": 72,
+        "result": {
+          "active_set_iterations": 6,
+          "active_set_mask_differences": [
+            9,
+            34,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.006253412702287127,
+            0.0058011797121481174,
+            0.001133472091135245,
+            0.0007952362075680138,
+            0.0007331916719346619,
+            0.0007331916719346619
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 2403.61265128077,
+          "terminal_residual": 0.0007331916719346619,
+          "termination_reason": "active_set_settled"
+        },
+        "step_cap_activation_count": 3,
+        "step_cap_factors": [
+          1.0,
+          0.27710528569103626,
+          1.0,
+          0.3466141472211341,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.659195447300116,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "terminal_topology": {
+          "achieved_class": "limited",
+          "admitted_axis_m": [
+            0.9122942650650455,
+            0.03571275625533822
+          ],
+          "admitted_saddle_m": [
+            0.5862368218593859,
+            1.1536828730125772
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": false
+        }
+      },
+      "public_route_receipt": {
+        "achieved_class": "limited",
+        "active_set_iterations": 9,
+        "active_set_residuals": [
+          0.00629080970613696,
+          0.005634408771625089,
+          0.0010935676516423847,
+          0.0009941512576520603,
+          0.00097457625936128,
+          0.0008838490247750544,
+          0.0007266065060902672,
+          0.0006997325005624959,
+          0.0006997325005624959
+        ],
+        "converged": false,
+        "terminal_residual": 0.0006997325005624959,
+        "termination_reason": "active_set_settled"
+      },
+      "vertical_mode_evidence": {
+        "largest_competing_projection_fraction": 0.1241202309917487,
+        "near_null_direction": true,
+        "near_null_is_vertical_mode": true,
+        "owner": "nova.equilibrium.forward.ForwardProfile.solve",
+        "rule": {
+          "alignment_separation": 0.1,
+          "near_null_relative_threshold": 0.001,
+          "vertical_alignment_threshold": 0.5
+        },
+        "smallest_to_largest_ratio": 0.0004314633369927756,
+        "solver_shape": "vertical_position_constraint_with_compensating_unknown",
+        "vertical_projection_fraction": 0.7099184127550809
+      }
+    },
+    {
+      "arm": "pure",
+      "frozen_mask_undamped": {
+        "damping": {
+          "factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_ladder": false,
+          "projected_conditioning": false,
+          "step_cap": false
+        },
+        "finite": true,
+        "gmres_info": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gmres_relative_residuals": [
+          1.753878521639484e-15,
+          3.0368866482242218e-15,
+          1.808959601487056e-15,
+          3.301752027331982e-15,
+          1.9156279626474226e-15,
+          2.0559095217516503e-15,
+          6.506374009294239e-16,
+          2.354339211939115e-15
+        ],
+        "initial_residual": 0.008083422238641164,
+        "raw_step_norms_taken": [
+          0.012344460343558367,
+          0.0002644058275258425,
+          1.752454987610533e-06,
+          5.6594735940901566e-11,
+          6.854078182122123e-16,
+          5.007358691215271e-16,
+          5.681923296614746e-16,
+          6.13197445971341e-16
+        ],
+        "residuals_after": [
+          6.84144038781276e-05,
+          8.192084987076377e-07,
+          1.1913255132522728e-11,
+          2.352644723461279e-16,
+          2.4646754245784824e-16,
+          2.68873682681289e-16,
+          4.48122804468815e-16,
+          5.601535055860187e-16
+        ],
+        "residuals_before": [
+          0.008083422238641164,
+          6.84144038781276e-05,
+          8.192084987076377e-07,
+          1.1913255132522728e-11,
+          2.352644723461279e-16,
+          2.4646754245784824e-16,
+          2.68873682681289e-16,
+          4.48122804468815e-16
+        ],
+        "residuals_per_step": [
+          {
+            "after": 6.84144038781276e-05,
+            "before": 0.008083422238641164,
+            "step": 1
+          },
+          {
+            "after": 8.192084987076377e-07,
+            "before": 6.84144038781276e-05,
+            "step": 2
+          },
+          {
+            "after": 1.1913255132522728e-11,
+            "before": 8.192084987076377e-07,
+            "step": 3
+          },
+          {
+            "after": 2.352644723461279e-16,
+            "before": 1.1913255132522728e-11,
+            "step": 4
+          },
+          {
+            "after": 2.4646754245784824e-16,
+            "before": 2.352644723461279e-16,
+            "step": 5
+          },
+          {
+            "after": 2.68873682681289e-16,
+            "before": 2.4646754245784824e-16,
+            "step": 6
+          },
+          {
+            "after": 4.48122804468815e-16,
+            "before": 2.68873682681289e-16,
+            "step": 7
+          },
+          {
+            "after": 5.601535055860187e-16,
+            "before": 4.48122804468815e-16,
+            "step": 8
+          }
+        ],
+        "terminal_residual": 5.601535055860187e-16
+      },
+      "identity": "22086/43",
+      "production_route_repaired_cap": {
+        "model_error_fractions": [
+          0.13695440802970443,
+          0.019332565734773686,
+          0.0006341051636322618,
+          9.13393270646615e-06,
+          1.000659610267702e-13
+        ],
+        "newton_step_count": 5,
+        "result": {
+          "active_set_iterations": 3,
+          "active_set_mask_differences": [
+            27,
+            1,
+            0
+          ],
+          "active_set_residuals": [
+            0.005257486947967778,
+            4.929350849156965e-16,
+            4.929350849156965e-16
+          ],
+          "converged": true,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 31.964451720464922,
+          "terminal_residual": 4.929350849156965e-16,
+          "termination_reason": "converged"
+        },
+        "step_cap_activation_count": 0,
+        "step_cap_factors": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.9016135226489936,
+            0.02461798412697708
+          ],
+          "admitted_saddle_m": [
+            0.5648168497490583,
+            1.2580221561478155
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "public_route_receipt": {
+        "achieved_class": "diverted",
+        "active_set_iterations": 3,
+        "active_set_residuals": [
+          0.0052574826729602266,
+          7.21477715194797e-15,
+          7.21477715194797e-15
+        ],
+        "converged": true,
+        "terminal_residual": 7.21477715194797e-15,
+        "termination_reason": "converged"
+      },
+      "vertical_mode_evidence": {
+        "largest_competing_projection_fraction": 0.8133440224067123,
+        "near_null_direction": false,
+        "near_null_is_vertical_mode": false,
+        "owner": null,
+        "rule": {
+          "alignment_separation": 0.1,
+          "near_null_relative_threshold": 0.001,
+          "vertical_alignment_threshold": 0.5
+        },
+        "smallest_to_largest_ratio": 0.012718954475440459,
+        "solver_shape": "none",
+        "vertical_projection_fraction": 0.27270779151860547
+      }
+    }
+  ],
+  "runtime": {
+    "devices": [
+      "cuda:0"
+    ],
+    "jax": "0.11.0",
+    "python": "3.14.2",
+    "scheduler": {
+      "job_id": "1262642",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "source_commit": "cef5026a58da8758385997aee21e6c357efad6da",
+  "verdict": {
+    "production_converged_count": 1,
+    "public_receipt_converged_count": 1,
+    "row_count": 4,
+    "undamped_all_factors_one": true,
+    "vertical_near_null_rows": [
+      "21986/46",
+      "21989/55"
+    ]
+  }
+}

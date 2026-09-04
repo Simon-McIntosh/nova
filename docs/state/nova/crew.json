@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T17:28:44",
+  "updated": "2026-09-04T17:36:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2489,6 +2489,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "scr-regression-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "scr-solver-x3",
         "harness": "codex",
         "role": "implement",
@@ -2611,6 +2620,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "sdw-routes-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "sdw-visual-bank-seam",
@@ -93525,6 +93543,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1624
+    "_version": 1626
   }
 }

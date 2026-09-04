@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T21:01:01",
+  "updated": "2026-09-04T21:05:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2564,6 +2564,15 @@
       },
       {
         "id": "scr-fwd-test-repair-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-fwd-verify-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -96657,6 +96666,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1664
+    "_version": 1665
   }
 }

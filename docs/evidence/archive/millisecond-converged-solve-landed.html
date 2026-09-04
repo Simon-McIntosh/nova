@@ -82,6 +82,31 @@
       log did not carry them.</li>
     </ul>
   </section>
+  <section id="trip-remainder">
+    <h2>The trip remainder is the projected-Krylov condition diagnostic (merged at 610b04ce)</h2>
+    <p><strong>Commit:</strong> <code>4972a4d9</code>; receipt
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json</code>, Perfetto trace and logs under
+    <code>~/.config/reckon/crew/reports/nova/millisecond/</code> (H200 job 1262726, 22086/43 pure, baseline 41.05 s per solve,
+    5.86 s per trip, seven trips). After the single-read restructure left 96.6 percent of a trip unexplained by isolated probes,
+    this node ablated one mechanism at a time inside the same fused production invocation.</p>
+    <table>
+      <caption>One-at-a-time ablations of the fused production solve (rows overlap, not additive)</caption>
+      <thead><tr><th scope="col">Mechanism</th><th scope="col">Source</th><th scope="col">Solve wall with it ablated</th><th scope="col">Saving per trip</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Projected-Krylov Arnoldi condition diagnostic</th><td><code>fixed_point.py:808</code></td><td><strong>0.754 s</strong></td><td>5.76 s (102 percent of the remainder)</td></tr>
+        <tr><th scope="row">Fixed line-search grade ladder</th><td><code>fixed_point.py:77</code></td><td>36.2 s</td><td>0.69 s</td></tr>
+        <tr><th scope="row">Connectivity flood and reachability loops</th><td><code>flux_surface_connectivity.py:204</code></td><td>40.6 s</td><td>0.07 s</td></tr>
+        <tr><th scope="row">Split-spline Jacobi SVD condition estimates</th><td><code>split_spline.py:162</code></td><td>40.9 s</td><td>0.02 s</td></tr>
+      </tbody>
+    </table>
+    <p>Zero recompilations across three warm solves, so the flat cost is not compilation; 322 dynamic flood-fill loop iterations
+    per read, so it is not the while loops; and with both condition estimators replaced by constants the complete device trace
+    holds 308,591 kernel events summing to 0.65 s of GPU time inside a 0.96 s warm solve, dominated by small transpose, scatter
+    and reduce fusions. The conditioning discriminator builds a second Arnoldi basis and takes an SVD of its Hessenberg on the hot
+    path; its decisions are wanted, its cost is not, and GMRES already produces the Hessenberg it needs. Removing that work leaves
+    about 0.107 s per trip between the solve and the one-millisecond target, before the other rows compound.</p>
+  </section>
+
 </main>
 </body>
 </html>

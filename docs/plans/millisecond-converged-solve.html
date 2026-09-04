@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -79,6 +79,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T175317062386" data-who="coordinator" data-when="2026-09-04T17:55:00Z">
+    <div class="r-comment-body"><p>The fused remainder is attributed (report <code>~/.config/reckon/crew/reports/nova/millisecond/trip-remainder-attribution.md</code>, receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json</code>, Perfetto trace kept under the report directory, merged at <code>610b04ce</code>; H200 job 1262726 on 22086/43 pure, baseline 41.05 s per solve, 5.86 s per trip). Ablation ladder on the same fused production invocation: with the projected-Krylov Arnoldi condition diagnostic at <code>fixed_point.py:808</code> replaced by a constant the whole solve takes <strong>0.754 s</strong>, a saving of 5.76 s per trip, 102 percent of the unexplained remainder; the fixed line-search grade ladder is 0.69 s per trip, the connectivity flood and reachability loops 0.07 s, the split-spline condition SVDs 0.02 s (rows overlap, not additive). Zero recompilations across three warm solves; 322 dynamic flood-fill loop iterations per read. With the diagnostic gone the remaining distance to the one-millisecond target is about 0.107 s per trip. Repair queued behind the live constraint-receipt node that holds fixed_point.py: reuse the Hessenberg GMRES already builds for the condition discriminator (or remove the second Arnoldi and its SVD from the hot path) while the trusted-Krylov admission keeps its decisions, verified by the nine referees and the four-row public-route receipt.</p></div>
 </div>
 </section>
 </main>

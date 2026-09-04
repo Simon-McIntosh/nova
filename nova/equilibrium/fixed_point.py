@@ -1243,7 +1243,13 @@ def _qualified_krylov_step(
     condition_ratio_limit: float,
     preceding_condition_baseline: jax.Array,
 ) -> _QualifiedKrylovStep:
-    """Solve, condition, and apply the shared linear-action qualification."""
+    """Solve, condition, and apply the shared linear-action qualification.
+
+    The projected condition remains diagnostic for every solve.  It may damp a
+    step only while the recomputed GMRES residual is too large to trust at the
+    working precision; a resolved linear model is passed unchanged to the
+    nonlinear merit ladder.
+    """
     probe_scale = jnp.maximum(jnp.max(jnp.abs(residual_vector)), 1.0e-300)
     probe = jnp.where(
         probe_scale > 1.0e-300,
@@ -1289,10 +1295,14 @@ def _qualified_krylov_step(
     )
 
     finite_condition = jnp.isfinite(projected_condition)
+    trusted_linear_solve = achieved_reduction <= jnp.sqrt(
+        jnp.finfo(residual_vector.dtype).eps
+    )
     conditioning_applied = (
         finite_condition
         & jnp.isfinite(condition_baseline)
         & (projected_condition > condition_ratio_limit * condition_baseline)
+        & ~trusted_linear_solve
         & (nonlinear_residual > jnp.finfo(residual_vector.dtype).eps ** 0.25)
     )
     damping = jnp.where(
@@ -1968,17 +1978,16 @@ def _newton_krylov_inner(
     Before promotion, the same fixed Krylov projection measures the condition
     of ``I - J``.  Its largest-to-median singular-value ratio supplies a robust
     typical-spectrum baseline, combined geometrically with the preceding
-    projection's baseline.  When the full condition exceeds
-    ``krylov_condition_limit`` times that online baseline, the step is scaled
-    by baseline divided by condition and by the default ratio.  The default
-    trigger is one natural-log unit of separation (a ratio of ``e``), so its
-    scale comes from the ratio coordinate rather than a measured trajectory;
-    applying the same margin below the baseline supplies symmetric log-space
-    hysteresis.  The first-power inverse law is the proportional normalization
-    that returns condition-weighted step size to a fixed baseline multiple; it
-    needs no projection-dimension calibration.  Damping releases below the
-    fourth root of machine precision so local convergence can finish without
-    trajectory control.  A qualified
+    projection's baseline.  A projected condition beyond
+    ``krylov_condition_limit`` times that online baseline may scale the step
+    only when the independently recomputed relative GMRES residual exceeds the
+    square root of machine precision.  A more accurate linear solve has already
+    resolved the current model, so its raw direction proceeds to the nonlinear
+    merit ladder and the projected condition remains receipt-only.  For an
+    unresolved linear model, the first-power inverse law returns the
+    condition-weighted step size to a fixed baseline multiple.  Damping also
+    releases below the fourth root of machine precision so local convergence
+    can finish without trajectory control.  A qualified
     step is then capped at ``step_cap`` × the relaxed step, bounding excursions
     while the current-centroid pin holds the basin.  Promotion selects the
     first of six fixed half-step factors that provides sufficient nonlinear

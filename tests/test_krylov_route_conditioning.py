@@ -34,7 +34,7 @@ def _diagonal_fixed_point(condition: float):
     return lambda state: tangent @ state + offset
 
 
-def test_ill_conditioned_step_is_damped_and_reported_at_its_iteration():
+def test_resolved_high_condition_step_is_undamped_and_reported_at_its_iteration():
     conditioned = newton_krylov(
         _diagonal_fixed_point(200.0),
         jnp.zeros(12),
@@ -53,13 +53,16 @@ def test_ill_conditioned_step_is_damped_and_reported_at_its_iteration():
         krylov_condition_limit=jnp.inf,
     )
 
-    assert int(conditioned.krylov_conditioning_count) == 1
+    assert float(conditioned.inner_iteration_krylov_reductions[0]) <= np.sqrt(
+        np.finfo(np.float64).eps
+    )
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    assert int(conditioned.krylov_conditioning_count) == 0
     np.testing.assert_allclose(
         float(conditioned.maximum_projected_krylov_condition), 200.0, rtol=2.0e-6
     )
-    assert np.max(np.abs(np.asarray(conditioned.state))) < 0.03 * np.max(
-        np.abs(np.asarray(unconditioned.state))
-    )
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    np.testing.assert_allclose(conditioned.state, unconditioned.state, rtol=2.0e-6)
     assert (
         KrylovActionQualification(int(conditioned.krylov_action_qualification))
         is KrylovActionQualification.ACCEPTED
@@ -104,7 +107,12 @@ def test_conditioning_receipt_is_fixed_shape_under_jit_and_vmap():
         )
 
     result = jax.jit(jax.vmap(solve))(jnp.asarray([4.0, 80.0, 200.0]))
-    np.testing.assert_array_equal(result.krylov_conditioning_count, [0, 1, 1])
+    assert np.all(
+        np.asarray(result.inner_iteration_krylov_reductions)
+        <= np.sqrt(np.finfo(np.float64).eps)
+    )
+    # Trusted linear solves stay undamped; only unresolved solves may condition.
+    np.testing.assert_array_equal(result.krylov_conditioning_count, [0, 0, 0])
     np.testing.assert_allclose(
         result.maximum_projected_krylov_condition,
         [4.0, 80.0, 200.0],
@@ -124,7 +132,8 @@ def test_kink_aware_route_carries_the_same_conditioning_receipt():
         step_cap=1.0e6,
     )
 
-    assert int(result.krylov_conditioning_count) == 1
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    assert int(result.krylov_conditioning_count) == 0
     np.testing.assert_allclose(
         float(result.maximum_projected_krylov_condition), 200.0, rtol=2.0e-6
     )

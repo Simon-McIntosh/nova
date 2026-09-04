@@ -1,0 +1,976 @@
+{
+  "artifact": "projected Krylov conditioning repair",
+  "baseline_source_commit": "b64ed3abb386532dc21dc4e6fcd89030fa71c66a",
+  "evidence_inputs": {
+    "after_measurement": "docs/figures/solver-convergence-regression/settled-mask-stall/repair/after-measurement.json",
+    "after_measurement_sha256": "ec3230853ba63082f19facb2d70bacc79f49562f6cd91672ab6636fa85a8c4d4",
+    "baseline_measurement": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-projected-conditioning-repair/docs/figures/solver-convergence-regression/settled-mask-stall/current-measurement.json",
+    "baseline_measurement_sha256": "f5c127fc5a022631d090752ba54156765c67b5ba09e3b08b3fce616eb5666798",
+    "fixed_point_source_sha256": "912e75268939e5912c3a51a97673304ac9383ef3a503bcbf9f8b458bfdc660e1",
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "operands_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005230071023106575
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-projected-conditioning-repair/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022104 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "figure": "docs/figures/solver-convergence-regression/settled-mask-stall/repair/stall-repair.png",
+  "measurement_contract": {
+    "comparison": "same cached terminal state and frozen residual mask before and after the linear-residual-conditioned discriminator",
+    "finite_difference_relative_steps": [
+      0.01,
+      0.0001,
+      1e-06
+    ],
+    "frozen_partition": "terminal residual-shadow mask held fixed for every smooth map, Jacobian action, finite difference, and Newton solve",
+    "full_active_set_start": "each production solve starts from the persisted bank seed and retains every terminal verdict",
+    "smooth_gmres_iterations": 40,
+    "smooth_newton_steps": 8,
+    "smooth_relaxation": 0.5,
+    "smooth_step_cap": 10.0,
+    "targets": [
+      [
+        21985,
+        51
+      ],
+      [
+        21986,
+        46
+      ],
+      [
+        21989,
+        55
+      ],
+      [
+        22086,
+        43
+      ]
+    ],
+    "terminal_reconstruction": "rebuild through the persisted carrier, validate terminal residual and active-set history against the exact operand cache, then retain the full in-memory solver state"
+  },
+  "measurement_source_commit": "72609e836617619b7d7c78dfb99ab2dc87f6f24b",
+  "rows": [
+    {
+      "attribution_contraction_ratio": 0.919426,
+      "baseline_matches_attribution": true,
+      "frozen_mask": {
+        "after": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.2784226242579506,
+          "first_proposed_step_sup": 0.038451938142290636,
+          "initial_residual": 0.008782395190283116,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            1.6783219488293825e-15,
+            3.3030484488187594e-13,
+            3.329436469822308e-13,
+            2.1686101651765524e-14,
+            4.2575699063451114e-13,
+            2.2060610226439333e-14,
+            1.6862372955297528e-13,
+            9.505361371656104e-15
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.03845193814229054,
+          "raw_to_proposed_step_fraction": 1.0000000000000024,
+          "residuals_per_newton_step": [
+            0.008782395190283116,
+            0.0026660668352618032,
+            0.0024452175161490284,
+            0.002469968886143719,
+            0.0027745170563120295,
+            0.002782225333016578,
+            0.002535522233533352,
+            0.0025781630074897645,
+            0.0027438373022087973
+          ],
+          "stepwise_contraction_ratios": [
+            0.30356944517955103,
+            0.9171628722161844,
+            1.0101223591894073,
+            1.1233004074977606,
+            1.0027782408787187,
+            0.9113288573159016,
+            1.0168173535977993,
+            1.0642605972693489
+          ],
+          "terminal_residual": 0.0024452175161490284
+        },
+        "before": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.9194259843423269,
+          "first_proposed_step_sup": 0.0004896504296397973,
+          "initial_residual": 0.0033985904046089106,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            2.2290471874922474e-15,
+            8.131775562831152e-15,
+            7.443285844578069e-15,
+            4.982094049828802e-15,
+            7.11635509102877e-15,
+            1.4760956914062755e-14,
+            1.5708020640800198e-14,
+            6.691498261260804e-15
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.0384519381422908,
+          "raw_to_proposed_step_fraction": 0.012734089705123665,
+          "residuals_per_newton_step": [
+            0.0033985904046089106,
+            0.003355108621553882,
+            0.0033141155516974857,
+            0.0032752546782663585,
+            0.003239040758923106,
+            0.0032046114760920247,
+            0.0031741292636301636,
+            0.003147159816271214,
+            0.0031247523281339347
+          ],
+          "stepwise_contraction_ratios": [
+            0.9872059360268711,
+            0.9877818948712871,
+            0.9882741344334772,
+            0.9889431745312639,
+            0.9893705311561043,
+            0.9904880161950136,
+            0.991503355686244,
+            0.9928800920685916
+          ],
+          "terminal_residual": 0.0031247523281339347
+        }
+      },
+      "full_active_set": {
+        "bank": {
+          "active_set_iterations": 12,
+          "active_set_mask_differences": [
+            35,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.005125953825566331,
+            0.004164298063872095,
+            0.0036740881897092035,
+            0.003605159581381462,
+            0.0036048272052177895,
+            0.003536182970289747,
+            0.0035359370725982758,
+            0.0034673098376049255,
+            0.0033986197338639374,
+            0.003398590491253042,
+            0.00339859040460876,
+            0.00339859040460876
+          ],
+          "converged": false,
+          "terminal_residual": 0.00339859040460876,
+          "termination_reason": "active_set_settled"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            7,
+            2,
+            0,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "active_set_residuals": [
+            0.0077489159021282,
+            0.007184734162253198,
+            0.006759813431058861,
+            0.006638805514440989,
+            0.0026435061448489804,
+            0.0026173580969699912,
+            0.002601253224280073,
+            0.0025822816575423652,
+            0.002564774973444342,
+            0.0025486998215755786,
+            0.0025355880561924284,
+            0.0025209473329737848,
+            0.0025031923007647803,
+            0.0024852157370731385,
+            0.002467015527537316,
+            0.001302905476585221
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 7264.652669462879,
+          "terminal_residual": 0.001302905476585221,
+          "termination_reason": "active_set_cycle_detected"
+        }
+      },
+      "identity": "21985/51"
+    },
+    {
+      "attribution_contraction_ratio": 0.996959,
+      "baseline_matches_attribution": true,
+      "frozen_mask": {
+        "after": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            0.125,
+            0.25,
+            0.5,
+            0.5,
+            1.0,
+            0.5,
+            0.25,
+            0.5
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.5016053725996925,
+          "first_proposed_step_sup": 0.05896048292716172,
+          "initial_residual": 0.009205832400384953,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            2.308680303964743e-12,
+            5.332940652796555e-15,
+            2.2937452858292048e-11,
+            2.2585356196619635e-14,
+            1.0738562334725303e-11,
+            4.47150450629119e-14,
+            3.638642536007832e-12,
+            1.2666092941919883e-13
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 1.2689086124751436,
+          "raw_to_proposed_step_fraction": 0.04646550771859993,
+          "residuals_per_newton_step": [
+            0.009205832400384953,
+            0.009185533540066909,
+            0.00800328996646325,
+            0.008195451258267783,
+            0.004617694991285416,
+            0.007321155747062811,
+            0.008122879793793537,
+            0.007965289122443583,
+            0.006705846476011591
+          ],
+          "stepwise_contraction_ratios": [
+            0.9977950000135571,
+            0.8712928793469903,
+            1.0240102873455492,
+            0.5634460929319745,
+            1.585456761626614,
+            1.109507852916853,
+            0.9805991624460128,
+            0.8418836244269785
+          ],
+          "terminal_residual": 0.004617694991285416
+        },
+        "before": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.9969589746962969,
+          "first_proposed_step_sup": 0.0006683060890544634,
+          "initial_residual": 0.005891455685358932,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            8.82180761236938e-12,
+            1.4238509776945681e-11,
+            6.052373164785627e-12,
+            3.3619808506150985e-11,
+            2.2030430917600593e-13,
+            1.3619299578943961e-11,
+            2.369692409559846e-12,
+            2.3537645517819737e-11
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 1.2689086124521658,
+          "raw_to_proposed_step_fraction": 0.0005266778730132203,
+          "residuals_per_newton_step": [
+            0.005891455685358932,
+            0.005887363938218906,
+            0.005886956175991886,
+            0.005882832966826595,
+            0.005882469166853737,
+            0.005878316457862858,
+            0.005877996805544205,
+            0.005873815235758626,
+            0.00587353961954411
+          ],
+          "stepwise_contraction_ratios": [
+            0.99930547773614,
+            0.99993073942238,
+            0.9992996025378775,
+            0.9999381590511053,
+            0.9992940534199009,
+            0.9999456217913847,
+            0.9992886063187999,
+            0.9999530771392267
+          ],
+          "terminal_residual": 0.00587353961954411
+        }
+      },
+      "full_active_set": {
+        "bank": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.007314960015739155,
+            0.006463598575053091,
+            0.006371003416632264,
+            0.006333911238059767,
+            0.006298462307385201,
+            0.006264030936294162,
+            0.006231685082271188,
+            0.006199592491282568,
+            0.006168749539086756,
+            0.006135975542338794,
+            0.006103094238872839,
+            0.006070631677234887,
+            0.0060255769617205334,
+            0.005979782781654548,
+            0.00593520834741741,
+            0.005891455685358932
+          ],
+          "converged": false,
+          "terminal_residual": 0.005891455685358932,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.007314960015739155,
+            0.006463598575053091,
+            0.006371003416632264,
+            0.006333911238059767,
+            0.006298462307385201,
+            0.006264030936294162,
+            0.006231685082271188,
+            0.006199592491282568,
+            0.006168749539086756,
+            0.006135975542338794,
+            0.006103094238872839,
+            0.006070631677234887,
+            0.0060255769617205334,
+            0.005979782781654548,
+            0.00593520834741741,
+            0.005891455685358932
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 1152.0964485989766,
+          "terminal_residual": 0.005891455685358932,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        }
+      },
+      "identity": "21986/46"
+    },
+    {
+      "attribution_contraction_ratio": 0.990372,
+      "baseline_matches_attribution": true,
+      "frozen_mask": {
+        "after": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            0.25,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.22527039110818833,
+          "first_proposed_step_sup": 0.0640087016385893,
+          "initial_residual": 0.00868279011749689,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            1.4228950148483363e-12,
+            2.7290397819238428e-14,
+            8.45017532121633e-15,
+            7.966743480850413e-14,
+            2.3857424833314696e-14,
+            3.131455290897802e-14,
+            3.128063220996386e-14,
+            4.2294914905954496e-14
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.5400318381185251,
+          "raw_to_proposed_step_fraction": 0.11852764433592672,
+          "residuals_per_newton_step": [
+            0.00868279011749689,
+            0.008607779018347033,
+            0.002564831708422546,
+            0.0019887254448325347,
+            0.001955975525678837,
+            0.002102419308786954,
+            0.0024462664411228244,
+            0.0024720805658109534,
+            0.0027696938248234783
+          ],
+          "stepwise_contraction_ratios": [
+            0.991360945256658,
+            0.2979667232343837,
+            0.7753824308635302,
+            0.9835322069022676,
+            1.074869946574251,
+            1.1635483135541893,
+            1.0105524583316772,
+            1.1203897895273063
+          ],
+          "terminal_residual": 0.001955975525678837
+        },
+        "before": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.9903724604357884,
+          "first_proposed_step_sup": 0.0004139487836364731,
+          "initial_residual": 0.002967953812667164,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            5.198688524511901e-12,
+            8.904237364118627e-13,
+            3.698877226679639e-12,
+            9.034095023930553e-13,
+            1.8517869757752956e-12,
+            1.208198023901702e-13,
+            2.1975983458665834e-12,
+            9.105433687647235e-13
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.5400318381086457,
+          "raw_to_proposed_step_fraction": 0.0007665266275526393,
+          "residuals_per_newton_step": [
+            0.002967953812667164,
+            0.002965109626185685,
+            0.0029607889450879907,
+            0.0029580774517708303,
+            0.0029536388987773223,
+            0.0029510589803374617,
+            0.0029465025412593556,
+            0.0029440536845259644,
+            0.0029393797199109583
+          ],
+          "stepwise_contraction_ratios": [
+            0.9990417012322229,
+            0.9985428258505058,
+            0.9990841990538843,
+            0.9984995142737554,
+            0.9991265288248579,
+            0.9984559986403304,
+            0.999168893731093,
+            0.998412405099957
+          ],
+          "terminal_residual": 0.0029393797199109583
+        }
+      },
+      "full_active_set": {
+        "bank": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            37,
+            2,
+            37,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.004922814252240544,
+            0.004192254895032461,
+            0.004281701589013235,
+            0.003919454664730701,
+            0.0037629562209486075,
+            0.0036845497142506,
+            0.0036064728661151365,
+            0.003528180990380767,
+            0.0034598987718936765,
+            0.0033857620493696556,
+            0.003310985142363465,
+            0.0032359289425903277,
+            0.0031628834351179664,
+            0.003097266303024901,
+            0.0030323919873265137,
+            0.0029679538126672015
+          ],
+          "converged": false,
+          "terminal_residual": 0.0029679538126672015,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            37,
+            2,
+            37,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.004922814252240544,
+            0.004192254895032461,
+            0.004281701589013235,
+            0.003919454664730701,
+            0.0037629562209486075,
+            0.0036845497142506,
+            0.0036064728661151365,
+            0.003528180990380767,
+            0.0034598987718936765,
+            0.0033857620493696556,
+            0.003310985142363465,
+            0.0032359289425903277,
+            0.0031628834351179664,
+            0.003097266303024901,
+            0.0030323919873265137,
+            0.0029679538126672015
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 669.1265355738988,
+          "terminal_residual": 0.0029679538126672015,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        }
+      },
+      "identity": "21989/55"
+    },
+    {
+      "attribution_contraction_ratio": 0.773444,
+      "baseline_matches_attribution": true,
+      "frozen_mask": {
+        "after": {
+          "accepted_promotions": 3,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "attempted_promotions": 3,
+          "eight_step_contraction_ratio": 1.4737802334701265e-09,
+          "first_proposed_step_sup": 0.01234446034355836,
+          "initial_residual": 0.008083422238641074,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            1.250353945750234e-15,
+            3.8212815054178e-15,
+            1.8211342050140012e-15,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.012344460343558359,
+          "raw_to_proposed_step_fraction": 1.0000000000000002,
+          "residuals_per_newton_step": [
+            0.008083422238641074,
+            6.84144038781276e-05,
+            8.192084989541055e-07,
+            1.1913187914102054e-11
+          ],
+          "stepwise_contraction_ratios": [
+            0.008463544506073973,
+            0.011974210875438327,
+            1.4542314843305192e-05
+          ],
+          "terminal_residual": 1.1913187914102054e-11
+        },
+        "before": {
+          "accepted_promotions": 8,
+          "all_linear_models_trusted": true,
+          "applied_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "attempted_promotions": 8,
+          "eight_step_contraction_ratio": 0.773443815208333,
+          "first_proposed_step_sup": 0.00015778517565330513,
+          "initial_residual": 0.0004788269350423749,
+          "linear_model_trusted_per_step": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "linear_residual_reductions": [
+            3.609051207940991e-15,
+            1.0419903899764051e-14,
+            3.3789580632065803e-15,
+            5.4173442086398806e-15,
+            3.1864153800455195e-15,
+            3.9547867484892985e-15,
+            6.006093434701632e-15,
+            3.9914352033249376e-15
+          ],
+          "linear_residual_trust_threshold": 1.4901161193847656e-08,
+          "raw_newton_direction_sup": 0.004998931597387194,
+          "raw_to_proposed_step_fraction": 0.03156377969560038,
+          "residuals_per_newton_step": [
+            0.0004788269350423749,
+            0.00046365539652042445,
+            0.00044898169670327254,
+            0.0004347750090333201,
+            0.0004210368372914064,
+            0.0004077555052614399,
+            0.00039490811253808055,
+            0.0003823882492693541,
+            0.0003703457314636871
+          ],
+          "stepwise_contraction_ratios": [
+            0.9683151940470499,
+            0.9683521427179043,
+            0.96835798034916,
+            0.9684016526790278,
+            0.9684556531551791,
+            0.9684924113651832,
+            0.9682967686121688,
+            0.968507092389274
+          ],
+          "terminal_residual": 0.0003703457314636871
+        }
+      },
+      "full_active_set": {
+        "bank": {
+          "active_set_iterations": 7,
+          "active_set_mask_differences": [
+            29,
+            28,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0049764024985941265,
+            0.0034928501564629164,
+            0.0022263514475277554,
+            0.0006567157524775198,
+            0.00047901608189354557,
+            0.0004788269350422851,
+            0.0004788269350422851
+          ],
+          "converged": false,
+          "terminal_residual": 0.0004788269350422851,
+          "termination_reason": "active_set_settled"
+        },
+        "measured": {
+          "active_set_iterations": 7,
+          "active_set_mask_differences": [
+            29,
+            28,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0049764024985941265,
+            0.0034928501564629164,
+            0.0022263514475277554,
+            0.0006567157524775198,
+            0.00047901608189354557,
+            0.0004788269350422851,
+            0.0004788269350422851
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 23.069151947499098,
+          "terminal_residual": 0.0004788269350422851,
+          "termination_reason": "active_set_settled"
+        }
+      },
+      "identity": "22086/43"
+    }
+  ],
+  "runtime": {
+    "devices": [
+      "cuda:0"
+    ],
+    "jax": "0.11.0",
+    "python": "3.14.2"
+  },
+  "source_commit": "66d9169897fb34eaf3e28146285095f17c21e06f",
+  "verdict": {
+    "all_baselines_match_attribution": true,
+    "all_frozen_residuals_improve_on_baseline": true,
+    "all_raw_to_proposed_fractions_improved": true,
+    "all_trusted_linear_directions_admitted_to_merit_ladder": true,
+    "full_active_set_converged_count": 0,
+    "full_active_set_row_count": 4
+  }
+}

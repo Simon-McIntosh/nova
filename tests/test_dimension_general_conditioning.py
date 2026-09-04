@@ -40,18 +40,21 @@ def _solve(condition: float, dimension: int, *, ratio_limit: float = math.e):
 
 
 @pytest.mark.parametrize("dimension", [8, 12, 24])
-def test_spectral_ratio_engages_without_dimension_calibration(dimension: int):
-    """A separated singular tail engages at every requested dimension."""
+def test_resolved_spectral_ratio_stays_undamped_at_every_dimension(dimension: int):
+    """A resolved direction stays raw despite a separated singular tail."""
     conditioned = _solve(200.0, dimension)
     control = _solve(200.0, dimension, ratio_limit=jnp.inf)
 
-    assert int(conditioned.krylov_conditioning_count) == 1
+    assert float(conditioned.inner_iteration_krylov_reductions[0]) <= math.sqrt(
+        np.finfo(np.float64).eps
+    )
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    assert int(conditioned.krylov_conditioning_count) == 0
     np.testing.assert_allclose(
         float(conditioned.maximum_projected_krylov_condition), 200.0, rtol=3.0e-6
     )
-    assert np.max(np.abs(np.asarray(conditioned.state))) < np.max(
-        np.abs(np.asarray(control.state))
-    )
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    np.testing.assert_array_equal(conditioned.state, control.state)
 
 
 @pytest.mark.parametrize("dimension", [8, 12, 24])
@@ -72,7 +75,12 @@ def test_conditioning_remains_jit_and_vmap_safe(dimension: int):
         return _solve(condition, dimension)
 
     result = jax.jit(jax.vmap(solve))(jnp.asarray([4.0, 200.0]))
-    np.testing.assert_array_equal(result.krylov_conditioning_count, [0, 1])
+    assert np.all(
+        np.asarray(result.inner_iteration_krylov_reductions)
+        <= math.sqrt(np.finfo(np.float64).eps)
+    )
+    # Trusted linear solves stay undamped; only unresolved solves may condition.
+    np.testing.assert_array_equal(result.krylov_conditioning_count, [0, 0])
     assert result.state.shape == (2, dimension)
 
 

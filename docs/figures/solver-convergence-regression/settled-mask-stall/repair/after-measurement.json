@@ -1,0 +1,4772 @@
+{
+  "artifact": "settled residual-mask smooth-solve diagnosis",
+  "evidence_inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "operands_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005230071023106575
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-projected-conditioning-repair/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022104 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "measurement_contract": {
+    "finite_difference_relative_steps": [
+      0.01,
+      0.0001,
+      1e-06
+    ],
+    "frozen_partition": "terminal residual-shadow mask held fixed for every smooth map, Jacobian action, finite difference, and Newton solve",
+    "smooth_gmres_iterations": 40,
+    "smooth_newton_steps": 8,
+    "smooth_relaxation": 0.5,
+    "smooth_step_cap": 10.0,
+    "targets": [
+      [
+        21985,
+        51
+      ],
+      [
+        21986,
+        46
+      ],
+      [
+        21989,
+        55
+      ],
+      [
+        22086,
+        43
+      ]
+    ],
+    "terminal_reconstruction": "rebuild through the persisted carrier, validate terminal residual and active-set history against the exact operand cache, then retain the full in-memory solver state"
+  },
+  "rows": [
+    {
+      "active_set_solve": {
+        "bank": {
+          "active_set_iterations": 12,
+          "active_set_mask_differences": [
+            35,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.005125953825566331,
+            0.004164298063872095,
+            0.0036740881897092035,
+            0.003605159581381462,
+            0.0036048272052177895,
+            0.003536182970289747,
+            0.0035359370725982758,
+            0.0034673098376049255,
+            0.0033986197338639374,
+            0.003398590491253042,
+            0.00339859040460876,
+            0.00339859040460876
+          ],
+          "converged": false,
+          "terminal_residual": 0.00339859040460876,
+          "termination_reason": "active_set_settled"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            7,
+            2,
+            0,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "active_set_residuals": [
+            0.0077489159021282,
+            0.007184734162253198,
+            0.006759813431058861,
+            0.006638805514440989,
+            0.0026435061448489804,
+            0.0026173580969699912,
+            0.002601253224280073,
+            0.0025822816575423652,
+            0.002564774973444342,
+            0.0025486998215755786,
+            0.0025355880561924284,
+            0.0025209473329737848,
+            0.0025031923007647803,
+            0.0024852157370731385,
+            0.002467015527537316,
+            0.001302905476585221
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 7264.652669462879,
+          "terminal_residual": 0.001302905476585221,
+          "termination_reason": "active_set_cycle_detected"
+        }
+      },
+      "bank_validation": {
+        "absolute_tolerance": 5e-11,
+        "active_set_mask_differences": [
+          7,
+          2,
+          0,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "active_set_residuals": [
+          0.0077489159021282,
+          0.007184734162253198,
+          0.006759813431058861,
+          0.006638805514440989,
+          0.0026435061448489804,
+          0.0026173580969699912,
+          0.002601253224280073,
+          0.0025822816575423652,
+          0.002564774973444342,
+          0.0025486998215755786,
+          0.0025355880561924284,
+          0.0025209473329737848,
+          0.0025031923007647803,
+          0.0024852157370731385,
+          0.002467015527537316,
+          0.001302905476585221
+        ],
+        "mask_differences_exact": false,
+        "maximum_residual_difference": null,
+        "passes": false,
+        "terminal_residual_difference": 0.002095684928023539
+      },
+      "candidate_table_status": {
+        "o_point": {
+          "candidate_count": 18,
+          "capacity": 30,
+          "truncated": false
+        },
+        "x_point": {
+          "candidate_count": 25,
+          "capacity": 30,
+          "truncated": false
+        }
+      },
+      "frozen_mask_smooth_solve": {
+        "accepted": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "accepted_promotions": 8,
+        "applied_factors": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "attempted_promotions": 8,
+        "converged": false,
+        "decisions": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "initial_residual": 0.008782395190283116,
+        "krylov_reductions": [
+          1.6783219488293825e-15,
+          3.3030484488187594e-13,
+          3.329436469822308e-13,
+          2.1686101651765524e-14,
+          4.2575699063451114e-13,
+          2.2060610226439333e-14,
+          1.6862372955297528e-13,
+          9.505361371656104e-15
+        ],
+        "krylov_tolerances": [
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05
+        ],
+        "newton_trajectory": [
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.038451938142290636,
+            "residual_after": 0.0026660668352618032,
+            "residual_before": 0.008782395190283116,
+            "step": 1
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.019913974383156674,
+            "residual_after": 0.0024452175161490284,
+            "residual_before": 0.0026660668352618032,
+            "step": 2
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.018167570305902825,
+            "residual_after": 0.002469968886143719,
+            "residual_before": 0.0024452175161490284,
+            "step": 3
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.01826229902610138,
+            "residual_after": 0.0027745170563120295,
+            "residual_before": 0.002469968886143719,
+            "step": 4
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.020613572250403334,
+            "residual_after": 0.002782225333016578,
+            "residual_before": 0.0027745170563120295,
+            "step": 5
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.020555967255856678,
+            "residual_after": 0.002535522233533352,
+            "residual_before": 0.002782225333016578,
+            "step": 6
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.018838097759448502,
+            "residual_after": 0.0025781630074897645,
+            "residual_before": 0.002535522233533352,
+            "step": 7
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.01905803577286591,
+            "residual_after": 0.0027438373022087973,
+            "residual_before": 0.0025781630074897645,
+            "step": 8
+          }
+        ],
+        "proposed_step_norms": [
+          0.038451938142290636,
+          0.019913974383156674,
+          0.018167570305902825,
+          0.01826229902610138,
+          0.020613572250403334,
+          0.020555967255856678,
+          0.018838097759448502,
+          0.01905803577286591
+        ],
+        "residuals_after": [
+          0.0026660668352618032,
+          0.0024452175161490284,
+          0.002469968886143719,
+          0.0027745170563120295,
+          0.002782225333016578,
+          0.002535522233533352,
+          0.0025781630074897645,
+          0.0027438373022087973
+        ],
+        "residuals_before": [
+          0.008782395190283116,
+          0.0026660668352618032,
+          0.0024452175161490284,
+          0.002469968886143719,
+          0.0027745170563120295,
+          0.002782225333016578,
+          0.002535522233533352,
+          0.0025781630074897645
+        ],
+        "terminal_residual": 0.0024452175161490284,
+        "termination_reason": "iteration_budget_exhausted"
+      },
+      "identity": "21985/51",
+      "jacobian_consistency": {
+        "direction": {
+          "finite_count": 1126,
+          "l2": 0.4391770831745112,
+          "size": 1126,
+          "sup": 0.03845193814229054
+        },
+        "finite_difference_checks": [
+          {
+            "epsilon": 0.4073617806294904,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 0.007300843821306897,
+                "size": 290,
+                "sup": 0.0019523475664045857
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 0.00583206381004254,
+                "size": 216,
+                "sup": 0.0012932639513166446
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 0.0052651295832515715,
+                "size": 164,
+                "sup": 0.0008380847154091538
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.004451050487255363,
+                "size": 405,
+                "sup": 0.0006907203013317345
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.0038709516683382403,
+                "size": 166,
+                "sup": 0.0008340647830884603
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 0.006197213980918917,
+                "size": 153,
+                "sup": 0.0019523475664045857
+              }
+            },
+            "relative_state_step": 0.01,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.011551347960049585,
+                  "size": 1,
+                  "sup": 0.011551347960049585
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.010936650505187523,
+                  "size": 1,
+                  "sup": 0.010936650505187523
+                },
+                "relative_disagreement": 0.05321434840228148
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 4.480276146320116,
+                  "size": 2,
+                  "sup": 4.480047305526721
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.06575206356421456,
+                  "size": 2,
+                  "sup": 0.06575206356421456
+                },
+                "relative_disagreement": 0.9999593603335418
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 1.35747287203086,
+                  "size": 1089,
+                  "sup": 0.10688856507326887
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 1.3116906635322207,
+                  "size": 1089,
+                  "sup": 0.10294254560915411
+                },
+                "relative_disagreement": 0.04152635590083732
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.4369761460649126,
+                  "size": 1126,
+                  "sup": 0.038491788453129394
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4469496060069324,
+                  "size": 1126,
+                  "sup": 0.039650805186625115
+                },
+                "relative_disagreement": 0.026296692681998652
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.25869789815171074,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.04078676145783488,
+                "size": 2,
+                "sup": 0.04016929693425462
+              },
+              "axis_flux": -0.0006143111343485941,
+              "boundary_flux": 0.011551347960049585,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 52,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 4.480276146320116,
+                "size": 2,
+                "sup": 4.480047305526721
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 1.35747287203086,
+                "size": 1089,
+                "sup": 0.10688856507326887
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.016544404787823038,
+                "size": 2,
+                "sup": 0.014762662276818515
+              },
+              "x_point_flux": 0.011551347960049585
+            }
+          },
+          {
+            "epsilon": 0.004073617806294904,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 2.175764465369871e-05,
+                "size": 290,
+                "sup": 5.899930483921432e-06
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 2.179237868008052e-05,
+                "size": 216,
+                "sup": 4.351943408119081e-06
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 2.7228515114932365e-05,
+                "size": 164,
+                "sup": 9.233363053393756e-06
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 1.678267242798406e-05,
+                "size": 405,
+                "sup": 2.6010487576308243e-06
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 1.1866995840148363e-05,
+                "size": 166,
+                "sup": 3.0061990104216993e-06
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 1.8256911937698532e-05,
+                "size": 153,
+                "sup": 5.899930483921432e-06
+              }
+            },
+            "relative_state_step": 0.0001,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.010936650724756629,
+                  "size": 1,
+                  "sup": 0.010936650724756629
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.010936650505187523,
+                  "size": 1,
+                  "sup": 0.010936650505187523
+                },
+                "relative_disagreement": 2.0076448583617094e-08
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.06575207908861107,
+                  "size": 2,
+                  "sup": 0.06575207908861107
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.06575206356421456,
+                  "size": 2,
+                  "sup": 0.06575206356421456
+                },
+                "relative_disagreement": 2.3610502845861138e-07
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 1.3116906527823062,
+                  "size": 1089,
+                  "sup": 0.10294254464864853
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 1.3116906635322207,
+                  "size": 1089,
+                  "sup": 0.10294254560915411
+                },
+                "relative_disagreement": 1.1450018952807211e-08
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.4469548201098843,
+                  "size": 1126,
+                  "sup": 0.039651795420872986
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4469496060069324,
+                  "size": 1126,
+                  "sup": 0.039650805186625115
+                },
+                "relative_disagreement": 0.0001002177103710971
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.0009859191720058334,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.029134881813393885,
+                "size": 2,
+                "sup": 0.02911823006568471
+              },
+              "axis_flux": -0.0005541103173425502,
+              "boundary_flux": 0.010936650724756629,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 1,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.06575207908861107,
+                "size": 2,
+                "sup": 0.06575207908861107
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 1.3116906527823062,
+                "size": 1089,
+                "sup": 0.10294254464864853
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.023588360994502705,
+                "size": 2,
+                "sup": 0.01965001547320119
+              },
+              "x_point_flux": 0.010936650724756629
+            }
+          },
+          {
+            "epsilon": 4.0736178062949033e-05,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 5.856483099293357e-11,
+                "size": 290,
+                "sup": 1.66538925662138e-11
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 5.3080477923241895e-11,
+                "size": 216,
+                "sup": 1.0197460578861492e-11
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 4.6489485151261206e-11,
+                "size": 164,
+                "sup": 7.873825289689274e-12
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 3.5880153536463186e-11,
+                "size": 405,
+                "sup": 7.050072304377528e-12
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 2.9249137456523625e-11,
+                "size": 166,
+                "sup": 7.586124328544386e-12
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 5.081475100024171e-11,
+                "size": 153,
+                "sup": 1.66538925662138e-11
+              }
+            },
+            "relative_state_step": 1e-06,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.010936650505559675,
+                  "size": 1,
+                  "sup": 0.010936650505559675
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.010936650505187523,
+                  "size": 1,
+                  "sup": 0.010936650505187523
+                },
+                "relative_disagreement": 3.402796512840892e-11
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.06575206356695106,
+                  "size": 2,
+                  "sup": 0.06575206356695106
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.06575206356421456,
+                  "size": 2,
+                  "sup": 0.06575206356421456
+                },
+                "relative_disagreement": 4.161833774384133e-11
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 1.311690663532231,
+                  "size": 1089,
+                  "sup": 0.10294254561267636
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 1.3116906635322207,
+                  "size": 1089,
+                  "sup": 0.10294254560915411
+                },
+                "relative_disagreement": 5.0861842082751494e-11
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.44694960593998717,
+                  "size": 1126,
+                  "sup": 0.03965080518441463
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4469496060069324,
+                  "size": 1126,
+                  "sup": 0.039650805186625115
+                },
+                "relative_disagreement": 2.1493626488046477e-10
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.4391770831745112,
+                  "size": 1126,
+                  "sup": 0.03845193814229054
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 2.1939771271999206e-09,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.029134881697608712,
+                "size": 2,
+                "sup": 0.029118229951571446
+              },
+              "axis_flux": -0.0005541101211547678,
+              "boundary_flux": 0.010936650505559675,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 1,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.06575206356695106,
+                "size": 2,
+                "sup": 0.06575206356695106
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 1.311690663532231,
+                "size": 1089,
+                "sup": 0.10294254561267636
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.023588357115275366,
+                "size": 2,
+                "sup": 0.019650010508179945
+              },
+              "x_point_flux": 0.010936650505559675
+            }
+          }
+        ],
+        "gmres_info": 0,
+        "gmres_iterations": 40,
+        "jvp_term_decomposition": {
+          "external_field": {
+            "l2": 0.0,
+            "reason": "captured conductor field is constant in solver state",
+            "sup": 0.0
+          },
+          "reconstructed_total": {
+            "finite_count": 1126,
+            "l2": 0.04543251614132599,
+            "size": 1126,
+            "sup": 0.012989770345481755
+          },
+          "reconstruction_relative_disagreement": 0.0,
+          "source_through_psi_norm_and_clip": {
+            "finite_count": 1126,
+            "l2": 0.4469496060069324,
+            "size": 1126,
+            "sup": 0.039650805186625115
+          },
+          "state_term": {
+            "finite_count": 1126,
+            "l2": 0.4391770831745112,
+            "size": 1126,
+            "sup": 0.03845193814229054
+          }
+        },
+        "linear_residual": {
+          "finite_count": 1126,
+          "l2": 8.499074939281452e-17,
+          "size": 1126,
+          "sup": 1.3877787807814457e-17
+        },
+        "relative_linear_residual_l2": 1.8707031133480582e-15
+      },
+      "settled_mask": {
+        "boundary_adjacency": {
+          "authority": "operator.grid.null.stencil",
+          "border_rows_are_centre_only": 128,
+          "centre_first": true,
+          "counts": {
+            "boundary_adjacent_union": 290,
+            "limiter_adjacent": 166,
+            "separatrix_adjacent": 153
+          },
+          "expanded_shape": [
+            1089,
+            7
+          ],
+          "source_shape": [
+            961,
+            7
+          ],
+          "topology_reader_subset": {
+            "authority": "operator.topology.connectivity_rings",
+            "centre_first_and_same_centres": true,
+            "shape": [
+              961,
+              7
+            ],
+            "used_for_residual_region_classification": false
+          }
+        },
+        "excluded_count": 35,
+        "grid_boundary_regions": {
+          "boundary_adjacent": 290,
+          "limiter_adjacent": 166,
+          "separatrix_adjacent": 153
+        },
+        "size": 1126
+      },
+      "stall_residual": {
+        "regions": {
+          "boundary_adjacent": {
+            "finite_count": 290,
+            "l2": 0.024246139897057116,
+            "size": 290,
+            "sup": 0.0047778458069667185
+          },
+          "common_sol": {
+            "finite_count": 216,
+            "l2": 0.018267347051731577,
+            "size": 216,
+            "sup": 0.003033594143684759
+          },
+          "core": {
+            "finite_count": 164,
+            "l2": 0.020530570149161917,
+            "size": 164,
+            "sup": 0.0032633058604399356
+          },
+          "excluded_material": {
+            "finite_count": 405,
+            "l2": 0.018798915969948482,
+            "size": 405,
+            "sup": 0.005026750436267324
+          },
+          "limiter_adjacent": {
+            "finite_count": 166,
+            "l2": 0.020584780098569743,
+            "size": 166,
+            "sup": 0.0047778458069667185
+          },
+          "private_flux": {
+            "finite_count": 14,
+            "l2": 0.0,
+            "size": 14,
+            "sup": 0.0
+          },
+          "separatrix_adjacent": {
+            "finite_count": 153,
+            "l2": 0.014382318564244745,
+            "size": 153,
+            "sup": 0.003024105696758775
+          }
+        },
+        "term_reconstruction_relative_disagreement": 3.5406782120314676e-14,
+        "terms": {
+          "external_field": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 14.779582603913305,
+                "size": 290,
+                "sup": 1.7656506200834892
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 14.852821353109304,
+                "size": 216,
+                "sup": 1.580059020898651
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 8.027752200509953,
+                "size": 164,
+                "sup": 1.1041331286068246
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 19.32337049759757,
+                "size": 405,
+                "sup": 2.0249508411776285
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 12.560249783323611,
+                "size": 166,
+                "sup": 1.7656506200834892
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 7.922969924760175,
+                "size": 153,
+                "sup": 1.2817549368842023
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 30.193426742162373,
+              "size": 1126,
+              "sup": 2.0249508411776285
+            }
+          },
+          "source_through_psi_norm": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 7.5186282537461295,
+                "size": 290,
+                "sup": 1.0639813275618382
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 7.2188175040284275,
+                "size": 216,
+                "sup": 0.9411466232018895
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 9.280287017553182,
+                "size": 164,
+                "sup": 1.144174055537602
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 6.575345351831517,
+                "size": 405,
+                "sup": 0.7246284317057154
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 4.70109442453651,
+                "size": 166,
+                "sup": 0.7874007414119748
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 5.887816094836758,
+                "size": 153,
+                "sup": 1.0639813275618382
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 15.590342516274973,
+              "size": 1126,
+              "sup": 1.144174055537602
+            }
+          },
+          "state": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 290,
+                "l2": 8.351676802116705,
+                "size": 290,
+                "sup": 1.0820067096554318
+              },
+              "common_sol": {
+                "finite_count": 216,
+                "l2": 8.106114731036172,
+                "size": 216,
+                "sup": 0.8684019456606855
+              },
+              "core": {
+                "finite_count": 164,
+                "l2": 2.074577853649526,
+                "size": 164,
+                "sup": 0.33781559895413915
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 12.8744687187391,
+                "size": 405,
+                "sup": 1.4754647516342339
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 7.997618455190502,
+                "size": 166,
+                "sup": 1.0820067096554318
+              },
+              "private_flux": {
+                "finite_count": 14,
+                "l2": 0.0,
+                "size": 14,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 2.5992584862748935,
+                "size": 153,
+                "sup": 0.38480103964802537
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 17.865141382184134,
+              "size": 1126,
+              "sup": 1.4754647516342339
+            }
+          }
+        },
+        "total": {
+          "finite_count": 1126,
+          "l2": 0.045432516141326026,
+          "size": 1126,
+          "sup": 0.012989770345481766
+        }
+      },
+      "terminal_topology": {
+        "axis": [
+          0.8971361974180511,
+          0.023242799865682073
+        ],
+        "axis_flux": 0.33870586029637556,
+        "boundary_flux": -0.21372133023905351,
+        "limiter_point": [
+          0.593839458388163,
+          1.8250000476837158
+        ],
+        "x_point": [
+          0.5610989050128365,
+          1.1550314358653346
+        ],
+        "x_point_flux": -0.21372133023905351
+      }
+    },
+    {
+      "active_set_solve": {
+        "bank": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.007314960015739155,
+            0.006463598575053091,
+            0.006371003416632264,
+            0.006333911238059767,
+            0.006298462307385201,
+            0.006264030936294162,
+            0.006231685082271188,
+            0.006199592491282568,
+            0.006168749539086756,
+            0.006135975542338794,
+            0.006103094238872839,
+            0.006070631677234887,
+            0.0060255769617205334,
+            0.005979782781654548,
+            0.00593520834741741,
+            0.005891455685358932
+          ],
+          "converged": false,
+          "terminal_residual": 0.005891455685358932,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.007314960015739155,
+            0.006463598575053091,
+            0.006371003416632264,
+            0.006333911238059767,
+            0.006298462307385201,
+            0.006264030936294162,
+            0.006231685082271188,
+            0.006199592491282568,
+            0.006168749539086756,
+            0.006135975542338794,
+            0.006103094238872839,
+            0.006070631677234887,
+            0.0060255769617205334,
+            0.005979782781654548,
+            0.00593520834741741,
+            0.005891455685358932
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 1152.0964485989766,
+          "terminal_residual": 0.005891455685358932,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        }
+      },
+      "bank_validation": {
+        "absolute_tolerance": 5e-11,
+        "active_set_mask_differences": [
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.007314960015739155,
+          0.006463598575053091,
+          0.006371003416632264,
+          0.006333911238059767,
+          0.006298462307385201,
+          0.006264030936294162,
+          0.006231685082271188,
+          0.006199592491282568,
+          0.006168749539086756,
+          0.006135975542338794,
+          0.006103094238872839,
+          0.006070631677234887,
+          0.0060255769617205334,
+          0.005979782781654548,
+          0.00593520834741741,
+          0.005891455685358932
+        ],
+        "mask_differences_exact": true,
+        "maximum_residual_difference": 0.0,
+        "passes": true,
+        "terminal_residual_difference": 0.0
+      },
+      "candidate_table_status": {
+        "o_point": {
+          "candidate_count": 20,
+          "capacity": 30,
+          "truncated": false
+        },
+        "x_point": {
+          "candidate_count": 30,
+          "capacity": 30,
+          "truncated": false
+        }
+      },
+      "frozen_mask_smooth_solve": {
+        "accepted": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "accepted_promotions": 8,
+        "applied_factors": [
+          0.125,
+          0.25,
+          0.5,
+          0.5,
+          1.0,
+          0.5,
+          0.25,
+          0.5
+        ],
+        "attempted_promotions": 8,
+        "converged": false,
+        "decisions": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "initial_residual": 0.009205832400384953,
+        "krylov_reductions": [
+          2.308680303964743e-12,
+          5.332940652796555e-15,
+          2.2937452858292048e-11,
+          2.2585356196619635e-14,
+          1.0738562334725303e-11,
+          4.47150450629119e-14,
+          3.638642536007832e-12,
+          1.2666092941919883e-13
+        ],
+        "krylov_tolerances": [
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05
+        ],
+        "newton_trajectory": [
+          {
+            "accepted": 1,
+            "applied_factor": 0.125,
+            "decision": 1,
+            "proposed_step_norm": 0.05896048292716172,
+            "residual_after": 0.009185533540066909,
+            "residual_before": 0.009205832400384953,
+            "step": 1
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.25,
+            "decision": 1,
+            "proposed_step_norm": 0.05896249315536006,
+            "residual_after": 0.00800328996646325,
+            "residual_before": 0.009185533540066909,
+            "step": 2
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.5,
+            "decision": 1,
+            "proposed_step_norm": 0.051143931447512614,
+            "residual_after": 0.008195451258267783,
+            "residual_before": 0.00800328996646325,
+            "step": 3
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.5,
+            "decision": 1,
+            "proposed_step_norm": 0.04550721897015017,
+            "residual_after": 0.004617694991285416,
+            "residual_before": 0.008195451258267783,
+            "step": 4
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.029524938790639332,
+            "residual_after": 0.007321155747062811,
+            "residual_before": 0.004617694991285416,
+            "step": 5
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.5,
+            "decision": 1,
+            "proposed_step_norm": 0.047231170554052626,
+            "residual_after": 0.008122879793793537,
+            "residual_before": 0.007321155747062811,
+            "step": 6
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.25,
+            "decision": 1,
+            "proposed_step_norm": 0.05202346255822138,
+            "residual_after": 0.007965289122443583,
+            "residual_before": 0.008122879793793537,
+            "step": 7
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 0.5,
+            "decision": 1,
+            "proposed_step_norm": 0.051212646234340686,
+            "residual_after": 0.006705846476011591,
+            "residual_before": 0.007965289122443583,
+            "step": 8
+          }
+        ],
+        "proposed_step_norms": [
+          0.05896048292716172,
+          0.05896249315536006,
+          0.051143931447512614,
+          0.04550721897015017,
+          0.029524938790639332,
+          0.047231170554052626,
+          0.05202346255822138,
+          0.051212646234340686
+        ],
+        "residuals_after": [
+          0.009185533540066909,
+          0.00800328996646325,
+          0.008195451258267783,
+          0.004617694991285416,
+          0.007321155747062811,
+          0.008122879793793537,
+          0.007965289122443583,
+          0.006705846476011591
+        ],
+        "residuals_before": [
+          0.009205832400384953,
+          0.009185533540066909,
+          0.00800328996646325,
+          0.008195451258267783,
+          0.004617694991285416,
+          0.007321155747062811,
+          0.008122879793793537,
+          0.007965289122443583
+        ],
+        "terminal_residual": 0.004617694991285416,
+        "termination_reason": "iteration_budget_exhausted"
+      },
+      "identity": "21986/46",
+      "jacobian_consistency": {
+        "direction": {
+          "finite_count": 1126,
+          "l2": 14.960268302297973,
+          "size": 1126,
+          "sup": 1.2689086124751436
+        },
+        "finite_difference_checks": [
+          {
+            "epsilon": 0.010046031700605864,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 0.19930859751390714,
+                "size": 273,
+                "sup": 0.06683653446296915
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 0.1547366199853099,
+                "size": 231,
+                "sup": 0.03796805373573429
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 0.21759929803689476,
+                "size": 160,
+                "sup": 0.09273880946326236
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.14985847449971557,
+                "size": 405,
+                "sup": 0.02498943609457058
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.1241505164123892,
+                "size": 166,
+                "sup": 0.03530823011456569
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 0.1559250296594465,
+                "size": 114,
+                "sup": 0.06683653446296915
+              }
+            },
+            "relative_state_step": 0.01,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.47211096198220803,
+                  "size": 1,
+                  "sup": 0.47211096198220803
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.3935649970331765,
+                  "size": 1,
+                  "sup": 0.3935649970331765
+                },
+                "relative_disagreement": 0.1663718305104545
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.33849921549393897,
+                  "size": 2,
+                  "sup": 0.27450873380715185
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.4725178647593864,
+                  "size": 2,
+                  "sup": 0.4725178647593864
+                },
+                "relative_disagreement": 0.5926997604682992
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 54.46915848776835,
+                  "size": 1089,
+                  "sup": 4.119219545155774
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 48.784875877539996,
+                  "size": 1089,
+                  "sup": 3.664404562002609
+                },
+                "relative_disagreement": 0.12369929053986062
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 15.10116106213061,
+                  "size": 1126,
+                  "sup": 1.2700503321804297
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.939072802532507,
+                  "size": 1126,
+                  "sup": 1.265202516407116
+                },
+                "relative_disagreement": 0.0245371223078723
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.9824208143749391,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 1.070504257171953,
+                "size": 2,
+                "sup": 1.0703020222434594
+              },
+              "axis_flux": -0.13414080588419272,
+              "boundary_flux": 0.47211096198220803,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 20,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.33849921549393897,
+                "size": 2,
+                "sup": 0.27450873380715185
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 54.46915848776835,
+                "size": 1089,
+                "sup": 4.119219545155774
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 1.4200508405600814,
+                "size": 2,
+                "sup": 1.3005198661927062
+              },
+              "x_point_flux": 0.47211096198220803
+            }
+          },
+          {
+            "epsilon": 0.00010046031700605863,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 0.0017511092846878122,
+                "size": 273,
+                "sup": 0.0006205196305099038
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 0.001202774492703426,
+                "size": 231,
+                "sup": 0.0003160789510094739
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 0.0012816229266721867,
+                "size": 160,
+                "sup": 0.0003220439939140619
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.0009668901755656641,
+                "size": 405,
+                "sup": 0.0002235361599582645
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.0009258133138366456,
+                "size": 166,
+                "sup": 0.0002793115512562702
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 0.0014866212214207466,
+                "size": 114,
+                "sup": 0.0006205196305099038
+              }
+            },
+            "relative_state_step": 0.0001,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.39356511345595935,
+                  "size": 1,
+                  "sup": 0.39356511345595935
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.3935649970331765,
+                  "size": 1,
+                  "sup": 0.3935649970331765
+                },
+                "relative_disagreement": 2.9581581008641695e-07
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.4725178695698706,
+                  "size": 2,
+                  "sup": 0.4725178695698706
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.4725178647593864,
+                  "size": 2,
+                  "sup": 0.4725178647593864
+                },
+                "relative_disagreement": 1.0180533874926492e-08
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 48.784878060600214,
+                  "size": 1089,
+                  "sup": 3.6644047448945662
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 48.784875877539996,
+                  "size": 1089,
+                  "sup": 3.664404562002609
+                },
+                "relative_disagreement": 9.315134305895586e-08
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 14.936912615961136,
+                  "size": 1126,
+                  "sup": 1.265093814268948
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.939072802532507,
+                  "size": 1126,
+                  "sup": 1.265202516407116
+                },
+                "relative_disagreement": 0.00018087726227666363
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.04702021113800774,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 1.0704941615909342,
+                "size": 2,
+                "sup": 1.0702919724833988
+              },
+              "axis_flux": -0.13413843297459,
+              "boundary_flux": 0.39356511345595935,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 2,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.4725178695698706,
+                "size": 2,
+                "sup": 0.4725178695698706
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 48.784878060600214,
+                "size": 1089,
+                "sup": 3.6644047448945662
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 2.0744383395722745,
+                "size": 2,
+                "sup": 2.0732667428891562
+              },
+              "x_point_flux": 0.39356511345595935
+            }
+          },
+          {
+            "epsilon": 1.0046031700605863e-06,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 1.0214205245476075e-08,
+                "size": 273,
+                "sup": 3.5383890032401888e-09
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 7.289554493163696e-09,
+                "size": 231,
+                "sup": 2.011832119083387e-09
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 6.880336505631752e-09,
+                "size": 160,
+                "sup": 1.8317884043373561e-09
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 5.998650093665e-09,
+                "size": 405,
+                "sup": 1.3887836780102428e-09
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 5.7787826874875915e-09,
+                "size": 166,
+                "sup": 1.8218536121990953e-09
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 8.42403416176105e-09,
+                "size": 114,
+                "sup": 3.5383890032401888e-09
+              }
+            },
+            "relative_state_step": 1e-06,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.3935649970358328,
+                  "size": 1,
+                  "sup": 0.3935649970358328
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.3935649970331765,
+                  "size": 1,
+                  "sup": 0.3935649970331765
+                },
+                "relative_disagreement": 6.749379718024823e-12
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.47251786475258317,
+                  "size": 2,
+                  "sup": 0.47251786475258317
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.4725178647593864,
+                  "size": 2,
+                  "sup": 0.4725178647593864
+                },
+                "relative_disagreement": 1.4397814681064692e-11
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 48.7848758750741,
+                  "size": 1089,
+                  "sup": 3.664404561957001
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 48.784875877539996,
+                  "size": 1089,
+                  "sup": 3.664404562002609
+                },
+                "relative_disagreement": 8.10532917376628e-11
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 14.939072814787743,
+                  "size": 1126,
+                  "sup": 1.2652025170679797
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.939072802532507,
+                  "size": 1126,
+                  "sup": 1.265202516407116
+                },
+                "relative_disagreement": 1.053568457352977e-09
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 14.960268302297973,
+                  "size": 1126,
+                  "sup": 1.2689086124751436
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 2.786787957540567e-07,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 1.0704941606194929,
+                "size": 2,
+                "sup": 1.0702919715160597
+              },
+              "axis_flux": -0.13413843273090753,
+              "boundary_flux": 0.3935649970358328,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 0,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.47251786475258317,
+                "size": 2,
+                "sup": 0.47251786475258317
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 48.7848758750741,
+                "size": 1089,
+                "sup": 3.664404561957001
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 2.074439788594654,
+                "size": 2,
+                "sup": 2.073268257608308
+              },
+              "x_point_flux": 0.3935649970358328
+            }
+          }
+        ],
+        "gmres_info": 0,
+        "gmres_iterations": 40,
+        "jvp_term_decomposition": {
+          "external_field": {
+            "l2": 0.0,
+            "reason": "captured conductor field is constant in solver state",
+            "sup": 0.0
+          },
+          "reconstructed_total": {
+            "finite_count": 1126,
+            "l2": 0.056590899620997476,
+            "size": 1126,
+            "sup": 0.011792096585437895
+          },
+          "reconstruction_relative_disagreement": 0.0,
+          "source_through_psi_norm_and_clip": {
+            "finite_count": 1126,
+            "l2": 14.939072802532507,
+            "size": 1126,
+            "sup": 1.265202516407116
+          },
+          "state_term": {
+            "finite_count": 1126,
+            "l2": 14.960268302297973,
+            "size": 1126,
+            "sup": 1.2689086124751436
+          }
+        },
+        "linear_residual": {
+          "finite_count": 1126,
+          "l2": 1.1312537191663156e-13,
+          "size": 1126,
+          "sup": 1.504352198367087e-14
+        },
+        "relative_linear_residual_l2": 1.9990028904692928e-12
+      },
+      "settled_mask": {
+        "boundary_adjacency": {
+          "authority": "operator.grid.null.stencil",
+          "border_rows_are_centre_only": 128,
+          "centre_first": true,
+          "counts": {
+            "boundary_adjacent_union": 273,
+            "limiter_adjacent": 166,
+            "separatrix_adjacent": 114
+          },
+          "expanded_shape": [
+            1089,
+            7
+          ],
+          "source_shape": [
+            961,
+            7
+          ],
+          "topology_reader_subset": {
+            "authority": "operator.topology.connectivity_rings",
+            "centre_first_and_same_centres": true,
+            "shape": [
+              961,
+              7
+            ],
+            "used_for_residual_region_classification": false
+          }
+        },
+        "excluded_count": 62,
+        "grid_boundary_regions": {
+          "boundary_adjacent": 273,
+          "limiter_adjacent": 166,
+          "separatrix_adjacent": 114
+        },
+        "size": 1126
+      },
+      "stall_residual": {
+        "regions": {
+          "boundary_adjacent": {
+            "finite_count": 273,
+            "l2": 0.03215942777396251,
+            "size": 273,
+            "sup": 0.0069527084507597925
+          },
+          "common_sol": {
+            "finite_count": 231,
+            "l2": 0.022770965867742438,
+            "size": 231,
+            "sup": 0.0034778398085651974
+          },
+          "core": {
+            "finite_count": 160,
+            "l2": 0.025861893279347355,
+            "size": 160,
+            "sup": 0.004169198079158484
+          },
+          "excluded_material": {
+            "finite_count": 405,
+            "l2": 0.0255637364188688,
+            "size": 405,
+            "sup": 0.007546586929786159
+          },
+          "limiter_adjacent": {
+            "finite_count": 166,
+            "l2": 0.026432926332372052,
+            "size": 166,
+            "sup": 0.0069527084507597925
+          },
+          "private_flux": {
+            "finite_count": 20,
+            "l2": 0.0,
+            "size": 20,
+            "sup": 0.0
+          },
+          "separatrix_adjacent": {
+            "finite_count": 114,
+            "l2": 0.018323700939649624,
+            "size": 114,
+            "sup": 0.003965016389102541
+          }
+        },
+        "term_reconstruction_relative_disagreement": 2.7140783693203344e-14,
+        "terms": {
+          "external_field": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 13.179216622204862,
+                "size": 273,
+                "sup": 1.5362948812071728
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 12.629044202909947,
+                "size": 231,
+                "sup": 1.3833624244189584
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 7.735015160640227,
+                "size": 160,
+                "sup": 1.0360155319742421
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 16.942502679241645,
+                "size": 405,
+                "sup": 1.7531885854773621
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 10.997439815201293,
+                "size": 166,
+                "sup": 1.5362948812071728
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 7.311223835197761,
+                "size": 114,
+                "sup": 1.1952252981105513
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 26.583290025593612,
+              "size": 1126,
+              "sup": 1.7531885854773621
+            }
+          },
+          "source_through_psi_norm": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 7.1052678503066,
+                "size": 273,
+                "sup": 0.9548628850457102
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 6.334189109835576,
+                "size": 231,
+                "sup": 0.8656648879386295
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 9.212583226281605,
+                "size": 160,
+                "sup": 1.0751025442631144
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 6.268236083149244,
+                "size": 405,
+                "sup": 0.7085035493111063
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 4.462581964812499,
+                "size": 166,
+                "sup": 0.7576280250694142
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 5.535014695318571,
+                "size": 114,
+                "sup": 0.9548628850457102
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 14.810576105096382,
+              "size": 1126,
+              "sup": 1.0751025442631144
+            }
+          },
+          "state": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 273,
+                "l2": 6.988219053522439,
+                "size": 273,
+                "sup": 0.9332525789685515
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 6.701787531290746,
+                "size": 231,
+                "sup": 0.7331521459603093
+              },
+              "core": {
+                "finite_count": 160,
+                "l2": 2.1297127090274808,
+                "size": 160,
+                "sup": 0.34595226417417796
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 10.817631856780041,
+                "size": 405,
+                "sup": 1.2850202649958313
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 6.684575358074124,
+                "size": 166,
+                "sup": 0.9332525789685515
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 114,
+                "l2": 2.1194677244666265,
+                "size": 114,
+                "sup": 0.39858960837118906
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 14.992075441394094,
+              "size": 1126,
+              "sup": 1.2850202649958313
+            }
+          }
+        },
+        "total": {
+          "finite_count": 1126,
+          "l2": 0.05659089962095484,
+          "size": 1126,
+          "sup": 0.011792096585432343
+        }
+      },
+      "terminal_topology": {
+        "axis": [
+          0.9136539972796212,
+          0.05412835214503442
+        ],
+        "axis_flux": 0.34950699149684994,
+        "boundary_flux": -0.18517967985920197,
+        "limiter_point": [
+          0.5649306774139404,
+          1.8242799186179743
+        ],
+        "x_point": [
+          0.6107480226057648,
+          1.1421472883099502
+        ],
+        "x_point_flux": -0.18517967985920197
+      }
+    },
+    {
+      "active_set_solve": {
+        "bank": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            37,
+            2,
+            37,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.004922814252240544,
+            0.004192254895032461,
+            0.004281701589013235,
+            0.003919454664730701,
+            0.0037629562209486075,
+            0.0036845497142506,
+            0.0036064728661151365,
+            0.003528180990380767,
+            0.0034598987718936765,
+            0.0033857620493696556,
+            0.003310985142363465,
+            0.0032359289425903277,
+            0.0031628834351179664,
+            0.003097266303024901,
+            0.0030323919873265137,
+            0.0029679538126672015
+          ],
+          "converged": false,
+          "terminal_residual": 0.0029679538126672015,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        },
+        "measured": {
+          "active_set_iterations": 16,
+          "active_set_mask_differences": [
+            37,
+            2,
+            37,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.004922814252240544,
+            0.004192254895032461,
+            0.004281701589013235,
+            0.003919454664730701,
+            0.0037629562209486075,
+            0.0036845497142506,
+            0.0036064728661151365,
+            0.003528180990380767,
+            0.0034598987718936765,
+            0.0033857620493696556,
+            0.003310985142363465,
+            0.0032359289425903277,
+            0.0031628834351179664,
+            0.003097266303024901,
+            0.0030323919873265137,
+            0.0029679538126672015
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 669.1265355738988,
+          "terminal_residual": 0.0029679538126672015,
+          "termination_reason": "active_set_iteration_budget_exhausted"
+        }
+      },
+      "bank_validation": {
+        "absolute_tolerance": 5e-11,
+        "active_set_mask_differences": [
+          37,
+          2,
+          37,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004922814252240544,
+          0.004192254895032461,
+          0.004281701589013235,
+          0.003919454664730701,
+          0.0037629562209486075,
+          0.0036845497142506,
+          0.0036064728661151365,
+          0.003528180990380767,
+          0.0034598987718936765,
+          0.0033857620493696556,
+          0.003310985142363465,
+          0.0032359289425903277,
+          0.0031628834351179664,
+          0.003097266303024901,
+          0.0030323919873265137,
+          0.0029679538126672015
+        ],
+        "mask_differences_exact": true,
+        "maximum_residual_difference": 0.0,
+        "passes": true,
+        "terminal_residual_difference": 0.0
+      },
+      "candidate_table_status": {
+        "o_point": {
+          "candidate_count": 19,
+          "capacity": 30,
+          "truncated": false
+        },
+        "x_point": {
+          "candidate_count": 35,
+          "capacity": 30,
+          "truncated": true
+        }
+      },
+      "frozen_mask_smooth_solve": {
+        "accepted": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "accepted_promotions": 8,
+        "applied_factors": [
+          0.25,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "attempted_promotions": 8,
+        "converged": false,
+        "decisions": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "initial_residual": 0.00868279011749689,
+        "krylov_reductions": [
+          1.4228950148483363e-12,
+          2.7290397819238428e-14,
+          8.45017532121633e-15,
+          7.966743480850413e-14,
+          2.3857424833314696e-14,
+          3.131455290897802e-14,
+          3.128063220996386e-14,
+          4.2294914905954496e-14
+        ],
+        "krylov_tolerances": [
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05
+        ],
+        "newton_trajectory": [
+          {
+            "accepted": 1,
+            "applied_factor": 0.25,
+            "decision": 1,
+            "proposed_step_norm": 0.0640087016385893,
+            "residual_after": 0.008607779018347033,
+            "residual_before": 0.00868279011749704,
+            "step": 1
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.04264981561765442,
+            "residual_after": 0.002564831708422546,
+            "residual_before": 0.008607779018347033,
+            "step": 2
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.018802978067312542,
+            "residual_after": 0.0019887254448325347,
+            "residual_before": 0.002564831708422546,
+            "step": 3
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.014630928188637815,
+            "residual_after": 0.001955975525678837,
+            "residual_before": 0.0019887254448325347,
+            "step": 4
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.014440836665834124,
+            "residual_after": 0.002102419308786954,
+            "residual_before": 0.001955975525678837,
+            "step": 5
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.015470045209774463,
+            "residual_after": 0.0024462664411228244,
+            "residual_before": 0.002102419308786954,
+            "step": 6
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.018067056772880508,
+            "residual_after": 0.0024720805658109534,
+            "residual_before": 0.0024462664411228244,
+            "step": 7
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.01817746594653974,
+            "residual_after": 0.0027696938248234783,
+            "residual_before": 0.0024720805658109534,
+            "step": 8
+          }
+        ],
+        "proposed_step_norms": [
+          0.0640087016385893,
+          0.04264981561765442,
+          0.018802978067312542,
+          0.014630928188637815,
+          0.014440836665834124,
+          0.015470045209774463,
+          0.018067056772880508,
+          0.01817746594653974
+        ],
+        "residuals_after": [
+          0.008607779018347033,
+          0.002564831708422546,
+          0.0019887254448325347,
+          0.001955975525678837,
+          0.002102419308786954,
+          0.0024462664411228244,
+          0.0024720805658109534,
+          0.0027696938248234783
+        ],
+        "residuals_before": [
+          0.00868279011749704,
+          0.008607779018347033,
+          0.002564831708422546,
+          0.0019887254448325347,
+          0.001955975525678837,
+          0.002102419308786954,
+          0.0024462664411228244,
+          0.0024720805658109534
+        ],
+        "terminal_residual": 0.001955975525678837,
+        "termination_reason": "iteration_budget_exhausted"
+      },
+      "identity": "21989/55",
+      "jacobian_consistency": {
+        "direction": {
+          "finite_count": 1126,
+          "l2": 6.584682666977066,
+          "size": 1126,
+          "sup": 0.5400318381185251
+        },
+        "finite_difference_checks": [
+          {
+            "epsilon": 0.02672072446762579,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 0.06533969802977421,
+                "size": 276,
+                "sup": 0.01978865916893614
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 0.05305157609653204,
+                "size": 231,
+                "sup": 0.011391164339426895
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 0.05789833735031102,
+                "size": 157,
+                "sup": 0.00752741212828518
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.03506823493040804,
+                "size": 405,
+                "sup": 0.006140542256238111
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.03196909747184333,
+                "size": 166,
+                "sup": 0.00842575835177983
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 0.057007876354265824,
+                "size": 118,
+                "sup": 0.01978865916893614
+              }
+            },
+            "relative_state_step": 0.01,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.11945371609605687,
+                  "size": 1,
+                  "sup": 0.11945371609605687
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.1263736137311477,
+                  "size": 1,
+                  "sup": 0.1263736137311477
+                },
+                "relative_disagreement": 0.05475745632955065
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.09342305316417085,
+                  "size": 2,
+                  "sup": 0.09342305316417085
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.03304079858184264,
+                  "size": 2,
+                  "sup": 0.03304079858184264
+                },
+                "relative_disagreement": 0.6463314196788177
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 15.062173061282301,
+                  "size": 1089,
+                  "sup": 1.1954819971844948
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 15.46078574436281,
+                  "size": 1089,
+                  "sup": 1.2069394346068805
+                },
+                "relative_disagreement": 0.04161826972574392
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.518593444234339,
+                  "size": 1126,
+                  "sup": 0.5339664232901667
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.599034354529625,
+                  "size": 1126,
+                  "sup": 0.5411482290737214
+                },
+                "relative_disagreement": 0.016534023328013254
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 1.1108727394213964,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.43267647199839127,
+                "size": 2,
+                "sup": 0.4315165214558979
+              },
+              "axis_flux": 0.0305421048583248,
+              "boundary_flux": 0.11945371609605687,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 45,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.09342305316417085,
+                "size": 2,
+                "sup": 0.09342305316417085
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 15.062173061282301,
+                "size": 1089,
+                "sup": 1.1954819971844948
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 1.0302273806864153,
+                "size": 2,
+                "sup": 1.0153749238395726
+              },
+              "x_point_flux": 0.11945371609605687
+            }
+          },
+          {
+            "epsilon": 0.0002672072446762579,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 0.0005281477264989241,
+                "size": 276,
+                "sup": 0.00014482322701078135
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 0.0004598533063239383,
+                "size": 231,
+                "sup": 9.63382827651421e-05
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 0.0004941757278029565,
+                "size": 157,
+                "sup": 0.00026880323605513916
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.0003862190503537263,
+                "size": 405,
+                "sup": 6.232002400900099e-05
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.00028193220824663243,
+                "size": 166,
+                "sup": 6.85447133060089e-05
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 0.0004467380415955331,
+                "size": 118,
+                "sup": 0.00014482322701078135
+              }
+            },
+            "relative_state_step": 0.0001,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.12637340571390318,
+                  "size": 1,
+                  "sup": 0.12637340571390318
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.1263736137311477,
+                  "size": 1,
+                  "sup": 0.1263736137311477
+                },
+                "relative_disagreement": 1.6460496647303206e-06
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.033040799395239795,
+                  "size": 2,
+                  "sup": 0.033040799395239795
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.03304079858184264,
+                  "size": 2,
+                  "sup": 0.03304079858184264
+                },
+                "relative_disagreement": 2.4617962339712966e-08
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 15.460771776410706,
+                  "size": 1089,
+                  "sup": 1.2069389771883088
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 15.46078574436281,
+                  "size": 1089,
+                  "sup": 1.2069394346068805
+                },
+                "relative_disagreement": 1.3503633882498298e-06
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.598959528767583,
+                  "size": 1126,
+                  "sup": 0.541160734069826
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.599034354529625,
+                  "size": 1126,
+                  "sup": 0.5411482290737214
+                },
+                "relative_disagreement": 0.0001440770790940102
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.024022977188371382,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.4326622498206623,
+                "size": 2,
+                "sup": 0.43150231658123384
+              },
+              "axis_flux": 0.030550464626503213,
+              "boundary_flux": 0.12637340571390318,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 0,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.033040799395239795,
+                "size": 2,
+                "sup": 0.033040799395239795
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 15.460771776410706,
+                "size": 1089,
+                "sup": 1.2069389771883088
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.969273580664061,
+                "size": 2,
+                "sup": 0.9378937712746133
+              },
+              "x_point_flux": 0.12637340571390318
+            }
+          },
+          {
+            "epsilon": 2.6720724467625787e-06,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 1.257676046022886e-08,
+                "size": 276,
+                "sup": 4.522429248796089e-09
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 9.374464152651473e-09,
+                "size": 231,
+                "sup": 2.5318999466450443e-09
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 7.121293618609879e-09,
+                "size": 157,
+                "sup": 1.5947314186423936e-09
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 6.8724009278341485e-09,
+                "size": 405,
+                "sup": 1.2863753083569573e-09
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 6.401245266247795e-09,
+                "size": 166,
+                "sup": 1.7459648629213759e-09
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 1.0827697086773425e-08,
+                "size": 118,
+                "sup": 4.522429248796089e-09
+              }
+            },
+            "relative_state_step": 1e-06,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.1263736137153719,
+                  "size": 1,
+                  "sup": 0.1263736137153719
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.1263736137311477,
+                  "size": 1,
+                  "sup": 0.1263736137311477
+                },
+                "relative_disagreement": 1.2483458270569104e-10
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.03304079857672182,
+                  "size": 2,
+                  "sup": 0.03304079857672182
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.03304079858184264,
+                  "size": 2,
+                  "sup": 0.03304079858184264
+                },
+                "relative_disagreement": 1.5498476593028844e-10
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 15.460785743258107,
+                  "size": 1089,
+                  "sup": 1.2069394345938183
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 15.46078574436281,
+                  "size": 1089,
+                  "sup": 1.2069394346068805
+                },
+                "relative_disagreement": 1.2734472551159604e-10
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.599034339486219,
+                  "size": 1126,
+                  "sup": 0.5411482268538584
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.599034354529625,
+                  "size": 1126,
+                  "sup": 0.5411482290737214
+                },
+                "relative_disagreement": 2.844444532452365e-09
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 6.584682666977066,
+                  "size": 1126,
+                  "sup": 0.5400318381185251
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 4.746592277842098e-07,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.4326622484023837,
+                "size": 2,
+                "sup": 0.43150231516760246
+              },
+              "axis_flux": 0.030550465466419013,
+              "boundary_flux": 0.1263736137153719,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 0,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.03304079857672182,
+                "size": 2,
+                "sup": 0.03304079857672182
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 15.460785743258107,
+                "size": 1089,
+                "sup": 1.2069394345938183
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.9692726776652965,
+                "size": 2,
+                "sup": 0.93789301429256
+              },
+              "x_point_flux": 0.1263736137153719
+            }
+          }
+        ],
+        "gmres_info": 0,
+        "gmres_iterations": 40,
+        "jvp_term_decomposition": {
+          "external_field": {
+            "l2": 0.0,
+            "reason": "captured conductor field is constant in solver state",
+            "sup": 0.0
+          },
+          "reconstructed_total": {
+            "finite_count": 1126,
+            "l2": 0.039577508943719766,
+            "size": 1126,
+            "sup": 0.012801740327722855
+          },
+          "reconstruction_relative_disagreement": 0.0,
+          "source_through_psi_norm_and_clip": {
+            "finite_count": 1126,
+            "l2": 6.599034354529625,
+            "size": 1126,
+            "sup": 0.5411482290737214
+          },
+          "state_term": {
+            "finite_count": 1126,
+            "l2": 6.584682666977066,
+            "size": 1126,
+            "sup": 0.5400318381185251
+          }
+        },
+        "linear_residual": {
+          "finite_count": 1126,
+          "l2": 6.073954989200717e-14,
+          "size": 1126,
+          "sup": 7.289308046054543e-15
+        },
+        "relative_linear_residual_l2": 1.5346986587352015e-12
+      },
+      "settled_mask": {
+        "boundary_adjacency": {
+          "authority": "operator.grid.null.stencil",
+          "border_rows_are_centre_only": 128,
+          "centre_first": true,
+          "counts": {
+            "boundary_adjacent_union": 276,
+            "limiter_adjacent": 166,
+            "separatrix_adjacent": 118
+          },
+          "expanded_shape": [
+            1089,
+            7
+          ],
+          "source_shape": [
+            961,
+            7
+          ],
+          "topology_reader_subset": {
+            "authority": "operator.topology.connectivity_rings",
+            "centre_first_and_same_centres": true,
+            "shape": [
+              961,
+              7
+            ],
+            "used_for_residual_region_classification": false
+          }
+        },
+        "excluded_count": 65,
+        "grid_boundary_regions": {
+          "boundary_adjacent": 276,
+          "limiter_adjacent": 166,
+          "separatrix_adjacent": 118
+        },
+        "size": 1126
+      },
+      "stall_residual": {
+        "regions": {
+          "boundary_adjacent": {
+            "finite_count": 276,
+            "l2": 0.018612182525684928,
+            "size": 276,
+            "sup": 0.004206445878306764
+          },
+          "common_sol": {
+            "finite_count": 231,
+            "l2": 0.01687355093570956,
+            "size": 231,
+            "sup": 0.004375894556965049
+          },
+          "core": {
+            "finite_count": 157,
+            "l2": 0.01866567876797669,
+            "size": 157,
+            "sup": 0.0030988379813750924
+          },
+          "excluded_material": {
+            "finite_count": 405,
+            "l2": 0.014423118729651524,
+            "size": 405,
+            "sup": 0.004179594783358942
+          },
+          "limiter_adjacent": {
+            "finite_count": 166,
+            "l2": 0.014431341348435723,
+            "size": 166,
+            "sup": 0.004206445878306764
+          },
+          "private_flux": {
+            "finite_count": 20,
+            "l2": 0.0,
+            "size": 20,
+            "sup": 0.0
+          },
+          "separatrix_adjacent": {
+            "finite_count": 118,
+            "l2": 0.011756511946146322,
+            "size": 118,
+            "sup": 0.0027605428520688507
+          }
+        },
+        "term_reconstruction_relative_disagreement": 4.354791497155654e-14,
+        "terms": {
+          "external_field": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 14.9194246841697,
+                "size": 276,
+                "sup": 1.7699103809671426
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 14.650876073272576,
+                "size": 231,
+                "sup": 1.5880784671796144
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 8.185954880528136,
+                "size": 157,
+                "sup": 1.1297028615339695
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 19.39967670920259,
+                "size": 405,
+                "sup": 2.027634451018553
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 12.554578713255225,
+                "size": 166,
+                "sup": 1.7699103809671426
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 8.113652261124438,
+                "size": 118,
+                "sup": 1.3130656848084314
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 30.255172452408573,
+              "size": 1126,
+              "sup": 2.027634451018553
+            }
+          },
+          "source_through_psi_norm": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 7.903523262605375,
+                "size": 276,
+                "sup": 1.0956001448488042
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 7.161771749763974,
+                "size": 231,
+                "sup": 0.97199693986966
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 9.504466285376882,
+                "size": 157,
+                "sup": 1.1675763587282333
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 6.816115397067626,
+                "size": 405,
+                "sup": 0.7615058200185414
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 4.854133858715636,
+                "size": 166,
+                "sup": 0.8171491979258471
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 6.243543507785791,
+                "size": 118,
+                "sup": 1.0956001448488042
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 15.998748863685671,
+              "size": 1126,
+              "sup": 1.1675763587282333
+            }
+          },
+          "state": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 276,
+                "l2": 8.14739441617731,
+                "size": 276,
+                "sup": 1.063553694748587
+              },
+              "common_sol": {
+                "finite_count": 231,
+                "l2": 7.927938456756824,
+                "size": 231,
+                "sup": 0.8543377142358431
+              },
+              "core": {
+                "finite_count": 157,
+                "l2": 2.0225517551571346,
+                "size": 157,
+                "sup": 0.33085557106579605
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 12.718272081051715,
+                "size": 405,
+                "sup": 1.471818228130453
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 7.846365588501481,
+                "size": 166,
+                "sup": 1.063553694748587
+              },
+              "private_flux": {
+                "finite_count": 20,
+                "l2": 0.0,
+                "size": 20,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 118,
+                "l2": 2.287723710055335,
+                "size": 118,
+                "sup": 0.37838111492528376
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 17.556011170526645,
+              "size": 1126,
+              "sup": 1.471818228130453
+            }
+          }
+        },
+        "total": {
+          "finite_count": 1126,
+          "l2": 0.039577508943697146,
+          "size": 1126,
+          "sup": 0.012801740327717637
+        }
+      },
+      "terminal_topology": {
+        "axis": [
+          0.9138182316024713,
+          0.03815256962467518
+        ],
+        "axis_flux": 0.33293101289125193,
+        "boundary_flux": -0.20323046277151366,
+        "limiter_point": [
+          0.5649306774139404,
+          1.7761611367974741
+        ],
+        "x_point": [
+          0.5792639617179477,
+          1.173737533201991
+        ],
+        "x_point_flux": -0.20323046277151366
+      }
+    },
+    {
+      "active_set_solve": {
+        "bank": {
+          "active_set_iterations": 7,
+          "active_set_mask_differences": [
+            29,
+            28,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0049764024985941265,
+            0.0034928501564629164,
+            0.0022263514475277554,
+            0.0006567157524775198,
+            0.00047901608189354557,
+            0.0004788269350422851,
+            0.0004788269350422851
+          ],
+          "converged": false,
+          "terminal_residual": 0.0004788269350422851,
+          "termination_reason": "active_set_settled"
+        },
+        "measured": {
+          "active_set_iterations": 7,
+          "active_set_mask_differences": [
+            29,
+            28,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0049764024985941265,
+            0.0034928501564629164,
+            0.0022263514475277554,
+            0.0006567157524775198,
+            0.00047901608189354557,
+            0.0004788269350422851,
+            0.0004788269350422851
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 12,
+          "maximum_projected_krylov_condition": 23.069151947499098,
+          "terminal_residual": 0.0004788269350422851,
+          "termination_reason": "active_set_settled"
+        }
+      },
+      "bank_validation": {
+        "absolute_tolerance": 5e-11,
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764024985941265,
+          0.0034928501564629164,
+          0.0022263514475277554,
+          0.0006567157524775198,
+          0.00047901608189354557,
+          0.0004788269350422851,
+          0.0004788269350422851
+        ],
+        "mask_differences_exact": true,
+        "maximum_residual_difference": 0.0,
+        "passes": true,
+        "terminal_residual_difference": 0.0
+      },
+      "candidate_table_status": {
+        "o_point": {
+          "candidate_count": 22,
+          "capacity": 30,
+          "truncated": false
+        },
+        "x_point": {
+          "candidate_count": 39,
+          "capacity": 30,
+          "truncated": true
+        }
+      },
+      "frozen_mask_smooth_solve": {
+        "accepted": [
+          1,
+          1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "accepted_promotions": 3,
+        "applied_factors": [
+          1.0,
+          1.0,
+          1.0,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "attempted_promotions": 3,
+        "converged": true,
+        "decisions": [
+          1,
+          1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "initial_residual": 0.008083422238641074,
+        "krylov_reductions": [
+          1.250353945750234e-15,
+          3.8212815054178e-15,
+          1.8211342050140012e-15,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "krylov_tolerances": [
+          1e-05,
+          1e-05,
+          1e-05,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "newton_trajectory": [
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.01234446034355836,
+            "residual_after": 6.84144038781276e-05,
+            "residual_before": 0.008083422238641164,
+            "step": 1
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 0.00026440582752581426,
+            "residual_after": 8.192084989541055e-07,
+            "residual_before": 6.84144038781276e-05,
+            "step": 2
+          },
+          {
+            "accepted": 1,
+            "applied_factor": 1.0,
+            "decision": 1,
+            "proposed_step_norm": 1.752454988173681e-06,
+            "residual_after": 1.1913187914102054e-11,
+            "residual_before": 8.192084989541055e-07,
+            "step": 3
+          },
+          {
+            "accepted": -1,
+            "applied_factor": null,
+            "decision": -1,
+            "proposed_step_norm": null,
+            "residual_after": null,
+            "residual_before": null,
+            "step": 4
+          },
+          {
+            "accepted": -1,
+            "applied_factor": null,
+            "decision": -1,
+            "proposed_step_norm": null,
+            "residual_after": null,
+            "residual_before": null,
+            "step": 5
+          },
+          {
+            "accepted": -1,
+            "applied_factor": null,
+            "decision": -1,
+            "proposed_step_norm": null,
+            "residual_after": null,
+            "residual_before": null,
+            "step": 6
+          },
+          {
+            "accepted": -1,
+            "applied_factor": null,
+            "decision": -1,
+            "proposed_step_norm": null,
+            "residual_after": null,
+            "residual_before": null,
+            "step": 7
+          },
+          {
+            "accepted": -1,
+            "applied_factor": null,
+            "decision": -1,
+            "proposed_step_norm": null,
+            "residual_after": null,
+            "residual_before": null,
+            "step": 8
+          }
+        ],
+        "proposed_step_norms": [
+          0.01234446034355836,
+          0.00026440582752581426,
+          1.752454988173681e-06,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "residuals_after": [
+          6.84144038781276e-05,
+          8.192084989541055e-07,
+          1.1913187914102054e-11,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "residuals_before": [
+          0.008083422238641164,
+          6.84144038781276e-05,
+          8.192084989541055e-07,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "terminal_residual": 1.1913187914102054e-11,
+        "termination_reason": "converged"
+      },
+      "identity": "22086/43",
+      "jacobian_consistency": {
+        "direction": {
+          "finite_count": 1126,
+          "l2": 0.060644280016064776,
+          "size": 1126,
+          "sup": 0.012344460343558359
+        },
+        "finite_difference_checks": [
+          {
+            "epsilon": 2.2977994635068364,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 0.0008221846516169444,
+                "size": 293,
+                "sup": 0.00020629215455502764
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 0.0005852822352059183,
+                "size": 203,
+                "sup": 0.0001353044999726724
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 0.00040504961096437153,
+                "size": 180,
+                "sup": 8.695827430354775e-05
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 0.0005652225910447178,
+                "size": 405,
+                "sup": 8.41691685477222e-05
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 0.0004626327078773732,
+                "size": 166,
+                "sup": 9.896362231641122e-05
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 0.0006799768707522481,
+                "size": 153,
+                "sup": 0.00020629215455502764
+              }
+            },
+            "relative_state_step": 0.01,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.0014654807420263428,
+                  "size": 1,
+                  "sup": 0.0014654807420263428
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.0014895509736654253,
+                  "size": 1,
+                  "sup": 0.0014895509736654253
+                },
+                "relative_disagreement": 0.016159387670937775
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.776910406471585,
+                  "size": 2,
+                  "sup": 0.7768342642340567
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.010462343963202093,
+                  "size": 2,
+                  "sup": 0.010462343963202093
+                },
+                "relative_disagreement": 1.0134653006614387
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 0.207605611139936,
+                  "size": 1089,
+                  "sup": 0.015454041501655393
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 0.20892412546663505,
+                  "size": 1089,
+                  "sup": 0.015516846417162946
+                },
+                "relative_disagreement": 0.008433324841826611
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.06340224390605378,
+                  "size": 1126,
+                  "sup": 0.005485856836046563
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.0644967657937623,
+                  "size": 1126,
+                  "sup": 0.005574965004051543
+                },
+                "relative_disagreement": 0.019295788822646102
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.06991015862941648,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.006580349508793538,
+                "size": 2,
+                "sup": 0.0064723017958560475
+              },
+              "axis_flux": 0.0001419154602755619,
+              "boundary_flux": 0.0014654807420263428,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 38,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.776910406471585,
+                "size": 2,
+                "sup": 0.7768342642340567
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 0.207605611139936,
+                "size": 1089,
+                "sup": 0.015454041501655393
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.0035854929407369346,
+                "size": 2,
+                "sup": 0.0033283831870171347
+              },
+              "x_point_flux": 0.0014654807420263428
+            }
+          },
+          {
+            "epsilon": 0.02297799463506836,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 8.696245846511261e-06,
+                "size": 293,
+                "sup": 2.5472249972683086e-06
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 5.234180201570317e-06,
+                "size": 203,
+                "sup": 1.298182466109442e-06
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 6.1518611229465285e-06,
+                "size": 180,
+                "sup": 2.811006013961597e-06
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 4.9212700817612615e-06,
+                "size": 405,
+                "sup": 8.128264648087449e-07
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 4.324776235082328e-06,
+                "size": 166,
+                "sup": 1.0673154474292405e-06
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 7.545773173839175e-06,
+                "size": 153,
+                "sup": 2.5472249972683086e-06
+              }
+            },
+            "relative_state_step": 0.0001,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.0014895509911545062,
+                  "size": 1,
+                  "sup": 0.0014895509911545062
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.0014895509736654253,
+                  "size": 1,
+                  "sup": 0.0014895509736654253
+                },
+                "relative_disagreement": 1.174117639063775e-08
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.010462365869895452,
+                  "size": 2,
+                  "sup": 0.010462365869895452
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.010462343963202093,
+                  "size": 2,
+                  "sup": 0.010462343963202093
+                },
+                "relative_disagreement": 2.09385655510969e-06
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 0.20892412315790468,
+                  "size": 1089,
+                  "sup": 0.01551684626223779
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 0.20892412546663505,
+                  "size": 1089,
+                  "sup": 0.015516846417162946
+                },
+                "relative_disagreement": 1.1484933910539843e-08
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.06448671048060527,
+                  "size": 1126,
+                  "sup": 0.005572608867334559
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.0644967657937623,
+                  "size": 1126,
+                  "sup": 0.005574965004051543
+                },
+                "relative_disagreement": 0.0002016213980726888
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 0.0007304901630940917,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.004383990169177913,
+                "size": 2,
+                "sup": 0.004375450891456117
+              },
+              "axis_flux": 0.000164465487127935,
+              "boundary_flux": 0.0014895509911545062,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 1,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.010462365869895452,
+                "size": 2,
+                "sup": 0.010462365869895452
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 0.20892412315790468,
+                "size": 1089,
+                "sup": 0.01551684626223779
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.0030387337520380695,
+                "size": 2,
+                "sup": 0.003036722967658012
+              },
+              "x_point_flux": 0.0014895509911545062
+            }
+          },
+          {
+            "epsilon": 0.00022977994635068358,
+            "grid_region_disagreement": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 3.3090688276408305e-12,
+                "size": 293,
+                "sup": 1.0424939991121596e-12
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 3.054032663222916e-12,
+                "size": 203,
+                "sup": 5.440444915318782e-13
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 2.2830076706955018e-12,
+                "size": 180,
+                "sup": 5.627560320953934e-13
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 3.2315521811507264e-12,
+                "size": 405,
+                "sup": 6.330383130670122e-13
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 1.9123683833291976e-12,
+                "size": 166,
+                "sup": 6.013073068980579e-13
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 2.707079925241739e-12,
+                "size": 153,
+                "sup": 1.0424939991121596e-12
+              }
+            },
+            "relative_state_step": 1e-06,
+            "residual_component_disagreement": {
+              "boundary_flux_read": {
+                "finite_difference": {
+                  "finite_count": 1,
+                  "l2": 0.0014895509736843617,
+                  "size": 1,
+                  "sup": 0.0014895509736843617
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1,
+                  "l2": 0.0014895509736654253,
+                  "size": 1,
+                  "sup": 0.0014895509736654253
+                },
+                "relative_disagreement": 1.2712863566769075e-11
+              },
+              "clip_geometry": {
+                "available": false,
+                "reason": "centroid-current carrier has no moment geometry; no clipped-support derivative was synthesized"
+              },
+              "external_field": {
+                "finite_difference": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "jacobian_vector_product": {
+                  "l2": 0.0,
+                  "sup": 0.0
+                },
+                "reason": "captured conductor field is constant in solver state",
+                "relative_disagreement": 0.0
+              },
+              "limiter_point_read": {
+                "finite_difference": {
+                  "finite_count": 2,
+                  "l2": 0.010462343965771797,
+                  "size": 2,
+                  "sup": 0.010462343965771797
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 2,
+                  "l2": 0.010462343963202093,
+                  "size": 2,
+                  "sup": 0.010462343963202093
+                },
+                "relative_disagreement": 2.4561447599563674e-10
+              },
+              "psi_norm_read": {
+                "finite_difference": {
+                  "finite_count": 1089,
+                  "l2": 0.20892412547324624,
+                  "size": 1089,
+                  "sup": 0.015516846417547293
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1089,
+                  "l2": 0.20892412546663505,
+                  "size": 1089,
+                  "sup": 0.015516846417162946
+                },
+                "relative_disagreement": 7.591158498618377e-11
+              },
+              "source_term_through_psi_norm": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.0644967657964675,
+                  "size": 1126,
+                  "sup": 0.005574965004147353
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.0644967657937623,
+                  "size": 1126,
+                  "sup": 0.005574965004051543
+                },
+                "relative_disagreement": 8.15303167272605e-11
+              },
+              "state_identity": {
+                "finite_difference": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "jacobian_vector_product": {
+                  "finite_count": 1126,
+                  "l2": 0.060644280016064776,
+                  "size": 1126,
+                  "sup": 0.012344460343558359
+                },
+                "relative_disagreement": 0.0
+              }
+            },
+            "residual_jvp_relative_disagreement": 3.433554978366491e-10,
+            "topology_and_support_directional_derivative": {
+              "axis": {
+                "finite_count": 2,
+                "l2": 0.004383990134115321,
+                "size": 2,
+                "sup": 0.004375450857335175
+              },
+              "axis_flux": 0.0001644655079597206,
+              "boundary_flux": 0.0014895509736843617,
+              "clip_geometry_route": "unavailable_on_centroid_current_carrier",
+              "label_changes": 1,
+              "limiter_point": {
+                "finite_count": 2,
+                "l2": 0.010462343965771797,
+                "size": 2,
+                "sup": 0.010462343965771797
+              },
+              "psi_norm": {
+                "finite_count": 1089,
+                "l2": 0.20892412547324624,
+                "size": 1089,
+                "sup": 0.015516846417547293
+              },
+              "sample_psi_norm": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_area": {
+                "finite_count": 0,
+                "l2": null,
+                "size": 0,
+                "sup": null
+              },
+              "support_boundary_changes": 0,
+              "x_point": {
+                "finite_count": 2,
+                "l2": 0.0030387332890735546,
+                "size": 2,
+                "sup": 0.0030367225583277997
+              },
+              "x_point_flux": 0.0014895509736843617
+            }
+          }
+        ],
+        "gmres_info": 0,
+        "gmres_iterations": 40,
+        "jvp_term_decomposition": {
+          "external_field": {
+            "l2": 0.0,
+            "reason": "captured conductor field is constant in solver state",
+            "sup": 0.0
+          },
+          "reconstructed_total": {
+            "finite_count": 1126,
+            "l2": 0.017801647098200684,
+            "size": 1126,
+            "sup": 0.00999116074992401
+          },
+          "reconstruction_relative_disagreement": 0.0,
+          "source_through_psi_norm_and_clip": {
+            "finite_count": 1126,
+            "l2": 0.0644967657937623,
+            "size": 1126,
+            "sup": 0.005574965004051543
+          },
+          "state_term": {
+            "finite_count": 1126,
+            "l2": 0.060644280016064776,
+            "size": 1126,
+            "sup": 0.012344460343558359
+          }
+        },
+        "linear_residual": {
+          "finite_count": 1126,
+          "l2": 1.92097140877973e-17,
+          "size": 1126,
+          "sup": 3.2526065174565133e-18
+        },
+        "relative_linear_residual_l2": 1.0790975678727468e-15
+      },
+      "settled_mask": {
+        "boundary_adjacency": {
+          "authority": "operator.grid.null.stencil",
+          "border_rows_are_centre_only": 128,
+          "centre_first": true,
+          "counts": {
+            "boundary_adjacent_union": 293,
+            "limiter_adjacent": 166,
+            "separatrix_adjacent": 153
+          },
+          "expanded_shape": [
+            1089,
+            7
+          ],
+          "source_shape": [
+            961,
+            7
+          ],
+          "topology_reader_subset": {
+            "authority": "operator.topology.connectivity_rings",
+            "centre_first_and_same_centres": true,
+            "shape": [
+              961,
+              7
+            ],
+            "used_for_residual_region_classification": false
+          }
+        },
+        "excluded_count": 27,
+        "grid_boundary_regions": {
+          "boundary_adjacent": 293,
+          "limiter_adjacent": 166,
+          "separatrix_adjacent": 153
+        },
+        "size": 1126
+      },
+      "stall_residual": {
+        "regions": {
+          "boundary_adjacent": {
+            "finite_count": 293,
+            "l2": 0.004258589987959055,
+            "size": 293,
+            "sup": 0.0005918331046141229
+          },
+          "common_sol": {
+            "finite_count": 203,
+            "l2": 0.0027487047313663983,
+            "size": 203,
+            "sup": 0.0004407967320274042
+          },
+          "core": {
+            "finite_count": 180,
+            "l2": 0.0038340375659682356,
+            "size": 180,
+            "sup": 0.0005449939724605918
+          },
+          "excluded_material": {
+            "finite_count": 405,
+            "l2": 0.0024077273927325038,
+            "size": 405,
+            "sup": 0.0004672001814216564
+          },
+          "limiter_adjacent": {
+            "finite_count": 166,
+            "l2": 0.0022100939757820556,
+            "size": 166,
+            "sup": 0.00040103795850043866
+          },
+          "private_flux": {
+            "finite_count": 8,
+            "l2": 0.0,
+            "size": 8,
+            "sup": 0.0
+          },
+          "separatrix_adjacent": {
+            "finite_count": 153,
+            "l2": 0.0036663684078474795,
+            "size": 153,
+            "sup": 0.0005918331046141229
+          }
+        },
+        "term_reconstruction_relative_disagreement": 8.369002627564001e-14,
+        "terms": {
+          "external_field": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 12.706415751577048,
+                "size": 293,
+                "sup": 1.5191413345502813
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 12.046969463808225,
+                "size": 203,
+                "sup": 1.3484953026547701
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 7.11515283012117,
+                "size": 180,
+                "sup": 0.9530802825168756
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 16.41892803132479,
+                "size": 405,
+                "sup": 1.7589843056801293
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 10.665654534220828,
+                "size": 166,
+                "sup": 1.5191413345502813
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 6.977690850746561,
+                "size": 153,
+                "sup": 1.1400004301205462
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 25.533789940713813,
+              "size": 1126,
+              "sup": 1.7589843056801293
+            }
+          },
+          "source_through_psi_norm": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 7.287647900129572,
+                "size": 293,
+                "sup": 0.975389762052162
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 6.434237675189573,
+                "size": 203,
+                "sup": 0.8771757186756961
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 9.035326683901411,
+                "size": 180,
+                "sup": 1.0386313262065316
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 6.380040776446507,
+                "size": 405,
+                "sup": 0.6946023210621364
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 4.577649670497509,
+                "size": 166,
+                "sup": 0.7519917485753547
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 5.688948633796396,
+                "size": 153,
+                "sup": 0.975389762052162
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 14.887543028869,
+              "size": 1126,
+              "sup": 1.0386313262065316
+            }
+          },
+          "state": {
+            "regions": {
+              "boundary_adjacent": {
+                "finite_count": 293,
+                "l2": 6.413798291278083,
+                "size": 293,
+                "sup": 0.8788323344862217
+              },
+              "common_sol": {
+                "finite_count": 203,
+                "l2": 5.97854449915434,
+                "size": 203,
+                "sup": 0.6731980672311123
+              },
+              "core": {
+                "finite_count": 180,
+                "l2": 2.341311150027635,
+                "size": 180,
+                "sup": 0.34119116351946804
+              },
+              "excluded_material": {
+                "finite_count": 405,
+                "l2": 10.164902132149338,
+                "size": 405,
+                "sup": 1.2360599746194503
+              },
+              "limiter_adjacent": {
+                "finite_count": 166,
+                "l2": 6.216502957628105,
+                "size": 166,
+                "sup": 0.8788323344862217
+              },
+              "private_flux": {
+                "finite_count": 8,
+                "l2": 0.0,
+                "size": 8,
+                "sup": 0.0
+              },
+              "separatrix_adjacent": {
+                "finite_count": 153,
+                "l2": 1.6739998538546998,
+                "size": 153,
+                "sup": 0.33686533643679345
+              }
+            },
+            "total": {
+              "finite_count": 1126,
+              "l2": 13.927647275068463,
+              "size": 1126,
+              "sup": 1.2360599746194503
+            }
+          }
+        },
+        "total": {
+          "finite_count": 1126,
+          "l2": 0.017801647098200684,
+          "size": 1126,
+          "sup": 0.00999116074992401
+        }
+      },
+      "terminal_topology": {
+        "axis": [
+          0.9019330968584681,
+          0.02011608721239092
+        ],
+        "axis_flux": 0.3415263796916261,
+        "boundary_flux": -0.1242223694237914,
+        "limiter_point": [
+          0.5649306774139404,
+          1.7660200910363166
+        ],
+        "x_point": [
+          0.5917516875565209,
+          1.219749197600917
+        ],
+        "x_point_flux": -0.1242223694237914
+      }
+    }
+  ],
+  "runtime": {
+    "devices": [
+      "cuda:0"
+    ],
+    "jax": "0.11.0",
+    "python": "3.14.2"
+  },
+  "source_commit": "72609e836617619b7d7c78dfb99ab2dc87f6f24b",
+  "source_label": "projected-conditioning repair"
+}

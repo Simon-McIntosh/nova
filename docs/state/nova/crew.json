@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:01:23",
+  "updated": "2026-09-04T18:10:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -94359,6 +94359,188 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T154835153711-fsa-route-requests-replay-gsmatch-certificate",
+        "plan": "forward-solve-api",
+        "section": "\u00a72",
+        "node": "fsa-route-requests-replay-gsmatch-certificate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4362,
+                "cached_input_tokens": 301883,
+                "input_tokens": 306346,
+                "output_tokens": 2926,
+                "reasoning_output_tokens": 493,
+                "total_tokens": 309272,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to benchmarks/bank_revision_reproduction.py, benchmarks/topology_mask_replay.py, benchmarks/diiid_forward_gs_match.py, benchmarks/solovev_certificate.py, benchmarks/solovev_certificate_current_pin.py and tests/test_route_solve_requests.py, in which a CPU test per route asserts the constructed request against the default table with every deviation named, one CPU fixture per route proves the request path bit-identical to the keyword path where the route has a CPU-sized fixture, each route's import plus existing smoke test green with logs, the manifest listing per route its deviations from the public policy",
+          "estimated_hours": null,
+          "goal": "Migrate the production routes whose defaults already resolve on but which expose no typed receipt (wiring audit ~/.config/reckon/crew/runs/r-20260904T151648756117-sdw-default-wiring-test/base-wiring-audit.md: exact bank replay in benchmarks/bank_revision_reproduction.py plus benchmarks/topology_mask_replay.py, the DIII-D Grad-Shafranov match in benchmarks/diiid_forward_gs_match.py, the Solov'ev certificate in benchmarks/solovev_certificate.py plus benchmarks/solovev_certificate_current_pin.py) onto the typed seam merged at a675c63f (ForwardSolveRequest with its nested ForwardSolvePolicy built from the version-keyed default table in nova/equilibrium/solve_request.py, ForwardSolveReceipt with resolved_defaults), following the EFIT parity exemplar in benchmarks/efit_forward_parity_slice.py so that each route constructs one request, records any budget it pins as an explicit deviation in its receipt, writes the resolved-defaults block into the JSON it already emits, plus produces numbers bit-identical to its keyword path (proved on CPU by a request-construction test per route plus one small solve fixture, no regeneration of banked evidence, no H200 job), with no edit to nova/equilibrium/ (forward.py plus solve_request.py held by the live ForwardProfile-defaults node, fixed_point.py plus forward_operator.py by the live one-read-per-trip node), the imas-ambix consumer plus the two EFIT-match evidence documents left for their own nodes",
+          "id": "fsa-route-requests-replay-gsmatch-certificate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154835153711-fsa-route-requests-replay-gsmatch-certificate/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "benchmarks/bank_revision_reproduction.py",
+            "benchmarks/topology_mask_replay.py",
+            "benchmarks/diiid_forward_gs_match.py",
+            "benchmarks/solovev_certificate.py",
+            "benchmarks/solovev_certificate_current_pin.py",
+            "tests/test_route_solve_requests.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "fsa-routes-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T15:48:49Z",
+        "completed_at": "2026-09-04T16:09:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1257,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1257,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "38ca2b2d03b73272972d05205859a3fd62ba3d9f",
+        "commits": [
+          "9c29a55aab56e64c6462ea835bf8ee9cb91c4fa9"
+        ],
+        "changed_lines": {
+          "added": 471,
+          "removed": 60,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_route_solve_requests.py plus the five route imports plus the DIII-D IMAS smoke plus the Solov'ev smoke",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154835153711-fsa-route-requests-replay-gsmatch-certificate/logs/route-request-gate-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T154835153711-fsa-route-requests-replay-gsmatch-certificate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d1b-bead-7651-b100-0e5603a0d4ad",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 34247,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 36647,
+              "external_wait": null,
+              "log_age_seconds": 35745,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 35801,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/fsa-route-requests-replay-gsmatch-certificate",
+          "session_id": "01a06d1b-bead-7651-b100-0e5603a0d4ad",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T16:09:46Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -94475,6 +94657,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1634
+    "_version": 1635
   }
 }

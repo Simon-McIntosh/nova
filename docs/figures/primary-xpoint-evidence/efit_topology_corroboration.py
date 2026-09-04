@@ -59,7 +59,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 4
+CACHE_SCHEMA_REVISION = 5
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 
@@ -380,12 +380,19 @@ def _write_operand_cache(
             "class_margin",
             "efit_lcfs",
             "efit_x_points",
+            "efit_axis",
             "active_set_residuals",
             "active_set_mask_differences",
             "active_set_cycle_damping_activations",
         ):
+            if name.startswith("active_set_"):
+                default = ()
+            elif name == "efit_axis":
+                default = np.full(2, np.nan)
+            else:
+                default = None
             arrays[f"{prefix}_{name}"] = np.asarray(
-                row.get(name, ()) if name.startswith("active_set_") else row[name]
+                row.get(name, default) if default is not None else row[name]
             )
     metadata = _cache_authority(carrier_evidence) | {
         "purpose": (
@@ -435,6 +442,7 @@ def _read_operand_cache(
                 "class_margin",
                 "efit_lcfs",
                 "efit_x_points",
+                "efit_axis",
                 "active_set_residuals",
                 "active_set_mask_differences",
                 "active_set_cycle_damping_activations",
@@ -517,6 +525,7 @@ def _build_identity_operands(
     efit_lcfs = efit_lcfs[np.isfinite(efit_lcfs).all(axis=1)]
     efit_x_points = referee.x_points_m[slice_index]
     efit_x_points = efit_x_points[np.isfinite(efit_x_points).all(axis=1)]
+    efit_axis = np.asarray(referee.magnetic_axis_m[slice_index], dtype=float)
     efit_label = (
         ("diverted" if bool(referee.diverted[slice_index]) else "limited")
         if referee_usable
@@ -535,6 +544,7 @@ def _build_identity_operands(
             efit_label=efit_label,
             efit_lcfs=efit_lcfs,
             efit_x_points=efit_x_points,
+            efit_axis=efit_axis,
             active_set_result=active_set_results[arm],
         )
         for arm, arm_result in states.items()
@@ -554,6 +564,7 @@ def _build_arm_operand(
     efit_label: str | None,
     efit_lcfs: np.ndarray,
     efit_x_points: np.ndarray,
+    efit_axis: np.ndarray | None = None,
     active_set_result: object | None = None,
 ) -> dict[str, Any]:
     """Build one arm operand or retain its named host-side qualification failure."""
@@ -569,6 +580,7 @@ def _build_arm_operand(
         "efit_label": efit_label,
         "efit_lcfs": efit_lcfs,
         "efit_x_points": efit_x_points,
+        "efit_axis": np.full(2, np.nan) if efit_axis is None else efit_axis,
     } | _active_set_receipt(active_set_result)
     try:
         geometry = reachability._grid_geometry(profile, state)
@@ -696,6 +708,18 @@ def _draw_panel(axis, row: dict[str, Any]) -> None:
     axis.spines[["top", "right"]].set_visible(False)
 
 
+def _axis_distance_m(nova_axis: object, efit_axis: object) -> float | None:
+    """Return the finite Euclidean distance between two banked axis positions."""
+
+    nova_point = _finite_point_list(nova_axis)
+    efit_point = _finite_point_list(efit_axis)
+    if nova_point is None or efit_point is None:
+        return None
+    return _strict_value(
+        float(np.linalg.norm(np.asarray(nova_point) - np.asarray(efit_point)))
+    )
+
+
 def _finite_point_list(point: object) -> list[float] | None:
     """Serialize one finite physical point without emitting non-finite JSON."""
 
@@ -799,6 +823,9 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "nova_selected_saddle_m": None,
             "efit_x_points_m": None,
             "selected_saddle_to_efit_x_point_m": None,
+            "nova_axis_m": None,
+            "efit_axis_m": _finite_point_list(operand.get("efit_axis")),
+            "axis_distance_m": None,
             "comparison_failures": [
                 f"arm_geometry_exception:{failure_exception_class}"
             ],
@@ -890,6 +917,11 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "nova_selected_saddle_m": _finite_point_list(operand.get("selected_saddle")),
         "efit_x_points_m": _finite_points(operand.get("efit_x_points")).tolist(),
         "selected_saddle_to_efit_x_point_m": comparison.x_point_distance_m,
+        "nova_axis_m": _finite_point_list(operand.get("axis")),
+        "efit_axis_m": _finite_point_list(operand.get("efit_axis")),
+        "axis_distance_m": _axis_distance_m(
+            operand.get("axis"), operand.get("efit_axis")
+        ),
         "comparison_failures": list(comparison.failures),
         "nova_limiter_point_m": limiter,
         "efit_boundary_wall_contacts_m": contacts.tolist(),
@@ -995,6 +1027,7 @@ def run() -> dict[str, Any]:
     boundary_sup_range = metric_range("binding_to_efit_lcfs_sup_m")
     boundary_rms_range = metric_range("binding_to_efit_lcfs_rms_m")
     x_point_range = metric_range("selected_saddle_to_efit_x_point_m")
+    axis_range = metric_range("axis_distance_m")
     payload = {
         "artifact": "independent EFIT topology corroboration of Nova wall reachability",
         "headline": (
@@ -1068,6 +1101,7 @@ def run() -> dict[str, Any]:
                 "separate open legs; only the valid closed branch enters metrics"
             ),
             "x_point_m": "Nova selected saddle to the nearest finite EFIT efm X-point",
+            "axis_m": "Nova banked magnetic axis to the EFIT efm magnetic axis",
             "limiter_contact_m": (
                 "Nova limiter point to the nearest exact EFIT LCFS and "
                 "governed-wall segment intersection; null when none exists"
@@ -1093,6 +1127,8 @@ def run() -> dict[str, Any]:
             "boundary_rms_m_max": boundary_rms_range[1],
             "x_point_distance_m_min": x_point_range[0],
             "x_point_distance_m_max": x_point_range[1],
+            "axis_distance_m_min": axis_range[0],
+            "axis_distance_m_max": axis_range[1],
             "identifiable_efit_boundary_wall_contact_count": sum(
                 bool(row["efit_boundary_wall_contacts_m"]) for row in rows
             ),

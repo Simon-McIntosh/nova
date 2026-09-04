@@ -1,0 +1,845 @@
+{
+  "after_worktree_revision": "b2a7a0460b5cc708ea531d74331c32260b14b58f",
+  "artifact": "per-row change table: corrected-read MAST bank regeneration against the 8678047a-lineage bank",
+  "before_measurement_revision": "acce6b3cf0832c9340c722c50dafb525c16954d7",
+  "changed_row_count": 7,
+  "changed_rows": [
+    "21983/35 pure",
+    "21983/35 mixed",
+    "21985/51 pure",
+    "21985/51 mixed",
+    "21986/46 pure",
+    "21989/55 pure",
+    "21989/55 mixed"
+  ],
+  "declared_arm_count": 12,
+  "governed_wall_node_10_binding": {
+    "after": [],
+    "before": [
+      "21986/46 pure",
+      "21989/55 pure",
+      "21989/55 mixed"
+    ]
+  },
+  "no_qualified_axis_rows_after": [
+    "21983/35 mixed",
+    "21985/51 pure",
+    "21985/51 mixed",
+    "21986/46 mixed",
+    "21989/55 mixed"
+  ],
+  "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+  "rows": [
+    {
+      "active_set_iterations": {
+        "after": 4,
+        "before": 4
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": 0.015188064994628896,
+        "banked_before": false,
+        "efit_m": [
+          0.9045118689537048,
+          0.0004183934652246535
+        ],
+        "nova_after_m": [
+          0.9030348052779694,
+          0.015534464422285375
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.19524440169334412,
+          -0.046144426181843556
+        ],
+        "before_m": [
+          0.19524440169334412,
+          -0.046144426181843556
+        ],
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": 0.0
+      },
+      "boundary_flux_wb": -0.06884701907496345,
+      "changed": false,
+      "class": {
+        "after": "diverted",
+        "before": "diverted",
+        "changed": false,
+        "label_agreement_after": true,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21978/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5628642390682692,
+          1.2634901482388117
+        ],
+        "before_m": [
+          0.5628642390682692,
+          1.2634901482388117
+        ],
+        "displacement_m": 0.0
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.0024506488565450104,
+        "before": 0.0024506488565450104
+      },
+      "termination_reason": {
+        "after": "active_set_cycle_detected",
+        "before": "active_set_cycle_detected"
+      },
+      "trip_1_mask_difference": {
+        "after": 29,
+        "before": 29,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": 0.0292153428820896,
+        "banked_before": false,
+        "efit_m": [
+          0.9045118689537048,
+          0.0004183934652246535
+        ],
+        "nova_after_m": [
+          0.9035484164982237,
+          0.029617845841666424
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": -0.06476589540675863,
+      "changed": false,
+      "class": {
+        "after": "diverted",
+        "before": "diverted",
+        "changed": false,
+        "label_agreement_after": true,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": true,
+        "before": true
+      },
+      "efit_label": "diverted",
+      "identity": "21978/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5745728038817767,
+          1.2639235916546951
+        ],
+        "before_m": [
+          0.5745728038817767,
+          1.2639235916546951
+        ],
+        "displacement_m": 0.0
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 7.50780096762432e-12,
+        "before": 7.50780096762432e-12
+      },
+      "termination_reason": {
+        "after": "converged",
+        "before": "converged"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 11,
+        "before": 16
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": 0.029383021617268336,
+        "banked_before": false,
+        "efit_m": [
+          0.9043859839439392,
+          0.004791049286723137
+        ],
+        "nova_after_m": [
+          0.9024454351902632,
+          0.034109920852584345
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.19524440169334412,
+          -0.006350347249883273
+        ],
+        "before_m": [
+          0.19524440169334412,
+          0.00010787415342856585
+        ],
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": 0.006458221403311839
+      },
+      "boundary_flux_wb": -0.0966902950243118,
+      "changed": true,
+      "class": {
+        "after": "diverted",
+        "before": "diverted",
+        "changed": false,
+        "label_agreement_after": true,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21983/35",
+      "selected_saddle": {
+        "after_m": [
+          0.5500433858036208,
+          1.2681617763767705
+        ],
+        "before_m": [
+          0.5519882544121029,
+          1.272313868980589
+        ],
+        "displacement_m": 0.004585017654812654
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": 0.0003685576871064815,
+        "before": 0.0016010813512420008
+      },
+      "termination_reason": {
+        "after": "active_set_settled",
+        "before": "active_set_iteration_budget_exhausted"
+      },
+      "trip_1_mask_difference": {
+        "after": 41,
+        "before": 0,
+        "changed": true
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": null,
+        "banked_before": false,
+        "efit_m": [
+          0.9043859839439392,
+          0.004791049286723137
+        ],
+        "nova_after_m": null,
+        "read_status_after": "no_qualified_axis"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": null,
+      "changed": true,
+      "class": {
+        "after": null,
+        "before": "diverted",
+        "changed": true,
+        "label_agreement_after": null,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21983/35",
+      "selected_saddle": {
+        "after_m": null,
+        "before_m": [
+          0.5526865426840635,
+          1.2743472087241114
+        ],
+        "displacement_m": null
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "terminal_residual": {
+        "after": null,
+        "before": 0.0013323492051528015
+      },
+      "termination_reason": {
+        "after": "NoQualifiedAxisError",
+        "before": "iteration_budget_exhausted"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 1,
+        "before": 7
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": null,
+        "banked_before": false,
+        "efit_m": [
+          0.8993120789527893,
+          0.004633639473468065
+        ],
+        "nova_after_m": null,
+        "read_status_after": "no_qualified_axis"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": null,
+      "changed": true,
+      "class": {
+        "after": null,
+        "before": "diverted",
+        "changed": true,
+        "label_agreement_after": null,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21985/51",
+      "selected_saddle": {
+        "after_m": null,
+        "before_m": [
+          0.5554440365321776,
+          -1.1188504565862138
+        ],
+        "displacement_m": null
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "terminal_residual": {
+        "after": null,
+        "before": 0.0006844491330166124
+      },
+      "termination_reason": {
+        "after": "NoQualifiedAxisError",
+        "before": "active_set_settled"
+      },
+      "trip_1_mask_difference": {
+        "after": 0,
+        "before": 0,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": null,
+        "banked_before": false,
+        "efit_m": [
+          0.8993120789527893,
+          0.004633639473468065
+        ],
+        "nova_after_m": null,
+        "read_status_after": "no_qualified_axis"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": null,
+      "changed": true,
+      "class": {
+        "after": null,
+        "before": "diverted",
+        "changed": true,
+        "label_agreement_after": null,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": true
+      },
+      "efit_label": "diverted",
+      "identity": "21985/51",
+      "selected_saddle": {
+        "after_m": null,
+        "before_m": [
+          0.5424844830714627,
+          -1.0975066858069535
+        ],
+        "displacement_m": null
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "terminal_residual": {
+        "after": null,
+        "before": 2.799015887563058e-16
+      },
+      "termination_reason": {
+        "after": "NoQualifiedAxisError",
+        "before": "converged"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 16,
+        "before": 16
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": 0.020764329340370015,
+        "banked_before": false,
+        "efit_m": [
+          0.9118046164512634,
+          0.0794563964009285
+        ],
+        "nova_after_m": [
+          0.9132432863202905,
+          0.058741966600344926
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "before_m": [
+          0.5649306774139404,
+          1.7721871186934495
+        ],
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": true,
+        "displacement_m": 0.2984139509806742
+      },
+      "boundary_flux_wb": -0.03253991931153417,
+      "changed": true,
+      "class": {
+        "after": "limited",
+        "before": "limited",
+        "changed": false,
+        "label_agreement_after": false,
+        "label_agreement_before": false
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21986/46",
+      "selected_saddle": {
+        "after_m": [
+          0.6131284784036216,
+          1.1601077079835256
+        ],
+        "before_m": [
+          0.6192157086901403,
+          1.174453758683143
+        ],
+        "displacement_m": 0.015584079800780743
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "terminal_residual": {
+        "after": 0.005889860956811716,
+        "before": 0.005887639830302741
+      },
+      "termination_reason": {
+        "after": "active_set_iteration_budget_exhausted",
+        "before": "active_set_iteration_budget_exhausted"
+      },
+      "trip_1_mask_difference": {
+        "after": 37,
+        "before": 0,
+        "changed": true
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": null,
+        "banked_before": false,
+        "efit_m": [
+          0.9118046164512634,
+          0.0794563964009285
+        ],
+        "nova_after_m": null,
+        "read_status_after": "no_qualified_axis"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": null,
+      "changed": false,
+      "class": {
+        "after": null,
+        "before": null,
+        "changed": false,
+        "label_agreement_after": null,
+        "label_agreement_before": null
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21986/46",
+      "selected_saddle": {
+        "after_m": null,
+        "before_m": null,
+        "displacement_m": null
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "terminal_residual": {
+        "after": null,
+        "before": null
+      },
+      "termination_reason": {
+        "after": "NoQualifiedAxisError",
+        "before": "NoQualifiedAxisError"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 9,
+        "before": 16
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": 0.018420671880654164,
+        "banked_before": false,
+        "efit_m": [
+          0.9149412512779236,
+          0.010957644321024418
+        ],
+        "nova_after_m": [
+          0.9119630142961731,
+          0.02913596264300505
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": [
+          0.2800000011920929,
+          1.683500051498413
+        ],
+        "before_m": [
+          0.5649306774139404,
+          1.7654016583458456
+        ],
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": true,
+        "displacement_m": 0.2964681491432608
+      },
+      "boundary_flux_wb": -0.031540916373092455,
+      "changed": true,
+      "class": {
+        "after": "limited",
+        "before": "limited",
+        "changed": false,
+        "label_agreement_after": false,
+        "label_agreement_before": false
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21989/55",
+      "selected_saddle": {
+        "after_m": [
+          0.5842964495427876,
+          1.1514741226390253
+        ],
+        "before_m": [
+          0.5880968559376076,
+          1.1589439080042145
+        ],
+        "displacement_m": 0.008380977399312383
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "terminal_residual": {
+        "after": 0.000920711818042524,
+        "before": 0.002856737994170132
+      },
+      "termination_reason": {
+        "after": "active_set_settled",
+        "before": "active_set_iteration_budget_exhausted"
+      },
+      "trip_1_mask_difference": {
+        "after": 37,
+        "before": 0,
+        "changed": true
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": null,
+        "banked_before": false,
+        "efit_m": [
+          0.9149412512779236,
+          0.010957644321024418
+        ],
+        "nova_after_m": null,
+        "read_status_after": "no_qualified_axis"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": [
+          0.5649306774139404,
+          1.764823199153031
+        ],
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": true,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": null,
+      "changed": true,
+      "class": {
+        "after": null,
+        "before": "limited",
+        "changed": true,
+        "label_agreement_after": null,
+        "label_agreement_before": false
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "21989/55",
+      "selected_saddle": {
+        "after_m": null,
+        "before_m": [
+          0.5897718401840847,
+          1.1624392892547324
+        ],
+        "displacement_m": null
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "terminal_residual": {
+        "after": null,
+        "before": 0.0029537921358981085
+      },
+      "termination_reason": {
+        "after": "NoQualifiedAxisError",
+        "before": "iteration_budget_exhausted"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 7,
+        "before": 7
+      },
+      "arm": "pure",
+      "axis": {
+        "axis_distance_after_m": 0.017050633468681336,
+        "banked_before": false,
+        "efit_m": [
+          0.9052576422691345,
+          0.0034392368979752064
+        ],
+        "nova_after_m": [
+          0.9019314019461326,
+          0.020162281686438594
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": -0.12422236950062966,
+      "changed": false,
+      "class": {
+        "after": "diverted",
+        "before": "diverted",
+        "changed": false,
+        "label_agreement_after": true,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": false,
+        "before": false
+      },
+      "efit_label": "diverted",
+      "identity": "22086/43",
+      "selected_saddle": {
+        "after_m": [
+          0.5923840472283124,
+          1.2202558665995356
+        ],
+        "before_m": [
+          0.5923840472283124,
+          1.2202558665995356
+        ],
+        "displacement_m": 0.0
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "terminal_residual": {
+        "after": 0.00048001875929238176,
+        "before": 0.00048001875929238176
+      },
+      "termination_reason": {
+        "after": "active_set_settled",
+        "before": "active_set_settled"
+      },
+      "trip_1_mask_difference": {
+        "after": 29,
+        "before": 29,
+        "changed": false
+      }
+    },
+    {
+      "active_set_iterations": {
+        "after": 0,
+        "before": 0
+      },
+      "arm": "mixed",
+      "axis": {
+        "axis_distance_after_m": 0.02148997305701005,
+        "banked_before": false,
+        "efit_m": [
+          0.9052576422691345,
+          0.0034392368979752064
+        ],
+        "nova_after_m": [
+          0.9016135226490096,
+          0.024617984126865743
+        ],
+        "read_status_after": "qualified"
+      },
+      "binding_limiter_point": {
+        "after_m": null,
+        "before_m": null,
+        "bound_governed_wall_node_10_after": false,
+        "bound_governed_wall_node_10_before": false,
+        "displacement_m": null
+      },
+      "boundary_flux_wb": -0.12239191397875912,
+      "changed": false,
+      "class": {
+        "after": "diverted",
+        "before": "diverted",
+        "changed": false,
+        "label_agreement_after": true,
+        "label_agreement_before": true
+      },
+      "converged": {
+        "after": true,
+        "before": true
+      },
+      "efit_label": "diverted",
+      "identity": "22086/43",
+      "selected_saddle": {
+        "after_m": [
+          0.5853011730723614,
+          1.2333806492436519
+        ],
+        "before_m": [
+          0.5853011730723614,
+          1.2333806492436519
+        ],
+        "displacement_m": 0.0
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "terminal_residual": {
+        "after": 1.7364758673167596e-14,
+        "before": 1.7364758673167596e-14
+      },
+      "termination_reason": {
+        "after": "converged",
+        "before": "converged"
+      },
+      "trip_1_mask_difference": {
+        "after": null,
+        "before": null,
+        "changed": false
+      }
+    }
+  ],
+  "scheduler_job_id": 1262210
+}

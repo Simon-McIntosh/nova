@@ -323,6 +323,34 @@
     earlier bank state is a control for this.</p>
   </section>
 
+  <section id="conditioning-repair">
+    <h2>The trusted-Krylov admission: damping removed where the linear solve is resolved (merged at c9b9b963)</h2>
+    <p><strong>Commits:</strong> <code>66d91698</code> (<code>fixed_point.py</code> and the admission test), <code>e2661dde</code>
+    (H200 receipts under <code>docs/figures/solver-convergence-regression/settled-mask-stall/repair/</code>), <code>fd1837de</code>
+    (twelve conditioning contracts now distinguishing a trusted solve from an unresolved one). The projected-condition discriminator
+    is bypassed when the Krylov relative residual is below the square root of machine epsilon, a dtype-derived threshold; no
+    constant, acceptance rule or referee expectation changed.</p>
+    <img src="/nova/figures/solver-convergence-regression/settled-mask-stall/repair/stall-repair.png" alt="Frozen-mask contraction before and after the trusted-Krylov admission on four MAST rows" style="max-width:100%">
+    <table>
+      <caption>Frozen mask, eight Newton steps at GMRES 40, before to after (H200 job 1262491)</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Contraction</th><th scope="col">Step as fraction of raw direction</th><th scope="col">Production active-set solve from the bank seed</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>0.919 to 0.278 (first step 0.30, then unit-ratio oscillation 2.4e-3 to 2.8e-3 at factor 1.0)</td><td>0.013 to 1.0</td><td>3.399e-3 settled at 12 trips to 1.303e-3 cycle detected at 16</td></tr>
+        <tr><th scope="row">21986/46</th><td>0.997 to 0.502</td><td>0.0005 to 0.046 (step cap and merit ladder)</td><td>identical to the bank</td></tr>
+        <tr><th scope="row">21989/55</th><td>0.990 to 0.225</td><td>0.0008 to 0.119 (step cap and merit ladder)</td><td>identical to the bank</td></tr>
+        <tr><th scope="row">22086/43</th><td>0.773 to 1.5e-9</td><td>0.032 to 1.0</td><td>identical to the bank</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Removing the false damping restores quadratic contraction where the direction was good and exposes what remains: a second
+    damping layer (the step cap and merit ladder) on two rows, and on 21985/51 a Newton direction that no longer reduces the
+    residual once it is taken in full, the signature of a near-singular Jacobian direction. The production route did not change
+    on three rows, most likely because its GMRES budget of 30 does not reach the trust threshold that 40 iterations reached here.
+    Zero of four rows converge in production. The two measurements that follow, the production-path damping layers and the
+    Jacobian's smallest singular directions projected onto the rigid vertical shift, decide whether the solver's shape, not its
+    damping, is the remaining question.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T14:21:29",
+  "updated": "2026-09-04T14:35:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1095,6 +1095,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "fsa-budget-audit",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "fsa-cold-seed-x",
@@ -2287,6 +2296,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "scr-bankroute-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "scr-cache-review",
         "harness": "codex",
         "role": "review",
@@ -2375,6 +2393,15 @@
       },
       {
         "id": "scr-stall-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-stepcap-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -91312,6 +91339,302 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T113521823580-scr-jacobian-null-direction",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-jacobian-null-direction",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1272,
+                "cached_input_tokens": 723643,
+                "input_tokens": 724917,
+                "output_tokens": 5000,
+                "reasoning_output_tokens": 3201,
+                "total_tokens": 729917,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/vertical-mode/jacobian-null-direction.md plus receipt docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json with a figure recording per row the smallest three singular values of the frozen-mask Jacobian operator with the largest for scale, the projection of each right singular vector onto the rigid vertical shift, the rigid radial shift and the uniform rescale as fractions of its norm, the residual change along a unit step in each of those three directions, and a verdict per row on whether the near-null direction is the vertical mode, with the solver shape it implies (a vertical-position constraint with a compensating unknown, a deflation of the mode, or none) and its owner, driver committed at benchmarks/jacobian_null_direction.py, no nova/ change, the manifest written before the SLURM wait",
+          "estimated_hours": null,
+          "goal": "Test the hypothesis that the stalled MAST rows sit at a near-singular direction of the Newton Jacobian that is the rigid vertical shift of the plasma (the free-boundary fixed-point map is known to have spectral radius above one at both roots, the conditioning guard fires on an ill-conditioned linear model, undamped full steps on 21985/51 oscillate the residual at unit ratio, a two-percent coil edit moves the boundary by half a metre, and the DIII-D axis lands a metre from EFIT) by computing on the H200, at the banked terminal states of 21985/51, 21986/46, 21989/55 plus 22086/43 with the settled mask frozen, the smallest few singular values of the Jacobian-vector operator and their right singular vectors, and projecting each vector onto the rigid vertical shift (the flux change from moving the current distribution by a unit Z step, minus dpsi/dZ), the rigid radial shift and a uniform current rescale, with the same on the one converging row for contrast (reuse map: the frozen-mask driver benchmarks/settled_mask_stall.py merged at d65ef765 for state reconstruction plus the JVP, jax.scipy.sparse.linalg or a Lanczos on the normal operator for the singular triplets, the cached operands under ~/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz, the persistent compilation cache wired at e04970ad, one SLURM job on betelgeuse under reservation gpu_0003_grpA polled in the foreground because a backgrounded wait ends the worker's turn, no nova/ change)",
+          "id": "scr-jacobian-null-direction",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T113521823580-scr-jacobian-null-direction/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "benchmarks/jacobian_null_direction.py",
+            "docs/figures/solver-convergence-regression/vertical-mode/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-vertical-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:35:35Z",
+        "completed_at": "2026-09-04T12:34:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3529,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3529,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "00c442370ecc7ef4987004a3a0f02acb92eabe94",
+        "commits": [
+          "a1edcdcaf39b44a35495564dfdd217f43ed87734"
+        ],
+        "changed_lines": {
+          "added": 22809,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/jacobian_null_direction.py on the H200 (job 1262523), receipt docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T113521823580-scr-jacobian-null-direction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c33-e9e3-7860-8a81-6b8d57f33d6e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 35240704,
+            "cached_input_tokens_cumulative": 35240704,
+            "input_tokens": 35559029,
+            "input_tokens_cumulative": 35559029,
+            "output_tokens": 67422,
+            "output_tokens_cumulative": 67422,
+            "reasoning_output_tokens": 19716,
+            "reasoning_output_tokens_cumulative": 19716
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 19053,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 21453,
+              "external_wait": null,
+              "log_age_seconds": 20550,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 20606,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 7200,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected paired H200 job 1262502 is running or queued; this manifest was updated before its foreground wait",
+              "elapsed_seconds": 2372,
+              "external_wait": null,
+              "log_age_seconds": 37,
+              "log_fresh": true,
+              "manifest_commits": [
+                "edf4dd21ce0c13bf2eb4ecbac9fcdf2381740037",
+                "aecbcebac4a95166c24f1a2df9257f0fd2bf1879; changed_paths: nova/equilibrium/connectivity_boundary.py",
+                "nova/equilibrium/flux_surface_connectivity.py",
+                "nova/equilibrium/topology.py",
+                "tests/test_shared_spline_authority.py",
+                "benchmarks/polish_support_performance.py"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T105544304981-nia-polish-support-shared-spline/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T105544304981-nia-polish-support-shared-spline/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-polish-support-shared-spline",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T105544304981-nia-polish-support-shared-spline",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 548,
+              "terminal_at": "2026-09-04T11:26:20Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: implementation and required verification pending",
+              "elapsed_seconds": 718,
+              "external_wait": null,
+              "log_age_seconds": 1,
+              "log_fresh": true,
+              "manifest_commits": [
+                "none; changed_paths: none"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112321584866-scr-conditioning-contract-pair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112321584866-scr-conditioning-contract-pair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-conditioning-contract-pair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T112321584866-scr-conditioning-contract-pair",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 592,
+              "terminal_at": "2026-09-04T11:25:36Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-conditioning-contract-pair"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: measurement in progress",
+              "elapsed_seconds": 497,
+              "external_wait": null,
+              "log_age_seconds": 63,
+              "log_fresh": true,
+              "manifest_commits": [
+                "none; changed_paths: none"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112702397502-nia-resolution-gate-calibration/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T112702397502-nia-resolution-gate-calibration/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-resolution-gate-calibration",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T112702397502-nia-resolution-gate-calibration",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 429,
+              "terminal_at": "2026-09-04T11:28:19Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-resolution-gate-calibration"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 87138,
+          "peak_input_tokens": 70799733
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-jacobian-null-direction",
+          "session_id": "01a06c33-e9e3-7860-8a81-6b8d57f33d6e",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T12:34:24Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -91428,6 +91751,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1596
+    "_version": 1600
   }
 }

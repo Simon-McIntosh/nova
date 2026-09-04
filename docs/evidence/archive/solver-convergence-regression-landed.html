@@ -377,6 +377,33 @@
     active-set result keeps only the last inner solve's conditioning count.</p>
   </section>
 
+  <section id="vertical-mode">
+    <h2>The Jacobian's null direction: the vertical mode on two rows, rejected on two (merged at 4d9a3008)</h2>
+    <p><strong>Commits:</strong> <code>5dfe5558</code> to <code>a1edcdca</code>; receipt
+    <code>docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json</code> (H200 job 1262523). The
+    active Jacobian of each frozen-shadow terminal state was decomposed exactly from batched JVPs and its smallest singular
+    directions projected onto the rigid vertical shift, the rigid radial shift and a uniform current rescale.</p>
+    <img src="/nova/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.png" alt="Smallest singular values of the frozen-mask Jacobian and their projections onto rigid vertical shift, radial shift and current rescale on five MAST branches" style="max-width:100%">
+    <table>
+      <caption>Smallest singular direction per branch</caption>
+      <thead><tr><th scope="col">Branch</th><th scope="col">Smallest / largest singular value</th><th scope="col">Vertical</th><th scope="col">Radial</th><th scope="col">Current</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51 pure</th><td>7.4e-3</td><td>0.70</td><td>0.06</td><td>0.05</td><td>vertically aligned, not near-null</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>3.1e-4</td><td>0.74</td><td>0.11</td><td>0.13</td><td>vertical mode</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td>4.3e-4</td><td>0.71</td><td>0.11</td><td>0.12</td><td>vertical mode</td></tr>
+        <tr><th scope="row">22086/43 pure</th><td>1.27e-2</td><td>0.27</td><td>0.80</td><td>0.81</td><td>not vertical; condition 1.01 times the converged branch</td></tr>
+        <tr><th scope="row">22086/43 mixed (converged)</th><td>1.26e-2</td><td>0.46</td><td>0.66</td><td>0.67</td><td>reference</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>One row, one mechanism. The two rows whose raw Newton directions grow to sup 6 to 140 under the step cap are the two with
+    a near-null vertical direction: a prescribed-current free-boundary solve of an elongated plasma cannot fix the vertical
+    position, so Newton walks along the mode and the cap holds it. Their repair is a solver shape, a vertical-position constraint
+    with a compensating unknown, prototyped and held for the lead. 21985/51 is vertically aligned but not singular; its stall is
+    the residual the linearisation does not describe across a step on a partition that moves by tens of cells per trip.
+    22086/43 has nothing singular and converges on the production route; its bank stall was the pinned GMRES budget.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

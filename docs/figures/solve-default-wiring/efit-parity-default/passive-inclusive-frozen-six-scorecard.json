@@ -1,0 +1,83 @@
+{
+  "receipt": "MAST passive-inclusive frozen-six forward scorecard",
+  "status": "failed",
+  "backend": {
+    "jax_backend": "gpu",
+    "device_kinds": [
+      "NVIDIA H200 NVL"
+    ],
+    "device_count": 1,
+    "slurm_job_id": "1262266"
+  },
+  "compilation_cache": {
+    "selection": "explicit_per_recipe",
+    "root": "/home/ITER/mcintos/.cache",
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "version_key": "runtime-0745ecebea4cb264e054",
+    "runtime_identity": {
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0",
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_enable_x64": true,
+        "jax_default_matmul_precision": null,
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "platform": "gpu",
+          "kind": "NVIDIA H200 NVL",
+          "process_index": 0,
+          "id": 0
+        }
+      ]
+    },
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "minimum_compile_seconds": 1.0,
+    "maximum_bytes": 8589934592
+  },
+  "source_revision": "07e0a45e5d9ac6c6df4f8da82e62e458f2c2c657",
+  "execution_contract": {
+    "invocation_route": "absolute_source_replay_diagnostic"
+  },
+  "frame": {
+    "shot": 21978,
+    "slice_index": 35
+  },
+  "frames": [
+    {
+      "shot": 21978,
+      "slice_index": 35
+    }
+  ],
+  "failure": {
+    "exception_class": "RuntimeError",
+    "message": "the closest-state replay changed the bounded solve"
+  }
+}

@@ -45,6 +45,7 @@ from nova.equilibrium.connectivity_boundary import (
     _raster_hex_partition_geometry,
 )
 from nova.equilibrium.domain import PlasmaDomain
+from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     hex_edge_admissibility,
@@ -54,6 +55,7 @@ from nova.equilibrium.flux_surface_connectivity import (
 )
 from nova.geometry.hexstencil import hex_stencil
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.jax.config import configure_dtypes
@@ -194,6 +196,16 @@ def _mast_rows(
         passive_case, profile, policy = _passive_inclusive_case(
             case, context, response_cache
         )
+        moment_geometry = profile.operator.moment_geometry
+        if moment_geometry is None:
+            moment_geometry = MomentGeometry.from_cells(
+                StencilMesh(
+                    np.asarray(profile.lattice.coordinate, dtype=np.float64),
+                    np.asarray(profile.operator.grid.null.stencil),
+                    np.asarray(profile.operator.area, dtype=np.float64),
+                ),
+                _lattice_cells(profile.lattice),
+            )
         if policy["section_kernel_evaluations_this_shot"] != 0:
             raise RuntimeError("MAST route entered a direct response builder")
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
@@ -301,7 +313,7 @@ def _mast_rows(
                     labels[private] = int(PlasmaDomain.PRIVATE_FLUX)
                     candidate_labels[candidate_index] = labels.T.reshape(-1)
 
-                current_polygons = profile.operator.moment_geometry.polygons
+                current_polygons = moment_geometry.polygons
                 polygon_width = max(len(polygon) for polygon in current_polygons)
                 padded_polygons = np.full(
                     (len(current_polygons), polygon_width, 2), np.nan, dtype=float
@@ -309,7 +321,7 @@ def _mast_rows(
                 for polygon_index, polygon in enumerate(current_polygons):
                     vertices = np.asarray(polygon, dtype=float)
                     padded_polygons[polygon_index, : len(vertices)] = vertices
-                shared_flux = profile.operator.shared_node_flux(state)
+                shared_flux = moment_geometry.shared_node_flux(grid_flux)
                 signed_flux = profile.operator.polarity * (
                     shared_flux - topology.boundary_flux
                 )

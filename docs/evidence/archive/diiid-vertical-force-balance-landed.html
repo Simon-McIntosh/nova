@@ -91,11 +91,36 @@
     (<code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>) no longer imports on main and is owed a repair.</p>
   </section>
 
+  <section id="residual-decomposition">
+    <h2>§2 — The tared residual on the five gate frames is the label's own inconsistency</h2>
+    <p><strong>Commit:</strong> <code>f152d4f5</code> merged at <code>5681764d</code>; driver
+    <code>benchmarks/diiid_residual_decomposition.py</code>, receipt
+    <code>docs/figures/diiid-vertical-force-balance/residual-decomposition.json</code> with one figure per frame (CPU,
+    1227 s, zero coefficients fitted, no passive current invented). Plasma tared with the exact clipped-cell moments,
+    coils tared from the persisted description at <code>5eeca293</code>, gauge removed.</p>
+    <table>
+      <caption>Decomposition across the five frames (ranges)</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Range</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Gauge-free residual RMS</th><td>0.0026 to 0.0183 Wb/rad</td></tr>
+        <tr><th scope="row">Smooth first-order R, Z share</th><td>28.6 to 81.5 percent</td></tr>
+        <tr><th scope="row">Conductor-localised share</th><td>18.5 to 71.1 percent</td></tr>
+        <tr><th scope="row">Vessel-following share</th><td>0.04 to 0.49 percent</td></tr>
+        <tr><th scope="row">Explained by the label's GS inconsistency</th><td>98.8 to 99.3 percent</td></tr>
+        <tr><th scope="row">Vertical dipole B_Z; radial dipole B_R</th><td>0.0145 to 0.1026 T; 0.00016 to 0.0046 T</td></tr>
+        <tr><th scope="row">Implied rigid vertical displacement</th><td>0.025 to 0.99 mm against the observed 0.286 to 1.285 m</td></tr>
+      </tbody>
+    </table>
+    <p>Verdict on all five frames: inside the label's own Grad-Shafranov inconsistency; the residual names no further
+    conductor or vessel-current source. The DIII-D displacement is therefore not a missing external field. What remains
+    is on the solver side and in the inference inputs: with EFIT's own profiles and currents the same arm converged to
+    9.7e-12 in six trips.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>§1 (axis decomposition), §2 (per-frame residual decomposition with the vertical-field conversion) and §3
-      (frame 144 and the single-shot gate) are not yet dispatched.</li>
+      <li>§1 (axis decomposition) and §3 (frame 144 and the single-shot gate) are not yet dispatched; §2 landed negative for the missing-field hypothesis.</li>
     </ul>
   </section>
 </main>

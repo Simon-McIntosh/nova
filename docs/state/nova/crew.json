@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T06:53:33",
+  "updated": "2026-09-04T07:01:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -904,9 +904,11 @@
         "id": "dvf-residual-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06aab-2baa-7402-82f9-25f2e0667304",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06aab-2baa-7402-82f9-25f2e0667304"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1578,9 +1580,11 @@
         "id": "nia-test-health-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06ab0-634b-7683-8abe-70a384d0c11f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06ab0-634b-7683-8abe-70a384d0c11f"
+        },
         "created": "2026-09-04"
       },
       {
@@ -84831,6 +84835,347 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T194836287677-scr-remedy-presettlement-solovev-run",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-remedy-presettlement-solovev-run",
+        "node_definition": {
+          "done_when": "Receipt docs/figures/solver-convergence-regression/remedy-presettlement/solovev/solovev-certificate.json plus the per-row figures from one H200 job (a single job is the unit of this measurement, SLURM polled in the foreground with sleep 120 between checks and the manifest written before the wait), sixteen rows each with terminal residual, qualified flag, trip count, root and exact read status, axis and saddle error, the qualified-row count stated against the banked 2 of 16 together with the count of rows whose topology read is admitted, the seven referee tests green in the worktree, the driver change confined to the new flag, no nova/ change, committed with a conventional subject and body",
+          "estimated_hours": null,
+          "goal": "Rerun the sixteen-row Solovev production-route certificate on the H200 with the pre-settlement incumbent-mask acceptance prototype enabled through a new opt-in flag on benchmarks/solovev_certificate.py that passes presettlement_incumbent_scoring=True through the production solve options, writing the receipt under docs/figures/solver-convergence-regression/remedy-presettlement/solovev/ and leaving the banked docs/figures/gs-absolute-accuracy/solovev-certificate*.json untouched (plan section 4 node 2, your previous turn's uncommitted flag edit survives at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-solovev/benchmarks/solovev_certificate.py and may be copied in, reuse map: the driver's --output flag and REQUESTED_CELLS rungs, /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/oracle-axis-admission.md for the read-status fields to report per row)",
+          "id": "scr-remedy-presettlement-solovev-run",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194836287677-scr-remedy-presettlement-solovev-run/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "180m",
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/solver-convergence-regression/remedy-presettlement/solovev/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "c-scr-measure-solovev",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:48:42Z",
+        "completed_at": "2026-09-04T04:53:53.377Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 32693,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 32711,
+        "stalled": true,
+        "time_budget": "180m",
+        "base_sha": "fff05974635f31994879d26627f6184a48be0bc5",
+        "commits": [
+          "fe1dc1c0cf18ecc307fe7e63dece5f10676c890d",
+          "036af36d7f8e150d462b3b62be605025e41ab4d2"
+        ],
+        "changed_lines": {
+          "added": 21320,
+          "removed": 13,
+          "files": 34
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 jobs 1262192 and 1262251, aggregate schema-valid with 16 rows; seven referee node IDs 9 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194836287677-scr-remedy-presettlement-solovev-run/logs/h200-1262192.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194836287677-scr-remedy-presettlement-solovev-run/manifest.md",
+        "scope_changed": false,
+        "session_id": "ed4846b2-7c50-4ac0-adf1-c0d7e145a40e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 212134,
+            "cache_creation_input_tokens_cumulative": 212134,
+            "cache_read_input_tokens": 3381093,
+            "cache_read_input_tokens_cumulative": 3381093,
+            "inference_geo": "not_available",
+            "input_tokens": 32,
+            "input_tokens_cumulative": 32,
+            "output_tokens": 9510,
+            "output_tokens_cumulative": 9510,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6199186000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6199186000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 87303,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 98103,
+              "log_age_seconds": 92333,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 92379,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 272.709,
+          "generated_tokens": 9510,
+          "generation_seconds": 143.397,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 23.7,
+          "machine_seconds": 129.312,
+          "peak_input_tokens": 236554,
+          "tokens_per_second": 66.32,
+          "wall_tokens_per_second": 34.87
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T042619078660-dvf-residual-decomposition",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a72",
+        "node": "dvf-residual-decomposition",
+        "node_definition": {
+          "done_when": "Receipt docs/figures/diiid-vertical-force-balance/residual-decomposition.json plus one figure per frame showing the residual map beside the vessel and conductor geometry, stating per frame the gauge-free residual norm, the three-way decomposition fractions, the vertical-field magnitude and the axis displacement it implies with the conversion's assumptions written out, and a verdict per frame naming the physical source of the missing field or stating the residual is inside the label's own GS inconsistency, driver benchmarks/diiid_residual_decomposition.py committed with a conventional subject and body, computed on CPU in the foreground with the manifest written before the run, no nova/ change",
+          "estimated_hours": null,
+          "goal": "Decompose the tared residual on the five DIII-D gate frames: tare the plasma with the exact clipped-cell current moments and the coils with the persisted description now carrying the wired ohmic circuits (docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc at 5eeca293), remove the gauge, and split what remains into the smooth first-order R and Z multipole, conductor-localised patches and vessel-following structure with the fraction of the residual each carries, converting the vertical-field magnitude from the dipole coefficient to the axis displacement it would produce on the elongated plasma beside the observed 0.29 to 1.29 m (plan section 2, reuse map: benchmarks/diiid_exact_clipped_tare.py, diiid_vacuum_against_exact_tare.py, diiid_unclaimed_current_patches.py and diiid_unclaimed_current_origin.py as the instruments named in /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/diiid-external-field-tare.md, the five gate frames from docs/figures/gs-absolute-accuracy/efit-reproduction.json, nothing fitted)",
+          "id": "dvf-residual-decomposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042619078660-dvf-residual-decomposition/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/diiid_residual_decomposition.py",
+            "docs/figures/diiid-vertical-force-balance/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "dvf-residual-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T04:26:36Z",
+        "completed_at": "2026-09-04T04:56:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1810,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1810,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8bc3e15d713c03a87bf4f25e24be5a2a0fa93784",
+        "commits": [
+          "f152d4f5e3842cd093e6ed805624b19db3612484"
+        ],
+        "changed_lines": {
+          "added": 1770,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/diiid_residual_decomposition.py --workers 4 on CPU, five frames, receipt schema validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042619078660-dvf-residual-decomposition/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042619078660-dvf-residual-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06aab-2baa-7402-82f9-25f2e0667304",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13031552,
+            "cached_input_tokens_cumulative": 13031552,
+            "input_tokens": 13229776,
+            "input_tokens_cumulative": 13229776,
+            "output_tokens": 28437,
+            "output_tokens_cumulative": 28437,
+            "reasoning_output_tokens": 6621,
+            "reasoning_output_tokens_cumulative": 6621
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 118374,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 129174,
+              "log_age_seconds": 123405,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 123450,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6279,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: SLURM job 1262252 (job name presettlement-mast-capture-v2; submitted from this worktree) remained PENDING(Priority) for the entire foreground wait (submitted ~03:33; still PENDING at 04:19; i.e. ~44 minutes with zero state change) because the single H200 node under reservation gpu_0003_grpA is fully occupied by other concurrently-running jobs (see follow_ons for the exact job list observed via squeue). This is a cluster-availability blocker; not a code or design blocker. Resume path for a subsequent dispatch: (1) `squeue -j 1262252` / `squeue -p betelgeuse -o \"%i %u %T %M\"` to check whether it has started or whether the node has freed up; (2) if it completed; read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/logs/h200-capture.log for EXIT_MARKER; if 0; the raw capture is at .../raw-presettlement-mast.json in this run directory \u2014 run from this worktree `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <raw path> --referee-log logs/referee.log --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; verify the printed verdict against the banked 4.8002e-4 / 7-trip figure; then commit benchmarks/acceptance_presettlement_remedy.py plus the two new files under docs/figures/solver-convergence-regression/remedy-presettlement/mast/ with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer); (3) if job 1262252 is still PENDING or was never scheduled before a future dispatch's own time budget runs out; either wait longer (the SLURM job itself has no deadline pressure \u2014 it persists independently of any single dispatch's fence) or escalate the node contention to the lead; since four to five long-running jobs occupying the sole H200 node is likely worth knowing about regardless of this measurement.",
+              "elapsed_seconds": 9879,
+              "log_age_seconds": 7482,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 7579,
+              "terminal_at": "2026-09-04T02:20:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 35058,
+          "peak_input_tokens": 26261328
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -84847,8 +85192,22 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260904050110",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T05:01:10Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1495
+    "_version": 1500
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:18:04",
+  "updated": "2026-09-04T23:30:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1728,6 +1728,15 @@
       },
       {
         "id": "msc-hessenberg-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "msc-host-profile-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -97708,6 +97717,201 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T201321620171-msc-condition-discriminator-device-trace",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-condition-discriminator-device-trace",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3617,
+                "cached_input_tokens": 587367,
+                "input_tokens": 591085,
+                "output_tokens": 6043,
+                "reasoning_output_tokens": 1946,
+                "total_tokens": 597128,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to benchmarks/condition_discriminator_trace.py and docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/ holding the two HLO op-count tables, the two per-kernel trace summaries with host gaps, the per-trip call census plus one figure, together with the report ~/.config/reckon/crew/reports/nova/millisecond/condition-discriminator-trace.md naming the mechanism with file:line, the evidence for it, plus the recommended repair with an estimated saving, the SLURM job id plus log paths, the manifest written before the SLURM wait begins, no nova/ source change",
+          "estimated_hours": null,
+          "goal": "Find why every exact evaluation of the projected-Krylov condition ratio keeps the production trip at 5.77 s while replacing the ratio by a constant makes it 0.108 s: on this tip the previous node measured five semantics-preserving routes (the original Arnoldi projection, a GMRES-layout Hessenberg with device SVD, a Gram eigenspectrum, a host SVD callback, a fixed-sweep Jacobi spectrum of the GMRES Gram matrix) at 40.2 to 40.9 s per solve against 0.754 s with the constant (receipt docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-reuse/profile.json, job 1262745, report in its manifest ~/.config/reckon/crew/runs/r-20260904T184535786002-msc-projected-krylov-condition-from-gmres-hessenberg/manifest.md), so the cost is not the spectrum arithmetic but what the ratio's data dependency does to the compiled program (candidates: the Arnoldi's 30 extra Jacobian-vector products per call are dead-code-eliminated only under the constant, the ratio is consumed on the host or inside a lax.cond that serialises the trip, a dynamic while loop is unrolled or not, fusion across the residual evaluation is broken by materialising the Krylov basis), which this node resolves by comparing the two compiled programs of one warm trip on the H200: the fixed-sweep Jacobi variant (no cusolver, so the CUPTI replay can complete) against the constant discriminator, with jax.jit(...).lower(...).compile() HLO op counts per category (while loops, conditionals, custom calls, fusions, dot and reduce counts) plus a complete device trace of each with per-kernel sums plus the host-side gaps between kernels, plus an evaluation-count census of how many times _projected_krylov_condition plus the linear_action are called per trip on each program, in one SLURM job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache wired at e04970ad, payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly (the compute node's uv wrapper injects --no-sync), polled in the foreground because a backgrounded wait ends the worker's turn, so that the report names the mechanism with the HLO or trace evidence plus recommends the repair that keeps the discriminator's decision (for example evaluating the ratio once per Newton step from the GMRES basis outside the residual hot path, or restructuring so the Arnoldi does not add Jacobian-vector products), no nova/ source change (the variants already exist on this tip)",
+          "id": "msc-condition-discriminator-device-trace",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T201321620171-msc-condition-discriminator-device-trace/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "benchmarks/condition_discriminator_trace.py",
+            "docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/condition-discriminator-trace.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-hessenberg-trace-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T20:13:31Z",
+        "completed_at": "2026-09-04T21:28:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4504,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4504,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "25d4ec745586d0bf26a5c81b431e3f4f3dac2dd0",
+        "commits": [
+          "a801e9a4834b06b44ee87a1c5934f97f783acb8e"
+        ],
+        "changed_lines": {
+          "added": 15878,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "jq evidence-contract assertions over profile.json plus ruff on benchmarks/condition_discriminator_trace.py; measurement node, both arms completed on H200 job 1262754",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T201321620171-msc-condition-discriminator-device-trace/h200.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T201321620171-msc-condition-discriminator-device-trace/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e0e-1587-7860-b5f1-bdbc9e4a150b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30268288,
+            "cached_input_tokens_cumulative": 30268288,
+            "input_tokens": 30879093,
+            "input_tokens_cumulative": 30879093,
+            "output_tokens": 80129,
+            "output_tokens_cumulative": 80129,
+            "reasoning_output_tokens": 22084,
+            "reasoning_output_tokens_cumulative": 22084
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 50129,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 52529,
+              "external_wait": null,
+              "log_age_seconds": 51627,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 51683,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 102213,
+          "peak_input_tokens": 61147381
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-condition-discriminator-device-trace",
+          "session_id": "01a06e0e-1587-7860-b5f1-bdbc9e4a150b",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T21:28:35Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -97852,6 +98056,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1680
+    "_version": 1682
   }
 }

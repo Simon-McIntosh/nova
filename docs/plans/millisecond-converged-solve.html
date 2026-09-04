@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -85,6 +85,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T201811862492" data-who="coordinator" data-when="2026-09-04T20:18:00Z">
     <div class="r-comment-body"><p>Negative result on the first repair (six commits held in worktree <code>msc-projected-krylov-condition-from-gmres-hessenberg</code>, tip <code>25d4ec74</code>, receipt banked at <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-reuse/profile.json</code>, H200 job 1262745): five semantics-preserving ways of evaluating the condition ratio (the original projection, a GMRES-layout Hessenberg with device SVD, a Gram eigenspectrum, a host SVD callback, a fixed-sweep Jacobi spectrum) all leave the solve at 40.2 to 40.9 s, 5.77 s per trip against the 5.86 s baseline, while the constant ratio gives 0.754 s. The decision sequence is proven identical on a fixture with a refused direction and the 75-test gate is green, so the arithmetic of the spectrum is not the cost: what the ratio's data dependency does to the compiled program is (candidates: the Arnoldi's extra Jacobian-vector products survive only when the ratio is live, a conditional that serialises the trip, a materialised Krylov basis breaking fusion). Dispatched <code>msc-condition-discriminator-device-trace</code> on that tip: HLO op-count tables and complete device traces of the Jacobi variant against the constant, with a per-trip call census, to name the mechanism before another repair is written. Adopting a cheaper proxy or deferred telemetry would change the trusted-Krylov admission meaning and is the lead's call if the trace points there.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T213157689055" data-who="coordinator" data-when="2026-09-04T21:32:00Z">
+    <div class="r-comment-body"><p>Device-trace comparison landed (report <code>~/.config/reckon/crew/reports/nova/millisecond/condition-discriminator-trace.md</code>, receipts banked at <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/</code>, H200 job 1262754) and it corrects two earlier readings. First, the constant-ratio ablation was not the same computation: with the ratio constant the solver settles a trip after 4 promotions and 56 linear actions instead of 12 and 156, so its 0.75 s solve came from a different, more permissive path, not from removing the spectrum arithmetic; the compiled HLO differs by 1 percent in every category and the exact evaluation costs 0.064 s per trip more, which is the whole removable arithmetic cost. The 98 percent attribution to the SVD is withdrawn. Second, and decisive: one compiled trip of 22086/43 pure costs 0.26 s of kernels plus 0.23 s of host gaps over 16,562 launches, about 0.49 s, while the production solve averages 5.77 s per trip. Roughly nine tenths of a production trip therefore lies outside the compiled trip, in the Python-level driver (active-set loop, per-trip topology read and relinearisation, receipt assembly, host transfers of state and history pytrees, or repeated dispatch of many small programs). Dispatched <code>msc-production-solve-host-profile</code>: cProfile with device synchronisation plus py-spy over one warm production solve, ranking host functions per trip and counting device-to-host transfers, to name the mechanism before another repair is written.</p></div>
 </div>
 </section>
 </main>

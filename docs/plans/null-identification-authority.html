@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.65">
@@ -130,6 +130,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260904T090300000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T09:03:00+02:00">
     <div class="r-comment-body">BOTH POLISH-SUPPORT PAIRS ARE COMPLETE AND HELD FOR THE LEAD'S MERGE DECISION. Pair A (section 3, the wall tangency on the common spline): prototype 9165374a plus receipt a75615f6 in worktree nia-limiter-spline-minimum-prototype, and the paired expectation 7ab0af43 in worktree nia-line-of-sight-expectations (tests/test_limiter_line_of_sight.py expects the continuous visible-fin tangency (1.1, 0.05); 6 passed, referees 9 passed; captured log line-of-sight.log in the run directory of r-20260904T065016774984, the ledger row cites stderr.log of the same directory by a coordinator slip). Pair B (section 4, the census O and X values on the common spline): prototype a3fa8b9b in worktree nia-census-value-spline-authority-prototype and the paired expectation eacfbdd1 in worktree nia-split-polish-expectations (tests/test_split_polish_nulls.py 15 passed, the tensor-authority file plus referees 12 passed). Merge order if accepted: B's prototype then its pair, A's prototype then its pair, in one integration, followed by the complete connectivity file on the long CPU lane (the 31-amplitude continuity test exceeded A's fence) and a rebank so the twelve rows are read on the unified support. The two prototypes touch disjoint files (A connectivity_boundary.py; B flux_surface_connectivity.py and topology.py) and each was gated against main independently, so an integration verification node runs the combined focused gate after the merge.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260904T055306005644-nia-limiter-spline-minimum-prototype" data-who="nia-limiter-spline-x" data-when="2026-09-04T06:48:39Z">
+    <div class="r-comment-body"><p>Prototype held unmerged at a75615f6: the reachable wall minimum is the spline-restricted minimum with position, value, psi_axis and both wall operands on one map; eight bank rows move at most 6.5 mm with no class-sign change; spline pins 7 passed, referees 9 passed; one retained line-of-sight expectation rewritten in the paired node 7ab0af43 and the long connectivity file owed a slow-lane run</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260903T190502681048-nia-oracle-axis-admission" data-who="c-inv-oracle-axis" data-when="2026-09-03T19:11:37.068Z">
     <div class="r-comment-body"><p>136-cell diverted oracle fails on both the converged numeric field and the exact field (stencil or connectivity, no candidate qualifies); o_point_index returns index 0 when nothing qualifies so the second pass seeds an arbitrary cell; Null2D maxsize 5 truncates silently; 551 cells admits a spurious extremum 143.7 mm off; exact-side fallback is scoped to one case; reproduction is the -110 rung on CPU</p></div>

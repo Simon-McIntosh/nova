@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:02:16",
+  "updated": "2026-09-04T09:05:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -87389,6 +87389,161 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T055306005644-nia-limiter-spline-minimum-prototype",
+        "plan": "null-identification-authority",
+        "section": "\u00a73",
+        "node": "nia-limiter-spline-minimum-prototype",
+        "node_definition": {
+          "done_when": "Worktree commit confined to nova/equilibrium/connectivity_boundary.py, tests/test_limiter_spline_minimum.py, tests/test_connectivity_boundary.py and docs/figures/limiter-spline-minimum/, held unmerged, in which the wall minimum is a fixed-shape jit- and vmap-safe per-segment bracketing of the signed normalised outward flux on the tensor spline (segments split at crossed grid knots, fixed derivative bins, fixed bisection trips, endpoints eligible only when both reachable and in line of sight, corners and reachability boundaries included as candidates) returning position and value from the same spline, psi_axis read from that spline, the nodal hard-boundary wall operand and the classification wall operand consuming the same wall-minimum record, test_reachable_wall_minimum_is_refined_along_polyline rewritten to the new contract, the new tests green on CPU covering at least the dense-reference match with a root inside a segment and a minimum at a corner, invariance to inserted collinear wall nodes, the shadowed-bracket mask on the re-entrant notch, the reachable sub-segment without reachable vertices, eager-jit-vmap parity, the one-map class margin and the exact-wall-flux-as-residual pin, the retained line-of-sight and connectivity-boundary tests green with any pre-existing failure named against the base, the seven referee node IDs green, a CPU receipt docs/figures/limiter-spline-minimum/mast-rows.json tabulating per banked row the binding point, flux and class margin under the local quadratic and under the spline minimum beside the scout's baseline, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Prototype the limiter tangency as the one-dimensional minimum of the common complete-map C2 tensor spline restricted to the reachable wall polyline, replacing the cyclic three-node quadratic position fit plus both wall operands in nova/equilibrium/connectivity_boundary.py so the binding position, its field value, psi_axis, the hard-boundary wall operand plus the class-margin wall operand all read one spline map with reachability plus line of sight kept as masks, the exact wall flux vector kept only as an independent residual diagnostic (lead mandate 2026-09-04, prototype held unmerged for the lead, design plus authority inventory plus pinning-test list in /home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/limiter-polish-support.md sections Concrete spline-restricted wall-minimum design, Boundary and class-margin read, Pinning tests, reuse map: polish_stationary_points plus traced_spline_contour in flux_surface_connectivity.py as the existing tensor-spline authority pattern, _select_reachable_wall_limiter plus _reachable_wall_limiter_point plus _refine_wall_minimum_position lines 689 to 908 as the code being replaced, _argmin_exact for the winning slot, the scout's CPU prototype /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T052935150166-nia-limiter-polish-support-trace/measure_limiter_spline_support.py with its receipt logs/limiter-spline-support-cpu.json as the measurement baseline, the cached per-row operands under ~/.config/reckon/crew/reports/nova/bank-regeneration-raw-20260902/ plus the repaired axis plus X coordinates in the run logs of r-20260904T043020189632)",
+          "id": "nia-limiter-spline-minimum-prototype",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_limiter_spline_minimum.py",
+            "tests/test_connectivity_boundary.py",
+            "docs/figures/limiter-spline-minimum/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-limiter-spline-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T05:53:19Z",
+        "completed_at": "2026-09-04T06:48:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3320,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3320,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6db5540111486640781eb846fba439f63d8c138f",
+        "commits": [
+          "9165374a8f19b3286028279fc7f3798adcc38f2f",
+          "a75615f6d1eb4ffad18fd0ba5aa8d4368276714d"
+        ],
+        "changed_lines": {
+          "added": 994,
+          "removed": 343,
+          "files": 5
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_limiter_spline_minimum.py tests/test_connectivity_boundary.py::<reachable-wall contract>",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/logs/connectivity-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06afa-8e53-7ab3-b11c-3e2bacf7ddbb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26993792,
+            "cached_input_tokens_cumulative": 26993792,
+            "input_tokens": 27223749,
+            "input_tokens_cumulative": 27223749,
+            "output_tokens": 63255,
+            "output_tokens_cumulative": 63255,
+            "reasoning_output_tokens": 13664,
+            "reasoning_output_tokens_cumulative": 13664
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 123579,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 134379,
+              "external_wait": null,
+              "log_age_seconds": 128609,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 128655,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 76919,
+          "peak_input_tokens": 54217541
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -87477,6 +87632,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1541
+    "_version": 1542
   }
 }

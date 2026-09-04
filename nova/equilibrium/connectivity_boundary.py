@@ -201,11 +201,11 @@ _PRE_SADDLE_OFFSET_FRACTION = 2.0e-4
 _WALL_REACHABILITY_SAMPLES = 420
 
 # Each wall segment is first split at every crossed tensor-spline grid knot.
-# Four derivative bins within each polynomial piece are sufficient to expose
-# every along-segment minimum of a bicubic restriction while retaining fixed
-# shapes under JIT and batching.
+# Four derivative bins within each polynomial piece expose every along-segment
+# minimum of a bicubic restriction. Twelve bisections put the root within
+# 2.1e-5 m even on the widest supported piece while retaining fixed shapes.
 _WALL_DERIVATIVE_BINS = 4
-_WALL_MINIMUM_BISECTION_STEPS = 32
+_WALL_MINIMUM_BISECTION_STEPS = 12
 
 # Coarse-grid offsets probed around the preceding binding level.  The asymmetric
 # upper reach covers both sides of the two-sided flood mean while retaining the
@@ -700,8 +700,9 @@ def _select_reachable_wall_limiter(
     global_surface,
     axis_r,
     axis_z,
+    selected_wall=None,
 ):
-    """Minimise one tensor-spline map over reachable wall-polyline pieces.
+    """Polish a wall candidate on the tensor spline over reachable wall pieces.
 
     A node or sample qualifies only when it BOTH touches the pre-saddle axis
     flood on the connectivity raster AND has an unobstructed straight
@@ -711,8 +712,13 @@ def _select_reachable_wall_limiter(
     wall notch whenever the notch is too fine for the raster to resolve; the
     sightline test uses the exact polyline instead, so it excludes that node
     regardless of raster resolution or how extreme its fitted flux is.
-    Every segment is split at crossed radial and vertical spline knots, then
-    sampled with a fixed number of derivative bins per polynomial piece.
+    When ``selected_wall`` is supplied, its nearest segment is the local support.
+    Candidate discovery and ranking have
+    already happened in the topology census; the spline polish must not turn a
+    rejected wall extremum into a different accepted limiter elsewhere on the
+    wall.  The unseeded boundary read retains the complete polyline support.
+    Every supported segment is split at crossed radial and vertical spline knots,
+    then sampled with a fixed number of derivative bins per polynomial piece.
     Negative-to-nonnegative along-wall derivative brackets are bisected with a
     fixed trip count.  Eligible endpoints, corners, and equal-arc reachability
     samples compete with all refined roots through one exact masked argmin.
@@ -729,8 +735,48 @@ def _select_reachable_wall_limiter(
     ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, sample_r, sample_z, wall_r, wall_z)
     sample_reachable &= wall_r.shape[0] > 1
 
-    start = jnp.stack((wall_r, wall_z), axis=-1)
-    end = jnp.roll(start, -1, axis=0)
+    all_start = jnp.stack((wall_r, wall_z), axis=-1)
+    all_end = jnp.roll(all_start, -1, axis=0)
+    all_tangent = all_end - all_start
+    all_length_squared = jnp.sum(all_tangent**2, axis=-1)
+    if selected_wall is None:
+        segment_index = jnp.arange(wall_r.size, dtype=jnp.int32)
+        support_valid = jnp.asarray(True)
+    else:
+        selected_wall = jnp.asarray(selected_wall, dtype=wall_r.dtype)
+        support_valid = jnp.all(jnp.isfinite(selected_wall[:3]))
+        safe_selected = jnp.where(support_valid, selected_wall[:2], all_start[0])
+        selected_reachable = (
+            _wall_nodes_touching_region(
+                pre_saddle_region,
+                inside_limiter,
+                rg,
+                zg,
+                safe_selected[None, 0],
+                safe_selected[None, 1],
+            )[0]
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                safe_selected[None, 0],
+                safe_selected[None, 1],
+                wall_r,
+                wall_z,
+            )[0]
+        )
+        support_valid &= selected_reachable
+        projection = jnp.sum(
+            (safe_selected[None, :] - all_start) * all_tangent, axis=-1
+        ) / jnp.where(all_length_squared > 0.0, all_length_squared, 1.0)
+        projection = jnp.clip(projection, 0.0, 1.0)
+        closest = all_start + projection[:, None] * all_tangent
+        distance_squared = jnp.sum((closest - safe_selected[None, :]) ** 2, axis=-1)
+        selected_segment = _argmin_exact(
+            jnp.where(all_length_squared > 0.0, distance_squared, jnp.inf)
+        )
+        segment_index = selected_segment[None]
+    start = all_start[segment_index]
+    end = all_end[segment_index]
     tangent = end - start
     segment_length = jnp.linalg.norm(tangent, axis=-1)
     safe_radial_step = jnp.where(tangent[:, 0] != 0.0, tangent[:, 0], 1.0)
@@ -747,10 +793,10 @@ def _select_reachable_wall_limiter(
     )
     breakpoints = jnp.concatenate(
         (
-            jnp.zeros((wall_r.size, 1), dtype=wall_r.dtype),
+            jnp.zeros((start.shape[0], 1), dtype=wall_r.dtype),
             jnp.where(radial_valid, radial_crossing, jnp.inf),
             jnp.where(vertical_valid, vertical_crossing, jnp.inf),
-            jnp.ones((wall_r.size, 1), dtype=wall_r.dtype),
+            jnp.ones((start.shape[0], 1), dtype=wall_r.dtype),
         ),
         axis=1,
     )
@@ -758,7 +804,10 @@ def _select_reachable_wall_limiter(
     lower = breakpoints[:, :-1]
     upper = breakpoints[:, 1:]
     interval_valid = (
-        jnp.isfinite(upper) & (upper > lower) & (segment_length[:, None] > 0)
+        jnp.isfinite(upper)
+        & (upper > lower)
+        & (segment_length[:, None] > 0)
+        & support_valid
     )
     fraction = jnp.linspace(0.0, 1.0, _WALL_DERIVATIVE_BINS + 1, dtype=wall_r.dtype)
     parameter = lower[..., None] + (upper - lower)[..., None] * fraction
@@ -849,11 +898,22 @@ def _select_reachable_wall_limiter(
     root_score = jnp.where(
         bracket, (root_value - psi_axis) / span_safe, jnp.inf
     ).reshape(-1)
-    sample_evaluation_r = jnp.where(sample_reachable, sample_r, axis_r)
-    sample_evaluation_z = jnp.where(sample_reachable, sample_z, axis_z)
+    all_segment_length = jnp.linalg.norm(all_tangent, axis=-1)
+    all_segment_end = jnp.cumsum(all_segment_length)
+    sample_segment = jnp.clip(
+        jnp.searchsorted(all_segment_end, sample_arc, side="right"),
+        0,
+        wall_r.size - 1,
+    )
+    sample_supported = jnp.any(
+        sample_segment[:, None] == segment_index[None, :], axis=-1
+    )
+    sample_eligible = sample_reachable & sample_supported & support_valid
+    sample_evaluation_r = jnp.where(sample_eligible, sample_r, axis_r)
+    sample_evaluation_z = jnp.where(sample_eligible, sample_z, axis_z)
     sample_value = global_surface(sample_evaluation_r, sample_evaluation_z)
     sample_score = jnp.where(
-        sample_reachable, (sample_value - psi_axis) / span_safe, jnp.inf
+        sample_eligible, (sample_value - psi_axis) / span_safe, jnp.inf
     )
     scores = jnp.concatenate((endpoint_score, root_score, sample_score))
     candidate_points = jnp.concatenate(
@@ -866,9 +926,9 @@ def _select_reachable_wall_limiter(
     )
     candidate_arcs = jnp.concatenate(
         (
-            (jnp.cumsum(segment_length) - segment_length)[:, None, None]
+            (all_segment_end - all_segment_length)[segment_index, None, None]
             + parameter * segment_length[:, None, None],
-            (jnp.cumsum(segment_length) - segment_length)[:, None, None]
+            (all_segment_end - all_segment_length)[segment_index, None, None]
             + root_parameter * segment_length[:, None, None],
             sample_arc[None, :],
         ),
@@ -880,7 +940,7 @@ def _select_reachable_wall_limiter(
     point_evaluation = jnp.where(valid, point, safe_point)
     point_flux = global_surface(point_evaluation[0], point_evaluation[1])
     nearest_node = _argmin_exact((wall_r - point[0]) ** 2 + (wall_z - point[1]) ** 2)
-    node_arc = jnp.cumsum(segment_length) - segment_length
+    node_arc = all_segment_end - all_segment_length
     nan = jnp.asarray(jnp.nan, dtype=wall_r.dtype)
     exact_evaluation_r = jnp.where(wall_r.shape[0] > 1, wall_r, axis_r)
     exact_evaluation_z = jnp.where(wall_r.shape[0] > 1, wall_z, axis_z)
@@ -1235,7 +1295,7 @@ def _read_ingredients(
         wall_region = pre_saddle_region
 
     if wall_r.shape[0] > 1:
-        class_wall = _select_reachable_wall_limiter(
+        wall_arguments = (
             psi2d,
             rg,
             zg,
@@ -1249,6 +1309,28 @@ def _read_ingredients(
             axis_r,
             axis_z,
         )
+        if classification_wall is None:
+            class_wall = _select_reachable_wall_limiter(*wall_arguments)
+        else:
+            supplied_wall_surface_flux = global_surface(
+                supplied_wall[0], supplied_wall[1]
+            )
+            supplied_wall_scale = jnp.maximum(
+                jnp.abs(supplied_wall_surface_flux), jnp.abs(span_safe)
+            )
+            supplied_wall_matches_surface = jnp.isclose(
+                supplied_wall[2],
+                supplied_wall_surface_flux,
+                rtol=1.0e-10,
+                atol=1.0e-12 * supplied_wall_scale,
+            )
+            class_wall = jax.lax.cond(
+                supplied_wall_matches_surface,
+                lambda: _select_reachable_wall_limiter(
+                    *wall_arguments, selected_wall=supplied_wall
+                ),
+                lambda: _select_reachable_wall_limiter(*wall_arguments),
+            )
         wall_level = (class_wall["psi"] - psi_axis) / span_safe
         u_wall_c = jnp.where(class_wall["valid"], wall_level, jnp.inf)
     else:

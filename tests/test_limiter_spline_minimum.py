@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -12,7 +14,14 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium import connectivity_boundary as cb
+    from nova.equilibrium.wall_mask import inside_polygon
     from nova.jax.config import configure_dtypes
+
+
+_MAST_OPERANDS = (
+    Path(__file__).parents[1]
+    / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
+)
 
 
 def _bowl_case(wall_r=None, wall_z=None):
@@ -251,3 +260,54 @@ def test_limiter_class_margin_and_axis_use_one_spline_map():
         ingredients["class_wall"]["psi"] - ingredients["psi_axis"]
     ) / ingredients["span_safe"]
     assert float(ingredients["class_u_wall"]) == pytest.approx(float(expected_wall))
+
+
+def test_diverted_mast_row_polishes_only_its_census_wall_candidate():
+    """A shadowed census wall point cannot discover a different limiter contact."""
+    configure_dtypes()
+    with np.load(_MAST_OPERANDS, allow_pickle=False) as stored:
+        coordinate = stored["row_10_cell_rz"]
+        field = stored["row_10_per_cell_flux_values"]
+        axis = stored["row_10_selected_o"][0]
+        saddle = stored["row_10_selected_x"][0]
+        wall_point = stored["row_10_wall_point"][0]
+        wall = stored["row_10_wall"]
+
+    radial = np.unique(coordinate[:, 0])
+    vertical = np.unique(coordinate[:, 1])
+    field = field.reshape((radial.size, vertical.size)).T
+    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
+    inside = inside_polygon(
+        radial_grid.ravel(), vertical_grid.ravel(), wall[:, 0], wall[:, 1]
+    ).reshape(field.shape)
+    surface = cb.fit_tensor_spline(
+        jnp.asarray(radial), jnp.asarray(vertical), jnp.asarray(field)
+    )
+    classification_x = jnp.full((30, 4), jnp.nan, dtype=jnp.float64)
+    classification_x = classification_x.at[0].set(
+        jnp.r_[saddle, surface(saddle[0], saddle[1]), 0.0]
+    )
+    classification_wall = jnp.r_[wall_point, surface(wall_point[0], wall_point[1])]
+    result = cb._read_ingredients(
+        jnp.asarray(field),
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        jnp.asarray(inside),
+        jnp.asarray(axis[0]),
+        jnp.asarray(axis[1]),
+        96,
+        18,
+        jnp.asarray(wall[:, 0]),
+        jnp.asarray(wall[:, 1]),
+        surface(wall[:, 0], wall[:, 1]),
+        jnp.asarray(jnp.nan),
+        True,
+        classification_x,
+        classification_wall,
+    )
+
+    assert bool(result["class_wall_shadowed"])
+    assert not bool(result["class_wall"]["valid"])
+    assert np.isposinf(float(result["class_u_wall"]))
+    assert np.isfinite(float(result["class_u_x"]))
+    assert np.isposinf(float(result["class_u_wall"] - result["class_u_x"]))

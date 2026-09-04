@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.65">
@@ -134,6 +134,9 @@ for the lead before merge.</p>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260904T055306005644-nia-limiter-spline-minimum-prototype" data-who="nia-limiter-spline-x" data-when="2026-09-04T06:48:39Z">
     <div class="r-comment-body"><p>Prototype held unmerged at a75615f6: the reachable wall minimum is the spline-restricted minimum with position, value, psi_axis and both wall operands on one map; eight bank rows move at most 6.5 mm with no class-sign change; spline pins 7 passed, referees 9 passed; one retained line-of-sight expectation rewritten in the paired node 7ab0af43 and the long connectivity file owed a slow-lane run</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-20260904T091300000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T09:13:00+02:00">
+    <div class="r-comment-body">MERGE DECISION TAKEN, GATED ON PERFORMANCE (decision polish-support-merge-gated-on-performance). The coordinator integrated the four held commits onto main 9a49568c in a detached worktree (integration-polish-support): a3fa8b9b then eacfbdd1 (pair B), a75615f6 then 7ab0af43 (pair A), all four merging cleanly to the candidate tip 0dce5fe1 (10 files, +1307 minus 394, disjoint nova/ files between the pairs). Two nodes run on that tip before anything reaches main: nia-polish-support-performance (codex, H200): for main and the candidate on the same frozen-six arm and carrier, compile count and first-call wall, median and spread of the solve wall over five warm launches, trips and residual, plus for the topology read kernel alone the jit wall per map, the vmap wall per map over the eleven banked flux maps with the compile count over the batch required to be one, and eager against jit against vmap agreement of the axis, saddle, binding point and class margin, receipt docs/figures/polish-support-performance/main-vs-candidate.json; and nia-polish-support-integration-gate (codex, CPU): the combined focused gate of both pairs plus the referees plus the complete tests/test_connectivity_boundary.py including the 31-amplitude continuity test, every failure reproduced at main to attribute it, report under ~/.config/reckon/crew/reports/nova/integration/. On a pass (wall change inside the launch spread, compile count unchanged, batch compile count one, gate green or only pre-existing failures) the coordinator merges 0dce5fe1 into main and the rebank reads the twelve rows on the unified support.</div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260903T190502681048-nia-oracle-axis-admission" data-who="c-inv-oracle-axis" data-when="2026-09-03T19:11:37.068Z">
     <div class="r-comment-body"><p>136-cell diverted oracle fails on both the converged numeric field and the exact field (stencil or connectivity, no candidate qualifies); o_point_index returns index 0 when nothing qualifies so the second pass seeds an arbitrary cell; Null2D maxsize 5 truncates silently; 551 cells admits a spurious extremum 143.7 mm off; exact-side fallback is scoped to one case; reproduction is the -110 rung on CPU</p></div>
 </div>
@@ -185,8 +188,16 @@ for the lead before merge.</p>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="q-nia-001" data-section="s3" data-status="open" data-opened-by="reckon-ship-s19-relaunch" data-opened-at="2026-09-04" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-nia-001" data-section="s3" data-status="resolved" data-opened-by="reckon-ship-s19-relaunch" data-opened-at="2026-09-04" data-resolved-at="2026-09-04T07:13:13+00:00" data-resolved-by="Simon McIntosh">
     <p class="r-q-body">Merge the two polish-support prototype pairs? Pair A moves the wall tangency onto the common tensor spline (maximum binding-point shift 6.5 mm on eight bank rows, no class-sign change; one retained expectation rewritten); pair B authors the census O and X values from the same spline (value error on the exact diverted oracle from 5.5e-5 to 4.6e-9; four superseded assertions rewritten). Both held unmerged per the prototype-first mandate; on acceptance the coordinator integrates B then A, runs the combined gate and the long connectivity file, and rebanks the twelve rows.</p>
+    <p class="r-q-resolution">Lead 2026-09-04 09:05: merge both pairs, asserting first that there is no performance impact; the processes must remain fast and GPU batchable.</p>
+    </div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="polish-support-merge-gated-on-performance" data-choice="merge-both-after-performance-assertion" data-by="Simon McIntosh" data-when="2026-09-04T07:13:13+00:00">
+    <p class="r-dec-q">polish-support-merge-gated-on-performance</p>
+    <p class="r-dec-rat">Lead 2026-09-04: both polish-support prototype pairs (the tensor-spline census values and the spline-restricted wall minimum) merge to main, but only after a measured assertion on the H200 that the production solve is no slower and the topology read kernel stays fixed-shape under jit and vmap over a batch of flux maps, because the forward processes must remain fast and GPU batchable.</p>
     </div>
 </section>
 </main>

@@ -314,24 +314,31 @@ def test_newton_reconciles_the_frozen_solve_with_its_live_active_set():
         assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
 
 
-def test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask():
+def _solve_equal_own_mask_residual(**options):
     def mask_fn(state):
         return state >= 0.5
 
     def shadowed_map(_state, mask):
         return jnp.where(mask, 0.25, 1.0)
 
+    return newton_krylov(
+        lambda state: shadowed_map(state, mask_fn(state)),
+        jnp.zeros(1),
+        newton_steps=1,
+        gmres_iterations=1,
+        warmup=0,
+        shadow_mask_fn=mask_fn,
+        promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
+        shadowed_map_fn=shadowed_map,
+        active_set_steps=6,
+        **options,
+    )
+
+
+def test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask():
     def solve():
-        return newton_krylov(
-            lambda state: shadowed_map(state, mask_fn(state)),
-            jnp.zeros(1),
-            newton_steps=1,
-            gmres_iterations=1,
-            warmup=0,
-            shadow_mask_fn=mask_fn,
-            promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
-            shadowed_map_fn=shadowed_map,
-            active_set_steps=6,
+        return _solve_equal_own_mask_residual(
+            presettlement_incumbent_scoring=False,
         )
 
     for result in (solve(), jax.jit(solve)()):
@@ -350,6 +357,24 @@ def test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask():
             int(result.termination_reason)
             == FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
         )
+
+
+def test_default_presettlement_scoring_accepts_strict_decrease_and_keeps_best():
+    def solve():
+        return _solve_equal_own_mask_residual()
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_residuals = np.asarray(result.active_set_residuals)
+        finite_residuals = finite_residuals[np.isfinite(finite_residuals)]
+
+        np.testing.assert_allclose(result.state, [0.625])
+        np.testing.assert_allclose(finite_residuals, [3.0, 1.5])
+        assert finite_residuals[-1] < finite_residuals[0]
+        assert float(result.residual) == float(np.min(finite_residuals))
+        np.testing.assert_array_equal(
+            result.active_set_mask_differences, [1, 0, -1, -1, -1, -1]
+        )
+        assert int(result.accepted_newton_promotions) == 2
 
 
 def test_newton_reports_active_set_exhaustion_with_live_receipts():

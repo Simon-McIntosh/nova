@@ -37,7 +37,7 @@ def _settled_mask(_state):
     return jnp.zeros(2, dtype=bool)
 
 
-def _solve_without_mask_changes(enabled):
+def _solve_without_mask_changes(enabled, **options):
     def shadowed_map(state, _mask):
         return 0.5 * state + jnp.asarray([1.0, -0.5])
 
@@ -53,20 +53,36 @@ def _solve_without_mask_changes(enabled):
         active_set_steps=2,
         stop_on_active_set_stagnation=False,
         own_mask_acceptance=enabled,
+        **options,
     )
 
 
 @pytest.mark.parametrize("compiled", (False, True), ids=("eager", "jit"))
 def test_own_mask_acceptance_is_inert_when_candidates_keep_the_mask(compiled):
-    evaluate = (
-        jax.jit(_solve_without_mask_changes, static_argnums=0)
-        if compiled
-        else _solve_without_mask_changes
-    )
+    def solve(enabled):
+        return _solve_without_mask_changes(
+            enabled,
+            presettlement_incumbent_scoring=False,
+        )
+
+    evaluate = jax.jit(solve, static_argnums=0) if compiled else solve
     guarded = evaluate(True)
     frozen = evaluate(False)
 
     _assert_result_equal(guarded, frozen)
+
+
+@pytest.mark.parametrize("compiled", (False, True), ids=("eager", "jit"))
+def test_default_presettlement_scoring_accepts_incumbent_mask_decrease(compiled):
+    def solve():
+        return _solve_without_mask_changes(True)
+
+    result = jax.jit(solve)() if compiled else solve()
+
+    np.testing.assert_allclose(result.state, [2.0, -1.0])
+    assert float(result.residual) < 1.0
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 1
 
 
 @pytest.mark.parametrize("compiled", (False, True), ids=("eager", "jit"))

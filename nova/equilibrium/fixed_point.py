@@ -578,6 +578,7 @@ class _ActiveSetIterationState(NamedTuple):
     nonfinite: jax.Array
     stagnated: jax.Array
     settled: jax.Array
+    presettlement: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -1950,6 +1951,7 @@ def _newton_krylov_inner(
         Callable[[jax.Array, jax.Array], jax.Array] | None
     ) = None,
     own_mask_acceptance: bool = False,
+    presettlement_incumbent_scoring: jax.Array | bool = False,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult | tuple[FixedPointResult, _NewtonGlobalizationState]:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -2185,7 +2187,12 @@ def _newton_krylov_inner(
             candidate_shadow = jnp.ravel(
                 acceptance_shadow_mask_fn(candidate, carry.shadow_mask)
             )
-            return acceptance_shadowed_map_fn(candidate, candidate_shadow)
+            induced_map = acceptance_shadowed_map_fn(candidate, candidate_shadow)
+            return jnp.where(
+                jnp.asarray(presettlement_incumbent_scoring),
+                frozen_map(candidate),
+                induced_map,
+            )
 
         mapped, tangent = jax.linearize(frozen_map, state)
         residual_vector = mapped - state
@@ -2779,6 +2786,7 @@ def _active_set_newton_krylov(
     continue_globalization_state: bool,
     model_trust_selection: bool,
     own_mask_acceptance: bool,
+    presettlement_incumbent_scoring: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2788,7 +2796,12 @@ def _active_set_newton_krylov(
     history = history.at[0].set(initial_mask)
 
     def solve_frozen(
-        state, mask, run_warmup, globalization_state=None, resume_globalization=False
+        state,
+        mask,
+        run_warmup,
+        globalization_state=None,
+        resume_globalization=False,
+        presettlement=False,
     ):
         def frozen_map(candidate):
             return shadowed_map_fn(candidate, mask)
@@ -2816,6 +2829,7 @@ def _active_set_newton_krylov(
             acceptance_shadow_mask_fn=promoted_shadow_mask_fn,
             acceptance_shadowed_map_fn=shadowed_map_fn,
             own_mask_acceptance=own_mask_acceptance,
+            presettlement_incumbent_scoring=presettlement,
             precision=precision,
         )
 
@@ -2963,7 +2977,12 @@ def _active_set_newton_krylov(
         )
 
     first_result, first_globalization = solve_frozen(
-        initial, initial_mask, jnp.asarray(True)
+        initial,
+        initial_mask,
+        jnp.asarray(True),
+        presettlement=(
+            jnp.asarray(True) if presettlement_incumbent_scoring else jnp.asarray(False)
+        ),
     )
     (
         first_state,
@@ -2993,6 +3012,11 @@ def _active_set_newton_krylov(
         first_globalization,
         jnp.asarray(True),
         jnp.asarray(jnp.nan, dtype=initial.dtype),
+    )
+    first_presettlement = (
+        jnp.asarray(first_difference != 0)
+        if presettlement_incumbent_scoring
+        else jnp.asarray(False)
     )
     outer = _ActiveSetIterationState(
         state=first_state,
@@ -3027,6 +3051,7 @@ def _active_set_newton_krylov(
         nonfinite=first_nonfinite,
         stagnated=first_stagnated,
         settled=first_settled,
+        presettlement=first_presettlement,
     )
 
     def outer_body(index, carry):
@@ -3040,6 +3065,7 @@ def _active_set_newton_krylov(
                 ~carry.continue_trajectory,
                 carry.globalization_state,
                 carry.continue_globalization,
+                presettlement=carry.presettlement,
             )
             (
                 state,
@@ -3069,6 +3095,11 @@ def _active_set_newton_krylov(
                 inner_globalization,
                 carry.active,
                 carry.live_residual,
+            )
+            next_presettlement = (
+                jnp.asarray(mask_difference != 0)
+                if presettlement_incumbent_scoring
+                else jnp.asarray(False)
             )
             return _ActiveSetIterationState(
                 state=state,
@@ -3107,6 +3138,7 @@ def _active_set_newton_krylov(
                 nonfinite=nonfinite,
                 stagnated=stagnated,
                 settled=settled,
+                presettlement=next_presettlement,
             )
 
         return jax.lax.cond(carry.active, solve_active, lambda value: value, carry)
@@ -3174,6 +3206,7 @@ def newton_krylov(
     continue_globalization_state: bool = True,
     model_trust_selection: bool | None = None,
     own_mask_acceptance: bool | None = None,
+    presettlement_incumbent_scoring: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3218,6 +3251,15 @@ def newton_krylov(
     residual on its own mask to improve on the incumbent's live residual on
     the incumbent's own mask.  Its default follows ``model_trust_selection``:
     enabled for state-dependent active-set solves and disabled for smooth maps.
+    ``presettlement_incumbent_scoring`` narrows ``own_mask_acceptance``: a trip
+    whose preceding trip changed the active set (nonzero mask difference)
+    scores every candidate and the incumbent on the incumbent's own frozen
+    mask instead of each candidate's induced mask, reproducing the acceptance
+    this solver used before induced-mask scoring.  A trip whose preceding
+    trip left the mask unchanged keeps induced-mask scoring.  The strict
+    residual-decrease requirement, best-iterate retention, and the induced-
+    mask referees are unaffected.  It is enabled by default for state-dependent
+    active-set solves and is inert when own-mask acceptance is not requested.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -3244,6 +3286,8 @@ def newton_krylov(
         raise ValueError("own-mask acceptance requires promoted shadow masks")
     if use_own_mask_acceptance and admissibility_fn is not None:
         raise ValueError("own-mask acceptance is unavailable for manifold advance")
+    if presettlement_incumbent_scoring and own_mask_acceptance is False:
+        raise ValueError("presettlement incumbent scoring requires own-mask acceptance")
     options = {
         "newton_steps": newton_steps,
         "gmres_iterations": gmres_iterations,
@@ -3290,6 +3334,7 @@ def newton_krylov(
             continue_globalization_state=continue_globalization_state,
             model_trust_selection=use_model_trust,
             own_mask_acceptance=use_own_mask_acceptance,
+            presettlement_incumbent_scoring=presettlement_incumbent_scoring,
             precision=precision,
         )
     if checkpoint_path is not None:

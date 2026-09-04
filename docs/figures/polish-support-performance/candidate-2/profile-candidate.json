@@ -1,0 +1,1552 @@
+{
+  "arm": "candidate",
+  "assembly_runtime": {
+    "cuda_visible_devices": "0",
+    "device": "cuda:0",
+    "device_kind": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "python": "3.14.2"
+  },
+  "captured_at": "2026-09-04T16:39:26.433913+00:00",
+  "complete": true,
+  "direct_probes": {
+    "candidate_census": {
+      "compile_wall_s": 5.385082175955176,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 2986,
+        "fixed_scan_trip_lower_bound": 2986
+      },
+      "first_execute_wall_s": 0.08438280504196882,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.017162269912660122,
+        "median_absolute_deviation_s": 1.032557338476181e-05,
+        "median_s": 0.017140877433121204,
+        "minimum_s": 0.017130551859736443,
+        "range_s": 3.171805292367935e-05,
+        "sample_count": 3,
+        "samples_s": [
+          0.017140877433121204,
+          0.017130551859736443,
+          0.017162269912660122
+        ]
+      }
+    },
+    "flood_fills": {
+      "compile_wall_s": 4.679204829968512,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 2499,
+        "fixed_scan_trip_lower_bound": 2499
+      },
+      "first_execute_wall_s": 0.022892487235367298,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.013415840454399586,
+        "median_absolute_deviation_s": 1.4045275747776031e-05,
+        "median_s": 0.01337471418082714,
+        "minimum_s": 0.013360668905079365,
+        "range_s": 5.517154932022095e-05,
+        "sample_count": 3,
+        "samples_s": [
+          0.01337471418082714,
+          0.013360668905079365,
+          0.013415840454399586
+        ]
+      }
+    },
+    "forward_evaluation": {
+      "compile_wall_s": 0.6673304848372936,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 14,
+        "fixed_scan_trip_lower_bound": 14
+      },
+      "first_execute_wall_s": 0.007810053415596485,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.00036170240491628647,
+        "median_absolute_deviation_s": 8.275732398033142e-06,
+        "median_s": 0.0002278471365571022,
+        "minimum_s": 0.00021957140415906906,
+        "range_s": 0.0001421310007572174,
+        "sample_count": 3,
+        "samples_s": [
+          0.00036170240491628647,
+          0.0002278471365571022,
+          0.00021957140415906906
+        ]
+      }
+    },
+    "gmres_orthogonalisation": {
+      "compile_wall_s": 0.1899116113781929,
+      "control_flow": {
+        "dynamic_while_primitives": 2,
+        "fixed_scan_trip_compiled_branch_sum": 0,
+        "fixed_scan_trip_lower_bound": 0
+      },
+      "first_execute_wall_s": 0.004970259964466095,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.0013462621718645096,
+        "median_absolute_deviation_s": 3.936421126127243e-05,
+        "median_s": 0.001254236325621605,
+        "minimum_s": 0.0012148721143603325,
+        "range_s": 0.0001313900575041771,
+        "sample_count": 3,
+        "samples_s": [
+          0.0013462621718645096,
+          0.001254236325621605,
+          0.0012148721143603325
+        ]
+      }
+    },
+    "jacobian_vector_product": {
+      "compile_wall_s": 0.7197025716304779,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 14,
+        "fixed_scan_trip_lower_bound": 14
+      },
+      "first_execute_wall_s": 0.0028239991515874863,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.0003442559391260147,
+        "median_absolute_deviation_s": 1.5152618288993835e-06,
+        "median_s": 0.0003427406772971153,
+        "minimum_s": 0.0003125462681055069,
+        "range_s": 3.170967102050781e-05,
+        "sample_count": 3,
+        "samples_s": [
+          0.0003427406772971153,
+          0.0003442559391260147,
+          0.0003125462681055069
+        ]
+      }
+    },
+    "line_search": {
+      "compile_wall_s": 3.888971301726997,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 214,
+        "fixed_scan_trip_lower_bound": 124
+      },
+      "first_execute_wall_s": 0.055923108011484146,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.004101492464542389,
+        "median_absolute_deviation_s": 4.25092875957489e-05,
+        "median_s": 0.004034035839140415,
+        "minimum_s": 0.003991526551544666,
+        "range_s": 0.00010996591299772263,
+        "sample_count": 3,
+        "samples_s": [
+          0.003991526551544666,
+          0.004034035839140415,
+          0.004101492464542389
+        ]
+      }
+    },
+    "separatrix": {
+      "compile_wall_s": 42.72617558017373,
+      "control_flow": {
+        "dynamic_while_primitives": 7,
+        "fixed_scan_trip_compiled_branch_sum": 8743,
+        "fixed_scan_trip_lower_bound": 7835
+      },
+      "first_execute_wall_s": 0.11709864716976881,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.07812782377004623,
+        "median_absolute_deviation_s": 0.004575308412313461,
+        "median_s": 0.05332550685852766,
+        "minimum_s": 0.0487501984462142,
+        "range_s": 0.029377625323832035,
+        "sample_count": 3,
+        "samples_s": [
+          0.0487501984462142,
+          0.05332550685852766,
+          0.07812782377004623
+        ]
+      }
+    },
+    "spline_fits": {
+      "compile_wall_s": 8.88761396985501,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 1438,
+        "fixed_scan_trip_lower_bound": 1438
+      },
+      "first_execute_wall_s": 0.22183148842304945,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.006804158911108971,
+        "median_absolute_deviation_s": 9.588152170181274e-05,
+        "median_s": 0.0066899945959448814,
+        "minimum_s": 0.006594113074243069,
+        "range_s": 0.00021004583686590195,
+        "sample_count": 3,
+        "samples_s": [
+          0.006804158911108971,
+          0.0066899945959448814,
+          0.006594113074243069
+        ]
+      }
+    },
+    "topology_read": {
+      "compile_wall_s": 19.31874109711498,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 23864,
+        "fixed_scan_trip_lower_bound": 23864
+      },
+      "first_execute_wall_s": 0.08748096786439419,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.056870777159929276,
+        "median_absolute_deviation_s": 1.7284415662288666e-05,
+        "median_s": 0.05663639586418867,
+        "minimum_s": 0.05661911144852638,
+        "range_s": 0.00025166571140289307,
+        "sample_count": 3,
+        "samples_s": [
+          0.056870777159929276,
+          0.05661911144852638,
+          0.05663639586418867
+        ]
+      }
+    },
+    "wall_reachability": {
+      "compile_wall_s": 35.92547943163663,
+      "control_flow": {
+        "dynamic_while_primitives": 6,
+        "fixed_scan_trip_compiled_branch_sum": 7822,
+        "fixed_scan_trip_lower_bound": 6914
+      },
+      "first_execute_wall_s": 0.1448760824277997,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.04743821173906326,
+        "median_absolute_deviation_s": 0.00012798607349395752,
+        "median_s": 0.04422795679420233,
+        "minimum_s": 0.04409997072070837,
+        "range_s": 0.0033382410183548927,
+        "sample_count": 3,
+        "samples_s": [
+          0.04743821173906326,
+          0.04422795679420233,
+          0.04409997072070837
+        ]
+      }
+    }
+  },
+  "driver": {
+    "mode": "device-synchronised timers with offline structural census",
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3/docs/figures/polish-support-performance/candidate-2/trip_quantum_profile.py",
+    "sha256": "fd99a680830031b990d04b807e0215f247717a16bd0ca87838feec0417746e50"
+  },
+  "evaluation_census": {
+    "candidate_census": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 2986,
+      "fixed_scan_trip_lower_bound_per_evaluation": 2986,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "flood_fills": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 2499,
+      "fixed_scan_trip_lower_bound_per_evaluation": 2499,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "forward_evaluation": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 14,
+      "fixed_scan_trip_lower_bound_per_evaluation": 14,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "gmres_orthogonalisation": {
+      "dynamic_while_primitives": 2,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 0,
+      "fixed_scan_trip_lower_bound_per_evaluation": 0,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "jacobian_vector_product": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 14,
+      "fixed_scan_trip_lower_bound_per_evaluation": 14,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "line_search": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 214,
+      "fixed_scan_trip_lower_bound_per_evaluation": 124,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "separatrix": {
+      "dynamic_while_primitives": 7,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 8743,
+      "fixed_scan_trip_lower_bound_per_evaluation": 7835,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "spline_fits": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 1438,
+      "fixed_scan_trip_lower_bound_per_evaluation": 1438,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "topology_read": {
+      "dynamic_while_primitives": 0,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 23864,
+      "fixed_scan_trip_lower_bound_per_evaluation": 23864,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    },
+    "wall_reachability": {
+      "dynamic_while_primitives": 6,
+      "fixed_scan_trip_compiled_branch_sum_per_evaluation": 7822,
+      "fixed_scan_trip_lower_bound_per_evaluation": 6914,
+      "gpu_compute_launches_per_evaluation": null,
+      "gpu_transfers_per_evaluation": null,
+      "launch_count_status": "not captured: both CUPTI replays failed in cusolverDnDgesvdj and the partial trace is unpromoted"
+    }
+  },
+  "fine_component_contract": {
+    "limiter_uses_selected_segment": true,
+    "line_of_sight_target_count": 420
+  },
+  "fine_direct_probes": {
+    "limiter_tangency": {
+      "compile_wall_s": 12.066231620498002,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 2811,
+        "fixed_scan_trip_lower_bound": 2811
+      },
+      "first_execute_wall_s": 0.5060240449383855,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.016323445364832878,
+        "median_absolute_deviation_s": 1.2786127626895905e-05,
+        "median_s": 0.016310659237205982,
+        "minimum_s": 0.01629597507417202,
+        "range_s": 2.7470290660858154e-05,
+        "sample_count": 3,
+        "samples_s": [
+          0.016323445364832878,
+          0.01629597507417202,
+          0.016310659237205982
+        ]
+      }
+    },
+    "line_of_sight": {
+      "compile_wall_s": 0.4229751955717802,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 0,
+        "fixed_scan_trip_lower_bound": 0
+      },
+      "first_execute_wall_s": 0.0007621999830007553,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 8.770544081926346e-05,
+        "median_absolute_deviation_s": 1.7439015209674835e-05,
+        "median_s": 7.026642560958862e-05,
+        "minimum_s": 4.400499165058136e-05,
+        "range_s": 4.37004491686821e-05,
+        "sample_count": 3,
+        "samples_s": [
+          8.770544081926346e-05,
+          7.026642560958862e-05,
+          4.400499165058136e-05
+        ]
+      }
+    },
+    "tensor_spline_fit": {
+      "compile_wall_s": 0.08634373266249895,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 120,
+        "fixed_scan_trip_lower_bound": 120
+      },
+      "first_execute_wall_s": 0.0028609726577997208,
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      },
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262723",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "steady": {
+        "maximum_s": 0.0010479968041181564,
+        "median_absolute_deviation_s": 9.734183549880981e-06,
+        "median_s": 0.0010382626205682755,
+        "minimum_s": 0.0010089166462421417,
+        "range_s": 3.908015787601471e-05,
+        "sample_count": 3,
+        "samples_s": [
+          0.0010479968041181564,
+          0.0010382626205682755,
+          0.0010089166462421417
+        ]
+      }
+    }
+  },
+  "host_callback_or_sync": {
+    "closed_jaxpr_callback_primitive_count": 0,
+    "closed_jaxpr_callback_primitives": {},
+    "device_syncs_per_timed_invocation": 1,
+    "final_sync": "jax.block_until_ready on every timed result pytree",
+    "note": "the production route disables streaming callbacks; the timer remainder bounds host dispatch and final synchronization but also retains fused device work absent from the isolated timer model"
+  },
+  "measurement_base_revision": "f001ce588d9ad3bde8387907e109dbf1226fff7c",
+  "per_trip_components": [
+    {
+      "calls_per_trip": 336.0,
+      "component": "wall_reachability",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 14.860593482851982,
+      "direct_wall_s_per_call": 0.04422795679420233,
+      "direct_wall_samples_s": [
+        0.04743821173906326,
+        0.04422795679420233,
+        0.04409997072070837
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "flood_fills",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 4.493903964757919,
+      "direct_wall_s_per_call": 0.01337471418082714,
+      "direct_wall_samples_s": [
+        0.01337471418082714,
+        0.013360668905079365,
+        0.013415840454399586
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "separatrix",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 17.917370304465294,
+      "direct_wall_s_per_call": 0.05332550685852766,
+      "direct_wall_samples_s": [
+        0.0487501984462142,
+        0.05332550685852766,
+        0.07812782377004623
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "spline_fits",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 0.34885624051094055,
+      "direct_wall_s_per_call": 0.0010382626205682755,
+      "direct_wall_samples_s": [
+        0.0010479968041181564,
+        0.0010382626205682755,
+        0.0010089166462421417
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "census",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 5.759334817528725,
+      "direct_wall_s_per_call": 0.017140877433121204,
+      "direct_wall_samples_s": [
+        0.017140877433121204,
+        0.017130551859736443,
+        0.017162269912660122
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "limiter_tangency_along_spline",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 5.48038150370121,
+      "direct_wall_s_per_call": 0.016310659237205982,
+      "direct_wall_samples_s": [
+        0.016323445364832878,
+        0.01629597507417202,
+        0.016310659237205982
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "census_values_by_spline",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 2.24783818423748,
+      "direct_wall_s_per_call": 0.0066899945959448814,
+      "direct_wall_samples_s": [
+        0.006804158911108971,
+        0.0066899945959448814,
+        0.006594113074243069
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 336.0,
+      "component": "line_of_sight_rule",
+      "counting_note": "one aggregate component call per modeled topology read",
+      "direct_product_s_per_trip": 0.023609519004821777,
+      "direct_wall_s_per_call": 7.026642560958862e-05,
+      "direct_wall_samples_s": [
+        8.770544081926346e-05,
+        7.026642560958862e-05,
+        4.400499165058136e-05
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 84.0,
+      "component": "forward_evaluation",
+      "counting_note": "solve-history count",
+      "direct_product_s_per_trip": 0.019139159470796585,
+      "direct_wall_s_per_call": 0.0002278471365571022,
+      "direct_wall_samples_s": [
+        0.00036170240491628647,
+        0.0002278471365571022,
+        0.00021957140415906906
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 144.0,
+      "component": "jacobian_vector_product",
+      "counting_note": "solve-history count",
+      "direct_product_s_per_trip": 0.04935465753078461,
+      "direct_wall_s_per_call": 0.0003427406772971153,
+      "direct_wall_samples_s": [
+        0.0003427406772971153,
+        0.0003442559391260147,
+        0.0003125462681055069
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 12.0,
+      "component": "line_search",
+      "counting_note": "solve-history count",
+      "direct_product_s_per_trip": 0.04840843006968498,
+      "direct_wall_s_per_call": 0.004034035839140415,
+      "direct_wall_samples_s": [
+        0.003991526551544666,
+        0.004034035839140415,
+        0.004101492464542389
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "calls_per_trip": 12.0,
+      "component": "gmres_orthogonalisation",
+      "counting_note": "solve-history count",
+      "direct_product_s_per_trip": 0.015050835907459259,
+      "direct_wall_s_per_call": 0.001254236325621605,
+      "direct_wall_samples_s": [
+        0.0013462621718645096,
+        0.001254236325621605,
+        0.0012148721143603325
+      ],
+      "persistent_compilation_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "calls_per_trip": 1.0,
+      "component": "host_sync_remainder",
+      "counting_note": "upper bound on host dispatch plus final synchronization; without a complete profiler trace it also contains fused device work absent from the isolated component model",
+      "direct_product_s_per_trip": 0.0,
+      "direct_wall_s_per_call": 0.0,
+      "direct_wall_samples_s": [
+        0.0
+      ],
+      "persistent_compilation_cache": {
+        "events": {},
+        "status": "not_applicable"
+      }
+    }
+  ],
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "production_identity": {
+    "arm": "pure",
+    "carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.00485237967222929
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022298 direct_builders=0 verdict=PASS"
+      }
+    },
+    "field_policy": {
+      "active_circuit_count": 13,
+      "active_mapping": [
+        {
+          "centroid_separation_m": 3.020663818271642e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 50319.66623454681,
+          "family": "p2_inner_lower",
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "raw_current_a": 50319.8671875,
+          "stored_circuit": 4
+        },
+        {
+          "centroid_separation_m": 4.610138552976278e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 50267.518005302176,
+          "family": "p2_inner_upper",
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "raw_current_a": 50267.71875,
+          "stored_circuit": 2
+        },
+        {
+          "centroid_separation_m": 3.794706373301994e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 33416.35546875,
+          "family": "p2_outer_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 33416.35546875,
+          "stored_circuit": 5
+        },
+        {
+          "centroid_separation_m": 3.882122250270243e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 33341.1796875,
+          "family": "p2_outer_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 33341.1796875,
+          "stored_circuit": 3
+        },
+        {
+          "centroid_separation_m": 1.2310483904636694e-07,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 46.641414642333984,
+          "family": "p3_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 46.641414642333984,
+          "stored_circuit": 7
+        },
+        {
+          "centroid_separation_m": 1.1378064254653142e-07,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 29.57099151611328,
+          "family": "p3_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 29.57099151611328,
+          "stored_circuit": 6
+        },
+        {
+          "centroid_separation_m": 0.002284428762164253,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -185195.33400285762,
+          "family": "p4_lower",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -185195.171875,
+          "stored_circuit": 9
+        },
+        {
+          "centroid_separation_m": 0.003039636783399228,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -185433.83421165083,
+          "family": "p4_upper",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -185433.671875,
+          "stored_circuit": 8
+        },
+        {
+          "centroid_separation_m": 0.0022829440191137885,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -138175.5897147773,
+          "family": "p5_lower",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -138175.46875,
+          "stored_circuit": 11
+        },
+        {
+          "centroid_separation_m": 0.0022872695201792835,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -138157.0271985269,
+          "family": "p5_upper",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -138156.90625,
+          "stored_circuit": 10
+        },
+        {
+          "centroid_separation_m": 5.527338696549878e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 926.8552856445312,
+          "family": "p6_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 926.8552856445312,
+          "stored_circuit": 13
+        },
+        {
+          "centroid_separation_m": 1.4493967305635352e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -554.8970947265625,
+          "family": "p6_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": -554.8970947265625,
+          "stored_circuit": 12
+        },
+        {
+          "centroid_separation_m": 2.5307005105576235e-06,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -8325233.859375,
+          "family": "sol",
+          "filament_turn_multiplier_sum": 328.0,
+          "raw_current_a": -25381.810546875,
+          "stored_circuit": 1
+        }
+      ],
+      "active_mapping_recomputed_for_shot": true,
+      "all_currents_prescribed": true,
+      "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+      "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+      "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+      "passive_or_vessel_circuit_count": 88,
+      "passive_registry_maximum_separation_m": 0.0,
+      "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+      "policy": "explicit prescribed-current response matrix",
+      "response_input_digests": {
+        "algorithm": "sha256",
+        "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "inputs": {
+          "fcoil_ang1": {
+            "dtype": "<f4",
+            "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang2": {
+            "dtype": "<f4",
+            "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_circ": {
+            "dtype": "<f8",
+            "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_height": {
+            "dtype": "<f4",
+            "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_n": {
+            "dtype": "<f4",
+            "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+            "shape": [
+              101
+            ]
+          },
+          "fcoil_r": {
+            "dtype": "<f4",
+            "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_turns": {
+            "dtype": "<f4",
+            "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_width": {
+            "dtype": "<f4",
+            "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_xmult": {
+            "dtype": "<f4",
+            "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_z": {
+            "dtype": "<f4",
+            "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+            "shape": [
+              938
+            ]
+          },
+          "gridr": {
+            "dtype": "<f4",
+            "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+            "shape": [
+              65
+            ]
+          },
+          "gridz": {
+            "dtype": "<f4",
+            "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+            "shape": [
+              65
+            ]
+          },
+          "limiterr": {
+            "dtype": "<f4",
+            "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+            "shape": [
+              37
+            ]
+          },
+          "limiterz": {
+            "dtype": "<f4",
+            "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+            "shape": [
+              37
+            ]
+          },
+          "resolved_response_targets": {
+            "dtype": "<f8",
+            "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "shape": [
+              1126,
+              2
+            ]
+          }
+        }
+      },
+      "response_matrix_reused": true,
+      "response_shape": [
+        1126,
+        101
+      ],
+      "section_kernel_evaluations": 938,
+      "section_kernel_evaluations_this_shot": 0,
+      "stored_circuit_count": 101,
+      "stored_field_closure_rms_wb": 1.4821494410218056e-16,
+      "stored_field_closure_sup_wb": 1.1102230246251565e-15
+    },
+    "reference": {
+      "machine": "MAST",
+      "plasma_current_a": 933034.875,
+      "qualification_before_attribution": {
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+        "passes": true,
+        "stored_lcfs_contour_limit": 0.006,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+        "typed_saddle_candidate_count": 2,
+        "typed_saddle_resolved": true
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "source_coordinate": {
+        "axis_wb": 0.3423115953376666,
+        "boundary_wb": -0.1292985047045701,
+        "support_nodes": 243
+      },
+      "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+      "span_wb": 1.5839675751331153,
+      "time_s": 0.22999998927116394
+    },
+    "solver": {
+      "active_set_step_budget": 24,
+      "gmres_iterations": 12,
+      "newton_steps": 12,
+      "route": "ForwardProfile.solve_branch newton_krylov",
+      "tolerance": 1e-08,
+      "warmup_sweeps": 0
+    }
+  },
+  "production_trip_probe": {
+    "compile_wall_s": 496.09182175900787,
+    "control_flow": {
+      "dynamic_while_primitives": 23,
+      "fixed_scan_trip_compiled_branch_sum": 1814963,
+      "fixed_scan_trip_lower_bound": 165243
+    },
+    "first_execute_wall_s": 127.80595361441374,
+    "persistent_compilation_cache": {
+      "events": {
+        "cache_hits": 4,
+        "cache_misses": 1,
+        "compile_requests_use_cache": 5
+      },
+      "status": "mixed"
+    },
+    "steady": {
+      "maximum_s": 125.08179432619363,
+      "median_absolute_deviation_s": 0.3777507971972227,
+      "median_s": 124.70404352899641,
+      "minimum_s": 123.3573497030884,
+      "range_s": 1.724444623105228,
+      "sample_count": 3,
+      "samples_s": [
+        123.3573497030884,
+        125.08179432619363,
+        124.70404352899641
+      ]
+    }
+  },
+  "profiler_replay": {
+    "failed_jobs": [],
+    "failure_call": "cusolverDnDgesvdj",
+    "finding": "profiling was omitted from the timer-only measurement",
+    "kernel_launch_counts_available": false,
+    "partial_trace": {
+      "exists": true,
+      "path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/trip-quantum-trace/plugins/profile/2026_09_04_14_30_40/perfetto_trace.json.gz",
+      "promoted": false,
+      "reason": "production annotation ended in a CUDA failure and CUPTI reported dropped activity events",
+      "sha256": "0c8b71c45336d11d7530e44aba52617ab4cb091f52d4685303f5c096852c7cbf",
+      "size_bytes": 62771888
+    },
+    "status": "not_requested"
+  },
+  "promotion_count_observation": {
+    "banked_field": "solve.trips",
+    "banked_performance_receipt_count": 24,
+    "banked_revision": "9a49568c",
+    "divergence": 144,
+    "interpretation": "the banked count predates the step-cap merge and is retained as an observation; it is not a validity gate on synchronized raw timings",
+    "matches": false,
+    "observed_attempted_newton_promotions": 168
+  },
+  "ranked_bottlenecks": [
+    {
+      "bottleneck": "topology read: wall reachability",
+      "owner_plan": "null-identification-authority",
+      "repair": "land the shared TensorBSpline authority so each topology read fits once rather than 63 times, then reuse one topology partition across residual grades",
+      "wall_s_per_trip": 19.029829010367393
+    },
+    {
+      "bottleneck": "Jacobian-vector products",
+      "owner_plan": "solver-convergence-regression",
+      "repair": "reuse or compress the linearized operator and reduce the Krylov action budget before changing nonlinear acceptance",
+      "wall_s_per_trip": 0.04935465753078461
+    },
+    {
+      "bottleneck": "line-search residual grades",
+      "owner_plan": "millisecond-converged-solve",
+      "repair": "batch or prune the fixed promotion ladder while retaining own-mask acceptance and best-iterate semantics",
+      "wall_s_per_trip": 0.032003436237573624
+    }
+  ],
+  "raw_serialization": {
+    "component_probe_job_id": "1262723",
+    "policy": "output rewritten after each synchronized component probe",
+    "production_probe_reused": true,
+    "production_source_job_id": "1262710",
+    "trip_count_retained_as_observation": true
+  },
+  "resume_provenance": {
+    "checks": {
+      "arm": true,
+      "authority_arm": true,
+      "authority_digest": true,
+      "authority_identity": true,
+      "counts_present": true,
+      "h200_runtime": true,
+      "incomplete_component_profile": true,
+      "only_production_serialised": true,
+      "production_probe_present": true,
+      "raw_schema": true,
+      "revision": true,
+      "scheduler_job_identity": true,
+      "scheduler_partition": true,
+      "scheduler_reservation": true,
+      "scheduler_tmp": true,
+      "three_synchronised_samples": true,
+      "x64_runtime": true
+    },
+    "policy": "reuse a complete three-sample production timing from the same arm and revision when it was measured on one H200 in betelgeuse under the gpu_0003_grpA reservation; component probes run in the resume job",
+    "resume_job_id": "1262723",
+    "source_job_id": "1262710",
+    "source_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3/docs/figures/polish-support-performance/candidate-2/profile-candidate.json",
+    "source_sha256": "7ec0c74f8c335de82e9c94f46aa77127462b9b25bc6a61dc0e0f23ac5af9ccfe",
+    "valid": true
+  },
+  "reuse_map_inputs": {
+    "persistent_compilation_cache_wiring_revision": "e04970ad",
+    "scan_iteration_latency_s": 7.6e-06,
+    "split_spline_fits_per_topology_read": 63,
+    "topology_reads_per_residual_evaluation": 4
+  },
+  "revision": "f001ce588d9ad3bde8387907e109dbf1226fff7c",
+  "schema": "nova.trip_quantum_profile",
+  "schema_version": 2,
+  "svd_census": {
+    "condition_svds_per_split_spline_fit": 2,
+    "explicit_solver_svd_call_site": "nova/equilibrium/fixed_point.py:_projected_krylov_condition jnp.linalg.svd(hessenberg, compute_uv=False)",
+    "explicit_solver_svds_per_newton_residual_linearisation": 1,
+    "split_spline_condition_call_site": "nova/linalg/split_spline.py:_conditioned_fit jnp.linalg.cond(normal)",
+    "split_spline_condition_svds_per_residual_evaluation": 504,
+    "split_spline_condition_svds_per_topology_read": 126
+  },
+  "timer_runs": [
+    {
+      "cupti_dropped_activity_buffers": false,
+      "job_id": "1262710",
+      "log_path": null,
+      "log_sha256": null,
+      "profiler_replay_failure": null,
+      "scheduler": {
+        "accepted_time_limit": "01:00:00",
+        "cpus_per_task": "1",
+        "job_id": "1262710",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "temporary_directory": "/tmp"
+      },
+      "scope": "production timing only; direct component probes name the resume job",
+      "timing_phase_complete": true,
+      "timings": {
+        "production_trip": {
+          "maximum_s": 125.08179432619363,
+          "median_absolute_deviation_s": 0.3777507971972227,
+          "median_s": 124.70404352899641,
+          "minimum_s": 123.3573497030884,
+          "range_s": 1.724444623105228,
+          "sample_count": 3,
+          "samples_s": [
+            123.3573497030884,
+            125.08179432619363,
+            124.70404352899641
+          ]
+        }
+      }
+    }
+  ],
+  "trip": {
+    "component_attribution": {
+      "directly_attributed_wall_s_per_trip": 19.145377099514008,
+      "method": "direct synchronized probe medians multiplied by exact trip counts; the line-search row subtracts its six separately counted forward grades, topology reads use the measured four-per-residual reuse-map count, and the nonnegative timer remainder retains fused device work, host dispatch, and final synchronization because CUPTI evidence failed",
+      "remainder_scope": "upper bound on host dispatch plus final synchronization; without a complete profiler trace it also contains fused device work absent from the isolated component model",
+      "topology_reads_per_trip": 336.0,
+      "unattributed_timer_remainder_s_per_trip": 0.0
+    },
+    "component_breakdown": [
+      {
+        "component": "topology_read",
+        "raw_direct_probe_wall_s_per_evaluation": 0.05663639586418867,
+        "share_of_trip": 2.1363990982633663,
+        "wall_s_per_evaluation": 0.05663639586418867,
+        "wall_s_per_trip": 19.029829010367393
+      },
+      {
+        "component": "jacobian_vector_product",
+        "raw_direct_probe_wall_s_per_evaluation": 0.0003427406772971153,
+        "share_of_trip": 0.005540840424074301,
+        "wall_s_per_evaluation": 0.0003427406772971153,
+        "wall_s_per_trip": 0.04935465753078461
+      },
+      {
+        "component": "line_search",
+        "raw_direct_probe_wall_s_per_evaluation": 0.004034035839140415,
+        "share_of_trip": 0.0035928915746974138,
+        "wall_s_per_evaluation": 0.002666953019797802,
+        "wall_s_per_trip": 0.032003436237573624
+      },
+      {
+        "component": "forward_evaluation",
+        "raw_direct_probe_wall_s_per_evaluation": 0.0002278471365571022,
+        "share_of_trip": 0.0021486731705604107,
+        "wall_s_per_evaluation": 0.0002278471365571022,
+        "wall_s_per_trip": 0.019139159470796585
+      },
+      {
+        "component": "gmres_orthogonalisation",
+        "raw_direct_probe_wall_s_per_evaluation": 0.001254236325621605,
+        "share_of_trip": 0.0016896942291645463,
+        "wall_s_per_evaluation": 0.001254236325621605,
+        "wall_s_per_trip": 0.015050835907459259
+      },
+      {
+        "component": "host_dispatch_or_device_sync",
+        "raw_direct_probe_wall_s_per_evaluation": null,
+        "share_of_trip": 0.0,
+        "wall_s_per_evaluation": 0.0,
+        "wall_s_per_trip": 0.0
+      }
+    ],
+    "counts": {
+      "accepted_newton_updates_per_trip": 10.714285714285714,
+      "accepted_newton_updates_total": 150,
+      "active_set_trips": 14,
+      "configured_gmres_iterations_per_update": 12,
+      "counting_contract": "residual evaluations count one primal residual for each Newton update plus all six fixed line-search grades; configured GMRES Jacobian-vector products are counted separately, and their sum is reported only as residual-evaluation equivalents",
+      "descent_activations": 12,
+      "fixed_line_search_grades_per_update": 6,
+      "gmres_jacobian_vector_products_per_trip": 144.0,
+      "gmres_jacobian_vector_products_total": 2016,
+      "line_search_grades_per_trip": 72.0,
+      "line_search_grades_total": 1008,
+      "model_rebuild_activations": 12,
+      "newton_updates_per_trip": 12.0,
+      "newton_updates_total": 168,
+      "primal_residual_evaluations_per_trip": 12.0,
+      "primal_residual_evaluations_total": 168,
+      "promotion_backtrack_counts": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "recovery_activations": 12,
+      "residual_evaluation_equivalents_per_trip": 228.0,
+      "residual_evaluation_equivalents_total": 3192,
+      "residual_evaluations_per_trip": 84.0,
+      "residual_evaluations_total": 1176
+    },
+    "full_solve_reference": {
+      "active_set_authority": {
+        "active_set_iterations": 7,
+        "arm": "pure",
+        "identity": "22086/43",
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "140fbace7cca0f0412c351f39deba7f53ba2208c7c5c78f9d7f6de02a5555b02",
+        "termination_reason": "active_set_settled"
+      },
+      "arithmetic_wall_s_per_active_set_trip": 5.9159991106550605,
+      "median_warm_wall_s": 41.411993774585426,
+      "performance_receipt_count": 24,
+      "performance_receipt_count_is_not_active_set_trips": true,
+      "performance_receipt_count_unit": "attempted Newton promotions",
+      "revision": "9a49568c",
+      "sha256": "695f56b32048f63b24f9cd921e3d520907f4986815d06f620743dc513d435418",
+      "source": "docs/figures/polish-support-performance/raw-main.json"
+    },
+    "measured_full_solve_wall_s": 124.70404352899641,
+    "prior_full_solve": {
+      "job_id": "1262501",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/trip-quantum-slurm.log",
+      "log_sha256": "67b14c586cd3391c0e66420cb1fa46e0a10a95b0867d8261708c5f6d1f205a65",
+      "maximum_warm_solve_wall_s": 41.537133796,
+      "median_warm_solve_wall_s": 41.435725475,
+      "minimum_warm_solve_wall_s": 41.353373258,
+      "warm_solve_wall_s": [
+        41.353373258,
+        41.435725475,
+        41.537133796
+      ]
+    },
+    "run_full_solve_medians_s": {
+      "1262710": 124.70404352899641
+    },
+    "scan_latency_floor": {
+      "arithmetic_floor_s": 0.08970334285714286,
+      "dynamic_while_primitives": 23,
+      "fixed_scan_trip_compiled_branch_sum": 1814963,
+      "fixed_scan_trip_lower_bound": 165243,
+      "fixed_scan_trip_lower_bound_per_trip": 11803.07142857143,
+      "measured_to_floor_ratio": 99.29877078079619,
+      "scan_iteration_s": 7.6e-06,
+      "scope": "minimum statically fixed scan-body count across compiled conditional branches, divided by executed active-set trips; dynamic while-loop iteration counts excluded"
+    },
+    "topology_breakdown": [
+      {
+        "attributed_wall_s_per_trip": 9.296810926998209,
+        "component": "wall_reachability",
+        "direct_probe_wall_s": 0.04422795679420233,
+        "share_of_topology": 0.48853885770246985
+      },
+      {
+        "attributed_wall_s_per_trip": 3.603049025304907,
+        "component": "candidate_census",
+        "direct_probe_wall_s": 0.017140877433121204,
+        "share_of_topology": 0.18933691013944354
+      },
+      {
+        "attributed_wall_s_per_trip": 2.8113934704325114,
+        "component": "flood_fills",
+        "direct_probe_wall_s": 0.01337471418082714,
+        "share_of_topology": 0.14773613934738314
+      },
+      {
+        "attributed_wall_s_per_trip": 1.9123244431228177,
+        "component": "separatrix",
+        "direct_probe_wall_s": 0.009097550064325333,
+        "share_of_topology": 0.1004908894389429
+      },
+      {
+        "attributed_wall_s_per_trip": 1.4062511445089483,
+        "component": "spline_fits",
+        "direct_probe_wall_s": 0.0066899945959448814,
+        "share_of_topology": 0.07389720337176056
+      }
+    ],
+    "topology_breakdown_method": "the directly timed candidate census, spline fit, flood fill, wall reachability, and separatrix-exclusive medians are normalized to partition the separately timed topology-read wall; these overlapping isolated probes are relative attribution weights, not additive wall",
+    "wall_s": 8.9074316806426
+  },
+  "trip_count_observation": {
+    "authority_active_set_trips": 7,
+    "difference": 7,
+    "gate_applied": false,
+    "interpretation": "a mismatch is a measured behavior change requiring commit attribution; it is neither rejected as invalid nor accepted as characteristic",
+    "matches": false,
+    "observed_active_set_trips": 14,
+    "ratio": 2.0
+  }
+}

@@ -281,6 +281,48 @@
     redispatch after the codex resume was refused by the budget hold.</p>
   </section>
 
+  <section id="settled-mask-stall">
+    <h2>The settled-mask stall: a correct Newton direction over-damped by the projected Krylov conditioning guard</h2>
+    <p><strong>Commit:</strong> diagnosis driver and receipts <code>73ba3dce</code> merged at <code>d65ef765</code>
+    (<code>benchmarks/settled_mask_stall.py</code>, <code>docs/figures/solver-convergence-regression/settled-mask-stall/</code>);
+    report <code>~/.config/reckon/crew/reports/nova/attribution/settled-mask-stall.md</code>. Four pure MAST rows were rebuilt
+    from their banked terminal states on main (<code>b64ed3ab</code>, all four exact) and on the polish-support candidate
+    (<code>0dce5fe1</code>, its own terminals), the residual mask frozen at its settled value, eight Newton updates run at GMRES
+    dimension 40, the Jacobian-vector product checked against a central finite difference along the Newton direction, and the
+    residual decomposed by region on the 1089-cell grid stencil.</p>
+    <img src="/nova/figures/solver-convergence-regression/settled-mask-stall/stall-diagnosis.png" alt="Frozen-mask residual per Newton step, raw against proposed step fraction, and Jacobian consistency on four MAST rows" style="max-width:100%">
+    <table>
+      <caption>Frozen-mask Newton on four rows, main (the candidate is within a few percent on every column)</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Residual, initial to after 8 steps</th><th scope="col">Contraction</th><th scope="col">FD against JVP</th><th scope="col">GMRES relative residual</th><th scope="col">Proposed step as a fraction of the raw Newton direction</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>3.399e-3 to 3.125e-3</td><td>0.919</td><td>2.6e-9</td><td>2.9e-15</td><td>0.0127</td></tr>
+        <tr><th scope="row">21986/46</th><td>5.891e-3 to 5.874e-3</td><td>0.997</td><td>2.9e-7</td><td>5.1e-12</td><td>0.00053</td></tr>
+        <tr><th scope="row">21989/55</th><td>2.968e-3 to 2.939e-3</td><td>0.990</td><td>5.4e-7</td><td>5.6e-12</td><td>0.00077</td></tr>
+        <tr><th scope="row">22086/43</th><td>4.788e-4 to 3.703e-4</td><td>0.773</td><td>1.4e-9</td><td>1.2e-14</td><td>0.0316</td></tr>
+      </tbody>
+    </table>
+    <h3>Mechanism</h3>
+    <p>With the partition frozen the solve should contract quadratically. It does not because the iteration-local projected Krylov
+    condition discriminator in <code>nova/equilibrium/fixed_point.py</code> judges the linear model of these physical branches
+    ill-conditioned (ratio limit <code>e</code>) and scales the proposed step to between 0.05 and 3 percent of the raw Newton
+    direction before the nonlinear merit ladder sees it; the line search then accepts the crippled step at factor 1.0 on all
+    eight promotions, so each update looks accepted while the residual barely moves. The Jacobian is right, the linear solve is
+    exact, and the direction is never rejected by the merit test. The alternatives were each excluded by a direct measurement:
+    a missing derivative through the topology read (finite difference agrees with the JVP to 1e-9 to 5e-7), a non-smooth residual
+    from a local-support read (the candidate's unified support leaves the fractions and ratios unchanged), an inexact-Newton cap
+    (linear residual 1e-12 to 1e-15 with the proposed steps far inside their bounds), and saddle mis-selection (the frozen mask
+    reselects nothing).</p>
+    <h3>Confidence</h3>
+    <p>High that this is the mechanism of the plateau: it is measured directly (the shrink fraction is read from the solver's own
+    receipt), replicated on four rows and two code revisions, and the competing explanations were tested rather than argued.
+    The frozen-mask regime matches production, where the bank telemetry shows the mask settling after one to four trips while
+    the residual plateaus. Two things are not yet shown and the repair node measures them: that admitting the raw direction
+    undamped restores superlinear contraction on these branches (the discriminator may be firing on a genuinely stiff linear
+    model whose full step the line search must then cut), and how many of the twelve bank rows converge once it does. The
+    old converged results on 21985/51 were roots of a false topology (anchor <a href="#triage-2026-09-03">above</a>), so no
+    earlier bank state is a control for this.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

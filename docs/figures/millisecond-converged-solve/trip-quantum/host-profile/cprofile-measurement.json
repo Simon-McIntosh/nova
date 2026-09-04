@@ -1,0 +1,2636 @@
+{
+  "captured_at": "2026-09-04T21:43:27.047608+00:00",
+  "compile": {
+    "lower_and_compile_wall_s": 66.76815324090421,
+    "persistent_cache": {
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 0.0,
+      "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "warm_execute_wall_s": 41.57526633981615
+  },
+  "cprofile": {
+    "stats_path": "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats",
+    "stats_sha256": "2dad074d0ad15670d02158fe3e243d44a210fc56ae44bdbe780b2ab734e94796",
+    "text_path": "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve-cprofile.txt",
+    "text_sha256": "899ce820c88bb98b5dfc5456f41c65db39489c318f8af9277ebfaf7eff018639",
+    "top_by_cumulative": [
+      {
+        "calls": 1,
+        "cumulative_s": 41.130662711,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py",
+        "function": "reraise_with_filtered_traceback",
+        "line": 191,
+        "primitive_calls": 1,
+        "self_s": 1.1234000000000001e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.130651477,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "cache_miss",
+        "line": 257,
+        "primitive_calls": 1,
+        "self_s": 3.0318000000000003e-05
+      },
+      {
+        "calls": 10,
+        "cumulative_s": 41.128074521,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py",
+        "function": "wrapper",
+        "line": 417,
+        "primitive_calls": 9,
+        "self_s": 4.4989000000000006e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127879846,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_run_python_pjit",
+        "line": 133,
+        "primitive_calls": 1,
+        "self_s": 5.666e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127639492,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_pjit_call_impl_python",
+        "line": 1169,
+        "primitive_calls": 1,
+        "self_s": 2.1588e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127398367000005,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "__call__",
+        "line": 399,
+        "primitive_calls": 1,
+        "self_s": 41.127311904
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.001666499,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_infer_params",
+        "line": 635,
+        "primitive_calls": 1,
+        "self_s": 0.000105914
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.001379641,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_trace_for_jit",
+        "line": 484,
+        "primitive_calls": 1,
+        "self_s": 0.00019010400000000002
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0010725350000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_get_fastpath_data",
+        "line": 190,
+        "primitive_calls": 1,
+        "self_s": 0.00010739
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.0009387260000000001,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "tree_flatten",
+        "line": 148,
+        "primitive_calls": 2,
+        "self_s": 2.4824e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0007944390000000001,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/benchmarks/production_solve_host_profile.py",
+        "function": "_solve_summary",
+        "line": 196,
+        "primitive_calls": 1,
+        "self_s": 7.096e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0007924070000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "reflatten_outputs_for_dispatch",
+        "line": 1861,
+        "primitive_calls": 1,
+        "self_s": 9.732700000000001e-05
+      },
+      {
+        "calls": 14,
+        "cumulative_s": 0.000704478,
+        "file": "~",
+        "function": "<built-in method numpy.asarray>",
+        "line": 0,
+        "primitive_calls": 7,
+        "self_s": 4.6387e-05
+      },
+      {
+        "calls": 7,
+        "cumulative_s": 0.0006634970000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "__array__",
+        "line": 409,
+        "primitive_calls": 7,
+        "self_s": 1.2885000000000001e-05
+      },
+      {
+        "calls": 7,
+        "cumulative_s": 0.000626074,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "_value",
+        "line": 634,
+        "primitive_calls": 7,
+        "self_s": 0.000575936
+      },
+      {
+        "calls": 118,
+        "cumulative_s": 0.0005375050000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<genexpr>",
+        "line": 567,
+        "primitive_calls": 118,
+        "self_s": 0.000148753
+      },
+      {
+        "calls": 235,
+        "cumulative_s": 0.0005224320000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py",
+        "function": "typeof",
+        "line": 1958,
+        "primitive_calls": 235,
+        "self_s": 8.5209e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00047404900000000004,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/benchmarks/production_solve_host_profile.py",
+        "function": "_ready",
+        "line": 191,
+        "primitive_calls": 1,
+        "self_s": 1.1055e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00046299400000000005,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py",
+        "function": "block_until_ready",
+        "line": 2666,
+        "primitive_calls": 1,
+        "self_s": 0.000139881
+      },
+      {
+        "calls": 109,
+        "cumulative_s": 0.000389637,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "_get_aval_array",
+        "line": 1120,
+        "primitive_calls": 109,
+        "self_s": 0.00018086100000000002
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000389174,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "class_determinate",
+        "line": 125,
+        "primitive_calls": 2,
+        "self_s": 0.00038885300000000004
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000341197,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py",
+        "function": "_operator_ge",
+        "line": 719,
+        "primitive_calls": 2,
+        "self_s": 0.000339152
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000305087,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "tree_leaves",
+        "line": 99,
+        "primitive_calls": 1,
+        "self_s": 3.7534000000000004e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.00019449700000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "tree_unflatten",
+        "line": 93,
+        "primitive_calls": 2,
+        "self_s": 0.000105458
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000193217,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "_check_no_aliased_closed_over_refs",
+        "line": 733,
+        "primitive_calls": 1,
+        "self_s": 3.3795000000000004e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000161039,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py",
+        "function": "_operator_and",
+        "line": 891,
+        "primitive_calls": 2,
+        "self_s": 1.4911000000000002e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.00015163900000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<genexpr>",
+        "line": 561,
+        "primitive_calls": 134,
+        "self_s": 3.3363e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.000143358,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/linear_util.py",
+        "function": "_clean_keystr_arg_names",
+        "line": 419,
+        "primitive_calls": 134,
+        "self_s": 5.2247e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000137553,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/ufunc_api.py",
+        "function": "__call__",
+        "line": 175,
+        "primitive_calls": 2,
+        "self_s": 0.000112719
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00013632300000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<lambda>",
+        "line": 639,
+        "primitive_calls": 1,
+        "self_s": 9.73e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00013395800000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_resolve_and_lower",
+        "line": 1114,
+        "primitive_calls": 1,
+        "self_s": 2.4835000000000002e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000126593,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "debug_info",
+        "line": 595,
+        "primitive_calls": 1,
+        "self_s": 8.329000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000111267,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "_non_static_arg_names",
+        "line": 664,
+        "primitive_calls": 1,
+        "self_s": 3.0501e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.00010802500000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/dtypes.py",
+        "function": "issubdtype",
+        "line": 499,
+        "primitive_calls": 134,
+        "self_s": 7.386300000000001e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000100124,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "flatten_static_argnums_argnames_and_return_various_trees",
+        "line": 322,
+        "primitive_calls": 1,
+        "self_s": 2.6071e-05
+      },
+      {
+        "calls": 113,
+        "cumulative_s": 9.701100000000001e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/sharding_impls.py",
+        "function": "__hash__",
+        "line": 133,
+        "primitive_calls": 113,
+        "self_s": 2.4551000000000003e-05
+      },
+      {
+        "calls": 924,
+        "cumulative_s": 9.0566e-05,
+        "file": "~",
+        "function": "<built-in method builtins.isinstance>",
+        "line": 0,
+        "primitive_calls": 924,
+        "self_s": 9.0566e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 8.922400000000001e-05,
+        "file": "~",
+        "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+        "line": 0,
+        "primitive_calls": 1,
+        "self_s": 8.922400000000001e-05
+      },
+      {
+        "calls": 70,
+        "cumulative_s": 7.8121e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/sharding_impls.py",
+        "function": "__eq__",
+        "line": 138,
+        "primitive_calls": 70,
+        "self_s": 4.0164000000000004e-05
+      },
+      {
+        "calls": 114,
+        "cumulative_s": 7.2866e-05,
+        "file": "~",
+        "function": "<built-in method builtins.hasattr>",
+        "line": 0,
+        "primitive_calls": 114,
+        "self_s": 7.2866e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 6.885800000000001e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "map2",
+        "line": 54,
+        "primitive_calls": 1,
+        "self_s": 9.893e-06
+      },
+      {
+        "calls": 5,
+        "cumulative_s": 6.6646e-05,
+        "file": "~",
+        "function": "<jaxlib.utils.safe_map>",
+        "line": 0,
+        "primitive_calls": 3,
+        "self_s": 5.205e-06
+      },
+      {
+        "calls": 12,
+        "cumulative_s": 5.9415000000000006e-05,
+        "file": "~",
+        "function": "<jaxlib.utils.safe_zip>",
+        "line": 0,
+        "primitive_calls": 12,
+        "self_s": 5.9415000000000006e-05
+      },
+      {
+        "calls": 10,
+        "cumulative_s": 5.6846000000000004e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "map",
+        "line": 190,
+        "primitive_calls": 5,
+        "self_s": 1.0748000000000001e-05
+      },
+      {
+        "calls": 75,
+        "cumulative_s": 5.648e-05,
+        "file": "~",
+        "function": "<built-in method builtins.len>",
+        "line": 0,
+        "primitive_calls": 43,
+        "self_s": 2.5225e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 5.6117000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "update",
+        "line": 123,
+        "primitive_calls": 2,
+        "self_s": 5.634000000000001e-06
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 5.4032e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "keystr",
+        "line": 834,
+        "primitive_calls": 134,
+        "self_s": 3.7202e-05
+      },
+      {
+        "calls": 5,
+        "cumulative_s": 5.2543e-05,
+        "file": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/functools.py",
+        "function": "__get__",
+        "line": 1110,
+        "primitive_calls": 5,
+        "self_s": 1.7111000000000003e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 4.9133000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_resolve_out_layouts",
+        "line": 1034,
+        "primitive_calls": 1,
+        "self_s": 1.4709000000000001e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 4.7557000000000006e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "shard_args",
+        "line": 85,
+        "primitive_calls": 2,
+        "self_s": 1.1071000000000001e-05
+      },
+      {
+        "calls": 25,
+        "cumulative_s": 4.5509e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "<genexpr>",
+        "line": 190,
+        "primitive_calls": 15,
+        "self_s": 9.746000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 4.4642000000000004e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "__call__",
+        "line": 304,
+        "primitive_calls": 1,
+        "self_s": 2.176e-06
+      },
+      {
+        "calls": 128,
+        "cumulative_s": 4.1917000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/abstract_arrays.py",
+        "function": "<lambda>",
+        "line": 67,
+        "primitive_calls": 128,
+        "self_s": 2.271e-05
+      },
+      {
+        "calls": 16,
+        "cumulative_s": 4.0942e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "__len__",
+        "line": 185,
+        "primitive_calls": 8,
+        "self_s": 6.847000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 3.8199000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "convert_to_metaty",
+        "line": 1155,
+        "primitive_calls": 1,
+        "self_s": 1.1456e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 3.7843000000000003e-05,
+        "file": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/inspect.py",
+        "function": "bind",
+        "line": 3229,
+        "primitive_calls": 1,
+        "self_s": 7.789000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 3.7815e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py",
+        "function": "out_avals",
+        "line": 188,
+        "primitive_calls": 1,
+        "self_s": 3.7515e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 3.7079e-05,
+        "file": "~",
+        "function": "<method 'sub' of 're.Pattern' objects>",
+        "line": 0,
+        "primitive_calls": 134,
+        "self_s": 3.7079e-05
+      },
+      {
+        "calls": 24,
+        "cumulative_s": 3.6825e-05,
+        "file": "~",
+        "function": "<built-in method builtins.sum>",
+        "line": 0,
+        "primitive_calls": 8,
+        "self_s": 1.1329000000000001e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 3.5256e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "_array_shard_arg",
+        "line": 1228,
+        "primitive_calls": 1,
+        "self_s": 1.9469000000000003e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 3.3474000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "tree_unflatten",
+        "line": 168,
+        "primitive_calls": 2,
+        "self_s": 2.1726000000000002e-05
+      },
+      {
+        "calls": 127,
+        "cumulative_s": 3.281e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "sharding",
+        "line": 269,
+        "primitive_calls": 127,
+        "self_s": 3.281e-05
+      },
+      {
+        "calls": 138,
+        "cumulative_s": 3.2422e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/sharding_impls.py",
+        "function": "memory_kind",
+        "line": 154,
+        "primitive_calls": 138,
+        "self_s": 3.2422e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 3.2195e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "<genexpr>",
+        "line": 710,
+        "primitive_calls": 2,
+        "self_s": 7.113e-06
+      },
+      {
+        "calls": 40,
+        "cumulative_s": 3.1644000000000004e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "<genexpr>",
+        "line": 185,
+        "primitive_calls": 24,
+        "self_s": 7.243000000000001e-06
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 3.1507e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_infer_input_type",
+        "line": 661,
+        "primitive_calls": 2,
+        "self_s": 8.363000000000001e-06
+      },
+      {
+        "calls": 3,
+        "cumulative_s": 3.0986000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "vals",
+        "line": 139,
+        "primitive_calls": 3,
+        "self_s": 3.7150000000000004e-06
+      },
+      {
+        "calls": 4,
+        "cumulative_s": 3.0129000000000002e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "pack",
+        "line": 279,
+        "primitive_calls": 1,
+        "self_s": 1.8164e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 3.0054e-05,
+        "file": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/inspect.py",
+        "function": "_bind",
+        "line": 3087,
+        "primitive_calls": 1,
+        "self_s": 2.1788000000000002e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 2.822e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<genexpr>",
+        "line": 209,
+        "primitive_calls": 134,
+        "self_s": 2.1344e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 2.7384e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/util.py",
+        "function": "map2",
+        "line": 760,
+        "primitive_calls": 2,
+        "self_s": 5.867000000000001e-06
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 2.4834000000000003e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/util.py",
+        "function": "check_arraylike",
+        "line": 171,
+        "primitive_calls": 2,
+        "self_s": 9.924e-06
+      },
+      {
+        "calls": 4,
+        "cumulative_s": 2.2813e-05,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "class_margin",
+        "line": 119,
+        "primitive_calls": 4,
+        "self_s": 7.173000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 2.1847000000000003e-05,
+        "file": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/contextlib.py",
+        "function": "__exit__",
+        "line": 145,
+        "primitive_calls": 1,
+        "self_s": 1.1727000000000001e-05
+      },
+      {
+        "calls": 12,
+        "cumulative_s": 2.1385000000000003e-05,
+        "file": "~",
+        "function": "<built-in method builtins.next>",
+        "line": 0,
+        "primitive_calls": 12,
+        "self_s": 1.6740000000000002e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 2.1187000000000002e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/util.py",
+        "function": "map",
+        "line": 755,
+        "primitive_calls": 2,
+        "self_s": 4.333e-06
+      },
+      {
+        "calls": 278,
+        "cumulative_s": 2.1185e-05,
+        "file": "~",
+        "function": "<method 'append' of 'list' objects>",
+        "line": 0,
+        "primitive_calls": 278,
+        "self_s": 2.1185e-05
+      },
+      {
+        "calls": 243,
+        "cumulative_s": 2.1162e-05,
+        "file": "~",
+        "function": "<method 'get' of 'dict' objects>",
+        "line": 0,
+        "primitive_calls": 243,
+        "self_s": 2.1162e-05
+      },
+      {
+        "calls": 11,
+        "cumulative_s": 2.0912000000000002e-05,
+        "file": "~",
+        "function": "<built-in method builtins.getattr>",
+        "line": 0,
+        "primitive_calls": 11,
+        "self_s": 7.398e-06
+      },
+      {
+        "calls": 128,
+        "cumulative_s": 1.9207e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/literals.py",
+        "function": "aval",
+        "line": 138,
+        "primitive_calls": 128,
+        "self_s": 1.9207e-05
+      }
+    ],
+    "top_python_source_by_cumulative": [
+      {
+        "calls": 1,
+        "cumulative_s": 41.130662711,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py",
+        "function": "reraise_with_filtered_traceback",
+        "line": 191,
+        "primitive_calls": 1,
+        "self_s": 1.1234000000000001e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.130651477,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "cache_miss",
+        "line": 257,
+        "primitive_calls": 1,
+        "self_s": 3.0318000000000003e-05
+      },
+      {
+        "calls": 10,
+        "cumulative_s": 41.128074521,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py",
+        "function": "wrapper",
+        "line": 417,
+        "primitive_calls": 9,
+        "self_s": 4.4989000000000006e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127879846,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_run_python_pjit",
+        "line": 133,
+        "primitive_calls": 1,
+        "self_s": 5.666e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127639492,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_pjit_call_impl_python",
+        "line": 1169,
+        "primitive_calls": 1,
+        "self_s": 2.1588e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 41.127398367000005,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "__call__",
+        "line": 399,
+        "primitive_calls": 1,
+        "self_s": 41.127311904
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.001666499,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_infer_params",
+        "line": 635,
+        "primitive_calls": 1,
+        "self_s": 0.000105914
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.001379641,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_trace_for_jit",
+        "line": 484,
+        "primitive_calls": 1,
+        "self_s": 0.00019010400000000002
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0010725350000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_get_fastpath_data",
+        "line": 190,
+        "primitive_calls": 1,
+        "self_s": 0.00010739
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.0009387260000000001,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "tree_flatten",
+        "line": 148,
+        "primitive_calls": 2,
+        "self_s": 2.4824e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0007944390000000001,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/benchmarks/production_solve_host_profile.py",
+        "function": "_solve_summary",
+        "line": 196,
+        "primitive_calls": 1,
+        "self_s": 7.096e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.0007924070000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py",
+        "function": "reflatten_outputs_for_dispatch",
+        "line": 1861,
+        "primitive_calls": 1,
+        "self_s": 9.732700000000001e-05
+      },
+      {
+        "calls": 7,
+        "cumulative_s": 0.0006634970000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "__array__",
+        "line": 409,
+        "primitive_calls": 7,
+        "self_s": 1.2885000000000001e-05
+      },
+      {
+        "calls": 7,
+        "cumulative_s": 0.000626074,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "_value",
+        "line": 634,
+        "primitive_calls": 7,
+        "self_s": 0.000575936
+      },
+      {
+        "calls": 118,
+        "cumulative_s": 0.0005375050000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<genexpr>",
+        "line": 567,
+        "primitive_calls": 118,
+        "self_s": 0.000148753
+      },
+      {
+        "calls": 235,
+        "cumulative_s": 0.0005224320000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py",
+        "function": "typeof",
+        "line": 1958,
+        "primitive_calls": 235,
+        "self_s": 8.5209e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00047404900000000004,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/benchmarks/production_solve_host_profile.py",
+        "function": "_ready",
+        "line": 191,
+        "primitive_calls": 1,
+        "self_s": 1.1055e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00046299400000000005,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py",
+        "function": "block_until_ready",
+        "line": 2666,
+        "primitive_calls": 1,
+        "self_s": 0.000139881
+      },
+      {
+        "calls": 109,
+        "cumulative_s": 0.000389637,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py",
+        "function": "_get_aval_array",
+        "line": 1120,
+        "primitive_calls": 109,
+        "self_s": 0.00018086100000000002
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000389174,
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/nova/equilibrium/forward_operator.py",
+        "function": "class_determinate",
+        "line": 125,
+        "primitive_calls": 2,
+        "self_s": 0.00038885300000000004
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000341197,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py",
+        "function": "_operator_ge",
+        "line": 719,
+        "primitive_calls": 2,
+        "self_s": 0.000339152
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000305087,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "tree_leaves",
+        "line": 99,
+        "primitive_calls": 1,
+        "self_s": 3.7534000000000004e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.00019449700000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "tree_unflatten",
+        "line": 93,
+        "primitive_calls": 2,
+        "self_s": 0.000105458
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000193217,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "_check_no_aliased_closed_over_refs",
+        "line": 733,
+        "primitive_calls": 1,
+        "self_s": 3.3795000000000004e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000161039,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py",
+        "function": "_operator_and",
+        "line": 891,
+        "primitive_calls": 2,
+        "self_s": 1.4911000000000002e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.00015163900000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<genexpr>",
+        "line": 561,
+        "primitive_calls": 134,
+        "self_s": 3.3363e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.000143358,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/linear_util.py",
+        "function": "_clean_keystr_arg_names",
+        "line": 419,
+        "primitive_calls": 134,
+        "self_s": 5.2247e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 0.000137553,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/ufunc_api.py",
+        "function": "__call__",
+        "line": 175,
+        "primitive_calls": 2,
+        "self_s": 0.000112719
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00013632300000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "<lambda>",
+        "line": 639,
+        "primitive_calls": 1,
+        "self_s": 9.73e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.00013395800000000002,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py",
+        "function": "_resolve_and_lower",
+        "line": 1114,
+        "primitive_calls": 1,
+        "self_s": 2.4835000000000002e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000126593,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "debug_info",
+        "line": 595,
+        "primitive_calls": 1,
+        "self_s": 8.329000000000001e-06
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000111267,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api_util.py",
+        "function": "_non_static_arg_names",
+        "line": 664,
+        "primitive_calls": 1,
+        "self_s": 3.0501e-05
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 0.00010802500000000001,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/dtypes.py",
+        "function": "issubdtype",
+        "line": 499,
+        "primitive_calls": 134,
+        "self_s": 7.386300000000001e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 0.000100124,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "flatten_static_argnums_argnames_and_return_various_trees",
+        "line": 322,
+        "primitive_calls": 1,
+        "self_s": 2.6071e-05
+      },
+      {
+        "calls": 113,
+        "cumulative_s": 9.701100000000001e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/sharding_impls.py",
+        "function": "__hash__",
+        "line": 133,
+        "primitive_calls": 113,
+        "self_s": 2.4551000000000003e-05
+      },
+      {
+        "calls": 70,
+        "cumulative_s": 7.8121e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/sharding_impls.py",
+        "function": "__eq__",
+        "line": 138,
+        "primitive_calls": 70,
+        "self_s": 4.0164000000000004e-05
+      },
+      {
+        "calls": 1,
+        "cumulative_s": 6.885800000000001e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "map2",
+        "line": 54,
+        "primitive_calls": 1,
+        "self_s": 9.893e-06
+      },
+      {
+        "calls": 10,
+        "cumulative_s": 5.6846000000000004e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "map",
+        "line": 190,
+        "primitive_calls": 5,
+        "self_s": 1.0748000000000001e-05
+      },
+      {
+        "calls": 2,
+        "cumulative_s": 5.6117000000000005e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/flattree.py",
+        "function": "update",
+        "line": 123,
+        "primitive_calls": 2,
+        "self_s": 5.634000000000001e-06
+      },
+      {
+        "calls": 134,
+        "cumulative_s": 5.4032e-05,
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py",
+        "function": "keystr",
+        "line": 834,
+        "primitive_calls": 134,
+        "self_s": 3.7202e-05
+      }
+    ]
+  },
+  "driver": {
+    "path": "benchmarks/production_solve_host_profile.py",
+    "sha256": "0059655ae5b57f04ece6e0e07c4f79f543844d733e3a188323f2029df807113b"
+  },
+  "measurement_revision": "5ba7fa558519c47abd3ab462073d6df80340ab55",
+  "production_identity": {
+    "active_set_trip_budget": 24,
+    "arm": "pure",
+    "carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.004892988130450249
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.023267 direct_builders=0 verdict=PASS"
+      }
+    },
+    "field_policy": {
+      "active_circuit_count": 13,
+      "active_mapping": [
+        {
+          "centroid_separation_m": 3.020663818271642e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 50319.66623454681,
+          "family": "p2_inner_lower",
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "raw_current_a": 50319.8671875,
+          "stored_circuit": 4
+        },
+        {
+          "centroid_separation_m": 4.610138552976278e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 50267.518005302176,
+          "family": "p2_inner_upper",
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "raw_current_a": 50267.71875,
+          "stored_circuit": 2
+        },
+        {
+          "centroid_separation_m": 3.794706373301994e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 33416.35546875,
+          "family": "p2_outer_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 33416.35546875,
+          "stored_circuit": 5
+        },
+        {
+          "centroid_separation_m": 3.882122250270243e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 33341.1796875,
+          "family": "p2_outer_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 33341.1796875,
+          "stored_circuit": 3
+        },
+        {
+          "centroid_separation_m": 1.2310483904636694e-07,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 46.641414642333984,
+          "family": "p3_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 46.641414642333984,
+          "stored_circuit": 7
+        },
+        {
+          "centroid_separation_m": 1.1378064254653142e-07,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 29.57099151611328,
+          "family": "p3_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 29.57099151611328,
+          "stored_circuit": 6
+        },
+        {
+          "centroid_separation_m": 0.002284428762164253,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -185195.33400285762,
+          "family": "p4_lower",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -185195.171875,
+          "stored_circuit": 9
+        },
+        {
+          "centroid_separation_m": 0.003039636783399228,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -185433.83421165083,
+          "family": "p4_upper",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -185433.671875,
+          "stored_circuit": 8
+        },
+        {
+          "centroid_separation_m": 0.0022829440191137885,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -138175.5897147773,
+          "family": "p5_lower",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -138175.46875,
+          "stored_circuit": 11
+        },
+        {
+          "centroid_separation_m": 0.0022872695201792835,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -138157.0271985269,
+          "family": "p5_upper",
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "raw_current_a": -138156.90625,
+          "stored_circuit": 10
+        },
+        {
+          "centroid_separation_m": 5.527338696549878e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": 926.8552856445312,
+          "family": "p6_lower",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": 926.8552856445312,
+          "stored_circuit": 13
+        },
+        {
+          "centroid_separation_m": 1.4493967305635352e-08,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -554.8970947265625,
+          "family": "p6_upper",
+          "filament_turn_multiplier_sum": 1.0,
+          "raw_current_a": -554.8970947265625,
+          "stored_circuit": 12
+        },
+        {
+          "centroid_separation_m": 2.5307005105576235e-06,
+          "current_field": "efm/fcoil_c",
+          "effective_drive_a_turn": -8325233.859375,
+          "family": "sol",
+          "filament_turn_multiplier_sum": 328.0,
+          "raw_current_a": -25381.810546875,
+          "stored_circuit": 1
+        }
+      ],
+      "active_mapping_recomputed_for_shot": true,
+      "all_currents_prescribed": true,
+      "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+      "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+      "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+      "passive_or_vessel_circuit_count": 88,
+      "passive_registry_maximum_separation_m": 0.0,
+      "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+      "policy": "explicit prescribed-current response matrix",
+      "response_input_digests": {
+        "algorithm": "sha256",
+        "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "inputs": {
+          "fcoil_ang1": {
+            "dtype": "<f4",
+            "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang2": {
+            "dtype": "<f4",
+            "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_circ": {
+            "dtype": "<f8",
+            "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_height": {
+            "dtype": "<f4",
+            "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_n": {
+            "dtype": "<f4",
+            "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+            "shape": [
+              101
+            ]
+          },
+          "fcoil_r": {
+            "dtype": "<f4",
+            "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_turns": {
+            "dtype": "<f4",
+            "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_width": {
+            "dtype": "<f4",
+            "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_xmult": {
+            "dtype": "<f4",
+            "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_z": {
+            "dtype": "<f4",
+            "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+            "shape": [
+              938
+            ]
+          },
+          "gridr": {
+            "dtype": "<f4",
+            "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+            "shape": [
+              65
+            ]
+          },
+          "gridz": {
+            "dtype": "<f4",
+            "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+            "shape": [
+              65
+            ]
+          },
+          "limiterr": {
+            "dtype": "<f4",
+            "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+            "shape": [
+              37
+            ]
+          },
+          "limiterz": {
+            "dtype": "<f4",
+            "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+            "shape": [
+              37
+            ]
+          },
+          "resolved_response_targets": {
+            "dtype": "<f8",
+            "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "shape": [
+              1126,
+              2
+            ]
+          }
+        }
+      },
+      "response_matrix_reused": true,
+      "response_shape": [
+        1126,
+        101
+      ],
+      "section_kernel_evaluations": 938,
+      "section_kernel_evaluations_this_shot": 0,
+      "stored_circuit_count": 101,
+      "stored_field_closure_rms_wb": 1.4821494410218056e-16,
+      "stored_field_closure_sup_wb": 1.1102230246251565e-15
+    },
+    "observed_active_set_trips": 7,
+    "outer_boundary": "one jax.jit around the complete solve_branch call",
+    "reference": {
+      "machine": "MAST",
+      "plasma_current_a": 933034.875,
+      "qualification_before_attribution": {
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+        "passes": true,
+        "stored_lcfs_contour_limit": 0.006,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+        "typed_saddle_candidate_count": 2,
+        "typed_saddle_resolved": true
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "source_coordinate": {
+        "axis_wb": 0.3423115953376666,
+        "boundary_wb": -0.1292985047045701,
+        "support_nodes": 243
+      },
+      "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+      "span_wb": 1.5839675751331153,
+      "time_s": 0.22999998927116394
+    },
+    "route": "ForwardProfile.solve_branch newton_krylov"
+  },
+  "profiled_solve": {
+    "compiled_wait_s": 0.000479063019156456,
+    "compiled_wait_s_per_trip": 6.8437574165208e-05,
+    "compiled_wait_share": 1.164694834560689e-05,
+    "dispatch_s": 41.13078558072448,
+    "dispatch_s_per_trip": 5.875826511532068,
+    "python_boundary_count_per_solve": 1,
+    "python_boundary_count_per_trip": 0.14285714285714285,
+    "summary": {
+      "accepted_newton_promotions": 65,
+      "active_set_trips": 7,
+      "attempted_newton_promotions": 84,
+      "converged": false,
+      "maximum_projected_krylov_condition": 23.071826168252095,
+      "terminal_residual": 0.00047882693504231827,
+      "termination_reason": "active_set_settled"
+    },
+    "summary_transfer_s": 0.0007988754659891129,
+    "summary_transfer_s_per_trip": 0.00011412506656987327,
+    "wall_s": 41.13206351920962,
+    "wall_s_per_trip": 5.876009074172804
+  },
+  "runtime": {
+    "backend": "gpu",
+    "device_kinds": [
+      "NVIDIA H200 NVL"
+    ],
+    "devices": [
+      "cuda:0"
+    ],
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39",
+    "python": "3.14.2"
+  },
+  "scheduler": {
+    "cpus_per_task": "1",
+    "job_id": "1262767",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "source_anchors": {
+    "compiled_outer_active_set_loop": "nova/equilibrium/fixed_point.py:3387",
+    "compiled_trip_conditional": "nova/equilibrium/fixed_point.py:3385"
+  },
+  "trace_comparison": {
+    "activity_sum_is_nonadditive": true,
+    "activity_sum_s_per_trip": 0.48551265599999893,
+    "host_gap_sum_s_per_trip": 0.22875219799999894,
+    "host_launch_count_per_trip": 16562,
+    "job_id": "1262754",
+    "receipt_commit": "a801e9a4834b06b44ee87a1c5934f97f783acb8e",
+    "receipt_path": "docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/profile.json",
+    "receipt_sha256": "ba9e11989ceb7e54361b5919ee2bdbf8432487299e3dca0d2accc8e1c7e29b0a",
+    "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/condition-discriminator-trace.md",
+    "report_sha256": "511ec16024b19ba0defe20795483e097833865cbfe78e48367433a0371ca6db2",
+    "summed_kernel_s_per_trip": 0.256760458,
+    "synchronized_wall_s_per_trip": 0.3801273973658681
+  },
+  "transfer_census_solve_wall_s": 41.10809835139662,
+  "transfers": {
+    "counting_contract": "counts are logical device array buffers whose values cross to host; a backend may coalesce copies, so logical buffers are not claimed as independent DMA transactions",
+    "full_receipt": {
+      "bulk_device_get_wall_s": 0.0012146905064582825,
+      "categories_bytes_per_solve": {
+        "branch_receipt": 89360,
+        "equilibrium_flux": 9017,
+        "solver_history": 12474,
+        "solver_state": 9008
+      },
+      "leaves": [
+        {
+          "bytes": 9008,
+          "category": "equilibrium_flux",
+          "dtype": "float64",
+          "path": ".equilibrium.flux",
+          "shape": [
+            1126
+          ]
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.cell_current",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 1089,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.domains.label",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.domains.psi_norm",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 0>]",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 1>]",
+          "shape": []
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 2>]",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 3>]",
+          "shape": []
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 4>]",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 5>]",
+          "shape": []
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 6>]",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 7>]",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".equilibrium.topology[<flat index 8>]",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.topology[<flat index 9>]",
+          "shape": []
+        },
+        {
+          "bytes": 9008,
+          "category": "solver_state",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.state",
+          "shape": [
+            1126
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.residual",
+          "shape": []
+        },
+        {
+          "bytes": 1344,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.trace",
+          "shape": [
+            168
+          ]
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.krylov_action_qualification",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "int64",
+          "path": ".equilibrium.fixed_point.amplification_observation",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.krylov_conditioning_count",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.maximum_projected_krylov_condition",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "int64",
+          "path": ".equilibrium.fixed_point.manifold_advance_qualification",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "solver_history",
+          "dtype": "bool",
+          "path": ".equilibrium.fixed_point.manifold_admissibility",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.predictor_lengths",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.corrector_lengths",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.advance_lengths",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.newton_step_lengths",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.newton_step_equivalents",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.attempted_newton_promotions",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.accepted_newton_promotions",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "solver_history",
+          "dtype": "bool",
+          "path": ".equilibrium.fixed_point.converged",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.termination_reason",
+          "shape": []
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.shadow_mask_changes",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.promotion_backtrack_counts",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.promotion_recovery_activations",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 192,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.promotion_recovery_radii",
+          "shape": [
+            12,
+            2
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.promotion_recovery_outcomes",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.promotion_model_rebuild_activations",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.promotion_model_rebuild_damping",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.promotion_descent_activations",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.promotion_descent_scales",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 4,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.active_set_iterations",
+          "shape": []
+        },
+        {
+          "bytes": 192,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.active_set_residuals",
+          "shape": [
+            24
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.active_set_mask_differences",
+          "shape": [
+            24
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.active_set_cycle_damping_activations",
+          "shape": [
+            24
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_residuals_before",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_residuals_after",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_proposed_step_norms",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.inner_iteration_accepted",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.inner_iteration_decisions",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.inner_iteration_krylov_qualifications",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_applied_factors",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_krylov_reductions",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_krylov_tolerances",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_model_error_fractions",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 48,
+          "category": "solver_history",
+          "dtype": "int32",
+          "path": ".equilibrium.fixed_point.inner_iteration_step_cap_activations",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 96,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.inner_iteration_step_cap_factors",
+          "shape": [
+            12
+          ]
+        },
+        {
+          "bytes": 9008,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.trajectory_state",
+          "shape": [
+            1126
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "solver_history",
+          "dtype": "float64",
+          "path": ".equilibrium.fixed_point.trajectory_residual",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.plasma_current",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.poloidal_beta",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.internal_inductance",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.volume",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.major_radius",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.pressure_integral",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.poloidal_field_integral",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "equilibrium_flux",
+          "dtype": "float64",
+          "path": ".equilibrium.moments.flux_span",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.ledger.core",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.ledger.common_sol",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.ledger.private_flux",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.ledger.excluded_material",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.ledger.total",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.grad_shafranov_residual",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.grad_shafranov_scale",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.force_residual",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.force_scale",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.divergence_b",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.divergence_b_scale",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.divergence_j",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.conservation.divergence_j_scale",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "int64",
+          "path": ".equilibrium.conservation.checked_cells",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.normalisation.policy",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.normalisation.amplitude",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".equilibrium.normalisation.rescaled",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.rotation.closure",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.rotation.reference_radius",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.rotation.mean_particle_mass",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.rotation.axis_mach_number",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.rotation.minimum_centrifugal_factor",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.rotation.maximum_centrifugal_factor",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.common_sol.domain",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.common_sol.form",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.common_sol.continuity",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.common_sol.support",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.common_sol.decay_width",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.common_sol.separatrix_pressure_gradient",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.common_sol.separatrix_diamagnetic_gradient",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.common_sol.truncated_fraction",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.private_flux.domain",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.private_flux.form",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.continuation.private_flux.continuity",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.private_flux.support",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.private_flux.decay_width",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.private_flux.separatrix_pressure_gradient",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.private_flux.separatrix_diamagnetic_gradient",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.continuation.private_flux.truncated_fraction",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "equilibrium_flux",
+          "dtype": "bool",
+          "path": ".equilibrium.finite.flux",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".equilibrium.finite.cell_current",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".equilibrium.finite.moments",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".equilibrium.finite.conservation",
+          "shape": []
+        },
+        {
+          "bytes": 264,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.raster_flux.radius",
+          "shape": [
+            33
+          ]
+        },
+        {
+          "bytes": 264,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.raster_flux.height",
+          "shape": [
+            33
+          ]
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "int32",
+          "path": ".equilibrium.raster_flux.shape",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.raster_flux.psi",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.raster_flux.psi_norm",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 1089,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.raster_flux.domain_label",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 32768,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.raster_flux.separatrix",
+          "shape": [
+            2048,
+            2
+          ]
+        },
+        {
+          "bytes": 4,
+          "category": "branch_receipt",
+          "dtype": "int32",
+          "path": ".equilibrium.raster_flux.separatrix_vertex_count",
+          "shape": []
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.psi",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 8712,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.psi_norm",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.o_point",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.primary_x_point",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 16,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.secondary_x_point",
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 0,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.lcfs",
+          "shape": [
+            0,
+            2
+          ]
+        },
+        {
+          "bytes": 4,
+          "category": "branch_receipt",
+          "dtype": "int32",
+          "path": ".equilibrium.labelled_flux.lcfs_vertex_count",
+          "shape": []
+        },
+        {
+          "bytes": 32,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".equilibrium.labelled_flux.strike_points",
+          "shape": [
+            2,
+            2
+          ]
+        },
+        {
+          "bytes": 1089,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".equilibrium.labelled_flux.domain_label",
+          "shape": [
+            1089
+          ]
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".requested_class",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "int8",
+          "path": ".achieved_class",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".converged",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "category": "branch_receipt",
+          "dtype": "float64",
+          "path": ".residual",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "category": "branch_receipt",
+          "dtype": "int32",
+          "path": ".iterations",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "category": "branch_receipt",
+          "dtype": "bool",
+          "path": ".topology_consistent",
+          "shape": []
+        }
+      ],
+      "logical_buffer_count_per_solve": 133,
+      "logical_buffer_count_per_trip": 19.0,
+      "logical_bytes_per_solve": 119859,
+      "logical_bytes_per_trip": 17122.714285714286
+    },
+    "ordinary_summary": {
+      "fields": [
+        {
+          "bytes": 4,
+          "dtype": "int32",
+          "field": "active_set_iterations",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "dtype": "int32",
+          "field": "attempted_newton_promotions",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "dtype": "int32",
+          "field": "accepted_newton_promotions",
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "dtype": "int32",
+          "field": "termination_reason",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "field": "residual",
+          "shape": []
+        },
+        {
+          "bytes": 1,
+          "dtype": "bool",
+          "field": "converged",
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "field": "maximum_projected_krylov_condition",
+          "shape": []
+        }
+      ],
+      "logical_buffer_count_per_solve": 7,
+      "logical_buffer_count_per_trip": 1.0,
+      "logical_bytes_per_solve": 33,
+      "logical_bytes_per_trip": 4.714285714285714
+    }
+  }
+}

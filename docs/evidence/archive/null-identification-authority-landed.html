@@ -251,6 +251,35 @@
     keeping its census flux); they are updated in a separately scoped node.</p>
   </section>
 
+  <section id="limiter-spline-minimum">
+    <h2>§3 — The wall tangency as the spline-restricted minimum (prototype, held for the lead)</h2>
+    <p><strong>Commits:</strong> worker <code>9165374a</code> (implementation, <code>connectivity_boundary.py</code> +541 −343 net
+    rewrite of the reachable-wall path, <code>tests/test_limiter_spline_minimum.py</code> +253, <code>tests/test_connectivity_boundary.py</code>
+    contract rewrite) and <code>a75615f6</code> (receipt figure), held unmerged in the worktree
+    <code>nia-limiter-spline-minimum-prototype</code>. The reachable wall minimum is a fixed-shape per-segment bracketing of the
+    signed normalised outward flux on the common tensor spline; position and value come from the same spline, <code>psi_axis</code>
+    reads that spline, and the hard-boundary and classification wall operands consume one wall-minimum record.</p>
+    <table>
+      <caption>docs/figures/limiter-spline-minimum/mast-rows.json: the banked rows under the local quadratic and under the spline minimum (CPU)</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Rows measured</th><td>8 of 12 (3 without a reconstructed reachable wall, 1 without terminal flux)</td></tr>
+        <tr><th scope="row">Maximum binding-point shift</th><td>6.53 mm</td></tr>
+        <tr><th scope="row">Maximum flux shift</th><td>3.56e-6</td></tr>
+        <tr><th scope="row">Maximum class-margin shift</th><td>2.78e-6</td></tr>
+        <tr><th scope="row">Class-sign changes</th><td>0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Gate (CPU):</strong> spline pins and the rewritten reachable-wall contract 7 passed; exact-wall residual, shadowed
+    bracket and spline-valued typed saddle 3 passed; the no-wall eager, jit, vmap and grad contract 1 passed; the wall termination
+    against a dense common-spline reference 1 passed; referees 9 passed. <strong>Owed before merge:</strong> one retained
+    line-of-sight test expects the node-biased tangency (1.1, 0.0) where the continuous spline tangency is (1.1, 0.05), rewritten in
+    a paired node; the complete connectivity file did not finish inside the fence (the 31-amplitude continuity test) and is owed a
+    run on the long lane; the exact wall flux is not in the bank operands, so the independent wall residual is measured only where
+    the reconstruction provides it. The scout's 46 mm estimate used spline samples fed to the old quadratic; the real read moves the
+    binding point at most 6.5 mm on these rows, so the support change is a consistency repair, not a large relocation.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

@@ -109,6 +109,30 @@
     </table>
   </section>
 
+  <section id="raster-receipt">
+    <h2>Node C2 — the rectangular raster receipt built once with the machine (merged at ff92e9d8)</h2>
+    <p><strong>Commit:</strong> worker <code>385ea608</code> merged at <code>ff92e9d8</code> (<code>forward_operator.py</code>,
+    <code>forward.py</code>, <code>tests/test_raster_flux_receipt.py</code>, <code>benchmarks/receipt_raster_check.py</code>);
+    receipt <code>docs/figures/forward-solve-api/raster-receipt.json</code> with <code>raster-receipt/flux-and-labels.png</code>
+    (H200 job 1262276).</p>
+    <table>
+      <caption>Raster receipt on the persisted 33 by 33 MAST carrier</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Nodes published</th><td>1089, psi and psi_N with all four domain labels</td></tr>
+        <tr><th scope="row">Separatrix vertices from the global spline</th><td>141 (was 0 from the zero-ray read)</td></tr>
+        <tr><th scope="row">Direct psi / psi_N relative error</th><td>1.80e-15 / 1.45e-15</td></tr>
+        <tr><th scope="row">Compile calls without / with the raster leaf</th><td>1 / 1; median walls 6.005 s / 6.077 s (delta +72 ms)</td></tr>
+        <tr><th scope="row">Existing receipt fields</th><td>bit-identical</td></tr>
+        <tr><th scope="row">Tests</th><td>tests/test_raster_flux_receipt.py 2 passed; referees 9 passed</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Finding carried to the convergence owner:</strong> the arm the receipt ran on records
+    <code>converging_mast_arm=false</code> at residual 3.26e-3, and <code>tests/test_solve_receipt_topology.py</code>'s 21985
+    fixture fails production convergence on the base (2.07e-3 against 1e-8) before any receipt assertion. Both sit on main after the
+    census admission repair and the pre-settlement default; an attribution node runs the fixture at the three revisions.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
@@ -116,7 +140,7 @@
       22086/43 mixed, each seeded from the previous terminal state, a cold-portfolio control per edit). Its H200 receipt is
       not yet banked: the cold portfolio dies on the persisted raster carrier because
       <code>coupling_current_moments</code> dereferences an absent moment geometry (jobs 1262270, 1262272); the repair node
-      and the re-measurement follow. Node C2 (the rectangular raster receipt built once with the machine) is in flight.</li>
+      and the re-measurement follow. Node C2 landed at ff92e9d8 (anchor raster-receipt).</li>
       <li>Sections 1 to 4 (the request and receipt types, route migration, transport defaults,
       agent guidance) wait on solve-default-wiring and on the acceptance decision that fixes which
       acceptance becomes the declared default.</li>

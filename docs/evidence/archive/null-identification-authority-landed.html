@@ -280,11 +280,44 @@
     binding point at most 6.5 mm on these rows, so the support change is a consistency repair, not a large relocation.</p>
   </section>
 
+  <section id="bank-repaired-census">
+    <h2>§1 — The twelve-row bank on the repaired census under the new default (merged at ed9bb793)</h2>
+    <p>H200 job 1262289, 51 min, on main at <code>f14573fe</code> carrying the complete census admission, the pre-settlement
+    default and the line-of-sight limiter; producer <code>078482d9</code> checkpoints each solved identity. Change table
+    <code>docs/figures/null-identification-authority/bank-repaired-census.json</code> with png, all twelve overlay panels
+    regenerated, candidate-table status banked per row.</p>
+    <table>
+      <caption>Per-row outcome against the f07ee0c5 bank</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Axis distance to EFIT (mm)</th><th scope="col">Terminal residual, before to after</th><th scope="col">Termination after</th><th scope="col">Class after</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35 pure</th><td>15.2 to 3.7</td><td>2.45e-3 to 3.00e-3</td><td>cycle detected</td><td>diverted</td></tr>
+        <tr><th scope="row">21978/35 mixed</th><td>29.2 to 27.5</td><td>7.51e-12 to 1.27e-3</td><td>budget exhausted</td><td>diverted</td></tr>
+        <tr><th scope="row">21983/35 pure</th><td>29.4 to 27.3</td><td>3.69e-4 to 3.62e-3</td><td>cycle detected</td><td>diverted</td></tr>
+        <tr><th scope="row">21983/35 mixed</th><td>none to 36.2</td><td>raised to 4.04e-3</td><td>budget exhausted</td><td>diverted</td></tr>
+        <tr><th scope="row">21985/51 pure</th><td>none to 18.7</td><td>raised to 3.40e-3</td><td>settled</td><td>diverted</td></tr>
+        <tr><th scope="row">21985/51 mixed</th><td>none to 16.7</td><td>raised to 2.07e-3</td><td>budget exhausted</td><td>diverted</td></tr>
+        <tr><th scope="row">21986/46 pure</th><td>20.8 to 25.4</td><td>5.89e-3 to 5.89e-3</td><td>budget exhausted</td><td>limited to diverted</td></tr>
+        <tr><th scope="row">21986/46 mixed</th><td>none to 31.0</td><td>raised to 5.49e-3</td><td>budget exhausted</td><td>diverted</td></tr>
+        <tr><th scope="row">21989/55 pure</th><td>18.4 to 27.2</td><td>9.21e-4 to 2.97e-3</td><td>settled to budget exhausted</td><td>limited to diverted</td></tr>
+        <tr><th scope="row">21989/55 mixed</th><td>none to 21.2</td><td>raised to 3.00e-3</td><td>budget exhausted</td><td>diverted</td></tr>
+        <tr><th scope="row">22086/43 pure</th><td>17.1 to 17.0</td><td>4.80e-4 to 4.79e-4</td><td>settled</td><td>diverted</td></tr>
+        <tr><th scope="row">22086/43 mixed</th><td>21.5 to 21.5</td><td>1.736e-14 unchanged</td><td>converged</td><td>diverted</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Identification is closed on the bank: every row places its axis where EFIT does and agrees on class, no row raises, no
+    O table truncates. Convergence is exposed: one converged, two settled, seven budget-exhausted, two cycling, against two,
+    three, one and five raising before. Two rows lost convergence on a partition change with the axis already right (21978/35
+    mixed, 21989/55 pure), and six saddle tables overflow their thirty slots (21978/35, 21989/55 and 22086/43, both arms), the
+    next §4 item. The attribution on solver-convergence-regression shows the old converged states of the rows that used to
+    raise were exact roots of false topologies.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>
-      <li>§1 banking (candidate table status per row, attempted terminal flux retained when a row raises) and the bank
-      regeneration on the repaired census wait on the pre-settlement acceptance default so one H200 job measures both.</li>
+      <li>§1 banking landed at ed9bb793 (anchor bank-repaired-census): axis, candidate-table status and retained flux per row,
+      checkpointed producer.</li>
       <li>§4 owes the joint qualification rule and the saddle-table ranking or widening on the seven overflowing rows;
       §5 owes the two forward-operator-axes failures, the 0.13025 mm X-coordinate identity in the slow sweep and the
       symmetric null-fit tangent.</li>

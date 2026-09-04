@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:53:34",
+  "updated": "2026-09-04T10:08:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1129,9 +1129,11 @@
         "id": "fsa-receipt-contract-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b5b-48be-7dc1-9367-818bc270e7c2",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b5b-48be-7dc1-9367-818bc270e7c2"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1618,9 +1620,11 @@
         "id": "nia-bank-x2",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b36-3718-7c90-8766-702c3aa635e6",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b36-3718-7c90-8766-702c3aa635e6"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1636,9 +1640,11 @@
         "id": "nia-gate-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b3f-bba0-7420-b129-69217491fd4e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b3f-bba0-7420-b129-69217491fd4e"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1692,9 +1698,11 @@
         "id": "nia-perf-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b3e-f042-7fe3-a18f-ca68486237fc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b3e-f042-7fe3-a18f-ca68486237fc"
+        },
         "created": "2026-09-04"
       },
       {
@@ -88420,6 +88428,246 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T065818622161-nia-bank-regeneration-repaired-census-2",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-bank-regeneration-repaired-census-2",
+        "node_definition": {
+          "done_when": "Worktree commits confined to docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json, docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py, docs/figures/null-identification-authority/, docs/figures/solver-convergence-regression/bank-efit-overlays/, tests/test_topology_domain_partition.py and tests/test_topology_o_qualification.py in which the producer checkpoints each solved identity to the operand cache so a rerun resumes from the rows already banked, one H200 job with a two-hour limit (manifest written before the wait, compile-cache hits recorded) regenerates all twelve rows, docs/figures/null-identification-authority/bank-repaired-census.json plus png tabulate per row against the f07ee0c5 bank the axis (nova against EFIT, distance), the saddle, the binding limiter point, the boundary flux, the class against EFIT, the trip-one mask difference, the terminal residual, the trips, the termination and the candidate-table status, the twelve overlay panels are regenerated, the focused-suite constants are re-baselined only where partitions moved and stated per constant, the seven referee node IDs plus the two focused test files green with logs, the manifest stating the count of rows converged, settled, budget-exhausted and raising before and after",
+          "estimated_hours": null,
+          "goal": "Regenerate the twelve-row MAST corroboration bank on main at cef8e884, which carries the complete stationary-point census admission (82949087), the pre-settlement incumbent-mask acceptance default (f0f1112f) plus the producer that banks candidate_table_status and keeps failed rows (179a2453), in one H200 job with a 02:00:00 SLURM time limit on betelgeuse under reservation gpu_0003_grpA and per-identity checkpointing in the producer so a timeout keeps the rows already solved (plan section 1 banking closure, reuse map: the previous attempt's SLURM script plus compile, finalize and render scripts under ~/.config/reckon/crew/runs/r-20260904T053937947282-nia-bank-regeneration-repaired-census/ whose job 1262267 timed out at 01:00:00 after eight of twelve arms, the earlier bank regeneration under ~/.config/reckon/crew/runs/r-20260903T214824918852-nia-bank-regeneration-corrected-read/ which took 1 h 11 min, the change-table format of docs/figures/null-identification-authority/bank-corrected-read.json, the persistent compilation cache wired at e04970ad whose hit count is recorded, the SLURM wait polled in the foreground because a backgrounded wait ends the worker's turn)",
+          "id": "nia-bank-regeneration-repaired-census-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "150m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "docs/figures/null-identification-authority/",
+            "docs/figures/solver-convergence-regression/bank-efit-overlays/",
+            "tests/test_topology_domain_partition.py",
+            "tests/test_topology_o_qualification.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-bank-x2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:58:29Z",
+        "completed_at": "2026-09-04T08:07:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4144,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4144,
+        "stalled": false,
+        "time_budget": "150m",
+        "base_sha": "f14573fe081caef9a6b9cd0fd18c321168ef1daf",
+        "commits": [
+          "078482d942c4237a0f0dd8389c02670e0d48d9eb",
+          "04e442ed4624d0f5cf11103dd13865424bacaf6c"
+        ],
+        "changed_lines": {
+          "added": 11050,
+          "removed": 7377,
+          "files": 17
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider -q tests/test_topology_domain_partition.py tests/test_topology_o_qualification.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/logs/focused-topology.txt",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b36-3718-7c90-8766-702c3aa635e6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26804992,
+            "cached_input_tokens_cumulative": 26804992,
+            "input_tokens": 27055851,
+            "input_tokens_cumulative": 27055851,
+            "output_tokens": 40551,
+            "output_tokens_cumulative": 40551,
+            "reasoning_output_tokens": 9482,
+            "reasoning_output_tokens_cumulative": 9482
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 127489,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 138289,
+              "external_wait": null,
+              "log_age_seconds": 132520,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 132565,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2428,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 4828,
+              "external_wait": null,
+              "log_age_seconds": 3926,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 3982,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 305,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The retained line-of-sight suite cannot be green without changing tests/test_limiter_line_of_sight.py; which is outside this node's exclusive write scope; and the complete connectivity-file run did not finish inside the time fence. The implementation and scoped artifacts are committed and held unmerged for lead review.",
+              "elapsed_seconds": 3905,
+              "external_wait": null,
+              "log_age_seconds": 585,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[9165374a8f19b3286028279fc7f3798adcc38f2f",
+                "a75615f6d1eb4ffad18fd0ba5aa8d4368276714d]; changed_paths: [nova/equilibrium/connectivity_boundary.py",
+                "tests/test_limiter_spline_minimum.py",
+                "tests/test_connectivity_boundary.py",
+                "docs/figures/limiter-spline-minimum/mast-rows.json",
+                "docs/figures/limiter-spline-minimum/mast-rows.png]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T055306005644-nia-limiter-spline-minimum-prototype/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-limiter-spline-minimum-prototype",
+              "phase": "complete",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T055306005644-nia-limiter-spline-minimum-prototype",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 612,
+              "terminal_at": "2026-09-04T06:48:12Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-limiter-spline-minimum-prototype"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 50033,
+          "peak_input_tokens": 53860843
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -88508,6 +88756,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1550
+    "_version": 1555
   }
 }

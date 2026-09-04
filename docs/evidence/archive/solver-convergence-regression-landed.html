@@ -209,6 +209,30 @@
     with per-trip O, X and boundary-flux telemetry.</p>
   </section>
 
+  <section id="presettlement-mast">
+    <h2>Pre-settlement acceptance measured on the marginal MAST arms: negative</h2>
+    <p><strong>Receipt:</strong> <code>docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.json</code>
+    (H200 job 1262252, 42 minutes, one solve per arm per setting on the prototype base <code>fff05974</code>; the driver
+    <code>benchmarks/acceptance_presettlement_remedy.py</code> is committed at <code>679d088c</code> in the measurement
+    worktree beside the prototype, both held unmerged).</p>
+    <table>
+      <caption>22086/43 pure, per-trip residual and mask difference</caption>
+      <thead><tr><th scope="col">Path</th><th scope="col">Residuals</th><th scope="col">Mask differences</th><th scope="col">Terminal</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Banked old (d47f7cd1)</th><td>4.976e-3, 3.493e-3, 2.227e-3, 2.825e-3, 1.769e-3, …, 6.08e-12</td><td>38, 23, 0, 1, 22, 0, …</td><td>converged, 12 trips</td></tr>
+        <tr><th scope="row">Induced-mask scoring (today)</th><td>4.976e-3, 3.132e-3, 1.950e-3, 6.66e-4, 4.81e-4, 4.80e-4, 4.80e-4</td><td>29, 28, 0, 0, 0, 0, 0</td><td>settled 4.8002e-4, 7 trips</td></tr>
+        <tr><th scope="row">Pre-settlement incumbent scoring</th><td>4.976e-3, 3.493e-3, 2.226e-3, 6.57e-4, 4.78e-4, 4.77e-4, 4.77e-4</td><td>29, 28, 0, 0, 0, 0, 0</td><td>settled 4.7652e-4, 7 trips</td></tr>
+      </tbody>
+    </table>
+    <p>The remedy reproduces the banked acceptance at trips 2 and 3 to four digits and still settles, because the mask never
+    re-opens: the trip-1 partition is 29 cells now against 38 in the banked path (the wall-shadow authority change at
+    <code>260a8b44</code> and the identification rules merged on 2026-09-04), and the trip-4 and trip-5 re-opening that
+    carried the old solve to tolerance belonged to that partition. 21978/35 pure is bit-identical under both settings
+    (cycle at 2.4506e-3 in 4 trips). The convergence question is therefore the identification question; the remedy is
+    re-judged once the production-grid admission repair lands. The capture ran without the persistent compilation cache
+    and paid about eleven minutes of compilation per pure-arm solve.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

@@ -1,0 +1,411 @@
+{
+  "allocation": {
+    "allocated_cpus": 1,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3",
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1262252,
+    "job_name": "presettlement-mast-capture-v2",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": null,
+    "python": "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/bin/python3.14",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "21978/35 pure": {
+      "presettlement_false": {
+        "active_set_mask_differences": [
+          29,
+          27,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554597364631252,
+          0.0033460296631549562,
+          0.0026743540782636055,
+          0.0024506488565450104
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "description": "trip-to-trip residual ratio where the induced mask stayed settled on both trips; null where the mask changed",
+          "per_trip_ratios": [
+            null,
+            null,
+            null
+          ],
+          "stalled": false,
+          "terminal_settled_ratio": null
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "presettlement_incumbent_scoring": false,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_geometry": {
+          "achieved_class": "diverted",
+          "boundary_flux_wb": -0.06884701907496345,
+          "class_margin": 0.028086002009868716,
+          "o_point_rz_m": [
+            0.9030348052779694,
+            0.015534464422285375
+          ],
+          "x_point_rz_m": [
+            0.5628642390682692,
+            1.2634901482388117
+          ]
+        },
+        "terminal_residual": 0.0024506488565450104,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 715.047401082702
+      },
+      "presettlement_true": {
+        "active_set_mask_differences": [
+          29,
+          27,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554597364631252,
+          0.0033460296631549562,
+          0.0026743540782636055,
+          0.0024506488565450104
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "description": "trip-to-trip residual ratio where the induced mask stayed settled on both trips; null where the mask changed",
+          "per_trip_ratios": [
+            null,
+            null,
+            null
+          ],
+          "stalled": false,
+          "terminal_settled_ratio": null
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "presettlement_incumbent_scoring": true,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_geometry": {
+          "achieved_class": "diverted",
+          "boundary_flux_wb": -0.06884701907496345,
+          "class_margin": 0.028086002009868716,
+          "o_point_rz_m": [
+            0.9030348052779694,
+            0.015534464422285375
+          ],
+          "x_point_rz_m": [
+            0.5628642390682692,
+            1.2634901482388117
+          ]
+        },
+        "terminal_residual": 0.0024506488565450104,
+        "termination_reason": "active_set_cycle_detected",
+        "trip_count": 4,
+        "wall_seconds_including_compilation": 535.592579449527
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      }
+    },
+    "22086/43 pure": {
+      "presettlement_false": {
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764024985941265,
+          0.003131688886067959,
+          0.0019503833095738026,
+          0.0006655722453715935,
+          0.00048086024350746707,
+          0.00048001875929238176,
+          0.00048001875929238176
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "description": "trip-to-trip residual ratio where the induced mask stayed settled on both trips; null where the mask changed",
+          "per_trip_ratios": [
+            null,
+            null,
+            0.34125202061795445,
+            0.722476405606426,
+            0.9982500441106393,
+            1.0
+          ],
+          "stalled": true,
+          "terminal_settled_ratio": 1.0
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "presettlement_incumbent_scoring": false,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_geometry": {
+          "achieved_class": "diverted",
+          "boundary_flux_wb": -0.12422236950062966,
+          "class_margin": Infinity,
+          "o_point_rz_m": [
+            0.9019314019461326,
+            0.020162281686438594
+          ],
+          "x_point_rz_m": [
+            0.5923840472283124,
+            1.2202558665995356
+          ]
+        },
+        "terminal_residual": 0.00048001875929238176,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 682.2153640361503
+      },
+      "presettlement_true": {
+        "active_set_mask_differences": [
+          29,
+          28,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.0049764024985941265,
+          0.0034928501564629164,
+          0.0022263514475277554,
+          0.0006567157524775198,
+          0.00047822177198355876,
+          0.0004765211017507568,
+          0.0004765211017507568
+        ],
+        "converged": false,
+        "mode_contraction": {
+          "description": "trip-to-trip residual ratio where the induced mask stayed settled on both trips; null where the mask changed",
+          "per_trip_ratios": [
+            null,
+            null,
+            0.294973982300399,
+            0.7282020724787303,
+            0.9964437624289919,
+            1.0
+          ],
+          "stalled": true,
+          "terminal_settled_ratio": 1.0
+        },
+        "reaches_tolerance": false,
+        "solver": {
+          "fixed_point_tolerance": 1e-08,
+          "gmres_iterations": 12,
+          "newton_steps": 12,
+          "presettlement_incumbent_scoring": true,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "warmup_sweeps": 0
+        },
+        "terminal_geometry": {
+          "achieved_class": "diverted",
+          "boundary_flux_wb": -0.12422236936360187,
+          "class_margin": Infinity,
+          "o_point_rz_m": [
+            0.9019332134722842,
+            0.020111959675353036
+          ],
+          "x_point_rz_m": [
+            0.5917565875999771,
+            1.2197598406977441
+          ]
+        },
+        "terminal_residual": 0.0004765211017507568,
+        "termination_reason": "active_set_settled",
+        "trip_count": 7,
+        "wall_seconds_including_compilation": 517.6479100100696
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      }
+    }
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.004640137776732445
+  },
+  "comparison_histories": {
+    "banked_new": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734301,
+        0.0031314746103240005,
+        0.0019512703665675098,
+        0.000665284202251045,
+        0.0004808521116039148,
+        0.000480233535391836,
+        0.000480233535391836
+      ],
+      "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
+      "terminal_residual": 0.000480233535391836,
+      "termination_reason": "active_set_stagnated",
+      "trip_count": 7
+    },
+    "banked_old": {
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        1,
+        22,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734121,
+        0.0034925711304508644,
+        0.002226786846263745,
+        0.002824543671089115,
+        0.0017686695998067922,
+        0.0011202504574493964,
+        0.0007158519978676796,
+        0.00046228423444706694,
+        0.00029898570793831397,
+        0.00019330286566941876,
+        0.00012525252154434573,
+        6.079614869877941e-12
+      ],
+      "revision": "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e",
+      "terminal_residual": 6.079614869877941e-12,
+      "termination_reason": "converged",
+      "trip_count": 12
+    }
+  },
+  "execution_contract": {
+    "allocated_cpus": 1,
+    "one_reserved_h200": true,
+    "per_trip_identification_deferred": "per-trip O-point, X-point and boundary flux are not recorded here; one solve per arm per acceptance setting records only the terminal identification, matching the wall-time shape of the five banked remedy drivers. A prior attempt to recover per-trip states by re-solving with active_set_steps truncated to each trip stalled past a three-hour H200 allocation (job 1262181) without completing even the first arm/setting combination, and is not repeated here; the per-trip identification record is deferred to a telemetry node.",
+    "persisted_carrier_reused": true,
+    "persistent_compilation_cache": "/home/ITER/mcintos/.cache",
+    "same_bank_generation_route": "bank_revision_reproduction persisted carrier, passive-inclusive case construction, and production solve_portfolio pure arm",
+    "targets": [
+      [
+        22086,
+        43
+      ],
+      [
+        21978,
+        35
+      ]
+    ]
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest/docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.png",
+  "receipt": "presettlement incumbent-mask acceptance remedy",
+  "scheduler": {
+    "elapsed": "00:42:30",
+    "exit_marker": 0,
+    "job_id": 1262252,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "source": {
+    "nova_diff_names": "",
+    "revision": "fff05974635f31994879d26627f6184a48be0bc5",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+  },
+  "sources": {
+    "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/raw-presettlement-mast.json",
+    "raw_capture_sha256": "ca5c56daf44f21ea3af1b9c4409a836e0bea8259f3ccd587498d3d9de93f0a18",
+    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821"
+  },
+  "tests": {
+    "presettlement_referee": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_presettlement_incumbent_scoring.py",
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/logs/referee.log",
+      "passed_count": 5
+    }
+  },
+  "verdict": {
+    "per_trip_identification_deferred": "this receipt records only the terminal selected O-point, X-point and boundary flux per arm and setting; classifying the banked trip-4 and trip-5 mask re-opening as an O/X re-selection, a boundary-flux move, or a pure acceptance event requires per-trip identification and is deferred to a telemetry node",
+    "remedied_recovers_banked_old": {
+      "banked_old_terminal_residual": 6.079614869877941e-12,
+      "banked_old_trip_count": 12,
+      "reaches_about_6e_12": false,
+      "remedied_converged": false,
+      "remedied_terminal_residual": 0.0004765211017507568,
+      "remedied_trip_count": 7,
+      "verdict": "negative: at this worktree's HEAD, presettlement_incumbent_scoring=True does not restore convergence to the banked ~6e-12 for 22086/43 pure. It terminates active_set_settled at the same 7 trips as the unremedied trajectory, with an essentially unchanged terminal residual (4.765211e-04 vs 4.800188e-04 unremedied) and an identical active-set mask-difference sequence [29, 28, 0, 0, 0, 0, 0]"
+    },
+    "unremedied_matches_banked_new": {
+      "absolute_difference": 2.1477609945424244e-07,
+      "banked_new_terminal_residual": 0.000480233535391836,
+      "banked_new_trip_count": 7,
+      "matches": true,
+      "note": "the bank-producing revision predates 260a8b44 (census X-set authority change) and aecea6a7 (census null polish), both of which shift the trip-1 active-set mask population (38/23 banked vs 29/28 here) without changing the qualitative outcome; an exact residual match is not expected, only the order-1e-4, seven-trip stagnated signature",
+      "relative_difference": 0.0004472326141884294,
+      "trip_count_matches": true,
+      "unremedied_terminal_residual": 0.00048001875929238176,
+      "unremedied_trip_count": 7
+    }
+  }
+}

@@ -389,6 +389,15 @@ class PrescribedCurrentField:
             )
         return self.response @ conductor
 
+    def flux_delta(self, current_delta) -> jax.Array:
+        """Return the flux image of one same-shaped circuit-current edit [Wb]."""
+        delta = jnp.asarray(current_delta, dtype=self.current.dtype)
+        if delta.shape != self.current.shape:
+            raise ValueError(
+                "prescribed current delta must match the stored circuit vector shape"
+            )
+        return self.response @ delta
+
 
 @dataclass
 class ForwardFluxOperator:

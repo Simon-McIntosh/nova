@@ -99,6 +99,13 @@ from nova.equilibrium.conservation import (
     conservation_ledger,
     poloidal_field,
 )
+from nova.equilibrium.constraint import (
+    CircuitCurrentUnknown,
+    ConstraintPair,
+    ConstraintRecord,
+    assemble_augmented_system,
+    constraint_records,
+)
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
@@ -282,6 +289,7 @@ class ForwardEquilibrium(NamedTuple):
     finite: FiniteCheck
     raster_flux: ForwardRasterFlux | None = None
     labelled_flux: ForwardLabelledFlux | None = None
+    constraints: tuple[ConstraintRecord, ...] = ()
 
 
 class ForwardBranchReceipt(NamedTuple):
@@ -1300,6 +1308,7 @@ class ForwardProfile:
         target_current=None,
         current=None,
         prescribed_current=None,
+        constraints: tuple[ConstraintRecord, ...] = (),
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
         current_moments, support_integrals, masks, topology, amplitude = (
@@ -1344,6 +1353,7 @@ class ForwardProfile:
                 prescribed_current=prescribed_current,
             ),
             labelled_flux=self._labelled_flux(flux, masks, topology),
+            constraints=constraints,
         )
 
     def _host_history(
@@ -1497,9 +1507,24 @@ class ForwardProfile:
         requested_class=None,
         target_current=None,
         prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         **options,
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
+        if constraint_pairs:
+            if route != "newton_krylov":
+                raise ValueError(
+                    "augmented constraints require the newton_krylov route"
+                )
+            return self._solve_augmented_constraints(
+                initial_flux,
+                current,
+                requested_class=requested_class,
+                target_current=target_current,
+                prescribed_current=prescribed_current,
+                constraint_pairs=constraint_pairs,
+                **options,
+            )
         mapped = self.flux_map(
             current,
             requested_class,
@@ -1558,6 +1583,106 @@ class ForwardProfile:
             prescribed_current,
         )
 
+    def _solve_augmented_constraints(
+        self,
+        initial_flux,
+        current,
+        *,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...],
+        **options,
+    ) -> ForwardEquilibrium:
+        """Solve flux and a static tuple of compensating unknowns together."""
+        pairs = tuple(constraint_pairs)
+        if not all(isinstance(pair, ConstraintPair) for pair in pairs):
+            raise TypeError("constraint_pairs must contain ConstraintPair values")
+        mapped = self.flux_map(
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
+        )
+        shadowed_map = self.operator.flux_map_with_shadow(
+            current,
+            requested_class,
+            target_current,
+            prescribed_current,
+        )
+
+        def shadow_mask(state):
+            return self.operator.residual_shadow_mask(state, requested_class)
+
+        def promoted_shadow_mask(state, previous):
+            return self.operator.residual_shadow_mask(
+                state, requested_class, previous_shadow=previous
+            )
+
+        system = assemble_augmented_system(
+            self,
+            jnp.asarray(initial_flux),
+            pairs,
+            base_map=mapped,
+            base_shadow_mask=shadow_mask,
+            base_promoted_shadow_mask=promoted_shadow_mask,
+            base_shadowed_map=shadowed_map,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+        history = fixed_point.newton_krylov(
+            system.map_fn,
+            system.initial,
+            **{
+                "newton_steps": self.newton_steps,
+                "shadow_mask_fn": system.shadow_mask_fn,
+                "promoted_shadow_mask_fn": system.promoted_shadow_mask_fn,
+                "shadowed_map_fn": system.shadowed_map_fn,
+                "row_jvp_observers": system.row_jvp_observers,
+                **options,
+            },
+        )
+        flux, _unknowns = system.split(history.state)
+        projections = jnp.asarray(history.row_jvp_projections)
+        records = constraint_records(
+            self,
+            system,
+            history.state,
+            pairs,
+            projections,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+        trajectory_state = history.trajectory_state
+        if getattr(trajectory_state, "shape", ()) == history.state.shape:
+            trajectory_state = trajectory_state[: system.flux_size] * system.flux_scale
+        public_history = history._replace(
+            state=flux,
+            trajectory_state=trajectory_state,
+        )
+        final_prescribed = (
+            self.operator.prescribed_current_field.current
+            if prescribed_current is None
+            and self.operator.prescribed_current_field is not None
+            else prescribed_current
+        )
+        if final_prescribed is not None:
+            final_prescribed = jnp.asarray(final_prescribed)
+            for pair, record in zip(pairs, records, strict=True):
+                if isinstance(pair.unknown, CircuitCurrentUnknown):
+                    final_prescribed = final_prescribed + (
+                        jnp.asarray(pair.unknown.direction) @ record.physical_unknown
+                    )
+        return self._receipt(
+            flux,
+            public_history,
+            requested_class,
+            target_current,
+            current,
+            final_prescribed,
+            constraints=records,
+        )
+
     @staticmethod
     def _resolve_solve_defaults(
         route: SolveRoute | None,
@@ -1600,10 +1725,8 @@ class ForwardProfile:
 
         if request.source_profile is not self.source:
             raise ValueError("request source_profile must be this profile's source")
-        if request.constraint_pairs:
-            raise NotImplementedError(
-                "augmented constraint pairs are not available; use constraint_pins"
-            )
+        if request.constraint_pairs and request.route != "newton_krylov":
+            raise ValueError("augmented constraints require the newton_krylov route")
         if not request.policy.current_pin and request.target_current is not None:
             raise ValueError("target_current requires the current-pin policy")
         if not request.policy.exact_kernels:
@@ -1622,6 +1745,7 @@ class ForwardProfile:
             current=request.current,
             target_current=request.target_current,
             prescribed_current=request.prescribed_current,
+            constraint_pairs=request.constraint_pairs,
             enforce=request.enforce,
             pins=request.constraint_pins,
             current_pin=policy.current_pin,
@@ -1638,6 +1762,13 @@ class ForwardProfile:
             & (residual <= policy.qualification_tolerance)
             & jnp.asarray(equilibrium.finite.passed)
         )
+        terminal_constraints = getattr(equilibrium, "constraints", ())
+        if terminal_constraints:
+            qualified = qualified & jnp.all(
+                jnp.concatenate(
+                    tuple(record.qualified for record in terminal_constraints)
+                )
+            )
         residual_history = (
             history.active_set_residuals
             if request.route == "newton_krylov"
@@ -1701,6 +1832,7 @@ class ForwardProfile:
         current=None,
         target_current=None,
         prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         current_pin: bool | None = None,
@@ -1742,6 +1874,7 @@ class ForwardProfile:
                 or current is not None
                 or target_current is not None
                 or prescribed_current is not None
+                or constraint_pairs
                 or enforce
                 or pins is not None
                 or current_pin is not None
@@ -1768,6 +1901,9 @@ class ForwardProfile:
         route = policy.route
 
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
+        constraint_pairs = tuple(constraint_pairs)
+        if constraint_pairs and route in _HOST:
+            raise ValueError("augmented constraints require the newton_krylov route")
         if route == "host":
             equilibrium = self._solve_host(
                 initial_flux,
@@ -1796,6 +1932,7 @@ class ForwardProfile:
                 current,
                 target_current=target_current,
                 prescribed_current=prescribed_current,
+                constraint_pairs=constraint_pairs,
                 **resolved_options,
             )
         self._require_constraints(equilibrium.flux, pins, target_current)
@@ -1815,6 +1952,7 @@ class ForwardProfile:
         current,
         target_current=None,
         prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         *,
         route: str,
         tolerance: float,
@@ -1831,6 +1969,7 @@ class ForwardProfile:
             requested_class=requested_class,
             target_current=target_current,
             prescribed_current=prescribed_current,
+            constraint_pairs=constraint_pairs,
             **options,
         )
         _masks, achieved = self.operator.read(equilibrium.flux)
@@ -1844,6 +1983,12 @@ class ForwardProfile:
             & consistent
             & equilibrium.finite.passed
         )
+        if equilibrium.constraints:
+            converged = converged & jnp.all(
+                jnp.concatenate(
+                    tuple(record.qualified for record in equilibrium.constraints)
+                )
+            )
         if pins is not None:
             converged = converged & self.constraints_satisfied(
                 equilibrium.flux, pins, target_current
@@ -1867,6 +2012,7 @@ class ForwardProfile:
         current=None,
         target_current=None,
         prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         tolerance: float | None = None,
@@ -1904,6 +2050,7 @@ class ForwardProfile:
             current,
             target_current,
             prescribed_current,
+            constraint_pairs,
             route=route,
             tolerance=tolerance,
             iterations=self._iteration_count(route, resolved_options),
@@ -1986,6 +2133,7 @@ class ForwardProfile:
         route: SolveRoute | None = None,
         current=None,
         target_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         tolerance: float | None = None,
@@ -2044,6 +2192,7 @@ class ForwardProfile:
                 branch_class,
                 conductor,
                 target,
+                constraint_pairs=constraint_pairs,
                 route=route,
                 tolerance=tolerance,
                 iterations=iterations,
@@ -2061,6 +2210,7 @@ class ForwardProfile:
         route: SolveRoute | None = None,
         current=None,
         target_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
         enforce: Sequence[str] = (),
         current_pin: bool | None = None,
         exact_kernels: bool | None = None,
@@ -2097,7 +2247,12 @@ class ForwardProfile:
         )
         return jax.vmap(
             lambda flux, conductor, target: self._solve_accelerated(
-                route, flux, conductor, target_current=target, **resolved_options
+                route,
+                flux,
+                conductor,
+                target_current=target,
+                constraint_pairs=constraint_pairs,
+                **resolved_options,
             ),
             in_axes=(0, current_axis, target_axis),
         )(initial_flux, current, target_current)

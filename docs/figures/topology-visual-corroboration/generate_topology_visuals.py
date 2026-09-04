@@ -58,7 +58,11 @@ from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -115,6 +119,21 @@ PanelPublisher = Callable[[dict[str, Any], int], None]
 
 class StaleOperandCacheError(RuntimeError):
     """Refuse operands produced by a source that is no longer authoritative."""
+
+
+class _ObservedProfile:
+    """Forward a profile while retaining the portfolio returned by its solve."""
+
+    def __init__(self, profile) -> None:
+        self._profile = profile
+        self.portfolio = None
+
+    def __getattr__(self, name: str):
+        return getattr(self._profile, name)
+
+    def solve_portfolio(self, *args, **kwargs):
+        self.portfolio = self._profile.solve_portfolio(*args, **kwargs)
+        return self.portfolio
 
 
 def _source_authority(path: Path) -> dict[str, str]:
@@ -177,12 +196,13 @@ def _mast_rows(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
     selected = select_slices_by_shot(DECOMPOSITION_BANK)
+    full_selection_count = len(selected)
     rows: list[dict[str, Any]] = []
     if shots is not None:
         selected = [item for item in selected if int(item[0]["shot"]) in shots]
         if not selected:
             raise ValueError(f"no selected MAST operand matches shots {sorted(shots)}")
-        if retained_rows is None:
+        if retained_rows is None and len(selected) != full_selection_count:
             raise ValueError("partial MAST regeneration requires retained cache rows")
     for selected_row, qualification in selected:
         shot_started = time.perf_counter()
@@ -209,13 +229,31 @@ def _mast_rows(
         if policy["section_kernel_evaluations_this_shot"] != 0:
             raise RuntimeError("MAST route entered a direct response builder")
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+        observed_profile = _ObservedProfile(profile)
         states = reachability._mast_states(
-            profile, jnp.asarray(passive_case["state"]), target_current
+            observed_profile, jnp.asarray(passive_case["state"]), target_current
         )
+        if observed_profile.portfolio is None:
+            raise RuntimeError("the MAST solve returned no observable branch portfolio")
+        pure_branch = jax.tree.map(
+            lambda value: value[int(reachability.TopologyClass.DIVERTED)],
+            observed_profile.portfolio.branches,
+        )
+        active_set_iterations = {
+            "pure": int(
+                np.asarray(pure_branch.equilibrium.fixed_point.active_set_iterations)
+            ),
+            "mixed": 0,
+        }
         print(f"MAST_STATES_READY {shot}/{slice_index}", flush=True)
         referee = read_efit_referee(shot, store=SHOT_STORE)
         for arm, arm_result in states.items():
             print(f"MAST_ARM {shot}/{slice_index} {arm}", flush=True)
+            print(
+                f"MAST_POLICY {shot}/{slice_index} {arm} "
+                "section_kernel_evaluations_this_shot == 0",
+                flush=True,
+            )
             state = arm_result.state
             governed_wall = reachability._closed_wall(
                 np.asarray(profile.operator.wall.coordinate, dtype=float)
@@ -355,6 +393,9 @@ def _mast_rows(
                     "nova_boundary": closed,
                     "converged": bool(arm_result.converged),
                     "qualification": str(arm_result.termination_reason),
+                    "termination_reason": str(arm_result.termination_reason),
+                    "terminal_residual": float(arm_result.terminal_residual),
+                    "active_set_iterations": active_set_iterations[arm],
                     "per_cell_flux_values": grid_values,
                     "per_candidate_domain_labels": candidate_labels,
                     "current_cell_polygons": padded_polygons,
@@ -377,6 +418,9 @@ def _mast_rows(
                     "nova_boundary": empty_points,
                     "converged": False,
                     "qualification": type(error).__name__,
+                    "termination_reason": str(arm_result.termination_reason),
+                    "terminal_residual": float(arm_result.terminal_residual),
+                    "active_set_iterations": active_set_iterations[arm],
                     "per_cell_flux_values": np.empty(0, dtype=float),
                     "per_candidate_domain_labels": np.empty((0, 0), dtype=np.int8),
                     "current_cell_polygons": np.empty((0, 0, 2), dtype=float),
@@ -418,6 +462,30 @@ def _mast_rows(
         {
             **source_authority,
             "carrier": carrier["carrier"]["semantic_response_identity"],
+        },
+        provenance={
+            "base_revision": subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip(),
+            "producer_commit": subprocess.run(
+                [
+                    "git",
+                    "log",
+                    "--first-parent",
+                    "-1",
+                    "--format=%H",
+                    "--",
+                    str(Path(__file__).resolve().relative_to(ROOT)),
+                ],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip(),
         },
     )
     return _read_cache(MAST_CACHE, source_authority["source_identity"])
@@ -557,7 +625,11 @@ def _diiid_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
 
 
 def _write_cache(
-    path: Path, rows: list[dict[str, Any]], authority: dict[str, Any]
+    path: Path,
+    rows: list[dict[str, Any]],
+    authority: dict[str, Any],
+    *,
+    provenance: dict[str, str] | None = None,
 ) -> None:
     arrays: dict[str, np.ndarray] = {}
     metadata = []
@@ -596,9 +668,12 @@ def _write_cache(
                 )
             arrays[f"row_{index:02d}_{field}"] = array
     np.savez_compressed(path, **arrays)
+    payload = {"authority": authority, "rows": metadata}
+    if provenance is not None:
+        payload.update(provenance)
     path.with_suffix(".metadata.json").write_text(
         json.dumps(
-            {"authority": authority, "rows": metadata},
+            payload,
             indent=2,
             sort_keys=True,
             allow_nan=False,
@@ -1396,12 +1471,21 @@ def main() -> None:
     MAST_CACHE = HERE / "mast-topology-operands.npz"
     DIIID_CACHE = HERE / "diiid-topology-operands.npz"
     configure_dtypes()
+    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     HERE.mkdir(parents=True, exist_ok=True)
     if args.cache_only:
         if not args.regenerate_mast_shot:
             raise ValueError("cache-only regeneration requires a MAST shot")
         mast_identity = _source_authority(MAST_AUTHORITY)["source_identity"]
-        retained = _read_cache(MAST_CACHE, mast_identity)
+        try:
+            retained = _read_cache(MAST_CACHE, mast_identity)
+        except StaleOperandCacheError:
+            selected = select_slices_by_shot(DECOMPOSITION_BANK)
+            requested = set(args.regenerate_mast_shot)
+            available = {int(item[0]["shot"]) for item in selected}
+            if requested != available:
+                raise
+            retained = None
         rows = _mast_rows(shots=set(args.regenerate_mast_shot), retained_rows=retained)
         refreshed = [
             row for row in rows if int(row["shot"]) in set(args.regenerate_mast_shot)

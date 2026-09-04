@@ -153,6 +153,27 @@ the whole message. Verify before push:
 
 Marker policy: `slow` marks the curated heavy numerical and integration tests—numerical sweeps, JAX JIT/vmap/grad kernels, signal-store round-trips, structural solves, reference-equilibrium reproductions, and pulse-scale integration—that the path-free default `pytest` lane excludes with `-m 'not slow'`; use `pytest -m "slow or not slow"` to select both fast and slow tests. An explicitly named test path or node ID clears only that inherited default filter and collects the named tests unless the command supplies its own `-m` or `--markexpr`, which is preserved. Any otherwise-successful session that collects zero tests is changed to pytest's nonzero `NO_TESTS_COLLECTED` exit status.
 
+#### CPU and H200 test lanes
+
+Use the default CPU lane for fast tests and for bit-identity contracts that pin
+CPU x64 arithmetic. Pin it explicitly with `JAX_PLATFORMS=cpu`; an implicit
+backend change is a different numerical measurement. Run a test file through
+the H200 lane when its measured CPU wall exceeds ten minutes. The launcher uses
+one reserved H200, records the selected JAX platforms in the log header, and
+reuses the persistent compilation cache:
+
+```bash
+scripts/h200_test_lane/run.sh \
+  --log /absolute/path/to/caller-named.log --wait -- \
+  tests/test_equilibrium_forward_solve.py -vv
+```
+
+The launcher submits to `betelgeuse` under `gpu_0003_grpA`, runs pytest from
+the repository's shared environment without invoking uv on the compute node,
+and appends both the pytest wall time and exit status to the named log. Preserve
+GPU failures from CPU-specific identity assertions as device-qualified evidence;
+do not weaken those CPU contracts to make the H200 lane green.
+
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment
 # per Repository above); --no-sync because peers share that environment:

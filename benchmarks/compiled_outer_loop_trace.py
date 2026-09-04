@@ -47,6 +47,7 @@ OUTPUT_ROOT = ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/oute
 DEFAULT_OUTPUT = OUTPUT_ROOT / "profile.json"
 DEFAULT_TABLE = OUTPUT_ROOT / "outer-iterations.csv"
 DEFAULT_FIGURE = OUTPUT_ROOT / "outer-loop-trace.png"
+DEFAULT_EVENT_LOG = OUTPUT_ROOT / "callback-events.jsonl"
 DEFAULT_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
     "compiled-outer-loop-trace.md"
@@ -71,6 +72,7 @@ ONE_TRIP_LINEAR_ACTIONS_PER_PROMOTION = 13
 
 _EVENTS: list[dict[str, Any]] = []
 _EVENT_LOCK = threading.Lock()
+_EVENT_LOG: Path | None = None
 
 
 def _strict(value: Any) -> Any:
@@ -169,16 +171,36 @@ def _source_anchor(function: Callable, needle: str) -> str:
     return f"{display}:{first + offset}"
 
 
-def _record_outer_event(kind: str, index: Any, active: Any) -> None:
-    event = {
-        "kind": kind,
-        "timestamp_ns": time.perf_counter_ns(),
-        "index": int(index),
-        "active": bool(active),
-    }
+def _append_event(event: dict[str, Any]) -> None:
     with _EVENT_LOCK:
         event["sequence"] = len(_EVENTS)
         _EVENTS.append(event)
+        if _EVENT_LOG is None:
+            raise RuntimeError("callback event log is not configured")
+        with _EVENT_LOG.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(_strict(event), sort_keys=True) + "\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+
+
+def _reset_events(path: Path) -> None:
+    global _EVENT_LOG
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("", encoding="utf-8")
+    with _EVENT_LOCK:
+        _EVENTS.clear()
+        _EVENT_LOG = path
+
+
+def _record_outer_event(kind: str, index: Any, active: Any) -> None:
+    _append_event(
+        {
+            "kind": kind,
+            "timestamp_ns": time.perf_counter_ns(),
+            "index": int(index),
+            "active": bool(active),
+        }
+    )
 
 
 def _record_active_result(
@@ -221,9 +243,7 @@ def _record_active_result(
         ),
         "line_search_grades": executed_receipt_rows * LINE_SEARCH_LADDER_LENGTH,
     }
-    with _EVENT_LOCK:
-        event["sequence"] = len(_EVENTS)
-        _EVENTS.append(event)
+    _append_event(event)
 
 
 def _instrumented_active_set_entry() -> Callable:
@@ -438,6 +458,19 @@ def _parse_outer_rows() -> list[dict[str, Any]]:
             )
         rows.append(row)
     return rows
+
+
+def _verify_event_log(path: Path) -> None:
+    persisted = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    if persisted != _strict(_EVENTS):
+        raise RuntimeError(
+            "persisted callback events do not match the in-memory trace: "
+            f"persisted={len(persisted)} memory={len(_EVENTS)}"
+        )
 
 
 def _distribution(values: list[float]) -> dict[str, Any]:
@@ -663,6 +696,7 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             f"- Receipt: `{receipt['artifacts']['receipt']}`.",
             f"- Per-iteration CSV: `{receipt['artifacts']['table']}`.",
             f"- Figure: `{receipt['artifacts']['figure']}`.",
+            f"- Durable callback event stream: `{receipt['artifacts']['event_log']}`.",
             f"- Scheduler stdout: `{receipt['log_paths']['stdout']}`.",
             f"- Scheduler stderr: `{receipt['log_paths']['stderr']}`.",
             "- No `nova/` source file was changed.",
@@ -676,6 +710,7 @@ def run(
     output: Path,
     table: Path,
     figure: Path,
+    event_log: Path,
     report: Path,
     cache_root: Path,
     stdout_path: Path,
@@ -709,13 +744,13 @@ def run(
         started = time.perf_counter()
         instrumented_executable = instrumented.lower(state).compile()
         instrumented_compile_s = time.perf_counter() - started
-        with _EVENT_LOCK:
-            _EVENTS.clear()
+        _reset_events(event_log)
         started = time.perf_counter()
         instrumented_result = _ready(instrumented_executable(state))
         instrumented_wall_s = time.perf_counter() - started
         instrumented_summary = _solve_summary(instrumented_result)
 
+    _verify_event_log(event_log)
     rows = _parse_outer_rows()
     active_rows = [row for row in rows if row["active_at_entry"]]
     inactive_rows = [row for row in rows if not row["active_at_entry"]]
@@ -879,6 +914,7 @@ def run(
             "receipt": str(output.resolve().relative_to(ROOT)),
             "table": str(table.resolve().relative_to(ROOT)),
             "figure": str(figure.resolve().relative_to(ROOT)),
+            "event_log": str(event_log.resolve().relative_to(ROOT)),
             "report": str(report),
         },
     }
@@ -919,6 +955,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--table", type=Path, default=DEFAULT_TABLE)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    parser.add_argument("--event-log", type=Path, default=DEFAULT_EVENT_LOG)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--stdout-path", type=Path, default=Path("stdout.log"))
@@ -931,6 +968,7 @@ def main() -> None:
         arguments.output,
         arguments.table,
         arguments.figure,
+        arguments.event_log,
         arguments.report,
         arguments.cache_root,
         arguments.stdout_path,

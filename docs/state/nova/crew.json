@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:21:47",
+  "updated": "2026-09-04T11:41:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1881,6 +1881,15 @@
           "gpt-5.6-sol": "01a05e89-3bc1-7c21-9a13-5a2126f275d3"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "pta-expect-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "pta-partition",
@@ -89639,6 +89648,222 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T092255915923-pta-replay-operand-expectations",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-replay-operand-expectations",
+        "node_definition": {
+          "done_when": "Worktree commit confined to tests/test_topology_domain_partition.py, tests/test_topology_o_qualification.py and tests/test_split_polish_nulls.py, held beside the operand commit, with the three files green on CPU in captured logs (exit 0, passed counts stated), each rewritten expectation carrying a one-line comment naming the bank revision it reads from, no assertion deleted, the seven referee node IDs green, the manifest written before the test runs",
+          "estimated_hours": null,
+          "goal": "Rewrite the seven bank-value test expectations that the regenerated MAST replay operands at 52cad98a54ab5c7df758eab55921ca5afee9151b change so each test states the current operands' values with its intent preserved: tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component on 21978/35 pure plus mixed (eager plus jit), tests/test_topology_o_qualification.py::test_committed_wall_notch_cannot_be_selected_without_qualification (eager plus jit), tests/test_split_polish_nulls.py::test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation (reuse map: the failing assertions with their messages in ~/.config/reckon/crew/runs/r-20260904T081201061587-pta-replay-operands-current-bank/operand-consumers.log, the operand metadata docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json for the banked rows, the corroboration bank docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json at ed9bb793 as the reference the operands now match)",
+          "id": "pta-replay-operand-expectations",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T092255915923-pta-replay-operand-expectations/manifest.md",
+          "plan": "plasma-cell-topology-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/test_topology_domain_partition.py",
+            "tests/test_topology_o_qualification.py",
+            "tests/test_split_polish_nulls.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pta-expect-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T09:23:05Z",
+        "completed_at": "2026-09-04T09:40:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1035,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1035,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "52cad98a54ab5c7df758eab55921ca5afee9151b",
+        "commits": [
+          "af6626702afdf68e92507976b7d243985a013bc1"
+        ],
+        "changed_lines": {
+          "added": 16,
+          "removed": 7,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/test_topology_domain_partition.py tests/test_topology_o_qualification.py tests/test_split_polish_nulls.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T092255915923-pta-replay-operand-expectations/seven-referee-nodes-cpu.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T092255915923-pta-replay-operand-expectations/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06bba-9932-74d2-b38a-1777da5827d5",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 11105,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 13505,
+              "external_wait": null,
+              "log_age_seconds": 12603,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 12659,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 7200,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: foreground wait for the already-submitted single paired H200 measurement job 1262444 and its quantitative cost/class receipt",
+              "elapsed_seconds": 3227,
+              "external_wait": null,
+              "log_age_seconds": 9,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[4f2668b6]; changed_paths: [\"nova/equilibrium/connectivity_boundary.py\"",
+                "\"tests/test_limiter_spline_minimum.py\"",
+                "\"benchmarks/polish_support_performance.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T082856913843-nia-polish-support-class-and-cost-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T082856913843-nia-polish-support-class-and-cost-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-polish-support-class-and-cost-repair",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T082856913843-nia-polish-support-class-and-cost-repair",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 1002,
+              "terminal_at": "2026-09-04T09:06:18Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-class-and-cost-repair"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 7200,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: foreground polling H200 jobs 1262450 and 1262453; manifest written before wait",
+              "elapsed_seconds": 1559,
+              "external_wait": null,
+              "log_age_seconds": 38,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[]; changed_paths: [\"benchmarks/settled_mask_stall.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T085646278854-scr-settled-mask-stall-root-cause-2/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T085646278854-scr-settled-mask-stall-root-cause-2/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-settled-mask-stall-root-cause-2",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": null,
+              "project": "nova",
+              "run_id": "r-20260904T085646278854-scr-settled-mask-stall-root-cause-2",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 716,
+              "terminal_at": "2026-09-04T09:11:04Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-settled-mask-stall-root-cause-2"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -89755,6 +89980,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1572
+    "_version": 1574
   }
 }

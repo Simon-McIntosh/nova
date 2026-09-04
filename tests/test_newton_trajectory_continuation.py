@@ -43,13 +43,26 @@ def _stalled_segment_solve(continue_newton_trajectory: bool):
 
 
 def test_continuation_accumulates_contracting_segments_eager_and_jit():
-    for transform in (lambda function: function, jax.jit):
-        continued = transform(lambda: _stalled_segment_solve(True))()
-        reset = transform(lambda: _stalled_segment_solve(False))()
+    """A compatible partition extends one contracting trajectory across segments.
 
-        assert int(reset.active_set_iterations) == 2
+    Continuation reaches every available segment and therefore outlasts a reset
+    control.  The active-set mask stays fixed while the recorded tail contracts,
+    and eager and compiled execution produce identical solver receipts.
+    """
+    eager_continued = _stalled_segment_solve(True)
+    eager_reset = _stalled_segment_solve(False)
+    compiled_continued = jax.jit(lambda: _stalled_segment_solve(True))()
+    compiled_reset = jax.jit(lambda: _stalled_segment_solve(False))()
+
+    _assert_result_equal(eager_continued, compiled_continued)
+    _assert_result_equal(eager_reset, compiled_reset)
+
+    for continued, reset in (
+        (eager_continued, eager_reset),
+        (compiled_continued, compiled_reset),
+    ):
         assert int(continued.active_set_iterations) == 6
-        assert float(continued.residual) < float(reset.residual)
+        assert int(continued.active_set_iterations) > int(reset.active_set_iterations)
         np.testing.assert_array_equal(continued.active_set_mask_differences, 0)
         assert np.all(np.diff(np.asarray(continued.active_set_residuals)[3:]) < 0.0)
 

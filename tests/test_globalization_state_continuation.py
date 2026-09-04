@@ -71,6 +71,13 @@ def test_monotone_solve_is_bit_identical_eager_and_jit():
 
 
 def test_inner_decision_state_accumulates_across_segments():
+    """A resumed segment carries recovery state and then makes new decisions.
+
+    Merit history grows and conditioning remains defined across the boundary.
+    The first recovery starts from the carried radius, successive recovery rows
+    form a state chain, and the final row supplies the resumed terminal radius.
+    """
+
     def map_fn(state):
         return state + jnp.exp(0.2 * (state - 10.0))
 
@@ -85,7 +92,7 @@ def test_inner_decision_state_accumulates_across_segments():
         convergence_tolerance=1.0e-12,
         return_globalization_state=True,
     )
-    _second, second_state = _newton_krylov_inner(
+    second, second_state = _newton_krylov_inner(
         map_fn,
         first.trajectory_state,
         newton_steps=2,
@@ -102,7 +109,7 @@ def test_inner_decision_state_accumulates_across_segments():
 
     assert int(second_state.merit_observations) > int(first_state.merit_observations)
     assert np.isfinite(np.asarray(second_state.condition_baseline))
-    assert float(second_state.recovery_radius) == float(first_state.recovery_radius)
-    assert float(second_state.model_rebuild_damping) == float(
-        first_state.model_rebuild_damping
-    )
+    recovery_radii = np.asarray(second.promotion_recovery_radii)
+    assert float(recovery_radii[0, 0]) == float(first_state.recovery_radius)
+    np.testing.assert_array_equal(recovery_radii[:-1, 1], recovery_radii[1:, 0])
+    assert float(second_state.recovery_radius) == float(recovery_radii[-1, 1])

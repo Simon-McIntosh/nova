@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T19:52:15",
+  "updated": "2026-09-04T19:57:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -95740,6 +95740,200 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T171635149587-nia-selected-wall-early-branch",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-selected-wall-early-branch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4875,
+                "cached_input_tokens": 421051,
+                "input_tokens": 426027,
+                "output_tokens": 4658,
+                "reasoning_output_tokens": 1533,
+                "total_tokens": 430685,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to nova/equilibrium/connectivity_boundary.py and tests/test_limiter_spline_minimum.py, in which the existing limiter, line-of-sight plus connectivity tests (tests/test_limiter_spline_minimum.py, tests/test_limiter_line_of_sight.py, tests/test_flux_surface_connectivity.py, tests/test_shared_spline_authority.py) stay green on CPU with logs, a new test proves the selected path's tangency point plus minimum bit-identical before plus after on a fixture with a supplied selected_wall, plus a CPU timing of the selected path before plus after quoted in the manifest",
+          "estimated_hours": null,
+          "goal": "Remove the unused whole-wall work from the selected-support limiter path of the integration candidate f001ce58: _select_reachable_wall_limiter in nova/equilibrium/connectivity_boundary.py computes the whole-wall node plus 420-sample reachability arrays before branching on a supplied selected_wall at lines 727-737, so the selected path pays global work it never consumes (paired H200 attribution ~/.config/reckon/crew/reports/nova/integration/candidate-2/trip-attribution.md: wall reachability 44.2 ms per call on the candidate against 25.2 ms on main, 336 calls per trip, an isolated exposure of 6.4 s per trip), so branch on selected_wall first plus evaluate reachability plus the line-of-sight rule only on the selected segment's support plus refined roots, preserving the census-selected segment plus the spline-restricted minimum bit for bit on every existing fixture, with the change confined to the candidate's own file plus its tests, no change to forward_operator.py or fixed_point.py",
+          "id": "nia-selected-wall-early-branch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T171635149587-nia-selected-wall-early-branch/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_limiter_spline_minimum.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-wall-perf-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T17:17:13Z",
+        "completed_at": "2026-09-04T17:56:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2356,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2356,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f001ce588d9ad3bde8387907e109dbf1226fff7c",
+        "commits": [
+          "8834ba07a457db81ab570e018d915e438e5402f1"
+        ],
+        "changed_lines": {
+          "added": 111,
+          "removed": 32,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_limiter_spline_minimum.py tests/test_limiter_line_of_sight.py tests/test_flux_surface_connectivity.py tests/test_shared_spline_authority.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T171635149587-nia-selected-wall-early-branch/logs/after-focused.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T171635149587-nia-selected-wall-early-branch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d6c-b0dd-7df1-b9a8-83e096a1e425",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12493056,
+            "cached_input_tokens_cumulative": 12493056,
+            "input_tokens": 12633604,
+            "input_tokens_cumulative": 12633604,
+            "output_tokens": 31070,
+            "output_tokens_cumulative": 31070,
+            "reasoning_output_tokens": 10452,
+            "reasoning_output_tokens_cumulative": 10452
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 39537,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 41937,
+              "external_wait": null,
+              "log_age_seconds": 41035,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 41091,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 41522,
+          "peak_input_tokens": 25126660
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-selected-wall-early-branch",
+          "session_id": "01a06d6c-b0dd-7df1-b9a8-83e096a1e425",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T17:56:29Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -95884,6 +96078,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1655
+    "_version": 1656
   }
 }

@@ -407,6 +407,38 @@
     <code>connectivity_boundary.py</code>. The candidate stays unmerged.</p>
   </section>
 
+  <section id="held-tip-diagnosis">
+    <h2>Why the held tips double the trips: one boundary cell at trip one, and a wall reader that ignores its own shadow verdict (merged at 2a5ab8da)</h2>
+    <p><strong>Commit:</strong> <code>d0da52c0</code>; receipts <code>docs/figures/null-identification-authority/held-tip-diagnosis/</code>
+    (four per-arm per-trip JSON, combined analysis, figure; H200 job 1262738, 36 min). All four arms start trip one from the
+    identical state.</p>
+    <table>
+      <caption>MAST 22086/43 pure, per arm</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Trips</th><th scope="col">Terminal residual</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">main</th><td>7</td><td>4.79e-4</td><td>diverted, consistent</td></tr>
+        <tr><th scope="row">main + containment tip</th><td>14</td><td>9.96e-4</td><td>limited, inconsistent</td></tr>
+        <tr><th scope="row">main + polish tip</th><td>18</td><td>1.11e-3</td><td>diverted, consistent</td></tr>
+        <tr><th scope="row">integrated candidate</th><td>14</td><td>9.96e-4</td><td>diverted, consistent</td></tr>
+      </tbody>
+    </table>
+    <h3>The X-point is never lost</h3>
+    <p>The premise that the containment census stops admitting the primary X-point is falsified: it is admitted on 14 of 14
+    trips, with ring count 4, a polish displacement of 0.057 m inside a 0.139 m cell, saddle polarity, inside the wall, selected
+    as primary. The limited class comes from the class reader in <code>connectivity_boundary.py</code>: it rediscovers a wall
+    limiter independently (exact wall node 20, u_wall 0.333 against u_x 0.438), gates the wall level only on that point's valid
+    bit, and ignores its own verdict that the supplied wall is shadowed. The polish tip's wall rule happens to override this in
+    the integrated candidate, which is why the candidate reads diverted while sharing the containment arm's state byte for byte.</p>
+    <h3>One cell at trip one</h3>
+    <p>On both tips the trip-one read has the same axis, X and wall tangency positions as main; only the spline-authored census
+    values move (axis flux by −5.2e-5, X flux by −1.8e-4). Thresholding the grid against the moved X value flips one boundary
+    cell (frozen mask 28 to 29, private mask 23 to 24), the trip's attempted mask movement doubles from 29 to 56 cells, and the
+    trajectory departs at trip two. The value authority is right by decision; the boundary comparison must read the same surface,
+    with a resolution-scaled deadband for cells within interpolation uncertainty of the separatrix. Two repairs dispatched on the
+    candidate lineage: the class reader consuming the supplied wall segment and letting a shadowed supplied wall invalidate the
+    rediscovered candidate, and the mask threshold made spline-consistent with a pinned trip-one regression.</p>
+  </section>
+
 </main>
 </body>
 </html>

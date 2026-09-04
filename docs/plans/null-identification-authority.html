@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -294,6 +294,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T175757971435" data-who="coordinator" data-when="2026-09-04T18:00:00Z">
     <div class="r-comment-body"><p>Selected-wall early branch landed into the integration candidate, not main: commit <code>8834ba07</code>, candidate lineage advanced to <code>e7447197</code> in worktree <code>integration-candidate-2</code>. A supplied wall segment now branches before the whole-wall node and 420-sample reachability work in <code>connectivity_boundary.py</code>; the tangency point and minimum are bit-identical on the exact-root fixture (uint64 bits pinned by a new test), the selected path drops from 1.77 to 1.35 ms per call on CPU, and the focused topology suite falls from 1146 s to 430 s. The candidate stays unmerged from main until the held-tip convergence diagnosis names the admission rule that flips 22086/43 to limited and it is repaired; the paired H200 receipt is then remeasured on the advanced tip.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T190353737769" data-who="coordinator" data-when="2026-09-04T19:03:00Z">
+    <div class="r-comment-body"><p>Held-tip diagnosis landed (commit <code>d0da52c0</code> merged at <code>2a5ab8da</code>, receipts <code>docs/figures/null-identification-authority/held-tip-diagnosis/</code>, report <code>~/.config/reckon/crew/reports/nova/integration/candidate-2/held-tip-convergence-diagnosis.md</code>, evidence anchor <code>#held-tip-diagnosis</code>). The premise that the containment census loses the X-point is falsified: it is admitted on all 14 trips (ring count 4, polish inside its cell, saddle polarity, inside the wall, selected primary). Two distinct mechanisms instead. First, the class reader in <code>connectivity_boundary.py</code> (lines 1265 to 1291, 1415 to 1422) rediscovers a wall limiter on its own, gates the wall level only on that point's valid bit and ignores its own shadowed verdict on the supplied wall, so the containment arm reads limited with a spurious binder; the polish tip's wall rule masks this in the integrated candidate. Second, on both tips the spline-authored axis and X values shift by 5e-5 and 1.8e-4 at trip one while every position is identical to main's; thresholding the grid against the moved X value flips one boundary cell, the trip's attempted mask movement doubles from 29 to 56 cells and the trajectory departs at trip two, hence 14 to 18 trips at a 1e-3 floor. The spline value authority stands by decision; the boundary comparison must read the same surface with a resolution-scaled deadband. Dispatched on the candidate lineage: <code>nia-class-reader-supplied-wall-authority</code> (connectivity_boundary.py) and <code>nia-mask-threshold-spline-consistency</code> (topology.py, forward_operator.py, flux_surface_connectivity.py), each with a regression pinning the diagnosed trip-one state. The paired H200 receipt is remeasured after both.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

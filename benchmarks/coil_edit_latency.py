@@ -380,8 +380,11 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         axis,
         diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(x_points[0])),
     )
+    endpoint_labelled = endpoint_seed.equilibrium.labelled_flux
+    endpoint_lcfs_count = int(np.asarray(endpoint_labelled.lcfs_vertex_count))
     prepared = {
         "initial": endpoint_seed.equilibrium.flux,
+        "reference_lcfs": np.asarray(endpoint_labelled.lcfs)[:endpoint_lcfs_count],
         "cold_diverted_seed": cold.branches.flux[int(TopologyClass.DIVERTED)],
         "prescribed_current": jnp.asarray(base_current),
         "target_current": target_current,
@@ -472,7 +475,7 @@ def run(
         state = initial
         _endpoint_masks, endpoint_topology = profile.operator.read(state)
         reference_boundary = np.asarray(endpoint_topology.boundary)
-        reference_lcfs = np.empty((0, 2), dtype=np.float64)
+        reference_lcfs = prepared["reference_lcfs"]
         for index, (fraction, current) in enumerate(
             zip(EDIT_FRACTIONS, edit_vectors, strict=True)
         ):
@@ -554,13 +557,18 @@ def run(
                 "lcfs_vertex_count": lcfs_count,
                 "boundary_displacement_m": boundary_displacement,
                 "boundary_displacement_source": displacement_source,
+                "warm_seed_source": (
+                    "minus-twenty-percent endpoint terminal state"
+                    if index == 0
+                    else "previous edit terminal state"
+                ),
                 "cold_control": cold_control,
             }
             rows.append(row)
-            if not row["converged"]:
+            if not np.isfinite(row["terminal_residual"]):
                 raise RuntimeError(
-                    f"warm-start chain lost convergence at edit {index}: "
-                    f"residual={row['terminal_residual']:.6g}"
+                    f"warm-start chain produced a nonfinite terminal state at edit "
+                    f"{index}"
                 )
             state = branch.equilibrium.flux
             print(

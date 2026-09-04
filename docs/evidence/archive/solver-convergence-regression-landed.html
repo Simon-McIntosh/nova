@@ -565,6 +565,19 @@
     the stiffness raises, why the prescribed currents hold the plasma 6 cm from where EFIT found it, is under investigation
     (passive structure currents EFIT reconstructs and the forward operator omits are the leading candidate). Nothing is merged;
     the solver shape stays the lead's decision.</p>
+    <h3>Second attempt: continuation with inner-convergence gating (commits a63bbd0a, f5c892aa, held)</h3>
+    <p>Receipt <code>docs/figures/solver-convergence-regression/vertical-mode/elimination/continuation/four-rows.json</code> (H200
+    job 1262711, two rows before the fence). The driver <code>nova/equilibrium/vertical_elimination.py</code> admits an outer
+    sample only from a converged inner solve, warm-starts flux and multiplier, bounds each move to one vertical cell, halves a
+    refused step, keeps the best sample and refines inside a sign-changing bracket. The mechanism holds: every admitted inner
+    solve on 21986/46 converged to 1e-11 at displaced targets, which the first attempt never achieved. Two corrections follow
+    from the converged trace. The local stiffness is <strong>−78.8 kA/m</strong>, not the +67.8 kA/m the first attempt read from
+    unconverged iterates, so the free root lies about 5 cm <strong>below</strong> the seed centroid of 0.099 m, not above it; the
+    field-deficit census's root estimate inherits the same sign error and is withdrawn to that extent, its conclusion that no
+    conductor is missing standing. And the step policy, not the physics, exhausted the budget: the first +0.02 m step worsened
+    the current to −5764 A, four reverse-direction inner attempts were refused, the step fell to 0.00125 m and stayed there, so
+    24 iterations moved the current only from −4103 A to −3904 A. The repair in flight lets a reduced step regrow toward the cell
+    cap after each converged sample and aims it with the secant of the two most recent converged samples.</p>
   </section>
 
   <section id="open-record">

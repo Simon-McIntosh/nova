@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T19:03:16",
+  "updated": "2026-09-04T19:09:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -530,6 +530,15 @@
         "id": "cank-interface-design-x",
         "harness": "codex",
         "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "cank-interface-x",
+        "harness": "codex",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -2472,6 +2481,15 @@
       },
       {
         "id": "scr-elimination-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-elimination-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -95257,6 +95275,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1644
+    "_version": 1646
   }
 }

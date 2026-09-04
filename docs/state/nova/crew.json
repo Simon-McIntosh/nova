@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T19:57:36",
+  "updated": "2026-09-04T20:00:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1992,6 +1992,15 @@
       },
       {
         "id": "nia-tip-diagnosis-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-tip-diagnosis-x2",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -96078,6 +96087,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1656
+    "_version": 1657
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T17:58:15",
+  "updated": "2026-09-04T18:01:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -94181,6 +94181,184 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T155214688690-scr-continuation-test-contract-repair",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-continuation-test-contract-repair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1011,
+                "cached_input_tokens": 316397,
+                "input_tokens": 317464,
+                "output_tokens": 1530,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 318994,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to tests/test_newton_trajectory_continuation.py and tests/test_globalization_state_continuation.py, the two repaired node IDs plus tests/test_step_cap_model_error.py plus the seven referee node IDs green on CPU with logs, the manifest quoting for each test the old assertion, the new assertion and the mechanism it encodes",
+          "estimated_hours": null,
+          "goal": "Re-express the two continuation tests whose expectations went stale when the model-error step cap plus partition relinearisation merged at e930710c (attribution ~/.config/reckon/crew/reports/nova/attribution/continuation-test-regression.md: both node IDs pass at the merge's first parent a0b668eb, fail on main, no other merge flips them, the mechanism is intentional so the repair is test-only): tests/test_newton_trajectory_continuation.py::test_continuation_accumulates_contracting_segments_eager_and_jit expected 2 reset active-set iterations but a mask change now relinearises so the reset path observes 5, so it should assert the continuation-shaped invariants (continued iterations against reset iterations, contraction across segments, eager against jit identity) rather than the superseded reset count plus residual ordering, plus tests/test_globalization_state_continuation.py::test_inner_decision_state_accumulates_across_segments expected the carried recovery radius to stay 1.0 but a mask change now resets carried conditioning plus model-error state before relinearising, so it should assert the resumed recovery starts from the carried radius plus evolves through its recorded rows rather than requiring the final adaptive state to remain immutable, with the mechanism each assertion now encodes stated in the test docstring in mechanism terms (no commit, plan or incident references in the source), the two node IDs added to the referee list the manifest names for future fixed_point.py landings, no source change (nova/equilibrium/fixed_point.py is held by the live one-read-per-trip node)",
+          "id": "scr-continuation-test-contract-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T155214688690-scr-continuation-test-contract-repair/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/test_newton_trajectory_continuation.py",
+            "tests/test_globalization_state_continuation.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-test-contract-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T15:52:32Z",
+        "completed_at": "2026-09-04T16:00:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 490,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 490,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d0e1ae1ae42ec050f1674fc520089c43b17a5d0a",
+        "commits": [
+          "0d507b30f4fce72a1834af678fb10fdc2ca02656"
+        ],
+        "changed_lines": {
+          "added": 31,
+          "removed": 11,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider the two repaired node IDs plus tests/test_step_cap_model_error.py plus the seven referee node IDs",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T155214688690-scr-continuation-test-contract-repair/logs/cpu-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T155214688690-scr-continuation-test-contract-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06d1f-2a0c-7741-adb0-e19d69eeb371",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 34466,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 36866,
+              "external_wait": null,
+              "log_age_seconds": 35964,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 36020,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-continuation-test-contract-repair",
+          "session_id": "01a06d1f-2a0c-7741-adb0-e19d69eeb371",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T16:00:42Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -94297,6 +94475,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1633
+    "_version": 1634
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:23:20",
+  "updated": "2026-09-04T13:35:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1778,6 +1778,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-resolution-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "nia-shared-spline-x",
         "harness": "codex",
         "role": "implement",
@@ -2339,6 +2348,15 @@
       },
       {
         "id": "scr-stall-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "scr-vertical-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -90946,6 +90964,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1588
+    "_version": 1590
   }
 }

@@ -389,8 +389,8 @@ def _component_measurement(setup) -> dict[str, Any]:
     def fixed_design_read(state):
         return operator._fixed_design_read(state[:physical_number], requested)
 
-    def support_partition(state):
-        return operator._support_partition(state, requested)
+    def published_domain_read(state):
+        return operator.read(state, requested)
 
     def shadow_read(state):
         return operator.residual_shadow_components(state, requested)
@@ -467,7 +467,7 @@ def _component_measurement(setup) -> dict[str, Any]:
             "tensor_spline_fit": measure(tensor_fit),
             "topology_qualification": measure(topology_qualification),
             "fixed_design_read": measure(fixed_design_read),
-            "support_partition_with_clips": measure(support_partition),
+            "published_domain_read": measure(published_domain_read),
             "residual_shadow_read": measure(shadow_read),
             "residual_evaluation": measure(residual_map),
             "one_newton_trip": measure(one_newton_trip),

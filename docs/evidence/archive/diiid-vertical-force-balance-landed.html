@@ -64,10 +64,31 @@
         <tr><th scope="row">Tests</th><td>tests/test_diiid_pf_active_circuits.py with the description and passive tests 40 passed; the four DIII-D artifact test files 37 passed after the leaf-count repair</td></tr>
       </tbody>
     </table>
-    <p>Not yet measured: the vacuum field built from the persisted description against the inclusion ladder's
-    all-conductors rung on frame 89, which the next node records. One skip-gated test
+    <p>The vacuum-field comparison is recorded below. One skip-gated test
     (<code>tests/imas/test_diiid_repaired_machine_artifact.py</code>) still carries the literal 1550 and is repaired
     when the authoritative netCDF source is mounted.</p>
+  </section>
+
+  <section id="vacuum-reproduction">
+    <h2>§4 closing measure — the vacuum field from the persisted description against the inclusion ladder</h2>
+    <p><strong>Driver:</strong> <code>benchmarks/diiid_vacuum_from_description.py</code> (merged at <code>54a611a0</code>);
+    <strong>repair:</strong> <code>700e8991</code>. The first comparison was 42 to 59 times the ladder peak on frames 89
+    and 102: every F-coil contribution equalled its turn count (58, or 55 for F6, F7 and F9) times the ladder's on an
+    identical bulk polygon, because the bulk element carried the physical turns while the recorded channel already
+    holds total ampere-turns. ECOILA and the five ohmic channels agreed to eight decimals throughout, both sides
+    authoring them as genuine one-turn elements.</p>
+    <table>
+      <caption>After the repair (each F-coil bulk element one signed turn)</caption>
+      <thead><tr><th scope="col">Frame</th><th scope="col">Worst F-coil disagreement (relative to ladder peak)</th><th scope="col">Remaining residual</th><th scope="col">Source</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">89 (d3d_shot_0003ff34e7)</th><td>4.316e-14 (F6A)</td><td>−0.9029 Wb, 0.107 of the peak</td><td>ECOILA as 48 one-turn rings against the ladder's one bulk rectangle</td></tr>
+        <tr><th scope="row">102 (d3d_shot_00000c4a7b)</th><td>3.662e-14 (F6B)</td><td>−0.6378 Wb, 0.114 of the peak</td><td>same</td></tr>
+      </tbody>
+    </table>
+    <p>The ECOILA residual is a representation choice, not a unit defect: the row-derived description drives one bulk
+    rectangle with total ampere-turns while the persisted description keeps the 48 winding rings. Which representation
+    the vacuum response should use is the next item on this section. The inclusion ladder driver itself
+    (<code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>) no longer imports on main and is owed a repair.</p>
   </section>
 
   <section id="open-record">

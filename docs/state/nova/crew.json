@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T23:50:42",
+  "updated": "2026-09-04T05:57:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -381,9 +381,11 @@
         "id": "c-nia-bank",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "83111cd9-e95c-43b0-ab90-caba95cc737e",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "83111cd9-e95c-43b0-ab90-caba95cc737e"
+        },
         "created": "2026-09-03"
       },
       {
@@ -83998,6 +84000,200 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T215215649891-dvf-pf-active-turns-convention",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a74",
+        "node": "dvf-pf-active-turns-convention",
+        "node_definition": {
+          "done_when": "Regenerated docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc with turns_with_sign 1 on every F-coil element and the ohmic channels unchanged, exact imas-python round trip, tests/test_diiid_pf_active_circuits.py updated so it asserts the total-ampere-turn convention for the F-coils and stays green with tests/imas/test_diiid_description.py and tests/imas/test_diiid_machine_ids.py, the vacuum driver rerun on CPU with its receipt showing every F-coil per-coil disagreement at roundoff (1e-12 relative) and the remaining residual attributed to ECOILA's representation with the figure stated, the manifest, identity receipt and PUBLISH.md regenerated through their owning helpers, committed with a conventional subject and body, the manifest written before the regeneration begins",
+          "estimated_hours": null,
+          "goal": "Repair the F-coil turns convention in the persisted DIII-D description you landed at cb9c883b: the eighteen F-coils are authored as one bulk winding-pack element each with turns_with_sign 58 or 55 while their recorded channel already carries total ampere-turns and every solve applies no turns multiplier to that bulk polygon, so active_coil_response_from_imas (response = turns_with_sign times polygon_greens) doubles their field by the turn count (diagnosis and per-coil evidence in docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json under defect, merged at 54a611a0), which is fixed by writing turns_with_sign 1 for each F-coil bulk element in docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py and the description, regenerating the IDS set, and rerunning benchmarks/diiid_vacuum_from_description.py so the F-coil contributions match the ladder to roundoff, with the ECOILA representation difference (48 one-turn rings against one bulk rectangle, about 11 percent of the ladder peak) recorded as a stated follow-on rather than fitted",
+          "id": "dvf-pf-active-turns-convention",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215215649891-dvf-pf-active-turns-convention/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/ids-set/",
+            "nova/imas/diiid_description.py",
+            "tests/test_diiid_pf_active_circuits.py",
+            "docs/figures/diiid-vertical-force-balance/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "c-dvf-pf-active",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:52:34Z",
+        "completed_at": "2026-09-04T03:56:17.902Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 21811,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 21823,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "e97efb3209e0eb14e729432ba8b517cc3131ae6a",
+        "commits": [
+          "700e89910e078c3d6e1a7675d3edf9a05d0c60b5"
+        ],
+        "changed_lines": {
+          "added": 464,
+          "removed": 385,
+          "files": 10
+        },
+        "tests_added": 19,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_diiid_pf_active_circuits.py (47 passed) and tests/imas/test_diiid_description.py tests/imas/test_diiid_machine_ids.py (11 passed); benchmarks/diiid_vacuum_from_description.py rerun on CPU",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215215649891-dvf-pf-active-turns-convention/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215215649891-dvf-pf-active-turns-convention/manifest.md",
+        "scope_changed": false,
+        "session_id": "4d27be24-2ff2-4038-8629-b7049f5a6047",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.93,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-04T04:50:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 70637,
+            "cache_creation_input_tokens_cumulative": 365907,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 7842338,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 44,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13998,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.0,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.1721635999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 94732,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 105532,
+              "log_age_seconds": 99762,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 99808,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3856,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the H200 capture job 1262181 has not completed within this node's 60-minute time fence; and its current single-combination progress (44.5s allocation+carrier setup; then >24 minutes with no solve-finish) makes it very unlikely to complete the remaining ~7 solve_arm combinations before the SLURM job's own 3-hour cap either; without a design change to the driver's per-trip state-recovery method. Resume path for a subsequent dispatch: (1) `squeue -j 1262181` / `sacct -j 1262181 --format=JobID; State; ExitCode; Elapsed`; (2) read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/logs/h200-capture.log for EXIT_MARKER and progress (grep 'STAGE\\|HEARTBEAT' \u2014 heartbeats alone with no advancing STAGE lines mean it is still stuck on the same combination); (3) if EXIT_MARKER=0 in that log; the raw capture JSON is at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192747188838-scr-remedy-presettlement-mast/raw-presettlement-mast.json \u2014 run; from a worktree carrying benchmarks/acceptance_presettlement_remedy.py (this file; unmodified): `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <that raw path> --referee-log <a referee log> --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; which writes docs/figures/solver-convergence-regression/remedy-presettlement/mast/{remedy-presettlement.json; remedy-presettlement.png}; then commit benchmarks/acceptance_presettlement_remedy.py plus those two files with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer before considering the node done); (4) if the job is still running past its own 3-hour cap or fails; the driver needs the redesign described under follow_ons before resubmitting; since resubmitting unchanged will very likely repeat the same multi-hour stall.",
+              "elapsed_seconds": 7456,
+              "log_age_seconds": 6590,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (driver is uncommitted in this worktree; committing an unvalidated driver before the H200 measurement it exists to produce is against the node's own evidence gate",
+                "which requires the receipt to exist first)"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 6601,
+              "terminal_at": "2026-09-03T20:02:25Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 227.497,
+          "generated_tokens": 13998,
+          "generation_seconds": 174.736,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 38.5,
+          "machine_seconds": 52.761,
+          "peak_input_tokens": 385138,
+          "tokens_per_second": 80.11,
+          "wall_tokens_per_second": 61.53
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -84016,6 +84212,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1482
+    "_version": 1484
   }
 }

@@ -58,14 +58,18 @@ def _admission_aware_solve(dimension: int, bound: float):
 
 
 @pytest.mark.parametrize("dimension", [8, 12, 24])
-def test_conditioning_engages_only_after_raw_ladder_refusal(dimension: int):
-    """An improving conditioned fallback engages at every projection dimension."""
+def test_resolved_direction_stays_undamped_after_raw_ladder_refusal(dimension: int):
+    """A physical refusal cannot make a resolved linear direction untrusted."""
     result = jax.jit(lambda: _admission_aware_solve(dimension, 1.0))()
 
-    assert int(result.krylov_conditioning_count) == 1
-    assert float(result.accepted_factors[0]) > 0.0
-    assert 0.0 < float(result.effective_newton_fractions[0]) < 0.03125
-    assert float(result.residual) < 1.0
+    # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    assert int(result.krylov_conditioning_count) == 0
+    # A trusted raw direction stays refused; unresolved fallback damping is separate.
+    assert float(result.accepted_factors[0]) == 0.0
+    # A trusted raw direction stays refused; unresolved fallback damping is separate.
+    assert float(result.effective_newton_fractions[0]) == 0.0
+    # A trusted raw direction stays refused; unresolved fallback damping is separate.
+    assert float(result.residual) == 1.0
 
 
 def test_admitted_raw_ladder_preserves_disabled_arm_traversal():

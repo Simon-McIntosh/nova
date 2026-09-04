@@ -404,6 +404,44 @@
     22086/43 has nothing singular and converges on the production route; its bank stall was the pinned GMRES budget.</p>
   </section>
 
+  <section id="public-route">
+    <h2>The four rows on the production route, and the cost of a trip (merged at 6ac6206a and c78f6364)</h2>
+    <p><strong>Route corroboration:</strong> commits <code>4cc32cd4</code>, <code>15d24489</code>; receipt
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json</code> (H200 job 1262592).
+    The bank producer and the frozen-mask driver resolve the public GMRES budget of 30 instead of a benchmark constant of 12, and
+    the active-set result aggregates its conditioning telemetry over the whole solve.</p>
+    <table>
+      <caption>Bank seeds re-solved on the production route</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Bank (GMRES 12)</th><th scope="col">Production route (GMRES 30)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>3.40e-3 settled, 12 trips</td><td>9.70e-4 cycle detected, 5 trips, diverted</td></tr>
+        <tr><th scope="row">21986/46</th><td>5.89e-3 budget exhausted</td><td>1.31e-3 settled, 8 trips, diverted</td></tr>
+        <tr><th scope="row">21989/55</th><td>2.97e-3 budget exhausted, diverted</td><td>7.00e-4 settled, 9 trips, limited (saddle not admitted)</td></tr>
+        <tr><th scope="row">22086/43</th><td>4.79e-4 settled, 7 trips</td><td>7.21e-15 converged, 3 trips</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Per-trip cost:</strong> commit <code>2ba72e45</code>; receipt
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/profile.json</code> (jobs 1262560, 1262571, synchronised timers,
+    22086/43 pure, 5.85 s per trip).</p>
+    <table>
+      <caption>Where a 5.85 s trip goes</caption>
+      <thead><tr><th scope="col">Component</th><th scope="col">Direct wall per call</th><th scope="col">Share of the trip</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Topology read</th><td>38.3 ms (wall reachability 25.2, flood fills 13.4, separatrix 28.6, spline fits 3.0, census 0.16)</td><td>62.8 percent</td></tr>
+        <tr><th scope="row">Host dispatch, device sync or unmodelled fused remainder</th><td>upper bound, zero host callbacks in the jaxpr</td><td>36.7 percent</td></tr>
+        <tr><th scope="row">Jacobian-vector product</th><td>0.25 ms</td><td>0.18 percent</td></tr>
+        <tr><th scope="row">Forward evaluation</th><td>0.32 ms</td><td>0.13 percent</td></tr>
+        <tr><th scope="row">Line search</th><td>3.99 ms</td><td>0.12 percent</td></tr>
+        <tr><th scope="row">GMRES orthogonalisation</th><td>1.23 ms</td><td>0.07 percent</td></tr>
+      </tbody>
+    </table>
+    <p>The topology read carries 11,690 fixed scan iterations per call against 14 in the forward evaluation, and the split-spline
+    fits call a dense condition number twice each, 504 Jacobi SVDs per residual evaluation, which is what breaks the CUPTI replay.
+    The physics of the solve is half a percent of a trip. The bank under-reported production on every row; it is regenerated on the
+    public route once the integration candidate lands, and the class flip of 21989/55 to limited on the production route is a new
+    identification finding on the vertical-mode row.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

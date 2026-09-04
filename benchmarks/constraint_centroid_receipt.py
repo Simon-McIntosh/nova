@@ -150,7 +150,7 @@ def _render(receipt, output):
     labels = [row["identity"] for row in rows]
     x = np.arange(len(rows))
     width = 0.25
-    figure, axes = plt.subplots(1, 3, figsize=(11.5, 4.0), constrained_layout=True)
+    figure, axes = plt.subplots(1, 3, figsize=(12.5, 4.5))
     axes[0].bar(
         x - width,
         [row["free"]["terminal_residual"] for row in rows],
@@ -172,22 +172,48 @@ def _render(receipt, output):
     axes[0].set_yscale("log")
     axes[0].set_ylabel("terminal residual")
     axes[0].legend(frameon=False)
-    axes[1].bar(
-        x,
-        [row["protocol"]["compensating_current_a"] / 1.0e3 for row in rows],
+    for offset, branch, label in (
+        (-width, "free", "free"),
+        (0.0, "protocol", "protocol"),
+        (width, "prototype", "held prototype"),
+    ):
+        axes[1].bar(
+            x + offset,
+            [row[branch]["active_set_trips"] for row in rows],
+            width,
+            label=label,
+        )
+    axes[1].set_ylabel("active-set trips")
+    axes[1].legend(frameon=False)
+    axes[2].scatter(
+        x - width,
+        np.zeros(len(rows)),
+        marker="x",
+        color="C0",
+        label="free: no pair",
     )
-    axes[1].axhline(0.0, color="0.4", linewidth=0.8)
-    axes[1].set_ylabel("P6 compensating current [kA]")
     axes[2].bar(
         x,
-        [row["protocol"]["vertical_error_m"] * 1.0e6 for row in rows],
+        [row["protocol"]["compensating_current_a"] / 1.0e3 for row in rows],
+        width,
+        color="C1",
+        label="protocol",
+    )
+    axes[2].bar(
+        x + width,
+        [row["prototype"]["compensating_current_a"] / 1.0e3 for row in rows],
+        width,
+        color="C2",
+        label="held prototype",
     )
     axes[2].axhline(0.0, color="0.4", linewidth=0.8)
-    axes[2].set_ylabel("centroid target error [micrometre]")
+    axes[2].set_ylabel("P6 compensating current [kA]")
+    axes[2].legend(frameon=False)
     for axis in axes:
         axis.set_xticks(x, labels)
         axis.grid(axis="y", alpha=0.2)
-    figure.suptitle("Vertical current centroid through the constraint protocol")
+    figure.suptitle("Vertical current centroid through the constraint protocol", y=0.96)
+    figure.subplots_adjust(left=0.07, right=0.99, bottom=0.14, top=0.80, wspace=0.28)
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=180)
     plt.close(figure)

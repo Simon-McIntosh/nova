@@ -28,7 +28,13 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import fixed_point
+from nova.equilibrium import ForwardProfile, fixed_point
+from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+)
+from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -94,7 +100,7 @@ def _lane() -> dict[str, Any]:
 
 def _prepare(
     case_name: str, requested_cells: int
-) -> tuple[Any, Any, np.ndarray, np.ndarray, float, dict[str, Any]]:
+) -> tuple[Any, ForwardProfile, Any, np.ndarray, np.ndarray, float, dict[str, Any]]:
     carrier_case, source_case, exact = certificate._case(case_name)
     machine = oracle_fixture.cached_machine(
         carrier_case,
@@ -116,6 +122,11 @@ def _prepare(
     operator = oracle_fixture.forward_operator(
         source_case, machine, oracle_state - exact_internal
     )
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
     seed, _moment_image, seed_receipt = recovery._moment_seed(
         source_case, machine, operator
     )
@@ -133,6 +144,7 @@ def _prepare(
     }
     return (
         machine,
+        profile,
         operator,
         seed,
         oracle_state,
@@ -144,26 +156,69 @@ def _prepare(
     )
 
 
+def _current_pin_solve_request(
+    profile: ForwardProfile,
+    seed: object,
+    target_current: float,
+    *,
+    pinned: bool,
+    carrier_identity: str,
+) -> ForwardSolveRequest:
+    """Declare whether the comparison arm applies the public current pin."""
+
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(seed),
+        policy_overrides={"current_pin": pinned},
+        target_current=target_current if pinned else None,
+    )
+
+
+def _run_fixed_point_request(operator: Any, request: ForwardSolveRequest):
+    """Apply the typed budget to the certificate's direct fixed-point route."""
+
+    policy = request.policy
+    mapped = operator.flux_map(target_current=request.target_current)
+    history = fixed_point.newton_krylov(
+        mapped,
+        jnp.asarray(request.seed_policy.resolve(operator)),
+        newton_steps=policy.newton_steps,
+        gmres_iterations=policy.gmres_iterations,
+        warmup=policy.warmup,
+    )
+    jax.block_until_ready(history.state)
+    return history
+
+
 def _amplitude(operator: Any, state: jax.Array, target_current: float) -> jax.Array:
     _moments, amplitude = operator.normalised_current_moments(state, target_current)
     return amplitude
 
 
 def _solve_arm(
+    profile: ForwardProfile,
     operator: Any,
     seed: np.ndarray,
     target_current: float,
     *,
     pinned: bool,
+    carrier_identity: str,
 ) -> dict[str, Any]:
-    base_map = operator.flux_map(target_current=target_current if pinned else None)
+    request = _current_pin_solve_request(
+        profile,
+        seed,
+        target_current,
+        pinned=pinned,
+        carrier_identity=carrier_identity,
+    )
     seed_amplitude = float(_amplitude(operator, jnp.asarray(seed), target_current))
 
     compile_started = perf_counter()
-    first = recovery._solve(base_map, seed)
+    first = _run_fixed_point_request(operator, request)
     first_wall = perf_counter() - compile_started
     warm_started = perf_counter()
-    terminal = recovery._solve(base_map, seed)
+    terminal = _run_fixed_point_request(operator, request)
     warm_wall = perf_counter() - warm_started
     jax.block_until_ready(terminal.state)
     state = np.asarray(terminal.state, dtype=np.float64)
@@ -194,6 +249,10 @@ def _solve_arm(
         ),
         "termination": termination,
         "converged": bool(np.asarray(terminal.converged)),
+        "carrier_identity": request.carrier_identity,
+        "resolved_defaults": ResolvedForwardSolveDefaults.from_policy(
+            request.policy
+        ).to_dict(),
         "compile_and_first_solve_wall_seconds": first_wall,
         "compile_warm_solve_wall_seconds": warm_wall,
         "first_run_terminal_relative_residual": float(first.residual),
@@ -324,14 +383,27 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         default_persistent_compilation_cache_root()
     )
     started = perf_counter()
-    machine, operator, seed, oracle_state, target_current, inputs = _prepare(
-        case_name, requested_cells
-    )
+    (
+        machine,
+        profile,
+        operator,
+        seed,
+        oracle_state,
+        target_current,
+        inputs,
+    ) = _prepare(case_name, requested_cells)
     _carrier, _source, exact = certificate._case(case_name)
     arms = {
         "unpinned": _banked_unpinned(case_name, requested_cells),
         "current_pinned": _score_arm(
-            _solve_arm(operator, seed, target_current, pinned=True),
+            _solve_arm(
+                profile,
+                operator,
+                seed,
+                target_current,
+                pinned=True,
+                carrier_identity=f"solovev-current-pin:{case_name}:{requested_cells}",
+            ),
             machine,
             operator,
             oracle_state,

@@ -557,6 +557,7 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
     budgets = receipt["budgets"]
     one_trip = receipt["banked_one_trip"]
     production = receipt["banked_production"]
+    solve = receipt["instrumented_execution"]["summary"]
     mechanism = receipt["mechanism"]
     rows = receipt["outer_iterations"]
     lines = [
@@ -573,6 +574,14 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             f"**{counts['inactive_outer_iterations']} are inactive**. The initial "
             "solve plus the six active loop bodies are the seven trips in the "
             "production receipt."
+        ),
+        (
+            "The instrumented and uninstrumented result summaries match exactly. "
+            "This is an active-set-settled, nonconverged solve "
+            f"(`converged={str(solve['converged']).lower()}`, termination "
+            f"`{solve['termination_reason']}`, terminal residual "
+            f"{solve['terminal_residual']:.9g}); it characterizes execution cost "
+            "and is not a certificate-passing solve."
         ),
         "",
         "## Per-iteration evidence",

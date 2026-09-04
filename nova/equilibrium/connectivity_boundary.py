@@ -1069,8 +1069,10 @@ def _read_ingredients(
     binding candidates ``u_wall_c`` / ``u_x_c`` (``inf`` when absent), the class
     operands, and the X-candidate diagnostics. ``classification_x`` carries a
     candidate table whose positions define the pre-saddle reachable wall, while
-    ``classification_wall`` retains the supplied extremum for shadow diagnostics;
-    they must be supplied together.
+    ``classification_wall`` owns the wall segment used for classification when
+    it agrees with the spline. Whole-wall recovery can diagnose a stale supplied
+    value, but cannot bind when that supplied segment is shadowed. The two
+    classification operands must be supplied together.
     The typed table stays fixed-shape while candidates outside the polygon
     described by ``wall_r`` / ``wall_z`` are made ineligible.
     """
@@ -1416,8 +1418,6 @@ def _read_ingredients(
             "wall_flux_residual_max": flux_nan,
         }
         u_wall_c = jnp.asarray(jnp.inf, dtype=psi2d.dtype)
-    class_u_wall = u_wall_c
-
     if classification_x is not None and classification_wall is not None:
         supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
         supplied_wall_index = _argmin_exact(
@@ -1426,6 +1426,9 @@ def _read_ingredients(
         class_wall_shadowed = (
             supplied_wall_valid & ~class_wall["reachable"][supplied_wall_index]
         )
+
+    u_wall_c = jnp.where(class_wall_shadowed, jnp.inf, u_wall_c)
+    class_u_wall = u_wall_c
 
     return {
         "n_iter": n_iter,

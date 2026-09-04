@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
 <main class="plan-doc">
@@ -141,6 +141,10 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
     <p class="r-dec-q">thomson-target-dataset</p>
     <p class="r-dec-rat">Lead 2026-09-04 16:05: the DIII-D competition dataset provides Thomson scattering channels as one of its signals, so the Thomson edge-crossing constraint is developed focused on that goal, placing the competition equilibria from the signals the competition supplies; the MAST bank with EFIT&#x27;s LCFS supplies the synthetic calibration against a known answer and stays secondary. Corpus reading and conventions cross the imas-ambix boundary as typed crossing points in COCOS 17.</p>
     </div>
+<div class="r-dec" data-key="thomson-geometry-as-dd4-ids" data-choice="vendor-through-ambix-as-thomson-scattering-ids-dd4" data-by="Simon McIntosh" data-when="2026-09-04T14:09:51+00:00">
+    <p class="r-dec-q">thomson-geometry-as-dd4-ids</p>
+    <p class="r-dec-rat">Lead 2026-09-04 16:10: the Thomson geometry (channel scattering positions, lines of sight, chord identity) crosses the ambix boundary as a DD version 4 thomson_scattering IDS, sourced and vendored inside imas-ambix under the lead&#x27;s authority to operate within that boundary, so Nova reads geometry and channels through imas-python with the same discipline as the machine descriptions and never from a bespoke table.</p>
+    </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
@@ -155,6 +159,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260904T160500000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T16:05:00+02:00">
     <div class="r-comment-body">LEAD 2026-09-04 16:05: include the DIII-D competition dataset for the Thomson edge crossings; the competition provides Thomson channels as one of its signals and the development is focused on that goal. Recorded as decision thomson-target-dataset and folded into section 3 and deliverable C: C0 is a read-only scout through the ambix reader of the competition's Thomson signals (channels, chord geometry, quantities, time base, edge marking, units), C1 places the five DIII-D gate frames from the competition's own channels with the compensating currents, residual, convergence and placement error against the label reported, and C2 keeps the MAST synthetic crossings as the calibration against a known answer. The scout C0 is dispatchable now (read-only, no solver file), ahead of the interface node that waits on the solver files.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260904T161000000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T16:10:00+02:00">
+    <div class="r-comment-body">LEAD 2026-09-04 16:10: the Thomson geometry data must come across from ambix as an IDS in DD version 4; authority given to operate within the ambix boundary to source and vendor it (decision thomson-geometry-as-dd4-ids). Consequence for C0 and C1: the competition's Thomson channels are delivered as a thomson_scattering IDS at the DD 4 pin (channel names, scattering-volume positions, lines of sight, and the per-channel signals with their time base) authored on the imas-ambix side, validated against the Data Dictionary with the imas-dd tools as the DIII-D machine description was, and Nova consumes it through imas-python; the crossing-point contract of C0 then sits on top of that IDS rather than on a bespoke table. The signal-inventory scout in flight reports what the corpus carries; the ambix-side vendoring node follows its report and is dispatched in the imas-ambix project under the lead's authority.</div>
 </div>
 </section>
 </main>

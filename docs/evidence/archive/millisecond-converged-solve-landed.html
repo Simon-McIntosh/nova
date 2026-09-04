@@ -188,6 +188,30 @@
     executable vmap-able over a batch with per-lane active masks. Upper bound: 41 s to about 3 s per solve.</p>
   </section>
 
+  <section id="common-trip-negative">
+    <h2>Driving the trip from the host is exact and slower (negative, held)</h2>
+    <p><strong>Commits:</strong> four held in worktree <code>msc-common-trip-executable</code>, tip <code>d703d0c2</code>; receipt
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/common-trip/profile.json</code> (H200 jobs 1262782, 1262783). The
+    host-driven common-trip driver carries state, residual, masks, histories, globalisation, conditioning and presettlement
+    state explicitly, is bit-identical to the fused loop on a mask-changing CPU fixture, settles a vmapped two-lane batch lane by
+    lane, and reproduces the production case's seven trips, class and termination with a residual delta of 4.5e-17.</p>
+    <table>
+      <caption>MAST 22086/43 pure, median of three warm solves</caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">Wall per solve</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">fused loop (baseline)</th><td>41.1 s</td></tr>
+        <tr><th scope="row">host-driven, active guard on device</th><td>82.8 s</td></tr>
+        <tr><th scope="row">host-driven, active guard on host</th><td>112.4 s</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The standalone 0.38 s first trip does not reproduce under repeated dispatch with the full carry, so the fused-loop
+    hypothesis is withdrawn alongside the host-overhead and condition-spectrum hypotheses. What every measurement agrees on is
+    that a trip's cost grows with its index for the same static budgets, from 3.4 s to 12.2 s, and that the slowest trips are
+    those where most promotions are rejected: the budgets hide dynamic work. The next measurement is a per-trip device trace
+    inside the fused solve with the dynamic loop counts the receipts carry.</p>
+  </section>
+
 </main>
 </body>
 </html>

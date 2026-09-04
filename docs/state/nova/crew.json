@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:42:02",
+  "updated": "2026-09-05T01:47:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1773,6 +1773,15 @@
       },
       {
         "id": "msc-remainder-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "msc-trip-kernels-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -99107,6 +99116,207 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T224639336930-msc-common-trip-executable",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-common-trip-executable",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4607,
+                "cached_input_tokens": 712623,
+                "input_tokens": 717232,
+                "output_tokens": 2748,
+                "reasoning_output_tokens": 794,
+                "total_tokens": 719980,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/fixed_point.py, tests/test_fixed_point.py, tests/test_common_trip_driver.py, benchmarks/settled_mask_stall.py, docs/figures/millisecond-converged-solve/trip-quantum/common-trip/ and docs/figures/solver-convergence-regression/settled-mask-stall/common-trip/, in which a CPU test proves the host-driven trip loop bit-identical to the previous fused solve on a fixture with a mask change plus a vmapped two-lane batch settling lane by lane, the nine referee node IDs plus tests/test_fixed_point.py plus tests/test_step_cap_model_error.py plus the conditioning contract tests green with logs, one H200 job writing common-trip/profile.json with the per-solve wall beside the 41.1 s baseline plus common-trip/four-rows.json with per row terminal residual, trips, termination plus class beside docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json with every difference stated, the manifest written before the SLURM wait begins",
+          "estimated_hours": null,
+          "goal": "Make every active-set trip of the production solve run the fast program: the per-iteration trace (report ~/.config/reckon/crew/reports/nova/millisecond/compiled-outer-loop-trace.md, receipts docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/, H200 job 1262779) shows the initial frozen solve outside the loop (nova/equilibrium/fixed_point.py:3193) costing 0.38 s as the compiled one-trip program, while the six active trips inside the compiled fori_loop at fixed_point.py:3387 cost 3.4, 3.4, 3.8, 5.6, 12.2 and 12.2 s for identical counted work (12 promotions, 156 linear actions, 72 grades each), a median of 12.4 times the one-trip program, and the 17 inactive iterations cost 0.026 s in total, so the 41 s solve of MAST 22086/43 pure could be about 3 s if each trip ran the one-trip executable, which this node achieves by compiling one common trip executable with an explicit carry (state, residual, masks, histories, globalisation and conditioning state, presettlement state) plus driving repeated trips from the host until settlement, convergence, cycle, nonfinite or budget (each trip one dispatch, the host loop paying only the sub-millisecond wrapper the host profile measured), replacing the fused fori_loop rather than adding a switch beside it (no wrappers, no global switches), keeping the solve GPU-batchable by making the trip executable vmap-able over a batch of equilibria with per-lane active masks so a batched solve loops until every lane settles, preserving the receipt histories, the settled exit, the nine referee contracts plus the four-row public-route results (terminal residual, trips, termination, class) unchanged, with a CPU bit-identity test of the new driver against the fused solve on a fixture with at least one mask change, plus one H200 job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile (payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly from the checkout root, JAX_PLATFORMS=cuda,cpu, the banked production driver copies under docs/figures/polish-support-performance/candidate-2/ for the timing plus benchmarks/settled_mask_stall.py for the four rows) measuring the per-solve wall before against after plus the four bank rows before against after, polled in the foreground because a backgrounded wait ends the worker's turn, with authority for up to three submissions on any failure, the manifest written before the wait",
+          "id": "msc-common-trip-executable",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T224639336930-msc-common-trip-executable/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "180m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py",
+            "tests/test_common_trip_driver.py",
+            "benchmarks/settled_mask_stall.py",
+            "docs/figures/millisecond-converged-solve/trip-quantum/common-trip/",
+            "docs/figures/solver-convergence-regression/settled-mask-stall/common-trip/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-common-trip-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T22:46:52Z",
+        "completed_at": "2026-09-04T23:45:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3517,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3517,
+        "stalled": false,
+        "time_budget": "180m",
+        "base_sha": "63ef993e9a0d1d1bb5908e5fac8d0dbd3225295f",
+        "commits": [
+          "9ff5b7654d8786112366cd90b2aa3bece9de341d",
+          "323f91b85fdc0dfb04e203e0babd650f74f6b3fe",
+          "9a99441a9c99faa40cf6cb955f9f0b492e6cfa0b",
+          "d703d0c26fdf88b689c960d7e48ad0b68a59d88a"
+        ],
+        "changed_lines": {
+          "added": 890,
+          "removed": 86,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1262783: host-driven common-trip solve of MAST 22086/43 pure, median of three warm solves against the fused baseline",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T224639336930-msc-common-trip-executable/slurm-1262783.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T224639336930-msc-common-trip-executable/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e9a-7b97-7261-8138-bb33c1492ddb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 39476352,
+            "cached_input_tokens_cumulative": 39476352,
+            "input_tokens": 39780715,
+            "input_tokens_cumulative": 39780715,
+            "output_tokens": 58799,
+            "output_tokens_cumulative": 58799,
+            "reasoning_output_tokens": 19599,
+            "reasoning_output_tokens_cumulative": 19599
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 59329,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 61729,
+              "external_wait": null,
+              "log_age_seconds": 60827,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 60883,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 78398,
+          "peak_input_tokens": 79257067
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-common-trip-executable",
+          "session_id": "01a06e9a-7b97-7261-8138-bb33c1492ddb",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T23:45:29Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -99251,6 +99461,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1695
+    "_version": 1697
   }
 }

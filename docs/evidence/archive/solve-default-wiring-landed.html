@@ -60,6 +60,28 @@
     topology session's worktree).</p>
   </section>
 
+  <section id="efit-parity-current-default">
+    <h2>Item 3 — the current-constrained solve is the parity slice's no-flag path (merged at 18db61cf)</h2>
+    <p><strong>Commits:</strong> worker <code>f51308d1</code> (route change and <code>tests/test_efit_parity_default_route.py</code>)
+    and <code>692b0b5a</code> (receipt), merged at <code>18db61cf</code>. Running <code>benchmarks/efit_forward_parity_slice.py</code>
+    with no route flag dispatches the current-constrained solve through <code>ForwardProfile.solve_branch(target_current=...)</code>;
+    only the named diagnostic flag selects the absolute-source replay. The new test pins both parses (2 passed); the seven referee
+    node IDs passed 9 before and after the change.</p>
+    <table>
+      <caption>No-flag receipt, docs/figures/solve-default-wiring/efit-parity-default/current-constrained-frozen-six-scorecard.json (H200, 21978/35)</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Target current at the terminal state</th><td>874260.4375 A, reproduced exactly</td></tr>
+        <tr><th scope="row">Terminal residual</th><td>2.4506488565449e-3, bounded nonconvergence; 0 of 1 registered passes</td></tr>
+        <tr><th scope="row">Carrier</th><td>persisted response carrier, zero direct builder entries; persistent compilation cache identity recorded</td></tr>
+        <tr><th scope="row">Flagged replay on the same frame</th><td>not serialised: RuntimeError, the closest-state replay was not bitwise identical (job 1262263); on 21986/46 NoQualifiedAxisError from the five-slot candidate table since repaired at 82949087 (job 1262262)</td></tr>
+      </tbody>
+    </table>
+    <p>The flagged route therefore has no receipt to sit beside the no-flag one. The follow-on node makes the diagnostic fail
+    closed, writing a failure receipt with the route, status, exception, frame, job, revision and cache identity, and banks it
+    from one more bounded H200 job on 21978/35; the bitwise replay invariant is not revised.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <ul>

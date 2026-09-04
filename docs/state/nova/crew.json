@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T07:20:26",
+  "updated": "2026-09-04T07:24:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -85639,6 +85639,190 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T042719270402-sdw-efit-parity-current-default-codex",
+        "plan": "solve-default-wiring",
+        "section": "\u00a71",
+        "node": "sdw-efit-parity-current-default-codex",
+        "node_definition": {
+          "done_when": "Running benchmarks/efit_forward_parity_slice.py with no route flag produces the current-constrained receipt (target_current block present, public entry point ForwardProfile.solve_branch(target_current=...)) on one MAST frozen-six frame on the H200 through the persisted carrier with the SLURM job polled in the foreground and the manifest written before the wait, banked under docs/figures/solve-default-wiring/efit-parity-default/ beside the same frame's flagged absolute-source replay receipt so the before and after terminal states are stated side by side, a new default-lane test tests/test_efit_parity_default_route.py asserting that the no-flag parse selects the current-constrained route and that only the diagnostic flag selects the replay, that test and the seven referee tests green in the worktree",
+          "estimated_hours": null,
+          "goal": "Make the current-constrained solve the no-flag path of benchmarks/efit_forward_parity_slice.py with the absolute-source replay retained behind a named diagnostic flag (wiring item 3, call site main() line 4316, reuse map: the capability-wiring audit report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/capability-wiring-audit.md, plus the uncommitted partial attempt left in /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/sdw-efit-parity-current-default which may be read for reference but must be re-derived rather than copied blindly)",
+          "id": "sdw-efit-parity-current-default-codex",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042719270402-sdw-efit-parity-current-default-codex/manifest.md",
+          "plan": "solve-default-wiring",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/efit_forward_parity_slice.py",
+            "tests/test_efit_parity_default_route.py",
+            "docs/figures/solve-default-wiring/efit-parity-default/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "sdw-parity-current",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T04:27:37Z",
+        "completed_at": "2026-09-04T05:18:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3039,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3039,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8bc3e15d713c03a87bf4f25e24be5a2a0fa93784",
+        "commits": [
+          "f51308d17edf7b17c433f5b2f82a27d0fa269f73",
+          "692b0b5a22e6298fcb569ffa0f19730800f23a9b"
+        ],
+        "changed_lines": {
+          "added": 981,
+          "removed": 70,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 uv run --no-sync pytest -p no:cacheprovider tests/test_efit_parity_default_route.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042719270402-sdw-efit-parity-current-default-codex/logs/default-route-after-amend.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T042719270402-sdw-efit-parity-current-default-codex/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06aac-1603-78a0-a70b-4baa05c3742f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20135552,
+            "cached_input_tokens_cumulative": 20135552,
+            "input_tokens": 20361946,
+            "input_tokens_cumulative": 20361946,
+            "output_tokens": 45250,
+            "output_tokens_cumulative": 45250,
+            "reasoning_output_tokens": 8750,
+            "reasoning_output_tokens_cumulative": 8750
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 118436,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 129236,
+              "log_age_seconds": 123466,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 123512,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6341,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: SLURM job 1262252 (job name presettlement-mast-capture-v2; submitted from this worktree) remained PENDING(Priority) for the entire foreground wait (submitted ~03:33; still PENDING at 04:19; i.e. ~44 minutes with zero state change) because the single H200 node under reservation gpu_0003_grpA is fully occupied by other concurrently-running jobs (see follow_ons for the exact job list observed via squeue). This is a cluster-availability blocker; not a code or design blocker. Resume path for a subsequent dispatch: (1) `squeue -j 1262252` / `squeue -p betelgeuse -o \"%i %u %T %M\"` to check whether it has started or whether the node has freed up; (2) if it completed; read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/logs/h200-capture.log for EXIT_MARKER; if 0; the raw capture is at .../raw-presettlement-mast.json in this run directory \u2014 run from this worktree `python3 benchmarks/acceptance_presettlement_remedy.py compile --raw <raw path> --referee-log logs/referee.log --scheduler-elapsed <elapsed from sacct> --exit-marker 0`; verify the printed verdict against the banked 4.8002e-4 / 7-trip figure; then commit benchmarks/acceptance_presettlement_remedy.py plus the two new files under docs/figures/solver-convergence-regression/remedy-presettlement/mast/ with a conventional subject+body commit (verify body-presence and absence of any co-authored-by trailer); (3) if job 1262252 is still PENDING or was never scheduled before a future dispatch's own time budget runs out; either wait longer (the SLURM job itself has no deadline pressure \u2014 it persists independently of any single dispatch's fence) or escalate the node contention to the lead; since four to five long-running jobs occupying the sole H200 node is likely worth knowing about regardless of this measurement.",
+              "elapsed_seconds": 9941,
+              "log_age_seconds": 7544,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-remedy-presettlement-mast-harvest",
+              "phase": "complete",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260903T194804754130-scr-remedy-presettlement-mast-harvest",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 7640,
+              "terminal_at": "2026-09-04T02:20:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 54000,
+          "peak_input_tokens": 40497498
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -85699,6 +85883,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1512
+    "_version": 1513
   }
 }

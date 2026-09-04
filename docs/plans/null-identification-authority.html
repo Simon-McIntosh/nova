@@ -22,8 +22,8 @@
 <title>Null identification authority | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="76">
+<meta name="plan-modified" content="2026-09-05">
+<meta name="plan-version" content="77">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -306,6 +306,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T204226809386" data-who="coordinator" data-when="2026-09-04T20:42:00Z">
     <div class="r-comment-body"><p>Mask-threshold repair landed into the candidate lineage: commit <code>3aa378dc</code>, candidate advanced to <code>e243f400</code> (now carrying the polish and containment tips, the selected-wall early branch, the supplied-wall shadow rule and this deadband). The tensor spline stays the authority for positions, values, closure, connectivity and clips; the boundary comparison gains a deadband equal to the gap between the spline-authored and the local quadratic X-point flux, applied toward the axis side of the nodal closure and shared-edge levels. It has flux units and contracts about eightfold per grid-axis doubling as the two interpolants converge. On the diagnosed trip-one operand the band is 1.18e-4 Wb against the flipped cell's 6.9e-5 Wb gap, so the mask returns to main's 23 private and 28 total cells and the first trip's attempted movement falls from 56 to 29 with the residual unchanged; regression pinned in <code>tests/test_mask_threshold_consistency.py</code>, 49 topology tests green. A smoke run saw <code>test_plasma_cell_topology_read::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle</code> fail on the candidate with its base status unmeasured. Dispatched <code>nia-candidate3-paired-remeasure</code>: production solve of 22086/43 pure, the four public-route bank rows and that test file on both arms, with a merge verdict against the lead's condition.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T231231690641" data-who="coordinator" data-when="2026-09-04T23:12:00Z">
+    <div class="r-comment-body"><p>Paired remeasure of the repaired candidate <code>e243f400</code> against main (report <code>~/.config/reckon/crew/reports/nova/integration/candidate-3/paired-remeasure.md</code>, receipts banked at <code>docs/figures/polish-support-performance/candidate-3/</code> and integrated into the candidate at <code>189fe454</code>; H200 jobs 1262764, 1262778, 1262780). Behaviour is repaired: the production solve of 22086/43 pure takes 7 trips and 84 promotions on both arms, diverted and consistent, residual 4.77e-4 against 4.79e-4, per-trip mask movement identical; on the four public-route rows the candidate turns 21989/55 from limited with no admitted saddle into diverted with the saddle admitted, the class EFIT reports, and leaves the other three unchanged. The verdict is still DO NOT MERGE on the lead's performance condition: 60.2 s against 40.7 s per solve (+48 percent), the topology-read probe 57.6 ms against 39.1 ms, and one candidate-only failure, <code>test_plasma_cell_topology_read::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle</code> at its pre-label admitted assertion, which passes on main. Two nodes follow on the candidate lineage: <code>nia-census-polish-compaction</code> (polish and evaluate only ring-admitted candidates before scattering the fixed-slot telemetry, bit-identical published values) and <code>nia-raster-oracle-admission-attribution</code> (does the independent oracle still encode the retired sign-count admission, or does the census miss a null).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -90,6 +90,7 @@ _ACTIVE_SET_ITERATION_LIMIT = 16
 _ACTIVE_SET_CYCLE_DAMPING = 0.5
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
+_STEP_CAP_MODEL_ERROR_FRACTION = 0.25
 # A family remains credible when its realized decrease is no more than one
 # order of magnitude weaker than its local prediction.  Stronger realized
 # decrease is harmless; weaker agreement no longer supports selecting that
@@ -110,6 +111,9 @@ def _print_inner_iteration(
     applied_factor,
     krylov_reduction,
     krylov_tolerance,
+    model_error_fraction,
+    step_cap_activated,
+    step_cap_factor,
 ) -> None:
     """Print one device-reported Newton iteration immediately on the host."""
 
@@ -125,7 +129,10 @@ def _print_inner_iteration(
         f"{KrylovActionQualification(int(krylov_qualification)).name} "
         f"applied_factor={float(applied_factor):.17g} "
         f"krylov_reduction={float(krylov_reduction):.17g} "
-        f"krylov_tolerance={float(krylov_tolerance):.17g}",
+        f"krylov_tolerance={float(krylov_tolerance):.17g} "
+        f"model_error_fraction={float(model_error_fraction):.17g} "
+        f"step_cap_activated={bool(step_cap_activated)} "
+        f"step_cap_factor={float(step_cap_factor):.17g}",
         flush=True,
     )
 
@@ -235,6 +242,9 @@ def _empty_inner_trace(length: int, dtype) -> _InnerIterationTrace:
         applied_factors=jnp.full(length, jnp.nan, dtype=dtype),
         krylov_reductions=jnp.full(length, jnp.nan, dtype=dtype),
         krylov_tolerances=jnp.full(length, jnp.nan, dtype=dtype),
+        model_error_fractions=jnp.full(length, jnp.nan, dtype=dtype),
+        step_cap_activations=jnp.full(length, -1, dtype=jnp.int32),
+        step_cap_factors=jnp.full(length, jnp.nan, dtype=dtype),
     )
 
 
@@ -250,6 +260,9 @@ def _record_inner_iteration(
     applied_factor,
     krylov_reduction,
     krylov_tolerance,
+    model_error_fraction,
+    step_cap_activated,
+    step_cap_factor,
 ) -> _InnerIterationTrace:
     """Fill one executed row without changing the receipt shape."""
 
@@ -265,6 +278,13 @@ def _record_inner_iteration(
         applied_factors=trace.applied_factors.at[index].set(applied_factor),
         krylov_reductions=trace.krylov_reductions.at[index].set(krylov_reduction),
         krylov_tolerances=trace.krylov_tolerances.at[index].set(krylov_tolerance),
+        model_error_fractions=trace.model_error_fractions.at[index].set(
+            model_error_fraction
+        ),
+        step_cap_activations=trace.step_cap_activations.at[index].set(
+            jnp.asarray(step_cap_activated, dtype=jnp.int32)
+        ),
+        step_cap_factors=trace.step_cap_factors.at[index].set(step_cap_factor),
     )
 
 
@@ -376,8 +396,9 @@ class FixedPointResult(NamedTuple):
     The ``inner_iteration_*`` arrays retain one row per attempted Newton
     promotion.  They record the nonlinear residual transition, bounded proposal
     norm, acceptance route, exact Krylov qualification, applied damping or
-    line-search factor, and achieved linear-residual reduction against the
-    requested tolerance.  Unexecuted rows use NaN and -1 padding.
+    line-search factor, achieved linear-residual reduction against the requested
+    tolerance, realized local-model error, and whether the model-error-triggered
+    step cap engaged.  Unexecuted rows use NaN and -1 padding.
     ``trajectory_state`` and ``trajectory_residual`` retain the terminal local
     Newton iterate separately from the best reported fallback.  An active-set
     solve may continue that local trajectory while still returning the best
@@ -430,6 +451,9 @@ class FixedPointResult(NamedTuple):
     inner_iteration_applied_factors: jax.Array | float = float("nan")
     inner_iteration_krylov_reductions: jax.Array | float = float("nan")
     inner_iteration_krylov_tolerances: jax.Array | float = float("nan")
+    inner_iteration_model_error_fractions: jax.Array | float = float("nan")
+    inner_iteration_step_cap_activations: jax.Array | int = -1
+    inner_iteration_step_cap_factors: jax.Array | float = float("nan")
     trajectory_state: jax.Array | float = float("nan")
     trajectory_residual: jax.Array | float = float("nan")
 
@@ -493,6 +517,9 @@ class _InnerIterationTrace(NamedTuple):
     applied_factors: jax.Array
     krylov_reductions: jax.Array
     krylov_tolerances: jax.Array
+    model_error_fractions: jax.Array
+    step_cap_activations: jax.Array
+    step_cap_factors: jax.Array
 
 
 class _AmplificationState(NamedTuple):
@@ -519,6 +546,7 @@ class _NewtonIterationState(NamedTuple):
     conditioning_count: jax.Array
     maximum_condition: jax.Array
     condition_baseline: jax.Array
+    previous_model_error_fraction: jax.Array
     attempted: jax.Array
     accepted: jax.Array
     converged: jax.Array
@@ -549,6 +577,7 @@ class _NewtonGlobalizationState(NamedTuple):
     merit_observations: jax.Array
     amplification: _AmplificationState
     condition_baseline: jax.Array
+    previous_model_error_fraction: jax.Array
     recovery_radius: jax.Array
     model_rebuild_damping: jax.Array
 
@@ -596,6 +625,7 @@ class _BacktrackedPromotion(NamedTuple):
     recovery_outcome: jax.Array
     applied_factor: jax.Array
     model_distrusted: jax.Array
+    model_error_fraction: jax.Array
 
 
 class _RebuiltModelPromotion(NamedTuple):
@@ -855,6 +885,16 @@ def _model_decrease_is_trusted(
     )
 
 
+def _nonlinear_model_error_fraction(
+    predicted_merit: jax.Array,
+    actual_merit: jax.Array,
+    incumbent_merit: jax.Array,
+) -> jax.Array:
+    """Measure local-model error relative to the accepted step's origin merit."""
+    scale = jnp.maximum(jnp.abs(incumbent_merit), jnp.finfo(incumbent_merit.dtype).tiny)
+    return jnp.abs(actual_merit - predicted_merit) / scale
+
+
 def _backtracked_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     model_map_fn: Callable[[jax.Array], jax.Array],
@@ -922,6 +962,11 @@ def _backtracked_promotion(
     )
 
     def accept_newton_ladder(_):
+        model_error_fraction = _nonlinear_model_error_fraction(
+            predicted_merits[ladder_selected],
+            merits[ladder_selected],
+            incumbent_merit,
+        )
         return _BacktrackedPromotion(
             state=candidates[ladder_selected],
             residual=residuals[ladder_selected],
@@ -935,6 +980,7 @@ def _backtracked_promotion(
             ),
             applied_factor=factors[ladder_selected],
             model_distrusted=jnp.asarray(False),
+            model_error_fraction=model_error_fraction,
         )
 
     def recover_with_continuation(_):
@@ -944,7 +990,14 @@ def _backtracked_promotion(
         )
 
         def recovery_trial(_index, carry):
-            selected_state, selected_residual, accepted, radius, distrusted = carry
+            (
+                selected_state,
+                selected_residual,
+                accepted,
+                radius,
+                distrusted,
+                selected_model_error,
+            ) = carry
             candidate = state + radius * continuation_step
             candidate_merit, candidate_residual = score(candidate)
             predicted_merit = _smooth_relative_sup_merit(
@@ -979,6 +1032,11 @@ def _backtracked_promotion(
                 )
                 & ~trusted
             )
+            candidate_model_error = _nonlinear_model_error_fraction(
+                predicted_merit,
+                candidate_merit,
+                incumbent_merit,
+            )
             return (
                 jnp.where(select, candidate, selected_state),
                 jnp.where(select, candidate_residual, selected_residual),
@@ -989,6 +1047,7 @@ def _backtracked_promotion(
                     jnp.maximum(radius * _RECOVERY_RADIUS_SHRINKAGE, minimum_radius),
                 ),
                 distrusted | candidate_distrusted,
+                jnp.where(select, candidate_model_error, selected_model_error),
             )
 
         (
@@ -997,6 +1056,7 @@ def _backtracked_promotion(
             recovery_accepted,
             trial_radius,
             model_distrusted,
+            model_error_fraction,
         ) = jax.lax.fori_loop(
             0,
             _RECOVERY_RADIUS_UPDATE_TRIPS,
@@ -1007,6 +1067,7 @@ def _backtracked_promotion(
                 jnp.asarray(False),
                 initial_radius,
                 ladder_distrusted,
+                jnp.asarray(jnp.nan, dtype=state.dtype),
             ),
         )
         next_radius = jnp.where(
@@ -1035,6 +1096,7 @@ def _backtracked_promotion(
                 jnp.asarray(0.0, dtype=state.dtype),
             ),
             model_distrusted=model_distrusted,
+            model_error_fraction=model_error_fraction,
         )
 
     return jax.lax.cond(
@@ -1989,9 +2051,12 @@ def _newton_krylov_inner(
     unresolved linear model, the first-power inverse law returns the
     condition-weighted step size to a fixed baseline multiple.  Damping also
     releases below the fourth root of machine precision so local convergence
-    can finish without trajectory control.  A qualified
-    step is then capped at ``step_cap`` × the relaxed step, bounding excursions
-    while the current-centroid pin holds the basin.  Promotion selects the
+    can finish without trajectory control.  A qualified step is capped at
+    ``step_cap`` × the relaxed step only when the preceding accepted step's
+    actual merit differed from its local linear prediction by more than 25
+    percent of the preceding incumbent merit.  The first proposal on every
+    partition is therefore uncapped, and a partition change clears this
+    measurement together with the projected-condition baseline.  Promotion selects the
     first of six fixed half-step factors that provides sufficient nonlinear
     residual decrease.  If that ladder exhausts, a bounded trust-region update
     follows the existing relaxed Picard direction and may promote only a
@@ -2156,6 +2221,7 @@ def _newton_krylov_inner(
             merit_observations=jnp.asarray(0, dtype=jnp.int32),
             amplification=_initial_amplification_state(initial.dtype),
             condition_baseline=jnp.asarray(jnp.nan, dtype=initial.dtype),
+            previous_model_error_fraction=jnp.asarray(jnp.nan, dtype=initial.dtype),
             recovery_radius=jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
             model_rebuild_damping=jnp.asarray(
                 _MODEL_REBUILD_DAMPING_INITIAL, dtype=initial.dtype
@@ -2179,6 +2245,11 @@ def _newton_krylov_inner(
         lambda resumed, reset: jnp.where(resume_globalization, resumed, reset),
         globalization_state.amplification,
         amplification,
+    )
+    previous_model_error_fraction = jnp.where(
+        resume_globalization,
+        globalization_state.previous_model_error_fraction,
+        jnp.asarray(jnp.nan, dtype=initial.dtype),
     )
 
     def continue_newton(carry):
@@ -2270,8 +2341,18 @@ def _newton_krylov_inner(
             action_accepted = step_qualification == KrylovActionQualification.ACCEPTED
             norm_step = jnp.max(jnp.abs(step))
             cap = step_cap * jnp.max(jnp.abs(relaxation * residual_vector))
+            step_cap_activated = jnp.isfinite(
+                measured.previous_model_error_fraction
+            ) & (
+                measured.previous_model_error_fraction > _STEP_CAP_MODEL_ERROR_FRACTION
+            )
+            step_cap_factor = jnp.where(
+                step_cap_activated & (norm_step > cap),
+                cap / jnp.maximum(norm_step, 1.0e-300),
+                jnp.asarray(1.0, dtype=state.dtype),
+            )
             step = jnp.where(
-                norm_step > cap,
+                step_cap_activated & (norm_step > cap),
                 step * (cap / jnp.maximum(norm_step, 1.0e-300)),
                 step,
             )
@@ -2319,7 +2400,11 @@ def _newton_krylov_inner(
                         nonlinear_residual,
                         reference_merit,
                         gmres_iterations=gmres_iterations,
-                        maximum_step=cap,
+                        maximum_step=jnp.where(
+                            step_cap_activated,
+                            cap,
+                            jnp.asarray(jnp.inf, dtype=state.dtype),
+                        ),
                         initial_damping=measured.model_rebuild_damping,
                         model_trust_selection=model_trust_selection,
                         acceptance_map_fn=acceptance_map,
@@ -2480,6 +2565,16 @@ def _newton_krylov_inner(
                 candidate_merit = _smooth_relative_sup_merit(
                     frozen_map(candidate), candidate
                 )
+                candidate_model_error_fraction = _nonlinear_model_error_fraction(
+                    _smooth_relative_sup_merit(local_model(candidate), candidate),
+                    candidate_merit,
+                    current_merit,
+                )
+                next_model_error_fraction = jnp.where(
+                    promotion_accepted,
+                    candidate_model_error_fraction,
+                    measured.previous_model_error_fraction,
+                )
                 recent_merits, merit_observations = _record_merit(
                     measured.recent_merits,
                     measured.merit_observations,
@@ -2528,6 +2623,13 @@ def _newton_krylov_inner(
                     applied_factor,
                     qualified_step.achieved_reduction,
                     qualified_step.requested_tolerance,
+                    jnp.where(
+                        promotion_accepted,
+                        candidate_model_error_fraction,
+                        jnp.asarray(jnp.nan, dtype=state.dtype),
+                    ),
+                    step_cap_activated,
+                    step_cap_factor,
                 )
                 if stream_inner_iterations:
                     jax.debug.callback(
@@ -2542,6 +2644,13 @@ def _newton_krylov_inner(
                         applied_factor,
                         qualified_step.achieved_reduction,
                         qualified_step.requested_tolerance,
+                        jnp.where(
+                            promotion_accepted,
+                            candidate_model_error_fraction,
+                            jnp.asarray(jnp.nan, dtype=state.dtype),
+                        ),
+                        step_cap_activated,
+                        step_cap_factor,
                         ordered=True,
                     )
                 return _NewtonIterationState(
@@ -2561,6 +2670,7 @@ def _newton_krylov_inner(
                     conditioning_count,
                     maximum_condition,
                     qualified_step.condition_baseline,
+                    next_model_error_fraction,
                     attempted,
                     accepted,
                     converged,
@@ -2603,6 +2713,9 @@ def _newton_krylov_inner(
                     applied_factor,
                     qualified_step.achieved_reduction,
                     qualified_step.requested_tolerance,
+                    jnp.asarray(jnp.nan, dtype=state.dtype),
+                    step_cap_activated,
+                    step_cap_factor,
                 )
                 if stream_inner_iterations:
                     jax.debug.callback(
@@ -2617,6 +2730,9 @@ def _newton_krylov_inner(
                         applied_factor,
                         qualified_step.achieved_reduction,
                         qualified_step.requested_tolerance,
+                        jnp.asarray(jnp.nan, dtype=state.dtype),
+                        step_cap_activated,
+                        step_cap_factor,
                         ordered=True,
                     )
                 return _NewtonIterationState(
@@ -2632,6 +2748,7 @@ def _newton_krylov_inner(
                     conditioning_count,
                     maximum_condition,
                     qualified_step.condition_baseline,
+                    measured.previous_model_error_fraction,
                     attempted,
                     measured.accepted,
                     jnp.asarray(False),
@@ -2692,6 +2809,7 @@ def _newton_krylov_inner(
                 globalization_state.condition_baseline,
                 jnp.asarray(jnp.nan, dtype=initial.dtype),
             ),
+            previous_model_error_fraction,
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(False),
@@ -2756,6 +2874,9 @@ def _newton_krylov_inner(
         inner_iteration_applied_factors=loop.inner_trace.applied_factors,
         inner_iteration_krylov_reductions=loop.inner_trace.krylov_reductions,
         inner_iteration_krylov_tolerances=loop.inner_trace.krylov_tolerances,
+        inner_iteration_model_error_fractions=(loop.inner_trace.model_error_fractions),
+        inner_iteration_step_cap_activations=(loop.inner_trace.step_cap_activations),
+        inner_iteration_step_cap_factors=loop.inner_trace.step_cap_factors,
         trajectory_state=loop.state,
         trajectory_residual=loop.residual,
     )
@@ -2766,6 +2887,7 @@ def _newton_krylov_inner(
         merit_observations=loop.merit_observations,
         amplification=loop.amplification,
         condition_baseline=loop.condition_baseline,
+        previous_model_error_fraction=loop.previous_model_error_fraction,
         recovery_radius=loop.recovery_radius,
         model_rebuild_damping=loop.model_rebuild_damping,
     )

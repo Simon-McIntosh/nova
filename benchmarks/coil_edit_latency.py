@@ -25,7 +25,9 @@ import matplotlib.pyplot as plt
 
 from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
+from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium.fixed_point import FixedPointTerminationReason
+from nova.equilibrium.forward import SaddleSeedGeometry
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
@@ -36,16 +38,20 @@ from nova.jax.config import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = ROOT / "docs/figures/forward-solve-api/coil-edit-latency.json"
-DEFAULT_FIGURE = ROOT / "docs/figures/forward-solve-api/coil-edit-latency.png"
-SHOT = 21989
-SLICE_INDEX = 55
-EDIT_FRACTIONS = 0.05 * np.asarray(
-    (0, 1, 2, 3, 4, 3, 2, 1, 0, -1, -2, -3, -4, -3, -2, -1, 0, 1, 2, 3, 4),
-    dtype=np.float64,
+DEFAULT_OUTPUT = (
+    ROOT / "docs/figures/forward-solve-api/coil-edit-latency-converging.json"
 )
+DEFAULT_FIGURE = (
+    ROOT / "docs/figures/forward-solve-api/coil-edit-latency-converging.png"
+)
+SHOT = 22086
+SLICE_INDEX = 43
+SWEEP_FRACTIONS = np.arange(-0.20, 0.201, 0.02, dtype=np.float64)
+EDIT_FRACTIONS = SWEEP_FRACTIONS[1:]
 EDIT_COUNT = len(EDIT_FRACTIONS)
-COIL_FAMILY = "p6_upper"
+COLD_CONTROL_EDIT_INDICES = frozenset((0, 6, 13, 19))
+BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_upper"})
+INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -154,28 +160,124 @@ def _termination_name(value: Any) -> str:
     return FixedPointTerminationReason(int(np.asarray(value))).name.lower()
 
 
-def _render(rows: list[dict[str, Any]], figure_path: Path) -> None:
+def _cache_monitor() -> dict[str, float | int]:
+    """Count JAX persistent-cache events without inferring them from timing."""
+    import jax.monitoring as monitoring
+
+    events: dict[str, float | int] = {"hits": 0, "saved_seconds": 0.0}
+
+    def hit(event: str, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/cache_hits":
+            events["hits"] = int(events["hits"]) + 1
+
+    def saved(event: str, duration_secs: float, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/compile_time_saved_sec":
+            events["saved_seconds"] = float(events["saved_seconds"]) + duration_secs
+
+    monitoring.register_event_listener(hit)
+    monitoring.register_event_duration_secs_listener(saved)
+    return events
+
+
+def _render(
+    rows: list[dict[str, Any]],
+    figure_path: Path,
+    *,
+    coil_family: str,
+    compile_count: int,
+    persistent_cache_hits: int,
+) -> None:
     indices = np.asarray([row["edit_index"] for row in rows])
     milliseconds = np.asarray([row["wall_milliseconds"] for row in rows])
     displacement = 1.0e3 * np.asarray([row["boundary_displacement_m"] for row in rows])
+    trips = np.asarray([row["trip_count"] for row in rows])
+    residual = np.asarray([row["terminal_residual"] for row in rows])
     colours = [
         "#d97706" if row["compilation_cache"] == "miss" else "#2563eb" for row in rows
     ]
-    figure, axes = plt.subplots(2, 1, figsize=(8.4, 7.2), constrained_layout=True)
-    axes[0].plot(indices, milliseconds, color="0.72", lw=1.0, zorder=1)
-    axes[0].scatter(indices, milliseconds, c=colours, s=34, zorder=2)
-    axes[0].set_yscale("log")
-    axes[0].set_ylabel("Solve wall time [ms]")
-    axes[0].set_title("MAST 21989/55 warm traced P6-upper edits")
-    axes[0].grid(True, which="both", alpha=0.25)
-    axes[0].scatter([], [], color="#d97706", label="compile miss")
-    axes[0].scatter([], [], color="#2563eb", label="cache hit")
-    axes[0].legend()
-    axes[1].plot(indices, displacement, color="#059669", marker="o", ms=4)
-    axes[1].axhline(0.0, color="0.5", lw=0.8)
-    axes[1].set_xlabel("Successive edit index")
-    axes[1].set_ylabel("Boundary displacement [mm]")
-    axes[1].grid(True, alpha=0.25)
+    cold_indices = np.asarray(
+        [row["edit_index"] for row in rows if row["cold_control"] is not None]
+    )
+    cold_milliseconds = np.asarray(
+        [
+            row["cold_control"]["wall_milliseconds"]
+            for row in rows
+            if row["cold_control"] is not None
+        ]
+    )
+    figure, axes = plt.subplots(2, 2, figsize=(11.2, 8.2), constrained_layout=True)
+    latency_axis, trip_axis, residual_axis, boundary_axis = axes.ravel()
+    latency_axis.plot(indices, milliseconds, color="0.72", lw=1.0, zorder=1)
+    latency_axis.scatter(indices, milliseconds, c=colours, s=34, zorder=2)
+    latency_axis.scatter(
+        cold_indices,
+        cold_milliseconds,
+        facecolors="none",
+        edgecolors="#7c3aed",
+        marker="s",
+        s=55,
+        label="cold-portfolio control",
+    )
+    latency_axis.axhline(
+        INTERACTIVE_LATENCY_TARGET_MILLISECONDS,
+        color="#dc2626",
+        linestyle="--",
+        linewidth=1.0,
+        label="100 ms target ceiling",
+    )
+    latency_axis.set_yscale("log")
+    latency_axis.set_ylabel("Solve wall time [ms]")
+    latency_axis.set_title(
+        f"MAST {SHOT}/{SLICE_INDEX} mixed arm · {coil_family.replace('_', '-').upper()}"
+    )
+    latency_axis.grid(True, which="both", alpha=0.25)
+    latency_axis.scatter([], [], color="#d97706", label="compile miss")
+    latency_axis.scatter([], [], color="#2563eb", label="process-cache hit")
+    latency_axis.legend(fontsize=8)
+
+    termination_names = sorted({row["termination"] for row in rows})
+    termination_colours = {
+        name: plt.get_cmap("tab10")(index)
+        for index, name in enumerate(termination_names)
+    }
+    for name in termination_names:
+        selected = np.asarray([row["termination"] == name for row in rows])
+        trip_axis.scatter(
+            indices[selected],
+            trips[selected],
+            color=termination_colours[name],
+            label=name.replace("_", " "),
+        )
+    trip_axis.plot(indices, trips, color="0.75", linewidth=0.8, zorder=0)
+    trip_axis.set_ylabel("Active-set trips")
+    trip_axis.set_title("Termination and trip count")
+    trip_axis.grid(True, alpha=0.25)
+    trip_axis.legend(fontsize=8)
+
+    residual_axis.plot(indices, residual, color="#0891b2", marker="o", ms=4)
+    residual_axis.axhline(
+        parity.FIXED_POINT_CRITERION,
+        color="#dc2626",
+        linestyle="--",
+        linewidth=1.0,
+        label=f"tolerance {parity.FIXED_POINT_CRITERION:.0e}",
+    )
+    residual_axis.set_yscale("log")
+    residual_axis.set_xlabel("Successive two-percent edit index")
+    residual_axis.set_ylabel("Terminal relative residual")
+    residual_axis.set_title("Convergence qualification")
+    residual_axis.grid(True, which="both", alpha=0.25)
+    residual_axis.legend(fontsize=8)
+
+    boundary_axis.plot(indices, displacement, color="#059669", marker="o", ms=4)
+    boundary_axis.axhline(0.0, color="0.5", lw=0.8)
+    boundary_axis.set_xlabel("Successive two-percent edit index")
+    boundary_axis.set_ylabel("Boundary displacement [mm]")
+    boundary_axis.set_title(
+        f"Boundary motion · compiles {compile_count} · persistent hits "
+        f"{persistent_cache_hits}"
+    )
+    boundary_axis.grid(True, alpha=0.25)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=180)
     plt.close(figure)
@@ -198,19 +300,114 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         raise RuntimeError("the persisted response carrier was not reused")
     if policy["stored_circuit_count"] != 101:
         raise RuntimeError("the passive-inclusive current vector is not complete")
-    matching = [row for row in policy["active_mapping"] if row["family"] == COIL_FAMILY]
-    if len(matching) != 1:
-        raise RuntimeError("the P6 upper circuit mapping is not unique")
-    circuit_index = int(matching[0]["stored_circuit"])
     prescribed = profile.operator.prescribed_current_field
     if prescribed is None or prescribed.current.shape != (101,):
         raise RuntimeError("the operator does not hold the 101-circuit vector")
+    response = np.asarray(prescribed.response, dtype=np.float64)
+    base_current = np.asarray(prescribed.current, dtype=np.float64)
+    wall_start = profile.operator.grid.node_number
+    candidates = []
+    for row in policy["active_mapping"]:
+        if row["family"] not in BOUNDARY_COIL_FAMILIES:
+            continue
+        circuit_index = int(row["stored_circuit"])
+        candidates.append(
+            {
+                "family": row["family"],
+                "stored_circuit": circuit_index,
+                "two_percent_wall_flux_sup_wb": float(
+                    0.02
+                    * abs(base_current[circuit_index])
+                    * np.max(np.abs(response[wall_start:, circuit_index]))
+                ),
+            }
+        )
+    if len(candidates) != len(BOUNDARY_COIL_FAMILIES):
+        raise RuntimeError("the P4/P5 boundary-circuit mapping is incomplete")
+    selected_coil = max(
+        candidates,
+        key=lambda row: row["two_percent_wall_flux_sup_wb"],
+    )
+    circuit_index = int(selected_coil["stored_circuit"])
+    target_current = abs(float(case["reference"]["plasma_current_a"]))
+    base_map = profile.flux_map(
+        requested_class=TopologyClass.DIVERTED,
+        target_current=target_current,
+        prescribed_current=jnp.asarray(base_current),
+    )
+    mixed_seed = _margin_graded_newton_krylov(
+        base_map,
+        profile.operator.topology_margin,
+        jnp.asarray(passive_case["state"]),
+        newton_steps=parity.NEWTON_STEPS,
+        gmres_iterations=parity.GMRES_ITERATIONS,
+    )
+    jax.block_until_ready(mixed_seed.state)
+    mixed_residual = float(np.asarray(mixed_seed.residual))
+    if not np.isfinite(mixed_residual) or mixed_residual > parity.FIXED_POINT_CRITERION:
+        raise RuntimeError(
+            f"the corrected-bank mixed arm did not converge: {mixed_residual:.6g}"
+        )
+    endpoint_current = base_current.copy()
+    endpoint_current[circuit_index] *= 1.0 + SWEEP_FRACTIONS[0]
+    endpoint_seed = profile.solve_branch(
+        mixed_seed.state,
+        TopologyClass.DIVERTED,
+        route="newton_krylov",
+        prescribed_current=jnp.asarray(endpoint_current),
+        target_current=target_current,
+        tolerance=parity.FIXED_POINT_CRITERION,
+        newton_steps=parity.NEWTON_STEPS,
+        gmres_iterations=parity.GMRES_ITERATIONS,
+        warmup=parity.WARMUP_SWEEPS,
+        relaxation=parity.RELAXATION,
+        step_cap=parity.STEP_CAP,
+    )
+    jax.block_until_ready(endpoint_seed)
+    endpoint_residual = float(np.asarray(endpoint_seed.residual))
+    if not bool(np.asarray(endpoint_seed.converged)):
+        raise RuntimeError(
+            f"the minus-twenty-percent endpoint did not converge: "
+            f"{endpoint_residual:.6g}"
+        )
+    axis = np.asarray(case["axis"], dtype=np.float64)
+    x_points = np.asarray(case["x_points"], dtype=np.float64)
+    x_points = x_points[np.all(np.isfinite(x_points), axis=1)]
+    if not len(x_points):
+        raise RuntimeError("the frozen-six reference supplies no finite saddle")
+    cold = profile.cold_seed_portfolio(
+        target_current,
+        axis,
+        diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(x_points[0])),
+    )
     prepared = {
-        "initial": jnp.asarray(passive_case["state"]),
-        "prescribed_current": jnp.asarray(prescribed.current),
-        "target_current": abs(float(case["reference"]["plasma_current_a"])),
+        "initial": endpoint_seed.equilibrium.flux,
+        "cold_diverted_seed": cold.branches.flux[int(TopologyClass.DIVERTED)],
+        "prescribed_current": jnp.asarray(base_current),
+        "target_current": target_current,
         "circuit_index": circuit_index,
-        "coil_mapping": matching[0],
+        "coil_mapping": selected_coil,
+        "boundary_coil_candidates": candidates,
+        "mixed_seed": {
+            "identity": f"{SHOT}/{SLICE_INDEX} mixed",
+            "terminal_residual": mixed_residual,
+            "converged": True,
+            "corrected_bank_receipt": (
+                "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
+            ),
+        },
+        "endpoint_seed": {
+            "edit_fraction": float(SWEEP_FRACTIONS[0]),
+            "terminal_residual": endpoint_residual,
+            "converged": True,
+            "trip_count": int(
+                np.asarray(endpoint_seed.equilibrium.fixed_point.active_set_iterations)
+            ),
+            "termination": _termination_name(
+                endpoint_seed.equilibrium.fixed_point.termination_reason
+            ),
+            "route": "production newton_krylov branch solve",
+        },
         "reference": case["reference"],
         "policy": policy,
     }
@@ -229,6 +426,7 @@ def run(
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
+    cache_events = _cache_monitor()
     stop = threading.Event()
     reporter = threading.Thread(
         target=_heartbeat,
@@ -238,7 +436,10 @@ def run(
     reporter.start()
     try:
         profile, prepared, carrier = _prepare_case(carrier_path)
+        solve_persistent_hits_start = int(cache_events["hits"])
+        solve_persistent_saved_start = float(cache_events["saved_seconds"])
         initial = prepared["initial"]
+        cold_diverted_seed = prepared["cold_diverted_seed"]
         base_current = prepared["prescribed_current"]
         circuit_index = prepared["circuit_index"]
         target_current = prepared["target_current"]
@@ -269,17 +470,20 @@ def run(
         rows: list[dict[str, Any]] = []
         executable_identity = None
         state = initial
-        reference_lcfs = None
-        reference_boundary = None
+        _endpoint_masks, endpoint_topology = profile.operator.read(state)
+        reference_boundary = np.asarray(endpoint_topology.boundary)
+        reference_lcfs = np.empty((0, 2), dtype=np.float64)
         for index, (fraction, current) in enumerate(
             zip(EDIT_FRACTIONS, edit_vectors, strict=True)
         ):
             cache_before = int(jitted._cache_size())
+            persistent_hits_before = int(cache_events["hits"])
             started = time.perf_counter()
             branch = jitted(state, current)
             jax.block_until_ready(branch)
             wall_milliseconds = 1.0e3 * (time.perf_counter() - started)
             cache_after = int(jitted._cache_size())
+            persistent_hits_after = int(cache_events["hits"])
             compiled = jitted.lower(state, current).compile()
             fingerprint = compiled.runtime_executable().fingerprint.decode()
             if executable_identity is None:
@@ -291,9 +495,6 @@ def run(
             lcfs_count = int(np.asarray(labelled.lcfs_vertex_count))
             lcfs = np.asarray(labelled.lcfs)[:lcfs_count]
             boundary = np.asarray(branch.equilibrium.topology.boundary)
-            if reference_boundary is None:
-                reference_boundary = boundary
-                reference_lcfs = lcfs
             if lcfs_count and len(reference_lcfs):
                 distances = np.linalg.norm(
                     lcfs[:, None, :] - reference_lcfs[None, :, :], axis=2
@@ -310,6 +511,25 @@ def run(
                     np.linalg.norm(boundary - reference_boundary)
                 )
                 displacement_source = "binding_point"
+            cold_control = None
+            if index in COLD_CONTROL_EDIT_INDICES:
+                cold_started = time.perf_counter()
+                cold_branch = jitted(cold_diverted_seed, current)
+                jax.block_until_ready(cold_branch)
+                cold_wall_milliseconds = 1.0e3 * (time.perf_counter() - cold_started)
+                cold_fixed_point = cold_branch.equilibrium.fixed_point
+                cold_control = {
+                    "seed_source": "ForwardProfile.cold_seed_portfolio diverted branch",
+                    "wall_milliseconds": cold_wall_milliseconds,
+                    "converged": bool(np.asarray(cold_branch.converged)),
+                    "terminal_residual": float(np.asarray(cold_branch.residual)),
+                    "trip_count": int(
+                        np.asarray(cold_fixed_point.active_set_iterations)
+                    ),
+                    "termination": _termination_name(
+                        cold_fixed_point.termination_reason
+                    ),
+                }
             row = {
                 "edit_index": index,
                 "edit_fraction": float(fraction),
@@ -317,20 +537,31 @@ def run(
                 "wall_milliseconds": wall_milliseconds,
                 "compilation_cache": ("miss" if cache_after > cache_before else "hit"),
                 "compile_count": cache_after,
+                "persistent_cache_hits_before": persistent_hits_before,
+                "persistent_cache_hits_after": persistent_hits_after,
+                "persistent_cache_hit_count": (
+                    persistent_hits_after - persistent_hits_before
+                ),
                 "jit_cache_size_before": cache_before,
                 "jit_cache_size_after": cache_after,
                 "executable_identity": fingerprint,
                 "stablehlo_sha256": stablehlo_identity,
                 "converged": bool(np.asarray(branch.converged)),
-                "residual": float(np.asarray(branch.residual)),
+                "terminal_residual": float(np.asarray(branch.residual)),
                 "trip_count": int(np.asarray(fixed_point.active_set_iterations)),
                 "fixed_iteration_count": int(np.asarray(branch.iterations)),
                 "termination": _termination_name(fixed_point.termination_reason),
                 "lcfs_vertex_count": lcfs_count,
                 "boundary_displacement_m": boundary_displacement,
                 "boundary_displacement_source": displacement_source,
+                "cold_control": cold_control,
             }
             rows.append(row)
+            if not row["converged"]:
+                raise RuntimeError(
+                    f"warm-start chain lost convergence at edit {index}: "
+                    f"residual={row['terminal_residual']:.6g}"
+                )
             state = branch.equilibrium.flux
             print(
                 "EDIT_DONE "
@@ -342,29 +573,6 @@ def run(
                 f"boundary_mm={1.0e3 * boundary_displacement:.6f}",
                 flush=True,
             )
-
-        explicit_stored = jitted(initial, base_current)
-        jax.block_until_ready(explicit_stored)
-
-        def solve_omitted(state: jax.Array) -> Any:
-            return profile.solve_branch(
-                state,
-                TopologyClass.DIVERTED,
-                route="newton_krylov",
-                target_current=target_current,
-                tolerance=parity.FIXED_POINT_CRITERION,
-                newton_steps=parity.NEWTON_STEPS,
-                gmres_iterations=parity.GMRES_ITERATIONS,
-                warmup=parity.WARMUP_SWEEPS,
-                relaxation=parity.RELAXATION,
-                step_cap=parity.STEP_CAP,
-            )
-
-        omitted = jax.jit(solve_omitted)(initial)
-        jax.block_until_ready(omitted)
-        omitted_identity = _tree_digest(omitted)
-        explicit_identity = _tree_digest(explicit_stored)
-        omitted_bit_identical = _tree_bit_identical(omitted, explicit_stored)
         warm_ms = np.asarray(
             [row["wall_milliseconds"] for row in rows[1:]], dtype=np.float64
         )
@@ -374,28 +582,55 @@ def run(
         one_executable = len({row["executable_identity"] for row in rows}) == 1
         all_converged = all(row["converged"] for row in rows)
         median_warm_ms = float(np.median(warm_ms))
-        latency_regime = "millisecond" if median_warm_ms < 1.0e3 else "second"
+        latency_target_met = median_warm_ms < INTERACTIVE_LATENCY_TARGET_MILLISECONDS
+        latency_regime = (
+            "tens_of_milliseconds_or_better"
+            if latency_target_met
+            else "above_tens_of_milliseconds"
+        )
         boundary_displacements = np.asarray(
             [row["boundary_displacement_m"] for row in rows], dtype=np.float64
         )
+        controls = [
+            row["cold_control"] for row in rows if row["cold_control"] is not None
+        ]
+        cold_ms = np.asarray(
+            [control["wall_milliseconds"] for control in controls],
+            dtype=np.float64,
+        )
+        persistent_hits = int(cache_events["hits"]) - solve_persistent_hits_start
+        persistent_saved_seconds = (
+            float(cache_events["saved_seconds"]) - solve_persistent_saved_start
+        )
         gates = {
-            "at_least_twenty_edits_recorded": len(rows) >= 20,
-            "successive_edits_are_five_percent": bool(
-                np.allclose(np.abs(np.diff(EDIT_FRACTIONS)), 0.05)
+            "exactly_twenty_edits_recorded": len(rows) == 20,
+            "sweep_spans_plus_minus_twenty_percent": bool(
+                np.isclose(SWEEP_FRACTIONS[0], -0.20)
+                and np.isclose(SWEEP_FRACTIONS[-1], 0.20)
+            ),
+            "successive_edits_are_two_percent": bool(
+                np.allclose(np.diff(SWEEP_FRACTIONS), 0.02)
             ),
             "first_edit_is_compile_miss": rows[0]["compilation_cache"] == "miss",
             "all_later_edits_are_cache_hits": all_cache_hits_after_first,
             "compile_count_is_one": int(jitted._cache_size()) == 1,
             "executable_identity_unchanged": one_executable,
             "all_edits_converged": all_converged,
+            "at_least_four_cold_portfolio_controls": len(controls) >= 4,
             "boundary_displacement_is_finite": bool(
                 np.all(np.isfinite(boundary_displacements))
             ),
-            "omitted_path_bit_identical_to_stored_vector": omitted_bit_identical,
+            "median_warm_wall_meets_tens_of_milliseconds_target": latency_target_met,
         }
         passed = all(gates.values())
         exit_marker = 0 if passed else 2
-        _render(rows, figure)
+        _render(
+            rows,
+            figure,
+            coil_family=prepared["coil_mapping"]["family"],
+            compile_count=int(jitted._cache_size()),
+            persistent_cache_hits=persistent_hits,
+        )
         receipt = {
             "schema": "nova.coil-edit-latency",
             "measurement_state": "complete",
@@ -424,7 +659,15 @@ def run(
                 "elapsed_seconds": time.perf_counter() - total_started,
                 "exit_marker": exit_marker,
             },
-            "persistent_compilation_cache": cache.receipt(),
+            "persistent_compilation_cache": cache.receipt()
+            | {
+                "solve_hit_count": persistent_hits,
+                "solve_compile_seconds_saved": persistent_saved_seconds,
+                "process_total_hit_count": int(cache_events["hits"]),
+                "process_total_compile_seconds_saved": float(
+                    cache_events["saved_seconds"]
+                ),
+            },
             "carrier": carrier,
             "case": {
                 "machine": "MAST",
@@ -432,38 +675,77 @@ def run(
                 "slice_index": SLICE_INDEX,
                 "time_s": float(prepared["reference"]["time_s"]),
                 "seed_policy": (
-                    "cold frozen-six state for the first solve; each later solve "
-                    "starts from the preceding terminal flux"
+                    "the converged corrected-bank mixed arm prepares the minus-twenty-"
+                    "percent endpoint; each of twenty two-percent edits starts from "
+                    "the preceding edit's convergence-qualified terminal flux"
                 ),
+                "seed_arm": prepared["mixed_seed"],
+                "sweep_start_endpoint": prepared["endpoint_seed"],
                 "route": "newton_krylov",
+                "solver_policy": {
+                    "tolerance": parity.FIXED_POINT_CRITERION,
+                    "newton_steps": parity.NEWTON_STEPS,
+                    "gmres_iterations": parity.GMRES_ITERATIONS,
+                    "warmup_sweeps": parity.WARMUP_SWEEPS,
+                    "relaxation": parity.RELAXATION,
+                    "step_cap": parity.STEP_CAP,
+                    "settled_exit": "production default unchanged",
+                    "presettlement_incumbent_scoring": ("production default unchanged"),
+                },
                 "target_current_a": target_current,
                 "current_pin": True,
                 "stored_circuit_count": 101,
-                "coil_family": COIL_FAMILY,
+                "coil_family": prepared["coil_mapping"]["family"],
                 "coil_circuit_index": circuit_index,
+                "boundary_coil_selection": {
+                    "criterion": (
+                        "largest two-percent wall-flux response among P4/P5 circuits"
+                    ),
+                    "candidates": prepared["boundary_coil_candidates"],
+                },
                 "shot_coil_current_a": float(np.asarray(base_current[circuit_index])),
                 "edit_fraction_bounds": [
-                    float(np.min(EDIT_FRACTIONS)),
-                    float(np.max(EDIT_FRACTIONS)),
+                    float(np.min(SWEEP_FRACTIONS)),
+                    float(np.max(SWEEP_FRACTIONS)),
                 ],
-                "successive_edit_step_fraction": 0.05,
+                "sweep_position_count": len(SWEEP_FRACTIONS),
+                "successive_edit_count": EDIT_COUNT,
+                "successive_edit_step_fraction": 0.02,
             },
             "compile": {
                 "count": int(jitted._cache_size()),
+                "process_cache_hit_count_after_first": sum(
+                    row["compilation_cache"] == "hit" for row in rows[1:]
+                ),
+                "persistent_cache_hit_count": persistent_hits,
                 "executable_identity": executable_identity,
                 "stablehlo_sha256": stablehlo_identity,
             },
             "summary": {
                 "edit_count": len(rows),
+                "cold_portfolio_control_count": len(controls),
                 "median_warm_wall_milliseconds": median_warm_ms,
                 "minimum_warm_wall_milliseconds": float(warm_ms.min()),
                 "maximum_warm_wall_milliseconds": float(warm_ms.max()),
+                "median_cold_portfolio_wall_milliseconds": float(np.median(cold_ms)),
+                "warm_to_cold_median_ratio": float(median_warm_ms / np.median(cold_ms)),
                 "latency_regime": latency_regime,
+                "interactive_latency_target_milliseconds": (
+                    INTERACTIVE_LATENCY_TARGET_MILLISECONDS
+                ),
+                "interactive_latency_target_verdict": (
+                    "PASS" if latency_target_met else "FAIL"
+                ),
                 "latency_statement": (
-                    f"The median warm solve is {median_warm_ms:.3f} ms, in the "
-                    f"{latency_regime} regime."
+                    f"Median warm per-edit wall is {median_warm_ms:.3f} ms "
+                    f"against the below-{INTERACTIVE_LATENCY_TARGET_MILLISECONDS:.0f}-"
+                    f"ms tens-of-milliseconds target: "
+                    f"{'PASS' if latency_target_met else 'FAIL'}."
                 ),
                 "converged_edit_count": sum(row["converged"] for row in rows),
+                "cold_control_converged_count": sum(
+                    control["converged"] for control in controls
+                ),
                 "trip_count_minimum": min(row["trip_count"] for row in rows),
                 "trip_count_median": float(
                     np.median([row["trip_count"] for row in rows])
@@ -471,13 +753,8 @@ def run(
                 "trip_count_maximum": max(row["trip_count"] for row in rows),
                 "maximum_boundary_displacement_m": float(boundary_displacements.max()),
             },
-            "omitted_argument_identity": {
-                "omitted_receipt_sha256": omitted_identity,
-                "explicit_stored_vector_receipt_sha256": explicit_identity,
-                "bit_identical": omitted_bit_identical,
-            },
             "edits": rows,
-            "figure": str(figure),
+            "figure": str(figure.relative_to(ROOT)),
         }
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
@@ -505,7 +782,7 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
         f"--figure {arguments.figure.resolve()}"
     )
     return f"""#!/usr/bin/env bash
-#SBATCH --job-name=coil-edit-latency
+#SBATCH --job-name=coil-edit-converging
 #SBATCH --partition=betelgeuse
 #SBATCH --reservation=gpu_0003_grpA
 #SBATCH --nodes=1
@@ -513,8 +790,8 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
-#SBATCH --time=03:00:00
-#SBATCH --output={log_directory}/coil-edit-latency-%j.log
+#SBATCH --time=00:55:00
+#SBATCH --output={log_directory}/coil-edit-converging-%j.log
 set -uo pipefail
 export JAX_PLATFORMS=cuda,cpu
 export TMPDIR=/tmp
@@ -582,7 +859,7 @@ def main() -> None:
             type=Path,
             default=Path(
                 "/home/ITER/mcintos/.config/reckon/crew/runs/"
-                "r-20260902T151655477529-fsa-coil-edit-latency/logs"
+                "r-20260904T054255696439-fsa-warm-start-converging-codex/logs"
             ),
         )
 

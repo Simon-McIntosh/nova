@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:43:14",
+  "updated": "2026-09-04T13:57:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1585,6 +1585,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "mcs-profile-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "mcs-quantum-remeasure",
         "harness": "codex",
         "role": "implement",
@@ -1779,6 +1788,15 @@
       },
       {
         "id": "nia-resolution-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "nia-shared-measure-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -91236,6 +91254,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1592
+    "_version": 1594
   }
 }

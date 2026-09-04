@@ -13,6 +13,7 @@ import argparse
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import subprocess
@@ -625,6 +626,12 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             "converged mixed branch of 22086/43, freezes each terminal residual "
             "shadow, and decomposes the active Jacobian exactly from batched JVPs."
         ),
+        (
+            "Measurement job: "
+            f"{receipt['runtime']['slurm']['job_id']} on "
+            f"{receipt['runtime']['slurm']['partition']} under reservation "
+            f"{receipt['runtime']['slurm']['reservation']}."
+        ),
         "",
         (
             "| row | smallest / largest | vertical projection | radial projection "
@@ -853,6 +860,13 @@ def measure(
             "python": platform.python_version(),
             "jax": jax.__version__,
             "devices": [str(device) for device in jax.devices()],
+            "slurm": {
+                "job_id": os.environ.get("SLURM_JOB_ID"),
+                "partition": os.environ.get("SLURM_JOB_PARTITION"),
+                "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+                "node_list": os.environ.get("SLURM_JOB_NODELIST"),
+                "cpus_per_task": os.environ.get("SLURM_CPUS_PER_TASK"),
+            },
         },
         "evidence_inputs": {
             "operands": str(operands),

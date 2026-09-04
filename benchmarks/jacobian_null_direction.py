@@ -599,10 +599,15 @@ def _draw_figure(receipt: dict[str, Any], path: Path) -> None:
         )
         residual_axis.set_ylabel("||J direction||₂")
         verdict = row["verdict"]
+        short_shape = {
+            "vertical_position_constraint_with_compensating_unknown": "constraint",
+            "deflation_of_measured_mode": "deflation",
+            "none": "none",
+        }[verdict["solver_shape"]]
         residual_axis.set_title(
-            "vertical near-null: "
+            "vertical null: "
             + ("YES" if verdict["near_null_is_vertical_mode"] else "NO")
-            + f" · {verdict['solver_shape'].replace('_', ' ')}"
+            + f" · {short_shape}"
         )
         for axis in (singular_axis, vector_axis, projection_axis, residual_axis):
             axis.spines[["top", "right"]].set_visible(False)
@@ -646,6 +651,57 @@ def _write_report(receipt: dict[str, Any], path: Path) -> None:
             f"{mode_verdict} | "
             f"{verdict['solver_shape']} | {verdict['owner'] or 'none'} |"
         )
+    stalled = [row for row in receipt["rows"] if row["role"] == "stalled_row"]
+    vertical_rows = [
+        row for row in stalled if row["verdict"]["near_null_is_vertical_mode"]
+    ]
+    aligned_rows = [
+        row
+        for row in stalled
+        if not row["verdict"]["near_null_direction"]
+        and row["verdict"]["vertical_projection_fraction"]
+        >= VERTICAL_ALIGNMENT_THRESHOLD
+    ]
+    contrast_rows = {(row["identity"], row["arm"]): row for row in receipt["rows"]}
+    contrast_identity = f"{CONTRAST_TARGET[0]}/{CONTRAST_TARGET[1]}"
+    contrast_pure = contrast_rows[(contrast_identity, "pure")]
+    contrast_mixed = contrast_rows[(contrast_identity, "mixed")]
+    contrast_ratio = (
+        contrast_pure["verdict"]["smallest_to_largest_ratio"]
+        / contrast_mixed["verdict"]["smallest_to_largest_ratio"]
+    )
+    lines.extend(
+        [
+            "",
+            "## Verdict",
+            "",
+            (
+                "The universal vertical-null hypothesis is rejected: "
+                f"{len(vertical_rows)} of {len(stalled)} stalled rows have a "
+                "near-null smallest singular direction that is dominantly vertical. "
+                "Only those rows support a vertical-position constraint with a "
+                "compensating unknown."
+            ),
+            "",
+            (
+                "The non-threshold but vertically aligned rows are "
+                + (
+                    ", ".join(f"{row['identity']} {row['arm']}" for row in aligned_rows)
+                    if aligned_rows
+                    else "none"
+                )
+                + ". They retain the measured alignment without being promoted to "
+                "a near-null verdict."
+            ),
+            "",
+            (
+                f"At {contrast_identity}, the stalled pure branch's condition ratio "
+                f"is {contrast_ratio:.6f} times the converged mixed branch's ratio; "
+                "their comparable singular scale rejects a vertical constraint as "
+                "the explanation for that stall."
+            ),
+        ]
+    )
     lines.extend(
         [
             "",

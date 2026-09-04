@@ -19,6 +19,7 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
+    from nova.equilibrium import fixed_point as fixed_point_module
     from nova.equilibrium.fixed_point import (
         FIXED_POINT_RESIDUAL_TOLERANCE,
         FixedPointTerminationReason,
@@ -312,6 +313,49 @@ def test_newton_reconciles_the_frozen_solve_with_its_live_active_set():
         assert int(result.active_set_iterations) == 2
         assert bool(result.converged)
         assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+
+
+def test_active_set_aggregates_conditioning_receipts_across_frozen_solves(
+    monkeypatch,
+):
+    original = fixed_point_module._qualified_krylov_step
+
+    def observed_conditioning(*args, **kwargs):
+        receipt = original(*args, **kwargs)
+        residual_vector = args[1]
+        projected_condition = 12.0 - jnp.max(jnp.abs(residual_vector))
+        return receipt._replace(
+            projected_condition=projected_condition,
+            conditioning_applied=jnp.asarray(True),
+        )
+
+    monkeypatch.setattr(
+        fixed_point_module, "_qualified_krylov_step", observed_conditioning
+    )
+
+    def mask_fn(state):
+        return state >= 0.5
+
+    def shadowed_map(_state, mask):
+        return jnp.where(mask, 3.0, 1.0)
+
+    def solve():
+        return newton_krylov(
+            lambda state: shadowed_map(state, mask_fn(state)),
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=mask_fn,
+            promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
+            shadowed_map_fn=shadowed_map,
+            active_set_steps=3,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        assert int(result.active_set_iterations) == 2
+        assert int(result.krylov_conditioning_count) == 2
+        np.testing.assert_allclose(result.maximum_projected_krylov_condition, 11.0)
 
 
 def _solve_equal_own_mask_residual(**options):

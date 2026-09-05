@@ -15,13 +15,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.005028720945119858
+        "warm_load_seconds": 0.011132569052278996
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-public-route-integrated/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-remaining-identities/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -30,11 +30,12 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.040910 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.030655 direct_builders=0 verdict=PASS"
       }
     },
     "catalogue_format_qualification": "efm is a raw read-only Zarr catalogue group rather than an IMAS IDS, so it has no DD version to infer or open; the governed machine-description seam it is compared within is authored and reopened at its written DD version",
     "catalogue_store": "/work/projects/imas_gpu/mast/level1/shots",
+    "class_margin_readability": "nova_post_cutover_class_margin is null when the read is diverted because a diverted read admits no finite reachable wall minimum, so its margin serialises as positive infinity and the receipt cannot distinguish a comfortably diverted row from one a hair from limited. nova_post_cutover_class_margin_finite is the same signed margin with a finite wall level on every resolved row: the visible wall level minus the X-point normalised level, negative exactly when the class is limited. nova_post_cutover_class_margin_finite_wall_source records whether the accepted reachable wall minimum or the rejected supplied wall candidate supplied the visible wall level.",
     "cocos_resolution": "source COCOS 3 is the measured MAST convention declared by mast_solve_inputs; the solve seam converts typed quantities to DD COCOS 17. R and Z are ONE_LIKE geometric coordinates, so their conversion factor is exactly one and the EFIT geometry is overlaid without a sign or scale edit",
     "efit_forward_parity_producer_request": {
       "constructor": "_parity_solve_request",
@@ -76,7 +77,7 @@
     "intermediate_operand_cache": {
       "authority": {
         "response_carrier_semantic_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
-        "schema_revision": 6,
+        "schema_revision": 7,
         "selection_source_commit": "80706f89"
       },
       "banked_artifact": false,
@@ -87,8 +88,8 @@
         "governed_wall_polyline",
         "full_flux_grid_with_tensor_axes"
       ],
-      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/raw/current-operands.npz",
-      "reused_for_this_render": false
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/current-operands.npz",
+      "reused_for_this_render": true
     },
     "legacy_label_trap": "ForwardTopologyState.diverted is the legacy geometric topology label and is not the post-cutover achieved class. This artifact derives achieved class only from the saddle-aware class margin: non-negative or positive infinity is diverted; negative is limited.",
     "nova_selection_source_commit": "80706f89",
@@ -174,15 +175,22 @@
     },
     "comparison": "docs/figures/null-identification-authority/bank-integrated/row-by-row-comparison.json",
     "comparison_inputs": [
-      "docs/figures/null-identification-authority/bank-repaired-census.json",
-      "docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json"
+      "docs/figures/null-identification-authority/bank-integrated/bank-integrated.json"
     ],
     "exact_operand_cache": {
       "committed_path": "docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz",
-      "run_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/raw/current-operands.npz",
-      "sha256": "be55d27afac69bd115b0f73b3ecaba11b342aac45cfeac286109b3ad18fb9af6"
+      "run_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/current-operands.npz",
+      "sha256": "59460a262b59c085612eeac3a4b7d19f8013426e5615fa52bd25d984d05f9d73",
+      "shard_inputs": [
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-a.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-b.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-c.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-d.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-e.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-f.npz"
+      ]
     },
-    "measurement_revision": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+    "measurement_revision": "2fa71ece70fbc4fef224fe2c3f273656ce80d8fd",
     "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
     "producer_request_contract": {
       "constructor": "_parity_solve_request",
@@ -218,10 +226,10 @@
       },
       "statement": "The producer resolves the versioned public table through a typed ForwardSolveRequest and records Newton 12 plus GMRES 12 as deviations."
     },
-    "raw_regeneration_sha256": "1a3c36e5d650d6a00f012553f9646ac566e524cce5317fc3b7ac331f1c386f75",
-    "regenerated_at": "2026-09-05T09:33:44.125558+02:00",
+    "raw_regeneration_sha256": "28a9127205ebf5bd713854905838d433a57f1f7d8b60729e838f4d9be3d31fe8",
+    "regenerated_at": "2026-09-05T19:30:40.408413+02:00",
     "runtime": {
-      "checkout_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-public-route-integrated",
+      "checkout_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-remaining-identities",
       "jax": "0.11.0",
       "jax_platforms": [
         "cuda",
@@ -230,43 +238,116 @@
       "jaxlib": "0.11.0",
       "payload_python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
       "persistent_compilation_cache": {
-        "compile_time_saved_seconds": 1374.0311191473156,
-        "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
-        "hit_count": 2684,
-        "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile"
+        "compile_time_saved_seconds": 3245.466685609892,
+        "hit_count": 1392,
+        "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+        "shards": [
+          {
+            "compile_time_saved_seconds": 1073.8880807077512,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "d"
+          },
+          {
+            "compile_time_saved_seconds": 1084.4069794071838,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "e"
+          },
+          {
+            "compile_time_saved_seconds": 1087.171625494957,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "f"
+          }
+        ]
       },
       "python": "3.14.2"
     },
     "scheduler_attempts": [
       {
         "accelerator": "NVIDIA H200 NVL",
-        "elapsed": "00:01:00",
-        "ended_at": "2026-09-05T07:48:54",
-        "exit_code": "1:0",
-        "job_id": 1262805,
-        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/logs/h200-bank-regeneration.log",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1073.8880807077512,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "d"
+        },
+        "elapsed": "00:22:00",
+        "ended_at": "2026-09-05T19:18:35",
+        "exit_code": "0:0",
+        "exit_marker": 0,
+        "identities": [
+          "21983/35"
+        ],
+        "job_id": 1262972,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-d.log",
         "node": "98dci4-gpu-0003",
         "partition": "betelgeuse",
-        "requested_time": "02:30:00",
+        "requested_time": "00:59:00",
         "reservation": "gpu_0003_grpA",
-        "started_at": "2026-09-05T07:47:54",
-        "state": "FAILED"
+        "shard": "d",
+        "started_at": "2026-09-05T18:56:35",
+        "state": "COMPLETED"
       },
       {
         "accelerator": "NVIDIA H200 NVL",
-        "elapsed": "01:37:32",
-        "ended_at": "2026-09-05T09:26:44",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1084.4069794071838,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "e"
+        },
+        "elapsed": "00:21:00",
+        "ended_at": "2026-09-05T19:17:35",
         "exit_code": "0:0",
-        "job_id": 1262806,
-        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/logs/h200-bank-regeneration.log",
+        "exit_marker": 0,
+        "identities": [
+          "21986/46"
+        ],
+        "job_id": 1262973,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-e.log",
         "node": "98dci4-gpu-0003",
         "partition": "betelgeuse",
-        "requested_time": "02:30:00",
+        "requested_time": "00:59:00",
         "reservation": "gpu_0003_grpA",
-        "started_at": "2026-09-05T07:49:12",
+        "shard": "e",
+        "started_at": "2026-09-05T18:56:35",
+        "state": "COMPLETED"
+      },
+      {
+        "accelerator": "NVIDIA H200 NVL",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1087.171625494957,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "f"
+        },
+        "elapsed": "00:16:00",
+        "ended_at": "2026-09-05T19:12:35",
+        "exit_code": "0:0",
+        "exit_marker": 0,
+        "identities": [
+          "22086/43"
+        ],
+        "job_id": 1262974,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-f.log",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "requested_time": "00:59:00",
+        "reservation": "gpu_0003_grpA",
+        "shard": "f",
+        "started_at": "2026-09-05T18:56:35",
         "state": "COMPLETED"
       }
     ],
+    "scheduler_split_reason": "the first regeneration attempt sharded the six identities across three two-identity jobs that were all terminated at the 59-minute time limit with only the first identity of each checkpointed; the three missing identities were re-run as three single-identity jobs (shards d, e, f), each within the one-hour limit, and merged with the three surviving two-arm checkpoints",
     "visual_artifacts": [
       "docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.png",
       "docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.json",
@@ -357,7 +438,9 @@
       "binding_to_efit_lcfs_rms_m": 0.033713863753380494,
       "binding_to_efit_lcfs_sup_m": 0.17241583945368613,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -3709,6 +3792,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.10447323044567691,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5754456671134563,
@@ -3913,7 +3998,9 @@
       "binding_to_efit_lcfs_rms_m": 0.03371386375337701,
       "binding_to_efit_lcfs_sup_m": 0.17241583945368222,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -7265,6 +7352,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.10447323044567702,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5754456671134566,
@@ -7497,7 +7586,9 @@
       "binding_to_efit_lcfs_rms_m": 0.04336401205924596,
       "binding_to_efit_lcfs_sup_m": 0.22338399830963213,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -10857,6 +10948,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.078655516725195,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5612634198454131,
@@ -11061,7 +11154,9 @@
       "binding_to_efit_lcfs_rms_m": null,
       "binding_to_efit_lcfs_sup_m": null,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -11754,6 +11849,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.07933591884458607,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5542585188635065,
@@ -11974,7 +12071,9 @@
       "binding_to_efit_lcfs_rms_m": 0.03122768151783318,
       "binding_to_efit_lcfs_sup_m": 0.17220833692216558,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -15086,6 +15185,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.14055404032779434,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5666121715950907,
@@ -15290,7 +15391,9 @@
       "binding_to_efit_lcfs_rms_m": 0.031535775488602175,
       "binding_to_efit_lcfs_sup_m": 0.17353030796331564,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -18402,6 +18505,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.14046400824974548,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5667418215017748,
@@ -18619,7 +18724,9 @@
       "binding_to_efit_lcfs_rms_m": 0.021017156044494296,
       "binding_to_efit_lcfs_sup_m": 0.06766075842007473,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -21699,6 +21806,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.1470519954050153,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.6201227658965295,
@@ -21903,7 +22012,9 @@
       "binding_to_efit_lcfs_rms_m": null,
       "binding_to_efit_lcfs_sup_m": null,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -22532,6 +22643,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.14843444081247126,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.6167748847196138,
@@ -22761,7 +22874,9 @@
       "binding_to_efit_lcfs_rms_m": null,
       "binding_to_efit_lcfs_sup_m": null,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -23414,6 +23529,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.15966638283339218,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5881787623614889,
@@ -23618,7 +23735,9 @@
       "binding_to_efit_lcfs_rms_m": null,
       "binding_to_efit_lcfs_sup_m": null,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -24271,6 +24390,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.15964606508711876,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5881007942427902,
@@ -24485,7 +24606,9 @@
       "binding_to_efit_lcfs_rms_m": 0.029183799398975717,
       "binding_to_efit_lcfs_sup_m": 0.16752110601346626,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -27829,6 +27952,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.13054071408450507,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5849783456209241,
@@ -28033,7 +28158,9 @@
       "binding_to_efit_lcfs_rms_m": 0.029183799398975106,
       "binding_to_efit_lcfs_sup_m": 0.16752110601346637,
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -31377,6 +31504,8 @@
       "nova_limiter_point_m": null,
       "nova_open_legs_m": [],
       "nova_post_cutover_class_margin": null,
+      "nova_post_cutover_class_margin_finite": -0.13054071408450518,
+      "nova_post_cutover_class_margin_finite_wall_source": "rejected_wall_candidate",
       "nova_post_cutover_class_margin_nonfinite": "positive_infinity",
       "nova_selected_saddle_m": [
         0.5849783456209243,

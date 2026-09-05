@@ -10,7 +10,9 @@
   "arm": "pure",
   "artifact": "MAST integrated public-route topology panel",
   "candidate_table_status": {
+    "census_slots_exhausted": false,
     "consistency": {
+      "census_slots_exhausted": false,
       "fixed_slot_overflow": false,
       "one_null_type_per_containing_cell": true,
       "retained_origins_unique_within_type": true,
@@ -46,11 +48,15 @@
       "unique_representative_origin_count": 5
     }
   },
+  "census_slots_exhausted": false,
+  "class_margin": null,
+  "class_margin_finite": -0.13054071408450507,
+  "class_margin_finite_wall_source": "rejected_wall_candidate",
   "converged": true,
   "efit_label": "diverted",
   "identity": "22086/43",
   "json_path": "/nova/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.json",
-  "measurement_revision": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+  "measurement_revision": "2fa71ece70fbc4fef224fe2c3f273656ce80d8fd",
   "nova_achieved_class": "diverted",
   "operand_cache": "docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz",
   "png_path": "/nova/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.png",

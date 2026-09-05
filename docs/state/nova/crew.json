@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T22:36:07",
+  "updated": "2026-09-05T22:53:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -592,6 +592,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "cank-wall-polish-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "carrier-advance",
@@ -2495,6 +2504,15 @@
         "sessions": {
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "1cbf0e3e-aed5-4ee9-986e-3c62692b23cc"
         },
+        "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-review-x",
+        "harness": "claude-opus",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-05"
       },
       {
@@ -105861,6 +105879,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1766
+    "_version": 1768
   }
 }

@@ -1,0 +1,123 @@
+{
+  "captured_at": "2026-09-05T04:23:57.060316+00:00",
+  "event_log": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/promotion-events.jsonl",
+  "instrumented_wall_s": 30.854917467000003,
+  "measurement_revision": "c5e1498a0e435f637f3b1d0c27d1bbea4397cac5",
+  "per_trip": [
+    {
+      "accepted_promotions": 12,
+      "promotion_wall_s": 0.053559007000000006,
+      "promotions": 12,
+      "trip": 1
+    },
+    {
+      "accepted_promotions": 12,
+      "promotion_wall_s": 0.067433488,
+      "promotions": 12,
+      "trip": 2
+    },
+    {
+      "accepted_promotions": 12,
+      "promotion_wall_s": 0.067320138,
+      "promotions": 12,
+      "trip": 3
+    },
+    {
+      "accepted_promotions": 12,
+      "promotion_wall_s": 3.7157584260000003,
+      "promotions": 12,
+      "trip": 4
+    },
+    {
+      "accepted_promotions": 12,
+      "promotion_wall_s": 5.491118537,
+      "promotions": 12,
+      "trip": 5
+    },
+    {
+      "accepted_promotions": 5,
+      "promotion_wall_s": 6.047381361,
+      "promotions": 12,
+      "trip": 6
+    },
+    {
+      "accepted_promotions": 0,
+      "promotion_wall_s": 1.047748262,
+      "promotions": 12,
+      "trip": 7
+    }
+  ],
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "production_wall_s": 34.85841905232519,
+  "promotion_table": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/promotions-after.csv",
+  "recovered_from_completed_event_stream": true,
+  "scheduler": {
+    "cpus_per_task": "1",
+    "job_id": "1262798",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.unchanged_state_fallback_promotion_timing",
+  "summary": {
+    "accepted_newton_promotions": 65,
+    "active_set_trips": 7,
+    "attempted_newton_promotions": 84,
+    "converged": false,
+    "terminal_residual": 0.00047882693504231827,
+    "termination_reason": "active_set_settled"
+  }
+}

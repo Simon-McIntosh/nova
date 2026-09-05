@@ -1,0 +1,473 @@
+{
+  "base_revision": "c811b21fd9c1756bbe170d10562a23e4779a0fc1",
+  "captured_at": "2026-09-05T03:44:48.566483+00:00",
+  "carrier": {
+    "carrier": {
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "size_bytes": 645864,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.004895814694464207
+    },
+    "loaded_from_persisted_carrier": true,
+    "named_cache_only_check": {
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-unchanged-state-fallback-carry/benchmarks/mast_response_carrier_warm.py",
+        "check",
+        "--carrier",
+        "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "--receipt",
+        "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+      ],
+      "direct_green_operator_builder_entries": 0,
+      "passes": true,
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.074736 direct_builders=0 verdict=PASS"
+    }
+  },
+  "complete": true,
+  "counts": {
+    "accepted_newton_updates_per_trip": 9.285714285714286,
+    "accepted_newton_updates_total": 65,
+    "active_set_trips": 7,
+    "configured_gmres_iterations_per_update": 12,
+    "counting_contract": "residual evaluations count one primal residual for each Newton update plus all six fixed line-search grades; configured GMRES Jacobian-vector products are counted separately, and their sum is reported only as residual-evaluation equivalents",
+    "descent_activations": 12,
+    "fixed_line_search_grades_per_update": 6,
+    "gmres_jacobian_vector_products_per_trip": 144.0,
+    "gmres_jacobian_vector_products_total": 1008,
+    "line_search_grades_per_trip": 72.0,
+    "line_search_grades_total": 504,
+    "model_rebuild_activations": 12,
+    "newton_updates_per_trip": 12.0,
+    "newton_updates_total": 84,
+    "primal_residual_evaluations_per_trip": 12.0,
+    "primal_residual_evaluations_total": 84,
+    "promotion_backtrack_counts": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "recovery_activations": 12,
+    "residual_evaluation_equivalents_per_trip": 228.0,
+    "residual_evaluation_equivalents_total": 1596,
+    "residual_evaluations_per_trip": 84.0,
+    "residual_evaluations_total": 588
+  },
+  "execution_contract": "one compile execution followed by one synchronized measured production solve; the terminal receipt is captured from the measured solve",
+  "field_policy": {
+    "active_circuit_count": 13,
+    "active_mapping": [
+      {
+        "centroid_separation_m": 3.020663818271642e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 50319.66623454681,
+        "family": "p2_inner_lower",
+        "filament_turn_multiplier_sum": 0.9999960064888,
+        "raw_current_a": 50319.8671875,
+        "stored_circuit": 4
+      },
+      {
+        "centroid_separation_m": 4.610138552976278e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 50267.518005302176,
+        "family": "p2_inner_upper",
+        "filament_turn_multiplier_sum": 0.9999960064888,
+        "raw_current_a": 50267.71875,
+        "stored_circuit": 2
+      },
+      {
+        "centroid_separation_m": 3.794706373301994e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 33416.35546875,
+        "family": "p2_outer_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 33416.35546875,
+        "stored_circuit": 5
+      },
+      {
+        "centroid_separation_m": 3.882122250270243e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 33341.1796875,
+        "family": "p2_outer_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 33341.1796875,
+        "stored_circuit": 3
+      },
+      {
+        "centroid_separation_m": 1.2310483904636694e-07,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 46.641414642333984,
+        "family": "p3_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 46.641414642333984,
+        "stored_circuit": 7
+      },
+      {
+        "centroid_separation_m": 1.1378064254653142e-07,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 29.57099151611328,
+        "family": "p3_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 29.57099151611328,
+        "stored_circuit": 6
+      },
+      {
+        "centroid_separation_m": 0.002284428762164253,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -185195.33400285762,
+        "family": "p4_lower",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -185195.171875,
+        "stored_circuit": 9
+      },
+      {
+        "centroid_separation_m": 0.003039636783399228,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -185433.83421165083,
+        "family": "p4_upper",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -185433.671875,
+        "stored_circuit": 8
+      },
+      {
+        "centroid_separation_m": 0.0022829440191137885,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -138175.5897147773,
+        "family": "p5_lower",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -138175.46875,
+        "stored_circuit": 11
+      },
+      {
+        "centroid_separation_m": 0.0022872695201792835,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -138157.0271985269,
+        "family": "p5_upper",
+        "filament_turn_multiplier_sum": 1.0000008754432201,
+        "raw_current_a": -138156.90625,
+        "stored_circuit": 10
+      },
+      {
+        "centroid_separation_m": 5.527338696549878e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": 926.8552856445312,
+        "family": "p6_lower",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": 926.8552856445312,
+        "stored_circuit": 13
+      },
+      {
+        "centroid_separation_m": 1.4493967305635352e-08,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -554.8970947265625,
+        "family": "p6_upper",
+        "filament_turn_multiplier_sum": 1.0,
+        "raw_current_a": -554.8970947265625,
+        "stored_circuit": 12
+      },
+      {
+        "centroid_separation_m": 2.5307005105576235e-06,
+        "current_field": "efm/fcoil_c",
+        "effective_drive_a_turn": -8325233.859375,
+        "family": "sol",
+        "filament_turn_multiplier_sum": 328.0,
+        "raw_current_a": -25381.810546875,
+        "stored_circuit": 1
+      }
+    ],
+    "active_mapping_recomputed_for_shot": true,
+    "all_currents_prescribed": true,
+    "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+    "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+    "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+    "passive_or_vessel_circuit_count": 88,
+    "passive_registry_maximum_separation_m": 0.0,
+    "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+    "policy": "explicit prescribed-current response matrix",
+    "response_input_digests": {
+      "algorithm": "sha256",
+      "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "inputs": {
+        "fcoil_ang1": {
+          "dtype": "<f4",
+          "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_ang2": {
+          "dtype": "<f4",
+          "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_circ": {
+          "dtype": "<f8",
+          "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_height": {
+          "dtype": "<f4",
+          "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_n": {
+          "dtype": "<f4",
+          "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+          "shape": [
+            101
+          ]
+        },
+        "fcoil_r": {
+          "dtype": "<f4",
+          "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_turns": {
+          "dtype": "<f4",
+          "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_width": {
+          "dtype": "<f4",
+          "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_xmult": {
+          "dtype": "<f4",
+          "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+          "shape": [
+            938
+          ]
+        },
+        "fcoil_z": {
+          "dtype": "<f4",
+          "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+          "shape": [
+            938
+          ]
+        },
+        "gridr": {
+          "dtype": "<f4",
+          "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+          "shape": [
+            65
+          ]
+        },
+        "gridz": {
+          "dtype": "<f4",
+          "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+          "shape": [
+            65
+          ]
+        },
+        "limiterr": {
+          "dtype": "<f4",
+          "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+          "shape": [
+            37
+          ]
+        },
+        "limiterz": {
+          "dtype": "<f4",
+          "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+          "shape": [
+            37
+          ]
+        },
+        "resolved_response_targets": {
+          "dtype": "<f8",
+          "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "shape": [
+            1126,
+            2
+          ]
+        }
+      }
+    },
+    "response_matrix_reused": true,
+    "response_shape": [
+      1126,
+      101
+    ],
+    "section_kernel_evaluations": 938,
+    "section_kernel_evaluations_this_shot": 0,
+    "stored_circuit_count": 101,
+    "stored_field_closure_rms_wb": 1.4821494410218056e-16,
+    "stored_field_closure_sup_wb": 1.1102230246251565e-15
+  },
+  "held_commit": "c5e1498a0e435f637f3b1d0c27d1bbea4397cac5",
+  "label": "fallback-carry",
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "production_probe": {
+    "compile_wall_s": 589.5893427934498,
+    "control_flow": {
+      "dynamic_while_primitives": 23,
+      "fixed_scan_trip_compiled_branch_sum": 891605,
+      "fixed_scan_trip_lower_bound": 83707
+    },
+    "first_execute_wall_s": 34.50589638762176,
+    "persistent_compilation_cache": {
+      "events": {
+        "cache_hits": 4,
+        "cache_misses": 1,
+        "compile_requests_use_cache": 5
+      },
+      "status": "mixed"
+    },
+    "steady": {
+      "maximum_s": 30.86651725973934,
+      "median_absolute_deviation_s": 0.0,
+      "median_s": 30.86651725973934,
+      "minimum_s": 30.86651725973934,
+      "range_s": 0.0,
+      "sample_count": 1,
+      "samples_s": [
+        30.86651725973934
+      ]
+    }
+  },
+  "reference": {
+    "machine": "MAST",
+    "plasma_current_a": 933034.875,
+    "qualification_before_attribution": {
+      "declared_boundary_to_map_saddle_limit": 0.01,
+      "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+      "passes": true,
+      "stored_lcfs_contour_limit": 0.006,
+      "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+      "typed_saddle_candidate_count": 2,
+      "typed_saddle_resolved": true
+    },
+    "shot": 22086,
+    "slice_index": 43,
+    "source_coordinate": {
+      "axis_wb": 0.3423115953376666,
+      "boundary_wb": -0.1292985047045701,
+      "support_nodes": 243
+    },
+    "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+    "span_wb": 1.5839675751331153,
+    "time_s": 0.22999998927116394
+  },
+  "revision": "c5e1498a0e435f637f3b1d0c27d1bbea4397cac5",
+  "runtime": {
+    "cuda_visible_devices": "0",
+    "device": "cuda:0",
+    "device_kind": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "python": "3.14.2"
+  },
+  "scheduler": {
+    "accepted_time_limit": "01:00:00",
+    "cpus_per_task": "1",
+    "job_id": "1262798",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.production_trip_tip_attribution",
+  "terminal": {
+    "achieved_class": "diverted",
+    "achieved_class_code": 1,
+    "converged": false,
+    "requested_class": "diverted",
+    "residual": 0.00047882693504231827,
+    "termination_code": 10,
+    "termination_reason": "active_set_settled",
+    "topology_consistent": true
+  },
+  "trip_count_observation": {
+    "authority_active_set_trips": 7,
+    "difference": 0,
+    "gate_applied": false,
+    "interpretation": "a mismatch is a measured behavior change requiring commit attribution; it is neither rejected as invalid nor accepted as characteristic",
+    "matches": true,
+    "observed_active_set_trips": 7,
+    "ratio": 1.0
+  }
+}

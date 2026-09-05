@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T10:33:28",
+  "updated": "2026-09-05T10:38:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2024,6 +2024,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-dsv4-census-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "nia-dsv4-margin-x",
@@ -102191,6 +102200,199 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T080535593577-scr-stale-expectation-inventory",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-stale-expectation-inventory",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4013,
+                "cached_input_tokens": 970761,
+                "input_tokens": 974776,
+                "output_tokens": 1147,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 975923,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/attribution/stale-expectation-inventory.md with one table row per pin (file:line, pinned value, mechanism, verdict, reasoning, recommended re-expression), a summary count per verdict, plus the list of modules read, no repository change",
+          "estimated_hours": null,
+          "goal": "Inventory the test expectations under tests/ that still encode solver or topology behaviour retired by this session's landings, before they fail one at a time as the last four did (the continuation trip count, the recovery radius, the stagnation trip count, the forward-solve oracles, the raster fixture polarity, all attributed to accepted mechanisms and re-expressed test-only): read the mechanisms that landed on main since 8df13859 (the model-error step cap with partition relinearisation at a mask change, one topology read per trip, the frozen-partition acceptance scoring, the unchanged-state fallback carry, containment admission with one null type per containing cell, the common tensor spline authority for census values plus the wall minimum, the supplied-wall shadow rule, the spline-consistent mask deadband, the public defaults resolved through one table) from the plan comments of solver-convergence-regression, null-identification-authority plus millisecond-converged-solve, read every test module that pins a trip count, a promotion count, a reset count, a carried conditioning value, a fixed-slot count, a wall level, a mask cell count or a census candidate set, judging each pinned value against the mechanism now in force without running the suite (a static read, file:line for every pin), so the report lists per pin the file:line, the value pinned, the mechanism that may have moved it, a verdict (consistent, stale, or undecidable without a run) with the reasoning, plus the recommended re-expression for the stale ones, read-only",
+          "id": "scr-stale-expectation-inventory",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T080535593577-scr-stale-expectation-inventory/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/stale-expectation-inventory.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "scr-dsv4-inventory-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-05T08:05:43Z",
+        "completed_at": "2026-09-05T08:35:20.632Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1763,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1777,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5823be70b5337795611ef3667beb0eb637334521",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T080535593577-scr-stale-expectation-inventory/manifest.md",
+        "scope_changed": false,
+        "session_id": "2646ffd6-0e51-4952-ac8b-3662c87ef7b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7975223,
+            "input_tokens_cumulative": 7975223,
+            "output_tokens": 50850,
+            "output_tokens_cumulative": 50850,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 41.14736500000001,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 41.14736500000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 92862,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 95262,
+              "external_wait": null,
+              "log_age_seconds": 94360,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 94416,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1773.784,
+          "generated_tokens": 50850,
+          "generation_seconds": 1726.883,
+          "input_budget_tokens": 492288,
+          "input_utilisation_pct": 54.2,
+          "machine_seconds": 46.901,
+          "peak_input_tokens": 266955,
+          "tokens_per_second": 29.45,
+          "wall_tokens_per_second": 28.67
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only static inventory, report at ~/.config/reckon/crew/reports/nova/attribution/stale-expectation-inventory.md, no repository change",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-stale-expectation-inventory",
+          "session_id": "2646ffd6-0e51-4952-ac8b-3662c87ef7b4",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T08:35:20.632Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -102335,6 +102537,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1730
+    "_version": 1732
   }
 }

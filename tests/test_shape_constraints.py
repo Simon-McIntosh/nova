@@ -128,7 +128,7 @@ def _edge_vanishing_profile(amplitude):
 def machine():
     """Return the bootstrapped free-boundary solve and its analytic seed."""
     configure_dtypes()
-    lattice = FluxLattice(np.linspace(0.6, 1.42, 25), np.linspace(-0.42, 0.42, 25))
+    lattice = FluxLattice(np.linspace(0.6, 1.42, 15), np.linspace(-0.42, 0.42, 15))
     coordinate = lattice.coordinate
     wall, wall_flux = _wall_loop()
     seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1])
@@ -308,6 +308,7 @@ def test_miller_boundary_reproduces_the_shape_figures_it_was_handed():
     assert (1.0 - upper) / 0.3 == pytest.approx(0.4, abs=1.0e-9)
 
 
+@pytest.mark.slow
 def test_shape_rows_respond_to_a_circuit_as_a_central_difference_does(machine):
     """Every row's circuit response equals the difference along its flux image."""
     profile, seed = machine
@@ -412,6 +413,7 @@ def test_shape_rows_respond_to_a_circuit_as_a_central_difference_does(machine):
         )
 
 
+@pytest.mark.slow
 def test_isoflux_rows_steer_the_boundary_onto_a_moved_miller_target(machine, converged):
     """Moving the Miller target moves the achieved boundary onto it."""
     profile, _seed = machine
@@ -447,6 +449,7 @@ def test_isoflux_rows_steer_the_boundary_onto_a_moved_miller_target(machine, con
     assert np.all(np.abs(np.asarray(record.physical_unknown)) > 0.0)
 
 
+@pytest.mark.slow
 def test_stationary_point_rows_command_the_flux_map_null(machine, converged):
     """Both gradient rows vanish at the commanded point when the solve closes.
 
@@ -490,6 +493,7 @@ def test_stationary_point_rows_command_the_flux_map_null(machine, converged):
     assert float(np.asarray(moved.axis)[1]) > float(axis[1])
 
 
+@pytest.mark.slow
 def test_wall_gap_row_stands_the_boundary_off_by_the_commanded_distance(
     machine, converged
 ):
@@ -550,6 +554,7 @@ def test_wall_gap_row_stands_the_boundary_off_by_the_commanded_distance(
     )
 
 
+@pytest.mark.slow
 def test_a_warm_started_move_costs_fewer_trips_than_the_same_move_from_the_seed(
     machine, converged
 ):

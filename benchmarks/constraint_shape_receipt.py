@@ -52,6 +52,10 @@ CONTROL_POINTS = 6
 #: elongation raised by five percent, both from the fitted target.
 VERTICAL_STEP_M = 0.02
 ELONGATION_FRACTION = 0.05
+#: Budget the constrained arms are given. A commanded shape move opens rows
+#: the public default budget was never sized for, so the arms state their own.
+NEWTON_STEPS = 16
+ACTIVE_SET_STEPS = 24
 
 
 def _strict_float(value: Any) -> float | None:
@@ -66,7 +70,11 @@ def _source_revision() -> str:
 
 
 def _boundary_polygon(profile, flux, *, angles=181):
-    """Ray-cast the achieved boundary contour outward from the magnetic axis."""
+    """Ray-cast the achieved boundary contour outward from the magnetic axis.
+
+    ``angles`` is either a count of equally spaced poloidal angles or the
+    explicit angles themselves.
+    """
     _masks, topology = profile.operator.read(jnp.asarray(flux))
     axis = np.asarray(topology.axis, dtype=float)
     level = float(np.asarray(topology.boundary_flux))
@@ -77,7 +85,11 @@ def _boundary_polygon(profile, flux, *, angles=181):
         float(lattice.radius[-1] - lattice.radius[0]),
         float(lattice.height[-1] - lattice.height[0]),
     )
-    theta = 2.0 * np.pi * np.arange(angles) / angles
+    theta = (
+        2.0 * np.pi * np.arange(angles) / angles
+        if np.ndim(angles) == 0
+        else np.asarray(angles, dtype=float)
+    )
     points = []
     for angle in theta:
         ray = np.asarray([np.cos(angle), np.sin(angle)])
@@ -114,9 +126,29 @@ def _miller_figures(boundary: np.ndarray) -> dict[str, float]:
     }
 
 
-def _control_points(figures: dict[str, float]) -> np.ndarray:
-    """Return the commanded control points of one set of shape figures."""
-    return np.asarray(miller_boundary_points(count=CONTROL_POINTS, **figures))
+#: Poloidal angles the control points are placed on, chosen away from the
+#: divertor legs where a Miller curve does not describe the boundary at all.
+CONTROL_ANGLES = np.linspace(-0.72, 0.72, CONTROL_POINTS) * np.pi
+
+
+def _boundary_at_angles(profile, flux, angles) -> np.ndarray:
+    """Ray-cast the achieved boundary at one set of poloidal angles."""
+    return _boundary_polygon(profile, flux, angles=angles)
+
+
+def _miller_displacement(fitted, commanded, angles) -> np.ndarray:
+    """Return the boundary displacement one commanded knob change asks for.
+
+    The knob is read as the difference between two Miller curves at the same
+    poloidal angles, so a vertical command is a rigid shift and an elongation
+    command is a height stretch, and the fit's own error cancels: the unmoved
+    command reproduces the achieved boundary exactly and the arm measures the
+    commanded move alone rather than the distance from a diverted boundary to
+    the nearest Miller ellipse.
+    """
+    return np.asarray(miller_boundary_points(angle=angles, **commanded)) - np.asarray(
+        miller_boundary_points(angle=angles, **fitted)
+    )
 
 
 def _reference_point(profile, flux) -> np.ndarray:
@@ -182,6 +214,8 @@ def _arm(
     previous_flux,
     figures,
     *,
+    anchor,
+    fitted,
     target_current,
     requested,
     circuits,
@@ -190,7 +224,7 @@ def _arm(
     tolerance_wb,
 ):
     """Solve one commanded shape move warm-started from the previous state."""
-    points = _control_points(figures)
+    points = anchor + _miller_displacement(fitted, figures, CONTROL_ANGLES)
     pair = _isoflux_pair(
         profile, previous_flux, points, span=span, tolerance_wb=tolerance_wb
     )
@@ -207,6 +241,8 @@ def _arm(
         requested,
         target_current=target_current,
         constraint_pairs=(derived,),
+        newton_steps=NEWTON_STEPS,
+        active_set_steps=ACTIVE_SET_STEPS,
     )
     branch.equilibrium.flux.block_until_ready()
     equilibrium = branch.equilibrium
@@ -269,26 +305,16 @@ def _render(receipt, output: Path):
     figure, axes = plt.subplots(1, len(arms), figsize=(5.6 * len(arms), 5.6))
     axes = np.atleast_1d(axes)
     previous = np.asarray(receipt["converged"]["boundary_rz_m"])
+    anchor = np.asarray(receipt["converged"]["control_points_rz_m"])
     for axis, arm in zip(axes, arms, strict=True):
-        commanded = np.asarray(
-            miller_boundary_points(count=361, **arm["commanded_figures"])
-        )
+        commanded = np.asarray(arm["control_points_rz_m"])
         achieved = np.asarray(arm["achieved_boundary_rz_m"])
-        control = np.asarray(arm["control_points_rz_m"])
         axis.plot(
             previous[:, 0],
             previous[:, 1],
             color="0.55",
             linewidth=1.2,
             label="previous boundary",
-        )
-        axis.plot(
-            commanded[:, 0],
-            commanded[:, 1],
-            color="tab:orange",
-            linestyle="--",
-            linewidth=1.4,
-            label="commanded target",
         )
         axis.plot(
             achieved[:, 0],
@@ -298,12 +324,20 @@ def _render(receipt, output: Path):
             label="achieved boundary",
         )
         axis.plot(
-            control[:, 0],
-            control[:, 1],
+            commanded[:, 0],
+            commanded[:, 1],
             "o",
             color="tab:orange",
-            markersize=5,
-            label="control points",
+            markersize=6,
+            label="commanded control points",
+        )
+        axis.plot(
+            anchor[:, 0],
+            anchor[:, 1],
+            "x",
+            color="0.35",
+            markersize=6,
+            label="previous control points",
         )
         axis.set_aspect("equal")
         axis.set_xlabel("R [m]")
@@ -367,6 +401,7 @@ def measure(*, directory: Path, cache_root: Path | None = None):
     base_flux = base.equilibrium.flux
     boundary = _boundary_polygon(profile, base_flux)
     fitted = _miller_figures(boundary)
+    anchor = _boundary_at_angles(profile, base_flux, CONTROL_ANGLES)
     receipt = {
         "receipt": "shape-control rows steered on one bank equilibrium",
         "identity": identity,
@@ -404,6 +439,8 @@ def measure(*, directory: Path, cache_root: Path | None = None):
                 np.asarray(base.equilibrium.fixed_point.active_set_iterations)
             ),
             "fitted_figures": fitted,
+            "control_points_rz_m": anchor.tolist(),
+            "control_angles_rad": CONTROL_ANGLES.tolist(),
             "landmarks": _landmarks(profile, base_flux),
             "boundary_rz_m": boundary.tolist(),
         },
@@ -435,6 +472,8 @@ def measure(*, directory: Path, cache_root: Path | None = None):
             profile,
             base_flux,
             figures,
+            anchor=anchor,
+            fitted=fitted,
             target_current=target_current,
             requested=requested,
             circuits=circuits,

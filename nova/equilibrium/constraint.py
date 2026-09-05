@@ -698,19 +698,27 @@ def miller_boundary_points(
     minor_radius,
     elongation,
     triangularity,
-    count: int,
+    count: int | None = None,
+    angle=None,
 ):
     """Return control points on one Miller-parametrised target boundary.
 
     The parametrisation is the standard shaped-tokamak one,
     ``R = R0 + a cos(theta + arcsin(delta) sin theta)`` and
-    ``Z = Z0 + kappa a sin theta`` on ``count`` equally spaced poloidal
-    angles.  Every shape figure is an ordinary array leaf, so moving a knob
-    moves the points without changing the compiled program.
+    ``Z = Z0 + kappa a sin theta``.  Supply ``count`` for equally spaced
+    poloidal angles closing the curve, or ``angle`` to place the points where
+    a caller wants them — a divertor leg is not described by this curve, so a
+    control-point set usually names its own angles.  Every shape figure is an
+    ordinary array leaf, so moving a knob moves the points without changing
+    the compiled program.
     """
-    if int(count) < 1:
-        raise ValueError("a Miller target boundary needs at least one point")
-    angle = 2.0 * jnp.pi * jnp.arange(int(count)) / float(count)
+    if (count is None) == (angle is None):
+        raise ValueError("a Miller target boundary needs either count or angle")
+    if count is not None:
+        if int(count) < 1:
+            raise ValueError("a Miller target boundary needs at least one point")
+        angle = 2.0 * jnp.pi * jnp.arange(int(count)) / float(count)
+    angle = jnp.asarray(angle)
     tilt = jnp.arcsin(jnp.clip(jnp.asarray(triangularity), -1.0, 1.0))
     radius = geometric_radius + minor_radius * jnp.cos(angle + tilt * jnp.sin(angle))
     height = geometric_height + elongation * minor_radius * jnp.sin(angle)

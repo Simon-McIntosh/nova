@@ -9,8 +9,11 @@ amplitudes is evidence about the map rather than about the parameterisation.
 
 Pinned here: the reduced coordinates carry the whole plasma current the map
 drives; reconstructing flux from them reproduces the production map exactly;
-and the reduced plain-Newton solve lands on the production Newton-Krylov
-solve's fixed point to within the solver tolerance.
+the reduced plain-Newton solve lands on the production Newton-Krylov solve's
+fixed point to within the solver tolerance; scoring the refused grade tail in
+one dispatch returns bitwise what the per-grade dispatches return and walks
+the same solve; and the residual sup norm the receipt reports comes back from
+the scoring kernel rather than from a reduction dispatched after it.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ with skip_import("jax"):
     from nova.biot.greens import hybrid_greens
     from nova.equilibrium import reduced_newton
     from nova.equilibrium.conservation import FluxLattice
-    from nova.equilibrium.fixed_point import _relative_residual
+    from nova.equilibrium.fixed_point import _BACKTRACKING_FACTORS, _relative_residual
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.jax.config import configure_dtypes
@@ -261,7 +264,7 @@ def test_dense_jacobian_is_square_on_the_reduced_state(machine):
 
 
 @pytest.mark.slow
-def test_first_accept_scoring_accepts_the_grade_the_eager_ladder_selects(machine):
+def test_ladder_scoring_accepts_the_grade_the_eager_ladder_selects(machine):
     """Stopping at the first grade below the merit selects the eager grade.
 
     The eager ladder scores every backtracking grade and then takes the
@@ -281,35 +284,33 @@ def test_first_accept_scoring_accepts_the_grade_the_eager_ladder_selects(machine
         ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
         **common,
     )
-    first_accept = reduced_newton.solve_reduced_newton(
+    scored = reduced_newton.solve_reduced_newton(
         profile.operator,
         seed,
         ladder_scoring=reduced_newton.LADDER_SCORING,
         **common,
     )
     assert eager.steps
-    assert len(first_accept.steps) == len(eager.steps)
-    for taken, scored in zip(first_accept.steps, eager.steps, strict=True):
-        assert (taken.trip, taken.step) == (scored.trip, scored.step)
-        assert taken.accepted_factor == scored.accepted_factor
-        assert taken.grades_tried == scored.grades_tried
-        assert taken.jacobian_refreshed == scored.jacobian_refreshed
-    assert first_accept.newton_steps_per_trip == eager.newton_steps_per_trip
-    assert first_accept.active_set_mask_differences == (
-        eager.active_set_mask_differences
-    )
-    assert first_accept.termination_name == eager.termination_name
+    assert len(scored.steps) == len(eager.steps)
+    for taken, reference in zip(scored.steps, eager.steps, strict=True):
+        assert (taken.trip, taken.step) == (reference.trip, reference.step)
+        assert taken.accepted_factor == reference.accepted_factor
+        assert taken.grades_tried == reference.grades_tried
+        assert taken.jacobian_refreshed == reference.jacobian_refreshed
+    assert scored.newton_steps_per_trip == eager.newton_steps_per_trip
+    assert scored.active_set_mask_differences == (eager.active_set_mask_differences)
+    assert scored.termination_name == eager.termination_name
     span = float(jnp.max(jnp.abs(eager.state)))
-    difference = float(jnp.max(jnp.abs(first_accept.state - eager.state)))
+    difference = float(jnp.max(jnp.abs(scored.state - eager.state)))
     assert difference <= 1.0e-12 * span
 
 
 @pytest.mark.slow
-def test_first_accept_scoring_evaluates_one_map_per_accepted_step(machine):
+def test_ladder_scoring_evaluates_one_map_per_accepted_step(machine):
     """A step accepted at full length costs one map evaluation, not eight.
 
     The eager route evaluates the map for the reduced residual, again for the
-    incumbent merit and once per grade; the first-accept route reads all three
+    incumbent merit and once per grade; the scoring route reads all of them
     from the grade it accepts, so an accepting step evaluates the map once and
     only the trip's opening state is scored separately.
     """
@@ -325,18 +326,16 @@ def test_first_accept_scoring_evaluates_one_map_per_accepted_step(machine):
         ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
         **common,
     )
-    first_accept = reduced_newton.solve_reduced_newton(
+    scored = reduced_newton.solve_reduced_newton(
         profile.operator,
         seed,
         ladder_scoring=reduced_newton.LADDER_SCORING,
         **common,
     )
-    full_length = [step for step in first_accept.steps if step.accepted_factor == 1.0]
+    full_length = [step for step in scored.steps if step.accepted_factor == 1.0]
     assert full_length
     assert all(step.map_evaluations == 1 for step in full_length[1:])
-    assert sum(first_accept.map_evaluations_per_trip) < sum(
-        eager.map_evaluations_per_trip
-    )
+    assert sum(scored.map_evaluations_per_trip) < sum(eager.map_evaluations_per_trip)
 
 
 @pytest.mark.slow
@@ -436,3 +435,115 @@ def test_fused_trip_boundary_solves_to_the_dispatched_terminal_state(machine):
     span = float(jnp.max(jnp.abs(dispatched.state)))
     difference = float(jnp.max(jnp.abs(fused.state - dispatched.state)))
     assert difference <= BOUNDARY_FLUX_AGREEMENT * span
+
+
+def test_batched_tail_scores_the_grades_the_serial_ladder_dispatches(machine):
+    """One batched tail returns what the per-grade dispatches return, bitwise.
+
+    The tail exists to remove round trips, not to change arithmetic: it builds
+    the same candidate amplitudes from the same factors and drives them
+    through the same scoring program, one lane at a time.  Every leaf is
+    compared for exact equality against the single-grade kernel, because a
+    tail that moved a last bit could move a merit across the incumbent and
+    change which grade the selection takes.
+    """
+    profile, seed = machine
+    operator = profile.operator
+    coordinates = reduced_newton.reduced_coordinates(operator, seed)
+    shadow = jnp.ravel(jnp.asarray(operator.residual_shadow_mask(seed), dtype=bool))
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    reduced = kernels["initial_gather"](seed)
+    direction = kernels["direction"](
+        kernels["jacobian"](reduced, shadow, seed),
+        kernels["reduced_residual"](reduced, shadow, seed),
+    )
+    candidates, tail = kernels["tail"](reduced, direction, shadow, seed)
+    factors = _BACKTRACKING_FACTORS[1:]
+    assert candidates.shape == (len(factors), coordinates.size)
+    for index, factor in enumerate(factors):
+        expected_candidate, expected = kernels["grade"](
+            reduced, direction, jnp.asarray(factor, dtype=reduced.dtype), shadow, seed
+        )
+        assert bool(jnp.array_equal(candidates[index], expected_candidate))
+        for lane, reference in zip(tail, expected, strict=True):
+            assert bool(jnp.array_equal(lane[index], reference))
+
+
+def test_step_kernel_returns_the_residual_sup_norm(machine):
+    """The norm the receipt reads comes back with the residual, not after it.
+
+    Nothing the solve branches on reads the reduced residual's sup norm, so
+    reducing it in a dispatch of its own would spend a synchronised round trip
+    per Newton step on a number only the receipt reports.  The scoring kernel
+    already holds the residual, and the value it returns is the value a
+    separate reduction would have produced.
+    """
+    profile, seed = machine
+    operator = profile.operator
+    coordinates = reduced_newton.reduced_coordinates(operator, seed)
+    shadow = jnp.ravel(jnp.asarray(operator.residual_shadow_mask(seed), dtype=bool))
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    reduced = kernels["initial_gather"](seed)
+    scores = kernels["step_scores"](reduced, shadow, seed)
+    assert float(scores.residual_norm) == float(jnp.max(jnp.abs(scores.residual)))
+    assert bool(
+        jnp.array_equal(
+            scores.residual, kernels["reduced_residual"](reduced, shadow, seed)
+        )
+    )
+    solved = reduced_newton.solve_reduced_newton(
+        operator, seed, tolerance=SOLVE_TOLERANCE, newton_steps=1, active_set_steps=1
+    )
+    assert solved.steps
+    assert solved.steps[0].reduced_residual == float(scores.residual_norm)
+
+
+@pytest.mark.slow
+def test_batched_tail_scoring_walks_the_serial_route(machine):
+    """Batching the refused tail leaves every decision and the flux unmoved.
+
+    The two routes differ only in how many dispatches a refused first grade
+    costs, so the grade each step accepts, the trips taken, the masks promoted
+    and the termination must be equal, and the terminal flux bitwise equal:
+    where a first grade accepts the two routes execute the same programs, and
+    where it is refused the tail scores the same candidates through the same
+    program one lane at a time.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    serial = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.SERIAL_LADDER_SCORING,
+        **common,
+    )
+    batched = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    assert serial.steps
+    assert len(batched.steps) == len(serial.steps)
+    for taken, reference in zip(batched.steps, serial.steps, strict=True):
+        assert (taken.trip, taken.step) == (reference.trip, reference.step)
+        assert taken.accepted_factor == reference.accepted_factor
+        assert taken.grades_tried == reference.grades_tried
+        assert taken.jacobian_refreshed == reference.jacobian_refreshed
+        assert taken.reduced_residual == reference.reduced_residual
+        assert taken.merit == reference.merit
+        assert taken.flux_residual == reference.flux_residual
+    assert batched.active_set_iterations == serial.active_set_iterations
+    assert batched.newton_steps_per_trip == serial.newton_steps_per_trip
+    assert batched.active_set_mask_differences == serial.active_set_mask_differences
+    assert batched.termination_name == serial.termination_name
+    assert batched.terminal_residual == serial.terminal_residual
+    assert bool(jnp.array_equal(batched.state, serial.state))

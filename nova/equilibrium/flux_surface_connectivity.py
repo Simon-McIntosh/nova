@@ -1130,12 +1130,6 @@ def polish_census_stationary_points(
         & jnp.isfinite(seed_normalized_gradient)
         & (seed_normalized_gradient <= seed_stationarity_tolerance)
     )
-    attempted = polish_stationary_points(
-        authority_spline,
-        selected[:, :2],
-        valid & ~seed_stationary,
-        stationary_steps=8,
-    )
     seed_hessian = jnp.stack(
         (
             jnp.stack(
@@ -1158,6 +1152,33 @@ def polish_census_stationary_points(
     seed_determinant = (
         seed_hessian[..., 0, 0] * seed_hessian[..., 1, 1]
         - seed_hessian[..., 0, 1] * seed_hessian[..., 1, 0]
+    )
+    active_polish = valid & ~seed_stationary
+
+    def refine_selected(_):
+        return polish_stationary_points(
+            authority_spline,
+            selected[:, :2],
+            active_polish,
+            stationary_steps=8,
+        )
+
+    def retain_stationary(_):
+        seed_hessian_type = jnp.sign(seed_determinant).astype(jnp.int8)
+        return {
+            "position_rz": jnp.where(valid[:, None], selected[:, :2], 0.0),
+            "value": jnp.where(valid, seed_evaluation.value, 0.0),
+            "gradient_norm": jnp.where(valid, seed_gradient_norm, 0.0),
+            "gradient": jnp.where(valid[:, None], seed_gradient, 0.0),
+            "hessian": jnp.where(valid[:, None, None], seed_hessian, 0.0),
+            "hessian_type": jnp.where(valid, seed_hessian_type, 0),
+            "converged": seed_stationary,
+            "in_domain": valid,
+            "iteration_count": jnp.zeros(valid.shape, dtype=jnp.int32),
+        }
+
+    attempted = jax.lax.cond(
+        jnp.any(active_polish), refine_selected, retain_stationary, operand=None
     )
     attempted = attempted | {
         "position_rz": jnp.where(

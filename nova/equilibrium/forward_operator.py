@@ -401,53 +401,78 @@ class _FixedDesignNull2D:
         crossing_count = self.locator.crossing_count(ring_values)
         ring_mask = jnp.stack((crossing_count == 0, crossing_count == 4), axis=0)
         admitted = jnp.any(ring_mask, axis=0)
-        seed = self.locator.physical_origin.astype(self.fit_dtype)
-        polish = polish_stationary_points(spline, seed, admitted)
-        displacement = jnp.linalg.norm(polish["position_rz"] - seed, axis=1)
-        requested_displacement = jnp.where(admitted, displacement, jnp.nan)
+        origin = self.locator.physical_origin.astype(self.fit_dtype)
         neighbours = ring_coordinate[:, 1:] - ring_coordinate[:, :1]
         cell_width = jnp.max(jnp.linalg.norm(neighbours, axis=-1), axis=1).astype(
             self.fit_dtype
         )
-        within_cell = displacement < cell_width
+        compact_capacity = min(admitted.size, 2 * self.locator.maxsize)
+        compact_index = jnp.where(admitted, size=compact_capacity, fill_value=0)[
+            0
+        ].astype(jnp.int32)
+        compact_valid = jnp.arange(compact_capacity) < jnp.sum(
+            admitted, dtype=jnp.int32
+        )
+        compact_ring_mask = ring_mask[:, compact_index] & compact_valid[None, :]
+        compact_seed = origin[compact_index]
+        compact_polish = polish_stationary_points(spline, compact_seed, compact_valid)
+        compact_displacement = jnp.linalg.norm(
+            compact_polish["position_rz"] - compact_seed, axis=1
+        )
+        compact_cell_width = cell_width[compact_index]
+        compact_within_cell = compact_displacement < compact_cell_width
         expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)[:, None]
-        type_agrees = polish["hessian_type"][None, :] == expected_hessian_type
-        polished_mask = ring_mask & polish["converged"][None, :] & within_cell[None, :]
-        typed_mask = polished_mask & type_agrees
+        compact_type_agrees = (
+            compact_polish["hessian_type"][None, :] == expected_hessian_type
+        ) & compact_valid[None, :]
+        compact_polished_mask = (
+            compact_ring_mask
+            & compact_polish["converged"][None, :]
+            & compact_within_cell[None, :]
+        )
+        compact_typed_mask = compact_polished_mask & compact_type_agrees
         domain_scale = jnp.hypot(
             self.spline_radial[-1] - self.spline_radial[0],
             self.spline_vertical[-1] - self.spline_vertical[0],
         )
-        root_uncertainty = self._root_uncertainty(polish, cell_width, domain_scale)
+        compact_root_uncertainty = self._root_uncertainty(
+            compact_polish, compact_cell_width, domain_scale
+        )
         deduplicated = [
             self._deduplicate_type(
-                polish["position_rz"], typed_mask[index], root_uncertainty
+                compact_polish["position_rz"],
+                compact_typed_mask[index],
+                compact_root_uncertainty,
             )
             for index in range(2)
         ]
-        representative_mask = jnp.stack([item[0] for item in deduplicated])
-        multiplicity = jnp.stack([item[1] for item in deduplicated])
-        representative_index = jnp.stack([item[2] for item in deduplicated])
+        compact_representative_mask = jnp.stack([item[0] for item in deduplicated])
+        compact_multiplicity = jnp.stack([item[1] for item in deduplicated])
+        compact_representative_index = jnp.stack([item[2] for item in deduplicated])
 
-        hessian = polish["hessian"]
-        hessian_determinant = (
-            hessian[..., 0, 0] * hessian[..., 1, 1]
-            - hessian[..., 0, 1] * hessian[..., 1, 0]
+        compact_hessian = compact_polish["hessian"]
+        compact_hessian_determinant = (
+            compact_hessian[..., 0, 0] * compact_hessian[..., 1, 1]
+            - compact_hessian[..., 0, 1] * compact_hessian[..., 1, 0]
         )
-        extremum_kind = -jnp.sign(jnp.trace(hessian, axis1=-2, axis2=-1))
-        kind = jnp.where(crossing_count == 4, 0.0, extremum_kind)
-        candidates = jnp.column_stack(
+        compact_extremum_kind = -jnp.sign(
+            jnp.trace(compact_hessian, axis1=-2, axis2=-1)
+        )
+        compact_kind = jnp.where(
+            crossing_count[compact_index] == 4, 0.0, compact_extremum_kind
+        )
+        compact_candidates = jnp.column_stack(
             (
-                polish["position_rz"].astype(jnp.float64),
-                polish["value"].astype(jnp.float64),
-                kind.astype(jnp.float64),
+                compact_polish["position_rz"].astype(jnp.float64),
+                compact_polish["value"].astype(jnp.float64),
+                compact_kind.astype(jnp.float64),
             )
         )
         source_origin = self.locator.stencil[:, 0].astype(jnp.int32)
         raw_ring_count = jnp.sum(ring_mask, axis=1, dtype=jnp.int32)
-        polished_count = jnp.sum(polished_mask, axis=1, dtype=jnp.int32)
-        typed_count = jnp.sum(typed_mask, axis=1, dtype=jnp.int32)
-        same_root_count = jnp.sum(representative_mask, axis=1, dtype=jnp.int32)
+        polished_count = jnp.sum(compact_polished_mask, axis=1, dtype=jnp.int32)
+        typed_count = jnp.sum(compact_typed_mask, axis=1, dtype=jnp.int32)
+        same_root_count = jnp.sum(compact_representative_mask, axis=1, dtype=jnp.int32)
         capacity = jnp.full(
             same_root_count.shape, self.locator.maxsize, dtype=jnp.int32
         )
@@ -455,13 +480,13 @@ class _FixedDesignNull2D:
         retained_index = jnp.stack(
             [
                 jnp.where(mask, size=self.locator.maxsize, fill_value=0)[0]
-                for mask in representative_mask
+                for mask in compact_representative_mask
             ]
         )
         retained_slot = jnp.arange(self.locator.maxsize)[None, :]
         retained_valid = retained_slot < retained_count[:, None]
         retained_multiplicity = jnp.take_along_axis(
-            multiplicity, retained_index, axis=1
+            compact_multiplicity, retained_index, axis=1
         )
         retained_multiplicity = jnp.where(retained_valid, retained_multiplicity, 0)
 
@@ -474,26 +499,92 @@ class _FixedDesignNull2D:
                 jnp.asarray(fill, dtype=gathered.dtype),
             )
 
+        def scatter(values_to_scatter):
+            trailing_shape = values_to_scatter.shape[1:]
+            valid_shape = (compact_capacity,) + (1,) * len(trailing_shape)
+            updates = jnp.where(
+                compact_valid.reshape(valid_shape),
+                values_to_scatter,
+                jnp.zeros((), dtype=values_to_scatter.dtype),
+            )
+            if values_to_scatter.dtype == jnp.bool_:
+                scattered = (
+                    jnp.zeros((admitted.size,) + trailing_shape, dtype=jnp.int32)
+                    .at[compact_index]
+                    .add(updates.astype(jnp.int32))
+                )
+                return scattered.astype(bool)
+            return (
+                jnp.zeros(
+                    (admitted.size,) + trailing_shape, dtype=values_to_scatter.dtype
+                )
+                .at[compact_index]
+                .add(updates)
+            )
+
+        polish_position = scatter(compact_polish["position_rz"])
+        polish_converged = scatter(compact_polish["converged"])
+        displacement = jnp.linalg.norm(polish_position - origin, axis=1)
+        requested_displacement = jnp.where(admitted, displacement, jnp.nan)
+        within_cell = displacement < cell_width
+        type_agrees = jnp.stack([scatter(item) for item in compact_type_agrees])
+        typed_mask = jnp.stack([scatter(item) for item in compact_typed_mask])
+        representative_mask = jnp.stack(
+            [scatter(item) for item in compact_representative_mask]
+        )
+        multiplicity = jnp.stack([scatter(item) for item in compact_multiplicity])
+        compact_parent_origin = jnp.where(
+            compact_representative_index >= 0,
+            compact_index[jnp.maximum(compact_representative_index, 0)],
+            -1,
+        )
+        representative_index = jnp.stack(
+            [scatter(parent + 1) - 1 for parent in compact_parent_origin]
+        )
+        arithmetic_floor = (
+            256.0
+            * jnp.finfo(self.fit_dtype).eps
+            * jnp.maximum(domain_scale, cell_width)
+        )
+        root_uncertainty = arithmetic_floor + scatter(
+            compact_root_uncertainty - arithmetic_floor[compact_index]
+        )
+        polish_value = scatter(compact_polish["value"])
+        hessian = scatter(compact_hessian)
+        extremum_kind = -jnp.sign(jnp.trace(hessian, axis1=-2, axis2=-1))
+        kind = jnp.where(crossing_count == 4, 0.0, extremum_kind)
+        candidates = jnp.column_stack(
+            (
+                polish_position.astype(jnp.float64),
+                polish_value.astype(jnp.float64),
+                kind.astype(jnp.float64),
+            )
+        )
+        spline_gradient = scatter(compact_polish["gradient"])
+        spline_gradient_norm = scatter(compact_polish["gradient_norm"])
+        hessian_type = scatter(compact_polish["hessian_type"])
+        hessian_determinant = scatter(compact_hessian_determinant)
+
         return {
             "candidate": candidates,
             "ring_crossing_count": crossing_count,
             "ring_admitted_mask": ring_mask,
             "ring_resolution_limited": crossing_count == 2,
-            "polish_converged": polish["converged"],
+            "polish_converged": polish_converged,
             "requested_displacement": requested_displacement,
             "cell_width": cell_width,
             "within_cell": within_cell,
             "polish_rejected": ring_mask
-            & (~polish["converged"][None, :] | ~within_cell[None, :]),
-            "hessian_type": polish["hessian_type"],
+            & (~polish_converged[None, :] | ~within_cell[None, :]),
+            "hessian_type": hessian_type,
             "hessian_type_agrees": type_agrees,
             "typed_mask": typed_mask,
             "representative_mask": representative_mask,
             "representative_index": representative_index,
             "multiplicity": multiplicity,
             "source_origin_index": source_origin,
-            "spline_gradient": polish["gradient"],
-            "spline_gradient_norm": polish["gradient_norm"],
+            "spline_gradient": spline_gradient,
+            "spline_gradient_norm": spline_gradient_norm,
             "spline_hessian_determinant": hessian_determinant,
             "root_uncertainty": root_uncertainty,
             "raw_ring_count": raw_ring_count,
@@ -503,18 +594,20 @@ class _FixedDesignNull2D:
             "retained_count": retained_count,
             "capacity": capacity,
             "overflow": same_root_count > capacity,
-            "retained_candidate": retain(candidates, trailing=1),
+            "retained_candidate": retain(compact_candidates, trailing=1),
             "retained_valid": retained_valid,
-            "retained_representative_origin_index": retain(source_origin),
+            "retained_representative_origin_index": retain(
+                source_origin[compact_index]
+            ),
             "retained_representative_origin_rz": retain(
-                self.locator.physical_origin, trailing=1
+                self.locator.physical_origin[compact_index], trailing=1
             ),
             "retained_multiplicity": retained_multiplicity,
-            "retained_spline_gradient": retain(polish["gradient"], trailing=1),
-            "retained_spline_gradient_norm": retain(polish["gradient_norm"]),
-            "retained_spline_hessian_determinant": retain(hessian_determinant),
-            "retained_requested_displacement": retain(displacement),
-            "retained_root_uncertainty": retain(root_uncertainty),
+            "retained_spline_gradient": retain(compact_polish["gradient"], trailing=1),
+            "retained_spline_gradient_norm": retain(compact_polish["gradient_norm"]),
+            "retained_spline_hessian_determinant": retain(compact_hessian_determinant),
+            "retained_requested_displacement": retain(compact_displacement),
+            "retained_root_uncertainty": retain(compact_root_uncertainty),
             "spline_authored": jnp.asarray(True),
         }
 

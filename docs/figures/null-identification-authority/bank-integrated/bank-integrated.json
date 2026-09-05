@@ -1,6 +1,24 @@
 {
   "artifact": "MAST integrated public-route twelve-row bank",
-  "measurement_revision": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+  "comparison_summary": {
+    "attributed_to_census_repair": 0,
+    "attributed_to_neither": 12,
+    "attributed_to_other_merged_solve_path_changes": 0,
+    "axis_position_changes": 0,
+    "candidate_count_changes": 0,
+    "census_slots_exhausted_rows": 0,
+    "class_changes": 0,
+    "convergence_changes": 0,
+    "finite_class_margin_rows": 12,
+    "finite_class_margin_wall_sources": {
+      "accepted_wall_minimum": 0,
+      "rejected_wall_candidate": 12
+    },
+    "rows": 12,
+    "rows_changed": 0,
+    "terminal_residual_changes": 0
+  },
+  "measurement_revision": "2fa71ece70fbc4fef224fe2c3f273656ce80d8fd",
   "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
   "receipt": {
     "actual_regeneration_route": {
@@ -42,15 +60,22 @@
     },
     "comparison": "docs/figures/null-identification-authority/bank-integrated/row-by-row-comparison.json",
     "comparison_inputs": [
-      "docs/figures/null-identification-authority/bank-repaired-census.json",
-      "docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json"
+      "docs/figures/null-identification-authority/bank-integrated/bank-integrated.json"
     ],
     "exact_operand_cache": {
       "committed_path": "docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz",
-      "run_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/raw/current-operands.npz",
-      "sha256": "be55d27afac69bd115b0f73b3ecaba11b342aac45cfeac286109b3ad18fb9af6"
+      "run_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/current-operands.npz",
+      "sha256": "59460a262b59c085612eeac3a4b7d19f8013426e5615fa52bd25d984d05f9d73",
+      "shard_inputs": [
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-a.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-b.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-c.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-d.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-e.npz",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/raw/operands-f.npz"
+      ]
     },
-    "measurement_revision": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+    "measurement_revision": "2fa71ece70fbc4fef224fe2c3f273656ce80d8fd",
     "producer": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
     "producer_request_contract": {
       "constructor": "_parity_solve_request",
@@ -86,10 +111,10 @@
       },
       "statement": "The producer resolves the versioned public table through a typed ForwardSolveRequest and records Newton 12 plus GMRES 12 as deviations."
     },
-    "raw_regeneration_sha256": "1a3c36e5d650d6a00f012553f9646ac566e524cce5317fc3b7ac331f1c386f75",
-    "regenerated_at": "2026-09-05T09:33:44.125558+02:00",
+    "raw_regeneration_sha256": "28a9127205ebf5bd713854905838d433a57f1f7d8b60729e838f4d9be3d31fe8",
+    "regenerated_at": "2026-09-05T19:30:40.408413+02:00",
     "runtime": {
-      "checkout_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-public-route-integrated",
+      "checkout_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-remaining-identities",
       "jax": "0.11.0",
       "jax_platforms": [
         "cuda",
@@ -98,43 +123,116 @@
       "jaxlib": "0.11.0",
       "payload_python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
       "persistent_compilation_cache": {
-        "compile_time_saved_seconds": 1374.0311191473156,
-        "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
-        "hit_count": 2684,
-        "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile"
+        "compile_time_saved_seconds": 3245.466685609892,
+        "hit_count": 1392,
+        "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+        "shards": [
+          {
+            "compile_time_saved_seconds": 1073.8880807077512,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "d"
+          },
+          {
+            "compile_time_saved_seconds": 1084.4069794071838,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "e"
+          },
+          {
+            "compile_time_saved_seconds": 1087.171625494957,
+            "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+            "hit_count": 464,
+            "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+            "shard": "f"
+          }
+        ]
       },
       "python": "3.14.2"
     },
     "scheduler_attempts": [
       {
         "accelerator": "NVIDIA H200 NVL",
-        "elapsed": "00:01:00",
-        "ended_at": "2026-09-05T07:48:54",
-        "exit_code": "1:0",
-        "job_id": 1262805,
-        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/logs/h200-bank-regeneration.log",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1073.8880807077512,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "d"
+        },
+        "elapsed": "00:22:00",
+        "ended_at": "2026-09-05T19:18:35",
+        "exit_code": "0:0",
+        "exit_marker": 0,
+        "identities": [
+          "21983/35"
+        ],
+        "job_id": 1262972,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-d.log",
         "node": "98dci4-gpu-0003",
         "partition": "betelgeuse",
-        "requested_time": "02:30:00",
+        "requested_time": "00:59:00",
         "reservation": "gpu_0003_grpA",
-        "started_at": "2026-09-05T07:47:54",
-        "state": "FAILED"
+        "shard": "d",
+        "started_at": "2026-09-05T18:56:35",
+        "state": "COMPLETED"
       },
       {
         "accelerator": "NVIDIA H200 NVL",
-        "elapsed": "01:37:32",
-        "ended_at": "2026-09-05T09:26:44",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1084.4069794071838,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "e"
+        },
+        "elapsed": "00:21:00",
+        "ended_at": "2026-09-05T19:17:35",
         "exit_code": "0:0",
-        "job_id": 1262806,
-        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/logs/h200-bank-regeneration.log",
+        "exit_marker": 0,
+        "identities": [
+          "21986/46"
+        ],
+        "job_id": 1262973,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-e.log",
         "node": "98dci4-gpu-0003",
         "partition": "betelgeuse",
-        "requested_time": "02:30:00",
+        "requested_time": "00:59:00",
         "reservation": "gpu_0003_grpA",
-        "started_at": "2026-09-05T07:49:12",
+        "shard": "e",
+        "started_at": "2026-09-05T18:56:35",
+        "state": "COMPLETED"
+      },
+      {
+        "accelerator": "NVIDIA H200 NVL",
+        "compilation_cache": {
+          "compile_time_saved_seconds": 1087.171625494957,
+          "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "hit_count": 464,
+          "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+          "shard": "f"
+        },
+        "elapsed": "00:16:00",
+        "ended_at": "2026-09-05T19:12:35",
+        "exit_code": "0:0",
+        "exit_marker": 0,
+        "identities": [
+          "22086/43"
+        ],
+        "job_id": 1262974,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T162430443081-nia-rebank-remaining-identities/logs/h200-bank-shard-f.log",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "requested_time": "00:59:00",
+        "reservation": "gpu_0003_grpA",
+        "shard": "f",
+        "started_at": "2026-09-05T18:56:35",
         "state": "COMPLETED"
       }
     ],
+    "scheduler_split_reason": "the first regeneration attempt sharded the six identities across three two-identity jobs that were all terminated at the 59-minute time limit with only the first identity of each checkpointed; the three missing identities were re-run as three single-identity jobs (shards d, e, f), each within the one-hour limit, and merged with the three surviving two-arm checkpoints",
     "visual_artifacts": [
       "docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.png",
       "docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.json",
@@ -178,7 +276,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -214,8 +314,11 @@
           "unique_representative_origin_count": 5
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.10447323044567691,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": true,
       "efit_label": "diverted",
@@ -272,7 +375,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -308,8 +413,11 @@
           "unique_representative_origin_count": 5
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.10447323044567702,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": true,
       "efit_label": "diverted",
@@ -360,7 +468,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -396,8 +506,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.078655516725195,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -460,7 +573,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -496,8 +611,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.07933591884458607,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -548,7 +666,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -584,8 +704,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.14055404032779434,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -644,7 +767,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -680,8 +805,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.14046400824974548,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -732,7 +860,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -768,8 +898,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.1470519954050153,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -827,7 +960,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -863,8 +998,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.14843444081247126,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -915,7 +1053,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -951,8 +1091,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.15966638283339218,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -1014,7 +1157,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -1050,8 +1195,11 @@
           "unique_representative_origin_count": 7
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.15964606508711876,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": false,
       "efit_label": "diverted",
@@ -1102,7 +1250,9 @@
       "agreement_with_efit": true,
       "arm": "pure",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -1138,8 +1288,11 @@
           "unique_representative_origin_count": 5
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.13054071408450507,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": true,
       "efit_label": "diverted",
@@ -1196,7 +1349,9 @@
       "agreement_with_efit": true,
       "arm": "mixed",
       "candidate_table_status": {
+        "census_slots_exhausted": false,
         "consistency": {
+          "census_slots_exhausted": false,
           "fixed_slot_overflow": false,
           "one_null_type_per_containing_cell": true,
           "retained_origins_unique_within_type": true,
@@ -1232,8 +1387,11 @@
           "unique_representative_origin_count": 5
         }
       },
+      "census_slots_exhausted": false,
       "class": "diverted",
       "class_margin": null,
+      "class_margin_finite": -0.13054071408450518,
+      "class_margin_finite_wall_source": "rejected_wall_candidate",
       "class_margin_nonfinite": "positive_infinity",
       "converged": true,
       "efit_label": "diverted",
@@ -1273,10 +1431,16 @@
       "trips": 0
     }
   ],
-  "scheduler_job_id": 1262806,
+  "scheduler_job_id": [
+    1262972,
+    1262973,
+    1262974
+  ],
   "summary": {
+    "census_slots_exhausted_rows": 0,
     "class_agreements": 12,
     "converged_rows": 4,
+    "finite_class_margin_rows": 12,
     "fixed_slot_overflow_rows": 0,
     "one_null_type_per_containing_cell_rows": 12,
     "rows": 12,

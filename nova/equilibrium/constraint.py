@@ -691,6 +691,330 @@ class CurrentCentroidConstraint:
         return jnp.moveaxis(jacobian, 0, -1)
 
 
+def miller_boundary_points(
+    *,
+    geometric_radius,
+    geometric_height,
+    minor_radius,
+    elongation,
+    triangularity,
+    count: int,
+):
+    """Return control points on one Miller-parametrised target boundary.
+
+    The parametrisation is the standard shaped-tokamak one,
+    ``R = R0 + a cos(theta + arcsin(delta) sin theta)`` and
+    ``Z = Z0 + kappa a sin theta`` on ``count`` equally spaced poloidal
+    angles.  Every shape figure is an ordinary array leaf, so moving a knob
+    moves the points without changing the compiled program.
+    """
+    if int(count) < 1:
+        raise ValueError("a Miller target boundary needs at least one point")
+    angle = 2.0 * jnp.pi * jnp.arange(int(count)) / float(count)
+    tilt = jnp.arcsin(jnp.clip(jnp.asarray(triangularity), -1.0, 1.0))
+    radius = geometric_radius + minor_radius * jnp.cos(angle + tilt * jnp.sin(angle))
+    height = geometric_height + elongation * minor_radius * jnp.sin(angle)
+    return jnp.stack((radius, height), axis=-1)
+
+
+class WallGapTarget(NamedTuple):
+    """Wall point, inward direction, the gap to close, and the flux reference."""
+
+    origin: jax.Array
+    direction: jax.Array
+    gap: jax.Array
+    reference_point: jax.Array | None = None
+
+    def closing_point(self) -> jax.Array:
+        """Return the point the boundary must reach to leave this gap."""
+        direction = jnp.asarray(self.direction, dtype=jnp.float64)
+        norm = jnp.linalg.norm(direction)
+        unit = direction / jnp.where(norm > 0.0, norm, 1.0)
+        return (
+            jnp.asarray(self.origin, dtype=jnp.float64) + jnp.asarray(self.gap) * unit
+        )
+
+
+def _cubic_convolution_weights(fraction: jax.Array) -> jax.Array:
+    """Return the four Keys cubic-convolution weights at one cell fraction.
+
+    The kernel reproduces every linear function exactly and is continuously
+    differentiable across cell walls, so a row that reads a flux gradient
+    sees a gradient that does not jump when a control point crosses a node.
+    """
+    step = jnp.asarray(fraction)
+    return jnp.stack(
+        (
+            step * (-0.5 + step * (1.0 - 0.5 * step)),
+            1.0 + step * step * (-2.5 + 1.5 * step),
+            step * (0.5 + step * (2.0 - 1.5 * step)),
+            step * step * (-0.5 + 0.5 * step),
+        )
+    )
+
+
+def _cell_position(support, step, count: int, value: jax.Array):
+    """Return the base node index and in-cell fraction of one coordinate."""
+    location = (jnp.asarray(value) - support) / step
+    index = jnp.clip(jnp.floor(location), 0.0, float(count - 2))
+    return index.astype(jnp.int32), location - index
+
+
+def sample_lattice_flux(lattice, grid: jax.Array, point: jax.Array) -> jax.Array:
+    """Interpolate the flux map at one point of the uniform lattice.
+
+    This is the reader every shape row shares, so a control point, a
+    commanded null and a gap-closing point all see one interpolation, and a
+    receipt that ray-casts the achieved boundary reads the same surface the
+    rows were driven onto.
+
+    The stencil indices are clamped to the lattice, so a point outside it is
+    the cubic extension of the edge cell rather than a shape error; a control
+    point that has left the grid shows up in the receipt as a row that does
+    not close, which is the honest report.
+    """
+    radial_count, vertical_count = lattice.shape
+    offset = jnp.arange(-1, 3)
+    radial_index, radial_fraction = _cell_position(
+        float(lattice.radius[0]), float(lattice.radial_step), radial_count, point[0]
+    )
+    vertical_index, vertical_fraction = _cell_position(
+        float(lattice.height[0]), float(lattice.vertical_step), vertical_count, point[1]
+    )
+    radial_nodes = jnp.clip(radial_index + offset, 0, radial_count - 1)
+    vertical_nodes = jnp.clip(vertical_index + offset, 0, vertical_count - 1)
+    block = grid[radial_nodes[:, None], vertical_nodes[None, :]]
+    radial_weight = _cubic_convolution_weights(radial_fraction)
+    vertical_weight = _cubic_convolution_weights(vertical_fraction)
+    return radial_weight @ block @ vertical_weight
+
+
+def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
+    """Return the plasma-grid block of one flux state in lattice shape."""
+    lattice = profile.lattice
+    return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
+
+
+IsofluxReference = Literal["boundary", "reference_point"]
+
+
+def _isoflux_reference(
+    profile: ForwardProfile,
+    context: ConstraintContext,
+    reference: IsofluxReference,
+    grid: jax.Array,
+    point: jax.Array | None,
+) -> jax.Array:
+    """Return the flux level the isoflux rows are measured against.
+
+    ``boundary`` reads the topology's own last-closed-surface level, which is
+    the physical statement.  ``reference_point`` reads the map at a declared
+    point instead, which states the same surface through a quantity the
+    interpolation differentiates exactly: where a machine's boundary level
+    comes from a polished null whose tangent the read does not carry, the
+    declared point keeps the augmented Jacobian honest.
+    """
+    if reference == "reference_point":
+        if point is None:
+            raise ValueError("a reference-point isoflux row needs a reference point")
+        return sample_lattice_flux(profile.lattice, grid, point)
+    if reference != "boundary":
+        raise ValueError("an isoflux reference is 'boundary' or 'reference_point'")
+    _masks, topology = profile.operator.read(context.flux, context.requested_class)
+    return topology.boundary_flux
+
+
+def _flux_jacobian_image(
+    functional: ConstraintFunctional[object],
+    profile: ForwardProfile,
+    context: ConstraintContext,
+    payload: object,
+) -> jax.Array:
+    """Return the transposed observation Jacobian one multiplier acts through."""
+    jacobian = jax.jacrev(
+        lambda flux: functional.observed(profile, context._replace(flux=flux), payload)
+    )(context.flux)
+    return jnp.moveaxis(jacobian, 0, -1)
+
+
+@dataclass(frozen=True)
+class IsofluxConstraint:
+    """Boundary control points asked to lie on the last closed flux surface.
+
+    One row per control point holds the interpolated flux there against the
+    boundary flux the topology read returns, so the rows vanish exactly when
+    the boundary passes through every point.  The points arrive as the
+    binding payload with shape ``(point_count, 2)`` in ``(R, Z)``, so steering
+    a shape knob is a new payload from :func:`miller_boundary_points` rather
+    than a new compiled program.
+    """
+
+    point_count: int
+    reference: IsofluxReference = "boundary"
+
+    def __post_init__(self) -> None:
+        if int(self.point_count) < 1:
+            raise ValueError("an isoflux row set needs at least one control point")
+        if self.reference not in ("boundary", "reference_point"):
+            raise ValueError("an isoflux reference is 'boundary' or 'reference_point'")
+        object.__setattr__(self, "point_count", int(self.point_count))
+
+    @property
+    def row_count(self) -> int:
+        return self.point_count
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        supplied = jnp.reshape(jnp.asarray(payload, dtype=jnp.float64), (-1, 2))
+        points = supplied[: self.point_count]
+        grid = _lattice_grid(profile, context.flux)
+        sampled = jax.vmap(
+            lambda point: sample_lattice_flux(profile.lattice, grid, point)
+        )(points)
+        reference = (
+            None
+            if supplied.shape[0] <= self.point_count
+            else supplied[self.point_count]
+        )
+        return sampled - _isoflux_reference(
+            profile, context, self.reference, grid, reference
+        )
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
+
+
+@dataclass(frozen=True)
+class XPointConstraint:
+    """Both poloidal flux gradients at one commanded null position.
+
+    The rows are ``dpsi/dR`` and ``dpsi/dZ`` at the payload point, taken
+    through the same interpolation the isoflux rows read, so they vanish
+    exactly when a stationary point of the flux map sits there.  Commanding
+    the null is moving the payload point.
+    """
+
+    @property
+    def row_count(self) -> int:
+        return 2
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        point = jnp.reshape(jnp.asarray(payload, dtype=jnp.float64), (2,))
+        grid = _lattice_grid(profile, context.flux)
+        gradient = jax.grad(
+            lambda position: sample_lattice_flux(profile.lattice, grid, position)
+        )(point)
+        return jnp.asarray(gradient)
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
+
+
+@dataclass(frozen=True)
+class WallGapConstraint:
+    """One wall clearance expressed as an isoflux row at the closing point.
+
+    The payload is a :class:`WallGapTarget`: a point on the wall, the inward
+    direction the clearance is measured along, the gap itself, and optionally
+    the point whose flux stands in for the boundary level.  The row is the
+    flux at the closing point minus that level, so it vanishes when the
+    boundary stands exactly the commanded distance off the wall.
+    """
+
+    reference: IsofluxReference = "boundary"
+
+    def __post_init__(self) -> None:
+        if self.reference not in ("boundary", "reference_point"):
+            raise ValueError("a wall-gap reference is 'boundary' or 'reference_point'")
+
+    @property
+    def row_count(self) -> int:
+        return 1
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        if not isinstance(payload, WallGapTarget):
+            raise TypeError("a wall-gap row needs a WallGapTarget payload")
+        grid = _lattice_grid(profile, context.flux)
+        sampled = sample_lattice_flux(profile.lattice, grid, payload.closing_point())
+        reference = (
+            None
+            if payload.reference_point is None
+            else jnp.asarray(payload.reference_point, dtype=jnp.float64)
+        )
+        return jnp.atleast_1d(
+            sampled
+            - _isoflux_reference(profile, context, self.reference, grid, reference)
+        )
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
+
+
 class ConstraintRecord(NamedTuple):
     """Terminal physical and numerical values of one registered pair."""
 
@@ -911,13 +1235,20 @@ __all__ = [
     "ConstraintPolicy",
     "ConstraintRecord",
     "CurrentCentroidConstraint",
+    "IsofluxConstraint",
+    "IsofluxReference",
     "ProfileAmplitudeUnknown",
+    "WallGapConstraint",
+    "WallGapTarget",
+    "XPointConstraint",
     "assemble_augmented_system",
     "compensator_rule_name",
     "constraint_records",
-    "constraint_response_matrix",
     "constraint_residual_jvp",
+    "constraint_response_matrix",
     "constraint_row_slices",
     "derive_circuit_compensators",
+    "miller_boundary_points",
+    "sample_lattice_flux",
     "select_compensating_directions",
 ]

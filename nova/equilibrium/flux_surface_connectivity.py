@@ -1246,7 +1246,11 @@ def polish_census_stationary_points(
             "gradient": jnp.where(valid[:, None], seed_gradient, 0.0),
             "hessian": jnp.where(valid[:, None, None], seed_hessian, 0.0),
             "hessian_type": jnp.where(valid, seed_hessian_type, 0),
-            "converged": seed_stationary,
+            # The refine lane masks every slot it does not polish; this lane
+            # polishes none, so its raw convergence slot must carry the same
+            # masked value. The acceptance qualification is recomputed below
+            # from the merged attempt, which is what the receipt publishes.
+            "converged": jnp.zeros(valid.shape, dtype=bool),
             "in_domain": valid,
             "iteration_count": jnp.zeros(valid.shape, dtype=jnp.int32),
         }

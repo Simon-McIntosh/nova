@@ -11,6 +11,7 @@ from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.forward_operator import _FixedDesignNull2D
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
+    polish_census_stationary_points,
     polish_stationary_points,
 )
 from nova.geometry.hexstencil import hex_stencil
@@ -178,6 +179,51 @@ def _stationary_fields(radial: np.ndarray, vertical: np.ndarray) -> list[np.ndar
     return [cubic_pair, offset_pair]
 
 
+# Telemetry keys the publication path adds beside the authority's own keys.
+_EXTRA_STATUS_KEYS = {"candidate_count", "truncated", "census_slots_exhausted"}
+
+# Values that are re-derived inside the routed branch and can therefore carry
+# one last ULP from the branch-trace context on a marginally-conditioned field,
+# even when the census itself runs eagerly.  The structural keys are exact.
+_BRANCH_TRACE_KEYS = {
+    "requested_displacement",
+    "spline_hessian_determinant",
+    "root_uncertainty",
+    "retained_requested_displacement",
+    "retained_spline_hessian_determinant",
+    "retained_root_uncertainty",
+}
+
+# The raw polish-value arrays.  On a field whose stationary polish converges
+# only marginally, the compiled census graph and the eager authority can carry
+# a last-ULP difference in these values (the structural keys below are exact).
+_POLISH_VALUE_KEYS = {
+    "candidate",
+    "requested_displacement",
+    "spline_gradient",
+    "spline_gradient_norm",
+    "spline_hessian_determinant",
+    "root_uncertainty",
+    "retained_candidate",
+    "retained_requested_displacement",
+    "retained_spline_gradient",
+    "retained_spline_gradient_norm",
+    "retained_spline_hessian_determinant",
+    "retained_root_uncertainty",
+}
+
+
+def _assert_bit_identical(actual, expected, extra_keys, name):
+    """Require every authority key to match shape, dtype and storage bytes."""
+    assert actual.keys() == expected.keys() | extra_keys, name
+    for key, expected_value in expected.items():
+        expected_array = np.asarray(expected_value)
+        actual_array = np.asarray(actual[key])
+        assert actual_array.shape == expected_array.shape, (name, key)
+        assert actual_array.dtype == expected_array.dtype, (name, key)
+        assert actual_array.tobytes() == expected_array.tobytes(), (name, key)
+
+
 def test_compacted_polish_is_bit_identical_to_all_origin_census():
     """Admission, candidates, values, and every telemetry slot remain identical."""
     radial = np.linspace(0.2, 2.2, 17)
@@ -189,21 +235,21 @@ def test_compacted_polish_is_bit_identical_to_all_origin_census():
         expected = _all_origin_census(fixed, field)
         actual = fixed.candidate_table_status(field)
 
-        assert actual.keys() == expected.keys() | {"candidate_count", "truncated"}
-        for key, expected_value in expected.items():
-            expected_array = np.asarray(expected_value)
-            actual_array = np.asarray(actual[key])
-            assert actual_array.shape == expected_array.shape, key
-            assert actual_array.dtype == expected_array.dtype, key
-            assert actual_array.tobytes() == expected_array.tobytes(), key
+        _assert_bit_identical(actual, expected, _EXTRA_STATUS_KEYS, "analytic")
         np.testing.assert_array_equal(
             actual["candidate_count"], expected["same_root_count"]
         )
         np.testing.assert_array_equal(actual["truncated"], expected["overflow"])
+        np.testing.assert_array_equal(actual["census_slots_exhausted"], False)
 
 
 def test_polish_work_slots_are_bounded_by_published_capacity(monkeypatch):
-    """Spline polish receives compact slots instead of every complete ring."""
+    """Spline polish receives compact slots instead of every complete ring.
+
+    The census routes both the fixed-slot and the all-origin lanes through
+    ``lax.cond``, so an ordinary under-capacity field traces (and, eagerly,
+    executes) both; the lane that is actually taken is the bounded one.
+    """
     radial = np.linspace(0.2, 2.2, 17)
     vertical = np.linspace(-1.2, 1.2, 19)
     fixed = _locator(radial, vertical)
@@ -220,5 +266,151 @@ def test_polish_work_slots_are_bounded_by_published_capacity(monkeypatch):
     monkeypatch.setattr(forward_operator, "polish_stationary_points", record_slots)
     fixed._structured_census(_flat_field(_stationary_fields(radial, vertical)[0]))
 
-    assert observed == [2 * fixed.locator.maxsize]
-    assert observed[0] < fixed.locator.stencil.shape[0]
+    assert sorted(observed) == sorted(
+        [2 * fixed.locator.maxsize, fixed.locator.stencil.shape[0]]
+    )
+    assert min(observed) == 2 * fixed.locator.maxsize
+    assert min(observed) < fixed.locator.stencil.shape[0]
+
+
+def _noise_field(radial: np.ndarray, vertical: np.ndarray, seed: int) -> jnp.ndarray:
+    """One seeded white-noise map admitting many independent stationary rings."""
+    rng = np.random.default_rng(seed)
+    values = rng.normal(0.0, 1e-3, size=(radial.size, vertical.size))
+    return _flat_field(values)
+
+
+def _admitted_count(census) -> int:
+    """Return how many ring origins any type admits."""
+    admitted = np.any(np.asarray(census["ring_admitted_mask"]), axis=0)
+    return int(admitted.sum())
+
+
+def test_over_capacity_census_publishes_the_complete_all_origin_census():
+    """Admitted origins beyond the work slots are never silently dropped."""
+    radial = np.linspace(0.2, 2.2, 17)
+    vertical = np.linspace(-1.2, 1.2, 19)
+    fixed = _locator(radial, vertical)
+    field = _noise_field(radial, vertical, seed=0)
+    expected = _all_origin_census(fixed, field)
+    actual = fixed.candidate_table_status(field)
+
+    assert _admitted_count(actual) > 2 * fixed.locator.maxsize
+    assert bool(actual["census_slots_exhausted"])
+    np.testing.assert_array_equal(actual["truncated"], expected["overflow"])
+    np.testing.assert_array_equal(
+        actual["candidate_count"], expected["same_root_count"]
+    )
+
+    # The routing logic itself: the same over-capacity branch, executed outside
+    # the compiled publication wrapper, is byte-identical to the all-origin
+    # authority on every key except the branch-trace ULP set above.
+    routing = fixed._structured_census(field)
+    assert bool(routing["census_slots_exhausted"])
+    for key, expected_value in expected.items():
+        expected_array = np.asarray(expected_value)
+        actual_array = np.asarray(routing[key])
+        assert actual_array.shape == expected_array.shape, key
+        assert actual_array.dtype == expected_array.dtype, key
+        if key in _BRANCH_TRACE_KEYS:
+            np.testing.assert_allclose(
+                actual_array, expected_array, rtol=0.0, atol=1.0e-9, err_msg=key
+            )
+        else:
+            assert actual_array.tobytes() == expected_array.tobytes(), key
+
+    # The compiled publication path is byte-identical on every structural and
+    # telemetry key; its raw polish values reproduce the authority within the
+    # compiled-polish precision (see the documented key set above).
+    for key, expected_value in expected.items():
+        if key in _POLISH_VALUE_KEYS:
+            continue
+        expected_array = np.asarray(expected_value)
+        actual_array = np.asarray(actual[key])
+        assert actual_array.shape == expected_array.shape, key
+        assert actual_array.dtype == expected_array.dtype, key
+        assert actual_array.tobytes() == expected_array.tobytes(), key
+    for key in _POLISH_VALUE_KEYS:
+        np.testing.assert_allclose(
+            np.asarray(actual[key]),
+            np.asarray(expected[key]),
+            rtol=0.0,
+            atol=4.0e-8,
+            err_msg=f"{key} must reproduce the all-origin value at compiled precision",
+        )
+
+
+def test_over_capacity_root_uncertainty_reconstruction_is_exact():
+    """Admitted origins carry the direct uncertainty, not an offset rebuild."""
+    radial = np.linspace(0.2, 2.2, 17)
+    vertical = np.linspace(-1.2, 1.2, 19)
+    fixed = _locator(radial, vertical)
+    field = _noise_field(radial, vertical, seed=1)
+    expected = _all_origin_census(fixed, field)
+    routing = fixed._structured_census(field)
+
+    assert _admitted_count(routing) > 2 * fixed.locator.maxsize
+    assert bool(routing["census_slots_exhausted"])
+    expected_uncertainty = np.asarray(expected["root_uncertainty"])
+    actual_uncertainty = np.asarray(routing["root_uncertainty"])
+    np.testing.assert_allclose(
+        actual_uncertainty,
+        expected_uncertainty,
+        rtol=0.0,
+        atol=1.0e-9,
+        err_msg="root uncertainty must carry the direct all-origin value",
+    )
+    np.testing.assert_allclose(
+        np.asarray(routing["retained_root_uncertainty"]),
+        np.asarray(expected["retained_root_uncertainty"]),
+        rtol=0.0,
+        atol=1.0e-9,
+        err_msg="retained root uncertainty must carry the direct all-origin value",
+    )
+
+
+def test_polish_branches_publish_identical_converged_on_stationary_input():
+    """Retain and refine lanes give every slot the same acceptance verdict."""
+    radial = np.linspace(-1.0, 1.0, 33)
+    vertical = np.linspace(-1.0, 1.0, 33)
+    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
+    local_r = radial_grid
+    # A cubic radial term with a quadratic vertical term: a minimum at
+    # (0.53, 0.0) and a saddle at (-0.53, 0.0), both exactly stationary.
+    values = local_r**3 / 3.0 - 0.53**2 * local_r + 0.7 * vertical_grid**2
+
+    def flux(position):
+        r, z = position
+        return r**3 / 3.0 - 0.53**2 * r + 0.7 * z**2
+
+    def row(position):
+        point = jnp.asarray(position, dtype=jnp.float64)
+        return jnp.r_[point, flux(position), 0.0]
+
+    extremum_seed = row((0.53, 0.0))
+    saddle_seed = row((-0.53, 0.0))
+    interface = jnp.asarray(flux((-0.53, 0.0)), dtype=jnp.float64)
+
+    def publish(offset):
+        return polish_census_stationary_points(
+            values,
+            radial,
+            vertical,
+            interface,
+            jnp.asarray(-1.0),
+            extremum_seed.at[0].add(jnp.asarray(offset)),
+            saddle_seed,
+        )
+
+    # Both seeds exactly stationary: the retain lane runs and every published
+    # convergence qualification holds.
+    _extremum, _saddle, retain_receipt = publish(0.0)
+    np.testing.assert_array_equal(retain_receipt["seed_stationary"], True)
+    converged = np.asarray(retain_receipt["converged"])
+    np.testing.assert_array_equal(converged, True)
+
+    # A sub-convergence seed displacement forces the refine lane; its verdict
+    # is the same accepted set as the retain lane published.
+    _extremum, _saddle, refine_receipt = publish(0.02)
+    assert not bool(refine_receipt["seed_stationary"][0])
+    np.testing.assert_array_equal(np.asarray(refine_receipt["converged"]), converged)

@@ -1,0 +1,58 @@
+{"active": true, "index": 1, "kind": "outer_start", "sequence": 0, "timestamp_ns": 6176934521968281}
+{"active": true, "index": 1, "kind": "solve_start", "sequence": 1, "timestamp_ns": 6176934717432024}
+{"accepted_promotions": 12, "active": true, "attempted_promotions": 12, "backtrack_counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "executed_receipt_rows": 12, "index": 1, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 2, "timestamp_ns": 6176934720445018}
+{"active": true, "index": 1, "kind": "outer_end", "sequence": 3, "timestamp_ns": 6176934722775252}
+{"active": true, "index": 2, "kind": "outer_start", "sequence": 4, "timestamp_ns": 6176934725123443}
+{"active": true, "index": 2, "kind": "solve_start", "sequence": 5, "timestamp_ns": 6176934916452141}
+{"accepted_promotions": 12, "active": true, "attempted_promotions": 12, "backtrack_counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "executed_receipt_rows": 12, "index": 2, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 6, "timestamp_ns": 6176934919115471}
+{"active": true, "index": 2, "kind": "outer_end", "sequence": 7, "timestamp_ns": 6176934921234866}
+{"active": true, "index": 3, "kind": "outer_start", "sequence": 8, "timestamp_ns": 6176934923371281}
+{"active": true, "index": 3, "kind": "solve_start", "sequence": 9, "timestamp_ns": 6176938795352398}
+{"accepted_promotions": 12, "active": true, "attempted_promotions": 12, "backtrack_counts": [0, 0, 0, 1, 2, 3, 4, 5, 6, 2, 5, 6], "executed_receipt_rows": 12, "index": 3, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 10, "timestamp_ns": 6176938800159059}
+{"active": true, "index": 3, "kind": "outer_end", "sequence": 11, "timestamp_ns": 6176938805180365}
+{"active": true, "index": 4, "kind": "outer_start", "sequence": 12, "timestamp_ns": 6176938807330666}
+{"active": true, "index": 4, "kind": "solve_start", "sequence": 13, "timestamp_ns": 6176944475708992}
+{"accepted_promotions": 12, "active": true, "attempted_promotions": 12, "backtrack_counts": [1, 2, 3, 6, 0, 3, 5, 6, 6, 4, 5, 6], "executed_receipt_rows": 12, "index": 4, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 14, "timestamp_ns": 6176944482534218}
+{"active": true, "index": 4, "kind": "outer_end", "sequence": 15, "timestamp_ns": 6176944486093420}
+{"active": true, "index": 5, "kind": "outer_start", "sequence": 16, "timestamp_ns": 6176944488239801}
+{"active": true, "index": 5, "kind": "solve_start", "sequence": 17, "timestamp_ns": 6176955433448959}
+{"accepted_promotions": 5, "active": true, "attempted_promotions": 12, "backtrack_counts": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6], "executed_receipt_rows": 12, "index": 5, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 18, "timestamp_ns": 6176955439250499}
+{"active": true, "index": 5, "kind": "outer_end", "sequence": 19, "timestamp_ns": 6176955447426708}
+{"active": true, "index": 6, "kind": "outer_start", "sequence": 20, "timestamp_ns": 6176955454244764}
+{"active": true, "index": 6, "kind": "solve_start", "sequence": 21, "timestamp_ns": 6176965274924408}
+{"accepted_promotions": 0, "active": false, "attempted_promotions": 12, "backtrack_counts": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6], "executed_receipt_rows": 12, "index": 6, "kind": "solve_end", "krylov_qualifications": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "line_search_grades": 72, "linear_actions": 156, "sequence": 22, "timestamp_ns": 6176965280584934}
+{"active": false, "index": 6, "kind": "outer_end", "sequence": 23, "timestamp_ns": 6176965284124701}
+{"active": false, "index": 7, "kind": "outer_start", "sequence": 24, "timestamp_ns": 6176965286285630}
+{"active": false, "index": 7, "kind": "outer_end", "sequence": 25, "timestamp_ns": 6176965291155712}
+{"active": false, "index": 8, "kind": "outer_start", "sequence": 26, "timestamp_ns": 6176965293617773}
+{"active": false, "index": 8, "kind": "outer_end", "sequence": 27, "timestamp_ns": 6176965296077436}
+{"active": false, "index": 9, "kind": "outer_start", "sequence": 28, "timestamp_ns": 6176965298346286}
+{"active": false, "index": 9, "kind": "outer_end", "sequence": 29, "timestamp_ns": 6176965300949674}
+{"active": false, "index": 10, "kind": "outer_start", "sequence": 30, "timestamp_ns": 6176965303374754}
+{"active": false, "index": 10, "kind": "outer_end", "sequence": 31, "timestamp_ns": 6176965305952972}
+{"active": false, "index": 11, "kind": "outer_start", "sequence": 32, "timestamp_ns": 6176965308254297}
+{"active": false, "index": 11, "kind": "outer_end", "sequence": 33, "timestamp_ns": 6176965310606023}
+{"active": false, "index": 12, "kind": "outer_start", "sequence": 34, "timestamp_ns": 6176965312871218}
+{"active": false, "index": 12, "kind": "outer_end", "sequence": 35, "timestamp_ns": 6176965315210363}
+{"active": false, "index": 13, "kind": "outer_start", "sequence": 36, "timestamp_ns": 6176965317670895}
+{"active": false, "index": 13, "kind": "outer_end", "sequence": 37, "timestamp_ns": 6176965320126153}
+{"active": false, "index": 14, "kind": "outer_start", "sequence": 38, "timestamp_ns": 6176965322700092}
+{"active": false, "index": 14, "kind": "outer_end", "sequence": 39, "timestamp_ns": 6176965325232509}
+{"active": false, "index": 15, "kind": "outer_start", "sequence": 40, "timestamp_ns": 6176965327895113}
+{"active": false, "index": 15, "kind": "outer_end", "sequence": 41, "timestamp_ns": 6176965330263623}
+{"active": false, "index": 16, "kind": "outer_start", "sequence": 42, "timestamp_ns": 6176965332666702}
+{"active": false, "index": 16, "kind": "outer_end", "sequence": 43, "timestamp_ns": 6176965335242274}
+{"active": false, "index": 17, "kind": "outer_start", "sequence": 44, "timestamp_ns": 6176965337641239}
+{"active": false, "index": 17, "kind": "outer_end", "sequence": 45, "timestamp_ns": 6176965340103822}
+{"active": false, "index": 18, "kind": "outer_start", "sequence": 46, "timestamp_ns": 6176965342665942}
+{"active": false, "index": 18, "kind": "outer_end", "sequence": 47, "timestamp_ns": 6176965345242160}
+{"active": false, "index": 19, "kind": "outer_start", "sequence": 48, "timestamp_ns": 6176965347644474}
+{"active": false, "index": 19, "kind": "outer_end", "sequence": 49, "timestamp_ns": 6176965350249052}
+{"active": false, "index": 20, "kind": "outer_start", "sequence": 50, "timestamp_ns": 6176965352609595}
+{"active": false, "index": 20, "kind": "outer_end", "sequence": 51, "timestamp_ns": 6176965354738480}
+{"active": false, "index": 21, "kind": "outer_start", "sequence": 52, "timestamp_ns": 6176965356872885}
+{"active": false, "index": 21, "kind": "outer_end", "sequence": 53, "timestamp_ns": 6176965359329013}
+{"active": false, "index": 22, "kind": "outer_start", "sequence": 54, "timestamp_ns": 6176965362041789}
+{"active": false, "index": 22, "kind": "outer_end", "sequence": 55, "timestamp_ns": 6176965364371999}
+{"active": false, "index": 23, "kind": "outer_start", "sequence": 56, "timestamp_ns": 6176965366790403}
+{"active": false, "index": 23, "kind": "outer_end", "sequence": 57, "timestamp_ns": 6176965369108935}

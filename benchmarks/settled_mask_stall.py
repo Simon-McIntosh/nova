@@ -262,9 +262,14 @@ class _ProductionTraceCollector:
         self.step_cap = step_cap
         self.relaxation = relaxation
         self._linear_actions: list[dict[str, Any]] = []
+        self._promotion_contexts: list[dict[str, Any]] = []
+        self._reusable_linear_action: dict[str, Any] | None = None
+        self._reusable_action_state: np.ndarray | None = None
+        self._reusable_action_partition: np.ndarray | None = None
         self._newton_steps: list[dict[str, Any]] = []
         self.trips: list[dict[str, Any]] = []
         self._global_step = 0
+        self._linear_action_count = 0
 
     def linear_action(
         self,
@@ -302,8 +307,10 @@ class _ProductionTraceCollector:
         )
         trusted = bool(reduction <= trust_threshold)
         applied = bool(np.asarray(conditioning_applied))
+        self._linear_action_count += 1
         self._linear_actions.append(
             {
+                "receipt": self._linear_action_count,
                 "qualification": fixed_point.KrylovActionQualification(
                     int(np.asarray(qualification))
                 ).name.lower(),
@@ -328,6 +335,16 @@ class _ProductionTraceCollector:
             }
         )
 
+    def promotion_context(self, state, partition, allows_action_reuse) -> None:
+        """Retain the exact state and frozen partition paired with a promotion."""
+        self._promotion_contexts.append(
+            {
+                "state": np.asarray(state).copy(),
+                "partition": np.asarray(partition).copy(),
+                "allows_action_reuse": bool(np.asarray(allows_action_reuse)),
+            }
+        )
+
     def inner_iteration(
         self,
         iteration,
@@ -344,12 +361,42 @@ class _ProductionTraceCollector:
         step_cap_activated,
         step_cap_factor,
     ) -> None:
-        if not self._linear_actions:
+        if not self._promotion_contexts:
             raise RuntimeError(
-                "inner iteration arrived without a linear-action receipt"
+                "inner iteration arrived without its state-partition context"
             )
-        primary, *auxiliary = self._linear_actions
-        self._linear_actions.clear()
+        context = self._promotion_contexts.pop(0)
+        reused_action = False
+        if self._linear_actions:
+            primary, *auxiliary = self._linear_actions
+            self._linear_actions.clear()
+            self._reusable_linear_action = primary
+            self._reusable_action_state = context["state"]
+            self._reusable_action_partition = context["partition"]
+        else:
+            if not context["allows_action_reuse"]:
+                raise RuntimeError(
+                    "inner iteration arrived without a linear-action receipt"
+                )
+            if self._reusable_linear_action is None:
+                raise RuntimeError(
+                    "carried inner iteration has no preceding linear action to reuse"
+                )
+            if not np.array_equal(context["state"], self._reusable_action_state):
+                raise RuntimeError(
+                    "carried inner iteration changed state before reusing "
+                    "a linear action"
+                )
+            if not np.array_equal(
+                context["partition"], self._reusable_action_partition
+            ):
+                raise RuntimeError(
+                    "carried inner iteration changed partition before reusing "
+                    "a linear action"
+                )
+            primary = self._reusable_linear_action
+            auxiliary = []
+            reused_action = True
         proposed = float(np.asarray(proposed_step_norm))
         ladder_factor = float(np.asarray(applied_factor))
         raw_sup = primary["raw_newton_direction_sup"]
@@ -385,6 +432,8 @@ class _ProductionTraceCollector:
                     np.asarray(krylov_tolerance)
                 ),
                 "linear_action": primary,
+                "linear_action_receipt": primary["receipt"],
+                "linear_action_reused": reused_action,
                 "auxiliary_linear_actions": auxiliary,
             }
         )
@@ -394,10 +443,8 @@ class _ProductionTraceCollector:
     ) -> None:
         if not bool(np.asarray(active)):
             return
-        if self._linear_actions:
-            raise RuntimeError(
-                "unpaired linear-action receipts remain at trip boundary"
-            )
+        if self._linear_actions or self._promotion_contexts:
+            raise RuntimeError("unpaired promotion accounting remains at trip boundary")
         self.trips.append(
             {
                 "trip": int(np.asarray(trip_index)) + 1,
@@ -408,9 +455,12 @@ class _ProductionTraceCollector:
             }
         )
         self._newton_steps = []
+        self._reusable_linear_action = None
+        self._reusable_action_state = None
+        self._reusable_action_partition = None
 
     def finish(self) -> None:
-        if self._linear_actions or self._newton_steps:
+        if self._linear_actions or self._promotion_contexts or self._newton_steps:
             raise RuntimeError(
                 "production trace ended with callbacks outside an active-set trip"
             )
@@ -421,6 +471,7 @@ def _production_trace_hooks(collector: _ProductionTraceCollector):
     """Observe the production solver without changing its numerical values."""
 
     original_qualified = fixed_point._qualified_krylov_step
+    original_complete = fixed_point._complete_newton_promotion
     original_inner = fixed_point._print_inner_iteration
     original_trip = fixed_point._print_active_set_trip
 
@@ -444,15 +495,137 @@ def _production_trace_hooks(collector: _ProductionTraceCollector):
         )
         return result
 
+    def observed_complete(*args, **kwargs):
+        measured, state = args[:2]
+        jax.debug.callback(
+            collector.promotion_context,
+            state,
+            measured.shadow_mask,
+            jnp.asarray(kwargs.get("reuse_rejected_score", False), dtype=bool),
+            ordered=True,
+        )
+        return original_complete(*args, **kwargs)
+
     fixed_point._qualified_krylov_step = observed_qualified
+    fixed_point._complete_newton_promotion = observed_complete
     fixed_point._print_inner_iteration = collector.inner_iteration
     fixed_point._print_active_set_trip = collector.active_set_trip
     try:
         yield
     finally:
         fixed_point._qualified_krylov_step = original_qualified
+        fixed_point._complete_newton_promotion = original_complete
         fixed_point._print_inner_iteration = original_inner
         fixed_point._print_active_set_trip = original_trip
+
+
+def _verify_trace_action_reuse_accounting() -> dict[str, Any]:
+    """Exercise receipt reuse and reject missing actions across changed inputs."""
+
+    def record_action(collector: _ProductionTraceCollector) -> None:
+        collector.linear_action(
+            int(fixed_point.KrylovActionQualification.ACCEPTED),
+            2.0,
+            False,
+            1.0,
+            np.asarray([1.0]),
+            np.asarray([1.0]),
+            1.0e-6,
+            1.0e-5,
+            np.asarray([1.0]),
+            1.0,
+        )
+
+    def record_inner(collector: _ProductionTraceCollector, iteration: int) -> None:
+        collector.inner_iteration(
+            iteration,
+            1.0,
+            1.0,
+            1.0,
+            False,
+            int(fixed_point.InnerIterationDecision.SUFFICIENT_DECREASE_REFUSED),
+            int(fixed_point.KrylovActionQualification.ACCEPTED),
+            0.0,
+            1.0e-6,
+            1.0e-5,
+            np.nan,
+            False,
+            1.0,
+        )
+
+    def refusing_map(state):
+        return jnp.where(state[0] == 0.0, jnp.ones_like(state), state / 2.1)
+
+    collector = _ProductionTraceCollector(step_cap=10.0, relaxation=0.5)
+    with _production_trace_hooks(collector):
+        result = jax.jit(
+            lambda: fixed_point._newton_krylov_inner(
+                refusing_map,
+                jnp.zeros(1),
+                newton_steps=12,
+                gmres_iterations=1,
+                warmup=0,
+                stream_inner_iterations=True,
+                carry_unchanged_fallback=True,
+            )
+        )()
+        result.state.block_until_ready()
+    collector.active_set_trip(
+        True,
+        0,
+        0,
+        result.residual,
+        result.attempted_newton_promotions,
+    )
+    collector.finish()
+    traced_steps = collector.trips[0]["newton_steps"]
+    if len(traced_steps) != 12:
+        raise AssertionError(
+            f"fallback fixture emitted {len(traced_steps)} rather than 12 iterations"
+        )
+    fresh = [step for step in traced_steps if not step["linear_action_reused"]]
+    carried = [step for step in traced_steps if step["linear_action_reused"]]
+    if len(fresh) != 1 or len(carried) != 11:
+        raise AssertionError(
+            "fallback fixture did not emit one fresh plus eleven carried actions"
+        )
+    receipt_ids = {step["linear_action_receipt"] for step in traced_steps}
+    if len(receipt_ids) != 1 or collector._linear_action_count != 1:
+        raise AssertionError("carried iterations invented linear-action receipts")
+
+    state = np.asarray([1.0, 2.0])
+    partition = np.asarray([True, False, True])
+
+    def require_failure(
+        changed_state, changed_partition, allows_action_reuse, expected: str
+    ) -> None:
+        guarded = _ProductionTraceCollector(step_cap=10.0, relaxation=0.5)
+        record_action(guarded)
+        guarded.promotion_context(state, partition, False)
+        record_inner(guarded, 0)
+        guarded.promotion_context(changed_state, changed_partition, allows_action_reuse)
+        try:
+            record_inner(guarded, 1)
+        except RuntimeError as error:
+            if expected not in str(error):
+                raise AssertionError(
+                    f"unexpected accounting refusal: {error}"
+                ) from error
+        else:
+            raise AssertionError(f"accounting accepted {expected}")
+
+    require_failure(state + 1.0, partition, True, "changed state")
+    require_failure(state, ~partition, True, "changed partition")
+    require_failure(state, partition, False, "without a linear-action receipt")
+    return {
+        "fresh_receipts": collector._linear_action_count,
+        "iterations_attributed": len(traced_steps),
+        "reused_iterations": len(carried),
+        "receipt_id_count": len(receipt_ids),
+        "changed_state_refused": True,
+        "changed_partition_refused": True,
+        "unmarked_missing_action_refused": True,
+    }
 
 
 class _WholeStepPathCollector:
@@ -3280,6 +3453,7 @@ def main() -> None:
     public_route_parser.add_argument(
         "--output", type=Path, default=DEFAULT_PUBLIC_ROUTE_OUTPUT
     )
+    subparsers.add_parser("trace-accounting-test")
     undamped_parser = subparsers.add_parser("undamped-control")
     undamped_parser.add_argument("--operands", type=Path, default=DEFAULT_OPERANDS)
     undamped_parser.add_argument(
@@ -3341,6 +3515,12 @@ def main() -> None:
             output=arguments.output,
         )
         print(json.dumps(result["verdict"], indent=2, sort_keys=True))
+    elif arguments.action == "trace-accounting-test":
+        print(
+            json.dumps(
+                _verify_trace_action_reuse_accounting(), indent=2, sort_keys=True
+            )
+        )
     else:
         result = measure_undamped_control(
             operands=arguments.operands,

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T14:12:48",
+  "updated": "2026-09-05T16:23:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -103438,6 +103438,392 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260905T121249155858-msc-reduced-newton-millisecond-step",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-reduced-newton-millisecond-step",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3153,
+                "cached_input_tokens": 318541,
+                "input_tokens": 321795,
+                "output_tokens": 7577,
+                "reasoning_output_tokens": 1935,
+                "total_tokens": 329372,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "tests/test_reduced_newton.py green on CPU with a new contract asserting that first-accept scoring accepts the same grade as eager scoring on every Newton step of the synthetic machine solve plus a contract that the jitted trip boundary reproduces the eager boundary's promoted shadow, residual, mask difference bit for bit, the captured CPU gate log saved as gate.log in this run's own crew run directory with its path in the manifest, the H200 receipt docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json rewritten with per-step map-evaluation counts, warm Newton step wall, warm trip wall, Newton work per trip for all four rows, plus the previous receipt's figures carried beside them, every row's terminal flux agreeing with the committed receipt's terminal flux to within 1e-9 of the flux span on the converged row plus within 1e-6 on the settled rows, the H200 log with EXIT status saved in this run's crew run directory, the report at the named path stating the measured warm step wall against the one millisecond target with the remaining balance attributed by kernel, commits in the worktree with conventional subjects plus bodies stating what changed together with why, the manifest naming the commit sha from git rev-parse HEAD",
+          "estimated_hours": null,
+          "goal": "Take the reduced-state plain-Newton step in nova/equilibrium/reduced_newton.py from the measured 4.5 to 6.1 ms toward one millisecond through the two repairs its own four-row receipt points at, without touching any production file: first-accept ladder scoring (evaluate grade 1.0 first, evaluate a later grade only when every earlier grade was refused, so the accepted grade equals the eager argmax-first-below result on every step, which takes a converging step from eight map evaluations to three), plus a jitted trip boundary (the promoted residual_shadow_mask read, the shadowed map for the live residual, the moment gather, the reconstruct call, fused into as few compiled programs as the operator interface allows, with the frozen shadow entering as an argument so every trip shares one program), keeping the receipt shape of docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json so the before-after comparison is row by row on the same fields, re-measuring the same four bank rows on one reserved H200 (betelgeuse, gpu_0003_grpA, /home/ITER/mcintos/Code/nova/.venv/bin/python with no uv on the node, JAX_PLATFORMS=cuda,cpu, cwd the checkout root, the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile configured through configure_persistent_compilation_cache before the first solve, each row written to the receipt as it finishes, the job under the one hour limit) with the terminal flux of every row compared against the committed receipt's terminal flux, names, comments, docstrings describing the mechanism only",
+          "id": "msc-reduced-newton-millisecond-step",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121249155858-msc-reduced-newton-millisecond-step/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "benchmarks/reduced_newton_rows.py",
+            "tests/test_reduced_newton.py",
+            "docs/figures/millisecond-converged-solve/reduced-newton/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/reduced-newton-millisecond-step.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-plain-newton-x",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T12:12:57Z",
+        "completed_at": "2026-09-05T13:54:09.345Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6065,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6072,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "255e33eb2f1a2a9c2ac88c985a04268c5823fcd7",
+        "commits": [
+          "3fd7aab494a6273b46943b3ecb6271ac05cdc970"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 15,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch all_debug compute node 98dci4-clu-3141, JAX_PLATFORMS=cpu, .venv python -m pytest -p no:cacheprovider tests/test_reduced_newton.py (8 passed in 2529 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121249155858-msc-reduced-newton-millisecond-step/gate-node-1262904.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121249155858-msc-reduced-newton-millisecond-step/manifest.md",
+        "scope_changed": false,
+        "session_id": "d54be3f3-a41c-4c58-80d5-3d325535fde6",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 86.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-05T17:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 293526,
+            "cache_creation_input_tokens_cumulative": 293526,
+            "cache_read_input_tokens": 34020457,
+            "cache_read_input_tokens_cumulative": 34020457,
+            "inference_geo": "not_available",
+            "input_tokens": 320,
+            "input_tokens_cumulative": 320,
+            "output_tokens": 130159,
+            "output_tokens_cumulative": 130159,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 23.2010635,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 23.2010635
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 107697,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 110097,
+              "external_wait": null,
+              "log_age_seconds": 109195,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 109251,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 6068.839,
+          "generated_tokens": 130159,
+          "generation_seconds": 1862.658,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 30.4,
+          "machine_seconds": 4206.181,
+          "peak_input_tokens": 304228,
+          "tokens_per_second": 69.88,
+          "wall_tokens_per_second": 21.45
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-reduced-newton-millisecond-step",
+          "session_id": "d54be3f3-a41c-4c58-80d5-3d325535fde6",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T13:54:09.345Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T121715258923-nia-stale-pins-re-expression",
+        "plan": "null-identification-authority",
+        "section": "\u00a75",
+        "node": "nia-stale-pins-re-expression",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8742,
+                "cached_input_tokens": 321694,
+                "input_tokens": 330438,
+                "output_tokens": 3250,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 333688,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "the captured log of JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_connectivity_boundary.py tests/test_forward_operator_axes.py tests/test_equilibrium_forward_constrained.py exiting 0 with zero failures saved as gate.log in this run's own crew run directory with its path in the manifest, the manifest stating for each of the five pins whether it was re-expressed or left unchanged with the measured value that decided it, one commit in the worktree touching only the three test files with a conventional subject plus a body stating what changed together with why, the manifest naming the commit sha from git rev-parse HEAD",
+          "estimated_hours": null,
+          "goal": "Re-express the three stale test pins that the static inventory found encode retired behaviour, settling the two undecidable ones by running them, touching test files only. First stale pin: tests/test_connectivity_boundary.py lines 783 to 787 assert that xpoint_diagnostics selected_x_coordinate_m equals limited_topology.x_point with rtol 0 atol 0, which compares an operand-read selected X against the spline-polished X, two quantities now computed on different surfaces (0.13 mm apart on main), so replace the exact identity with an explicit tolerance derived from the mechanism (the grid cell pitch of the fixture, stated in a named constant with a comment giving the reason) or read both from the spline surface, whichever the surrounding test already supports. Second stale pin: tests/test_forward_operator_axes.py lines 99 to 108 pin class_margin -0.9611433885788007 with rtol 1e-12 plus a negative margin plus not diverted on a synthetic cubic field, which encodes the pre-spline wall read on a fixture whose wall flux is not spline-consistent, so re-derive the expected margin on the current read (assert it equals operator.topology_margin(state) within a stated tolerance with the class outcome the current read gives) or make the fixture's wall flux spline-consistent so the identity is again the mechanism's answer. Undecidable pins: tests/test_equilibrium_forward_constrained.py (the flux_map stub signature pair at lines 48 to 59 plus 108 to 121) plus tests/test_forward_operator_axes.py lines 58 to 80 (the tensor-product grid ValueError contract), run on CPU, left unchanged if green, re-derived to the current class-read seam if red, with every re-expression stated in the test docstring as the mechanism it now pins rather than the history, no production file touched",
+          "id": "nia-stale-pins-re-expression",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121715258923-nia-stale-pins-re-expression/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_connectivity_boundary.py",
+            "tests/test_forward_operator_axes.py",
+            "tests/test_equilibrium_forward_constrained.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-dsv4-pins-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T12:17:24Z",
+        "completed_at": "2026-09-05T14:17:16.954Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7185,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7192,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "255e33eb2f1a2a9c2ac88c985a04268c5823fcd7",
+        "commits": [
+          "268e6928defdb885dd76f80c233201a11ae6c03b"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 23,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_forward_operator_axes.py (3 passed); the connectivity-boundary edit lies inside a slow-marked test that is red upstream of the pin on a production regression, and the constrained file was left unchanged and green at base",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121715258923-nia-stale-pins-re-expression/axes-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121715258923-nia-stale-pins-re-expression/manifest.md",
+        "scope_changed": false,
+        "session_id": "d3f6bd49-68d1-4e5b-aba4-5a6952160f36",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 107963,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 110363,
+              "external_wait": null,
+              "log_age_seconds": 109461,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 109517,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-stale-pins-re-expression",
+          "session_id": "d3f6bd49-68d1-4e5b-aba4-5a6952160f36",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T14:17:16.954Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -103582,6 +103968,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1739
+    "_version": 1741
   }
 }

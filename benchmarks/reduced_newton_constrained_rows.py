@@ -72,8 +72,10 @@ DEFAULT_FIGURE = (
 #: exact-tangent Newton contracts quadratically.
 NEWTON_STEPS = 24
 #: Commanded vertical displacements of the current centroid [m], each solved
-#: from the equilibrium the previous one left behind.
-MOVES = (1.0e-2, 2.0e-2)
+#: from the equilibrium the previous one left behind and inside the program
+#: the previous one built.  The first move compiles that program; the two
+#: after it are the steered keyframes the budget is read from.
+MOVES = (1.0e-2, 2.0e-2, 3.0e-2)
 #: The unconstrained warm trip the millisecond route banked on the four bank
 #: rows, in seconds.  The keyframe wall is stated beside it rather than
 #: against it: a constrained trip carries the same topology read plus the
@@ -211,9 +213,15 @@ def _free_arm(operator, seed, target_current, requested) -> dict[str, Any]:
 
 
 def _move_arm(
-    profile, state, unknown, *, target, target_current, requested, names
+    profile, state, unknown, *, target, target_current, requested, names, program
 ) -> dict[str, Any]:
-    """Command one centroid target and re-solve from the state supplied."""
+    """Command one centroid target and re-solve from the state supplied.
+
+    ``program`` is the built solve the previous move returned.  Handing it
+    back is what makes a keyframe a keyframe: the targets reach the kernels
+    as traced arguments, so the commanded move happens inside the program the
+    first move compiled instead of building another one.
+    """
     pair, selection = _centroid_pair(
         profile,
         state,
@@ -230,6 +238,7 @@ def _move_arm(
         constraint_pairs=(pair,),
         requested_class=requested,
         target_current=target_current,
+        program=program,
         tolerance=FIXED_POINT_CRITERION,
         newton_steps=NEWTON_STEPS,
         stream=True,
@@ -273,6 +282,12 @@ def _move_arm(
         ],
         "ampere_scale_a": float(np.asarray(pair.unknown.ampere_scale)[0]),
         "warm_started_unknown": None if unknown is None else float(unknown),
+        "reused_program": program is not None,
+        "kernel_program_counts": {
+            name: kernel._cache_size()
+            for name, kernel in result.program.kernels.items()
+            if hasattr(kernel, "_cache_size")
+        },
         "banked_warm_trip_interval_s": list(BANKED_WARM_TRIP_S),
     }
     summary.update(_walls(result))
@@ -424,6 +439,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
 
     state = free_result.state
     unknown = None
+    program = None
     for move in MOVES:
         target = free_centroid + move
         print(f"CONSTRAINED-KEYFRAME move {move:+.3f} {identity}", flush=True)
@@ -435,6 +451,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             target_current=target_current,
             requested=requested,
             names=names,
+            program=program,
         )
         summary["commanded_move_m"] = float(move)
         summary["free_centroid_m"] = free_centroid
@@ -446,6 +463,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             flush=True,
         )
         state = result.state
+        program = result.program
         unknown = float(np.asarray(result.compensating_unknown)[0])
 
     receipt["verdict"] = {
@@ -458,6 +476,14 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             (move["keyframe_wall_s"] for move in receipt["moves"]), default=None
         ),
         "free_keyframe_wall_s": free_summary["keyframe_wall_s"],
+        "steered_first_trip_over_median_warm_trip": [
+            (
+                None
+                if not move["median_warm_trip_wall_s"]
+                else move["first_trip_wall_s"] / move["median_warm_trip_wall_s"]
+            )
+            for move in receipt["moves"][1:]
+        ],
     }
     _write(receipt, output)
     _draw(receipt, figure)

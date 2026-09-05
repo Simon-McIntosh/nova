@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="playable-forward-solve-landed">
+  <meta name="plan-title" content="Playable forward solve — cumulative execution evidence">
+  <meta name="plan-summary" content="Each landing node's receipt for the playable Grad-Shafranov forward solve: the reuse map, the constrained reduced route, the keyboard and Bokeh loop, the frame schema.">
+  <meta name="plan-evidence-for" content="playable-forward-solve">
+  <meta name="plan-verifies" content="playable-forward-solve#s3">
+  <meta name="plan-informs" content="constraint-augmented-newton-krylov,millisecond-converged-solve">
+  <title>Playable forward solve — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Playable forward solve — cumulative execution evidence</h1>
+    <p class="lede">The plan opened on 2026-09-05 from the lead's direction: a Grad-Shafranov forward solve a person steers at
+    human response time through keyboard controls and a Bokeh view, as the physics backbone for the MAST video decoder in
+    imas-ambix. This record carries each landing node's receipt in the order it landed. Receipt values keep their recorded
+    precision.</p>
+  </header>
+
+  <section id="reuse-map">
+    <h2>The reuse map: what the tree already holds for the four capabilities (2026-09-05)</h2>
+    <p><strong>Node:</strong> <code>pfs-prior-art-reuse-map</code>, read-only on the local DeepSeek lane, run
+    <code>r-20260905T172551219088</code> against base <code>194c79fc</code>, 7.9 minutes, no repository file touched; report
+    <code>~/.config/reckon/crew/reports/nova/playable/reuse-map.md</code>. Twenty-five candidates across the four capabilities, each with
+    module, symbol, a fitness verdict and the gap left.</p>
+    <table>
+      <caption>Reuse verdicts that fix the node cut</caption>
+      <thead><tr><th scope="col">Capability</th><th scope="col">Fits as is</th><th scope="col">Extend</th><th scope="col">Gap</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Constrained reduced Newton</th>
+          <td><code>ProfileAmplitudeUnknown</code>, <code>CircuitCurrentUnknown</code>, <code>derive_circuit_compensators</code>,
+            <code>_solve_augmented_constraints</code> as the blueprint</td>
+          <td><code>assemble_augmented_system</code> (reduced variant), <code>solve_reduced_newton</code> (no constraint entry; the
+            reduced state is already the amplitude vector)</td>
+          <td><code>forward.py</code> raises "augmented constraints require the newton_krylov route" at its route gate</td></tr>
+        <tr><th scope="row">Warm-started keyframe</th>
+          <td><code>ForwardProfile.solve(initial_flux)</code>, <code>ForwardEquilibrium.flux</code>,
+            <code>mast_response_carrier_warm.load_carrier</code> (load once per session)</td>
+          <td><code>benchmarks/coil_edit_latency.py</code> (receipt skeleton), <code>benchmarks/portfolio_warm_start.py</code>
+            (seed-distance ladder)</td>
+          <td>the coil-edit receipt shows 21989/55 stagnating (21 to 68 s warm, 0 of 21 converged), so the keyframe receipt runs on
+            22086/43</td></tr>
+        <tr><th scope="row">Bokeh loop and keyboard</th>
+          <td><code>apps/pulsedesign/main.py</code> renderers, <code>nova/graphics/bokeh.py</code> hook pattern</td>
+          <td><code>apps/pulsedesign/simulator.py</code> ColumnDataSource push, <code>apps/pulsedesign/config.py</code> (hard-coded
+            ITER pulse)</td>
+          <td>no key handling anywhere in the tree</td></tr>
+        <tr><th scope="row">Recorded-frame schema</th>
+          <td><code>ForwardLabelledFlux</code> (the decoder field list verbatim), <code>ForwardRasterFlux</code>,
+            <code>ForwardTopologyState</code>, <code>ForwardSolveReceipt</code>, <code>nova.database.netcdf</code>,
+            ambix <code>equilibrium_labels</code> store keys</td>
+          <td></td>
+          <td>no recorded-session writer or reader; the raster publishes zero LCFS vertices on the converging mixed arm today</td></tr>
+      </tbody>
+    </table>
+    <p>The decoder's consumed fields, by name: psi and psi_N on the raster grid, the O-point, primary and secondary X-points, the LCFS
+    polyline with its vertex count, the strike points, the per-cell domain labels (core, private flux, wall shadow, open), the topology
+    class, the grid axes and shape; the ambix corpus keys are <code>magnetic_axis_r/z</code>, <code>x_point_r/z</code> (two slots),
+    <code>lcfs_r/z</code> NaN-padded with <code>n_boundary_coords</code>, <code>finite_mask</code>, masked never imputed, time as the
+    last axis.</p>
+  </section>
+
+</main>
+</body>
+</html>

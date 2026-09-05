@@ -60,7 +60,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 6
+CACHE_SCHEMA_REVISION = 7
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
@@ -300,6 +300,10 @@ def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
     margin = float(host["class_margin"])
     limiter = np.asarray(host["limiter_coordinate"], dtype=float)
     limiter_flux = float(host["limiter_flux"])
+    x_level = float(host["selected_x_normalized_flux_operand"])
+    wall_level = float(host["wall_normalized_flux_operand"])
+    rejected_wall_level = float(host["wall_normalized_flux_operand_before_shadow"])
+    wall_candidate_present = bool(host["wall_candidate_present"])
     try:
         achieved_mode = classify_boundary_mode(margin)
     except ValueError:
@@ -318,6 +322,10 @@ def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
         "binding_flux": binding_flux,
         "selected_saddle": selected[:2],
         "limiter_coordinate": limiter,
+        "x_normalized_flux_operand": x_level,
+        "wall_normalized_flux_operand": wall_level,
+        "wall_normalized_flux_operand_before_shadow": rejected_wall_level,
+        "wall_candidate_present": wall_candidate_present,
     }
 
 
@@ -433,6 +441,10 @@ def _write_operand_cache(
             "selected_saddle",
             "limiter_coordinate",
             "class_margin",
+            "x_normalized_flux_operand",
+            "wall_normalized_flux_operand",
+            "wall_normalized_flux_operand_before_shadow",
+            "wall_candidate_present",
             "efit_lcfs",
             "efit_x_points",
             "efit_axis",
@@ -444,6 +456,8 @@ def _write_operand_cache(
                 default = ()
             elif name == "efit_axis":
                 default = np.full(2, np.nan)
+            elif name == "wall_candidate_present":
+                default = np.asarray(False)
             else:
                 default = None
             arrays[f"{prefix}_{name}"] = np.asarray(
@@ -502,6 +516,10 @@ def _read_operand_cache(
                 "selected_saddle",
                 "limiter_coordinate",
                 "class_margin",
+                "x_normalized_flux_operand",
+                "wall_normalized_flux_operand",
+                "wall_normalized_flux_operand_before_shadow",
+                "wall_candidate_present",
                 "efit_lcfs",
                 "efit_x_points",
                 "efit_axis",
@@ -749,6 +767,10 @@ def _build_arm_operand(
             "selected_saddle": np.full(2, np.nan),
             "limiter_coordinate": np.full(2, np.nan),
             "class_margin": np.asarray(np.nan),
+            "x_normalized_flux_operand": np.asarray(np.nan),
+            "wall_normalized_flux_operand": np.asarray(np.nan),
+            "wall_normalized_flux_operand_before_shadow": np.asarray(np.nan),
+            "wall_candidate_present": np.asarray(False),
             "candidate_table_status": candidate_table_status,
         }
     return common | {
@@ -766,6 +788,12 @@ def _build_arm_operand(
         "selected_saddle": post_cutover["selected_saddle"],
         "limiter_coordinate": post_cutover["limiter_coordinate"],
         "class_margin": post_cutover["class_margin"],
+        "x_normalized_flux_operand": post_cutover["x_normalized_flux_operand"],
+        "wall_normalized_flux_operand": post_cutover["wall_normalized_flux_operand"],
+        "wall_normalized_flux_operand_before_shadow": post_cutover[
+            "wall_normalized_flux_operand_before_shadow"
+        ],
+        "wall_candidate_present": post_cutover["wall_candidate_present"],
         "candidate_table_status": candidate_table_status,
     }
 
@@ -892,6 +920,43 @@ def _finite_points(points: object) -> np.ndarray:
     return result[np.isfinite(result).all(axis=1)]
 
 
+def _finite_margin_read(
+    operand: dict[str, Any],
+) -> tuple[float | None, str | None]:
+    """Return the always-finite class margin and the wall source that fed it.
+
+    The banked class margin is ``+inf`` on a diverted row because a diverted
+    read admits no finite reachable wall minimum, so a receipt cannot tell a
+    comfortably diverted row from one a hair from limited.  This companion
+    margin reads the same signed quantity with a finite wall level on every
+    resolved row: the visible wall level minus the X-point normalised level,
+    negative exactly when the class is limited.  The visible wall level is the
+    accepted reachable wall minimum when one exists; otherwise it is the
+    supplied wall candidate's level before shadow admission (the rejected
+    candidate), and the returned wall-source label records which one fed the
+    margin.  A row without a resolved X point, or without any wall candidate
+    to read, has no finite margin.
+    """
+
+    def level(name: str) -> float:
+        try:
+            return float(operand.get(name))
+        except TypeError, ValueError:
+            return float("nan")
+
+    x_level = level("x_normalized_flux_operand")
+    accepted_wall_level = level("wall_normalized_flux_operand")
+    rejected_wall_level = level("wall_normalized_flux_operand_before_shadow")
+    has_wall_candidate = bool(operand.get("wall_candidate_present"))
+    if not np.isfinite(x_level):
+        return None, None
+    if np.isfinite(accepted_wall_level):
+        return accepted_wall_level - x_level, "accepted_wall_minimum"
+    if has_wall_candidate and np.isfinite(rejected_wall_level):
+        return rejected_wall_level - x_level, "rejected_wall_candidate"
+    return None, None
+
+
 def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
     """Build one bank row even when one or more comparison inputs are absent."""
 
@@ -965,6 +1030,8 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "nova_achieved_class": None,
             "nova_post_cutover_class_margin": None,
             "nova_post_cutover_class_margin_nonfinite": None,
+            "nova_post_cutover_class_margin_finite": None,
+            "nova_post_cutover_class_margin_finite_wall_source": None,
             "nova_boundary_flux_wb": None,
             "label_agreement": None,
             "rms_threshold_eligible": False,
@@ -1026,6 +1093,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         margin = float(class_margin)
     except TypeError, ValueError:
         margin = float("nan")
+    finite_margin, margin_wall_source = _finite_margin_read(operand)
     achieved_class = (
         comparison.achieved_mode.value if comparison.achieved_mode is not None else None
     )
@@ -1056,6 +1124,16 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             if np.isneginf(margin)
             else None
         ),
+        # Always-finite companion to the banked margin: on a diverted row the
+        # read admits no reachable wall minimum so the banked margin is +inf
+        # and a receipt cannot tell a comfortably diverted row from one a hair
+        # from limited.  This field is the visible wall level minus the
+        # X-point normalised level (see _finite_margin_read): finite on every
+        # resolved row, negative exactly when the class is limited.
+        "nova_post_cutover_class_margin_finite": (
+            _strict_value(finite_margin) if finite_margin is not None else None
+        ),
+        "nova_post_cutover_class_margin_finite_wall_source": margin_wall_source,
         "nova_boundary_flux_wb": _strict_value(operand.get("binding_flux")),
         "label_agreement": comparison.topology_class_agreement,
         "rms_threshold_eligible": bool(
@@ -1241,6 +1319,20 @@ def run() -> dict[str, Any]:
                 "label and is not the post-cutover achieved class. This artifact "
                 "derives achieved class only from the saddle-aware class margin: "
                 "non-negative or positive infinity is diverted; negative is limited."
+            ),
+            "class_margin_readability": (
+                "nova_post_cutover_class_margin is null when the read is "
+                "diverted because a diverted read admits no finite reachable "
+                "wall minimum, so its margin serialises as positive infinity "
+                "and the receipt cannot distinguish a comfortably diverted row "
+                "from one a hair from limited. "
+                "nova_post_cutover_class_margin_finite is the same signed "
+                "margin with a finite wall level on every resolved row: the "
+                "visible wall level minus the X-point normalised level, "
+                "negative exactly when the class is limited. "
+                "nova_post_cutover_class_margin_finite_wall_source records "
+                "whether the accepted reachable wall minimum or the rejected "
+                "supplied wall candidate supplied the visible wall level."
             ),
         },
         "distance_method": {

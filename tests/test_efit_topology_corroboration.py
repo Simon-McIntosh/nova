@@ -59,6 +59,10 @@ def _operand(**overrides):
         "selected_saddle": np.asarray((1.0, 0.0)),
         "limiter_coordinate": np.asarray((0.0, 1.0)),
         "class_margin": 0.25,
+        "x_normalized_flux_operand": 1.0,
+        "wall_normalized_flux_operand": 1.25,
+        "wall_normalized_flux_operand_before_shadow": 1.5,
+        "wall_candidate_present": True,
         "efit_lcfs": _ring(),
         "efit_x_points": np.asarray(((1.0, 0.0),)),
     }
@@ -140,11 +144,76 @@ def test_margin_classification_ignores_cached_achieved_label(monkeypatch):
             class_margin=-0.5,
             efit_label="limited",
             nova_achieved_class="diverted",
+            x_normalized_flux_operand=1.0,
+            wall_normalized_flux_operand=0.5,
+            wall_normalized_flux_operand_before_shadow=0.5,
         )
     )
 
     assert row["nova_achieved_class"] == "limited"
     assert row["label_agreement"] is True
+    assert row["nova_post_cutover_class_margin_finite"] == -0.5
+    assert (
+        row["nova_post_cutover_class_margin_finite_wall_source"]
+        == "accepted_wall_minimum"
+    )
+
+
+def test_finite_class_margin_is_readable_on_diverted_and_limited_rows(monkeypatch):
+    """The always-finite margin is null-free and negative exactly when limited.
+
+    A diverted read admits no reachable wall minimum, so the banked margin is
+    +inf and cannot tell a comfortably diverted row from one a hair from
+    limited.  The companion finite margin reads the same signed quantity
+    against the rejected wall candidate's level (the supplied wall point,
+    marked as such) and stays finite on both classes.
+    """
+    adapter = _adapter()
+    monkeypatch.setattr(
+        adapter, "_assembled_branch_polylines", lambda geometry: (_ring(), [])
+    )
+    diverted = adapter._score_operand(
+        _operand(
+            class_margin=float("inf"),
+            efit_label="diverted",
+            x_normalized_flux_operand=1.0,
+            wall_normalized_flux_operand=float("inf"),
+            # a hair from limited: the rejected wall candidate sits just above
+            # the separatrix level, so the finite margin is small and positive
+            wall_normalized_flux_operand_before_shadow=1.05,
+        )
+    )
+    limited = adapter._score_operand(
+        _operand(
+            class_margin=-0.5,
+            efit_label="limited",
+            x_normalized_flux_operand=1.0,
+            wall_normalized_flux_operand=0.5,
+            wall_normalized_flux_operand_before_shadow=0.5,
+        )
+    )
+
+    assert diverted["nova_achieved_class"] == "diverted"
+    assert diverted["nova_post_cutover_class_margin"] is None
+    assert diverted["nova_post_cutover_class_margin_nonfinite"] == "positive_infinity"
+    assert diverted["nova_post_cutover_class_margin_finite"] == pytest.approx(0.05)
+    assert (
+        diverted["nova_post_cutover_class_margin_finite_wall_source"]
+        == "rejected_wall_candidate"
+    )
+
+    assert limited["nova_achieved_class"] == "limited"
+    assert limited["nova_post_cutover_class_margin"] == -0.5
+    assert limited["nova_post_cutover_class_margin_nonfinite"] is None
+    assert limited["nova_post_cutover_class_margin_finite"] == -0.5
+    assert (
+        limited["nova_post_cutover_class_margin_finite_wall_source"]
+        == "accepted_wall_minimum"
+    )
+
+    for row in (diverted, limited):
+        assert row["nova_post_cutover_class_margin_finite"] is not None
+    json.dumps([diverted, limited], allow_nan=False)
 
 
 def test_all_missing_comparator_inputs_remain_one_strict_json_bank_row(monkeypatch):
@@ -160,6 +229,9 @@ def test_all_missing_comparator_inputs_remain_one_strict_json_bank_row(monkeypat
             selected_saddle=None,
             efit_lcfs=None,
             efit_x_points=None,
+            x_normalized_flux_operand=None,
+            wall_normalized_flux_operand=None,
+            wall_normalized_flux_operand_before_shadow=None,
         )
     )
 
@@ -175,6 +247,8 @@ def test_all_missing_comparator_inputs_remain_one_strict_json_bank_row(monkeypat
     assert row["nova_closed_boundary_m"] is None
     assert row["binding_to_efit_lcfs_sup_m"] is None
     assert row["label_agreement"] is None
+    assert row["nova_post_cutover_class_margin_finite"] is None
+    assert row["nova_post_cutover_class_margin_finite_wall_source"] is None
     json.dumps(row, allow_nan=False)
 
 
@@ -250,6 +324,10 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
             "class_margin": jnp.asarray(0.75),
             "limiter_coordinate": jnp.asarray((0.4, 1.1)),
             "limiter_flux": jnp.asarray(2.0),
+            "selected_x_normalized_flux_operand": jnp.asarray(1.0),
+            "wall_normalized_flux_operand": jnp.asarray(0.35),
+            "wall_normalized_flux_operand_before_shadow": jnp.asarray(0.35),
+            "wall_candidate_present": jnp.asarray(True),
         }
 
     monkeypatch.setattr(
@@ -287,6 +365,10 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
     )
     assert result["achieved_class"] == "limited"
     assert result["binding_flux"] == 2.0
+    assert result["x_normalized_flux_operand"] == 1.0
+    assert result["wall_normalized_flux_operand"] == pytest.approx(0.35)
+    assert result["wall_normalized_flux_operand_before_shadow"] == pytest.approx(0.35)
+    assert result["wall_candidate_present"] is True
 
 
 @pytest.mark.parametrize(
@@ -327,6 +409,10 @@ def test_named_arm_failure_retains_twelve_row_census(
             "selected_saddle": np.asarray((1.0, 0.0)),
             "limiter_coordinate": np.asarray((0.0, 1.0)),
             "class_margin": 0.25,
+            "x_normalized_flux_operand": 1.0,
+            "wall_normalized_flux_operand": 1.25,
+            "wall_normalized_flux_operand_before_shadow": 1.5,
+            "wall_candidate_present": True,
         },
     )
     monkeypatch.setattr(
@@ -378,6 +464,8 @@ def test_named_arm_failure_retains_twelve_row_census(
     assert failed["nova_closed_boundary_m"] is None
     assert failed["binding_to_efit_lcfs_rms_m"] is None
     assert failed["label_agreement"] is None
+    assert failed["nova_post_cutover_class_margin_finite"] is None
+    assert failed["nova_post_cutover_class_margin_finite_wall_source"] is None
     assert eligibility["declared_arm_denominator"] == 12
     assert eligibility["eligible_count"] == 11
     assert eligibility["excluded_nonconverged_arms"] == ["synthetic/2 mixed"]

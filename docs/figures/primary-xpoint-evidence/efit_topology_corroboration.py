@@ -573,6 +573,7 @@ def _build_operand_cache(
                 response_cache,
                 selected_row,
                 qualification,
+                carrier_evidence,
             )
             rows.extend(identity_rows)
         finally:
@@ -604,6 +605,7 @@ def _build_identity_operands(
     response_cache,
     selected_row: dict[str, Any],
     qualification,
+    carrier_evidence: dict[str, Any],
 ) -> list[dict[str, Any]]:
     """Build both arms while one identity's solve objects have bounded lifetime."""
 
@@ -617,8 +619,14 @@ def _build_identity_operands(
         raise RuntimeError("MAST reconstruction entered a direct response builder")
     target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
     observed_profile = _ObservedProfile(profile)
+    carrier_identity = (
+        f"mast:{shot}:{slice_index}:{_carrier_semantic_identity(carrier_evidence)}"
+    )
     states = reachability._mast_states(
-        observed_profile, jnp.asarray(passive_case["state"]), target_current
+        observed_profile,
+        jnp.asarray(passive_case["state"]),
+        target_current,
+        carrier_identity=carrier_identity,
     )
     if observed_profile.portfolio is None:
         raise RuntimeError("the MAST solve returned no observable branch portfolio")

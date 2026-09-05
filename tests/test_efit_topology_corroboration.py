@@ -4,6 +4,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import jax.numpy as jnp
 import numpy as np
@@ -414,6 +415,49 @@ def test_unrelated_arm_geometry_exception_propagates(monkeypatch):
         )
 
 
+def test_identity_operands_supply_carrier_identity_to_state_request(monkeypatch):
+    adapter = _adapter()
+    captured: dict[str, Any] = {}
+
+    def fake_mast_states(observed_profile, seed, target_current, *, carrier_identity):
+        captured["carrier_identity"] = carrier_identity
+        captured["target_current"] = target_current
+        return {}
+
+    reachability = SimpleNamespace(_mast_states=fake_mast_states)
+    monkeypatch.setattr(
+        adapter,
+        "_mast_case_from_selection",
+        lambda store, row, qualification: ("case", "context"),
+    )
+    monkeypatch.setattr(
+        adapter,
+        "_passive_inclusive_case",
+        lambda case, context, response_cache: (
+            {
+                "reference": {"plasma_current_a": -123.0},
+                "state": np.zeros(3),
+            },
+            SimpleNamespace(),
+            {"section_kernel_evaluations_this_shot": 0},
+        ),
+    )
+    selected_row = {"shot": 21978, "slice_index": 35}
+    carrier_evidence = {"carrier": {"semantic_response_identity": "synthetic-carrier"}}
+
+    with pytest.raises(RuntimeError, match="no observable branch portfolio"):
+        adapter._build_identity_operands(
+            reachability,
+            "responses",
+            selected_row,
+            "qualification",
+            carrier_evidence,
+        )
+
+    assert captured["carrier_identity"] == "mast:21978:35:synthetic-carrier"
+    assert captured["target_current"] == 123.0
+
+
 def test_operand_build_releases_compilation_state_between_identities(monkeypatch):
     adapter = _adapter()
     selected = [
@@ -425,9 +469,12 @@ def test_operand_build_releases_compilation_state_between_identities(monkeypatch
     monkeypatch.setattr(adapter, "select_slices_by_shot", lambda _bank: selected)
     monkeypatch.setattr(adapter, "_reachability_module", lambda: "reachability")
 
-    def build_identity(reachability, response_cache, selected_row, qualification):
+    def build_identity(
+        reachability, response_cache, selected_row, qualification, carrier_evidence
+    ):
         assert reachability == "reachability"
         assert response_cache == "responses"
+        assert carrier_evidence == {"carrier": "evidence"}
         identity = f"{selected_row['shot']}/{selected_row['slice_index']}"
         events.append(("build", identity, qualification))
         return [{"identity": identity, "arm": "pure"}]

@@ -251,3 +251,163 @@ def test_dense_jacobian_is_square_on_the_reduced_state(machine):
     assert float(jnp.max(jnp.abs(jacobian @ direction + residual))) <= 1.0e-6 * float(
         jnp.max(jnp.abs(residual))
     )
+
+
+@pytest.mark.slow
+def test_first_accept_scoring_accepts_the_grade_the_eager_ladder_selects(machine):
+    """Stopping at the first grade below the merit selects the eager grade.
+
+    The eager ladder scores every backtracking grade and then takes the
+    earliest one below the incumbent merit, so a route that stops scoring at
+    that grade must reach the same decision on every step of a whole solve,
+    and the two solves must then walk the same trips to the same flux.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+    )
+    eager = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
+        **common,
+    )
+    first_accept = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    assert eager.steps
+    assert len(first_accept.steps) == len(eager.steps)
+    for taken, scored in zip(first_accept.steps, eager.steps, strict=True):
+        assert (taken.trip, taken.step) == (scored.trip, scored.step)
+        assert taken.accepted_factor == scored.accepted_factor
+        assert taken.grades_tried == scored.grades_tried
+        assert taken.jacobian_refreshed == scored.jacobian_refreshed
+    assert first_accept.newton_steps_per_trip == eager.newton_steps_per_trip
+    assert first_accept.active_set_mask_differences == (
+        eager.active_set_mask_differences
+    )
+    assert first_accept.termination_name == eager.termination_name
+    span = float(jnp.max(jnp.abs(eager.state)))
+    difference = float(jnp.max(jnp.abs(first_accept.state - eager.state)))
+    assert difference <= 1.0e-12 * span
+
+
+@pytest.mark.slow
+def test_first_accept_scoring_evaluates_one_map_per_accepted_step(machine):
+    """A step accepted at full length costs one map evaluation, not eight.
+
+    The eager route evaluates the map for the reduced residual, again for the
+    incumbent merit and once per grade; the first-accept route reads all three
+    from the grade it accepts, so an accepting step evaluates the map once and
+    only the trip's opening state is scored separately.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+    )
+    eager = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
+        **common,
+    )
+    first_accept = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    full_length = [step for step in first_accept.steps if step.accepted_factor == 1.0]
+    assert full_length
+    assert all(step.map_evaluations == 1 for step in full_length[1:])
+    assert sum(first_accept.map_evaluations_per_trip) < sum(
+        eager.map_evaluations_per_trip
+    )
+
+
+@pytest.mark.slow
+def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
+    """One compiled trip close returns what the separate calls returned.
+
+    The promoted shadow, the mask difference against the frozen shadow, the
+    live residual of the promoted map, the next trip's amplitudes and the
+    off-support leakage are compared against the calls the dispatched
+    boundary makes, at the same reduced state and the same frozen shadow.
+    """
+    profile, seed = machine
+    operator = profile.operator
+    coordinates = reduced_newton.reduced_coordinates(operator, seed)
+    shadow = jnp.ravel(jnp.asarray(operator.residual_shadow_mask(seed), dtype=bool))
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    reduced = kernels["initial_gather"](seed)
+    direction = kernels["direction"](
+        kernels["jacobian"](reduced, shadow, seed),
+        kernels["reduced_residual"](reduced, shadow, seed),
+    )
+    for factor in (0.0, 1.0):
+        moved = reduced + factor * direction
+        state, promoted, difference, residual, gathered, leakage = kernels["boundary"](
+            moved, shadow, seed
+        )
+        expected_state = kernels["reconstruct"](moved, shadow, seed)
+        expected_promoted = jnp.ravel(
+            jnp.asarray(
+                operator.residual_shadow_mask(
+                    expected_state, None, previous_shadow=shadow
+                ),
+                dtype=bool,
+            )
+        )
+        mapped = operator.flux_map_with_shadow()(expected_state, expected_promoted)
+        assert bool(jnp.array_equal(state, expected_state))
+        assert bool(jnp.array_equal(promoted, expected_promoted))
+        assert int(difference) == int(jnp.sum(expected_promoted != shadow))
+        assert float(residual) == float(_relative_residual(mapped, expected_state))
+        assert bool(
+            jnp.array_equal(
+                gathered,
+                reduced_newton._gather(
+                    coordinates, operator.cell_current_moments(expected_state)
+                ),
+            )
+        )
+        assert float(leakage) == float(kernels["leakage"](moved, shadow, seed))
+
+
+@pytest.mark.slow
+def test_fused_trip_boundary_solves_to_the_dispatched_terminal_state(machine):
+    """Closing trips in one program walks the same trips to the same flux."""
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+    )
+    dispatched = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+        **common,
+    )
+    fused = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+        **common,
+    )
+    assert fused.active_set_iterations == dispatched.active_set_iterations
+    assert fused.active_set_mask_differences == dispatched.active_set_mask_differences
+    assert fused.newton_steps_per_trip == dispatched.newton_steps_per_trip
+    assert fused.termination_name == dispatched.termination_name
+    assert fused.off_support_leakage == dispatched.off_support_leakage
+    assert fused.active_set_residuals == dispatched.active_set_residuals
+    assert bool(jnp.array_equal(fused.state, dispatched.state))

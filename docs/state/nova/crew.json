@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:57:35",
+  "updated": "2026-09-05T02:04:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1871,6 +1871,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-candidate4-measure-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "nia-census-compaction-x",
@@ -99519,6 +99528,201 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T230939387714-nia-census-polish-compaction",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-census-polish-compaction",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3103,
+                "cached_input_tokens": 724756,
+                "input_tokens": 727960,
+                "output_tokens": 4547,
+                "reasoning_output_tokens": 1183,
+                "total_tokens": 732507,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/forward_operator.py, nova/equilibrium/flux_surface_connectivity.py and tests/test_census_polish_compaction.py, in which the new test proves the compacted census bit-identical to the current one on the forward-census fixtures (admitted candidates, positions, values, telemetry slots), the existing census, admission, spline-authority, connectivity plus partition tests (tests/test_forward_census.py, tests/test_stationary_point_admission.py, tests/test_census_spline_value_authority.py, tests/test_oracle_axis_admission.py, tests/test_flux_surface_connectivity.py, tests/test_topology_domain_partition.py, tests/test_mask_threshold_consistency.py) stay green on CPU with logs, the manifest quoting the topology-read CPU timing before against after",
+          "estimated_hours": null,
+          "goal": "Remove the topology read's added cost on the integration candidate at this tip, where the paired remeasure (report ~/.config/reckon/crew/reports/nova/integration/candidate-3/paired-remeasure.md, receipts docs/figures/polish-support-performance/candidate-3/) now shows behaviour equal to main on the production solve of MAST 22086/43 pure (7 trips, 84 promotions, diverted, consistent, residual 4.77e-4 against 4.79e-4) plus an improved 21989/55 class, but the topology-read probe at 57.6 ms against 39.1 ms on main (+47 percent) making the solve 60.2 s against 40.7 s, with the earlier per-component attribution (docs/figures/polish-support-performance/candidate-2/paired-components.json) placing the added per-call cost in the census (0.23 to 17.1 ms), the census values by spline (3.0 to 6.7 ms) and the limiter tangency along the spline (15.1 to 16.3 ms), so this node compacts the structured containment census in nova/equilibrium/forward_operator.py (the census fits the surface, evaluates every cell ring, polishes the fixed field of origins, deduplicates and emits fixed-slot telemetry at roughly lines 387 to 518) so that only ring-admitted candidates are polished plus evaluated on the spline before the fixed-capacity telemetry is scattered back, keeping every admission rule, every published value and the telemetry contract bit-identical on the existing census plus admission tests, plus trims the census-values-by-spline path in nova/equilibrium/flux_surface_connectivity.py to one evaluation per admitted candidate, with a CPU timing of the topology read before against after on the production operand quoted in the manifest, no change to connectivity_boundary.py, topology.py or fixed_point.py",
+          "id": "nia-census-polish-compaction",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230939387714-nia-census-polish-compaction/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_census_polish_compaction.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-census-compaction-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:09:47Z",
+        "completed_at": "2026-09-05T00:03:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3219,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3219,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "189fe4549ab0b1e4548209142d2519ec56bf6635",
+        "commits": [
+          "ed00ba0c6ef909ee82c15e071333683da0972c82"
+        ],
+        "changed_lines": {
+          "added": 385,
+          "removed": 47,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_census_polish_compaction.py plus the census, admission, spline-authority, connectivity, partition and mask-threshold files (50 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230939387714-nia-census-polish-compaction/after-fast-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230939387714-nia-census-polish-compaction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06eaf-77e8-7a31-ba31-58cbbe34f7d9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 31260928,
+            "cached_input_tokens_cumulative": 31260928,
+            "input_tokens": 31758522,
+            "input_tokens_cumulative": 31758522,
+            "output_tokens": 44590,
+            "output_tokens_cumulative": 44590,
+            "reasoning_output_tokens": 13413,
+            "reasoning_output_tokens_cumulative": 13413
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 60706,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 63106,
+              "external_wait": null,
+              "log_age_seconds": 62204,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 62260,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 58003,
+          "peak_input_tokens": 63019450
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-census-polish-compaction",
+          "session_id": "01a06eaf-77e8-7a31-ba31-58cbbe34f7d9",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T00:03:26Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -99663,6 +99867,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1699
+    "_version": 1701
   }
 }

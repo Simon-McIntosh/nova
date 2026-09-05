@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-impl" content="0.1">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py">
@@ -227,6 +227,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260905T080136675175-cank-matrix-led-compensator-selection" data-who="cank-compensator-x" data-when="2026-09-05T09:10:10.626Z">
     <div class="r-comment-body"><p>Matrix-led compensator selection: constraint_response_matrix (one reverse-mode pass per residual row contracted with the prescribed-current response carrier), select_compensating_directions with a dominant-authority rule and a singular-distribution rule chosen by a row-coupling test, derive_circuit_compensators restricted to a caller-named drivable set, and the rule, direction, spectrum and authority on the ConstraintRecord; 25 tests pass on CPU. On the two vertical-mode bank rows the derived direction qualifies where the named P6 pair does not (vertical error 1e-16 and 3e-13 m, current 2-norm 3377 and 2249 A against 5803 and 4274 A), but the plan's gate condition is false on the bank: the solenoid and P3 outrank P6 for vertical-centroid authority and no circuit dominates, so the P6-pair reproduction is carried by the CPU contract on a fixture that is exactly that condition. A first receipt derived over passive structure (circuit 15 second in authority) and was superseded.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260905T121601078883-cank-shape-control-rows" data-who="cank-compensator-x" data-when="2026-09-05T14:05:53.545Z">
+    <div class="r-comment-body"><p>Partial by the worker&#x27;s own manifest and superseded by the lead: the isoflux, X-point and wall-gap functionals with Miller-generated control points landed on the worktree tip (three commits, tree clean) and the H200 steering receipt on 22086/43 showed neither arm converging because a Miller curve fitted to a diverted boundary is not that boundary (fitted triangularity -0.025 against 0.253 achieved); the repair of the command construction is committed but unmeasured, the four solve contracts were OOM-killed on both CPU and the 64G H200 test lane, and three protocol test files are unverified. The lead redirected shape control to the pulse-design bounding-box constraint set; the tip is retained unmerged as the base of the successor node, which deletes the Miller generator. The node also found the wall-null boundary-flux autodiff tangent wrong by 51 percent on a limited machine (followup opened).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T18:06:27",
+  "updated": "2026-09-05T18:18:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2063,6 +2063,15 @@
       },
       {
         "id": "nia-dsv4-pins-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-dsv4-rebank-x",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -103851,6 +103860,405 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260905T121601078883-cank-shape-control-rows",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-shape-control-rows",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8742,
+                "cached_input_tokens": 321694,
+                "input_tokens": 330438,
+                "output_tokens": 3250,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 333688,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "tests/test_shape_constraints.py green on CPU with the isoflux, X-point, gap contracts described in the goal plus a contract that the warm-started re-solve after a target move converges in fewer trips than the cold solve, the existing tests/test_equilibrium_constraint_protocol.py plus tests/test_constraint_response_matrix.py plus tests/test_vertical_position_constraint.py still green, the captured CPU gate log saved as gate.log in this run's own crew run directory with its path in the manifest, the H200 receipt under docs/figures/constraint-augmented-newton-krylov/shape-control/ with a json per steering arm plus one figure overlaying the target boundary, the achieved boundary, the previous boundary for both arms, the H200 log with EXIT status in this run's crew run directory, the report at the named path stating the trips, the compensating currents per circuit, the boundary error per arm, the distance to a steerable prototype, commits in the worktree with conventional subjects plus bodies stating what changed together with why, the manifest naming the commit sha from git rev-parse HEAD",
+          "estimated_hours": null,
+          "goal": "Add the shape-control constraint library to nova/equilibrium/constraint.py as ConstraintFunctional implementations on the existing interface (ConstraintPair, ConstraintBinding, static tuple on the request, ConstraintRecord on the receipt, compensating directions from derive_circuit_compensators restricted to the machine's active mapping): an isoflux functional whose rows are the flux at N boundary control points minus the boundary flux, with the control points generated from a Miller-parametrised target boundary (R0, Z0, minor radius, elongation, triangularity, N points) so steering a shape knob means moving the target, an X-point functional whose two rows are the flux gradient components at a target point, plus a gap functional whose row is the boundary flux at the wall point that closes one gap, each differentiable through the flux map like the centroid row, each with a CPU contract on the bootstrapped Solov'ev free-boundary machine used by tests/test_reduced_newton.py plus tests/test_equilibrium_forward_solve.py (the constrained solve reaches the target to the declared tolerance, the response matrix equals a central difference, a moved target re-solved from the previous equilibrium as a warm start converges in fewer trips than from the seed), together with one H200 receipt on bank row 22086/43 with two steering arms from the converged equilibrium (Z0 moved by plus 2 cm, elongation raised by 5 percent), the compensating directions derived on the active mapping with the singular-distribution rule when rows compete, recording the trips, the compensating currents per circuit, the achieved boundary against the target, the change of the axis plus the X-point, on the same H200 recipe as the compensator-selection receipt (betelgeuse, gpu_0003_grpA, .venv python with no uv on the node, JAX_PLATFORMS=cuda,cpu, cwd the checkout root, persistent cache /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile, receipt persisted per arm, under one hour), re-exporting the new functionals together with CompensatorRule, CompensatorSelection, constraint_response_matrix, derive_circuit_compensators, select_compensating_directions, compensator_rule_name on nova.equilibrium, names, comments, docstrings describing the mechanism only",
+          "id": "cank-shape-control-rows",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121601078883-cank-shape-control-rows/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/constraint.py",
+            "nova/equilibrium/__init__.py",
+            "tests/test_shape_constraints.py",
+            "benchmarks/constraint_shape_receipt.py",
+            "docs/figures/constraint-augmented-newton-krylov/shape-control/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/shape-control-rows.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cank-compensator-x",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T12:16:08Z",
+        "completed_at": "2026-09-05T14:05:53.545Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6579,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6585,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "255e33eb2f1a2a9c2ac88c985a04268c5823fcd7",
+        "commits": [
+          "66aea76bdb22189a70f5a39cf89098414e2a8ae4"
+        ],
+        "changed_lines": {
+          "added": 7259,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121601078883-cank-shape-control-rows/manifest.md",
+        "scope_changed": false,
+        "session_id": "f8c6e28c-7be8-488f-9e4c-ceab156560f1",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 92.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-05T17:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 257530,
+            "cache_creation_input_tokens_cumulative": 257530,
+            "cache_read_input_tokens": 20823434,
+            "cache_read_input_tokens_cumulative": 20823434,
+            "inference_geo": "not_available",
+            "input_tokens": 226,
+            "input_tokens_cumulative": 226,
+            "output_tokens": 107359,
+            "output_tokens_cumulative": 107359,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 15.672122000000007,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 15.672122000000007
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 107888,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 110288,
+              "external_wait": null,
+              "log_age_seconds": 109386,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 109442,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 6582.328,
+          "generated_tokens": 107359,
+          "generation_seconds": 1425.276,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 27.1,
+          "machine_seconds": 5157.052,
+          "peak_input_tokens": 270741,
+          "tokens_per_second": 75.33,
+          "wall_tokens_per_second": 16.31
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-shape-control-rows",
+          "session_id": "f8c6e28c-7be8-488f-9e4c-ceab156560f1",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T14:05:53.545Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T121400440959-nia-rebank-repaired-census",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-rebank-repaired-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3153,
+                "cached_input_tokens": 318541,
+                "input_tokens": 321795,
+                "output_tokens": 7577,
+                "reasoning_output_tokens": 1935,
+                "total_tokens": 329372,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "the regenerated docs/figures/null-identification-authority/bank-integrated/bank-integrated.json plus row-by-row-comparison.json plus figure committed with the twelve rows, every row carrying census_slots_exhausted plus nova_post_cutover_class_margin_finite plus its wall source, the row-by-row comparison stating for each row whether class, candidate counts, convergence, terminal residual, axis position are unchanged against the previous integrated bank with any change attributed to the census repair or to the finite margin or to neither, the captured log of JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_topology_domain_partition.py tests/test_forward_census.py tests/test_efit_topology_corroboration.py with NOVA_FORWARD_CENSUS_BANK naming the regenerated operands exiting 0 saved as gate.log in this run's own crew run directory with its path in the manifest, the H200 job logs with EXIT status saved in this run's crew run directory, the report at the named path, commits in the worktree with conventional subjects plus bodies stating what changed together with why, the manifest naming the commit sha from git rev-parse HEAD",
+          "estimated_hours": null,
+          "goal": "Regenerate the twelve-row MAST topology bank at the merged head that now carries the over-capacity census repair (lax.cond all-origin lane, census_slots_exhausted, exact root-uncertainty reconstruction) plus the always-finite class margin (nova_post_cutover_class_margin_finite with its wall-source label, operand cache schema revision 7), on one reserved H200 through the same producer path that wrote the integrated bank (docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py on the public route, betelgeuse, gpu_0003_grpA, /home/ITER/mcintos/Code/nova/.venv/bin/python with no uv on the node, JAX_PLATFORMS=cuda,cpu, cwd the checkout root, the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile, receipts persisted per row as they land, jobs split under the one hour limit since the previous regeneration took 98 minutes), rewriting docs/figures/null-identification-authority/bank-integrated/ in place (bank json, row-by-row comparison against the previous bank, figure) plus the twelve per-row panels together with the solve operands under docs/figures/topology-visual-corroboration/, reading the census_slots_exhausted flag on every row plus the finite class margin with its wall source on every row, judging whether any of the twelve rows changed class, candidate count, convergence or terminal residual against the previous bank, re-baselining the partition constants in tests/test_topology_domain_partition.py only if the operands moved, with the bank-gated tests in tests/test_forward_census.py run against the regenerated operands",
+          "id": "nia-rebank-repaired-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121400440959-nia-rebank-repaired-census/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "docs/figures/null-identification-authority/bank-integrated/",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/topology-visual-corroboration/",
+            "tests/test_topology_domain_partition.py",
+            "tests/test_forward_census.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/rebank-repaired-census.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "c-nia-bank",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T12:14:07Z",
+        "completed_at": "2026-09-05T12:26:38.677Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 745,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 751,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "255e33eb2f1a2a9c2ac88c985a04268c5823fcd7",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T121400440959-nia-rebank-repaired-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "06c53f5b-bc19-47b3-9610-0a42624f9d3d",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 33.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-05T17:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 162258,
+            "cache_creation_input_tokens_cumulative": 162258,
+            "cache_read_input_tokens": 5978969,
+            "cache_read_input_tokens_cumulative": 5978969,
+            "inference_geo": "not_available",
+            "input_tokens": 106,
+            "input_tokens_cumulative": 106,
+            "output_tokens": 46633,
+            "output_tokens_cumulative": 46633,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.778419500000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.778419500000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 107767,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 110167,
+              "external_wait": null,
+              "log_age_seconds": 109265,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 109321,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 747.783,
+          "generated_tokens": 46633,
+          "generation_seconds": 578.815,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 17.5,
+          "machine_seconds": 168.968,
+          "peak_input_tokens": 175469,
+          "tokens_per_second": 80.57,
+          "wall_tokens_per_second": 62.36
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the worker's process ended after submitting three H200 shard jobs; no commit on the worktree; the shards' checkpoints are preserved under ~/.config/reckon/crew/reports/nova/null-identification/rebank-checkpoints/",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-repaired-census",
+          "session_id": "06c53f5b-bc19-47b3-9610-0a42624f9d3d",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T12:26:38.677Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -103995,6 +104403,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1744
+    "_version": 1747
   }
 }

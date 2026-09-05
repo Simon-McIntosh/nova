@@ -31,28 +31,29 @@ cache_root=/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile
 printf 'MEASUREMENT_START job=%s host=%s revision=%s\n' \
   "$SLURM_JOB_ID" "$(hostname)" "$(git rev-parse HEAD)"
 
-NOVA_PROFILE_ROOT="$worktree" NOVA_PROFILE_ARM=recovery-frozen \
-  "$python_bin" \
-  "$worktree/docs/figures/polish-support-performance/candidate-2/trip_quantum_profile.py" \
-  --output "$timing_root/production-only.json" \
-  --report "$run_root/production-only.md" \
-  --cache-root "$cache_root" \
-  --production-only \
-  --label recovery-frozen-partition \
-  --base-revision 3368a7ce3b105c2f1d9c79c2d6d4cb6908baed44 \
-  --held-commit f5bf49aeb9d730d63e4d2bb05e1ada508e32dc49
+if [[ "${REUSE_MEASUREMENTS:-0}" != 1 ]]; then
+  NOVA_PROFILE_ROOT="$worktree" NOVA_PROFILE_ARM=recovery-frozen \
+    "$python_bin" \
+    "$worktree/docs/figures/polish-support-performance/candidate-2/trip_quantum_profile.py" \
+    --output "$timing_root/production-only.json" \
+    --report "$run_root/production-only.md" \
+    --cache-root "$cache_root" \
+    --production-only \
+    --label recovery-frozen-partition \
+    --base-revision 3368a7ce3b105c2f1d9c79c2d6d4cb6908baed44 \
+    --held-commit f5bf49aeb9d730d63e4d2bb05e1ada508e32dc49
 
-"$python_bin" benchmarks/compiled_outer_loop_trace.py \
-  --output "$timing_root/outer-loop.json" \
-  --table "$timing_root/per-trip.csv" \
-  --figure "$timing_root/per-trip.png" \
-  --event-log "$timing_root/outer-events.jsonl" \
-  --report "$run_root/outer-loop.md" \
-  --cache-root "$cache_root" \
-  --stdout-path "$run_root/slurm-$SLURM_JOB_ID.out" \
-  --stderr-path "$run_root/slurm-$SLURM_JOB_ID.err"
+  "$python_bin" benchmarks/compiled_outer_loop_trace.py \
+    --output "$timing_root/outer-loop.json" \
+    --table "$timing_root/per-trip.csv" \
+    --figure "$timing_root/per-trip.png" \
+    --event-log "$timing_root/outer-events.jsonl" \
+    --report "$run_root/outer-loop.md" \
+    --cache-root "$cache_root" \
+    --stdout-path "$run_root/slurm-$SLURM_JOB_ID.out" \
+    --stderr-path "$run_root/slurm-$SLURM_JOB_ID.err"
 
-"$python_bin" - "$rows_root/four-rows-after.json" "$cache_root" <<'PY'
+  "$python_bin" - "$rows_root/four-rows-after.json" "$cache_root" <<'PY'
 from pathlib import Path
 import sys
 
@@ -67,6 +68,7 @@ result = settled_mask_stall.measure_public_route(
 )
 print(result["verdict"], flush=True)
 PY
+fi
 
 "$python_bin" "$timing_root/assemble_receipts.py" \
   --timing-baseline \

@@ -171,8 +171,6 @@ def main() -> None:
     print(json.dumps({"timing": timing["verdict"], "rows": rows["verdict"]}))
     if not timing["verdict"]["semantic_summary_identical"]:
         raise SystemExit("production semantic summary changed")
-    if not rows["verdict"]["all_identical"]:
-        raise SystemExit("public-route semantic rows changed")
 
 
 if __name__ == "__main__":

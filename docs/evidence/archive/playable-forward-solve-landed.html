@@ -68,6 +68,35 @@
     last axis.</p>
   </section>
 
+  <section id="frame-schema">
+    <h2>The steering-frame record and its netCDF session store (3afd3caf, merged at c06ea9e7)</h2>
+    <p><strong>Node:</strong> <code>pfs-frame-schema</code> (§5a), local DeepSeek lane, run <code>r-20260905T173915411640</code> against base
+    <code>73bf3acf</code>, about two hours; two files, <code>nova/equilibrium/steering_frames.py</code> (609 lines) and
+    <code>tests/test_steering_frames.py</code> (468 lines), no other path touched. Gate: 7 passed on CPU (442 s, one slow test) and the fast
+    lane 6 passed in 9.3 s on the committed bytes.</p>
+    <p><strong>What landed.</strong> <code>SteeringFrame</code> and <code>SteeringAction</code> typed records; <code>assemble_frame</code> builds a frame
+    from a <code>ForwardSolveReceipt</code> without re-deriving anything: raster channels (<code>psi</code>, <code>psi_norm</code>,
+    <code>domain_label</code>, traced <code>separatrix</code> on the rectangular grid) from <code>ForwardRasterFlux</code>, the labelled points from
+    <code>ForwardLabelledFlux</code> in the imas-ambix corpus key vocabulary (<code>magnetic_axis_r/z</code>, <code>x_point_r/z</code> with the primary
+    in slot 0 and NaN in the absent slot, <code>strike_points_r/z</code>, <code>lcfs_r/z</code> NaN-padded with <code>n_boundary_coords</code>,
+    <code>finite_mask</code> over six components, masked never imputed), coil current per circuit, compensating current per registered row
+    (auto-derived from the terminal <code>ConstraintRecord</code> rows when not supplied), the action (name, signed delta, commanded control
+    points), keyframe wall and trip count, carrier identity, Nova version and a sha256 digest of the resolved solve policy.
+    <code>session_dataset</code>, <code>write_session</code>, <code>read_session</code> and <code>frames_from_session</code> carry a session through
+    <code>nova.database.netcdf</code> (group <code>steering</code>) with time as the last axis; the dataset declares COCOS 17 and the module
+    docstring tabulates every field with session shape, dtype and units.</p>
+    <p><strong>Measures.</strong> A synthetic three-frame session round-trips bitwise on every variable (NaN-equal on floats); every field of
+    two or more dimensions carries <code>time</code> last; frames reconstruct from the store equal to the originals; masked components stay NaN
+    and False; the policy digest is deterministic and 64 hex characters. On the solved Solov'ev free-boundary fixture (15 by 15 lattice, 16
+    conductors, Newton–Krylov 12/12 at 1e-8, one trip) the frame carries psi (15, 15), 34 traced separatrix vertices of a 392 capacity, 26 LCFS
+    vertices of 900, primary X-point (0.6535, 0.1449) and secondary (0.8631, -0.3654), outboard strike (1.1927, 0.0602) with the inboard absent,
+    16 coil currents and two compensating rows.</p>
+    <p><strong>Caveat carried forward.</strong> A constrained augmented solve on the fixture was OOM-killed in the shared 64 GiB login cgroup
+    (51 GiB already held by concurrent workers), so the compensating-current auto-derivation from real constraint records is verified at the
+    helper level, not end to end; the constrained reduced route's H200 receipt or the recorded-session node (§5b) exercises it on a real
+    constrained solve.</p>
+  </section>
+
 </main>
 </body>
 </html>

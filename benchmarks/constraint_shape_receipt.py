@@ -39,6 +39,7 @@ from nova.equilibrium.constraint import (
     sample_lattice_flux,
 )
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+from nova.equilibrium.solve_request import resolve_forward_solve_policy
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -277,14 +278,22 @@ def _arm(
         target_current=target_current,
         circuits=circuits,
     )
+    # The branch route closes over a resolved option set. solve_branch only
+    # merges in the declared policy defaults when nothing is overridden, so a
+    # caller that supplies a budget of its own must pass the whole resolved
+    # set beneath it or the newton-krylov iteration count loses its warmup.
+    policy = resolve_forward_solve_policy(route="newton_krylov")
+    branch_options = dict(policy.kernel_options())
+    branch_options.update(
+        newton_steps=NEWTON_STEPS, active_set_steps=ACTIVE_SET_STEPS
+    )
     branch = profile.solve_branch(
         jnp.asarray(previous_flux),
         requested,
         target_current=target_current,
         constraint_pairs=derived,
         route="newton_krylov",
-        newton_steps=NEWTON_STEPS,
-        active_set_steps=ACTIVE_SET_STEPS,
+        **branch_options,
     )
     branch.equilibrium.flux.block_until_ready()
     equilibrium = branch.equilibrium

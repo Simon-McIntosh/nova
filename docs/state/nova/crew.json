@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T05:04:13",
+  "updated": "2026-09-05T06:22:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1918,6 +1918,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "nia-candidate6-measure-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "nia-census-compaction-x",
         "harness": "codex",
         "role": "implement",
@@ -2010,6 +2019,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06d0c-79bf-79d1-b7f8-ec0f0edd911b"
         },
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-limiter-cost-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "nia-limiter-polish-scout",
@@ -100514,6 +100532,184 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T023201808349-nia-candidate5-paired-remeasure",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-candidate5-paired-remeasure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1895,
+                "cached_input_tokens": 829916,
+                "input_tokens": 831912,
+                "output_tokens": 3178,
+                "reasoning_output_tokens": 184,
+                "total_tokens": 835090,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to docs/figures/polish-support-performance/candidate-5/ holding production-main.json, production-candidate.json, four-rows-main.json, four-rows-candidate.json, trip-census-main.json, trip-census-candidate.json, topology-read-tests.json plus one paired figure, together with the report ~/.config/reckon/crew/reports/nova/integration/candidate-5/paired-remeasure.md stating per arm the production wall, topology-read probe, trips, class plus residual, the four-row table, the per-trip mask movement, the topology-read test outcomes per arm, plus a merge verdict against the lead's condition, the SLURM job ids plus log paths, the manifest written before the first SLURM wait, no source change",
+          "estimated_hours": null,
+          "goal": "Remeasure the integration candidate at this tip against current main for the lead's merge condition (no performance impact, behaviour unchanged or improved), now that the structured read reuses the census rows (e0eb4956, the duplicate polish that the component attribution measured as the whole 3.9 ms read gap) sits on the candidate whose fourth remeasure (report ~/.config/reckon/crew/reports/nova/integration/candidate-4/paired-remeasure.md) read 43.0 s against 40.8 s per solve plus 43.0 against 39.1 ms per topology read, and now that main carries the frozen-partition scoring (0efbf123, production solve 34.3 s) which both arms inherit, reusing only the proven drivers exactly as the previous remeasures ran them (the run_measurements.sh pattern of run r-20260905T000454486337, the banked production driver copies under docs/figures/polish-support-performance/candidate-2/ for one warm-up plus three timed solves of MAST 22086/43 pure per arm, benchmarks/settled_mask_stall.py for the four public-route rows per arm) with no new callback instrumentation, every driver run from its checkout root with a login-node dry run of path resolution before submission, splitting the work across two SLURM jobs so neither approaches the one-hour limit that stopped the previous attempt (job one: production timing both arms plus the four rows both arms, job two: benchmarks/held_tip_trip_diagnosis.py per-trip census both arms plus tests/test_plasma_cell_topology_read.py both arms through /home/ITER/mcintos/Code/nova/scripts/h200_test_lane/run.sh), on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile, payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly with JAX_PLATFORMS=cuda,cpu, main in a detached checkout created with git worktree add under the run's own directory at git -C /home/ITER/mcintos/Code/nova rev-parse main with .venv a symlink to the root environment, each arm's receipt persisted the moment it finishes, polled in the foreground because a backgrounded wait ends the worker's turn, with authority for up to four submissions on any failure, the manifest checkpointed before the first wait",
+          "id": "nia-candidate5-paired-remeasure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T023201808349-nia-candidate5-paired-remeasure/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "150m",
+          "write_paths": [
+            "docs/figures/polish-support-performance/candidate-5/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-5/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-candidate5-measure-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T02:32:12Z",
+        "completed_at": "2026-09-05T04:20:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6474,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6474,
+        "stalled": false,
+        "time_budget": "150m",
+        "base_sha": "ead87a9b1a1b37ffeeecd312dc042852198346b7",
+        "commits": [
+          "4c21ef76dafe324e8cd2446a705d2265158961e4"
+        ],
+        "changed_lines": {
+          "added": 233080,
+          "removed": 0,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "seven receipt validations plus the H200 lane run of tests/test_plasma_cell_topology_read.py on both arms (2 passed each); measurement node, jobs 1262795, 1262796, 1262799",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T023201808349-nia-candidate5-paired-remeasure/timing-slurm-1262795.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T023201808349-nia-candidate5-paired-remeasure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06f68-c7c2-77d2-baa7-24cd72b19052",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 72847,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 75247,
+              "external_wait": null,
+              "log_age_seconds": 74345,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 74401,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate5-paired-remeasure",
+          "session_id": "01a06f68-c7c2-77d2-baa7-24cd72b19052",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T04:20:06Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -100658,6 +100854,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1711
+    "_version": 1714
   }
 }

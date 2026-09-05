@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-impl" content="0.4">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563">
 </head>
@@ -55,10 +55,11 @@
     <div class="r-fu-body">The sequential receipt shows a real member costs 16 to 316 s at width 1 with 2 to 16 trips per solve, so the trip loop, not the exit, is the lever. §2: measure and restructure the per-trip quantum at width 1 (host reconciliation, retrace below the compiled boundary, device sync), persisting each member's row immediately after its solve so a timeout cannot erase it, and complete the three DIII-D frames once a member-selective path exists. §3 waits on the acceptance decision (certificate-passing solves) and on batched-operator-boundary (heterogeneous batches). Baselines 0.784 ms and 25.0 ms are stale at HEAD and must be re-measured before any §2 claim.</div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
     </article>
-<article class="r-fu" data-id="f-msc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-msc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="2026-09-05T12:08:29+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Give the fallback carry one conditioning rule and a gate that reaches it</h4>
     <div class="r-fu-body"><p><code>_requalify_krylov_step</code> in <code>nova/equilibrium/fixed_point.py</code> is a hand copy of the conditioning policy in <code>_qualified_krylov_step</code>, and the carry gate never executes its conditioning branch: the twelve-fallback fixture is one-dimensional, <code>krylov_conditioning_count</code> is 0, <code>maximum_projected_krylov_condition</code> is 1.0, and no carried attempt accepts. Either route both call sites through one conditioning helper so no second copy exists, or add a fixture with state dimension above one and an ill-conditioned linear action so a carried attempt is damped, plus a fixture whose carried sequence accepts, each asserting bit identity against <code>carry_unchanged_fallback=False</code>. Also parameterise the committed receipt script <code>docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/run_measurement.sbatch</code> off the checkout root: it hardcodes a removed worker worktree and a crew run id, so it cannot run from the repository it is committed to.</p></div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
+    <p class="r-fu-outcome"><p>Landed at <code>0b3484a1</code>, merged at <code>737d0da1</code>. <code>_apply_krylov_conditioning</code> is the one projected-condition damping rule and both the first-attempt qualification and the unchanged-state requalification route through it. Two carry fixtures now reach what the gate never did: an ill-conditioned four-dimensional action (conditioning count 12, twelve distinct carried step norms, every attempt refused) and an accepting carry (12 promotions accepted through the rebuilt model at the unchanged residual), each bit-identical on every result leaf against the pipeline re-entry. The receipt sbatch resolves the checkout root from its own location. 73 tests pass on CPU.</p></p>
     </article>
 <article class="r-fu" data-id="f-msc-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Take the reduced Newton step to one millisecond: lazy ladder scoring plus a jitted trip boundary</h4>

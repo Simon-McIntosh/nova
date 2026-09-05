@@ -492,7 +492,7 @@
   </section>
 
   <section id="census-slot-exhaustion">
-    <h2>The compacted census truncates silently beyond its work slots (found by review, repair in flight)</h2>
+    <h2>The compacted census truncated silently beyond its work slots (found by review, repaired at 5a86f349, merged at 0895bc51)</h2>
     <p><strong>Source:</strong> independent line review of the three solver commits merged on 2026-09-05 with green gates that no
     human had read, report <code>~/.config/reckon/crew/reports/nova/millisecond/merged-solver-diffs-line-review.md</code>. The compaction
     at <code>ed00ba0c</code> keeps the first <code>2 * maxsize</code> admitted origins through <code>jnp.where(size=)</code> while
@@ -506,6 +506,18 @@
     states, so the defect is a contract error, not a telemetry nit. Repair node <code>nia-census-slot-exhaustion-repair</code>: the
     all-origin computation as a <code>lax.cond</code> fallback whenever admission exceeds capacity, a <code>census_slots_exhausted</code>
     field, the exact <code>where</code>-based reconstruction, branch agreement, and an over-capacity fixture.</p>
+    <p><strong>Repair landed.</strong> The census body is one lane function evaluated through <code>lax.cond</code> on slot exhaustion:
+    the compact lane with <code>2 * maxsize</code> work slots on ordinary fields, the all-origin lane with one slot per origin when
+    admission exceeds capacity, so the published rows and counts are the complete ones in every case and
+    <code>census_slots_exhausted</code> carries the routing visibly. On the seed-0 white-noise field (141 admitted origins against 60
+    slots) the census now publishes <code>same_root_count</code> 59 and 31, <code>polished_count</code> 63 and 41 and
+    <code>overflow</code> True and True, matching the all-origin census, where the base published 25 and 16, 26 and 19, False and False.
+    The root uncertainty is <code>where(admitted, scatter(compact), floor)</code> with no offset arithmetic, and the polish retain lane
+    publishes the same masked <code>converged</code> value as the refine lane. Gate: 41 passed and 2 pre-existing skips over six census
+    files on CPU. One assertion caveat is documented in the fixture: the compiled census path drifts from the eager authority by a last
+    ULP in the raw polish-value arrays on the marginal noise field, so those keys carry a stated tolerance while every structural and
+    telemetry key is byte-identical and the analytic-field test stays byte-exact on every key. Under <code>vmap</code> the
+    <code>lax.cond</code> lowers to a select and both lanes execute.</p>
   </section>
 
   <section id="finite-class-margin">

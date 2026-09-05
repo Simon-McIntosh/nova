@@ -355,6 +355,20 @@
     evaluation.</p>
   </section>
 
+  <section id="carry-one-rule">
+    <h2>One conditioning rule for the carry, and a gate that reaches it (0b3484a1, merged at 737d0da1)</h2>
+    <p>The independent line review found that the unchanged-state fallback carry's one re-derived decision rule, the Krylov conditioning
+    policy copied into <code>_requalify_krylov_step</code>, was executed zero times by its own gate: the twelve-fallback fixture is
+    one-dimensional, conditioning never applies, and no carried attempt accepts. <code>_apply_krylov_conditioning</code> is now the single
+    projected-condition damping rule and both the first-attempt qualification and the requalification route through it, with every
+    existing result leaf bit-identical across nine gate files. Two fixtures reach the branches the gate never did: a four-dimensional
+    ill-conditioned action whose carried attempts are all damped (conditioning count 12, twelve distinct carried step norms, every attempt
+    refused) and a carry whose requalified sequence accepts through the rebuilt model at the unchanged residual (12 promotions accepted),
+    each bit-identical on every result leaf against the pipeline re-entry. The receipt script under
+    <code>trip-quantum/fallback-carry/</code> resolves the checkout root from its own committed location and carries no worktree path,
+    run id or node name. Gate: 73 passed on CPU.</p>
+  </section>
+
 </main>
 </body>
 </html>

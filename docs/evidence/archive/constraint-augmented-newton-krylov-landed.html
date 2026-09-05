@@ -58,6 +58,43 @@
     solve becomes the production shape remains the lead's decision. Next in the library order: Thomson separatrix crossings on
     the DIII-D competition frames, then the Shafranov shift.</p>
   </section>
+  <section id="compensator-selection">
+    <h2>The compensating circuit is read off the constraint-response matrix (a6f7bc89, merged at e247cff6)</h2>
+    <p><strong>Commits:</strong> <code>d41f771b</code> (response matrix, selection rules, derived pairs), <code>d608eaf9</code> (selection
+    restricted to circuits a caller can drive), <code>a6f7bc89</code> (two-row receipt
+    <code>docs/figures/constraint-augmented-newton-krylov/compensator-selection/two-rows.json</code> and figure). H200 job 1262840, exit 0.
+    Gate: 25 tests on CPU, seven of them the new response-matrix contracts on a four-node, four-circuit fixture whose only vertical
+    authority is one antisymmetric pair.</p>
+    <p>The response matrix is one reverse-mode pass per residual row contracted with the operator's prescribed-current response carrier,
+    exact because the circuits enter the flux linearly, so its cost is the rows and not the 101 circuits. Dividing each row by its
+    declared scale gives an authority matrix whose entries are that row's own scales moved per ampere. A row's steepest direction is its
+    own authority row, normalised so the largest participating circuit carries unity; rows whose steepest directions are nearly parallel
+    (normalised Gram above 0.5) are competing and take the pseudo-inverse columns instead, which move one row and leave the others still.
+    The rule is chosen from that test or named outright, and the singular values of the drivable block ride on the record.</p>
+    <table>
+      <caption>Two vertical-mode bank rows, derived direction against the named P6 pair, same seed and ampere scale</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Arm</th><th scope="col">Vertical error</th><th scope="col">Terminal residual</th><th scope="col">Qualified</th><th scope="col">Trips</th><th scope="col">Current 2-norm</th><th scope="col">Pair-projected current</th></tr></thead>
+      <tbody>
+        <tr><th scope="row" rowspan="2">21986/46</th><td>derived</td><td>1.39e-16 m</td><td>5.25e-15</td><td>yes</td><td>3</td><td>3376.6 A</td><td>-1037.27 A</td></tr>
+        <tr><td>named pair</td><td>3.82e-09 m</td><td>9.22e-09</td><td>no</td><td>2</td><td>5802.8 A</td><td>-4103.22 A</td></tr>
+        <tr><th scope="row" rowspan="2">21989/55</th><td>derived</td><td>-3.29e-13 m</td><td>5.02e-12</td><td>yes</td><td>1</td><td>2249.0 A</td><td>+842.46 A</td></tr>
+        <tr><td>named pair</td><td>2.40e-10 m</td><td>2.06e-09</td><td>no</td><td>1</td><td>4274.2 A</td><td>+3022.33 A</td></tr>
+      </tbody>
+    </table>
+    <p>The plan's gate asked the centroid row to reproduce the P6-pair result where P6 is the dominant singular direction, and that
+    condition is false on the bank: at the seed on 21986/46 the vertical-centroid authority in micrometres per ampere is solenoid 0.914,
+    P3 upper 0.732, P6 upper 0.586, P4 upper 0.515, P6 lower -0.428, and on 21989/55 P3 lower -0.572, P3 upper 0.554, P6 lower -0.514.
+    No circuit dominates (the top six sit within a factor of two), so the derived direction is an antisymmetric combination spread over
+    the solenoid and the P3, P6 and P4 pairs, and the compensating current cannot be the pair's -4103 or +3022 A while the direction is
+    derived. The pair reproduction is carried by the CPU contract instead, where the derived direction equals the named pair to 1e-12
+    component by component. The first receipt derived over every column of the response carrier and let passive structure carry the
+    current (circuit 15 at 0.733 micrometres per ampere, second in authority); the committed receipt restricts the selection to the
+    thirteen-entry active mapping. Two caveats travel with the improvement: the matrix is read at the seed flux, and authority per
+    ampere says nothing about collateral change, so a rule that maximises it will use a circuit whose effect on the centroid is mediated
+    by reshaping the plasma as readily as one that displaces it. Whether the compensating current should keep its reading as the current
+    the machine would have driven for vertical control is the lead's question (<code>q-cank-compensator-reading</code>).</p>
+  </section>
+
 </main>
 </body>
 </html>

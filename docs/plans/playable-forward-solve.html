@@ -22,6 +22,8 @@
   <title>Playable forward solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-05">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -72,45 +74,54 @@
     frame schema it emits and the receipt that a recorded steering session round-trips through it; the decoder training itself is
     ambix work and is not scheduled here.</p>
 
-  <section data-reckon="decisions">
-    <h2 id="s6">§6 — Decisions</h2>
-    <article class="r-decision" data-id="d-pfs-001" data-status="locked">
-      <h3 class="r-decision-title">Controls are the pulse-design bounding-box constraint set, not a fitted profile</h3>
-      <div class="r-decision-body"><p>Lead decision 2026-09-05: flux and field constraints at the bounding-box points that move the
-        separatrix turning points, with the null row at the X-point and gap rows at the wall, supersede the Miller-parametrised isoflux
-        target whose fit to a diverted boundary made neither steering arm converge.</p></div>
-    </article>
-    <article class="r-decision" data-id="d-pfs-002" data-status="locked">
-      <h3 class="r-decision-title">The compensating current vector takes the best-conditioned derived direction</h3>
-      <div class="r-decision-body"><p>Lead decision 2026-09-05: derived directions on the machine's active mapping now; the
-        collateral-penalised derivation with a second row held still once the shape rows exist.</p></div>
-    </article>
-  </section>
+  
 
-  <section data-reckon="followups">
-    <h2 id="s7">§7 — Followups</h2>
-    <article class="r-fu" data-id="f-pfs-001" data-status="open" data-capability-version="1.0" data-capability-class="general">
-      <h3 class="r-fu-title">Augment the reduced Newton route with the constraint rows</h3>
-      <div class="r-fu-body"><p>The constraint interface augments the Newton–Krylov ladder today. Pose the bounding-box rows and
+  <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pfs-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="" data-written-at="" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Augment the reduced Newton route with the constraint rows</h4>
+    <div class="r-fu-body"><p>The constraint interface augments the Newton–Krylov ladder today. Pose the bounding-box rows and
         their compensating unknowns on the reduced-state plain-Newton solve in <code>nova/equilibrium/reduced_newton.py</code> so a
         constrained keyframe runs on the millisecond route, with a CPU contract on the Solov'ev machine and one H200 receipt on
         22086/43 giving trips and wall per constrained re-solve. Sequence after the bounding-box rows land.</p></div>
-      <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §3</pre>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §3</pre>
     </article>
-    <article class="r-fu" data-id="f-pfs-002" data-status="open" data-capability-version="1.0" data-capability-class="general">
-      <h3 class="r-fu-title">Keyboard-driven solve loop and Bokeh view on one MAST equilibrium</h3>
-      <div class="r-fu-body"><p>A server-side loop over the forward solve behind the pulse-design Bokeh view: key map for bulk R and Z,
+<article class="r-fu" data-id="f-pfs-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="" data-written-at="" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Keyboard-driven solve loop and Bokeh view on one MAST equilibrium</h4>
+    <div class="r-fu-body"><p>A server-side loop over the forward solve behind the pulse-design Bokeh view: key map for bulk R and Z,
         elongation, upper and lower triangularity, X-point and gaps; warm-started re-solve per key press; flux map, separatrix, control
         points, compensating currents and keyframe wall pushed to the page; a receipt of keyframe wall and trips per action.</p></div>
-      <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §4</pre>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §4</pre>
     </article>
-    <article class="r-fu" data-id="f-pfs-003" data-status="open" data-capability-version="1.0" data-capability-class="general">
-      <h3 class="r-fu-title">Frame schema and recorded-session receipt for the decoder</h3>
-      <div class="r-fu-body"><p>Define the per-frame record a steering session emits (lattice flux, separatrix and turning points, coil
+<article class="r-fu" data-id="f-pfs-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="" data-written-at="" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Frame schema and recorded-session receipt for the decoder</h4>
+    <div class="r-fu-body"><p>Define the per-frame record a steering session emits (lattice flux, separatrix and turning points, coil
         and compensating currents, action) and show one recorded session round-trips through it, so imas-ambix can train against it.</p></div>
-      <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §5</pre>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §5</pre>
     </article>
-  </section>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260905T173000-handoff" data-who="reckon-ship-s19-playable" data-when="2026-09-05T17:30:00Z">
+    <div class="r-comment-body"><p><strong>Coordination handoff 2026-09-05 19:25.</strong> The s19-relaunch session closed for a clean relaunch and handed every nova plan, the S19 record and its three live local-lane runs (bounding-box shape rows on constraint-augmented-newton-krylov §4, the persistent-sweep margin regression and the bank regeneration on null-identification-authority) to session s19-playable, which promotes them when they land. The lead's brief for this session: plasma position constraints with the performance to drive them at human response time, a playable Grad-Shafranov forward solve with keyboard controls and a Bokeh view, as the physics backbone for the MAST video decoder in imas-ambix (plan physics-carried-playable-plasma, which waits on nova's forward-solve-api §5 receipt). Workers run on the local DeepSeek lane with Opus where the design is open. First wave: a prior-art reuse map for §3 to §5 (read-only, local lane), the wall-null boundary-flux tangent repair (f-cank-007, Opus) and the batched refused-ladder tail on the reduced route (f-msc-005, Opus), while the shape rows finish.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260905T173100-s3-design" data-who="reckon-ship-s19-playable" data-when="2026-09-05T17:31:00Z">
+    <div class="r-comment-body"><p><strong>Where the numbers stand and how the constrained reduced route is posed.</strong> Measured on the reduced-state plain-Newton route (millisecond-converged-solve, anchor <code>millisecond-step</code>): accepting Newton step 2.15 ms median on 22086/43, warm trip 46 to 58 ms with 95 percent of the trip being one topology read, a converged solve in three trips. A keyframe re-solved from the previous equilibrium in one to three trips therefore sits at 50 to 150 ms before any further trip-boundary work, so the order-100 ms budget is reachable on this route and the constraint rows are what remains. The constrained reduced route appends the compensating unknowns to the amplitude vector and uses the augmented residual of <code>assemble_augmented_system</code>: the augmented state is <code>[u, c]</code> with <code>u</code> the plasma-cell amplitudes the frozen partition defines and <code>c</code> the normalised compensating unknowns, one per registered row; the reconstruction is <code>external + sum_k flux_delta_k(c_k) + P scatter(u)</code> behind the frozen shadow; the residual is <code>[u - gather(moments(reconstruct)), g_k(reconstruct, c)]</code> with each row scaled as the Newton-Krylov augmentation scales it; the dense Jacobian is one <code>jacfwd</code> over the augmented state per trip; the merit adds the scaled constraint residuals to the production flux merit so a step is accepted on the augmented system. Rows enter through the <code>ConstraintFunctional</code> protocol, so the current-centroid row on main and the bounding-box rows in flight are the same kind of input. The warm-start contract: a moved target re-solved from the previous <code>[u, c]</code> and shadow converges in fewer trips than the same target solved from the cold seed, and the unmoved target re-solves in one trip with zero accepted steps.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260905T173200-s5-consumer" data-who="reckon-ship-s19-playable" data-when="2026-09-05T17:32:00Z">
+    <div class="r-comment-body"><p><strong>What the consumer reads.</strong> imas-ambix's physics-carried-playable-plasma (S19, M4) is blocked on nova's forward-solve-api §5, whose receipt must carry, at no extra compile, psi and psi_N on the hex mesh, the O-point, primary and secondary X-points, the LCFS, the strike points and the per-cell domain labels the plasma-cell authority resolves (core, private flux, wall shadow; every other cell outside the LCFS simply open, no scrape-off-layer class). The frame record this section defines carries those fields per frame together with the action that produced the frame (the control parameter moved, its delta, the commanded control-point set), the coil and compensating currents per circuit, the keyframe wall and trip count, and the solve request identity (carrier identity, Nova version, resolved policy), so a recorded steering session is a sequence of forward-solve-api §5 receipts with actions attached and the decoder never re-derives topology from psi.</p></div>
+</div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="control-vocabulary" data-choice="pulse-design-bounding-box-set" data-by="Simon McIntosh" data-when="2026-09-05T17:31:55+00:00">
+    <p class="r-dec-q">control-vocabulary</p>
+    <p class="r-dec-rat">Lead decision 2026-09-05: flux and field constraints at the bounding-box points that move the separatrix turning points, with the null row at the X-point and gap rows at the wall, supersede the Miller-parametrised isoflux target whose fit to a diverted boundary made neither steering arm converge. Restored 2026-09-05 19:35 after the first structured write dropped the plan&#x27;s original decision markup.</p>
+    </div>
+<div class="r-dec" data-key="compensating-current-direction" data-choice="best-conditioned-derived-direction" data-by="Simon McIntosh" data-when="2026-09-05T17:31:55+00:00">
+    <p class="r-dec-q">compensating-current-direction</p>
+    <p class="r-dec-rat">Lead decision 2026-09-05: derived directions on the machine&#x27;s active mapping now; the collateral-penalised derivation with a second row held still once the shape rows exist. Restored 2026-09-05 19:35 after the first structured write dropped the plan&#x27;s original decision markup.</p>
+    </div>
+</section>
 </main>
 </body>
 </html>

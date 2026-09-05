@@ -315,6 +315,46 @@
     that means exiting a trip once its rejections make settlement decidable, a policy change the lead owns.</p>
   </section>
 
+  <section id="reduced-newton">
+    <h2>Plain Newton on the plasma-cell amplitudes: a factor of 86 and a measured path to one millisecond (5b3279e5, merged at 1a1a7ae2)</h2>
+    <p><strong>Commits:</strong> <code>2468bce2</code> (module <code>nova/equilibrium/reduced_newton.py</code>, driver
+    <code>benchmarks/reduced_newton_rows.py</code>), <code>733abf58</code> (receipt
+    <code>docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json</code> and figure), <code>5b3279e5</code>
+    (<code>tests/test_reduced_newton.py</code>, 4 passed on CPU). H200 job 1262829, payload 2259 s, exit 0. Report
+    <code>~/.config/reckon/crew/reports/nova/millisecond/reduced-newton-prototype.md</code>.</p>
+    <p>The free-boundary map writes an iterate as external flux plus the fixed plasma response applied to the per-cell current, and
+    that current vanishes outside the profile-owned support, so the fixed point is posed on the 622 to 661 cell amplitudes rather than
+    the 1126 flux nodes. The flux-space and amplitude-space Jacobians share every nonzero eigenvalue, so a dense Newton step on the
+    amplitudes is the flux-space step restricted to the response range: the reduction is exact, and the receipt measures zero current
+    driven outside the reduced support on all four rows. The prototype keeps the production merit, backtracking grades, one topology
+    read per trip, the settled exit and the incumbent-mask acceptance, and replaces only the inner solve with one dense
+    <code>jacfwd</code> Jacobian per trip and a dense solve per step.</p>
+    <table>
+      <caption>Four bank rows on the H200, warm figures exclude each row's compiling first trip</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Reduced dimension</th><th scope="col">Warm Jacobian</th><th scope="col">Warm Newton step</th><th scope="col">Warm trip</th><th scope="col">Trips</th><th scope="col">Terminal residual</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>623</td><td>0.60 ms</td><td>4.69 ms</td><td>0.118 to 0.127 s</td><td>4</td><td>9.50e-4 settled</td></tr>
+        <tr><th scope="row">21986/46</th><td>637</td><td>0.79 ms</td><td>4.53 ms</td><td>0.125 to 0.141 s</td><td>3</td><td>1.97e-3 settled</td></tr>
+        <tr><th scope="row">21989/55</th><td>622</td><td>0.86 ms</td><td>6.13 ms</td><td>0.125 to 0.129 s</td><td>4</td><td>9.93e-4 settled</td></tr>
+        <tr><th scope="row">22086/43</th><td>661</td><td>0.43 ms</td><td>5.32 ms</td><td>0.117 to 0.124 s</td><td>3</td><td>1.03e-13 converged</td></tr>
+      </tbody>
+    </table>
+    <p>On 22086/43, the one row where both arms converge, the terminal fluxes agree to 8.60e-9 Wb sup (6.9e-9 of the span) on the H200
+    and on CPU alike, with zero ladder refusals: all thirteen steps accept at full length on one Jacobian per trip. Three warm trips
+    at 0.12 s is 0.36 s against the banked warm production wall of 30.9 s, a factor of 86; the prototype's own cold solve with
+    compilation is 3.37 s. On the three settled rows a ladder is refused after the Jacobian is rebuilt at the current iterate, so the
+    stall belongs to the frozen-mask map, which has no reachable root there, and not to the Krylov method; the production fallback
+    cascade was spending 73.6 percent of its late-trip wall recovering from a condition a dense Newton diagnoses in one refused ladder.</p>
+    <p>The warm step is map-evaluation bound, not Jacobian bound: eight map evaluations per step (one reduced residual, one flux
+    score, six eagerly scored ladder grades) at the banked 0.32 ms each. Lazy first-accept ladder scoring takes a step to three
+    evaluations, about 1.0 ms, and the 0.11 s balance of each trip is the eager, un-jitted trip boundary (promoted shadow read,
+    shadowed map, moment gather). Both repairs live inside the prototype. Not settled by this node: the chord-versus-fresh-Jacobian
+    policy (refreshing every step costs 0.4 to 0.9 ms and buys quadratic contraction; the synthetic CPU machine contracts at about a
+    quarter per step under the chord), and the fact that the four bank rows' public route builds the operator without linear moments,
+    so the frozen-partition revaluation hooks are unreachable on them and both arms pay a full topology read inside every map
+    evaluation.</p>
+  </section>
+
 </main>
 </body>
 </html>

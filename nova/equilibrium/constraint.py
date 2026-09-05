@@ -8,8 +8,9 @@ leaves that can be traced and mapped over.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from enum import IntEnum
 from typing import TYPE_CHECKING, Literal, NamedTuple, Protocol, TypeVar
 
 import jax
@@ -24,6 +25,24 @@ if TYPE_CHECKING:
 
 Payload = TypeVar("Payload")
 ConstraintPolicy = Literal["imposed", "eliminated"]
+
+
+class CompensatorRule(IntEnum):
+    """How one row's compensating circuit direction was decided.
+
+    The value is what a receipt carries, because a record row is an array
+    leaf under :func:`jax.vmap`; :func:`compensator_rule_name` turns it back
+    into the readable name.
+    """
+
+    EXPLICIT = 0
+    DOMINANT_AUTHORITY = 1
+    SINGULAR_DISTRIBUTION = 2
+
+
+def compensator_rule_name(value) -> str:
+    """Return the readable rule name behind one recorded integer code."""
+    return CompensatorRule(int(np.asarray(value).reshape(-1)[0])).name.lower()
 
 
 class ConstraintContext(NamedTuple):
@@ -212,10 +231,21 @@ def constraint_residual_jvp(
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class CircuitCurrentUnknown:
-    """Physical circuit-current columns selected by dimensionless directions."""
+    """Physical circuit-current columns selected by dimensionless directions.
+
+    ``direction`` is the caller's when a circuit is named outright and the
+    output of :func:`derive_circuit_compensators` when the direction is read
+    off the constraint-response matrix instead.  ``rule`` states which of the
+    two produced it and ``singular_values`` and ``authority`` carry the
+    spectrum and the per-ampere authority the derivation measured, so the
+    receipt can say why this direction was taken.
+    """
 
     direction: object
     ampere_scale: object
+    singular_values: object = None
+    authority: object = None
+    rule: CompensatorRule = CompensatorRule.EXPLICIT
 
     def __post_init__(self) -> None:
         direction = jnp.asarray(self.direction)
@@ -228,6 +258,7 @@ class CircuitCurrentUnknown:
             )
         object.__setattr__(self, "direction", direction)
         object.__setattr__(self, "ampere_scale", scale)
+        object.__setattr__(self, "rule", CompensatorRule(self.rule))
         _require_positive_if_concrete(scale, "ampere scale")
 
     @property
@@ -253,12 +284,18 @@ class CircuitCurrentUnknown:
         return field.flux_delta(current_delta)
 
     def tree_flatten(self):
-        return ((self.direction, self.ampere_scale), None)
+        """Keep the selection rule static and map over the numerical leaves."""
+        return (
+            (self.direction, self.ampere_scale, self.singular_values, self.authority),
+            (self.rule,),
+        )
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
-        del aux_data
-        return cls(*children)
+        """Rebuild the compensator without re-running the selection."""
+        (rule,) = aux_data
+        direction, ampere_scale, singular_values, authority = children
+        return cls(direction, ampere_scale, singular_values, authority, rule)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -350,6 +387,251 @@ class ProfileAmplitudeUnknown:
         return cls(component, amplitude_scale)
 
 
+class CompensatorSelection(NamedTuple):
+    """What the constraint-response matrix said and which directions it gave.
+
+    ``response`` holds the derivative of every registered observation with
+    respect to every prescribed circuit current, in the observation's own
+    physical unit per ampere.  ``authority`` is the same matrix divided by
+    each row's declared scale, so its entries are that row's own scales moved
+    per ampere and rows are comparable with one another.  ``directions`` are
+    the compensating directions handed to the circuit unknowns, one column per
+    row, normalised so the largest participating circuit carries unity.
+
+    ``drivable`` lists the circuit indices the selection was allowed to reach.
+    The response carrier holds a column for every conductor the operator
+    prescribes, passive structure included, and a compensator that asks a
+    passive ring to carry a current is not a compensator; ``authority`` and
+    ``response`` stay full width so the ranking still shows what was excluded,
+    while ``singular_values`` and ``directions`` describe the drivable block.
+    """
+
+    rule: CompensatorRule
+    response: np.ndarray
+    authority: np.ndarray
+    singular_values: np.ndarray
+    directions: np.ndarray
+    direction_authority: np.ndarray
+    row_coupling: np.ndarray
+    competing: bool
+    drivable: np.ndarray
+
+    def leading_circuits(
+        self, row: int, *, count: int = 4, floor: float = 1.0e-9
+    ) -> tuple[int, ...]:
+        """Return the circuit indices carrying most of one row's direction.
+
+        ``floor`` is relative to the direction's largest component and exists
+        to keep rounding noise in an inactive circuit out of the receipt.
+        """
+        column = np.abs(np.asarray(self.directions)[:, row])
+        order = np.argsort(column)[::-1]
+        threshold = float(floor) * column[order[0]]
+        return tuple(int(index) for index in order[:count] if column[index] > threshold)
+
+
+def constraint_response_matrix(
+    profile: ForwardProfile,
+    pairs: Sequence[ConstraintPair],
+    flux: jax.Array,
+    *,
+    requested_class: jax.Array | None = None,
+    target_current: jax.Array | None = None,
+) -> jax.Array:
+    """Differentiate every registered observation against every circuit current.
+
+    The prescribed circuits enter the flux state linearly through the
+    operator's response carrier, so one reverse-mode pass per residual row
+    contracted with that carrier is the whole matrix, exact and at the cost of
+    the rows rather than of the circuits.
+    """
+    pairs = tuple(pairs)
+    if not pairs:
+        raise ValueError("a response matrix needs at least one constraint pair")
+    field = profile.operator.prescribed_current_field
+    if field is None:
+        raise ValueError("a constraint response matrix needs a prescribed field")
+    response = jnp.asarray(field.response)
+    state = jnp.ravel(jnp.asarray(flux))
+    context = ConstraintContext(state, requested_class, target_current, None)
+    blocks = []
+    for pair in pairs:
+
+        def observe(value, pair=pair):
+            return jnp.atleast_1d(
+                pair.functional.observed(
+                    profile, context._replace(flux=value), pair.binding.payload
+                )
+            )
+
+        jacobian = jnp.reshape(jax.jacrev(observe)(state), (pair.row_count, state.size))
+        blocks.append(jacobian @ response)
+    return jnp.concatenate(blocks, axis=0)
+
+
+def _infinity_normalised(columns: np.ndarray) -> np.ndarray:
+    """Scale each column so its largest participating circuit carries unity."""
+    peak = np.max(np.abs(columns), axis=0)
+    peak = np.where(peak > 0.0, peak, 1.0)
+    return columns / peak
+
+
+def select_compensating_directions(
+    authority: np.ndarray,
+    *,
+    circuits: Sequence[int] | np.ndarray | None = None,
+    rule: CompensatorRule | None = None,
+    competition_threshold: float = 0.5,
+    participation_floor: float = 0.0,
+) -> CompensatorSelection:
+    """Read compensating circuit directions off one normalised authority matrix.
+
+    A row's steepest direction is its own authority row: among directions of
+    equal current norm, that one buys the most motion, and its largest entry
+    names the circuit with the most authority per ampere.  Two rows whose
+    steepest directions are nearly parallel are asking the same circuits for
+    different things, and taking each row's steepest direction would leave the
+    pair fighting.  The pseudo-inverse columns of the authority matrix are the
+    directions that move one row and leave the others where they are, so rows
+    that compete are distributed across the circuits by the matrix's own
+    singular structure instead.
+    """
+    authority = np.asarray(authority, dtype=float)
+    if authority.ndim != 2:
+        raise ValueError("the authority matrix must have shape (row, circuit)")
+    rows, circuit_count = authority.shape
+    if circuits is None:
+        drivable = np.arange(circuit_count)
+    else:
+        drivable = np.unique(np.asarray(circuits, dtype=int))
+        if drivable.size == 0:
+            raise ValueError("a derived direction needs at least one drivable circuit")
+        if drivable[0] < 0 or drivable[-1] >= circuit_count:
+            raise ValueError("a drivable circuit index falls outside the response")
+    if not np.all(np.isfinite(authority)):
+        raise ValueError("every constraint row needs finite non-zero circuit authority")
+    block = authority[:, drivable]
+    norms = np.linalg.norm(block, axis=1)
+    if np.any(norms <= 0.0):
+        raise ValueError("every constraint row needs finite non-zero circuit authority")
+    unit = block / norms[:, None]
+    coupling = np.abs(unit @ unit.T)
+    competing = bool(
+        rows > 1 and np.max(coupling - np.eye(rows)) > float(competition_threshold)
+    )
+    if rule is None:
+        rule = (
+            CompensatorRule.SINGULAR_DISTRIBUTION
+            if competing
+            else CompensatorRule.DOMINANT_AUTHORITY
+        )
+    rule = CompensatorRule(rule)
+    singular_values = np.linalg.svd(block, compute_uv=False)
+    if rule is CompensatorRule.DOMINANT_AUTHORITY:
+        columns = block.T
+    elif rule is CompensatorRule.SINGULAR_DISTRIBUTION:
+        columns = np.linalg.pinv(block)
+    else:
+        raise ValueError("a derived direction needs an authority or singular rule")
+    columns = np.asarray(columns, dtype=float)
+    if participation_floor > 0.0:
+        peak = np.max(np.abs(columns), axis=0, keepdims=True)
+        columns = np.where(
+            np.abs(columns) >= float(participation_floor) * peak, columns, 0.0
+        )
+    directions = np.zeros((circuit_count, rows))
+    directions[drivable] = _infinity_normalised(columns)
+    direction_authority = np.einsum("rc,cr->r", authority, directions)
+    if np.any(direction_authority <= 0.0):
+        sign = np.where(direction_authority < 0.0, -1.0, 1.0)
+        directions = directions * sign[None, :]
+        direction_authority = direction_authority * sign
+    return CompensatorSelection(
+        rule=rule,
+        response=np.zeros_like(authority),
+        authority=authority,
+        singular_values=singular_values,
+        directions=directions,
+        direction_authority=direction_authority,
+        row_coupling=coupling,
+        competing=competing,
+        drivable=drivable,
+    )
+
+
+def derive_circuit_compensators(
+    profile: ForwardProfile,
+    pairs: Sequence[ConstraintPair],
+    flux: jax.Array,
+    *,
+    requested_class: jax.Array | None = None,
+    target_current: jax.Array | None = None,
+    circuits: Sequence[int] | np.ndarray | None = None,
+    rule: CompensatorRule | None = None,
+    competition_threshold: float = 0.5,
+    participation_floor: float = 0.0,
+) -> tuple[tuple[ConstraintPair, ...], CompensatorSelection]:
+    """Replace each pair's compensator with the direction the matrix implies.
+
+    Only the direction is derived.  An ampere scale the caller already stated
+    is kept, because it sets conditioning and not the converged current; a
+    pair that arrives without one is given the current amplitude that moves
+    its row by one declared scale, which is the same conditioning the flux
+    block already carries.
+
+    ``circuits`` names the columns the caller can actually drive.  Leaving it
+    unset lets the derivation reach every column the operator prescribes,
+    which on a machine whose response carrier also holds passive structure
+    means asking a passive ring to carry a compensating current.
+    """
+    pairs = tuple(pairs)
+    response = np.asarray(
+        constraint_response_matrix(
+            profile,
+            pairs,
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+        ),
+        dtype=float,
+    )
+    row_slices = constraint_row_slices(pairs)
+    scales = np.concatenate(
+        tuple(np.ravel(np.asarray(pair.binding.scale, dtype=float)) for pair in pairs)
+    )
+    selection = select_compensating_directions(
+        response / scales[:, None],
+        circuits=circuits,
+        rule=rule,
+        competition_threshold=competition_threshold,
+        participation_floor=participation_floor,
+    )
+    selection = selection._replace(response=response)
+    derived = []
+    for pair, row_slice in zip(pairs, row_slices, strict=True):
+        columns = selection.directions[:, row_slice]
+        authority = selection.direction_authority[row_slice]
+        if isinstance(pair.unknown, CircuitCurrentUnknown):
+            ampere_scale = jnp.asarray(pair.unknown.ampere_scale)
+        else:
+            ampere_scale = jnp.asarray(1.0 / authority)
+        unknown = CircuitCurrentUnknown(
+            direction=jnp.asarray(columns),
+            ampere_scale=ampere_scale,
+            singular_values=jnp.asarray(selection.singular_values),
+            authority=jnp.asarray(authority),
+            rule=selection.rule,
+        )
+        derived.append(
+            ConstraintPair(
+                functional=pair.functional,
+                unknown=unknown,
+                binding=pair.binding,
+            )
+        )
+    return tuple(derived), selection
+
+
 @dataclass(frozen=True)
 class CurrentCentroidConstraint:
     """Current-centroid rows on one explicitly declared integration support."""
@@ -421,6 +703,10 @@ class ConstraintRecord(NamedTuple):
     normalized_unknown: jax.Array
     physical_unknown: jax.Array
     soft_mode_projection: jax.Array
+    compensator_rule: jax.Array | None = None
+    compensator_direction: jax.Array | None = None
+    compensator_singular_values: jax.Array | None = None
+    compensator_authority: jax.Array | None = None
 
 
 @dataclass(frozen=True)
@@ -574,6 +860,9 @@ def constraint_records(
         physical_residual = observed - target
         scale = jnp.atleast_1d(jnp.asarray(binding.scale))
         tolerance = jnp.atleast_1d(jnp.asarray(binding.tolerance))
+        circuit = (
+            pair.unknown if isinstance(pair.unknown, CircuitCurrentUnknown) else None
+        )
         records.append(
             ConstraintRecord(
                 observed=observed,
@@ -585,6 +874,24 @@ def constraint_records(
                 normalized_unknown=value,
                 physical_unknown=pair.unknown.physical_value(value),
                 soft_mode_projection=jnp.asarray(projections)[row_slice],
+                compensator_rule=jnp.full(
+                    observed.shape,
+                    int(CompensatorRule.EXPLICIT if circuit is None else circuit.rule),
+                    dtype=jnp.int8,
+                ),
+                compensator_direction=(
+                    None if circuit is None else jnp.asarray(circuit.direction)
+                ),
+                compensator_singular_values=(
+                    None
+                    if circuit is None or circuit.singular_values is None
+                    else jnp.asarray(circuit.singular_values)
+                ),
+                compensator_authority=(
+                    None
+                    if circuit is None or circuit.authority is None
+                    else jnp.asarray(circuit.authority)
+                ),
             )
         )
     return tuple(records)
@@ -594,6 +901,8 @@ __all__ = [
     "AugmentedConstraintSystem",
     "CircuitCurrentUnknown",
     "CompensatingUnknown",
+    "CompensatorRule",
+    "CompensatorSelection",
     "ConstraintBinding",
     "ConstraintContext",
     "ConstraintFunctional",
@@ -604,7 +913,11 @@ __all__ = [
     "CurrentCentroidConstraint",
     "ProfileAmplitudeUnknown",
     "assemble_augmented_system",
+    "compensator_rule_name",
     "constraint_records",
+    "constraint_response_matrix",
     "constraint_residual_jvp",
     "constraint_row_slices",
+    "derive_circuit_compensators",
+    "select_compensating_directions",
 ]

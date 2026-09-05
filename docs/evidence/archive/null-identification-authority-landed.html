@@ -532,6 +532,42 @@
     regeneration re-solves the rows, which belongs with the rebank that follows the census repair above.</p>
   </section>
 
+  <section id="bank-schema-7">
+    <h2>The bank regenerated on the schema-7 producer with the repaired census (7b0311d2, merged at 37116a32)</h2>
+    <p><strong>Node:</strong> <code>nia-rebank-remaining-identities</code>, local DeepSeek lane, run
+    <code>r-20260905T162430443081</code>, base <code>2fa71ece</code>; report
+    <code>~/.config/reckon/crew/reports/nova/null-identification/rebank-remaining-identities.md</code>. Three identities (21978/35,
+    21985/51, 21989/55) came from the earlier shard attempt's two-arm checkpoints at 255e33eb; the three missing identities (21983/35,
+    21986/46, 22086/43) were solved as three single-identity H200 jobs (1262972, 1262973, 1262974, all exit 0) on the public-route recipe
+    at 2fa71ece, merged in canonical identity order into the twelve-arm operand cache (sha256 <code>59460a26</code>), scored with the
+    cache reused, and compiled into <code>docs/figures/null-identification-authority/bank-integrated/</code>, the authority bank
+    <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code> and the twelve per-row panels under
+    <code>docs/figures/topology-visual-corroboration/</code>.</p>
+    <p><strong>Result.</strong> All twelve rows are unchanged against the previous integrated bank on class, candidate counts,
+    convergence, terminal residual and axis position (<code>rows_changed</code> 0, every row attributed <code>neither</code>). Every row now
+    carries <code>census_slots_exhausted</code> False and a finite class margin with wall source <code>rejected_wall_candidate</code>;
+    12 of 12 agree with the EFIT diverted label; 4 rows converge to machine precision (21978/35 and 22086/43, both arms) and 8 settle
+    (21983/35 at 2.4e-4, 21985/51 at 6.7e-4, 21986/46 at 1.35e-3, 21989/55 at 7.4e-4). Gate on the regenerated operands: 26 passed over
+    <code>tests/test_topology_domain_partition.py</code>, <code>tests/test_forward_census.py</code> and
+    <code>tests/test_efit_topology_corroboration.py</code> on CPU, against the same 26 on the committed operands.</p>
+    <table>
+      <caption>Per-identity H200 wall, same persistent cache root: the earlier doubling was cold compilation</caption>
+      <thead><tr><th scope="col">Identity</th><th scope="col">Single job 1262806 (47b9f996, schema 6)</th><th scope="col">Cold shards a/b/c (255e33eb)</th><th scope="col">This run d/e/f (2fa71ece, warm cache)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21978/35</th><td>960 s</td><td>1789 s</td><td>checkpoint reused</td></tr>
+        <tr><th scope="row">21983/35</th><td>1028 s</td><td>killed at the limit</td><td>1255 s</td></tr>
+        <tr><th scope="row">21985/51</th><td>1034 s</td><td>2066 s</td><td>checkpoint reused</td></tr>
+        <tr><th scope="row">21986/46</th><td>1015 s</td><td>killed at the limit</td><td>1192 s</td></tr>
+        <tr><th scope="row">21989/55</th><td>1020 s</td><td>2130 s</td><td>checkpoint reused</td></tr>
+        <tr><th scope="row">22086/43</th><td>737 s</td><td>killed at the limit</td><td>876 s</td></tr>
+      </tbody>
+    </table>
+    <p>The cold shards each compiled two <code>jit_while</code> GPU modules of about three minutes; the warm jobs reported 464 cache hits
+    and 3245 s of compile time saved and returned to the old per-identity scale. The census did not take its all-origin runtime lane on
+    any row (<code>census_slots_exhausted</code> False everywhere, retained candidate counts byte-identical to the previous bank), so the
+    doubling is attributed to cold compilation of the schema-7 producer and the census-repair read, not to census runtime.</p>
+  </section>
+
   <section id="stale-pins-and-sweep-margin">
     <h2>Three stale pins re-expressed, and a class-margin regression surfaced on the way (268e6928, merged at f34d8fd3)</h2>
     <p>The static inventory's three stale pins are re-expressed as the mechanisms now in force, test files only: the X-coordinate identity

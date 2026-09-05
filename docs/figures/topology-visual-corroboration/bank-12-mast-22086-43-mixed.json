@@ -1,0 +1,59 @@
+{
+  "admitted_axis_m": [
+    0.9033613058059214,
+    0.022469963649236754
+  ],
+  "admitted_saddle_m": [
+    0.5849783456209243,
+    1.2305027322144648
+  ],
+  "arm": "mixed",
+  "artifact": "MAST integrated public-route topology panel",
+  "candidate_table_status": {
+    "consistency": {
+      "fixed_slot_overflow": false,
+      "one_null_type_per_containing_cell": true,
+      "retained_origins_unique_within_type": true,
+      "ring_admission_rule": {
+        "extremum_crossings": 0,
+        "saddle_crossings": 4
+      }
+    },
+    "o_point": {
+      "candidate_count": 9,
+      "capacity": 30,
+      "maximum_multiplicity": 1,
+      "polished_count": 9,
+      "raw_ring_count": 9,
+      "retained_count": 9,
+      "retained_flux_margin_to_second_best_wb": 0.29714402346218843,
+      "same_root_count": 9,
+      "truncated": false,
+      "typed_count": 9,
+      "unique_representative_origin_count": 9
+    },
+    "x_point": {
+      "candidate_count": 5,
+      "capacity": 30,
+      "maximum_multiplicity": 1,
+      "polished_count": 5,
+      "raw_ring_count": 5,
+      "retained_count": 5,
+      "retained_flux_margin_to_second_best_wb": 0.01581410613156596,
+      "same_root_count": 5,
+      "truncated": false,
+      "typed_count": 5,
+      "unique_representative_origin_count": 5
+    }
+  },
+  "converged": true,
+  "efit_label": "diverted",
+  "identity": "22086/43",
+  "json_path": "/nova/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.json",
+  "measurement_revision": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+  "nova_achieved_class": "diverted",
+  "operand_cache": "docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz",
+  "png_path": "/nova/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.png",
+  "terminal_residual": 3.192874981840307e-16,
+  "termination_reason": "converged"
+}

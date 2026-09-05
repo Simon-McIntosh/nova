@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -321,6 +321,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T000625808120" data-who="coordinator" data-when="2026-09-05T00:06:00Z">
     <div class="r-comment-body"><p>Census compaction landed into the candidate lineage: commit <code>ed00ba0c</code>, candidate advanced to <code>7fa87203</code>. The structured census still evaluates every ring for containment, but compacts the ring-admitted origins into at most 60 work slots before the spline polish, Hessian typing and same-root deduplication, scatters every per-origin telemetry array back to its published shape, and skips the fixed eight-step polish on the spline-value path when the admitted extremum and saddle already meet the seed stationarity gate. Every published census key is byte-identical on two forward-grid fixtures (a new equivalence test proves the polish input is 60 slots rather than 255 complete rings), the twelve-row MAST census gate keeps 8 to 10 extrema and 5 to 7 saddles per map with no overflow, 50 tests green. CPU topology read on the production operand: 1.35 s to 0.65 s, a 52 percent reduction. The paired remeasure against main is dispatched on this tip as <code>nia-candidate4-paired-remeasure</code>, on the proven drivers, for the merge verdict.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T012320929044" data-who="coordinator" data-when="2026-09-05T01:23:00Z">
+    <div class="r-comment-body"><p>Fourth paired remeasure of the candidate (<code>7fa87203</code>, now advanced with its receipts to <code>21e91769</code>; report <code>~/.config/reckon/crew/reports/nova/integration/candidate-4/paired-remeasure.md</code>, receipts banked at <code>docs/figures/polish-support-performance/candidate-4/</code>; H200 job 1262785, timed out at the one-hour limit after the four timing receipts, before the per-trip census and the topology-test arms). Against main <code>3368a7ce</code>: production solve 43.0 s against 40.8 s (+5.4 percent), topology-read probe 43.0 ms against 39.1 ms (+9.9 percent), every candidate sample slower than every main sample; both arms 7 trips and 84 promotions; the four public-route rows keep the 21989/55 improvement to diverted with an admitted saddle and the other three classes unchanged. The census compaction took the gap from +48 to +5 percent. Verdict under the lead's no-impact condition remains DO NOT MERGE; the remaining 4 ms per read is being attributed per component on both arms (<code>nia-candidate4-read-component-attribution</code>, probes only). Decision for the lead: whether a 5 percent cost is acceptable for containment admission, the EFIT-consistent class on 21989/55 and the end of the 30-slot overflow, or whether the last 4 ms per read must go first.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T02:51:57",
+  "updated": "2026-09-05T03:21:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2086,6 +2086,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-read-components-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "nia-resolution-x",
@@ -99876,6 +99885,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1702
+    "_version": 1703
   }
 }

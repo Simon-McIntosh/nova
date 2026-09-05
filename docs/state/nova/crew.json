@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T19:58:42",
+  "updated": "2026-09-05T20:22:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2491,6 +2491,15 @@
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "8bec1476-1813-4459-8aa8-e2806a40b187"
         },
+        "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-serve-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-05"
       },
       {
@@ -105233,6 +105242,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1758
+    "_version": 1759
   }
 }

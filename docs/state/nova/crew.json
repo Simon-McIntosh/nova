@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T09:50:00",
+  "updated": "2026-09-05T10:03:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -525,6 +525,15 @@
           "gpt-5.6-sol": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "cank-compensator-x",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "cank-interface-design-x",
@@ -2008,6 +2017,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-dsv4-margin-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "nia-gate-x",
         "harness": "codex",
         "role": "implement",
@@ -2777,6 +2795,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "scr-dsv4-inventory-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "scr-elimination-x",
@@ -102107,6 +102134,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1725
+    "_version": 1728
   }
 }

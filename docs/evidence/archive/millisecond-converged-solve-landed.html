@@ -212,6 +212,33 @@
     inside the fused solve with the dynamic loop counts the receipts carry.</p>
   </section>
 
+  <section id="per-trip-kernels">
+    <h2>Late trips replay the recovery sequence: the growing cost is named</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/</code> (per-trip
+    components, dynamic counts, kernel growth, figure, persisted trace events; five complete Perfetto traces under the run
+    directory of H200 job 1262787; the commit is held on the Jacobi-variant lineage because the exact SVD path crashes the CUPTI
+    replay, which also ended tracing at trip six).</p>
+    <table>
+      <caption>MAST 22086/43 pure, traced trips inside the fused solve</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Trip 2</th><th scope="col">Trip 5</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Traced wall</th><td>5.49 s</td><td>9.11 s (+66 percent)</td></tr>
+        <tr><th scope="row">Summed kernel time</th><td>2.95 s</td><td>4.31 s (+46 percent)</td></tr>
+        <tr><th scope="row">Host launches</th><td>213,938</td><td>353,942 (+65 percent)</td></tr>
+        <tr><th scope="row">Backtracks / recoveries / model rebuilds / descents</th><td>0 / 0 / 0 / 0</td><td>47 / 4 / 3 / 2</td></tr>
+        <tr><th scope="row">Dominant kernel median duration</th><td colspan="2">unchanged (6.624 to 6.625 µs); call counts grow 1.44 to 1.45 times</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>No kernel got slower; the same device loop bodies execute more often. The growth begins exactly where globalisation
+    recovery begins on rejected promotions: the rejected-promotion continuation re-scores the nonlinear map
+    (<code>fixed_point.py:1299</code>) and the rebuilt-model path re-linearises and restarts GMRES (lines 1438 to 1495), and both
+    re-enter the topology flood, reachability and stationary-point polish although the trip's partition is frozen at one read
+    and acceptance scores on the incumbent mask. Floor saving 3.6 s per late trip, ceiling 8.9 s. The repair makes every
+    recovery, rebuild and descent evaluation inside a trip reuse the frozen partition, bit-identical where the re-entry was
+    redundant.</p>
+  </section>
+
 </main>
 </body>
 </html>

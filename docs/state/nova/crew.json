@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T02:04:53",
+  "updated": "2026-09-05T02:51:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1770,6 +1770,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-recovery-frozen-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "msc-remainder-x",
@@ -99867,6 +99876,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1701
+    "_version": 1702
   }
 }

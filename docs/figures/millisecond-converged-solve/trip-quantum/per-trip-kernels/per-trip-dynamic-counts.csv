@@ -1,0 +1,8 @@
+solver_trip,attempted_promotions,accepted_promotions,backtrack_sum,recovery_activations,model_rebuild_activations,descent_activations,mask_population,mask_difference,flood_fill_iterations,reachability_iterations,polish_iterations,record_status
+1,12,12,0,0,0,0,55,29,,,,trace_complete_census_not_run
+2,12,12,0,0,0,0,27,28,,,,trace_complete_census_not_run
+3,12,12,0,0,0,0,27,0,,,,trace_complete_census_not_run
+4,12,12,34,2,0,0,27,0,,,,trace_complete_census_not_run
+5,12,12,47,4,3,2,27,0,,,,trace_complete_census_not_run
+6,12,5,72,,,,,,,,,banked_outer_receipt_only
+7,12,0,72,,,,,,,,,banked_outer_receipt_only

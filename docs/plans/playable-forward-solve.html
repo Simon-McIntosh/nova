@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.33">
 <meta name="plan-commits" content="3afd3caf,81bec10b,672f3b43,d5e90aea">
 <meta name="plan-artifacts" content="docs/evidence/archive/playable-forward-solve-landed.html,nova/equilibrium/steering_frames.py,tests/test_steering_frames.py,nova/equilibrium/reduced_newton.py,tests/test_reduced_newton_constraints.py,benchmarks/reduced_newton_constrained_rows.py,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.json,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.png">
@@ -336,6 +336,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260905T193500-tunnel-contract" data-who="reckon-ship-s19-playable" data-when="2026-09-05T19:35:00Z">
     <div class="r-comment-body"><p><strong>Tunnel contract confirmed with the imas-codex coordinator, 2026-09-05 21:30.</strong> Port 18506 is free in the service band (17687 neo4j, 18400 llm proxy, 18450 postgres, 18765 embed, 18800 vLLM) and stands; the accessor will be a <code>PLAYABLE_PORT = 18506</code> constant in <code>imas_codex/settings.py</code> with an <code>IMAS_CODEX_PLAYABLE_PORT</code> override; job name <code>nova-playable</code>; the <code>--playable</code> target is three lines against <code>discover_compute_node</code> with that job name, same-port forward bound to the discovered node, a clear failure when no job is running. No allocation-log fallback on the tunnel side (a discovery path exercised only on failure rots unnoticed), so the record the launcher writes serves nova's own status command only. The target stays with imas-codex on its lead's timetable; nothing here waits on it. <strong>Binding rule for the launcher (f-pfs-004):</strong> the forward's remote end is the compute node, so the Bokeh server must bind the node's routable interface (<code>--address 0.0.0.0</code>), never loopback, and allow the websocket origin <code>localhost:18506</code> that the browser presents through the forward, plus the node's own name for a login-node check.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260905T212500-height-pin-trigger" data-who="reckon-ship-s19-playable" data-when="2026-09-05T21:25:00Z">
+    <div class="r-comment-body"><p><strong>The height pin is a scoped exception with a removal trigger, on both sides.</strong> The imas-ambix lead authorised it on 2026-09-05 for the demo only; it is removed when a Thomson forward model can supply the plasma height instead of the reconstruction, and that sentence is to be written where the row is applied in the labeller, not only here, so a reader touching the pin can tell whether the condition is met. Two records travel with every dataset this section produces: the per-slice conditioning flag and target source, which is both the firewall's enforcement across the seam (neither imas-ambix guard sees a number handed over as data) and the removal mechanism (which labels carry the pin is a flag read, not a corpus audit); and the caveat that any held-out result scored by the EFIT referee on a corpus built with these labels carries a one-scalar-per-slice leak on the axis position, the interior quantity whose skill claims have been the weakest and most contested, so a demo figure quoted as skill would be flattered on exactly that number. Both facts sit beside the numbers in every receipt this section writes.</p></div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

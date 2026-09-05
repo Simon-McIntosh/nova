@@ -1,0 +1,326 @@
+{
+  "receipt": "reference-free vertical-mode elimination public solve",
+  "source": {
+    "revision": "4ba8ba3fb016b19df6e75b148fc9bd6a90801461",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "configuration": {
+    "route": "ForwardProfile.solve(ForwardSolveRequest)",
+    "constraint_layout": "static ConstraintPair tuple on every request",
+    "constraint_target": "vertical plasma-current centroid of the seed",
+    "compensating_unknown": "P6 antisymmetric CircuitCurrentUnknown",
+    "elimination": {
+      "equation": "inner compensating current equals zero",
+      "method": "grid-bounded continuation followed by bracketed safeguarded secant or bisection",
+      "centroid_step_m": 0.02,
+      "current_tolerance_a": 1.0,
+      "maximum_outer_iterations": 48,
+      "minimum_centroid_step_m": 1e-05,
+      "centroid_step_growth": 2.0,
+      "row_runtime_limit_seconds": 1200.0,
+      "unbracketed_displacement": "secant prediction from the two latest converged samples, bounded by the recovering continuation limit and one grid cell",
+      "inner_warm_start": "previous flux and normalized circuit-current unknown",
+      "inner_convergence_gate": "nonconverged solves publish no outer current and halve the step",
+      "best_iterate_retention": "minimum absolute admitted current",
+      "published_reference_position": null
+    },
+    "efit_vertical_diagnostic": "current-centroid and magnetic-axis heights, compared after solving and never used as input",
+    "persistent_compilation_cache": {
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    }
+  },
+  "inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "operands_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
+    "null_direction_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol/docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+    "null_direction_receipt_sha256": "46169cd5aa481a3d29203df3d0927e75ad3d35e2a7876a8f07210440018374f7",
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005449051968753338,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.052264 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "identity": "21985/51",
+      "role": "unconstrained control",
+      "seed_vertical_centroid_m": 0.003215320013413085,
+      "target_current_a": 934383.875,
+      "efit": {
+        "class": "diverted",
+        "magnetic_axis_height_m": 0.004633639473468065,
+        "current_centroid_height_m": 0.006019973661750555
+      },
+      "domain_grid_vertical_step_m": 0.125,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "stored_circuit_count": 101,
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "nonzero_direction_entries": [
+          {
+            "stored_circuit": 12,
+            "coefficient": 1.0
+          },
+          {
+            "stored_circuit": 13,
+            "coefficient": -1.0
+          }
+        ],
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 144723.518947531,
+        "current_scale_definition": "one multiplier produces the seed reference flux span",
+        "position_scale_m": 4.0,
+        "position_scale_definition": "full vertical extent of the solve lattice"
+      },
+      "null_direction_reference": null,
+      "free": {
+        "qualified": false,
+        "class_determinate": true,
+        "achieved_class": "diverted",
+        "terminal_residual": 0.0006535225590385817,
+        "active_set_trips": 6,
+        "termination": "active_set_settled",
+        "vertical_centroid_m": 0.0336563191513879,
+        "vertical_target_m": null,
+        "vertical_error_m": null,
+        "normalized_compensating_unknown": null,
+        "compensating_current_a": null
+      },
+      "pinned": null,
+      "eliminated": null,
+      "elimination_checkpoint": null,
+      "elapsed_seconds": 216.56137872487307
+    },
+    {
+      "identity": "21986/46",
+      "role": "near-null vertical target",
+      "seed_vertical_centroid_m": 0.09889428493417936,
+      "target_current_a": 874260.4375,
+      "efit": {
+        "class": "diverted",
+        "magnetic_axis_height_m": 0.0794563964009285,
+        "current_centroid_height_m": 0.0949496179819107
+      },
+      "domain_grid_vertical_step_m": 0.125,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "stored_circuit_count": 101,
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "nonzero_direction_entries": [
+          {
+            "stored_circuit": 12,
+            "coefficient": 1.0
+          },
+          {
+            "stored_circuit": 13,
+            "coefficient": -1.0
+          }
+        ],
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 130455.06566432705,
+        "current_scale_definition": "one multiplier produces the seed reference flux span",
+        "position_scale_m": 4.0,
+        "position_scale_definition": "full vertical extent of the solve lattice"
+      },
+      "null_direction_reference": {
+        "smallest_to_largest_ratio": 0.00031153696584586515,
+        "rigid_vertical_projection_fraction": 0.7431868313141167
+      },
+      "free": {
+        "qualified": false,
+        "class_determinate": true,
+        "achieved_class": "diverted",
+        "terminal_residual": 0.001346549722632811,
+        "active_set_trips": 5,
+        "termination": "active_set_settled",
+        "vertical_centroid_m": 0.07004366673855222,
+        "vertical_target_m": null,
+        "vertical_error_m": null,
+        "normalized_compensating_unknown": null,
+        "compensating_current_a": null
+      },
+      "pinned": {
+        "qualified": false,
+        "class_determinate": true,
+        "achieved_class": "diverted",
+        "terminal_residual": 9.216672469029877e-09,
+        "active_set_trips": 1,
+        "termination": "converged",
+        "vertical_centroid_m": 0.09889428874969335,
+        "vertical_target_m": 0.09889428493417936,
+        "vertical_error_m": 3.815513988092434e-09,
+        "normalized_compensating_unknown": -0.03145313101631831,
+        "compensating_current_a": -4103.220272082487
+      },
+      "eliminated": null,
+      "elimination_checkpoint": {
+        "complete": false,
+        "completed_outer_samples": 6,
+        "outer_trace": [
+          {
+            "iteration": 1,
+            "target_height": 0.09889428493417936,
+            "compensating_current": -4103.220272082487,
+            "inner_residual": 9.216672469029877e-09,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "seed",
+            "step_reason": "seed target is the initial plasma-current centroid",
+            "step_origin_height": null,
+            "predicted_zero_height": null,
+            "predicted_displacement": null,
+            "applied_displacement": null,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          },
+          {
+            "iteration": 2,
+            "target_height": 0.11889428493417936,
+            "compensating_current": -5764.244038592116,
+            "inner_residual": 1.5255593047686557e-12,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "continuation_probe",
+            "step_reason": "a secant slope is unavailable; probe in the retained direction",
+            "step_origin_height": 0.09889428493417936,
+            "predicted_zero_height": null,
+            "predicted_displacement": null,
+            "applied_displacement": 0.02,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          },
+          {
+            "iteration": 3,
+            "target_height": 0.09889428493417936,
+            "compensating_current": -4103.223467793147,
+            "inner_residual": 1.1457021500260844e-11,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "secant_continuation",
+            "step_reason": "the last two converged samples predict zero current beyond the recovered continuation limit; cap the displacement",
+            "step_origin_height": 0.11889428493417936,
+            "predicted_zero_height": 0.04948836606879507,
+            "predicted_displacement": -0.06940591886538429,
+            "applied_displacement": -0.02,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          },
+          {
+            "iteration": 4,
+            "target_height": 0.07889428493417935,
+            "compensating_current": -2885.199687563005,
+            "inner_residual": 2.7660212583470675e-09,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "secant_continuation",
+            "step_reason": "the last two converged samples predict zero current beyond the recovered continuation limit; cap the displacement",
+            "step_origin_height": 0.09889428493417936,
+            "predicted_zero_height": 0.049488232535689756,
+            "predicted_displacement": -0.0494060523984896,
+            "applied_displacement": -0.02,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          },
+          {
+            "iteration": 5,
+            "target_height": 0.05889428493417935,
+            "compensating_current": -2580.8360473689827,
+            "inner_residual": 6.648745062519308e-11,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "secant_continuation",
+            "step_reason": "the last two converged samples predict zero current beyond the recovered continuation limit; cap the displacement",
+            "step_origin_height": 0.07889428493417935,
+            "predicted_zero_height": 0.031519188743235435,
+            "predicted_displacement": -0.04737509619094392,
+            "applied_displacement": -0.02,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          },
+          {
+            "iteration": 6,
+            "target_height": 0.038894284934179346,
+            "compensating_current": -2730.069868058021,
+            "inner_residual": 1.8282469340094093e-09,
+            "inner_converged": true,
+            "inner_trips": 1,
+            "inner_termination": "converged",
+            "inner_termination_code": 1,
+            "step_kind": "secant_continuation",
+            "step_reason": "the last two converged samples predict zero current beyond the recovered continuation limit; cap the displacement",
+            "step_origin_height": 0.05889428493417935,
+            "predicted_zero_height": -0.1106947005125566,
+            "predicted_displacement": -0.16958898544673595,
+            "applied_displacement": -0.02,
+            "continuation_step_limit": 0.02,
+            "bracket_lower_height": null,
+            "bracket_upper_height": null,
+            "bracket_lower_current": null,
+            "bracket_upper_current": null
+          }
+        ]
+      },
+      "elapsed_seconds": 1216.7826203806326
+    }
+  ]
+}

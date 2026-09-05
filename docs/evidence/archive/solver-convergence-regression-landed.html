@@ -578,6 +578,23 @@
     the current to −5764 A, four reverse-direction inner attempts were refused, the step fell to 0.00125 m and stayed there, so
     24 iterations moved the current only from −4103 A to −3904 A. The repair in flight lets a reduced step regrow toward the cell
     cap after each converged sample and aims it with the secant of the two most recent converged samples.</p>
+    <h3>Third attempt on the merged protocol: the mechanism works and there is no zero to find (commits 4ba8ba3f, f1da1c7a, held)</h3>
+    <p>Receipt <code>docs/figures/solver-convergence-regression/vertical-mode/elimination/protocol/four-rows.json</code> (H200 jobs
+    1262808 and 1262819, reproduced bit for bit). Driving the public constrained solve through the typed request with the
+    protocol's centroid row, every inner solve converged and the step policy walked the target height as designed.</p>
+    <table>
+      <caption>21986/46, compensating current on the P6 pair against target centroid height</caption>
+      <thead><tr><th scope="col">Height</th><th scope="col">0.1189 m</th><th scope="col">0.0989 m (seed)</th><th scope="col">0.0789 m</th><th scope="col">0.0589 m</th><th scope="col">0.0389 m</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Current</th><td>−5764 A</td><td>−4103 A</td><td>−2885 A</td><td>−2581 A</td><td>−2730 A</td></tr>
+      </tbody>
+    </table>
+    <p>The magnitude has a minimum of about 2.6 kA near 0.06 m and rises again below it: no height in the scanned range lets the
+    prescribed 101-circuit current set hold the plasma without an extra radial field of about 0.6 mT. The census found no
+    omitted conductor, so the inconsistency lives in the prescribed currents or the machine model, or in fitted currents that
+    absorbed diagnostic error as the lead suggested. The elimination therefore delivers a measurement rather than a root, and
+    what to do with it is the lead's question (accept the minimum as the measurement, widen the scan, or re-examine the current
+    set). The earlier estimate of a root 5 cm below the seed came from the local slope and is superseded.</p>
   </section>
 
   <section id="open-record">

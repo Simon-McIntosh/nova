@@ -1,0 +1,274 @@
+{
+  "captured_at": "2026-09-05T01:32:40.063467+00:00",
+  "contract": {
+    "limiter_uses_selected_segment": false,
+    "line_of_sight_target_count": 420
+  },
+  "direct_probes": {
+    "census": {
+      "compile_wall_s": 0.04308152012526989,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 0,
+        "fixed_scan_trip_lower_bound": 0
+      },
+      "first_execute_wall_s": 0.001063433475792408,
+      "steady": {
+        "maximum_s": 0.0003440435975790024,
+        "median_absolute_deviation_s": 4.626810550689697e-05,
+        "median_s": 0.00023764744400978088,
+        "minimum_s": 0.00016534794121980667,
+        "range_s": 0.0001786956563591957,
+        "sample_count": 5,
+        "samples_s": [
+          0.00024173036217689514,
+          0.0003440435975790024,
+          0.0001913793385028839,
+          0.00023764744400978088,
+          0.00016534794121980667
+        ]
+      }
+    },
+    "census_values_by_spline": {
+      "compile_wall_s": 0.5305390981957316,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 843,
+        "fixed_scan_trip_lower_bound": 843
+      },
+      "first_execute_wall_s": 0.05164468567818403,
+      "steady": {
+        "maximum_s": 0.009760339744389057,
+        "median_absolute_deviation_s": 0.0006938297301530838,
+        "median_s": 0.003737896680831909,
+        "minimum_s": 0.0030440669506788254,
+        "range_s": 0.006716272793710232,
+        "sample_count": 5,
+        "samples_s": [
+          0.006067841313779354,
+          0.009760339744389057,
+          0.003737896680831909,
+          0.0030440669506788254,
+          0.003095412626862526
+        ]
+      }
+    },
+    "flood_fills": {
+      "compile_wall_s": 0.373499546200037,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 2499,
+        "fixed_scan_trip_lower_bound": 2499
+      },
+      "first_execute_wall_s": 0.020896881818771362,
+      "steady": {
+        "maximum_s": 0.013076061382889748,
+        "median_absolute_deviation_s": 6.51506707072258e-05,
+        "median_s": 0.012873007915914059,
+        "minimum_s": 0.012807857245206833,
+        "range_s": 0.00026820413768291473,
+        "sample_count": 5,
+        "samples_s": [
+          0.012807857245206833,
+          0.012829463928937912,
+          0.012873007915914059,
+          0.012994037009775639,
+          0.013076061382889748
+        ]
+      }
+    },
+    "limiter_tangency": {
+      "compile_wall_s": 0.9333430454134941,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 2073,
+        "fixed_scan_trip_lower_bound": 2073
+      },
+      "first_execute_wall_s": 0.028930993750691414,
+      "steady": {
+        "maximum_s": 0.015528721734881401,
+        "median_absolute_deviation_s": 2.831779420375824e-05,
+        "median_s": 0.0146380215883255,
+        "minimum_s": 0.01460958831012249,
+        "range_s": 0.0009191334247589111,
+        "sample_count": 5,
+        "samples_s": [
+          0.014666339382529259,
+          0.0146380215883255,
+          0.01460958831012249,
+          0.01462504267692566,
+          0.015528721734881401
+        ]
+      }
+    },
+    "line_of_sight": {
+      "compile_wall_s": 0.02838005032390356,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 0,
+        "fixed_scan_trip_lower_bound": 0
+      },
+      "first_execute_wall_s": 0.0005401195958256721,
+      "steady": {
+        "maximum_s": 9.167194366455078e-05,
+        "median_absolute_deviation_s": 6.46151602268219e-06,
+        "median_s": 4.7217123210430145e-05,
+        "minimum_s": 4.0755607187747955e-05,
+        "range_s": 5.0916336476802826e-05,
+        "sample_count": 5,
+        "samples_s": [
+          9.167194366455078e-05,
+          6.100069731473923e-05,
+          4.7217123210430145e-05,
+          4.3159350752830505e-05,
+          4.0755607187747955e-05
+        ]
+      }
+    },
+    "separatrix": {
+      "compile_wall_s": 2.991323751397431,
+      "control_flow": {
+        "dynamic_while_primitives": 7,
+        "fixed_scan_trip_compiled_branch_sum": 4031,
+        "fixed_scan_trip_lower_bound": 4031
+      },
+      "first_execute_wall_s": 0.06506819557398558,
+      "steady": {
+        "maximum_s": 0.02860952727496624,
+        "median_absolute_deviation_s": 7.292721420526505e-05,
+        "median_s": 0.02839990984648466,
+        "minimum_s": 0.028326982632279396,
+        "range_s": 0.00028254464268684387,
+        "sample_count": 5,
+        "samples_s": [
+          0.02860952727496624,
+          0.02839990984648466,
+          0.02857248205691576,
+          0.028335140086710453,
+          0.028326982632279396
+        ]
+      }
+    },
+    "tensor_spline_fit": {
+      "compile_wall_s": 0.08147049974650145,
+      "control_flow": {
+        "dynamic_while_primitives": 0,
+        "fixed_scan_trip_compiled_branch_sum": 120,
+        "fixed_scan_trip_lower_bound": 120
+      },
+      "first_execute_wall_s": 0.0027791745960712433,
+      "steady": {
+        "maximum_s": 0.0010860711336135864,
+        "median_absolute_deviation_s": 1.8192455172538757e-05,
+        "median_s": 0.001047411933541298,
+        "minimum_s": 0.0010088225826621056,
+        "range_s": 7.724855095148087e-05,
+        "sample_count": 5,
+        "samples_s": [
+          0.0010860711336135864,
+          0.0010480405762791634,
+          0.001047411933541298,
+          0.0010088225826621056,
+          0.0010292194783687592
+        ]
+      }
+    },
+    "wall_reachability": {
+      "compile_wall_s": 3.809619415551424,
+      "control_flow": {
+        "dynamic_while_primitives": 6,
+        "fixed_scan_trip_compiled_branch_sum": 3110,
+        "fixed_scan_trip_lower_bound": 3110
+      },
+      "first_execute_wall_s": 0.05336778983473778,
+      "steady": {
+        "maximum_s": 0.024626742117106915,
+        "median_absolute_deviation_s": 4.102475941181183e-05,
+        "median_s": 0.024585717357695103,
+        "minimum_s": 0.02452361024916172,
+        "range_s": 0.00010313186794519424,
+        "sample_count": 5,
+        "samples_s": [
+          0.024626742117106915,
+          0.024585717357695103,
+          0.024527976289391518,
+          0.02452361024916172,
+          0.024593457579612732
+        ]
+      }
+    }
+  },
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "revision": "22b2cff90e8a5d9200c4c191bc747b6559f29e6a",
+  "runtime": {
+    "cuda_visible_devices": "0",
+    "device": "cuda:0",
+    "device_kind": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "python": "3.14.2"
+  },
+  "scheduler": {
+    "accepted_time_limit": "00:30:00",
+    "cpus_per_task": "1",
+    "job_id": "1262790",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.fine_topology_component_profile"
+}

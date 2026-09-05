@@ -206,6 +206,7 @@ _WALL_REACHABILITY_SAMPLES = 420
 # 2.1e-5 m even on the widest supported piece while retaining fixed shapes.
 _WALL_DERIVATIVE_BINS = 4
 _WALL_MINIMUM_BISECTION_STEPS = 12
+_SELECTED_WALL_REACHABILITY_CAPACITY = 64
 _SUPPLIED_WALL_SPLINE_RELATIVE_TOLERANCE = 5.0e-2
 
 # Coarse-grid offsets probed around the preceding binding level.  The asymmetric
@@ -667,6 +668,141 @@ def _wall_nodes_in_line_of_sight(
     return ~crossed
 
 
+def _masked_wall_reachability(
+    region,
+    inside_limiter,
+    rg,
+    zg,
+    axis_r,
+    axis_z,
+    candidate_r,
+    candidate_z,
+    candidate_mask,
+    wall_r,
+    wall_z,
+    compact_capacity,
+):
+    """Evaluate exact reachability without visiting inactive padded candidates."""
+    candidate_mask = candidate_mask.reshape(-1)
+    candidate_count = jnp.sum(candidate_mask, dtype=jnp.int32)
+
+    def compact_reachability():
+        indices = jnp.nonzero(candidate_mask, size=compact_capacity, fill_value=0)[0]
+        active_slots = jnp.arange(compact_capacity) < candidate_count
+        selected_r = candidate_r[indices]
+        selected_z = candidate_z[indices]
+        reachable = (
+            _wall_nodes_touching_region(
+                region,
+                inside_limiter,
+                rg,
+                zg,
+                selected_r,
+                selected_z,
+            )
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                selected_r,
+                selected_z,
+                wall_r,
+                wall_z,
+            )
+            & active_slots
+        )
+        return (
+            jnp.zeros(candidate_mask.shape, dtype=jnp.int8)
+            .at[indices]
+            .max(reachable.astype(jnp.int8))
+            .astype(bool)
+        )
+
+    def complete_reachability():
+        return (
+            candidate_mask
+            & _wall_nodes_touching_region(
+                region,
+                inside_limiter,
+                rg,
+                zg,
+                candidate_r,
+                candidate_z,
+            )
+            & _wall_nodes_in_line_of_sight(
+                axis_r,
+                axis_z,
+                candidate_r,
+                candidate_z,
+                wall_r,
+                wall_z,
+            )
+        )
+
+    return jax.lax.cond(
+        candidate_count == 0,
+        lambda: jnp.zeros(candidate_mask.shape, dtype=bool),
+        lambda: jax.lax.cond(
+            candidate_count <= compact_capacity,
+            compact_reachability,
+            complete_reachability,
+        ),
+    )
+
+
+def _masked_surface_derivatives(
+    surface,
+    candidate_r,
+    candidate_z,
+    candidate_mask,
+    safe_r,
+    safe_z,
+    compact_capacity,
+):
+    """Evaluate a spline only at active fixed-shape candidate slots."""
+    candidate_mask = candidate_mask.reshape(-1)
+    candidate_count = jnp.sum(candidate_mask, dtype=jnp.int32)
+
+    def compact_evaluation():
+        candidate_size = candidate_mask.size
+        indices = jnp.nonzero(
+            candidate_mask, size=compact_capacity, fill_value=candidate_size
+        )[0]
+        safe_indices = jnp.minimum(indices, candidate_size - 1)
+        evaluation = surface.evaluate(
+            candidate_r[safe_indices], candidate_z[safe_indices]
+        )
+
+        def scatter(values):
+            return (
+                jnp.zeros(candidate_mask.shape, dtype=values.dtype)
+                .at[indices]
+                .set(values, mode="drop")
+            )
+
+        return (
+            scatter(evaluation.value),
+            scatter(evaluation.radial_derivative),
+            scatter(evaluation.vertical_derivative),
+        )
+
+    def complete_evaluation():
+        evaluation = surface.evaluate(
+            jnp.where(candidate_mask, candidate_r, safe_r),
+            jnp.where(candidate_mask, candidate_z, safe_z),
+        )
+        return (
+            evaluation.value,
+            evaluation.radial_derivative,
+            evaluation.vertical_derivative,
+        )
+
+    return jax.lax.cond(
+        candidate_count <= compact_capacity,
+        compact_evaluation,
+        complete_evaluation,
+    )
+
+
 def _sample_wall_polyline(wall_r, wall_z, sample_count):
     """Return fixed-count, equal-arc samples around a closed wall polyline."""
     segment_length = jnp.hypot(
@@ -750,24 +886,6 @@ def _select_reachable_wall_limiter(
         selected_wall = jnp.asarray(selected_wall, dtype=wall_r.dtype)
         support_valid = jnp.all(jnp.isfinite(selected_wall[:3]))
         safe_selected = jnp.where(support_valid, selected_wall[:2], all_start[0])
-        selected_reachable = (
-            _wall_nodes_touching_region(
-                pre_saddle_region,
-                inside_limiter,
-                rg,
-                zg,
-                safe_selected[None, 0],
-                safe_selected[None, 1],
-            )[0]
-            & _wall_nodes_in_line_of_sight(
-                axis_r,
-                axis_z,
-                safe_selected[None, 0],
-                safe_selected[None, 1],
-                wall_r,
-                wall_z,
-            )[0]
-        )
         projection = jnp.sum(
             (safe_selected[None, :] - all_start) * all_tangent, axis=-1
         ) / jnp.where(all_length_squared > 0.0, all_length_squared, 1.0)
@@ -780,30 +898,8 @@ def _select_reachable_wall_limiter(
         selected_node = _argmin_exact(
             (wall_r - safe_selected[0]) ** 2 + (wall_z - safe_selected[1]) ** 2
         )
-        selected_node_reachable = (
-            _wall_nodes_touching_region(
-                pre_saddle_region,
-                inside_limiter,
-                rg,
-                zg,
-                wall_r[selected_node, None],
-                wall_z[selected_node, None],
-            )[0]
-            & _wall_nodes_in_line_of_sight(
-                axis_r,
-                axis_z,
-                wall_r[selected_node, None],
-                wall_z[selected_node, None],
-                wall_r,
-                wall_z,
-            )[0]
-        )
-        support_valid &= selected_reachable & selected_node_reachable
-        node_reachable = (
-            jnp.zeros_like(wall_r, dtype=bool)
-            .at[selected_node]
-            .set(selected_node_reachable & support_valid)
-        )
+        support_r = jnp.stack((safe_selected[0], wall_r[selected_node]))
+        support_z = jnp.stack((safe_selected[1], wall_z[selected_node]))
         sample_reachable = jnp.zeros_like(sample_arc, dtype=bool)
         segment_index = selected_segment[None]
     start = all_start[segment_index]
@@ -848,38 +944,63 @@ def _select_reachable_wall_limiter(
     evaluation_points = jnp.where(interval_valid[..., None, None], points, safe_point)
     flat_points = points.reshape(-1, 2)
     flat_evaluation_points = evaluation_points.reshape(-1, 2)
-    endpoint_reachable = _wall_nodes_touching_region(
-        pre_saddle_region,
-        inside_limiter,
-        rg,
-        zg,
-        flat_points[:, 0],
-        flat_points[:, 1],
-    ) & _wall_nodes_in_line_of_sight(
-        axis_r,
-        axis_z,
-        flat_points[:, 0],
-        flat_points[:, 1],
-        wall_r,
-        wall_z,
-    )
-    endpoint_reachable = (
-        endpoint_reachable.reshape(parameter.shape) & interval_valid[..., None]
-    )
-    evaluation = global_surface.evaluate(
-        flat_evaluation_points[:, 0], flat_evaluation_points[:, 1]
-    )
-    endpoint_value = evaluation.value.reshape(parameter.shape)
+    endpoint_mask = jnp.broadcast_to(interval_valid[..., None], parameter.shape)
+    if selected_wall is None:
+        endpoint_reachable = _wall_nodes_touching_region(
+            pre_saddle_region,
+            inside_limiter,
+            rg,
+            zg,
+            flat_points[:, 0],
+            flat_points[:, 1],
+        ) & _wall_nodes_in_line_of_sight(
+            axis_r,
+            axis_z,
+            flat_points[:, 0],
+            flat_points[:, 1],
+            wall_r,
+            wall_z,
+        )
+        endpoint_reachable = endpoint_reachable.reshape(parameter.shape) & endpoint_mask
+    if selected_wall is None:
+        evaluation = global_surface.evaluate(
+            flat_evaluation_points[:, 0], flat_evaluation_points[:, 1]
+        )
+        flat_endpoint_value = evaluation.value
+        flat_radial_derivative = evaluation.radial_derivative
+        flat_vertical_derivative = evaluation.vertical_derivative
+    else:
+        (
+            flat_endpoint_value,
+            flat_radial_derivative,
+            flat_vertical_derivative,
+        ) = _masked_surface_derivatives(
+            global_surface,
+            flat_points[:, 0],
+            flat_points[:, 1],
+            endpoint_mask,
+            axis_r,
+            axis_z,
+            _SELECTED_WALL_REACHABILITY_CAPACITY,
+        )
+    endpoint_value = flat_endpoint_value.reshape(parameter.shape)
     gradient = jnp.stack(
-        (evaluation.radial_derivative, evaluation.vertical_derivative), axis=-1
+        (flat_radial_derivative, flat_vertical_derivative), axis=-1
     ).reshape(points.shape)
     derivative = jnp.sum(gradient * tangent[:, None, None, :], axis=-1)
-    bracket = (
-        endpoint_reachable[..., :-1]
-        & endpoint_reachable[..., 1:]
+    derivative_bracket = (
+        interval_valid[..., None]
         & (derivative[..., :-1] <= 0.0)
         & (derivative[..., 1:] >= 0.0)
     )
+    if selected_wall is None:
+        refinement_bracket = (
+            derivative_bracket
+            & endpoint_reachable[..., :-1]
+            & endpoint_reachable[..., 1:]
+        )
+    else:
+        refinement_bracket = derivative_bracket
     root_lower = parameter[..., :-1]
     root_upper = parameter[..., 1:]
 
@@ -889,7 +1010,9 @@ def _select_reachable_wall_limiter(
         middle_point = (
             start[:, None, None, :] + middle[..., None] * tangent[:, None, None, :]
         )
-        middle_point = jnp.where(bracket[..., None], middle_point, safe_point)
+        middle_point = jnp.where(
+            refinement_bracket[..., None], middle_point, safe_point
+        )
         middle_evaluation = global_surface.evaluate(
             middle_point[..., 0], middle_point[..., 1]
         )
@@ -913,32 +1036,65 @@ def _select_reachable_wall_limiter(
     root_points = (
         start[:, None, None, :] + root_parameter[..., None] * tangent[:, None, None, :]
     )
-    root_evaluation_points = jnp.where(bracket[..., None], root_points, safe_point)
+    root_evaluation_points = jnp.where(
+        refinement_bracket[..., None], root_points, safe_point
+    )
     root_value = global_surface(
         root_evaluation_points[..., 0], root_evaluation_points[..., 1]
     )
     if selected_wall is None:
+        bracket = refinement_bracket
         root_reachable = bracket
     else:
         flat_root_points = root_points.reshape(-1, 2)
+        combined_r = jnp.concatenate(
+            (support_r, flat_points[:, 0], flat_root_points[:, 0])
+        )
+        combined_z = jnp.concatenate(
+            (support_z, flat_points[:, 1], flat_root_points[:, 1])
+        )
+        combined_mask = jnp.concatenate(
+            (
+                jnp.full((2,), support_valid),
+                endpoint_mask.reshape(-1),
+                derivative_bracket.reshape(-1),
+            )
+        )
+        combined_reachable = _masked_wall_reachability(
+            pre_saddle_region,
+            inside_limiter,
+            rg,
+            zg,
+            axis_r,
+            axis_z,
+            combined_r,
+            combined_z,
+            combined_mask,
+            wall_r,
+            wall_z,
+            _SELECTED_WALL_REACHABILITY_CAPACITY,
+        )
+        support_reachable = support_valid & jnp.all(combined_reachable[:2])
+        selected_node_reachable = combined_reachable[1] & support_reachable
+        node_reachable = (
+            jnp.zeros_like(wall_r, dtype=bool)
+            .at[selected_node]
+            .set(selected_node_reachable)
+        )
+        endpoint_start = 2
+        root_start = endpoint_start + flat_points.shape[0]
+        endpoint_reachable = (
+            combined_reachable[endpoint_start:root_start].reshape(parameter.shape)
+            & support_reachable
+        )
+        bracket = (
+            derivative_bracket
+            & endpoint_reachable[..., :-1]
+            & endpoint_reachable[..., 1:]
+        )
         root_reachable = (
-            _wall_nodes_touching_region(
-                pre_saddle_region,
-                inside_limiter,
-                rg,
-                zg,
-                flat_root_points[:, 0],
-                flat_root_points[:, 1],
-            )
-            & _wall_nodes_in_line_of_sight(
-                axis_r,
-                axis_z,
-                flat_root_points[:, 0],
-                flat_root_points[:, 1],
-                wall_r,
-                wall_z,
-            )
-        ).reshape(bracket.shape) & bracket
+            combined_reachable[root_start:].reshape(derivative_bracket.shape) & bracket
+        )
 
     edge = jnp.concatenate((psi2d[0], psi2d[-1], psi2d[:, 0], psi2d[:, -1]))
     psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]

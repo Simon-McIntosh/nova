@@ -312,6 +312,34 @@ def test_the_dominant_rule_can_be_named_against_the_competition_default() -> Non
     )
 
 
+def test_a_derivation_reaches_only_the_circuits_it_is_allowed_to_drive() -> None:
+    """Restricting the candidate circuits keeps the direction on the actuators."""
+    configure_dtypes()
+    profile = _profile()
+    seed = jnp.asarray(SEED)
+    pair = _pair(GAP_WEIGHT, direction=PAIR_DIRECTION, target=0.2)
+    (derived,), selection = derive_circuit_compensators(
+        profile, (pair,), seed, circuits=(UPPER, LOWER)
+    )
+
+    np.testing.assert_array_equal(selection.drivable, [UPPER, LOWER])
+    assert np.all(np.asarray(selection.directions)[2:, 0] == 0.0)
+    assert selection.leading_circuits(0) == (UPPER, LOWER)
+    assert np.asarray(selection.authority).shape[1] == RESPONSE.shape[1]
+    assert selection.singular_values.shape == (1,)
+    open_block = np.linalg.norm(np.asarray(selection.authority)[0])
+    assert float(selection.singular_values[0]) < open_block
+
+    result = _solve(profile, (derived,), seed)
+    record = result.constraints[0]
+    np.testing.assert_allclose(np.asarray(record.observed), [0.2], atol=1.0e-8)
+    delta = np.asarray(derived.unknown.direction) @ np.asarray(record.physical_unknown)
+    assert np.all(delta[2:] == 0.0)
+
+    with pytest.raises(ValueError, match="outside the response"):
+        derive_circuit_compensators(profile, (pair,), seed, circuits=(0, 9))
+
+
 def test_a_row_without_circuit_authority_is_refused() -> None:
     """A constraint no circuit can move cannot be given a derived direction."""
     with pytest.raises(ValueError, match="non-zero circuit authority"):

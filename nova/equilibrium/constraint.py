@@ -397,6 +397,13 @@ class CompensatorSelection(NamedTuple):
     per ampere and rows are comparable with one another.  ``directions`` are
     the compensating directions handed to the circuit unknowns, one column per
     row, normalised so the largest participating circuit carries unity.
+
+    ``drivable`` lists the circuit indices the selection was allowed to reach.
+    The response carrier holds a column for every conductor the operator
+    prescribes, passive structure included, and a compensator that asks a
+    passive ring to carry a current is not a compensator; ``authority`` and
+    ``response`` stay full width so the ranking still shows what was excluded,
+    while ``singular_values`` and ``directions`` describe the drivable block.
     """
 
     rule: CompensatorRule
@@ -407,6 +414,7 @@ class CompensatorSelection(NamedTuple):
     direction_authority: np.ndarray
     row_coupling: np.ndarray
     competing: bool
+    drivable: np.ndarray
 
     def leading_circuits(
         self, row: int, *, count: int = 4, floor: float = 1.0e-9
@@ -471,6 +479,7 @@ def _infinity_normalised(columns: np.ndarray) -> np.ndarray:
 def select_compensating_directions(
     authority: np.ndarray,
     *,
+    circuits: Sequence[int] | np.ndarray | None = None,
     rule: CompensatorRule | None = None,
     competition_threshold: float = 0.5,
     participation_floor: float = 0.0,
@@ -490,11 +499,22 @@ def select_compensating_directions(
     authority = np.asarray(authority, dtype=float)
     if authority.ndim != 2:
         raise ValueError("the authority matrix must have shape (row, circuit)")
-    rows = authority.shape[0]
-    norms = np.linalg.norm(authority, axis=1)
-    if np.any(norms <= 0.0) or not np.all(np.isfinite(authority)):
+    rows, circuit_count = authority.shape
+    if circuits is None:
+        drivable = np.arange(circuit_count)
+    else:
+        drivable = np.unique(np.asarray(circuits, dtype=int))
+        if drivable.size == 0:
+            raise ValueError("a derived direction needs at least one drivable circuit")
+        if drivable[0] < 0 or drivable[-1] >= circuit_count:
+            raise ValueError("a drivable circuit index falls outside the response")
+    if not np.all(np.isfinite(authority)):
         raise ValueError("every constraint row needs finite non-zero circuit authority")
-    unit = authority / norms[:, None]
+    block = authority[:, drivable]
+    norms = np.linalg.norm(block, axis=1)
+    if np.any(norms <= 0.0):
+        raise ValueError("every constraint row needs finite non-zero circuit authority")
+    unit = block / norms[:, None]
     coupling = np.abs(unit @ unit.T)
     competing = bool(
         rows > 1 and np.max(coupling - np.eye(rows)) > float(competition_threshold)
@@ -506,11 +526,11 @@ def select_compensating_directions(
             else CompensatorRule.DOMINANT_AUTHORITY
         )
     rule = CompensatorRule(rule)
-    singular_values = np.linalg.svd(authority, compute_uv=False)
+    singular_values = np.linalg.svd(block, compute_uv=False)
     if rule is CompensatorRule.DOMINANT_AUTHORITY:
-        columns = authority.T
+        columns = block.T
     elif rule is CompensatorRule.SINGULAR_DISTRIBUTION:
-        columns = np.linalg.pinv(authority)
+        columns = np.linalg.pinv(block)
     else:
         raise ValueError("a derived direction needs an authority or singular rule")
     columns = np.asarray(columns, dtype=float)
@@ -519,7 +539,8 @@ def select_compensating_directions(
         columns = np.where(
             np.abs(columns) >= float(participation_floor) * peak, columns, 0.0
         )
-    directions = _infinity_normalised(columns)
+    directions = np.zeros((circuit_count, rows))
+    directions[drivable] = _infinity_normalised(columns)
     direction_authority = np.einsum("rc,cr->r", authority, directions)
     if np.any(direction_authority <= 0.0):
         sign = np.where(direction_authority < 0.0, -1.0, 1.0)
@@ -534,6 +555,7 @@ def select_compensating_directions(
         direction_authority=direction_authority,
         row_coupling=coupling,
         competing=competing,
+        drivable=drivable,
     )
 
 
@@ -544,6 +566,7 @@ def derive_circuit_compensators(
     *,
     requested_class: jax.Array | None = None,
     target_current: jax.Array | None = None,
+    circuits: Sequence[int] | np.ndarray | None = None,
     rule: CompensatorRule | None = None,
     competition_threshold: float = 0.5,
     participation_floor: float = 0.0,
@@ -555,6 +578,11 @@ def derive_circuit_compensators(
     pair that arrives without one is given the current amplitude that moves
     its row by one declared scale, which is the same conditioning the flux
     block already carries.
+
+    ``circuits`` names the columns the caller can actually drive.  Leaving it
+    unset lets the derivation reach every column the operator prescribes,
+    which on a machine whose response carrier also holds passive structure
+    means asking a passive ring to carry a compensating current.
     """
     pairs = tuple(pairs)
     response = np.asarray(
@@ -573,6 +601,7 @@ def derive_circuit_compensators(
     )
     selection = select_compensating_directions(
         response / scales[:, None],
+        circuits=circuits,
         rule=rule,
         competition_threshold=competition_threshold,
         participation_floor=participation_floor,

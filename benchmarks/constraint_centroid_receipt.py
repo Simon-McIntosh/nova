@@ -166,11 +166,13 @@ def _pair_projection(delta, actuator) -> float:
 def _authority_report(selection, names, *, count=8):
     """Rank the circuits by the row scale each moves per ampere."""
     authority = np.asarray(selection.authority)[0]
+    drivable = set(int(index) for index in np.asarray(selection.drivable))
     order = np.argsort(np.abs(authority))[::-1][:count]
     return [
         {
             "circuit": int(index),
             "family": names.get(int(index)),
+            "drivable": int(index) in drivable,
             "row_scales_per_ampere": float(authority[index]),
             "direction_component": float(np.asarray(selection.directions)[index, 0]),
         }
@@ -178,7 +180,7 @@ def _authority_report(selection, names, *, count=8):
     ]
 
 
-def _derived_pair(profile, fixed, seed, *, target_current, requested_class):
+def _derived_pair(profile, fixed, seed, *, target_current, requested_class, circuits):
     """Return the same centroid row with a matrix-led compensating direction."""
     (derived,), selection = derive_circuit_compensators(
         profile,
@@ -186,6 +188,7 @@ def _derived_pair(profile, fixed, seed, *, target_current, requested_class):
         seed,
         requested_class=requested_class,
         target_current=target_current,
+        circuits=circuits,
     )
     return derived, selection
 
@@ -299,6 +302,10 @@ def measure_selection(
             "support": MomentIntegralSupport.ALL_DOMAIN.value,
             "authority": "row scale moved per ampere; the direction is normalised "
             "so the largest participating circuit carries unity",
+            "drivable_circuits": "the machine active mapping; the response "
+            "carrier also holds passive structure, which no compensator drives",
+            "response_state": "the derivation reads the matrix at the seed flux, "
+            "the state the solve starts from",
             "persistent_compilation_cache": {
                 "directory": str(cache.directory),
                 "version": cache.version_key,
@@ -337,6 +344,7 @@ def measure_selection(
             seed,
             target_current=target_current,
             requested_class=requested,
+            circuits=sorted(names),
         )
         fixed_branch = profile.solve_branch(
             seed,
@@ -360,6 +368,13 @@ def measure_selection(
             "selection": {
                 "rule": selection.rule.name.lower(),
                 "competing_rows": bool(selection.competing),
+                "drivable_circuits": [
+                    {"circuit": int(index), "family": names.get(int(index))}
+                    for index in np.asarray(selection.drivable)
+                ],
+                "prescribed_circuit_count": int(
+                    np.asarray(selection.authority).shape[1]
+                ),
                 "singular_values_row_scales_per_ampere": [
                     float(value) for value in np.asarray(selection.singular_values)
                 ],

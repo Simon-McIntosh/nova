@@ -282,6 +282,7 @@ def _arm(
         requested,
         target_current=target_current,
         constraint_pairs=derived,
+        route="newton_krylov",
         newton_steps=NEWTON_STEPS,
         active_set_steps=ACTIVE_SET_STEPS,
     )

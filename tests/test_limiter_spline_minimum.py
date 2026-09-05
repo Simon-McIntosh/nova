@@ -146,6 +146,78 @@ def test_selected_wall_keeps_restricted_minimum_bits():
     assert bool(result["valid"])
 
 
+def test_selected_wall_production_operand_keeps_result_bits():
+    """The production selected segment retains its exact shadowed result."""
+    from benchmarks.receipt_raster_check import _profile_and_seed
+    from nova.equilibrium.topology import TopologyClass
+
+    case, profile, _target_current, _carrier, _policy = _profile_and_seed()
+    state = jnp.asarray(case["state"])
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    operator = profile.operator
+    physical = state[: operator.physical_node_number]
+    _masks, topology, _connected, _admitted = operator._fixed_design_read(
+        physical, requested
+    )
+    grid_flux, wall_flux = operator._fixed_design_topology.split_flux_map(physical)
+    radial, vertical, shape = operator.connectivity_grid_axes()
+    radial_count, vertical_count = shape
+    field = grid_flux.reshape((radial_count, vertical_count)).T
+    surface = cb.fit_tensor_spline(radial, vertical, field)
+    _seed, material = operator.connectivity_axis_seed(topology.axis)
+    inside = material.reshape((radial_count, vertical_count)).T
+    psi_axis = surface(topology.axis[0], topology.axis[1])
+    edge = jnp.concatenate((field[0], field[-1], field[:, 0], field[:, -1]))
+    psi_out = edge[cb._argmax_exact(jnp.abs(edge - psi_axis))]
+    span_safe = jnp.where(
+        jnp.abs(psi_out - psi_axis) < 1.0e-30, 1.0e-30, psi_out - psi_axis
+    )
+    normalized = (field - psi_axis) / span_safe
+    x_level = (surface(topology.x_point[0], topology.x_point[1]) - psi_axis) / span_safe
+    pre_saddle = cb._axis_component_before_level(
+        normalized,
+        inside,
+        radial,
+        vertical,
+        topology.axis[0],
+        topology.axis[1],
+        x_level,
+    )
+    selected_wall = jnp.r_[topology.wall_point, topology.wall_point_flux]
+    result = cb._select_reachable_wall_limiter(
+        field,
+        radial,
+        vertical,
+        inside,
+        operator.wall.coordinate[:, 0],
+        operator.wall.coordinate[:, 1],
+        wall_flux,
+        pre_saddle,
+        psi_axis,
+        surface,
+        topology.axis[0],
+        topology.axis[1],
+        selected_wall=selected_wall,
+    )
+
+    actual_bits = np.asarray(
+        [result["r"], result["z"], result["psi"], result["distance"]],
+        dtype=np.float64,
+    ).view(np.uint64)
+    expected_bits = np.asarray(
+        [
+            9221120237041090560,
+            9221120237041090560,
+            9221120237041090560,
+            9218868437227405312,
+        ],
+        dtype=np.uint64,
+    )
+    np.testing.assert_array_equal(actual_bits, expected_bits)
+    assert int(result["minimum_bracket_count"]) == 0
+    assert not bool(result["valid"])
+
+
 def test_wall_spline_minimum_retains_reachable_subsegment_without_vertices():
     """Equal-arc eligibility retains a reachable run between wall vertices."""
     case = _bowl_case()

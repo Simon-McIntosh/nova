@@ -156,7 +156,9 @@ def _centroid_pair(profile, flux, *, target, unknown, target_current, requested,
             tolerance=derived.binding.tolerance,
             scale=derived.binding.scale,
             initial_unknown=jnp.asarray(
-                [0.0] if unknown is None else np.asarray(unknown, dtype=float)
+                np.atleast_1d(
+                    np.asarray(0.0 if unknown is None else unknown, dtype=float)
+                )
             ),
         ),
     )

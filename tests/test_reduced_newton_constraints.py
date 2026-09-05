@@ -327,6 +327,35 @@ def test_a_moved_target_is_reached_and_warm_starting_costs_fewer_trips(steered):
     assert np.all(np.isfinite(np.asarray(warm.prescribed_current)))
 
 
+def test_the_public_route_carries_the_rows_into_a_receipt(steered):
+    """A constrained keyframe is reachable by naming the route, not the module.
+
+    The gate that refused augmented constraints off the Newton-Krylov route
+    now names the routes that carry a compensating unknown vector, so the same
+    row solved through ``ForwardProfile.solve`` returns an ordinary forward
+    equilibrium whose terminal record says what the row achieved and whose
+    prescribed currents already carry the compensation.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    equilibrium = profile.solve(
+        free.state,
+        route="reduced_newton",
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert bool(np.asarray(equilibrium.fixed_point.converged))
+    record = equilibrium.constraints[0]
+    assert bool(np.asarray(record.qualified)[0])
+    assert abs(_centroid(profile, equilibrium.flux) - commanded) <= CENTROID_AGREEMENT
+    with pytest.raises(ValueError, match="compensating unknown vector"):
+        profile.solve(
+            free.state, route="picard", constraint_pairs=(pair,), evaluations=1
+        )
+
+
 def test_the_reduced_route_refuses_a_state_reading_compensator(steered):
     """Only a compensator whose flux image is explicit is admitted.
 

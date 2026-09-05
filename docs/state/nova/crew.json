@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T10:15:48",
+  "updated": "2026-09-05T10:33:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -101999,6 +101999,198 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T081549398058-msc-merged-solver-diffs-line-review",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-merged-solver-diffs-line-review",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2312,
+                "cached_input_tokens": 978607,
+                "input_tokens": 980923,
+                "output_tokens": 2053,
+                "reasoning_output_tokens": 735,
+                "total_tokens": 982976,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/millisecond/merged-solver-diffs-line-review.md with one section per commit listing the hunks read, the findings (severity, file:line, the input that exposes it, whether the node's gate could have caught it), the gate-coverage judgement (which touched paths the named gate exercised and which it did not), plus a verdict per commit (clean, defect found, or defect suspected with the test that would settle it), no repository change",
+          "estimated_hours": null,
+          "goal": "Read line by line, as an independent reviewer, the three solver diffs merged to main today whose gates were green but whose diffs no human has read (a control datum for the joint worker-lane report the leads asked for: defects a review finds that the node's own gate could not see): f5bf49ae (frozen-partition acceptance scoring, nova/equilibrium/fixed_point.py, gate 71 tests plus the four public-route rows), c5e1498a (unchanged-state fallback carry, fixed_point.py, gate 74 tests plus bit identity on a twelve-fallback fixture plus 84 identical acceptance decisions plus the four rows) and ed00ba0c (compacted stationary-point census, nova/equilibrium/forward_operator.py plus flux_surface_connectivity.py, gate 50 tests plus byte-identical published census), asking of each hunk whether it does what the commit says, whether the bit-identity or byte-identity gate could have seen a defect there (a gate that compares only what the change preserves cannot see what it silently changes elsewhere), whether any path the change touches is exercised by the named gate at all (the default pytest lane excludes the slow marker unless a file is named, and no CUDA path runs on the CPU gate), whether the carried state, the compaction's capacity fallback or the skipped candidate-topology evaluation has a case the fixtures do not reach (a mask change mid-ladder, more admitted origins than the 60 work slots, own-mask admission active), and whether any comment or name in the diff carries plan, incident or author references, reporting every finding with file:line plus the concrete input that would expose it, read-only",
+          "id": "msc-merged-solver-diffs-line-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T081549398058-msc-merged-solver-diffs-line-review/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/merged-solver-diffs-line-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "msc-diff-review-x",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-05T08:16:00Z",
+        "completed_at": "2026-09-05T08:30:23.182Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 857,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 863,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "40a062dee377da030151f44162ff71d399af2892",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T081549398058-msc-merged-solver-diffs-line-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "72a54860-5689-45f9-bedb-480fc40a6b51",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 185988,
+            "cache_creation_input_tokens_cumulative": 185988,
+            "cache_read_input_tokens": 6364707,
+            "cache_read_input_tokens_cumulative": 6364707,
+            "inference_geo": "not_available",
+            "input_tokens": 104,
+            "input_tokens_cumulative": 104,
+            "output_tokens": 58579,
+            "output_tokens_cumulative": 58579,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 6.5072285,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 6.5072285
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 93479,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 95879,
+              "external_wait": null,
+              "log_age_seconds": 94977,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 95033,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 859.521,
+          "generated_tokens": 58579,
+          "generation_seconds": 785.317,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 19.9,
+          "machine_seconds": 74.204,
+          "peak_input_tokens": 199199,
+          "tokens_per_second": 74.59,
+          "wall_tokens_per_second": 68.15
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only line review of three merged solver commits, report at ~/.config/reckon/crew/reports/nova/millisecond/merged-solver-diffs-line-review.md, worktree clean",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-merged-solver-diffs-line-review",
+          "session_id": "72a54860-5689-45f9-bedb-480fc40a6b51",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T08:30:23.182Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -102143,6 +102335,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1729
+    "_version": 1730
   }
 }

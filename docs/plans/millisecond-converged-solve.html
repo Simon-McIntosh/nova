@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-impl" content="0.4">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563">
 </head>
@@ -80,6 +80,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260904T224639336930-msc-common-trip-executable" data-who="msc-common-trip-x" data-when="2026-09-04T23:45:29Z">
     <div class="r-comment-body"><p>negative result: the host-driven common-trip solve is semantically identical to the fused loop (bit-identical CPU fixture, same 7 trips, class and termination, residual delta 4.5e-17) but 2.0 to 2.7 times slower on the H200 (82.8 s and 112.4 s against 41.1 s), so the 0.38 s standalone one-trip figure does not reproduce under repeated dispatch with the full carry; commits held unmerged as evidence</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260905T081549398058-msc-merged-solver-diffs-line-review" data-who="msc-diff-review-x" data-when="2026-09-05T08:30:23.182Z">
+    <div class="r-comment-body"><p>Three merged solver diffs read hunk by hunk: ed00ba0c defect found (HIGH: compacted census silently truncates admitted origins beyond 2*maxsize slots and reports overflow False; LOW: root_uncertainty reconstruction one ULP off in 0.33 percent of pairs; LOW: dead cond-branch disagreement on converged), c5e1498a clean with a coverage hole (_requalify_krylov_step conditioning branch executed zero times by its gate; receipt sbatch unrunnable, carries dispatch ids), f5bf49ae clean (frozen-route saving is a duplicated map evaluation not a skipped topology read; vmap converts cond to select). None of the three gates could have seen the defects: all are identity comparisons over the preserved regime.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

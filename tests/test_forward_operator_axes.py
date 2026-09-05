@@ -13,6 +13,7 @@ from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
+from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 def _operator(coordinate: np.ndarray) -> ForwardFluxOperator:
@@ -55,38 +56,47 @@ def _flux_field(coordinate: np.ndarray) -> np.ndarray:
     return -(radial**3 / 3.0 - separation**2 * radial + height**2)
 
 
-def test_non_tensor_product_grid_constructs_until_margin_read() -> None:
-    """Only connectivity-margin access requires tensor-product coordinates."""
+# The class margin is read on the fitted tensor spline, so the wall operand no
+# longer comes from the analytic wall values.  Evaluate the fixture wall flux on
+# the same spline and hold it below the separatrix: the old ``+0.2`` offset put
+# the inboard wall pole above the axis value, which moved the boundary selection
+# onto the wall and emptied the axis-closed region on the spline read.
+_WALL_SEPARATRIX_OFFSET = 0.2
+
+
+def test_non_tensor_product_grid_is_refused_without_authored_cell_polygons() -> None:
+    """The carrier-cell flux read needs authored polygons, so the tensor-product
+    requirement gates construction before any margin access is reachable."""
     configure_dtypes()
     lattice = FluxLattice(np.linspace(0.5, 1.5, 9), np.linspace(-0.5, 0.5, 9))
     coordinate = np.asarray(lattice.coordinate).copy()
     coordinate[40, 0] += 1.0e-3
 
-    operator = _operator(coordinate)
-    state = jnp.zeros(operator.physical_node_number)
-    masks, topology = operator.read(state)
-
-    assert masks.label.shape == (operator.grid.node_number,)
-
-    with pytest.raises(
-        ValueError,
-        match="connectivity topology requires a tensor-product forward grid",
-    ):
-        topology.class_margin
-    with pytest.raises(
-        ValueError,
-        match="connectivity topology requires a tensor-product forward grid",
-    ):
-        operator.topology_margin(state)
+    with pytest.raises(ValueError, match="cell polygons must have at least"):
+        _operator(coordinate)
 
 
-def test_tensor_product_grid_class_margin_is_unchanged() -> None:
-    """Lazy axis derivation preserves the structured-grid class margin."""
+def test_tensor_product_grid_class_margin_is_read_on_the_spline() -> None:
+    """The structured-grid class margin comes from the fitted tensor spline."""
     configure_dtypes()
     lattice = FluxLattice(np.linspace(0.5, 1.5, 9), np.linspace(-0.5, 0.5, 9))
     operator = _operator(lattice.coordinate)
     grid_flux = _flux_field(lattice.coordinate)
-    wall_flux = _flux_field(np.asarray(operator.wall.coordinate)) + 0.2
+    wall_coordinate = np.asarray(operator.wall.coordinate)
+    surface = fit_tensor_spline(
+        jnp.asarray(lattice.radius, dtype=jnp.float64),
+        jnp.asarray(lattice.height, dtype=jnp.float64),
+        jnp.asarray(grid_flux.reshape((9, 9)).T, dtype=jnp.float64),
+    )
+    wall_flux = (
+        np.asarray(
+            surface(
+                jnp.asarray(wall_coordinate[:, 0], dtype=jnp.float64),
+                jnp.asarray(wall_coordinate[:, 1], dtype=jnp.float64),
+            )
+        )
+        - _WALL_SEPARATRIX_OFFSET
+    )
     state = jnp.asarray(np.r_[grid_flux, wall_flux])
 
     radius, height, shape = operator.connectivity_grid_axes()
@@ -97,7 +107,7 @@ def test_tensor_product_grid_class_margin_is_unchanged() -> None:
     _masks, topology = operator.read(state)
 
     assert float(topology.class_margin) == pytest.approx(
-        -0.9611433885788007, rel=1.0e-12, abs=1.0e-12
+        -0.31887492472951007, rel=1.0e-12, abs=1.0e-12
     )
     assert float(operator.topology_margin(state)) == pytest.approx(
         float(topology.class_margin), rel=0.0, abs=0.0

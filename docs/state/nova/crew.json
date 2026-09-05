@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T20:22:53",
+  "updated": "2026-09-05T21:14:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1849,9 +1849,11 @@
         "id": "msc-plain-newton-x",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "e1117e0d-0621-499b-a127-b424b608d4e0",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "e1117e0d-0621-499b-a127-b424b608d4e0"
+        },
         "created": "2026-09-05"
       },
       {
@@ -2480,6 +2482,17 @@
         "session_id": null,
         "session_model": null,
         "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-reduced-route-x",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": "1cbf0e3e-aed5-4ee9-986e-3c62692b23cc",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "1cbf0e3e-aed5-4ee9-986e-3c62692b23cc"
+        },
         "created": "2026-09-05"
       },
       {
@@ -105098,6 +105111,197 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T172823797281-msc-batched-refused-ladder-tail",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-batched-refused-ladder-tail",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3176,
+                "cached_input_tokens": 312455,
+                "input_tokens": 315663,
+                "output_tokens": 2616,
+                "reasoning_output_tokens": 198,
+                "total_tokens": 318279,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "on the four bank rows through benchmarks/reduced_newton_rows.py on the H200 (submitted from the checkout root with /home/ITER/mcintos/Code/nova/.venv/bin/python, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache configured, each row's receipt persisted as it finishes, no new callback instrumentation) every acceptance decision and terminal flux is bit-identical to the first-accept fused route, the refused-step wall on 21985/51, 21986/46 and 21989/55 is within 0.5 ms of the eager route's, the accepting-step median on 22086/43 is at or below the banked 2.15 ms, the per-step residual norm is no longer a separate synchronised reduction, receipts land under docs/figures/millisecond-converged-solve/reduced-newton/ in the same shape as four-rows.json, and the CPU tests in tests/test_reduced_newton.py pass in one gate log",
+          "estimated_hours": null,
+          "goal": "Remove the per-grade round trips from a refused reduced Newton step by scoring grades two to six in one batched dispatch with the reduced-residual norm returned from the step kernel",
+          "id": "msc-batched-refused-ladder-tail",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T172823797281-msc-batched-refused-ladder-tail/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "90m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py",
+            "benchmarks/reduced_newton_rows.py",
+            "docs/figures/millisecond-converged-solve/reduced-newton"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "msc-plain-newton-x",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T17:28:33Z",
+        "completed_at": "2026-09-05T18:46:00.562Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4639,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4647,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "194c79fc96be8d6b4aedacc98ba923967a60457a",
+        "commits": [
+          "974181fd83682e640a5b529930d145cb443c40f5"
+        ],
+        "changed_lines": {
+          "added": 50,
+          "removed": 19,
+          "files": 1
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_reduced_newton.py -m 'slow or not slow' -p no:cacheprovider -v (compute node, jobs 1263019 and 1263021)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T172823797281-msc-batched-refused-ladder-tail/logs/cpu-gate-cached.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T172823797281-msc-batched-refused-ladder-tail/manifest.md",
+        "scope_changed": false,
+        "session_id": "e1117e0d-0621-499b-a127-b424b608d4e0",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 100.0,
+          "rate_limit_type": "spend-limit",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": "exhausted",
+          "surpassed_threshold": true,
+          "tokens": null,
+          "cost_usd": null,
+          "refusal": true,
+          "detail": "backend refused the turn: the account's spend-limit is reached"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 126632,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 129032,
+              "external_wait": null,
+              "log_age_seconds": 128130,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 128186,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 0.456,
+          "generated_tokens": 100196,
+          "generation_seconds": -3184.909,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 28.3,
+          "machine_seconds": 3185.365,
+          "peak_input_tokens": 283082,
+          "wall_tokens_per_second": 219728.07
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail",
+          "session_id": "e1117e0d-0621-499b-a127-b424b608d4e0",
+          "session_source": "pointer",
+          "retained_at": "2026-09-05T18:46:00.562Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -105242,6 +105446,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1759
+    "_version": 1763
   }
 }

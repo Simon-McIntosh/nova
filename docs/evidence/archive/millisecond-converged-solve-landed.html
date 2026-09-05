@@ -404,6 +404,44 @@
     route re-derived the banked receipt in the same job and serves as the terminal-flux reference.</p>
   </section>
 
+  <section id="batched-refused-tail">
+    <h2>The refused grade tail scored in one dispatch, the residual norm folded into the step kernel (2ff80029, b5326487, 974181fd, merged at 2ecfb516)</h2>
+    <p><strong>Node:</strong> <code>msc-batched-refused-ladder-tail</code>, Opus, run <code>r-20260905T172823797281</code> against base
+    <code>194c79fc</code>, 77 minutes. The reduced Newton step keeps first-accept scoring for the first grade and, when that grade is refused,
+    scores grades two to six in one <code>lax.map</code> dispatch instead of one synchronised round trip apiece; the reduced-residual sup norm
+    the receipt reports returns from the scoring kernel that already holds the residual, so no separate reduction remains. The selection is
+    unchanged: the earliest grade below the incumbent merit. Receipts <code>docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json</code>
+    and <code>four-rows-repeat.json</code> (H200 jobs 1262998 and 1263000, one reserved H200, persistent compilation cache on, every row solved
+    through the batched tail, the serial per-grade ladder it replaces and the eager <code>lax.map</code> ladder in the same job).</p>
+    <p><strong>Semantics.</strong> On all four bank rows in both jobs every acceptance decision, trip count, Newton steps per trip, mask difference,
+    rejected-step count and accepted grade per step is identical to the serial route, terminal residuals equal, terminal flux bitwise identical
+    (sup difference exactly 0 Wb). On the CPU fixture a grade scored inside the batched tail returns the candidate amplitudes, the merit and the
+    flux residual bit for bit as the per-grade dispatch does on every tail grade; only the residual vector moves, by 2e-16 to 4e-16 of its sup,
+    which no acceptance decision reads, and the terminal flux stays bitwise identical on the bank rows because those rows refuse the whole
+    ladder. The pin on that quantity is stated as what the scoring guarantees rather than bit identity of a reassociated sum.</p>
+    <table>
+      <caption>Median warm step wall, milliseconds, job 1262998 with job 1263000 in brackets</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Refused step, serial</th><th scope="col">Refused step, batched</th><th scope="col">Recovered</th><th scope="col">Against the eager ladder</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>7.030 (7.364)</td><td>3.982 (4.087)</td><td>3.049 (3.277)</td><td>-0.397 (+0.305)</td></tr>
+        <tr><th scope="row">21986/46</th><td>8.545 (9.342)</td><td>5.363 (5.436)</td><td>3.182 (3.906)</td><td>-0.144 (+0.137)</td></tr>
+        <tr><th scope="row">21989/55</th><td>11.067 (11.376)</td><td>6.490 (6.621)</td><td>4.577 (4.755)</td><td>-0.781 (+0.081)</td></tr>
+        <tr><th scope="row">22086/43 accepting step</th><td>3.162 serial</td><td>3.164 batched</td><td>none, none expected</td><td>eager control 4.809 (4.007), banked 3.489</td></tr>
+      </tbody>
+    </table>
+    <p>The batched tail recovers 3.0 to 4.8 ms per refused step, above the 2.8 ms the followup projected, and sits within 0.5 ms of the
+    eager ladder on six row-runs; the accepting step costs the same to two microseconds. Warm trip 45.9 to 57.6 ms against the eager route's
+    121.5 to 129.4 ms. The absolute 2.15 ms accepting-step figure named as the fence was not reached on today's node (3.164 and 2.942 ms), and
+    the eager control, whose code neither commit touches, moved by a factor 1.15 to 1.38 between the banked job and these two, so the honest
+    reference for a step-wall gate is the paired arm measured in the same job, not a figure banked on another day. The plan text's 2.15 ms
+    (jobs 1262897 and 1262898) and the committed receipt's 2.825 ms minimum warm step at the base revision are two different quantities from
+    two different jobs and neither is the reference for a paired gate.</p>
+    <p><strong>Gate.</strong> 11 of 11 on CPU across two compute-node logs (jobs 1263019 and 1263021): two earlier gate processes died with
+    SIGABRT inside JAX's persistent compilation cache read (<code>get_executable_and_time</code>) at the first Jacobian build of the walk test
+    while peer sessions ran CPU gates against the same default cache root, which is an infrastructure fault a concurrent CPU gate will meet
+    again and not an assertion.</p>
+  </section>
+
 </main>
 </body>
 </html>

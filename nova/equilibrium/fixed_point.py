@@ -910,6 +910,40 @@ def _nonlinear_model_error_fraction(
     return jnp.abs(actual_merit - predicted_merit) / scale
 
 
+def _acceptance_map_on_selected_partition(
+    candidate: jax.Array,
+    previous_shadow: jax.Array,
+    use_incumbent_partition: jax.Array | bool,
+    frozen_map_fn: Callable[[jax.Array], jax.Array],
+    induced_shadow_fn: Callable[[jax.Array, jax.Array], jax.Array],
+    induced_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
+) -> jax.Array:
+    """Evaluate exactly one topology authority for a candidate score.
+
+    Incumbent-partition scoring already carries the trip's partition, census,
+    and masks.  Recovery, rebuilt-model, and descent candidates therefore get
+    the same score from that frozen authority, while evaluating their induced
+    topology would be discarded.  A scalar conditional keeps that duplicate
+    flood, reachability, and stationary-point work out of all three fallbacks.
+    Once incumbent-partition scoring is inactive, own-mask admission requires
+    the candidate-induced topology and retains that read as its authority.
+    """
+
+    def on_incumbent(_):
+        return frozen_map_fn(candidate)
+
+    def on_induced(_):
+        candidate_shadow = jnp.ravel(induced_shadow_fn(candidate, previous_shadow))
+        return induced_map_fn(candidate, candidate_shadow)
+
+    return jax.lax.cond(
+        jnp.asarray(use_incumbent_partition),
+        on_incumbent,
+        on_induced,
+        operand=None,
+    )
+
+
 def _backtracked_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     model_map_fn: Callable[[jax.Array], jax.Array],
@@ -2281,14 +2315,13 @@ def _newton_krylov_inner(
         def acceptance_map(candidate):
             if acceptance_shadow_mask_fn is None or not own_mask_acceptance:
                 return frozen_map(candidate)
-            candidate_shadow = jnp.ravel(
-                acceptance_shadow_mask_fn(candidate, carry.shadow_mask)
-            )
-            induced_map = acceptance_shadowed_map_fn(candidate, candidate_shadow)
-            return jnp.where(
-                jnp.asarray(presettlement_incumbent_scoring),
-                frozen_map(candidate),
-                induced_map,
+            return _acceptance_map_on_selected_partition(
+                candidate,
+                carry.shadow_mask,
+                presettlement_incumbent_scoring,
+                frozen_map,
+                acceptance_shadow_mask_fn,
+                acceptance_shadowed_map_fn,
             )
 
         mapped, tangent = jax.linearize(frozen_map, state)

@@ -1,0 +1,157 @@
+{
+  "baseline": {
+    "banked_uninstrumented_s": 41.787351296283305,
+    "measurement_revision": "083036e9310dbd8051f630e9202bc9bd47681acf",
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json",
+    "stated_active_trip_range_s": [
+      3.4,
+      12.2
+    ],
+    "stated_solve_wall_s": 41.1
+  },
+  "captured_at": "2026-09-05T02:07:38.572752+00:00",
+  "measurement": {
+    "outer_trace_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-loop.json",
+    "outer_uninstrumented_s": 36.41673356946558,
+    "production_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/production-only.json",
+    "production_synchronized_s": 34.27321686595678,
+    "summary": {
+      "accepted_newton_promotions": 65,
+      "active_set_trips": 7,
+      "attempted_newton_promotions": 84,
+      "converged": false,
+      "terminal_residual": 0.00047882693504231827,
+      "termination_reason": "active_set_settled"
+    }
+  },
+  "measurement_revision": "aa344960688a871590684f48f2e6b87b987e0955",
+  "per_trip": [
+    {
+      "accepted_promotions": 12,
+      "after_s": 0.20334009900000002,
+      "attempted_promotions": 12,
+      "backtrack_sum": 0,
+      "before_s": 3.3684856040000004,
+      "difference_s": -3.1651455050000004,
+      "ratio": 0.060365435066291585,
+      "trip": 2
+    },
+    {
+      "accepted_promotions": 12,
+      "after_s": 0.198114493,
+      "attempted_promotions": 12,
+      "backtrack_sum": 0,
+      "before_s": 3.375181769,
+      "difference_s": -3.1770672760000003,
+      "ratio": 0.05869742922281114,
+      "trip": 3
+    },
+    {
+      "accepted_promotions": 12,
+      "after_s": 3.850397982,
+      "attempted_promotions": 12,
+      "backtrack_sum": 34,
+      "before_s": 3.824515324,
+      "difference_s": 0.025882658000000003,
+      "ratio": 1.0067675655102173,
+      "trip": 4
+    },
+    {
+      "accepted_promotions": 12,
+      "after_s": 5.672600539,
+      "attempted_promotions": 12,
+      "backtrack_sum": 47,
+      "before_s": 5.610516447,
+      "difference_s": 0.06208409200000009,
+      "ratio": 1.0110656643798268,
+      "trip": 5
+    },
+    {
+      "accepted_promotions": 5,
+      "after_s": 12.300403974,
+      "attempted_promotions": 12,
+      "backtrack_sum": 72,
+      "before_s": 12.18821216,
+      "difference_s": 0.11219181399999911,
+      "ratio": 1.0092049442959483,
+      "trip": 6
+    },
+    {
+      "accepted_promotions": 0,
+      "after_s": 12.297384434000001,
+      "attempted_promotions": 12,
+      "backtrack_sum": 72,
+      "before_s": 12.236912064,
+      "difference_s": 0.06047237000000116,
+      "ratio": 1.004941799833465,
+      "trip": 7
+    }
+  ],
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "scheduler": {
+    "cpus_per_task": "1",
+    "job_id": "1262789",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.recovery_frozen_partition_timing",
+  "verdict": {
+    "active_trip_count_identical": true,
+    "semantic_summary_identical": true,
+    "solve_difference_from_stated_baseline_s": -6.826783134043218
+  }
+}

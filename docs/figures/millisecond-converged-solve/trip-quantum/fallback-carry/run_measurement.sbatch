@@ -8,28 +8,30 @@
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
-#SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T044351267228-msc-fallback-carry-four-row-gate/slurm-%j.out
-#SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T044351267228-msc-fallback-carry-four-row-gate/slurm-%j.err
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
 
 set -euo pipefail
+
+# The receipt resolves the checkout root from its own committed location so it
+# runs unchanged from any clone or worktree this revision is checked into.
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+checkout_root="${NOVA_CHECKOUT_ROOT:-$(cd "$here/../../../../.." && pwd)}"
 
 export TMPDIR=/tmp
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export JAX_PLATFORMS=cuda,cpu
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate
+export PYTHONPATH="${NOVA_PYTHONPATH:-$checkout_root}"
 
-worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate
-run_root=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T044351267228-msc-fallback-carry-four-row-gate
-timing_root="$worktree/docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry"
-rows_root="$worktree/docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry"
-python_bin=/home/ITER/mcintos/Code/nova/.venv/bin/python
-cache_root=/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile
+python_bin="${NOVA_PYTHON:-$checkout_root/.venv/bin/python}"
+cache_root="${NOVA_JAX_CACHE_ROOT:-/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile}"
+timing_root="$checkout_root/docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry"
+rows_root="$checkout_root/docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry"
 
 printf 'MEASUREMENT_START job=%s host=%s revision=%s\n' \
-  "$SLURM_JOB_ID" "$(hostname)" "$(git rev-parse HEAD)"
+  "$SLURM_JOB_ID" "$(hostname)" "$(git -C "$checkout_root" rev-parse HEAD)"
 
 "$python_bin" - "$rows_root/four-rows-after.json" "$cache_root" <<'PY'
 from pathlib import Path
@@ -49,16 +51,16 @@ PY
 
 "$python_bin" "$timing_root/assemble_receipts.py" \
   --timing-baseline \
-    "$worktree/docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json" \
+    "$checkout_root/docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json" \
   --production-measurement "$timing_root/production-only.json" \
   --outer-measurement "$timing_root/outer-loop.json" \
   --promotion-baseline \
-    "$worktree/docs/figures/millisecond-converged-solve/trip-quantum/late-trips/promotions.csv" \
+    "$checkout_root/docs/figures/millisecond-converged-solve/trip-quantum/late-trips/promotions.csv" \
   --promotion-measurement "$timing_root/promotion-profile.json" \
   --promotion-table "$timing_root/promotions-after.csv" \
   --timing-output "$timing_root/profile.json" \
   --rows-baseline \
-    "$worktree/docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/four-rows-after.json" \
+    "$checkout_root/docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/four-rows-after.json" \
   --rows-measurement "$rows_root/four-rows-after.json" \
   --rows-output "$rows_root/four-rows.json"
 

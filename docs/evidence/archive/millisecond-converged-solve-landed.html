@@ -369,6 +369,41 @@
     run id or node name. Gate: 73 passed on CPU.</p>
   </section>
 
+  <section id="millisecond-step">
+    <h2>The reduced Newton step at 2.15 ms, and the trip at 46 ms (3fd7aab4, merged at aac7ce6f)</h2>
+    <p><strong>Commits:</strong> <code>cfea0ce3</code> (first-accept ladder scoring), <code>47d2dc98</code> and <code>922ca551</code>
+    (both routes measured on the four bank rows, checkout root resolved under the batch launcher), <code>3479f6a7</code> (receipt
+    <code>docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json</code> with the previous receipt preserved as
+    <code>four-rows-before.json</code>), <code>3fd7aab4</code> (contracts). H200 jobs 1262897 and 1262898, exit 0. Gate: 8 of 8 in
+    <code>tests/test_reduced_newton.py</code> on a compute node (the shared 64 GiB login cgroup kills the production comparison test).</p>
+    <p>Two host-side costs were removed rather than paid. The backtracking grades are scored one at a time and scoring stops at the first
+    grade below the incumbent merit, which is the grade the eager ladder selects anyway, so a step accepted at full length evaluates the
+    map once instead of eight times and carries its residual and merit into the next step. A trip closes inside one compiled program that
+    reconstructs the flux, promotes the residual shadow against the frozen one, maps the promoted state, gathers the next trip's amplitudes
+    and measures the leakage from a single topology read, with the frozen shadow as an argument so every trip runs the same program.</p>
+    <table>
+      <caption>Four bank rows on the H200, warm, first-accept scoring with the fused boundary against the banked eager route</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Warm trip before</th><th scope="col">Warm trip after</th><th scope="col">Boundary before</th><th scope="col">Boundary after</th><th scope="col">Terminal flux agreement</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21985/51</th><td>0.122 to 0.130 s</td><td>0.046 to 0.058 s</td><td>0.104 to 0.135 s</td><td>0.041 to 0.044 s</td><td>3.00e-16 of span</td></tr>
+        <tr><th scope="row">21986/46</th><td>0.122 to 0.130 s</td><td>0.046 to 0.058 s</td><td>0.104 to 0.135 s</td><td>0.041 to 0.044 s</td><td>2.60e-16 of span</td></tr>
+        <tr><th scope="row">21989/55</th><td>0.122 to 0.130 s</td><td>0.046 to 0.058 s</td><td>0.104 to 0.135 s</td><td>0.041 to 0.044 s</td><td>2.93e-15 of span</td></tr>
+        <tr><th scope="row">22086/43</th><td>0.122 to 0.130 s</td><td>0.046 to 0.058 s</td><td>0.104 to 0.135 s</td><td>0.041 to 0.044 s</td><td>2.69e-16 of span</td></tr>
+      </tbody>
+    </table>
+    <p>On the converged row 22086/43 a trip costs 13 map evaluations against 96, and the steady accepting Newton step falls from 3.05 to
+    3.99 ms to 2.12 to 2.26 ms on one map evaluation, median 2.15 ms, 2.1 times the one-millisecond target. Every decision (trip census,
+    mask differences, steps per trip, accepted grades) is bit-identical against both the eager route measured in the same job and the banked
+    receipt; off-support leakage is zero on every row. Solving three step shapes on the converged row gives a dispatched map evaluation
+    0.67 ms, an evaluation inside a batched <code>lax.map</code> 0.11 ms and a fixed per-step cost 1.49 ms: the step is host-dispatch bound,
+    about 0.6 ms per synchronised round trip with a tenth of a millisecond of arithmetic inside. A warm converged trip is 45.7 ms of which
+    the fused boundary is 43.4 ms and all Newton work 1.4 ms, so one millisecond per fixed point is now a dispatch problem at the step scale
+    and a topology-read problem at the trip scale. The settled rows spend their warm steps in refused ladders and are 1.4 to 2.6 ms slower per
+    step than before, because six grades as six round trips cost more than one batched dispatch of the same six; batching the refused tail
+    is the next followup. The production arm was not re-measured (a cold production compile would not fit the one-hour limit); the eager
+    route re-derived the banked receipt in the same job and serves as the terminal-flux reference.</p>
+  </section>
+
 </main>
 </body>
 </html>

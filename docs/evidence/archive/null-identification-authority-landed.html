@@ -532,6 +532,25 @@
     regeneration re-solves the rows, which belongs with the rebank that follows the census repair above.</p>
   </section>
 
+  <section id="stale-pins-and-sweep-margin">
+    <h2>Three stale pins re-expressed, and a class-margin regression surfaced on the way (268e6928, merged at f34d8fd3)</h2>
+    <p>The static inventory's three stale pins are re-expressed as the mechanisms now in force, test files only: the X-coordinate identity
+    in <code>tests/test_connectivity_boundary.py</code> becomes a tolerance at the fixture cell pitch (12.5 mm) because the operand table
+    selects the saddle at grid resolution while the topology read refines it on the tensor spline; the class-margin fixture in
+    <code>tests/test_forward_operator_axes.py</code> evaluates its wall flux on the operator's own spline below the separatrix (the old
+    plus 0.2 offset put the inboard wall pole above the axis value and emptied the axis-closed region under the spline read) and the margin
+    is re-derived to -0.31887492472951007 with the seam identity <code>class_margin == topology_margin(state)</code> kept exact; the
+    tensor-product requirement is pinned where it now acts, at construction. Both constrained-solve stub pins are green as written. Gate:
+    3 of 3 on the axes file.</p>
+    <p><strong>Regression.</strong> On today's head the fixed-design class margin of the 81 by 81 persistent-saddle fixture reads NaN with
+    <code>diverted</code> False for all 17 sweep shifts where the slow test expects positive infinity and diverted, so
+    <code>test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate</code> fails at its sweep assertion before reaching the pin
+    it used to fail on, and the terminal X diagnostics on the same field raise because the class-margin operand moves beyond the roundoff
+    bound. The two merges since the 0.13 mm measurement that touch the topology read are the integration candidate (47b9f996) and the
+    over-capacity census repair (0895bc51); which introduced it is unmeasured. Probe scripts and the head log are preserved under
+    <code>~/.config/reckon/crew/reports/nova/attribution/persistent-sweep/</code>; the repair is the next followup on this plan.</p>
+  </section>
+
 </main>
 </body>
 </html>

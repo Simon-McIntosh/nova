@@ -370,8 +370,8 @@ def _arm(
         "compensated_circuits": compensated,
         "compensating_current_norm_a": float(
             np.linalg.norm(
-                np.concatenate(
-                    [np.asarray(item["current_norm_a"]) for item in compensated]
+                np.asarray(
+                    [item["current_norm_a"] for item in compensated]
                 )
             )
         ),

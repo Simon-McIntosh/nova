@@ -291,6 +291,30 @@
     acceptance decision, and exits the trip once the carried sequence is exhausted: an estimated 12.8 s of the 35 s solve.</p>
   </section>
 
+  <section id="fallback-carry">
+    <h2>Carrying the fallback across unchanged-state attempts: 35 s to 31 s (merged at e1e1e563)</h2>
+    <p><strong>Commits:</strong> <code>c5e1498a</code> (the carry), <code>5fa527da</code> and <code>7e8c1b61</code> (recoverable timing
+    receipts), <code>1b56a7c7</code> (the frozen-mask benchmark attributes carried iterations to the action they reuse),
+    <code>f5b413b2</code> (four-row receipts); evidence <code>docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/</code>
+    and <code>docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/</code> (H200 jobs 1262798, 1262804).
+    When a promotion attempt leaves the state and the frozen partition unchanged, the primary linearisation, the backtracking
+    scores and the rebuilt normal model carry to the next damping attempt; only the scalar globalisation state advances and every
+    acceptance decision is reapplied. A CPU fixture reaching twelve unchanged-state fallbacks is bit-identical on every result
+    leaf and decision; all 84 production acceptance decisions and all four public-route rows are unchanged to the last digit.</p>
+    <table>
+      <caption>MAST 22086/43 pure on the H200</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Warm solve</th><td>34.96 s</td><td>30.87 s</td></tr>
+        <tr><th scope="row">Trips 6 and 7</th><td>12.30, 12.30 s</td><td>10.96, 9.83 s</td></tr>
+        <tr><th scope="row">Whole day, from the relaunch baseline</th><td>41.1 s</td><td>30.9 s</td></tr>
+      </tbody>
+    </table>
+    <p>The saving is a third of the estimate: re-linearising and re-scoring were not most of the late-trip cost. What remains in
+    trips six and seven is the damped normal-equation GMRES ladder itself, run for each of the twelve rejected promotions; cutting
+    that means exiting a trip once its rejections make settlement decidable, a policy change the lead owns.</p>
+  </section>
+
 </main>
 </body>
 </html>

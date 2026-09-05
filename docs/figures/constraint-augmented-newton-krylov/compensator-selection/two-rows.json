@@ -1,0 +1,547 @@
+{
+  "receipt": "compensating circuit direction from the constraint response",
+  "source": {
+    "revision": "d608eaf919c90499cab7b061c6413cdc5c9ee1bc",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "configuration": {
+    "route": "ForwardProfile.solve_branch public defaults",
+    "constraint_policy": "imposed",
+    "support": "all_domain",
+    "authority": "row scale moved per ampere; the direction is normalised so the largest participating circuit carries unity",
+    "drivable_circuits": "the machine active mapping; the response carrier also holds passive structure, which no compensator drives",
+    "response_state": "the derivation reads the matrix at the seed flux, the state the solve starts from",
+    "persistent_compilation_cache": {
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    }
+  },
+  "inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.010433810763061047,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/cank-matrix-led-compensator-selection/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.026498 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "identity": "21986/46",
+      "seed_vertical_centroid_m": 0.09889428493417936,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 130455.06566432705,
+        "position_scale_m": 4.0
+      },
+      "selection": {
+        "rule": "dominant_authority",
+        "competing_rows": false,
+        "drivable_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol"
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper"
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper"
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower"
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower"
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper"
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower"
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          }
+        ],
+        "prescribed_circuit_count": 101,
+        "singular_values_row_scales_per_ampere": [
+          4.1237614346365337e-07
+        ],
+        "direction_authority_row_scales_per_ampere": [
+          7.446161444416652e-07
+        ],
+        "chosen_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol",
+            "component": 1.0
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "component": 0.8015030258894703
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "component": 0.6412633240890712
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "component": 0.5637395359344958
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "component": -0.4681228384668511
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "component": -0.4627788656863157
+          }
+        ],
+        "authority_ranking": [
+          {
+            "circuit": 0,
+            "family": "sol",
+            "drivable": true,
+            "row_scales_per_ampere": 2.283781851459414e-07,
+            "direction_component": 1.0
+          },
+          {
+            "circuit": 15,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": 1.8315391625979023e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "drivable": true,
+            "row_scales_per_ampere": 1.8304580644161772e-07,
+            "direction_component": 0.8015030258894703
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "drivable": true,
+            "row_scales_per_ampere": 1.4645055415611573e-07,
+            "direction_component": 0.6412633240890712
+          },
+          {
+            "circuit": 21,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": 1.4595985874449594e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "drivable": true,
+            "row_scales_per_ampere": 1.2874581211173536e-07,
+            "direction_component": 0.5637395359344958
+          },
+          {
+            "circuit": 17,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": 1.2823742554686432e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "drivable": true,
+            "row_scales_per_ampere": -1.0690904427442615e-07,
+            "direction_component": -0.4681228384668511
+          }
+        ]
+      },
+      "fixed": {
+        "qualified": false,
+        "topology_consistent": true,
+        "terminal_residual": 9.216672461983231e-09,
+        "active_set_trips": 2,
+        "termination": "converged",
+        "vertical_centroid_m": 0.09889428874969337,
+        "vertical_target_m": 0.09889428493417936,
+        "vertical_error_m": 3.8155140158480094e-09,
+        "compensating_current_a": -4103.220272082505,
+        "scaled_constraint_residual": 9.538785039620024e-10,
+        "soft_mode_projection": 0.029604853169287897,
+        "compensator_rule": "explicit",
+        "singular_values_row_scales_per_ampere": null,
+        "pair_projected_current_a": -4103.220272082505,
+        "circuit_current_delta_norm_a": 5802.8297581833,
+        "driven_circuits": [
+          {
+            "circuit": 12,
+            "current_a": 4103.220272082505
+          },
+          {
+            "circuit": 11,
+            "current_a": -4103.220272082505
+          }
+        ]
+      },
+      "derived": {
+        "qualified": true,
+        "topology_consistent": true,
+        "terminal_residual": 5.25168274852538e-15,
+        "active_set_trips": 3,
+        "termination": "converged",
+        "vertical_centroid_m": 0.0988942849341795,
+        "vertical_target_m": 0.09889428493417936,
+        "vertical_error_m": 1.3877787807814457e-16,
+        "compensating_current_a": -1869.9809661854233,
+        "scaled_constraint_residual": 3.469446951953614e-17,
+        "soft_mode_projection": -2.2505022278883096e-16,
+        "compensator_rule": "dominant_authority",
+        "singular_values_row_scales_per_ampere": [
+          4.1237614346365337e-07
+        ],
+        "pair_projected_current_a": -1037.2655040645313,
+        "circuit_current_delta_norm_a": 3376.572673494185,
+        "driven_circuits": [
+          {
+            "circuit": 0,
+            "current_a": -1869.9809661854233
+          },
+          {
+            "circuit": 5,
+            "current_a": -1498.7954027533322
+          },
+          {
+            "circuit": 11,
+            "current_a": -1199.1502103593575
+          },
+          {
+            "circuit": 7,
+            "current_a": -1054.1822020837105
+          },
+          {
+            "circuit": 12,
+            "current_a": 875.380797769705
+          },
+          {
+            "circuit": 6,
+            "current_a": 865.3876703862909
+          }
+        ]
+      }
+    },
+    {
+      "identity": "21989/55",
+      "seed_vertical_centroid_m": 0.012586049153551354,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 143188.14849106473,
+        "position_scale_m": 4.0
+      },
+      "selection": {
+        "rule": "dominant_authority",
+        "competing_rows": false,
+        "drivable_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol"
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper"
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper"
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower"
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower"
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper"
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower"
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          }
+        ],
+        "prescribed_circuit_count": 101,
+        "singular_values_row_scales_per_ampere": [
+          3.355167525247554e-07
+        ],
+        "direction_authority_row_scales_per_ampere": [
+          7.875018906927662e-07
+        ],
+        "chosen_circuits": [
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "component": -1.0
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "component": 0.9688192240357058
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "component": -0.8994889912461603
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "component": 0.8589557740283061
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower",
+            "component": -0.7597286727834048
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "component": 0.7267506974269619
+          }
+        ],
+        "authority_ranking": [
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "drivable": true,
+            "row_scales_per_ampere": -1.429475821648233e-07,
+            "direction_component": -1.0
+          },
+          {
+            "circuit": 16,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": -1.4163501351938907e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 15,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": 1.3850011701272358e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "drivable": true,
+            "row_scales_per_ampere": 1.384903656307044e-07,
+            "direction_component": 0.9688192240357058
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "drivable": true,
+            "row_scales_per_ampere": -1.2857977648251453e-07,
+            "direction_component": -0.8994889912461603
+          },
+          {
+            "circuit": 22,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": -1.2797720586416566e-07,
+            "direction_component": 0.0
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "drivable": true,
+            "row_scales_per_ampere": 1.2278565108386069e-07,
+            "direction_component": 0.8589557740283061
+          },
+          {
+            "circuit": 21,
+            "family": null,
+            "drivable": false,
+            "row_scales_per_ampere": 1.2225341040773687e-07,
+            "direction_component": 0.0
+          }
+        ]
+      },
+      "fixed": {
+        "qualified": false,
+        "topology_consistent": true,
+        "terminal_residual": 2.0622862375360644e-09,
+        "active_set_trips": 1,
+        "termination": "converged",
+        "vertical_centroid_m": 0.012586049393301019,
+        "vertical_target_m": 0.012586049153551354,
+        "vertical_error_m": 2.3974966456563607e-10,
+        "compensating_current_a": 3022.3308106620793,
+        "scaled_constraint_residual": 5.993741614140902e-11,
+        "soft_mode_projection": -0.02898976894725221,
+        "compensator_rule": "explicit",
+        "singular_values_row_scales_per_ampere": null,
+        "pair_projected_current_a": 3022.3308106620793,
+        "circuit_current_delta_norm_a": 4274.221222416383,
+        "driven_circuits": [
+          {
+            "circuit": 12,
+            "current_a": -3022.3308106620793
+          },
+          {
+            "circuit": 11,
+            "current_a": 3022.3308106620793
+          }
+        ]
+      },
+      "derived": {
+        "qualified": true,
+        "topology_consistent": true,
+        "terminal_residual": 5.023863532902652e-12,
+        "active_set_trips": 1,
+        "termination": "converged",
+        "vertical_centroid_m": 0.012586049153222513,
+        "vertical_target_m": 0.012586049153551354,
+        "vertical_error_m": -3.2884112100006746e-13,
+        "compensating_current_a": 958.1879904731317,
+        "scaled_constraint_residual": -8.221028025001687e-14,
+        "soft_mode_projection": -0.005404608060989008,
+        "compensator_rule": "dominant_authority",
+        "singular_values_row_scales_per_ampere": [
+          3.355167525247554e-07
+        ],
+        "pair_projected_current_a": 842.4603279981693,
+        "circuit_current_delta_norm_a": 2248.993078463404,
+        "driven_circuits": [
+          {
+            "circuit": 6,
+            "current_a": -958.1879904731317
+          },
+          {
+            "circuit": 5,
+            "current_a": 928.3109454105116
+          },
+          {
+            "circuit": 12,
+            "current_a": -861.8795489748627
+          },
+          {
+            "circuit": 11,
+            "current_a": 823.041107021476
+          },
+          {
+            "circuit": 8,
+            "current_a": -727.9628902791501
+          },
+          {
+            "circuit": 7,
+            "current_a": 696.3637903424875
+          }
+        ]
+      }
+    }
+  ],
+  "verdict": {
+    "row_count": 2,
+    "derived_qualified_count": 2,
+    "pair_projected_current_max_abs_difference_a": 3065.954768017974,
+    "vertical_error_max_abs_m": 3.2884112100006746e-13,
+    "rules": [
+      "dominant_authority"
+    ]
+  }
+}

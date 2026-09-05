@@ -41,6 +41,14 @@ def _strict(value):
     return value
 
 
+def _events_from_log(path: Path) -> list[dict[str, object]]:
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
@@ -193,6 +201,23 @@ def _promotion_rows() -> list[dict[str, object]]:
     return rows
 
 
+def _trip_rows(
+    rows: list[dict[str, object]], active_set_trips: int
+) -> list[dict[str, object]]:
+    result = []
+    for trip in range(1, active_set_trips + 1):
+        selected = [row for row in rows if row["trip"] == trip]
+        result.append(
+            {
+                "trip": trip,
+                "promotions": len(selected),
+                "accepted_promotions": sum(row["accepted"] for row in selected),
+                "promotion_wall_s": sum(row["wall_s"] for row in selected),
+            }
+        )
+    return result
+
+
 def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as stream:
@@ -242,17 +267,7 @@ def run(output: Path, table: Path, event_log: Path, cache_root: Path) -> None:
             f"promotion census {len(rows)} != "
             f"{production_summary['attempted_newton_promotions']}"
         )
-    trip_rows = []
-    for trip in range(1, production_summary["active_set_trips"] + 1):
-        selected = [row for row in rows if row["trip"] == trip]
-        trip_rows.append(
-            {
-                "trip": trip,
-                "promotions": len(selected),
-                "accepted_promotions": sum(row["accepted"] for row in selected),
-                "promotion_wall_s": sum(row["wall_s"] for row in selected),
-            }
-        )
+    trip_rows = _trip_rows(rows, production_summary["active_set_trips"])
     _write_csv(table, rows)
     _write_json(
         output,
@@ -268,7 +283,7 @@ def run(output: Path, table: Path, event_log: Path, cache_root: Path) -> None:
                 "partition": os.environ.get("SLURM_JOB_PARTITION"),
                 "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
             },
-            "persistent_compilation_cache": cache,
+            "persistent_compilation_cache": cache.receipt(),
             "production_wall_s": production_wall,
             "instrumented_wall_s": instrumented_wall,
             "summary": production_summary,
@@ -279,14 +294,62 @@ def run(output: Path, table: Path, event_log: Path, cache_root: Path) -> None:
     )
 
 
+def recover(
+    output: Path, table: Path, event_log: Path, outer_measurement: Path
+) -> None:
+    """Recover a completed device measurement whose final JSON write failed."""
+    global _EVENTS
+    outer = json.loads(outer_measurement.read_text(encoding="utf-8"))
+    _EVENTS = _events_from_log(event_log)
+    rows = _promotion_rows()
+    summary = outer["uninstrumented_execution"]["summary"]
+    if len(rows) != summary["attempted_newton_promotions"]:
+        raise RuntimeError(
+            f"promotion census {len(rows)} != {summary['attempted_newton_promotions']}"
+        )
+    timestamps = [event["timestamp_ns"] for event in _EVENTS]
+    _write_csv(table, rows)
+    _write_json(
+        output,
+        {
+            "schema": "nova.unchanged_state_fallback_promotion_timing",
+            "captured_at": datetime.now(UTC).isoformat(),
+            "measurement_revision": outer["measurement_revision"],
+            "scheduler": outer["scheduler"],
+            "persistent_compilation_cache": outer["compile"]["persistent_cache"],
+            "production_wall_s": outer["uninstrumented_execution"]["wall_s"],
+            "instrumented_wall_s": (max(timestamps) - min(timestamps)) * 1.0e-9,
+            "summary": summary,
+            "per_trip": _trip_rows(rows, summary["active_set_trips"]),
+            "promotion_table": str(table),
+            "event_log": str(event_log),
+            "recovered_from_completed_event_stream": True,
+        },
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--table", type=Path, required=True)
     parser.add_argument("--event-log", type=Path, required=True)
     parser.add_argument("--cache-root", type=Path, required=True)
+    parser.add_argument("--recover-from", type=Path)
     arguments = parser.parse_args()
-    run(arguments.output, arguments.table, arguments.event_log, arguments.cache_root)
+    if arguments.recover_from is not None:
+        recover(
+            arguments.output,
+            arguments.table,
+            arguments.event_log,
+            arguments.recover_from,
+        )
+    else:
+        run(
+            arguments.output,
+            arguments.table,
+            arguments.event_log,
+            arguments.cache_root,
+        )
 
 
 if __name__ == "__main__":

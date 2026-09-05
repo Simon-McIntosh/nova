@@ -20,7 +20,14 @@ if TYPE_CHECKING:
     from nova.equilibrium.observation import ConstraintPinSet
     from nova.equilibrium.source import ForwardSource
 
-SolveRoute = Literal["host", "host_krylov", "picard", "anderson", "newton_krylov"]
+SolveRoute = Literal[
+    "host",
+    "host_krylov",
+    "picard",
+    "anderson",
+    "newton_krylov",
+    "reduced_newton",
+]
 JsonScalar = str | int | float | bool | None
 
 
@@ -68,6 +75,7 @@ class ForwardSolvePolicy:
             "picard",
             "anderson",
             "newton_krylov",
+            "reduced_newton",
         }:
             raise ValueError(f"unknown forward solve route {self.route!r}")
         for name in (
@@ -111,6 +119,12 @@ class ForwardSolvePolicy:
                 "continue_newton_trajectory": self.continuation,
                 "continue_globalization_state": self.continuation,
                 "own_mask_acceptance": self.own_mask_acceptance,
+            }
+        if self.route == "reduced_newton":
+            return {
+                "newton_steps": self.newton_steps,
+                "active_set_steps": self.active_set_steps,
+                "tolerance": self.kernel_tolerance,
             }
         if self.route in {"picard", "anderson"}:
             options: dict[str, JsonScalar] = {

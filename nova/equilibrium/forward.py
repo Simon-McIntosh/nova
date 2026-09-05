@@ -117,6 +117,7 @@ from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
 from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
 from nova.equilibrium.labels import LCFS_ANGLES
+from nova.equilibrium.reduced_newton import solve_constrained_reduced_newton
 from nova.equilibrium.moment import (
     CurrentIntegralSupport,
     CurrentCells,
@@ -182,6 +183,14 @@ __all__ = [
 #: Routes that drive the same map to the same fixed point.
 _HOST: tuple[str, ...] = ("host", "host_krylov")
 _ACCELERATED: tuple[str, ...] = ("picard", "anderson", "newton_krylov")
+#: Routes that solve on the plasma-cell amplitudes behind a frozen shadow
+#: rather than on the flux nodes.  They are driven from the host trip by
+#: trip, so they carry no batched or branch entry.
+_REDUCED: tuple[str, ...] = ("reduced_newton",)
+#: Routes that can carry a tuple of augmented constraint rows.  The rows
+#: extend the solved state by one compensating unknown apiece, which every
+#: other route has no unknown vector to extend.
+_CONSTRAINABLE: tuple[str, ...] = ("newton_krylov", *_REDUCED)
 
 
 def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
@@ -1517,9 +1526,10 @@ class ForwardProfile:
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
         if constraint_pairs:
-            if route != "newton_krylov":
+            if route not in _CONSTRAINABLE:
                 raise ValueError(
-                    "augmented constraints require the newton_krylov route"
+                    "augmented constraints require a route carrying a compensating "
+                    f"unknown vector; available: {', '.join(_CONSTRAINABLE)}"
                 )
             return self._solve_augmented_constraints(
                 initial_flux,
@@ -1741,6 +1751,69 @@ class ForwardProfile:
             constraints=records,
         )
 
+    def _solve_reduced_newton(
+        self,
+        initial_flux,
+        current,
+        *,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
+        constraint_pairs: tuple[ConstraintPair, ...] = (),
+        **options,
+    ) -> ForwardEquilibrium:
+        """Solve the plasma-cell amplitudes, with any constraint rows beside them.
+
+        The reduced route poses the free-boundary fixed point on the few
+        hundred cell amplitudes the profile owns rather than on the flux
+        nodes, and a constraint tuple extends that state by one compensating
+        unknown per row.  A keyframe warm-started from the previous
+        equilibrium therefore re-solves a square dense system a few rows wider
+        than the unconstrained one, which is what puts a steered solve on the
+        millisecond route rather than on the Krylov ladder.
+        """
+        result = solve_constrained_reduced_newton(
+            self,
+            jnp.asarray(initial_flux),
+            constraint_pairs=tuple(constraint_pairs),
+            requested_class=requested_class,
+            target_current=target_current,
+            current=current,
+            prescribed_current=prescribed_current,
+            **options,
+        )
+        residuals = jnp.asarray(result.active_set_residuals, dtype=jnp.float64)
+        history = fixed_point.FixedPointResult(
+            state=result.state,
+            residual=jnp.asarray(result.terminal_residual, dtype=jnp.float64),
+            trace=residuals,
+            converged=jnp.asarray(result.converged),
+            termination_reason=jnp.asarray(result.termination_reason, dtype=jnp.int32),
+            active_set_iterations=jnp.asarray(
+                result.active_set_iterations, dtype=jnp.int32
+            ),
+            active_set_residuals=residuals,
+            active_set_mask_differences=jnp.asarray(
+                result.active_set_mask_differences, dtype=jnp.int32
+            ),
+            shadow_mask_changes=jnp.asarray(
+                result.active_set_mask_differences, dtype=jnp.int32
+            ),
+        )
+        return self._receipt(
+            result.state,
+            history,
+            requested_class,
+            target_current,
+            current,
+            (
+                prescribed_current
+                if result.prescribed_current is None
+                else result.prescribed_current
+            ),
+            constraints=result.constraints,
+        )
+
     @staticmethod
     def _configure_solve_compilation_cache(enabled: bool) -> str | None:
         """Select the node-local default unless the process named a cache."""
@@ -1794,8 +1867,11 @@ class ForwardProfile:
 
         if request.source_profile is not self.source:
             raise ValueError("request source_profile must be this profile's source")
-        if request.constraint_pairs and request.route != "newton_krylov":
-            raise ValueError("augmented constraints require the newton_krylov route")
+        if request.constraint_pairs and request.route not in _CONSTRAINABLE:
+            raise ValueError(
+                "augmented constraints require a route carrying a compensating "
+                f"unknown vector; available: {', '.join(_CONSTRAINABLE)}"
+            )
         if not request.policy.current_pin and request.target_current is not None:
             raise ValueError("target_current requires the current-pin policy")
         if not request.policy.exact_kernels:
@@ -1977,8 +2053,11 @@ class ForwardProfile:
 
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         constraint_pairs = tuple(constraint_pairs)
-        if constraint_pairs and route in _HOST:
-            raise ValueError("augmented constraints require the newton_krylov route")
+        if constraint_pairs and route not in _CONSTRAINABLE:
+            raise ValueError(
+                "augmented constraints require a route carrying a compensating "
+                f"unknown vector; available: {', '.join(_CONSTRAINABLE)}"
+            )
         if route == "host":
             equilibrium = self._solve_host(
                 initial_flux,
@@ -1995,10 +2074,19 @@ class ForwardProfile:
                 prescribed_current=prescribed_current,
                 **resolved_options,
             )
+        elif route in _REDUCED:
+            equilibrium = self._solve_reduced_newton(
+                initial_flux,
+                current,
+                target_current=target_current,
+                prescribed_current=prescribed_current,
+                constraint_pairs=constraint_pairs,
+                **resolved_options,
+            )
         elif route not in _ACCELERATED:
             raise ValueError(
                 f"unknown solve route {route!r}; available: "
-                f"{', '.join((*_HOST, *_ACCELERATED))}"
+                f"{', '.join((*_HOST, *_ACCELERATED, *_REDUCED))}"
             )
         else:
             equilibrium = self._solve_accelerated(

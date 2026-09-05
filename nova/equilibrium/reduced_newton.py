@@ -52,6 +52,14 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium.constraint import (
+    CircuitCurrentUnknown,
+    ConstraintContext,
+    ConstraintPair,
+    ConstraintRecord,
+    constraint_records,
+    constraint_row_slices,
+)
 from nova.equilibrium.forward_operator import CellCurrentMoments
 from nova.equilibrium.fixed_point import (
     _BACKTRACKING_FACTORS,
@@ -63,11 +71,13 @@ from nova.equilibrium.fixed_point import (
 
 
 __all__ = [
+    "ConstrainedReducedNewtonResult",
     "ReducedCoordinates",
     "ReducedNewtonResult",
     "ReducedScores",
     "ReducedTrip",
     "reduced_coordinates",
+    "solve_constrained_reduced_newton",
     "solve_reduced_newton",
 ]
 
@@ -270,17 +280,67 @@ def _reduced_kernels(
     external,
     requested_class,
     target_current,
+    augmentation: "_RowAugmentation | None" = None,
 ) -> dict[str, Callable[..., Any]]:
     """Build the jitted reduced map, residual, Jacobian and merit ladder.
 
     The trip's frozen shadow and its base state enter as arguments rather than
     captured constants, so every trip of one solve shares a single compiled
     program and the compilation is paid once.
+
+    ``augmentation`` extends the reduced state by one compensating unknown per
+    constraint row and the reduced residual by the authored rows themselves.
+    Its absence is not a separate route: every kernel below then evaluates the
+    unaugmented expression itself rather than a degenerate case of the
+    augmented one, so the two entries return the same numbers.
     """
+
+    def _split(reduced):
+        """Return the amplitudes and the compensating unknowns of one state."""
+        if augmentation is None:
+            return reduced, None
+        return reduced[: coordinates.size], reduced[coordinates.size :]
+
+    def _image(moments, unknowns):
+        """Return the flux image of one moment set and its compensation."""
+        image = external + operator.current_moment_image(moments)
+        if augmentation is None:
+            return image
+        return image + augmentation.flux_delta(unknowns)
+
+    def _augment(residual, state, unknowns, shadow):
+        """Return the residual with the authored rows appended to it."""
+        if augmentation is None:
+            return residual, None
+        rows = augmentation.rows(state, unknowns, shadow)
+        return jnp.concatenate((residual, rows)), rows
+
+    def _scores(state, mapped, unknowns, rows):
+        """Return the merit and relative residual the selection reads.
+
+        Unaugmented these are the production flux-space scores.  With rows
+        present they are the same two functions of the state the augmented
+        Newton-Krylov route scores: the flux normalised by its own span beside
+        the unknowns, so a row far from its target is visible to the line
+        search instead of hidden under the flux block.
+        """
+        if augmentation is None:
+            return (
+                _smooth_relative_sup_merit(mapped, state),
+                _relative_residual(mapped, state),
+            )
+        scale = augmentation.flux_scale
+        scored = jnp.concatenate((state / scale, unknowns))
+        imaged = jnp.concatenate((mapped / scale, unknowns - rows))
+        return (
+            _smooth_relative_sup_merit(imaged, scored),
+            _relative_residual(imaged, scored),
+        )
 
     def reconstruct(reduced, shadow, base_state):
         """Return the flux one reduced state reconstructs behind the shadow."""
-        image = external + operator.current_moment_image(_scatter(coordinates, reduced))
+        amplitudes, unknowns = _split(reduced)
+        image = _image(_scatter(coordinates, amplitudes), unknowns)
         return jnp.where(shadow, base_state, image)
 
     def reduced_map(reduced, shadow, base_state):
@@ -294,19 +354,28 @@ def _reduced_kernels(
         return _gather(coordinates, moments)
 
     def reduced_residual(reduced, shadow, base_state):
-        """Return the reduced fixed-point residual ``u - R(u)``."""
-        return reduced - reduced_map(reduced, shadow, base_state)
+        """Return the reduced fixed-point residual ``u - R(u)`` and its rows."""
+        amplitudes, unknowns = _split(reduced)
+        if augmentation is None:
+            return amplitudes - reduced_map(reduced, shadow, base_state)
+        state = reconstruct(reduced, shadow, base_state)
+        moments = _current_moments(operator, state, requested_class, target_current)
+        residual, _rows = _augment(
+            amplitudes - _gather(coordinates, moments), state, unknowns, shadow
+        )
+        return residual
 
     def flux_scores(reduced, shadow, base_state):
         """Return the production merit and relative residual in flux space."""
+        amplitudes, unknowns = _split(reduced)
         state = reconstruct(reduced, shadow, base_state)
         moments = _current_moments(operator, state, requested_class, target_current)
-        image = external + operator.current_moment_image(moments)
+        image = _image(moments, unknowns)
         mapped = jnp.where(shadow, state, image)
-        return (
-            _smooth_relative_sup_merit(mapped, state),
-            _relative_residual(mapped, state),
+        rows = (
+            None if augmentation is None else augmentation.rows(state, unknowns, shadow)
         )
+        return _scores(state, mapped, unknowns, rows)
 
     def ladder(reduced, step, shadow, base_state):
         """Score the production backtracking grades of one Newton step."""
@@ -338,16 +407,20 @@ def _reduced_kernels(
         here is what keeps it off the host: the caller reads it beside the
         merit it was going to synchronise on anyway.
         """
+        amplitudes, unknowns = _split(reduced)
         state = reconstruct(reduced, shadow, base_state)
         moments = _current_moments(operator, state, requested_class, target_current)
-        image = external + operator.current_moment_image(moments)
+        image = _image(moments, unknowns)
         mapped = jnp.where(shadow, state, image)
-        residual = reduced - _gather(coordinates, moments)
+        residual, rows = _augment(
+            amplitudes - _gather(coordinates, moments), state, unknowns, shadow
+        )
+        merit, flux_residual = _scores(state, mapped, unknowns, rows)
         return ReducedScores(
             residual,
             jnp.max(jnp.abs(residual)),
-            _smooth_relative_sup_merit(mapped, state),
-            _relative_residual(mapped, state),
+            merit,
+            flux_residual,
         )
 
     def grade_scores(reduced, step, factor, shadow, base_state):
@@ -389,6 +462,8 @@ def _reduced_kernels(
         and the frozen shadow enters as an argument rather than a constant,
         which keeps every trip of one solve on the same compiled program.
         """
+        amplitudes, unknowns = _split(reduced)
+        del amplitudes
         state = reconstruct(reduced, shadow, base_state)
         moments = _current_moments(operator, state, requested_class, target_current)
         promoted = jnp.ravel(
@@ -399,17 +474,23 @@ def _reduced_kernels(
                 dtype=bool,
             )
         )
-        image = external + operator.current_moment_image(moments)
+        image = _image(moments, unknowns)
         mapped = jnp.where(promoted, state, image)
         current = moments.cell_current
         retained = jnp.zeros_like(current).at[coordinates.cells].set(1.0)
         excluded = jnp.max(jnp.abs(jnp.where(retained > 0.0, 0.0, current)))
+        gathered = _gather(coordinates, moments)
+        rows = (
+            None
+            if augmentation is None
+            else augmentation.rows(state, unknowns, promoted)
+        )
         return (
             state,
             promoted,
             jnp.sum(promoted != shadow),
-            _relative_residual(mapped, state),
-            _gather(coordinates, moments),
+            _scores(state, mapped, unknowns, rows)[1],
+            gathered if augmentation is None else jnp.concatenate((gathered, unknowns)),
             excluded / jnp.maximum(jnp.max(jnp.abs(current)), 1.0e-30),
         )
 
@@ -672,6 +753,134 @@ def _plain_newton_trip(
     return reduced, census
 
 
+def _drive_trips(
+    kernels: dict[str, Callable[..., Any]],
+    state: jax.Array,
+    reduced: jax.Array,
+    shadow: jax.Array,
+    *,
+    tolerance: float,
+    newton_steps: int,
+    active_set_steps: int,
+    fused: bool,
+    scoring: str,
+    regather: Callable[[jax.Array], jax.Array],
+    dispatched_boundary: Callable[..., Any],
+    stream: bool,
+) -> dict[str, Any]:
+    """Run the active-set trips of one reduced solve and report every census.
+
+    One topology read opens each trip and freezes the residual shadow; the
+    trip's Newton steps run entirely on the reduced state; the trip closes on
+    the promoted shadow the settled state induces, and the solve exits when
+    that shadow stops moving, which is the production settled exit on the
+    incumbent mask.  The reduced state the trips carry is the plasma-cell
+    amplitude vector on its own, or that vector extended by the compensating
+    unknowns of a constraint tuple; the loop is the same either way because
+    every difference between the two lives inside the kernels.
+    """
+    residuals: list[float] = []
+    differences: list[int] = []
+    per_trip_steps: list[int] = []
+    per_trip_builds: list[int] = []
+    per_trip_rejected: list[int] = []
+    per_trip_jacobian_wall: list[float] = []
+    per_trip_newton_wall: list[float] = []
+    per_trip_boundary_wall: list[float] = []
+    per_trip_wall: list[float] = []
+    per_trip_maps: list[int] = []
+    steps: list[ReducedNewtonStep] = []
+    reason = FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
+    converged = False
+    terminal_residual = float("inf")
+    leakage = 0.0
+
+    for trip in range(active_set_steps):
+        trip_started = time.perf_counter()
+        if not fused:
+            reduced = regather(state)
+        reduced, census = _plain_newton_trip(
+            kernels,
+            reduced,
+            shadow,
+            state,
+            trip=trip,
+            newton_steps=newton_steps,
+            tolerance=tolerance,
+            steps=steps,
+            scoring=scoring,
+        )
+        per_trip_steps.append(int(census["steps"]))
+        per_trip_builds.append(int(census["jacobian_builds"]))
+        per_trip_rejected.append(int(census["rejected"]))
+        per_trip_jacobian_wall.append(float(census["jacobian_wall"]))
+        per_trip_newton_wall.append(float(census["newton_wall"]))
+        per_trip_maps.append(int(census["map_evaluations"]))
+        boundary_started = time.perf_counter()
+        if fused:
+            closed, _ = _timed(kernels["boundary"], reduced, shadow, state)
+            state, promoted, difference, observed, carried, excluded = closed
+            difference = int(difference)
+            observed = float(observed)
+            leakage = max(leakage, float(excluded))
+            reduced = carried
+        else:
+            state, promoted, difference, observed, excluded = dispatched_boundary(
+                reduced, shadow, state
+            )
+            leakage = max(leakage, excluded)
+        per_trip_boundary_wall.append(time.perf_counter() - boundary_started)
+        per_trip_wall.append(time.perf_counter() - trip_started)
+        residuals.append(observed)
+        differences.append(difference)
+        terminal_residual = observed
+        if stream:
+            print(
+                f"REDUCED-TRIP {trip} residual={observed:.6e} "
+                f"difference={difference} steps={census['steps']} "
+                f"jacobians={census['jacobian_builds']} "
+                f"wall={per_trip_wall[-1]:.4f}",
+                flush=True,
+            )
+        shadow = promoted
+        if np.isfinite(observed) and observed <= tolerance and difference == 0:
+            converged = True
+            reason = FixedPointTerminationReason.CONVERGED
+            break
+        if difference == 0:
+            reason = FixedPointTerminationReason.ACTIVE_SET_SETTLED
+            break
+
+    return {
+        "state": state,
+        "reduced": reduced,
+        "terminal_residual": terminal_residual,
+        "converged": converged,
+        "reason": reason,
+        "residuals": residuals,
+        "differences": differences,
+        "newton_steps_per_trip": per_trip_steps,
+        "jacobian_builds_per_trip": per_trip_builds,
+        "rejected_steps_per_trip": per_trip_rejected,
+        "jacobian_wall_per_trip": per_trip_jacobian_wall,
+        "newton_wall_per_trip": per_trip_newton_wall,
+        "boundary_wall_per_trip": per_trip_boundary_wall,
+        "trip_wall_per_trip": per_trip_wall,
+        "map_evaluations_per_trip": per_trip_maps,
+        "off_support_leakage": leakage,
+        "steps": steps,
+    }
+
+
+def _validate_solve_policy(ladder_scoring: str, trip_boundary: str) -> bool:
+    """Return whether the trip boundary is fused, refusing unknown policies."""
+    if ladder_scoring not in _GRADERS:
+        raise ValueError(f"unknown ladder scoring {ladder_scoring!r}")
+    if trip_boundary not in (TRIP_BOUNDARY, DISPATCHED_TRIP_BOUNDARY):
+        raise ValueError(f"unknown trip boundary {trip_boundary!r}")
+    return trip_boundary == TRIP_BOUNDARY
+
+
 def solve_reduced_newton(
     operator,
     initial,
@@ -721,115 +930,360 @@ def solve_reduced_newton(
     kernels = _reduced_kernels(
         operator, coordinates, external, requested_class, target_current
     )
-    if ladder_scoring not in _GRADERS:
-        raise ValueError(f"unknown ladder scoring {ladder_scoring!r}")
-    if trip_boundary not in (TRIP_BOUNDARY, DISPATCHED_TRIP_BOUNDARY):
-        raise ValueError(f"unknown trip boundary {trip_boundary!r}")
-    fused = trip_boundary == TRIP_BOUNDARY
-    residuals: list[float] = []
-    differences: list[int] = []
-    per_trip_steps: list[int] = []
-    per_trip_builds: list[int] = []
-    per_trip_rejected: list[int] = []
-    per_trip_jacobian_wall: list[float] = []
-    per_trip_newton_wall: list[float] = []
-    per_trip_boundary_wall: list[float] = []
-    per_trip_wall: list[float] = []
-    per_trip_maps: list[int] = []
-    steps: list[ReducedNewtonStep] = []
-    reason = FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
-    converged = False
-    terminal_residual = float("inf")
-    leakage = 0.0
+    fused = _validate_solve_policy(ladder_scoring, trip_boundary)
 
-    carried_reduced = kernels["initial_gather"](state) if fused else None
-    for trip in range(active_set_steps):
-        trip_started = time.perf_counter()
-        if fused:
-            reduced = carried_reduced
-        else:
-            moments = _current_moments(operator, state, requested_class, target_current)
-            reduced = _gather(coordinates, moments)
-        reduced, census = _plain_newton_trip(
-            kernels,
-            reduced,
-            shadow,
-            state,
-            trip=trip,
-            newton_steps=newton_steps,
-            tolerance=tolerance,
-            steps=steps,
-            scoring=ladder_scoring,
+    def regather(state):
+        """Return the amplitudes one flux state drives, outside a program."""
+        moments = _current_moments(operator, state, requested_class, target_current)
+        return _gather(coordinates, moments)
+
+    def dispatched_boundary(reduced, shadow, base_state):
+        """Close one trip through the separate calls the fused program folds."""
+        leakage = float(kernels["leakage"](reduced, shadow, base_state))
+        state, _ = _timed(kernels["reconstruct"], reduced, shadow, base_state)
+        promoted = jnp.ravel(
+            jnp.asarray(
+                operator.residual_shadow_mask(
+                    state, requested_class, previous_shadow=shadow
+                ),
+                dtype=bool,
+            )
         )
-        per_trip_steps.append(int(census["steps"]))
-        per_trip_builds.append(int(census["jacobian_builds"]))
-        per_trip_rejected.append(int(census["rejected"]))
-        per_trip_jacobian_wall.append(float(census["jacobian_wall"]))
-        per_trip_newton_wall.append(float(census["newton_wall"]))
-        per_trip_maps.append(int(census["map_evaluations"]))
-        boundary_started = time.perf_counter()
-        if fused:
-            closed, _ = _timed(kernels["boundary"], reduced, shadow, state)
-            state, promoted, difference, observed, carried_reduced, excluded = closed
-            difference = int(difference)
-            observed = float(observed)
-            leakage = max(leakage, float(excluded))
-        else:
-            leakage = max(leakage, float(kernels["leakage"](reduced, shadow, state)))
-            state, _ = _timed(kernels["reconstruct"], reduced, shadow, state)
-            promoted = jnp.ravel(
-                jnp.asarray(
-                    operator.residual_shadow_mask(
-                        state, requested_class, previous_shadow=shadow
-                    ),
-                    dtype=bool,
-                )
-            )
-            difference = int(jnp.sum(promoted != shadow))
-            mapped = operator.flux_map_with_shadow(
-                current, requested_class, target_current, prescribed_current
-            )(state, promoted)
-            observed = float(_relative_residual(mapped, state))
-        per_trip_boundary_wall.append(time.perf_counter() - boundary_started)
-        per_trip_wall.append(time.perf_counter() - trip_started)
-        residuals.append(observed)
-        differences.append(difference)
-        terminal_residual = observed
-        if stream:
-            print(
-                f"REDUCED-TRIP {trip} residual={observed:.6e} "
-                f"difference={difference} steps={census['steps']} "
-                f"jacobians={census['jacobian_builds']} "
-                f"wall={per_trip_wall[-1]:.4f}",
-                flush=True,
-            )
-        shadow = promoted
-        if np.isfinite(observed) and observed <= tolerance and difference == 0:
-            converged = True
-            reason = FixedPointTerminationReason.CONVERGED
-            break
-        if difference == 0:
-            reason = FixedPointTerminationReason.ACTIVE_SET_SETTLED
-            break
+        difference = int(jnp.sum(promoted != shadow))
+        mapped = operator.flux_map_with_shadow(
+            current, requested_class, target_current, prescribed_current
+        )(state, promoted)
+        observed = float(_relative_residual(mapped, state))
+        return state, promoted, difference, observed, leakage
 
+    driven = _drive_trips(
+        kernels,
+        state,
+        kernels["initial_gather"](state) if fused else None,
+        shadow,
+        tolerance=tolerance,
+        newton_steps=newton_steps,
+        active_set_steps=active_set_steps,
+        fused=fused,
+        scoring=ladder_scoring,
+        regather=regather,
+        dispatched_boundary=dispatched_boundary,
+        stream=stream,
+    )
     return ReducedNewtonResult(
-        state=state,
-        terminal_residual=terminal_residual,
-        active_set_iterations=len(residuals),
-        converged=converged,
-        termination_reason=int(reason),
-        active_set_residuals=residuals,
-        active_set_mask_differences=differences,
-        newton_steps_per_trip=per_trip_steps,
-        jacobian_builds_per_trip=per_trip_builds,
-        rejected_steps_per_trip=per_trip_rejected,
-        jacobian_wall_per_trip=per_trip_jacobian_wall,
-        newton_wall_per_trip=per_trip_newton_wall,
-        boundary_wall_per_trip=per_trip_boundary_wall,
-        trip_wall_per_trip=per_trip_wall,
-        map_evaluations_per_trip=per_trip_maps,
+        state=driven["state"],
+        terminal_residual=driven["terminal_residual"],
+        active_set_iterations=len(driven["residuals"]),
+        converged=driven["converged"],
+        termination_reason=int(driven["reason"]),
+        active_set_residuals=driven["residuals"],
+        active_set_mask_differences=driven["differences"],
+        newton_steps_per_trip=driven["newton_steps_per_trip"],
+        jacobian_builds_per_trip=driven["jacobian_builds_per_trip"],
+        rejected_steps_per_trip=driven["rejected_steps_per_trip"],
+        jacobian_wall_per_trip=driven["jacobian_wall_per_trip"],
+        newton_wall_per_trip=driven["newton_wall_per_trip"],
+        boundary_wall_per_trip=driven["boundary_wall_per_trip"],
+        trip_wall_per_trip=driven["trip_wall_per_trip"],
+        map_evaluations_per_trip=driven["map_evaluations_per_trip"],
         reduced_dimension=coordinates.size,
         support_cells=int(coordinates.cells.size),
-        off_support_leakage=leakage,
-        steps=steps,
+        off_support_leakage=driven["off_support_leakage"],
+        steps=driven["steps"],
+    )
+
+
+@dataclass(frozen=True)
+class _RowAugmentation:
+    """The constraint block a reduced state and its residual are extended by.
+
+    The reduced route poses its fixed point on amplitudes rather than on flux,
+    so the flux a state reconstructs is a function of the unknowns rather than
+    an unknown of its own.  A compensator whose flux image read the state would
+    therefore make that reconstruction implicit, which is why only the
+    circuit-current compensator is admitted here: its image is the prescribed
+    response acting on a current, and it is linear in the unknown.
+    """
+
+    profile: Any
+    pairs: tuple[ConstraintPair, ...]
+    row_slices: tuple[slice, ...]
+    row_count: int
+    flux_scale: jax.Array
+    requested_class: Any
+    target_current: Any
+
+    def flux_delta(self, unknowns) -> jax.Array:
+        """Return the flux every compensating unknown drives at this state."""
+        delta = 0.0
+        for pair, row_slice in zip(self.pairs, self.row_slices, strict=True):
+            delta = delta + pair.unknown.flux_delta(
+                self.profile,
+                None,
+                pair.functional,
+                pair.binding.payload,
+                unknowns[row_slice],
+            )
+        return delta
+
+    def rows(self, flux, unknowns, shadow) -> jax.Array:
+        """Return every authored constraint residual row at one state."""
+        context = ConstraintContext(
+            flux, self.requested_class, self.target_current, shadow
+        )
+        return jnp.concatenate(
+            tuple(
+                jnp.ravel(
+                    pair.functional.residual(
+                        self.profile,
+                        context,
+                        unknowns[row_slice],
+                        pair.binding.payload,
+                        jnp.asarray(pair.binding.target),
+                        jnp.asarray(pair.binding.scale),
+                    )
+                )
+                for pair, row_slice in zip(self.pairs, self.row_slices, strict=True)
+            )
+        )
+
+
+class _RowRecordView(NamedTuple):
+    """The two members :func:`constraint_records` reads off a solved system.
+
+    The reduced route's state is amplitudes and unknowns rather than flux and
+    unknowns, so the terminal record is written from the flux that state
+    reconstructs.  Sharing the reader keeps one definition of what a row
+    achieved rather than a second copy that can drift from it.
+    """
+
+    row_slices: tuple[slice, ...]
+    flux: jax.Array
+    unknowns: jax.Array
+
+    def split(self, state):
+        """Return the terminal flux and unknowns this view already holds."""
+        del state
+        return self.flux, self.unknowns
+
+
+@dataclass
+class ConstrainedReducedNewtonResult(ReducedNewtonResult):
+    """A reduced solve that also carried a tuple of constraint rows.
+
+    ``state`` remains the terminal flux, so every field the unconstrained
+    result declares means what it means there.  The compensating unknowns and
+    the terminal row records are what the augmentation adds, together with the
+    prescribed circuit currents the compensation implies, which is the vector a
+    caller drives the machine with on the next keyframe.
+    """
+
+    compensating_unknown: jax.Array | None = None
+    constraints: tuple[ConstraintRecord, ...] = ()
+    prescribed_current: jax.Array | None = None
+    row_count: int = 0
+
+
+def _row_augmentation(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    seed: jax.Array,
+    *,
+    requested_class,
+    target_current,
+) -> _RowAugmentation:
+    """Validate one constraint tuple and bind it to this solve's flux scale."""
+    for pair in pairs:
+        if not isinstance(pair, ConstraintPair):
+            raise TypeError("constraint_pairs must contain ConstraintPair values")
+        if not isinstance(pair.unknown, CircuitCurrentUnknown):
+            raise TypeError(
+                "the reduced route admits circuit-current compensators only; a "
+                "compensator whose flux image reads the state would make the "
+                "amplitude reconstruction implicit"
+            )
+    row_slices = constraint_row_slices(pairs)
+    return _RowAugmentation(
+        profile=profile,
+        pairs=pairs,
+        row_slices=row_slices,
+        row_count=row_slices[-1].stop,
+        flux_scale=jnp.maximum(jnp.max(jnp.abs(seed)), jnp.finfo(seed.dtype).tiny),
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+
+
+def solve_constrained_reduced_newton(
+    profile,
+    initial,
+    *,
+    constraint_pairs: tuple[ConstraintPair, ...] = (),
+    requested_class=None,
+    target_current=None,
+    current=None,
+    prescribed_current=None,
+    tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
+    newton_steps: int = NEWTON_STEPS,
+    active_set_steps: int = ACTIVE_SET_STEPS,
+    support_policy: str = SUPPORT_POLICY,
+    support_floor: float = _ACTIVE_SUPPORT_FLOOR,
+    ladder_scoring: str = LADDER_SCORING,
+    trip_boundary: str = TRIP_BOUNDARY,
+    stream: bool = False,
+) -> ConstrainedReducedNewtonResult:
+    """Drive the reduced fixed point with constraint rows on the same state.
+
+    The compensating unknowns extend the amplitude vector and the authored
+    constraint residuals extend the amplitude residual, so the square dense
+    system one trip solves grows by one row and one column per constraint row
+    and nothing else about the trip structure changes.  Scoring follows the
+    augmented Newton-Krylov route: the merit and the relative residual are read
+    on the flux normalised by its own span beside the unknowns, so a row that
+    is far from its target is visible to the line search rather than hidden
+    under the flux block.
+
+    An empty constraint tuple is the unconstrained solve.  Every kernel then
+    evaluates the expression :func:`solve_reduced_newton` evaluates, so the two
+    entries return the same numbers rather than nearly the same ones.
+    """
+    operator = profile.operator
+    state = jnp.asarray(initial)
+    pairs = tuple(constraint_pairs)
+    augmentation = (
+        None
+        if not pairs
+        else _row_augmentation(
+            profile,
+            pairs,
+            state,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+    )
+    fused = _validate_solve_policy(ladder_scoring, trip_boundary)
+    if pairs and not fused:
+        raise ValueError(
+            "the constrained reduced route closes its trips inside one program; "
+            "the dispatched boundary rebuilds the reduced state from the flux "
+            "alone and would discard the compensating unknowns"
+        )
+    external = operator.external(current, prescribed_current)
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
+    )
+    coordinates = reduced_coordinates(
+        operator,
+        state,
+        requested_class=requested_class,
+        target_current=target_current,
+        policy=support_policy,
+        floor=support_floor,
+    )
+    kernels = _reduced_kernels(
+        operator,
+        coordinates,
+        external,
+        requested_class,
+        target_current,
+        augmentation=augmentation,
+    )
+
+    def regather(state):
+        """Return the amplitudes one flux state drives, outside a program."""
+        moments = _current_moments(operator, state, requested_class, target_current)
+        return _gather(coordinates, moments)
+
+    def dispatched_boundary(reduced, shadow, base_state):
+        """Close one trip through the separate calls the fused program folds."""
+        leakage = float(kernels["leakage"](reduced, shadow, base_state))
+        state, _ = _timed(kernels["reconstruct"], reduced, shadow, base_state)
+        promoted = jnp.ravel(
+            jnp.asarray(
+                operator.residual_shadow_mask(
+                    state, requested_class, previous_shadow=shadow
+                ),
+                dtype=bool,
+            )
+        )
+        difference = int(jnp.sum(promoted != shadow))
+        mapped = operator.flux_map_with_shadow(
+            current, requested_class, target_current, prescribed_current
+        )(state, promoted)
+        observed = float(_relative_residual(mapped, state))
+        return state, promoted, difference, observed, leakage
+
+    amplitudes = kernels["initial_gather"](state) if fused else None
+    if augmentation is not None:
+        amplitudes = jnp.concatenate(
+            (
+                amplitudes,
+                jnp.concatenate(
+                    tuple(
+                        jnp.ravel(jnp.asarray(pair.binding.initial_unknown))
+                        for pair in pairs
+                    )
+                ),
+            )
+        )
+    driven = _drive_trips(
+        kernels,
+        state,
+        amplitudes,
+        shadow,
+        tolerance=tolerance,
+        newton_steps=newton_steps,
+        active_set_steps=active_set_steps,
+        fused=fused,
+        scoring=ladder_scoring,
+        regather=regather,
+        dispatched_boundary=dispatched_boundary,
+        stream=stream,
+    )
+    unknowns = None if augmentation is None else driven["reduced"][coordinates.size :]
+    records: tuple[ConstraintRecord, ...] = ()
+    circuit_current = (
+        None if prescribed_current is None else jnp.asarray(prescribed_current)
+    )
+    if circuit_current is None and operator.prescribed_current_field is not None:
+        circuit_current = jnp.asarray(operator.prescribed_current_field.current)
+    if augmentation is not None:
+        records = constraint_records(
+            profile,
+            _RowRecordView(augmentation.row_slices, driven["state"], unknowns),
+            driven["state"],
+            pairs,
+            jnp.full(augmentation.row_count, jnp.nan),
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+        if circuit_current is not None:
+            for pair, record in zip(pairs, records, strict=True):
+                circuit_current = circuit_current + (
+                    jnp.asarray(pair.unknown.direction) @ record.physical_unknown
+                )
+    return ConstrainedReducedNewtonResult(
+        state=driven["state"],
+        terminal_residual=driven["terminal_residual"],
+        active_set_iterations=len(driven["residuals"]),
+        converged=driven["converged"],
+        termination_reason=int(driven["reason"]),
+        active_set_residuals=driven["residuals"],
+        active_set_mask_differences=driven["differences"],
+        newton_steps_per_trip=driven["newton_steps_per_trip"],
+        jacobian_builds_per_trip=driven["jacobian_builds_per_trip"],
+        rejected_steps_per_trip=driven["rejected_steps_per_trip"],
+        jacobian_wall_per_trip=driven["jacobian_wall_per_trip"],
+        newton_wall_per_trip=driven["newton_wall_per_trip"],
+        boundary_wall_per_trip=driven["boundary_wall_per_trip"],
+        trip_wall_per_trip=driven["trip_wall_per_trip"],
+        map_evaluations_per_trip=driven["map_evaluations_per_trip"],
+        reduced_dimension=coordinates.size,
+        support_cells=int(coordinates.cells.size),
+        off_support_leakage=driven["off_support_leakage"],
+        steps=driven["steps"],
+        compensating_unknown=unknowns,
+        constraints=records,
+        prescribed_current=circuit_current,
+        row_count=0 if augmentation is None else augmentation.row_count,
     )

@@ -1,13 +1,20 @@
 """Measure the reduced-state plain-Newton prototype on the four bank rows.
 
-Each row is solved twice from the same persisted pure-arm seed: once through
-the production public route, ``ForwardProfile.solve_branch(newton_krylov)``,
-and once through the reduced-amplitude plain-Newton prototype.  Both arms
-report the terminal residual, the trip count, the Newton steps per trip and
-the wall per step and per trip, so the prototype's distance to a millisecond
-fixed point is read against the ladder it replaces rather than against a
-projection.  Every row is written to the receipt as it finishes, so a job that
-runs out of wall clock still delivers the rows it measured.
+Each row is solved from the same persisted pure-arm seed through two
+prototype routes: the first-accept ladder behind a fused trip boundary, and
+the eager ladder behind the dispatched boundary the first prototype measured.
+The second is the route the banked receipt beside this one recorded, so it
+re-derives that receipt's terminal flux in the same job and the first route's
+terminal flux is compared against it row by row.  Optionally each row is also
+solved through the production public route,
+``ForwardProfile.solve_branch(newton_krylov)``.
+
+Every arm reports the terminal residual, the trip count, the Newton steps and
+map evaluations per trip, and the wall per step, per boundary and per trip, so
+the prototype's distance to a millisecond fixed point is read against the
+route it replaces rather than against a projection.  Every row is written to
+the receipt as it finishes, so a job that runs out of wall clock still
+delivers the rows it measured.
 """
 
 from __future__ import annotations
@@ -64,6 +71,30 @@ PRODUCTION_RECEIPT = (
     / "docs/figures/solver-convergence-regression"
     / "settled-mask-stall/fallback-carry/four-rows-after.json"
 )
+#: The receipt this measurement is read against, copied from the revision that
+#: banked it so a rewrite of the live receipt cannot move the comparison.
+PREVIOUS_RECEIPT = (
+    ROOT
+    / "docs/figures/millisecond-converged-solve/reduced-newton/four-rows-before.json"
+)
+#: Terminal-flux agreement required between the two prototype routes, as a
+#: fraction of the flux span.  A converged row sits at the map's fixed point
+#: and the routes may differ only by the arithmetic the fusion reassociates; a
+#: settled row stops on an unmoved mask at a finite residual, where the same
+#: reassociation is carried through the trips that follow it.
+CONVERGED_FLUX_AGREEMENT = 1.0e-9
+SETTLED_FLUX_AGREEMENT = 1.0e-6
+#: Both prototype routes, named by the mechanism each measures.
+PROTOTYPE_ROUTES = {
+    "prototype": {
+        "ladder_scoring": reduced_newton.LADDER_SCORING,
+        "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+    },
+    "eager_prototype": {
+        "ladder_scoring": reduced_newton.EAGER_LADDER_SCORING,
+        "trip_boundary": reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+    },
+}
 PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
 
 
@@ -83,6 +114,103 @@ def _banked_production_rows() -> dict[str, dict[str, Any]]:
         return {}
     receipt = json.loads(PRODUCTION_RECEIPT.read_text())
     return {row["identity"]: row["public_route"] for row in receipt["rows"]}
+
+
+def _previous_prototype_rows() -> dict[str, dict[str, Any]]:
+    """Return the prototype figures the receipt beside this one banked."""
+    if not PREVIOUS_RECEIPT.exists():
+        return {}
+    receipt = json.loads(PREVIOUS_RECEIPT.read_text())
+    return {row["identity"]: row["prototype"] for row in receipt["rows"]}
+
+
+def _route_agreement(fast, eager, previous) -> dict[str, Any]:
+    """Compare the two prototype routes, and the slow one against its receipt.
+
+    The eager route re-derives what the previous receipt measured, so its
+    terminal residual and trip census standing beside the banked ones say
+    whether the reference reproduced; the fast route's terminal flux is then
+    compared against that reference rather than against a projection.
+    """
+    fast_flux = jnp.asarray(fast["flux"])
+    eager_flux = jnp.asarray(eager["flux"])
+    span = float(jnp.max(jnp.abs(eager_flux)))
+    difference = float(jnp.max(jnp.abs(fast_flux - eager_flux)))
+    fraction = difference / max(span, 1.0e-30)
+    required = (
+        CONVERGED_FLUX_AGREEMENT if eager["converged"] else SETTLED_FLUX_AGREEMENT
+    )
+    reproduced = None
+    if previous is not None:
+        banked = float(previous["terminal_residual"])
+        reproduced = {
+            "banked_terminal_residual": banked,
+            "measured_terminal_residual": eager["terminal_residual"],
+            "relative_residual_difference": abs(eager["terminal_residual"] - banked)
+            / max(abs(banked), 1.0e-30),
+            "banked_active_set_iterations": previous["active_set_iterations"],
+            "measured_active_set_iterations": eager["active_set_iterations"],
+            "banked_newton_steps_per_trip": previous["newton_steps_per_trip"],
+            "measured_newton_steps_per_trip": eager["newton_steps_per_trip"],
+            "identical_trip_census": (
+                previous["active_set_iterations"] == eager["active_set_iterations"]
+                and previous["newton_steps_per_trip"] == eager["newton_steps_per_trip"]
+                and previous["active_set_mask_differences"]
+                == eager["active_set_mask_differences"]
+            ),
+        }
+    return {
+        "reference_route": "eager ladder behind the dispatched boundary",
+        "sup_flux_difference_wb": difference,
+        "sup_flux_difference_fraction_of_span": fraction,
+        "required_fraction_of_span": required,
+        "flux_agrees": fraction <= required,
+        "bitwise_identical_flux": bool(jnp.array_equal(fast_flux, eager_flux)),
+        "terminal_residual_fast": fast["terminal_residual"],
+        "terminal_residual_reference": eager["terminal_residual"],
+        "identical_trip_census": (
+            fast["active_set_iterations"] == eager["active_set_iterations"]
+            and fast["newton_steps_per_trip"] == eager["newton_steps_per_trip"]
+            and fast["active_set_mask_differences"]
+            == eager["active_set_mask_differences"]
+        ),
+        "previous_receipt_reproduced": reproduced,
+    }
+
+
+def _speedup(fast, eager) -> dict[str, Any]:
+    """Rank what the two repairs removed from the warm step and the trip."""
+
+    def ratio(numerator, denominator):
+        """Return one before-after ratio, or None where a figure is absent."""
+        if not numerator or not denominator:
+            return None
+        return float(numerator) / float(denominator)
+
+    return {
+        "warm_step_wall_s": fast["median_warm_step_wall_s"],
+        "reference_warm_step_wall_s": eager["median_warm_step_wall_s"],
+        "warm_step_speedup": ratio(
+            eager["median_warm_step_wall_s"], fast["median_warm_step_wall_s"]
+        ),
+        "warm_trip_wall_s": fast["median_warm_trip_wall_s"],
+        "reference_warm_trip_wall_s": eager["median_warm_trip_wall_s"],
+        "warm_trip_speedup": ratio(
+            eager["median_warm_trip_wall_s"], fast["median_warm_trip_wall_s"]
+        ),
+        "warm_boundary_wall_s": fast["median_warm_boundary_wall_s"],
+        "reference_warm_boundary_wall_s": eager["median_warm_boundary_wall_s"],
+        "warm_newton_work_per_trip_s": fast["median_warm_newton_work_per_trip_s"],
+        "reference_warm_newton_work_per_trip_s": eager[
+            "median_warm_newton_work_per_trip_s"
+        ],
+        "warm_step_map_evaluations": fast["median_warm_step_map_evaluations"],
+        "reference_warm_step_map_evaluations": eager[
+            "median_warm_step_map_evaluations"
+        ],
+        "millisecond_target_s": 1.0e-3,
+        "warm_step_walls_of_target": ratio(fast["median_warm_step_wall_s"], 1.0e-3),
+    }
 
 
 def _production_arm(profile, seed, target_current) -> dict[str, Any]:
@@ -128,7 +256,9 @@ def _production_arm(profile, seed, target_current) -> dict[str, Any]:
     }
 
 
-def _prototype_arm(operator, seed, target_current, policy: str) -> dict[str, Any]:
+def _prototype_arm(
+    operator, seed, target_current, policy: str, route: dict[str, str]
+) -> dict[str, Any]:
     """Time one reduced-state plain-Newton solve of the same bank seed."""
     requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
     started = time.perf_counter()
@@ -141,13 +271,19 @@ def _prototype_arm(operator, seed, target_current, policy: str) -> dict[str, Any
         newton_steps=NEWTON_STEPS,
         support_policy=policy,
         stream=True,
+        **route,
     )
     wall = time.perf_counter() - started
     accepted = [step for step in result.steps if step.accepted_factor is not None]
     step_walls = [step.wall_s for step in result.steps]
     warm_steps = [step for step in result.steps if step.trip > 0]
+    warm_trips = result.trip_wall_per_trip[1:]
+    warm_boundaries = result.boundary_wall_per_trip[1:]
+    warm_newton = result.newton_wall_per_trip[1:]
     return {
         "route": "reduced_newton.solve_reduced_newton",
+        "ladder_scoring": route["ladder_scoring"],
+        "trip_boundary": route["trip_boundary"],
         "support_policy": policy,
         "reduced_dimension": result.reduced_dimension,
         "support_cells": result.support_cells,
@@ -163,8 +299,10 @@ def _prototype_arm(operator, seed, target_current, policy: str) -> dict[str, Any
         "newton_steps_per_trip": result.newton_steps_per_trip,
         "jacobian_builds_per_trip": result.jacobian_builds_per_trip,
         "rejected_steps_per_trip": result.rejected_steps_per_trip,
+        "map_evaluations_per_trip": result.map_evaluations_per_trip,
         "jacobian_wall_per_trip_s": result.jacobian_wall_per_trip,
         "newton_wall_per_trip_s": result.newton_wall_per_trip,
+        "boundary_wall_per_trip_s": result.boundary_wall_per_trip,
         "trip_wall_per_trip_s": result.trip_wall_per_trip,
         "accepted_step_count": len(accepted),
         "rejected_step_count": len(result.steps) - len(accepted),
@@ -182,6 +320,20 @@ def _prototype_arm(operator, seed, target_current, policy: str) -> dict[str, Any
             if len(result.jacobian_wall_per_trip) > 1
             else None
         ),
+        "median_warm_trip_wall_s": (
+            float(np.median(warm_trips)) if warm_trips else None
+        ),
+        "median_warm_boundary_wall_s": (
+            float(np.median(warm_boundaries)) if warm_boundaries else None
+        ),
+        "median_warm_newton_work_per_trip_s": (
+            float(np.median(warm_newton)) if warm_newton else None
+        ),
+        "median_warm_step_map_evaluations": (
+            float(np.median([step.map_evaluations for step in warm_steps]))
+            if warm_steps
+            else None
+        ),
         "steps": [
             {
                 "trip": step.trip,
@@ -191,6 +343,7 @@ def _prototype_arm(operator, seed, target_current, policy: str) -> dict[str, Any
                 "merit": step.merit,
                 "accepted_factor": step.accepted_factor,
                 "grades_tried": step.grades_tried,
+                "map_evaluations": step.map_evaluations,
                 "jacobian_refreshed": step.jacobian_refreshed,
                 "wall_s": step.wall_s,
             }
@@ -222,54 +375,87 @@ def _fixed_point_agreement(operator, production, prototype, target_current):
 
 
 def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
-    """Plot per-row wall and per-step wall for both arms."""
+    """Plot the warm step, the warm trip and the map evaluations, before/after."""
     figure, axes = plt.subplots(1, 3, figsize=(13.5, 4.2))
     identities = [row["identity"] for row in rows]
     index = np.arange(len(rows))
-    production = [row["production"]["wall_s"] for row in rows]
-    prototype = [row["prototype"]["wall_s"] for row in rows]
-    axes[0].bar(index - 0.2, production, 0.4, label="production", color="#c0504d")
-    axes[0].bar(index + 0.2, prototype, 0.4, label="reduced Newton", color="#4f81bd")
-    axes[0].set_yscale("log")
-    axes[0].set_ylabel("solve wall [s]")
-    axes[0].set_title("whole solve")
-    axes[0].legend(fontsize=8)
+    before = "#c0504d"
+    after = "#4f81bd"
 
-    warm = [row["prototype"]["median_warm_step_wall_s"] or np.nan for row in rows]
-    first = [row["prototype"]["first_step_wall_s"] or np.nan for row in rows]
-    axes[1].bar(index - 0.2, first, 0.4, label="first step (cold)", color="#9bbb59")
-    axes[1].bar(index + 0.2, warm, 0.4, label="median warm step", color="#4f81bd")
-    axes[1].axhline(1.0e-3, color="black", linestyle="--", linewidth=1.0)
+    def series(name, field_name):
+        """Return one per-row figure of one prototype route."""
+        return [row[name].get(field_name) or np.nan for row in rows]
+
+    axes[0].bar(
+        index - 0.2,
+        series("eager_prototype", "median_warm_step_wall_s"),
+        0.4,
+        label="eager ladder, dispatched boundary",
+        color=before,
+    )
+    axes[0].bar(
+        index + 0.2,
+        series("prototype", "median_warm_step_wall_s"),
+        0.4,
+        label="first accept, fused boundary",
+        color=after,
+    )
+    axes[0].axhline(1.0e-3, color="black", linestyle="--", linewidth=1.0)
+    axes[0].set_yscale("log")
+    axes[0].set_ylabel("median warm Newton step wall [s]")
+    axes[0].set_title("per Newton step against 1 ms")
+    axes[0].legend(fontsize=7)
+
+    axes[1].bar(
+        index - 0.2,
+        series("eager_prototype", "median_warm_trip_wall_s"),
+        0.4,
+        label="dispatched boundary",
+        color=before,
+    )
+    axes[1].bar(
+        index + 0.2,
+        series("prototype", "median_warm_trip_wall_s"),
+        0.4,
+        label="fused boundary",
+        color=after,
+    )
+    axes[1].bar(
+        index + 0.2,
+        series("prototype", "median_warm_newton_work_per_trip_s"),
+        0.4,
+        label="Newton work inside the fused trip",
+        color="#9bbb59",
+    )
     axes[1].set_yscale("log")
-    axes[1].set_ylabel("Newton step wall [s]")
-    axes[1].set_title("per Newton step against 1 ms")
-    axes[1].legend(fontsize=8)
+    axes[1].set_ylabel("median warm trip wall [s]")
+    axes[1].set_title("per active-set trip")
+    axes[1].legend(fontsize=7)
 
     axes[2].bar(
         index - 0.2,
-        [row["production"]["terminal_residual"] for row in rows],
+        series("eager_prototype", "median_warm_step_map_evaluations"),
         0.4,
-        label="production",
-        color="#c0504d",
+        label="eager ladder",
+        color=before,
     )
     axes[2].bar(
         index + 0.2,
-        [row["prototype"]["terminal_residual"] for row in rows],
+        series("prototype", "median_warm_step_map_evaluations"),
         0.4,
-        label="reduced Newton",
-        color="#4f81bd",
+        label="first accept",
+        color=after,
     )
-    axes[2].set_yscale("log")
-    axes[2].set_ylabel("terminal relative residual")
-    axes[2].set_title("terminal residual")
-    axes[2].legend(fontsize=8)
+    axes[2].set_ylabel("map evaluations per warm Newton step")
+    axes[2].set_title("map evaluations a step pays for")
+    axes[2].legend(fontsize=7)
 
     for axis in axes:
         axis.set_xticks(index)
         axis.set_xticklabels(identities, rotation=20, fontsize=8)
         axis.grid(True, axis="y", alpha=0.3)
     figure.suptitle(
-        "Reduced-state plain Newton beside the production Newton-Krylov ladder"
+        "Reduced-state plain Newton: first-accept scoring and a fused trip boundary"
     )
     figure.tight_layout()
     figure_path.parent.mkdir(parents=True, exist_ok=True)
@@ -288,11 +474,19 @@ def _write(receipt: dict[str, Any], output: Path) -> None:
     scratch.replace(output)
 
 
-def measure(*, output: Path, policy: str, production: bool) -> dict[str, Any]:
-    """Solve the four bank rows through both arms and persist as they land."""
+def measure(
+    *,
+    output: Path,
+    policy: str,
+    production: bool,
+    cache_root: Path | None = None,
+) -> dict[str, Any]:
+    """Solve the four bank rows through both routes and persist as they land."""
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
-        default_persistent_compilation_cache_root()
+        cache_root
+        if cache_root is not None
+        else default_persistent_compilation_cache_root()
     )
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
@@ -302,8 +496,10 @@ def measure(*, output: Path, policy: str, production: bool) -> dict[str, Any]:
         for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
     }
     banked_production = _banked_production_rows()
+    previous_prototype = _previous_prototype_rows()
     rows: list[dict[str, Any]] = []
     indexed: dict[str, dict[str, Any]] = {}
+    terminal_flux: dict[str, np.ndarray] = {}
     receipt = {
         "artifact": "reduced-state plain-Newton prototype on the four bank rows",
         "source_commit": _source_revision(),
@@ -322,20 +518,29 @@ def measure(*, output: Path, policy: str, production: bool) -> dict[str, Any]:
             "response_carrier": carrier_evidence,
             "persistent_compilation_cache": cache.receipt(),
             "production_receipt": str(PRODUCTION_RECEIPT),
+            "previous_receipt": str(PREVIOUS_RECEIPT),
         },
         "measurement_contract": {
             "targets": [list(key) for key in TARGETS],
             "seed": "persisted pure-arm bank seed for each row",
             "production_route": "ForwardProfile.solve_branch(newton_krylov)",
             "prototype_route": "reduced_newton.solve_reduced_newton",
+            "prototype_routes": PROTOTYPE_ROUTES,
             "support_policy": policy,
             "convergence_tolerance": FIXED_POINT_CRITERION,
             "newton_steps": NEWTON_STEPS,
             "production_arm_measured_here": production,
+            "reference_arm": (
+                "the eager ladder behind the dispatched boundary is the route "
+                "the previous receipt measured, re-derived in this job so the "
+                "fast route's terminal flux is compared against a terminal "
+                "flux measured here rather than against a stored scalar"
+            ),
             "pass_order": (
-                "every prototype row lands before the first production row, so "
-                "a job that runs out of wall clock still delivers the arm it "
-                "was dispatched to measure"
+                "both prototype routes of a row land before the next row, and "
+                "every production row lands after all of them, so a job that "
+                "runs out of wall clock still delivers the arms it was "
+                "dispatched to measure"
             ),
         },
         "rows": rows,
@@ -354,48 +559,94 @@ def measure(*, output: Path, policy: str, production: bool) -> dict[str, Any]:
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
         return profile, jnp.asarray(passive_case["state"]), target_current
 
-    measurement_passes = ["prototype"] + (["production"] if production else [])
-    for measurement_pass in measurement_passes:
+    def publish(headline):
+        """Persist the receipt so far and announce the row that landed."""
+        receipt["rows"] = [
+            {
+                name: value
+                for name, value in item.items()
+                if not name.endswith("_terminal_flux")
+            }
+            for item in rows
+        ]
+        _write(receipt, output)
+        print("REDUCED-ROW-DONE " + json.dumps(headline, sort_keys=True), flush=True)
+
+    for key in TARGETS:
+        identity = f"{key[0]}/{key[1]}"
+        profile, seed, target_current = rebuild(key)
+        row = {"identity": identity, "arm": "pure"}
+        row["banked_production"] = banked_production.get(identity)
+        row["previous_prototype"] = previous_prototype.get(identity)
+        indexed[identity] = row
+        rows.append(row)
+        arms: dict[str, dict[str, Any]] = {}
+        for name, route in PROTOTYPE_ROUTES.items():
+            print(f"REDUCED-ROW {name} {identity}", flush=True)
+            measured = _prototype_arm(
+                profile.operator, seed, target_current, policy, route
+            )
+            arms[name] = measured
+            row[f"{name}_terminal_flux"] = measured["flux"]
+            row[name] = {
+                field_name: value
+                for field_name, value in measured.items()
+                if field_name != "flux"
+            }
+            publish(
+                {
+                    "identity": identity,
+                    "route": name,
+                    "residual": measured["terminal_residual"],
+                    "trips": measured["active_set_iterations"],
+                    "wall_s": measured["wall_s"],
+                    "median_warm_step_wall_s": measured["median_warm_step_wall_s"],
+                    "median_warm_trip_wall_s": measured["median_warm_trip_wall_s"],
+                }
+            )
+        row["route_agreement"] = _route_agreement(
+            arms["prototype"], arms["eager_prototype"], row["previous_prototype"]
+        )
+        row["repair"] = _speedup(row["prototype"], row["eager_prototype"])
+        terminal_flux[f"{identity} fast"] = np.asarray(arms["prototype"]["flux"])
+        terminal_flux[f"{identity} reference"] = np.asarray(
+            arms["eager_prototype"]["flux"]
+        )
+        np.savez_compressed(
+            output.with_name(output.stem + "-terminal-flux.npz"), **terminal_flux
+        )
+        publish(
+            {
+                "identity": identity,
+                "flux_agrees": row["route_agreement"]["flux_agrees"],
+                "sup_flux_difference_fraction_of_span": row["route_agreement"][
+                    "sup_flux_difference_fraction_of_span"
+                ],
+                "warm_step_speedup": row["repair"]["warm_step_speedup"],
+                "warm_trip_speedup": row["repair"]["warm_trip_speedup"],
+            }
+        )
+
+    if production:
         for key in TARGETS:
             identity = f"{key[0]}/{key[1]}"
-            print(f"REDUCED-ROW {measurement_pass} {identity}", flush=True)
+            print(f"REDUCED-ROW production {identity}", flush=True)
             profile, seed, target_current = rebuild(key)
-            if measurement_pass == "prototype":
-                measured = _prototype_arm(
-                    profile.operator, seed, target_current, policy
-                )
-                row = {"identity": identity, "arm": "pure"}
-                row["banked_production"] = banked_production.get(identity)
-                row["prototype_terminal_flux"] = measured["flux"]
-                row["prototype"] = {
-                    field_name: value
-                    for field_name, value in measured.items()
-                    if field_name != "flux"
-                }
-                indexed[identity] = row
-                rows.append(row)
-                headline = {
-                    "identity": identity,
-                    "prototype_residual": measured["terminal_residual"],
-                    "prototype_trips": measured["active_set_iterations"],
-                    "prototype_wall_s": measured["wall_s"],
-                    "reduced_dimension": measured["reduced_dimension"],
-                }
-            else:
-                row = indexed[identity]
-                measured = _production_arm(profile, seed, target_current)
-                row["agreement"] = _fixed_point_agreement(
-                    profile.operator,
-                    measured,
-                    {
-                        "flux": row["prototype_terminal_flux"],
-                        "converged": row["prototype"]["converged"],
-                    },
-                    target_current,
-                )
-                measured.pop("flux")
-                row["production"] = measured
-                headline = {
+            row = indexed[identity]
+            measured = _production_arm(profile, seed, target_current)
+            row["agreement"] = _fixed_point_agreement(
+                profile.operator,
+                measured,
+                {
+                    "flux": row["prototype_terminal_flux"],
+                    "converged": row["prototype"]["converged"],
+                },
+                target_current,
+            )
+            measured.pop("flux")
+            row["production"] = measured
+            publish(
+                {
                     "identity": identity,
                     "production_wall_s": measured["wall_s"],
                     "production_trips": measured["active_set_iterations"],
@@ -403,42 +654,53 @@ def measure(*, output: Path, policy: str, production: bool) -> dict[str, Any]:
                         "sup_flux_difference_wb"
                     ],
                 }
-            receipt["rows"] = [
-                {
-                    name: value
-                    for name, value in item.items()
-                    if name != "prototype_terminal_flux"
-                }
-                for item in rows
-            ]
-            _write(receipt, output)
-            print(
-                "REDUCED-ROW-DONE " + json.dumps(headline, sort_keys=True),
-                flush=True,
             )
 
-    rows = receipt["rows"]
-    if production and all("production" in row for row in rows):
-        figure_path = output.with_suffix(".png")
-        _draw(rows, figure_path)
-        receipt["figure"] = str(figure_path)
+    published = receipt["rows"]
+    figure_path = output.with_suffix(".png")
+    _draw(published, figure_path)
+    receipt["figure"] = str(figure_path)
     receipt["verdict"] = {
-        "row_count": len(rows),
-        "prototype_converged_count": sum(row["prototype"]["converged"] for row in rows),
+        "row_count": len(published),
+        "prototype_converged_count": sum(
+            row["prototype"]["converged"] for row in published
+        ),
         "maximum_off_support_leakage": max(
-            (row["prototype"]["off_support_leakage"] for row in rows), default=0.0
+            (row["prototype"]["off_support_leakage"] for row in published),
+            default=0.0,
         ),
         "any_rejected_newton_step": any(
-            row["prototype"]["rejected_step_count"] > 0 for row in rows
+            row["prototype"]["rejected_step_count"] > 0 for row in published
         ),
         "minimum_warm_step_wall_s": min(
             (
                 row["prototype"]["median_warm_step_wall_s"]
-                for row in rows
+                for row in published
                 if row["prototype"]["median_warm_step_wall_s"] is not None
             ),
             default=None,
         ),
+        "maximum_warm_step_wall_s": max(
+            (
+                row["prototype"]["median_warm_step_wall_s"]
+                for row in published
+                if row["prototype"]["median_warm_step_wall_s"] is not None
+            ),
+            default=None,
+        ),
+        "every_row_flux_agrees": all(
+            row["route_agreement"]["flux_agrees"] for row in published
+        ),
+        "every_row_trip_census_identical": all(
+            row["route_agreement"]["identical_trip_census"] for row in published
+        ),
+        "previous_receipt_reproduced": all(
+            (row["route_agreement"]["previous_receipt_reproduced"] or {}).get(
+                "identical_trip_census", False
+            )
+            for row in published
+        ),
+        "terminal_flux": str(output.with_name(output.stem + "-terminal-flux.npz")),
     }
     _write(receipt, output)
     return receipt
@@ -454,11 +716,18 @@ def main() -> None:
         default=reduced_newton.SUPPORT_POLICY,
     )
     parser.add_argument("--no-production", action="store_true")
+    parser.add_argument(
+        "--cache-root",
+        type=Path,
+        default=None,
+        help="persistent compilation cache root this launch selects",
+    )
     arguments = parser.parse_args()
     measure(
         output=arguments.output,
         policy=arguments.support_policy,
         production=not arguments.no_production,
+        cache_root=arguments.cache_root,
     )
 
 

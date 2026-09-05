@@ -55,6 +55,13 @@ FIXED_POINT_AGREEMENT = 100.0 * SOLVE_TOLERANCE
 #: reduced factor is about a quarter per step, so it needs the wider budget to
 #: reach the same tolerance from the same seed.
 REDUCED_NEWTON_STEPS = 24
+#: Agreement required between the fused trip boundary and the dispatched calls
+#: it replaces, on the residual each trip observes and on the terminal flux as
+#: a fraction of its span. The two compute the same expressions and differ only
+#: where one compiled program reassociates what several evaluate separately, so
+#: these bracket that reassociation rather than predict it.
+BOUNDARY_RESIDUAL_AGREEMENT = 1.0e-9
+BOUNDARY_FLUX_AGREEMENT = 1.0e-9
 PRODUCTION_NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
 
@@ -251,3 +258,181 @@ def test_dense_jacobian_is_square_on_the_reduced_state(machine):
     assert float(jnp.max(jnp.abs(jacobian @ direction + residual))) <= 1.0e-6 * float(
         jnp.max(jnp.abs(residual))
     )
+
+
+@pytest.mark.slow
+def test_first_accept_scoring_accepts_the_grade_the_eager_ladder_selects(machine):
+    """Stopping at the first grade below the merit selects the eager grade.
+
+    The eager ladder scores every backtracking grade and then takes the
+    earliest one below the incumbent merit, so a route that stops scoring at
+    that grade must reach the same decision on every step of a whole solve,
+    and the two solves must then walk the same trips to the same flux.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+    )
+    eager = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
+        **common,
+    )
+    first_accept = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    assert eager.steps
+    assert len(first_accept.steps) == len(eager.steps)
+    for taken, scored in zip(first_accept.steps, eager.steps, strict=True):
+        assert (taken.trip, taken.step) == (scored.trip, scored.step)
+        assert taken.accepted_factor == scored.accepted_factor
+        assert taken.grades_tried == scored.grades_tried
+        assert taken.jacobian_refreshed == scored.jacobian_refreshed
+    assert first_accept.newton_steps_per_trip == eager.newton_steps_per_trip
+    assert first_accept.active_set_mask_differences == (
+        eager.active_set_mask_differences
+    )
+    assert first_accept.termination_name == eager.termination_name
+    span = float(jnp.max(jnp.abs(eager.state)))
+    difference = float(jnp.max(jnp.abs(first_accept.state - eager.state)))
+    assert difference <= 1.0e-12 * span
+
+
+@pytest.mark.slow
+def test_first_accept_scoring_evaluates_one_map_per_accepted_step(machine):
+    """A step accepted at full length costs one map evaluation, not eight.
+
+    The eager route evaluates the map for the reduced residual, again for the
+    incumbent merit and once per grade; the first-accept route reads all three
+    from the grade it accepts, so an accepting step evaluates the map once and
+    only the trip's opening state is scored separately.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+    )
+    eager = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.EAGER_LADDER_SCORING,
+        **common,
+    )
+    first_accept = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    full_length = [step for step in first_accept.steps if step.accepted_factor == 1.0]
+    assert full_length
+    assert all(step.map_evaluations == 1 for step in full_length[1:])
+    assert sum(first_accept.map_evaluations_per_trip) < sum(
+        eager.map_evaluations_per_trip
+    )
+
+
+@pytest.mark.slow
+def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
+    """One compiled trip close returns what the separate calls returned.
+
+    The promoted shadow, the mask difference against the frozen shadow and the
+    live residual of the promoted map are the boundary's decisions, and they
+    are compared for exact equality against the calls the dispatched boundary
+    makes at the same reduced state and the same frozen shadow.  The next
+    trip's amplitudes and the off-support leakage are carried values rather
+    than decisions and are compared to a tolerance: one program computing the
+    whole boundary is free to reassociate arithmetic that separate programs
+    evaluate one expression at a time, and that reassociation moves the last
+    bits of a sum without moving anything the solve decides.
+    """
+    profile, seed = machine
+    operator = profile.operator
+    coordinates = reduced_newton.reduced_coordinates(operator, seed)
+    shadow = jnp.ravel(jnp.asarray(operator.residual_shadow_mask(seed), dtype=bool))
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    reduced = kernels["initial_gather"](seed)
+    direction = kernels["direction"](
+        kernels["jacobian"](reduced, shadow, seed),
+        kernels["reduced_residual"](reduced, shadow, seed),
+    )
+    for factor in (0.0, 1.0):
+        moved = reduced + factor * direction
+        state, promoted, difference, residual, gathered, leakage = kernels["boundary"](
+            moved, shadow, seed
+        )
+        expected_state = kernels["reconstruct"](moved, shadow, seed)
+        expected_promoted = jnp.ravel(
+            jnp.asarray(
+                operator.residual_shadow_mask(
+                    expected_state, None, previous_shadow=shadow
+                ),
+                dtype=bool,
+            )
+        )
+        mapped = operator.flux_map_with_shadow()(expected_state, expected_promoted)
+        assert bool(jnp.array_equal(state, expected_state))
+        assert bool(jnp.array_equal(promoted, expected_promoted))
+        assert int(difference) == int(jnp.sum(expected_promoted != shadow))
+        assert float(residual) == float(_relative_residual(mapped, expected_state))
+        expected_gather = reduced_newton._gather(
+            coordinates, operator.cell_current_moments(expected_state)
+        )
+        span = float(jnp.max(jnp.abs(expected_gather)))
+        assert float(jnp.max(jnp.abs(gathered - expected_gather))) <= 1.0e-12 * span
+        assert float(leakage) == pytest.approx(
+            float(kernels["leakage"](moved, shadow, seed)), abs=1.0e-15
+        )
+
+
+@pytest.mark.slow
+def test_fused_trip_boundary_solves_to_the_dispatched_terminal_state(machine):
+    """Closing trips in one program walks the same trips to the same flux.
+
+    Every decision is compared for equality: the trips taken, the mask
+    difference each one promoted, the Newton steps inside it, the termination
+    and the leakage.  The residual each trip observed and the terminal flux
+    are compared to a tolerance, because a single program is free to
+    reassociate arithmetic that separate dispatches evaluate one expression at
+    a time.  Measured on the H200 bank rows that reassociation moves the
+    terminal flux by 3e-16 to 3e-15 of its span; the pins below hold it far
+    inside what would change a decision.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+    )
+    dispatched = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+        **common,
+    )
+    fused = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+        **common,
+    )
+    assert fused.active_set_iterations == dispatched.active_set_iterations
+    assert fused.active_set_mask_differences == dispatched.active_set_mask_differences
+    assert fused.newton_steps_per_trip == dispatched.newton_steps_per_trip
+    assert fused.termination_name == dispatched.termination_name
+    assert fused.off_support_leakage == dispatched.off_support_leakage
+    assert fused.active_set_residuals == pytest.approx(
+        dispatched.active_set_residuals, rel=BOUNDARY_RESIDUAL_AGREEMENT
+    )
+    span = float(jnp.max(jnp.abs(dispatched.state)))
+    difference = float(jnp.max(jnp.abs(fused.state - dispatched.state)))
+    assert difference <= BOUNDARY_FLUX_AGREEMENT * span

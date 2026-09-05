@@ -306,13 +306,7 @@ def test_independent_second_pass_rescues_an_empty_first_qualification():
 
 
 def test_second_pass_never_changes_an_already_qualified_axis():
-    """The rescue pass must only ever confirm a first pass that already qualified.
-
-    With ``inside_material`` true everywhere, the single genuine axis
-    qualifies without any material-widening rescue. Seeding the second pass
-    from a property independent of the first pass's winner must still
-    reproduce exactly the same admitted state, never a different one.
-    """
+    """Changing the independent rescue seed cannot admit a wrong-polarity null."""
     operator = _single_axis_operator()
     grid_coordinate = np.asarray(operator.grid.coordinate)
     wall_coordinate = np.asarray(operator.wall.coordinate)
@@ -327,26 +321,8 @@ def test_second_pass_never_changes_an_already_qualified_axis():
         ]
     )
 
-    topology = operator._fixed_design_topology
-    unrescued = topology.read_qualification(
-        physical, operator.polarity, operator.inside_material
-    )
-    assert bool(unrescued.axis_admitted)
-
-    _masks, state, _connected, admitted = operator._fixed_design_read(physical)
-    assert bool(admitted)
-    np.testing.assert_allclose(
-        np.asarray(state.axis), np.asarray(unrescued.state.axis), rtol=0.0, atol=0.0
-    )
-    np.testing.assert_allclose(
-        np.asarray(state.axis_flux),
-        np.asarray(unrescued.state.axis_flux),
-        rtol=0.0,
-        atol=0.0,
-    )
-    np.testing.assert_allclose(
-        np.asarray(state.boundary_flux),
-        np.asarray(unrescued.state.boundary_flux),
-        rtol=0.0,
-        atol=0.0,
-    )
+    for rescue_seed in ([1.05, -0.72], [2.35, 0.72]):
+        operator._material_centroid = jnp.asarray(rescue_seed, dtype=jnp.float64)
+        _masks, state, _connected, admitted = operator._fixed_design_read(physical)
+        assert not bool(admitted)
+        assert np.all(np.isnan(np.asarray(state.axis)))

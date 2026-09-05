@@ -24,11 +24,13 @@ from nova.equilibrium.domain import (
     classify_domains,
 )
 from nova.equilibrium.flux_surface_connectivity import (
+    census_stationary_receipt,
     hex_edge_admissibility,
     polish_census_stationary_points,
 )
 from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
+from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 _MATERIAL_CONNECTED_FRACTION = 0.01
 """Minimum share of the material grid an O candidate's component must reach.
@@ -109,6 +111,7 @@ class TopologyQualification(NamedTuple):
     connected: jax.Array
     axis_admitted: jax.Array
     polish_receipt: dict[str, jax.Array]
+    boundary_uncertain: jax.Array
 
 
 def _carrier_polish_layout(coordinate, rings):
@@ -479,10 +482,50 @@ class Topology(Pytree):
         )
 
     @jax.jit
-    def psi_mask(self, polarity, psi_grid, psi_boundary):
-        """Return plasma filament psi-mask."""
+    def psi_mask(self, polarity, psi_grid, psi_boundary, uncertainty=0.0):
+        """Return the plasma-side mask outside an unresolved boundary band.
+
+        ``uncertainty`` has flux units.  A grid value within that distance of
+        the boundary is not resolved as closed: positive-polarity maps must
+        exceed the upper edge of the band, while negative-polarity maps must
+        fall below its lower edge.  The zero-width case retains the historic
+        comparison, including its polarity-specific equality convention.
+        """
+        uncertainty = jnp.maximum(jnp.asarray(uncertainty, dtype=psi_grid.dtype), 0.0)
+        threshold = jnp.where(
+            polarity > 0,
+            psi_boundary + uncertainty,
+            psi_boundary - uncertainty,
+        )
         return jax.lax.cond(
-            polarity > 0, jnp.greater_equal, jnp.less, psi_grid, psi_boundary
+            polarity > 0, jnp.greater_equal, jnp.less, psi_grid, threshold
+        )
+
+    @jax.jit
+    def boundary_interpolation_uncertainty(self, polish_receipt, boundary_is_xpoint):
+        """Return the selected separatrix value's interpolation uncertainty.
+
+        The tensor spline is the value authority.  The local census quadratic
+        remains independent interpolation evidence on the same detected cell,
+        so their absolute disagreement is the resolution-dependent uncertainty
+        of comparing discrete grid values with the sub-cell separatrix value.
+        Refining the grid contracts this band as those interpolants converge.
+        A wall boundary or a carrier without tensor-spline authority has no
+        stationary-value band and keeps the exact nodal comparison.
+        """
+        selected_x_value = polish_receipt["selected_value"][1]
+        local_x_value = polish_receipt["local_value_evidence"][1]
+        spline_authored = polish_receipt["spline_authored"][1]
+        resolved = (
+            boundary_is_xpoint
+            & spline_authored
+            & jnp.isfinite(selected_x_value)
+            & jnp.isfinite(local_x_value)
+        )
+        return jnp.where(
+            resolved,
+            jnp.abs(selected_x_value - local_x_value),
+            jnp.asarray(0.0, dtype=selected_x_value.dtype),
         )
 
     @jax.jit
@@ -534,6 +577,8 @@ class Topology(Pytree):
         inside,
         saddle_cut=False,
         saddle=None,
+        surface: TensorBSpline | None = None,
+        boundary_uncertainty=0.0,
     ):
         """Return the closed, in-material hex component containing the axis.
 
@@ -552,8 +597,9 @@ class Topology(Pytree):
             jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
         )
         direction = jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
-        component_flux = boundary_flux + direction * inward
-        component_flux = jnp.where(saddle_cut, component_flux, boundary_flux)
+        comparison_boundary_flux = boundary_flux + direction * boundary_uncertainty
+        component_flux = comparison_boundary_flux + direction * inward
+        component_flux = jnp.where(saddle_cut, component_flux, comparison_boundary_flux)
         component_closed = closed
         edge_midpoint = jnp.mean(shared_edges, axis=-2)
         structured = self.connectivity_radius.size and self.connectivity_height.size
@@ -568,9 +614,10 @@ class Topology(Pytree):
                 flux,
                 self.connectivity_radius,
                 self.connectivity_height,
-                boundary_flux,
+                comparison_boundary_flux,
                 axis_flux,
                 shared_edges,
+                surface=surface,
             )
             inward_link = hex_edge_admissibility(
                 flux,
@@ -579,6 +626,7 @@ class Topology(Pytree):
                 component_flux,
                 axis_flux,
                 shared_edges,
+                surface=surface,
             )
             coordinate = self.connectivity_coordinate.reshape(
                 (radial_count, vertical_count, 2)
@@ -593,7 +641,7 @@ class Topology(Pytree):
                 psi_grid,
                 self.connectivity_coordinate[:, 0],
                 self.connectivity_coordinate[:, 1],
-                boundary_flux,
+                comparison_boundary_flux,
                 axis_flux,
                 shared_edges,
                 edge_values=edge_values,
@@ -634,7 +682,14 @@ class Topology(Pytree):
 
     @jax.jit
     def qualified_o_candidates(
-        self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material
+        self,
+        vmap_o,
+        vmap_x,
+        data_w,
+        polarity,
+        psi_grid,
+        inside_material,
+        surface: TensorBSpline | None = None,
     ):
         """Return O candidates whose flood reaches the confined material.
 
@@ -676,6 +731,7 @@ class Topology(Pytree):
                 seed_material,
                 jnp.equal(data_b[2], data_x[2]),
                 data_x[:2],
+                surface,
             )
             governed_size = jnp.sum(component & inside_material)
             governed_connection = governed_size >= connection_floor
@@ -729,7 +785,27 @@ class Topology(Pytree):
         different questions and no longer the same cells.
         """
         psi_grid, psi_wall = self.split_flux_map(psi)
-        vmap_o, vmap_x = self.grid(psi_grid)
+        structured = bool(
+            self.connectivity_radius.size and self.connectivity_height.size
+        )
+        if structured:
+            radial_count = self.connectivity_radius.shape[0]
+            vertical_count = self.connectivity_height.shape[0]
+            flux = psi_grid.reshape((radial_count, vertical_count)).T
+            surface = fit_tensor_spline(
+                self.connectivity_radius,
+                self.connectivity_height,
+                flux,
+            )
+        else:
+            flux = psi_grid[self.polish_gather]
+            surface = None
+        census_authored = structured and hasattr(self.grid, "read_census")
+        if census_authored:
+            (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
+        else:
+            vmap_o, vmap_x = self.grid(psi_grid)
+            census = None
         data_w = self.wall(psi_wall, polarity)
         qualified_o = self.qualified_o_candidates(
             vmap_o,
@@ -738,6 +814,7 @@ class Topology(Pytree):
             polarity,
             psi_grid,
             inside_material,
+            surface,
         )
         selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
         data_o = selection.data
@@ -751,10 +828,28 @@ class Topology(Pytree):
             boundary_is_xpoint = jnp.asarray(requested_class) == int(
                 TopologyClass.DIVERTED
             )
-        if self.connectivity_radius.size and self.connectivity_height.size:
-            radial_count = self.connectivity_radius.shape[0]
-            vertical_count = self.connectivity_height.shape[0]
-            flux = psi_grid.reshape((radial_count, vertical_count)).T
+        if census_authored:
+            selected_index = jnp.stack(
+                (
+                    self.o_point_index(vmap_o, polarity, qualified_o),
+                    self.x_point_index(vmap_x, polarity, data_o[2]),
+                )
+            )
+            polish_receipt = census_stationary_receipt(
+                flux,
+                self.connectivity_radius,
+                self.connectivity_height,
+                census,
+                selected_index,
+                jnp.stack((data_o, data_x)),
+                jnp.stack(
+                    (
+                        selection.admitted,
+                        jnp.all(jnp.isfinite(data_x[:3])),
+                    )
+                ),
+            )
+        elif structured:
             data_o, data_x, polish_receipt = polish_census_stationary_points(
                 flux,
                 self.connectivity_radius,
@@ -763,9 +858,9 @@ class Topology(Pytree):
                 polarity,
                 data_o,
                 data_x,
+                surface=surface,
             )
         else:
-            flux = psi_grid[self.polish_gather]
             data_o, data_x, polish_receipt = polish_census_stationary_points(
                 flux,
                 self.polish_radial,
@@ -776,11 +871,41 @@ class Topology(Pytree):
                 data_x,
                 self.polish_valid,
             )
+        published_stationary = jnp.stack((data_o, data_x))
+        published_stationary = published_stationary.at[:, :2].set(
+            polish_receipt["selected_position_rz"]
+        )
+        published_stationary = published_stationary.at[:, 2].set(
+            polish_receipt["selected_value"]
+        )
+        data_o, data_x = published_stationary
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
-        psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
-        closed = self.psi_mask(polarity, psi_grid, data_b[2])
+        if structured:
+            comparison_flux = surface(
+                self.connectivity_coordinate[:, 0],
+                self.connectivity_coordinate[:, 1],
+            )
+        else:
+            comparison_flux = psi_grid
+        boundary_uncertainty = self.boundary_interpolation_uncertainty(
+            polish_receipt, boundary_is_xpoint
+        )
+        boundary_uncertain = (
+            jnp.abs(comparison_flux - data_b[2]) <= boundary_uncertainty
+        ) & (boundary_uncertainty > 0.0)
+        polish_receipt = polish_receipt | {
+            "boundary_interpolation_uncertainty": boundary_uncertainty,
+            "boundary_comparison_spline_authored": jnp.asarray(structured),
+        }
+        psi_norm = self.normalize(data_o[2], data_b[2], comparison_flux)
+        closed = self.psi_mask(
+            polarity,
+            comparison_flux,
+            data_b[2],
+            boundary_uncertainty,
+        )
         connected = self.axis_component(
-            psi_grid,
+            comparison_flux,
             data_b[2],
             data_o[2],
             data_o[:2],
@@ -788,6 +913,8 @@ class Topology(Pytree):
             inside_material,
             boundary_is_xpoint,
             data_x[:2],
+            surface,
+            boundary_uncertainty,
         )
         masks = classify_domains(
             psi_norm,
@@ -812,6 +939,7 @@ class Topology(Pytree):
             connected,
             selection.admitted,
             polish_receipt,
+            boundary_uncertain,
         )
 
     def read_with_connectivity(

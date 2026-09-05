@@ -1,0 +1,959 @@
+{
+  "count_order": [
+    "extremum",
+    "saddle"
+  ],
+  "input_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
+  "rows": [
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          5
+        ],
+        "raw_ring_count": [
+          9,
+          5
+        ],
+        "retained_count": [
+          9,
+          5
+        ],
+        "same_root_count": [
+          9,
+          5
+        ],
+        "typed_count": [
+          9,
+          5
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9065715904831593,
+        0.003539733205531276
+      ],
+      "current_production_saddle_rz_m": [
+        0.5685255405438062,
+        1.2390654261879772
+      ],
+      "efit_axis_rz_m": [
+        0.9045118689537048,
+        0.0004183934652246535
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5688938498497009,
+          -1.2379939556121826
+        ],
+        [
+          0.5643741488456726,
+          1.2358670234680176
+        ]
+      ],
+      "identity": "21978/35",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.06331651164501652,
+      "maximum_retained_gradient_wb_per_m": 3.3606533679208207e-15,
+      "minimum_absolute_retained_hessian_determinant": 0.9050338238141596,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.904857807490399,
+        0.010592384982367017
+      ],
+      "selected_axis_to_current_production_mm": 7.257888758556351,
+      "selected_axis_to_efit_mm": 10.179871161368148,
+      "selected_saddle_rz_m": [
+        0.5622277054180524,
+        1.257866262153119
+      ],
+      "selected_saddle_to_current_production_mm": 19.827611057798766,
+      "selected_saddle_to_nearest_efit_mm": 22.10370380981507
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          5
+        ],
+        "raw_ring_count": [
+          9,
+          5
+        ],
+        "retained_count": [
+          9,
+          5
+        ],
+        "same_root_count": [
+          9,
+          5
+        ],
+        "typed_count": [
+          9,
+          5
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9035153450433918,
+        0.02786980907892999
+      ],
+      "current_production_saddle_rz_m": [
+        0.5615808562216046,
+        1.2819551708231136
+      ],
+      "efit_axis_rz_m": [
+        0.9045118689537048,
+        0.0004183934652246535
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5688938498497009,
+          -1.2379939556121826
+        ],
+        [
+          0.5643741488456726,
+          1.2358670234680176
+        ]
+      ],
+      "identity": "21978/35",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.05905356955235791,
+      "maximum_retained_gradient_wb_per_m": 1.4423187047696263e-14,
+      "minimum_absolute_retained_hessian_determinant": 0.7399389149569181,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9052223387884342,
+        0.025398053235974327
+      ],
+      "selected_axis_to_current_production_mm": 3.003898232763415,
+      "selected_axis_to_efit_mm": 24.989761296348348,
+      "selected_saddle_rz_m": [
+        0.5597379292313936,
+        1.287171237558291
+      ],
+      "selected_saddle_to_current_production_mm": 5.532063997919144,
+      "selected_saddle_to_nearest_efit_mm": 51.513269317064754
+    },
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          8,
+          6
+        ],
+        "raw_ring_count": [
+          8,
+          6
+        ],
+        "retained_count": [
+          8,
+          6
+        ],
+        "same_root_count": [
+          8,
+          6
+        ],
+        "typed_count": [
+          8,
+          6
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9025584095625726,
+        0.032022649456697715
+      ],
+      "current_production_saddle_rz_m": [
+        0.5294946121842712,
+        1.2896631084670336
+      ],
+      "efit_axis_rz_m": [
+        0.9043859839439392,
+        0.004791049286723137
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5459407567977905,
+          -1.230005145072937
+        ],
+        [
+          0.5431188344955444,
+          1.236562728881836
+        ]
+      ],
+      "identity": "21983/35",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.08731603193084504,
+      "maximum_retained_gradient_wb_per_m": 1.3572938185954192e-14,
+      "minimum_absolute_retained_hessian_determinant": 0.6364595210311722,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9041608216121376,
+        0.02981896040430136
+      ],
+      "selected_axis_to_current_production_mm": 2.724696279632412,
+      "selected_axis_to_efit_mm": 25.028923927829133,
+      "selected_saddle_rz_m": [
+        0.5199489678094641,
+        1.3012193939362322
+      ],
+      "selected_saddle_to_current_production_mm": 14.988897903978717,
+      "selected_saddle_to_nearest_efit_mm": 68.68280030842601
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          7
+        ],
+        "raw_ring_count": [
+          9,
+          7
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9027715025314195,
+        0.04097414905532949
+      ],
+      "current_production_saddle_rz_m": [
+        0.5379020133226977,
+        1.2891877650881471
+      ],
+      "efit_axis_rz_m": [
+        0.9043859839439392,
+        0.004791049286723137
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5459407567977905,
+          -1.230005145072937
+        ],
+        [
+          0.5431188344955444,
+          1.236562728881836
+        ]
+      ],
+      "identity": "21983/35",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.08701815252721877,
+      "maximum_retained_gradient_wb_per_m": 3.810686503654424e-15,
+      "minimum_absolute_retained_hessian_determinant": 0.7237613359754645,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9041163976123945,
+        0.038795550599410145
+      ],
+      "selected_axis_to_current_production_mm": 2.56028006494699,
+      "selected_axis_to_efit_mm": 34.005569930743526,
+      "selected_saddle_rz_m": [
+        0.5338285131862098,
+        1.2920649476074115
+      ],
+      "selected_saddle_to_current_production_mm": 4.987141727595816,
+      "selected_saddle_to_nearest_efit_mm": 56.274384523442905
+    },
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          10,
+          7
+        ],
+        "raw_ring_count": [
+          10,
+          8
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.8971361974180511,
+        0.023242799865682073
+      ],
+      "current_production_saddle_rz_m": [
+        0.5610989050128365,
+        1.1550314358653346
+      ],
+      "efit_axis_rz_m": [
+        0.8993120789527893,
+        0.004633639473468065
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5590311884880066,
+          -1.1253553628921509
+        ],
+        [
+          0.558182954788208,
+          1.1303188800811768
+        ]
+      ],
+      "identity": "21985/51",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.14331016787441433,
+      "maximum_retained_gradient_wb_per_m": 1.3452954153562062e-14,
+      "minimum_absolute_retained_hessian_determinant": 1.122491775099506,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        1
+      ],
+      "selected_axis_rz_m": [
+        0.898811797583479,
+        0.021819883701165013
+      ],
+      "selected_axis_to_current_production_mm": 2.1982552912766797,
+      "selected_axis_to_efit_mm": 17.193524132722928,
+      "selected_saddle_rz_m": [
+        0.5580089860261566,
+        1.155928614857681
+      ],
+      "selected_saddle_to_current_production_mm": 3.2175346911188405,
+      "selected_saddle_to_nearest_efit_mm": 25.61032566081625
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          10,
+          7
+        ],
+        "raw_ring_count": [
+          10,
+          8
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.8980918246759667,
+        0.021304415844562052
+      ],
+      "current_production_saddle_rz_m": [
+        0.5506172417197256,
+        1.171476499322636
+      ],
+      "efit_axis_rz_m": [
+        0.8993120789527893,
+        0.004633639473468065
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5590311884880066,
+          -1.1253553628921509
+        ],
+        [
+          0.558182954788208,
+          1.1303188800811768
+        ]
+      ],
+      "identity": "21985/51",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.14400579839671762,
+      "maximum_retained_gradient_wb_per_m": 2.573999103401236e-14,
+      "minimum_absolute_retained_hessian_determinant": 1.00478789474051,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        1
+      ],
+      "selected_axis_rz_m": [
+        0.8999331732011137,
+        0.019528391068119877
+      ],
+      "selected_axis_to_current_production_mm": 2.5582862227665837,
+      "selected_axis_to_efit_mm": 14.90769543328828,
+      "selected_saddle_rz_m": [
+        0.5719135907583598,
+        1.1820556604274604
+      ],
+      "selected_saddle_to_current_production_mm": 23.77925844212057,
+      "selected_saddle_to_nearest_efit_mm": 53.5277946934527
+    },
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          7
+        ],
+        "raw_ring_count": [
+          9,
+          7
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9136539972796212,
+        0.05412835214503442
+      ],
+      "current_production_saddle_rz_m": [
+        0.6107480226057648,
+        1.1421472883099502
+      ],
+      "efit_axis_rz_m": [
+        0.9118046164512634,
+        0.0794563964009285
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5724796056747437,
+          -1.0747820138931274
+        ],
+        [
+          0.6237258315086365,
+          1.1930568218231201
+        ]
+      ],
+      "identity": "21986/46",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.05682460695536983,
+      "maximum_retained_gradient_wb_per_m": 2.1868942058149856e-14,
+      "minimum_absolute_retained_hessian_determinant": 0.5367496601278788,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9139338492558928,
+        0.056587663449760406
+      ],
+      "selected_axis_to_current_production_mm": 2.475182664406042,
+      "selected_axis_to_efit_mm": 22.96764200191546,
+      "selected_saddle_rz_m": [
+        0.6198789224091055,
+        1.1391617658633408
+      ],
+      "selected_saddle_to_current_production_mm": 9.606595416579971,
+      "selected_saddle_to_nearest_efit_mm": 54.03217343886691
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          7
+        ],
+        "raw_ring_count": [
+          9,
+          7
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9138925514764273,
+        0.04855194270724766
+      ],
+      "current_production_saddle_rz_m": [
+        0.6100124742800892,
+        1.1296717665605136
+      ],
+      "efit_axis_rz_m": [
+        0.9118046164512634,
+        0.0794563964009285
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5724796056747437,
+          -1.0747820138931274
+        ],
+        [
+          0.6237258315086365,
+          1.1930568218231201
+        ]
+      ],
+      "identity": "21986/46",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.052192639575064134,
+      "maximum_retained_gradient_wb_per_m": 1.7957871898974132e-14,
+      "minimum_absolute_retained_hessian_determinant": 0.45858279860796675,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9151787004363855,
+        0.04924906308592003
+      ],
+      "selected_axis_to_current_production_mm": 1.462927192160211,
+      "selected_axis_to_efit_mm": 30.39518759183232,
+      "selected_saddle_rz_m": [
+        0.6218581214591736,
+        1.1324867140956372
+      ],
+      "selected_saddle_to_current_production_mm": 12.175519977267875,
+      "selected_saddle_to_nearest_efit_mm": 60.598896779955936
+    },
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          7
+        ],
+        "raw_ring_count": [
+          9,
+          7
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9138182316024713,
+        0.03815256962467518
+      ],
+      "current_production_saddle_rz_m": [
+        0.5792639617179477,
+        1.173737533201991
+      ],
+      "efit_axis_rz_m": [
+        0.9149412512779236,
+        0.010957644321024418
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5749794840812683,
+          -1.117248296737671
+        ],
+        [
+          0.5782567262649536,
+          1.134856939315796
+        ]
+      ],
+      "identity": "21989/55",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.0642104993669535,
+      "maximum_retained_gradient_wb_per_m": 7.643850578952207e-15,
+      "minimum_absolute_retained_hessian_determinant": 0.2672343708517774,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9145739086603297,
+        0.039806283053231147
+      ],
+      "selected_axis_to_current_production_mm": 1.8181902869501476,
+      "selected_axis_to_efit_mm": 28.85097740632159,
+      "selected_saddle_rz_m": [
+        0.5712171541162112,
+        1.1792133603175796
+      ],
+      "selected_saddle_to_current_production_mm": 9.73323148698207,
+      "selected_saddle_to_nearest_efit_mm": 44.91155374872739
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          7
+        ],
+        "raw_ring_count": [
+          9,
+          7
+        ],
+        "retained_count": [
+          9,
+          7
+        ],
+        "same_root_count": [
+          9,
+          7
+        ],
+        "typed_count": [
+          9,
+          7
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9125723574832081,
+        0.03203930070696315
+      ],
+      "current_production_saddle_rz_m": [
+        0.5728336859156682,
+        1.1818890224213945
+      ],
+      "efit_axis_rz_m": [
+        0.9149412512779236,
+        0.010957644321024418
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5749794840812683,
+          -1.117248296737671
+        ],
+        [
+          0.5782567262649536,
+          1.134856939315796
+        ]
+      ],
+      "identity": "21989/55",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.0750424075716301,
+      "maximum_retained_gradient_wb_per_m": 2.0113812181040312e-14,
+      "minimum_absolute_retained_hessian_determinant": 0.3103421900314454,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9134745790999459,
+        0.03326864816389884
+      ],
+      "selected_axis_to_current_production_mm": 1.5248931161177268,
+      "selected_axis_to_efit_mm": 22.359159638823883,
+      "selected_saddle_rz_m": [
+        0.6286087267423557,
+        1.1964360636854416
+      ],
+      "selected_saddle_to_current_production_mm": 57.64088469789952,
+      "selected_saddle_to_nearest_efit_mm": 79.54440590141205
+    },
+    {
+      "arm": "pure",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          5
+        ],
+        "raw_ring_count": [
+          9,
+          5
+        ],
+        "retained_count": [
+          9,
+          5
+        ],
+        "same_root_count": [
+          9,
+          5
+        ],
+        "typed_count": [
+          9,
+          5
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9019330968584681,
+        0.02011608721239092
+      ],
+      "current_production_saddle_rz_m": [
+        0.5917516875565209,
+        1.219749197600917
+      ],
+      "efit_axis_rz_m": [
+        0.9052576422691345,
+        0.0034392368979752064
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5856547355651855,
+          -1.196423053741455
+        ],
+        [
+          0.5821353197097778,
+          1.2025988101959229
+        ]
+      ],
+      "identity": "22086/43",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.07155430131122201,
+      "maximum_retained_gradient_wb_per_m": 6.00627170497708e-15,
+      "minimum_absolute_retained_hessian_determinant": 1.8483051195066353,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.903763915257603,
+        0.017938464708524556
+      ],
+      "selected_axis_to_current_production_mm": 2.8449843198084763,
+      "selected_axis_to_efit_mm": 14.575967463163003,
+      "selected_saddle_rz_m": [
+        0.5895230287639596,
+        1.2170098448011304
+      ],
+      "selected_saddle_to_current_production_mm": 3.5314265920954826,
+      "selected_saddle_to_nearest_efit_mm": 16.194325038782196
+    },
+    {
+      "arm": "mixed",
+      "capacity_o_x": [
+        30,
+        30
+      ],
+      "counts_o_x": {
+        "polished_count": [
+          9,
+          5
+        ],
+        "raw_ring_count": [
+          9,
+          5
+        ],
+        "retained_count": [
+          9,
+          5
+        ],
+        "same_root_count": [
+          9,
+          5
+        ],
+        "typed_count": [
+          9,
+          5
+        ]
+      },
+      "current_production_axis_rz_m": [
+        0.9016135226490096,
+        0.024617984126865743
+      ],
+      "current_production_saddle_rz_m": [
+        0.564816849749112,
+        1.2580221561476006
+      ],
+      "efit_axis_rz_m": [
+        0.9052576422691345,
+        0.0034392368979752064
+      ],
+      "efit_saddles_rz_m": [
+        [
+          0.5856547355651855,
+          -1.196423053741455
+        ],
+        [
+          0.5821353197097778,
+          1.2025988101959229
+        ]
+      ],
+      "identity": "22086/43",
+      "maximum_multiplicity_o_x": [
+        1,
+        1
+      ],
+      "maximum_requested_displacement_m": 0.07807565676156467,
+      "maximum_retained_gradient_wb_per_m": 2.2698538932313284e-14,
+      "minimum_absolute_retained_hessian_determinant": 1.2165740349842948,
+      "overflow_o_x": [
+        false,
+        false
+      ],
+      "rejected_cell_displacement_o_x": [
+        0,
+        0
+      ],
+      "selected_axis_rz_m": [
+        0.9033613058027915,
+        0.022469963650075087
+      ],
+      "selected_axis_to_current_production_mm": 2.769248620358181,
+      "selected_axis_to_efit_mm": 19.124974580549704,
+      "selected_saddle_rz_m": [
+        0.5849707936630444,
+        1.2305167028328092
+      ],
+      "selected_saddle_to_current_production_mm": 34.09884774208803,
+      "selected_saddle_to_nearest_efit_mm": 28.061515315897815
+    }
+  ],
+  "schema": "forward-census",
+  "source_revision": "e227d3dcc71f2be3c206a9bc9227d339d5aad323"
+}

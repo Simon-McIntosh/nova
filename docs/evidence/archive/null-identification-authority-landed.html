@@ -468,6 +468,29 @@
     from main. The bank is regenerated on the public route next.</p>
   </section>
 
+  <section id="bank-integrated">
+    <h2>The bank regenerated at the merged head reproduces HEAD (f4f245a2)</h2>
+    <p><strong>Commit:</strong> <code>82fe3f3e</code>; receipts <code>docs/figures/null-identification-authority/bank-integrated/</code>
+    (twelve-row bank, row-by-row comparison, figure), the authority bank
+    <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code>, twelve per-row panels and the regenerated
+    solve operands under <code>docs/figures/topology-visual-corroboration/</code> (H200 job 1262806, 98 minutes, persistent cache
+    2684 hits). The producer's stale state call is repaired at <code>315bb70a</code>.</p>
+    <table>
+      <caption>Twelve rows, public route, merged head against the morning bank</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Morning bank (repaired census)</th><th scope="col">Integrated bank</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Class agreement with EFIT</th><td>12 of 12 diverted</td><td>12 of 12 diverted</td></tr>
+        <tr><th scope="row">Fixed-slot overflow</th><td>6 tables at the 30-slot cap</td><td>none; one null type per containing cell on every row</td></tr>
+        <tr><th scope="row">Convergence</th><td>1 converged, 2 settled, 7 budget-exhausted, 2 cycling</td><td>4 converged, 8 settled</td></tr>
+        <tr><th scope="row">Candidates per map</th><td></td><td>9 O, 5 to 7 X; O margins 0.27 to 0.34 Wb, X margins 0.3 to 16 mWb</td></tr>
+        <tr><th scope="row">Changes against the public-route receipt</th><td colspan="2">21989/55 pure limited to diverted (supplied-wall rule); 21985/51 pure cycling to settled (mask deadband, common-spline containment, frozen scoring)</td></tr>
+      </tbody>
+    </table>
+    <p>The producer records Newton 12 and GMRES 12 as explicit deviations from the public policy in its receipt. The settled rows
+    sit at the residual floor the vertical mode sets on 21986/46 and 21989/55, which is the constraint work's subject, not an
+    admission defect. The class margin serialises as positive infinity on every row and stays a qualifier to read.</p>
+  </section>
+
 </main>
 </body>
 </html>

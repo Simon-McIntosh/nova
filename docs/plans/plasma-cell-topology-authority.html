@@ -15,7 +15,7 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-modified" content="2026-09-05">
 <meta name="plan-effort-hours" content="28.0">
 <meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 </head>
@@ -334,6 +334,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T161311799441" data-who="coordinator" data-when="2026-09-04T16:14:00Z">
     <div class="r-comment-body"><p>Finding from the forward-solve-api route migration (2026-09-04): the topology mask replay route now raises <code>StaleOperandCacheError</code> on main because <code>mast-topology-operands.metadata.json</code> records source authority <code>sha256:5b145295…</code> while the current source authority is <code>sha256:738333…</code>, moved by the census and polish landings since the operands were generated. The replay's request wiring is in place (bare public policy emitted), but no replay can execute until the operands are regenerated on the current authority, which is the regeneration followup already open here; it should run once the integration candidate merges and the bank is rebanked on the public route, so the operands and the bank share one authority.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T075110224096" data-who="coordinator" data-when="2026-09-05T07:53:00Z">
+    <div class="r-comment-body"><p>The solve operands are regenerated on the current source authority together with the twelve-row bank at the merged head (<code>f4f245a2</code>, <code>docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz</code> with its metadata, operand sha256 <code>be55d27a…</code>), so the topology mask replay's StaleOperandCacheError against the old authority is lifted and the operands and bank share one authority, as the regeneration followup required. The twelve per-row flux and EFIT panels are republished beside them.</p></div>
 </div>
 </section>
 </main>

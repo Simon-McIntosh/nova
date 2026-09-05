@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T09:38:21",
+  "updated": "2026-09-05T09:50:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2140,6 +2140,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-producer-fix-x",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "nia-raster-fixture-x",
@@ -101496,6 +101505,464 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T053837565598-nia-rebank-public-route-integrated",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-rebank-public-route-integrated",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1677,
+                "cached_input_tokens": 890959,
+                "input_tokens": 892692,
+                "output_tokens": 2539,
+                "reasoning_output_tokens": 246,
+                "total_tokens": 895231,
+                "uncached_input_tokens": 56
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to docs/figures/null-identification-authority/bank-integrated/ (the twelve-row bank JSON, its figure, the row-by-row comparison) plus the bank files the producer writes (the paths the previous regeneration node committed, named in docs/figures/null-identification-authority/bank-repaired-census.json's receipt), the receipt carrying the producer's resolved defaults plus deviations, every row's class beside EFIT, convergence, admitted nulls plus margins, census consistency, every change against the previous bank explained, the SLURM job id plus log paths, the manifest written before the SLURM wait begins, no source change",
+          "estimated_hours": null,
+          "goal": "Regenerate the twelve-row MAST bank on the public route at current main, now that the integration candidate is merged (containment census admission, common spline authority, supplied-wall shadow rule, mask deadband, compacted census, structured-read row reuse, compacted limiter candidates, frozen-partition scoring), so the committed bank reproduces HEAD: the bank producer benchmarks/efit_forward_parity_slice.py resolves the public defaults through its typed request (recording its Newton 12 plus GMRES 12 as explicit deviations in the receipt), one H200 job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile (payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly from the checkout root with JAX_PLATFORMS=cuda,cpu, the previous regeneration took about two hours so request 02:30:00), polled in the foreground because a backgrounded wait ends the worker's turn, with authority for up to three submissions on pre-compilation faults, producing per row the terminal residual, trips, termination, class beside EFIT, admitted axis plus saddle counts and margins, candidate-table status, with the census consistency (no fixed-slot overflow, one null per containing cell) stated per row, compared row by row with the previous bank docs/figures/null-identification-authority/bank-repaired-census.json plus the public-route receipt docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json with every class or convergence change explained by the mechanism that landed, the manifest written before the SLURM wait begins",
+          "id": "nia-rebank-public-route-integrated",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "180m",
+          "write_paths": [
+            "docs/figures/null-identification-authority/bank-integrated/",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/topology-visual-corroboration/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-rebank-x3",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T05:38:46Z",
+        "completed_at": "2026-09-05T07:39:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 7258,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 7258,
+        "stalled": false,
+        "time_budget": "180m",
+        "base_sha": "47b9f9965d15807af87b57fbfed9621cedddcdb7",
+        "commits": [
+          "82fe3f3ed9013956e186901218e29734a62f52c4"
+        ],
+        "changed_lines": {
+          "added": 23177,
+          "removed": 8579,
+          "files": 31
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "artifact verification over the twelve regenerated rows plus tests/test_efit_topology_corroboration.py (10 passed); H200 job 1262806",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/logs/artifact-verification.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07013-9584-7da2-8e8b-cf0ee39541d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 47267584,
+            "cached_input_tokens_cumulative": 47267584,
+            "input_tokens": 47716706,
+            "input_tokens_cumulative": 47716706,
+            "output_tokens": 82500,
+            "output_tokens_cumulative": 82500,
+            "reasoning_output_tokens": 23106,
+            "reasoning_output_tokens_cumulative": 23106
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 84043,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 86443,
+              "external_wait": null,
+              "log_age_seconds": 85541,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 85597,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 105606,
+          "peak_input_tokens": 94984290
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T074346780006-nia-corroboration-producer-carrier-identity",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-corroboration-producer-carrier-identity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5134,
+                "cached_input_tokens": 946831,
+                "input_tokens": 952066,
+                "output_tokens": 3026,
+                "reasoning_output_tokens": 600,
+                "total_tokens": 955092,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py and tests/test_efit_topology_corroboration.py, tests/test_efit_topology_corroboration.py green on CPU with its log, the manifest quoting the call before and after",
+          "estimated_hours": null,
+          "goal": "Repair the bank producer's stale call that the integrated regeneration worked around at runtime: docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py still calls the current _mast_states interface without its required carrier_identity keyword (the regeneration node's manifest ~/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/manifest.md records supplying that identity from its harness), so pass the carrier identity the producer already resolves for its receipt, with a CPU test that constructs the producer's state request for one bank row without a solve plus the existing tests/test_efit_topology_corroboration.py green, no change to nova/",
+          "id": "nia-corroboration-producer-carrier-identity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T074346780006-nia-corroboration-producer-carrier-identity/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "tests/test_efit_topology_corroboration.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-producer-fix-x",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T07:44:04Z",
+        "completed_at": "2026-09-05T07:47:03.777Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 172,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 179,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f4f245a2f9736132009992ebb53cc1de7641cd78",
+        "commits": [
+          "52fef391db0005f69fdb01bf83c29e92d770f546"
+        ],
+        "changed_lines": {
+          "added": 57,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_efit_topology_corroboration.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T074346780006-nia-corroboration-producer-carrier-identity/logs/producer-focused.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T074346780006-nia-corroboration-producer-carrier-identity/manifest.md",
+        "scope_changed": false,
+        "session_id": "4d8d3757-6e34-415f-8da0-23159f36d771",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 113506,
+            "cache_creation_input_tokens_cumulative": 113506,
+            "cache_read_input_tokens": 2210618,
+            "cache_read_input_tokens_cumulative": 2210618,
+            "inference_geo": "not_available",
+            "input_tokens": 40,
+            "input_tokens_cumulative": 40,
+            "output_tokens": 15099,
+            "output_tokens_cumulative": 15099,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.0472176,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.0472176
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 91560,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 93960,
+              "external_wait": null,
+              "log_age_seconds": 93058,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 93114,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 7510,
+              "external_wait": null,
+              "log_age_seconds": 252,
+              "log_fresh": true,
+              "manifest_commits": [
+                "[\"82fe3f3ed9013956e186901218e29734a62f52c4\"]; changed_paths: [\"docs/figures/null-identification-authority/bank-integrated/bank-integrated.json\"",
+                "\"docs/figures/null-identification-authority/bank-integrated/bank-integrated.png\"",
+                "\"docs/figures/null-identification-authority/bank-integrated/row-by-row-comparison.json\"",
+                "\"docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-02-mast-21978-35-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-02-mast-21978-35-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-03-mast-21983-35-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-03-mast-21983-35-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-04-mast-21983-35-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-04-mast-21983-35-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-05-mast-21985-51-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-05-mast-21985-51-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-06-mast-21985-51-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-06-mast-21985-51-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-07-mast-21986-46-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-07-mast-21986-46-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-08-mast-21986-46-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-08-mast-21986-46-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-09-mast-21989-55-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-09-mast-21989-55-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-10-mast-21989-55-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-10-mast-21989-55-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.png\"",
+                "\"docs/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.json\"",
+                "\"docs/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.png\"",
+                "\"docs/figures/topology-visual-corroboration/mast-bank-efit-overlays.png\"",
+                "\"docs/figures/topology-visual-corroboration/mast-bank-solve-operands.metadata.json\"",
+                "\"docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T053837565598-nia-rebank-public-route-integrated/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260905T053837565598-nia-rebank-public-route-integrated --gate <verdict> --commit [\"82fe3f3ed9013956e186901218e29734a62f52c4\"]; changed_paths: [\"docs/figures/null-identification-authority/bank-integrated/bank-integrated.json\" --commit \"docs/figures/null-identification-authority/bank-integrated/bank-integrated.png\" --commit \"docs/figures/null-identification-authority/bank-integrated/row-by-row-comparison.json\" --commit \"docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json\" --commit \"docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-01-mast-21978-35-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-02-mast-21978-35-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-02-mast-21978-35-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/bank-03-mast-21983-35-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-03-mast-21983-35-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-04-mast-21983-35-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-04-mast-21983-35-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/bank-05-mast-21985-51-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-05-mast-21985-51-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-06-mast-21985-51-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-06-mast-21985-51-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/bank-07-mast-21986-46-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-07-mast-21986-46-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-08-mast-21986-46-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-08-mast-21986-46-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/bank-09-mast-21989-55-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-09-mast-21989-55-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-10-mast-21989-55-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-10-mast-21989-55-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.json\" --commit \"docs/figures/topology-visual-corroboration/bank-11-mast-22086-43-pure.png\" --commit \"docs/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.json\" --commit \"docs/figures/topology-visual-corroboration/bank-12-mast-22086-43-mixed.png\" --commit \"docs/figures/topology-visual-corroboration/mast-bank-efit-overlays.png\" --commit \"docs/figures/topology-visual-corroboration/mast-bank-solve-operands.metadata.json\" --commit \"docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz\"]",
+              "node": "nia-rebank-public-route-integrated",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260905T053837565598-nia-rebank-public-route-integrated",
+              "session": "s19-relaunch",
+              "terminal_age_seconds": 319,
+              "terminal_at": "2026-09-05T07:38:37Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-public-route-integrated"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 176.227,
+          "generated_tokens": 15099,
+          "generation_seconds": 145.325,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.3,
+          "machine_seconds": 30.902,
+          "peak_input_tokens": 132737,
+          "tokens_per_second": 103.9,
+          "wall_tokens_per_second": 85.68
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-corroboration-producer-carrier-identity",
+          "session_id": "4d8d3757-6e34-415f-8da0-23159f36d771",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T07:47:03.777Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -101640,6 +102107,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1722
+    "_version": 1725
   }
 }

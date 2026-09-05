@@ -7,6 +7,16 @@ from nova import njit
 
 _ROOT_FLOOR = 1e-30
 
+#: Blend window of the wall-extremum selection, as a fraction of the sampled
+#: wall-flux span.  A bracket whose nearest competitor sits further than this
+#: below the sampled maximum is reproduced exactly; only brackets competing
+#: within the window are blended toward each other.
+_WINDOW_FRACTION = 0.02
+#: Floor of the blend window in absolute flux.  A wall flux flat below this
+#: scale carries no selection to smooth: every node is a maximiser and the
+#: extremum is a kink, so the discrete winner bracket is kept as-is.
+_WINDOW_FLOOR = 1e-30
+
 __all__ = [
     "bisect",
     "bisect_2d",
@@ -114,22 +124,33 @@ def host_wall_index(psi_wall):
     return index, 0
 
 
-def host_wall_flux(x_wall, z_wall, psi_wall, polarity=1):
-    """Return eager wall extremum ``[x, z, psi, type]``.
+def _ramp(value):
+    """Return the C^2 smoothstep of its argument on the host route.
 
-    Zero polarity returns four NaNs.  The host route retains eager mutation,
-    NumPy NaN selection, float64/GELSD fitting, and its default polarity.
+    The quintic has vanishing zeroth, first and second derivatives at both
+    ends, so clamping it to [0, 1] keeps the composed weight exactly at 0 or 1
+    with a C^2 join wherever the sampled-flux margin leaves the blend window.
     """
-    if polarity == 0:
-        return np.full(4, np.nan)
-    index, roll = host_wall_index(polarity * psi_wall)
-    if roll != 0:
-        x_wall = np.roll(x_wall, roll)
-        z_wall = np.roll(z_wall, roll)
-        psi_wall = np.roll(psi_wall, roll)
-    x_cluster = x_wall[index - 1 : index + 2]
-    z_cluster = z_wall[index - 1 : index + 2]
-    psi_cluster = psi_wall[index - 1 : index + 2]
+    value = np.clip(value, 0.0, 1.0)
+    return value**3 * (6.0 * value**2 - 15.0 * value + 10.0)
+
+
+def _ramped_weight(margin, width):
+    """Return the C^2 winner weight from a sampled-flux margin.
+
+    A tie (margin zero) weights both brackets equally, a margin at or beyond
+    the window reproduces the winner bracket bit-for-bit, and the joining
+    polynomials are C^2 everywhere the selection is genuinely ambiguous.
+    """
+    return _ramp(margin / (2.0 * width) + 0.5)
+
+
+def _host_bracket(x_wall, z_wall, psi_wall, start):
+    """Return the stationary ``[x, z, psi]`` of one quadratically fitted
+    three-node wall bracket on the host route."""
+    x_cluster = x_wall[start : start + 3]
+    z_cluster = z_wall[start : start + 3]
+    psi_cluster = psi_wall[start : start + 3]
     length_cluster = length_2d(x_cluster, z_cluster)
     coefficients = host_quadratic_wall(length_cluster, psi_cluster)
     coordinate = wall_length(coefficients)
@@ -138,9 +159,58 @@ def host_wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     x_coordinate, z_coordinate = wall_coordinate(
         coordinate, x_cluster, z_cluster, length_cluster
     )
-    if coefficients[0] > 0:
+    return x_coordinate, z_coordinate, psi, coefficients[0]
+
+
+def host_wall_flux(x_wall, z_wall, psi_wall, polarity=1):
+    """Return eager wall extremum ``[x, z, psi, type]``.
+
+    Zero polarity returns four NaNs.  The host route retains eager mutation,
+    NumPy NaN selection, float64/GELSD fitting, and its default polarity.
+
+    The selection is continuous: the discrete argmax names the winning
+    three-node bracket and its strongest adjacent neighbour, and the two are
+    blended by a C^2 weight in the sampled-flux margin between them.  Where
+    the winner dominates by more than the blend window the blend is exactly
+    the winner bracket, so well-separated extrema are unchanged to the bit.
+    """
+    if polarity == 0:
+        return np.full(4, np.nan)
+    psi_p = polarity * psi_wall
+    index, roll = host_wall_index(psi_p)
+    if roll != 0:
+        x_wall = np.roll(x_wall, roll)
+        z_wall = np.roll(z_wall, roll)
+        psi_wall = np.roll(psi_wall, roll)
+        psi_p = polarity * psi_wall
+    x_wrap = np.concatenate((x_wall[-1:], x_wall, x_wall[:2]))
+    z_wrap = np.concatenate((z_wall[-1:], z_wall, z_wall[:2]))
+    psi_wrap = np.concatenate((psi_wall[-1:], psi_wall, psi_wall[:2]))
+    winner = _host_bracket(x_wrap, z_wrap, psi_wrap, index)
+    duplicate_prev = (
+        x_wall[index] == x_wall[index - 1] and z_wall[index] == z_wall[index - 1]
+    )
+    duplicate_next = (
+        x_wall[index] == x_wall[index + 1] and z_wall[index] == z_wall[index + 1]
+    )
+    candidate_prev = -np.inf if duplicate_prev else psi_p[index - 1]
+    candidate_next = -np.inf if duplicate_next else psi_p[index + 1]
+    adjacent = index + 1 if candidate_next >= candidate_prev else index - 1
+    start = index + 1 if adjacent == index + 1 else index - 1
+    rival = _host_bracket(x_wrap, z_wrap, psi_wrap, start)
+    margin = psi_p[index] - max(candidate_prev, candidate_next)
+    span = np.max(psi_wall) - np.min(psi_wall)
+    width = _WINDOW_FRACTION * span + _WINDOW_FLOOR
+    if span < _WINDOW_FLOOR:
+        weight = 1.0
+    else:
+        weight = _ramped_weight(margin, width)
+    x_coordinate = weight * winner[0] + (1.0 - weight) * rival[0]
+    z_coordinate = weight * winner[1] + (1.0 - weight) * rival[1]
+    psi = weight * winner[2] + (1.0 - weight) * rival[2]
+    if winner[3] > 0:
         kind = -1.0
-    elif coefficients[0] < 0:
+    elif winner[3] < 0:
         kind = 1.0
     else:
         kind = np.nan
@@ -295,18 +365,18 @@ else:
         return index + offset, offset
 
     @jax.jit
-    def _traced_wall_cluster(index, roll, value):
-        """Return three traced wall values around a selected index."""
-        value = jnp.where(roll != 0, jnp.roll(value, roll), value)
-        return jax.lax.dynamic_slice(value, [index - 1], 3)
+    def _ramped_weight_traced(margin, width):
+        """Return the traced C^2 winner weight from a sampled-flux margin."""
+        value = jnp.clip(margin / (2.0 * width) + 0.5, 0.0, 1.0)
+        return value**3 * (6.0 * value**2 - 15.0 * value + 10.0)
 
     @jax.jit
-    def traced_wall_flux(x_wall, z_wall, psi_wall, polarity):
-        """Return traced wall extremum ``[x, z, psi, type]``."""
-        index, roll = traced_wall_index(polarity * psi_wall)
-        x_cluster = _traced_wall_cluster(index, roll, x_wall)
-        z_cluster = _traced_wall_cluster(index, roll, z_wall)
-        psi_cluster = _traced_wall_cluster(index, roll, psi_wall)
+    def _traced_bracket(x_wrap, z_wrap, psi_wrap, start):
+        """Return the stationary ``[x, z, psi, curvature]`` of one quadratically
+        fitted three-node wall bracket on the traced route."""
+        x_cluster = jax.lax.dynamic_slice(x_wrap, [start], 3)
+        z_cluster = jax.lax.dynamic_slice(z_wrap, [start], 3)
+        psi_cluster = jax.lax.dynamic_slice(psi_wrap, [start], 3)
         length_cluster = length_2d(x_cluster, z_cluster, array_namespace=jnp)
         coefficients = traced_quadratic_wall(length_cluster, psi_cluster)
         coordinate = wall_length(coefficients, array_namespace=jnp)
@@ -319,10 +389,54 @@ else:
             length_cluster,
             array_namespace=jnp,
         )
+        return x_coordinate, z_coordinate, psi, coefficients[0]
+
+    @jax.jit
+    def traced_wall_flux(x_wall, z_wall, psi_wall, polarity):
+        """Return traced wall extremum ``[x, z, psi, type]``.
+
+        The selection is continuous exactly as on the host route: the discrete
+        argmax names the winning three-node bracket and its strongest adjacent
+        neighbour, and the two are blended by a C^2 weight in the sampled-flux
+        margin between them.  A wall flux flat below the blend-window floor
+        keeps the discrete winner bracket, since that state is a kink rather
+        than a selection with a slope to preserve.
+        """
+        index, roll = traced_wall_index(polarity * psi_wall)
+        x_shifted = jnp.where(roll != 0, jnp.roll(x_wall, roll), x_wall)
+        z_shifted = jnp.where(roll != 0, jnp.roll(z_wall, roll), z_wall)
+        psi_shifted = jnp.where(roll != 0, jnp.roll(psi_wall, roll), psi_wall)
+        psi_p = polarity * psi_shifted
+        x_wrap = jnp.concatenate((x_shifted[-1:], x_shifted, x_shifted[:2]))
+        z_wrap = jnp.concatenate((z_shifted[-1:], z_shifted, z_shifted[:2]))
+        psi_wrap = jnp.concatenate((psi_shifted[-1:], psi_shifted, psi_shifted[:2]))
+        winner = _traced_bracket(x_wrap, z_wrap, psi_wrap, index)
+        duplicate_prev = (x_shifted[index] == x_shifted[index - 1]) & (
+            z_shifted[index] == z_shifted[index - 1]
+        )
+        duplicate_next = (x_shifted[index] == x_shifted[index + 1]) & (
+            z_shifted[index] == z_shifted[index + 1]
+        )
+        candidate_prev = jnp.where(duplicate_prev, -jnp.inf, psi_p[index - 1])
+        candidate_next = jnp.where(duplicate_next, -jnp.inf, psi_p[index + 1])
+        adjacent_next = candidate_next >= candidate_prev
+        start = jnp.where(adjacent_next, index + 1, index - 1)
+        rival = _traced_bracket(x_wrap, z_wrap, psi_wrap, start)
+        margin = psi_p[index] - jnp.maximum(candidate_prev, candidate_next)
+        span = jnp.max(psi_p) - jnp.min(psi_p)
+        width = _WINDOW_FRACTION * span + _WINDOW_FLOOR
+        weight = jnp.where(
+            span < _WINDOW_FLOOR,
+            1.0,
+            _ramped_weight_traced(margin, width),
+        )
+        x_coordinate = weight * winner[0] + (1.0 - weight) * rival[0]
+        z_coordinate = weight * winner[1] + (1.0 - weight) * rival[1]
+        psi = weight * winner[2] + (1.0 - weight) * rival[2]
         kind = jnp.where(
-            coefficients[0] > 0,
+            winner[3] > 0,
             -1.0,
-            jnp.where(coefficients[0] < 0, 1.0, jnp.nan),
+            jnp.where(winner[3] < 0, 1.0, jnp.nan),
         )
         result = jnp.stack((x_coordinate, z_coordinate, psi, kind))
         return jnp.where(polarity != 0, result, jnp.full(4, jnp.nan))

@@ -7,22 +7,31 @@ flux of a limited plasma.  Every constraint row, moment or elimination that
 differentiates a limited boundary differentiates that value, so the tangent has
 to be the derivative of the quantity it names.
 
-Two regimes, and they are different questions.
+The selection is continuous: the discrete argmax names the winning three-node
+bracket and its strongest adjacent neighbour, and the two are blended by a
+smooth weight in the sampled-flux margin, so the boundary flux of a limited
+plasma is smooth across a bracket flip, not piecewise.  That smoothness is what
+lets the tangent be pinned against a central difference even where a step
+promotes a different wall node.
+
+Two regimes remain, and they are different questions.
 
 Where the wall flux has a strict extremum the value is a smooth function of the
 sampled flux and the tangent is its derivative; the contracts below pin that
-against a central difference along one conductor's flux image.
+against a central difference along one conductor's flux image at a step that
+crosses the bracket flip as well as at steps that do not.
 
 Where the wall lies exactly ON a flux surface the sampled flux is bit-exactly
 constant, every node is a maximiser, and the extremum is a KINK: perturbing one
 way promotes the node where the perturbation is largest, perturbing the other
 way promotes the node where it is smallest, and the two one-sided slopes are
 different numbers.  A central difference there returns their mean, which is not
-a derivative of anything and which no tangent can reproduce.  That state is
-reachable in practice - the analytic seed of a bootstrapped machine puts the
-material boundary on a seed flux surface by construction - so the kink is
-pinned here explicitly, one-sided slope by one-sided slope, rather than left to
-be rediscovered as an apparent tangent error.
+a derivative of anything and which no tangent can reproduce.  The continuous
+selection deliberately keeps the discrete winner bracket on such a flat wall -
+there is no selection to smooth - so the tangent remains the slope of that
+winner bracket, and the kink is pinned here explicitly, one-sided slope by
+one-sided slope, rather than left to be rediscovered as an apparent tangent
+error.
 """
 
 from __future__ import annotations
@@ -61,24 +70,33 @@ FINE_STEP = 1.0e-6
 
 #: Agreement required between the tangent and the coarse-step central
 #: difference.  The step is far enough above the subtraction's cancellation
-#: floor that what remains is the difference quotient's own truncation.
-COARSE_AGREEMENT = 1.0e-5
+#: floor that what remains is the difference quotient's own truncation.  The
+#: wall read's selection is continuous, so the central difference is a valid
+#: derivative estimate even across a step that promotes a different bracket,
+#: and the figure is the contraction of the flip-case contract from the
+#: one-sided quotient that the discrete selection forced.
+COARSE_AGREEMENT = 1.0e-6
 
 #: Agreement required at the fine step.  Differencing flux values of order one
 #: weber over a step of order one microweber cancels about eleven decades, so a
 #: double-precision central difference carries some 1e-5 of relative noise of
 #: its own at this step and cannot certify a tangent more tightly than that.
 #: The looser figure brackets that noise instead of predicting it.
-FINE_AGREEMENT = 1.0e-4
+FINE_AGREEMENT = 1.0e-5
 
-#: Agreement required where a step crosses a cluster-selection boundary and
-#: only the side that keeps the base cluster is admissible.  A one-sided
-#: quotient is first-order accurate, so its truncation is of the order of the
-#: step itself times the curvature of the flux along the probe rather than of
-#: the step squared.  The manufactured single-null field below is far steeper
-#: along its wall than the Solov'ev machine, so the figure brackets the worst
-#: curvature either fixture presents instead of predicting it.
-ONE_SIDED_AGREEMENT = 1.0e-2
+#: Agreement required where a step crosses a selection boundary and the central
+#: difference is not admissible because the wall read's extremum is not a local
+#: bracket flip.  The kept side's slope is then measured by a second-order
+#: one-sided quotient, whose truncation is the step squared rather than the
+#: step, so the figure reaches 1e-5 at the fine step.
+ONE_SIDED_AGREEMENT = 1.0e-5
+
+#: Agreement required for the same second-order one-sided quotient at the
+#: coarse step.  The single-null fixture used to keep the wall outside a
+#: strictly-converged bracket is far steeper along its wall than the Solov'ev
+#: machine, so its third derivative leaves a coarse-step quotient truncation
+#: near 1e-4 that the fine-step figure cannot bracket.
+COARSE_ONE_SIDED_AGREEMENT = 1.0e-3
 
 #: Amplitude, as a fraction of the flux span, of the flux image used to lift
 #: the wall off the seed surface so its extremum is strict.  Any amplitude
@@ -181,29 +199,47 @@ def _one_sided(null, state, direction, step):
     return forward, backward
 
 
-def _assert_difference_quotient(null, state, direction, step, tangent, agreement):
-    """Pin the tangent against the difference quotient the cluster admits.
+def _second_order_quotient(null, state, direction, step, forward):
+    """Return the second-order one-sided quotient on the kept side.
 
-    The polish fits the three nodes bracketing the largest sampled flux, and
-    that bracket is chosen by a discrete argmax, so the wall flux is smooth in
-    the sampled state only within one selection cell.  Where a step keeps the
-    promoted node the central difference is a derivative of the same fit and
-    the tangent must match it.  Where a step crosses a selection boundary the
-    two sides fit different clusters, the central difference averages their
-    slopes, and only the side that keeps the base cluster is a derivative of
-    the function the tangent differentiates.
+    The three-point formula has truncation of the order of the step squared
+    times the value's third derivative, rather than of the step itself, so the
+    kept side's slope is pinned more tightly than a first-order quotient could.
+    """
+    here = float(null(state, 1)[2])
+    if forward:
+        one = float(null(state + step * direction, 1)[2])
+        two = float(null(state + 2 * step * direction, 1)[2])
+        return (-3.0 * here + 4.0 * one - two) / (2.0 * step)
+    one = float(null(state - step * direction, 1)[2])
+    two = float(null(state - 2 * step * direction, 1)[2])
+    return (3.0 * here - 4.0 * one + two) / (2.0 * step)
+
+
+def _assert_difference_quotient(
+    null, state, direction, step, tangent, agreement, one_sided_agreement
+):
+    """Pin the tangent against the difference quotient the fixture admits.
+
+    The polish blends the winning three-node bracket with its strongest
+    adjacent neighbour, so the wall flux is smooth across a bracket flip and
+    the central difference is a valid derivative estimate wherever the step
+    keeps the promoted node.  Where a step changes the promoted node by more
+    than one cell the extremum is not a local bracket flip at all, and only
+    the side that keeps the base bracket measures the slope the tangent
+    differentiates; that side is read through a second-order one-sided
+    quotient.
     """
     base = _promoted_index(state)
     ahead = _promoted_index(state + step * direction)
     behind = _promoted_index(state - step * direction)
-    forward, backward = _one_sided(null, state, direction, step)
-    if ahead == base == behind:
+    if ahead == base and behind == base:
         central = _central_difference(null, state, direction, step)
         assert tangent == pytest.approx(central, rel=agreement)
         return
     assert ahead == base or behind == base
-    kept = forward if ahead == base else backward
-    assert tangent == pytest.approx(kept, rel=ONE_SIDED_AGREEMENT)
+    kept = _second_order_quotient(null, state, direction, step, forward=ahead == base)
+    assert tangent == pytest.approx(kept, rel=one_sided_agreement)
 
 
 def _strict_extremum_state(seed, image, span):
@@ -231,7 +267,12 @@ def test_flat_wall_extremum_is_a_kink_not_a_tangent_error(wall_read):
     where the image is largest gives the forward slope and promoting the node
     where it is smallest gives the backward slope, so the central difference is
     their mean and is not the derivative of the wall flux along the image.  The
-    tangent returns the forward slope, which is the derivative that exists.
+    wall lies exactly on a flux surface, so the continuous selection keeps the
+    discrete winner bracket (there is no selection to smooth) and the tangent
+    returns that bracket's slope, which is the derivative that exists; the
+    tie-break position is at the rightmost wall node, where this image also
+    peaks, so the tangent is the forward slope to the accuracy of that
+    bracket's own one-sided read.
     """
     null, seed, image = wall_read
     direction = _unit_peak(image[:, 0])
@@ -252,7 +293,12 @@ def test_flat_wall_extremum_is_a_kink_not_a_tangent_error(wall_read):
 def test_strict_wall_extremum_tangent_matches_the_central_difference(
     wall_read, conductor
 ):
-    """Every conductor's image differentiates the strict wall extremum right."""
+    """Every conductor's image differentiates the strict wall extremum right.
+
+    The selection is continuous, so even where the step promotes a different
+    wall node the boundary flux is smooth and the central difference is a valid
+    derivative estimate; the tangent must match it through the flip.
+    """
     null, seed, image = wall_read
     state = _strict_extremum_state(seed, image, _flux_span(seed))
     span = _flux_span(state)
@@ -264,9 +310,8 @@ def test_strict_wall_extremum_tangent_matches_the_central_difference(
         (COARSE_STEP, COARSE_AGREEMENT),
         (FINE_STEP, FINE_AGREEMENT),
     ):
-        _assert_difference_quotient(
-            null, state, direction, step * span, tangent, agreement
-        )
+        central = _central_difference(null, state, direction, step * span)
+        assert tangent == pytest.approx(central, rel=agreement)
 
 
 @pytest.fixture(scope="module")
@@ -292,7 +337,13 @@ def diverted_wall_read():
 def test_diverted_wall_extremum_tangent_matches_the_central_difference(
     diverted_wall_read,
 ):
-    """The same contract holds on a field carrying a saddle within the wall."""
+    """The same contract holds on a field carrying a saddle within the wall.
+
+    The manufactured field holds two near-equal wall maxima on opposite sides
+    of the wall, so a probe that tips one over the other changes the promoted
+    node by more than one cell; the kept side is read through the second-order
+    one-sided quotient.
+    """
     null, state, image = diverted_wall_read
     span = _flux_span(state)
     assert span > 0.0
@@ -300,12 +351,18 @@ def test_diverted_wall_extremum_tangent_matches_the_central_difference(
     for conductor in range(image.shape[1]):
         direction = _unit_peak(image[:, conductor])
         tangent = _tangent(null, state, direction)
-        for step, agreement in (
-            (COARSE_STEP, COARSE_AGREEMENT),
-            (FINE_STEP, FINE_AGREEMENT),
+        for step, agreement, one_sided in (
+            (COARSE_STEP, COARSE_AGREEMENT, COARSE_ONE_SIDED_AGREEMENT),
+            (FINE_STEP, FINE_AGREEMENT, ONE_SIDED_AGREEMENT),
         ):
             _assert_difference_quotient(
-                null, state, direction, step * span, tangent, agreement
+                null,
+                state,
+                direction,
+                step * span,
+                tangent,
+                agreement,
+                one_sided,
             )
 
 

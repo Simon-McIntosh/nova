@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T14:07:23",
+  "updated": "2026-09-05T14:12:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2045,6 +2045,15 @@
       },
       {
         "id": "nia-dsv4-margin-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-dsv4-pins-x",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -103573,6 +103582,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1738
+    "_version": 1739
   }
 }

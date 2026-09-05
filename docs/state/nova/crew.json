@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T18:42:20",
+  "updated": "2026-09-05T19:23:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -572,6 +572,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "cank-null-tangent-x",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "cank-thomson-scout",
@@ -2450,6 +2459,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-13"
+      },
+      {
+        "id": "pfs-scout-x",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "plan-wording",
@@ -104583,6 +104601,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1748
+    "_version": 1750
   }
 }

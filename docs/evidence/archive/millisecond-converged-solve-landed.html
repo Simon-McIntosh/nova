@@ -82,6 +82,215 @@
       log did not carry them.</li>
     </ul>
   </section>
+  <section id="trip-remainder">
+    <h2>The trip remainder is the projected-Krylov condition diagnostic (merged at 610b04ce)</h2>
+    <p><strong>Commit:</strong> <code>4972a4d9</code>; receipt
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json</code>, Perfetto trace and logs under
+    <code>~/.config/reckon/crew/reports/nova/millisecond/</code> (H200 job 1262726, 22086/43 pure, baseline 41.05 s per solve,
+    5.86 s per trip, seven trips). After the single-read restructure left 96.6 percent of a trip unexplained by isolated probes,
+    this node ablated one mechanism at a time inside the same fused production invocation.</p>
+    <table>
+      <caption>One-at-a-time ablations of the fused production solve (rows overlap, not additive)</caption>
+      <thead><tr><th scope="col">Mechanism</th><th scope="col">Source</th><th scope="col">Solve wall with it ablated</th><th scope="col">Saving per trip</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Projected-Krylov Arnoldi condition diagnostic</th><td><code>fixed_point.py:808</code></td><td><strong>0.754 s</strong></td><td>5.76 s (102 percent of the remainder)</td></tr>
+        <tr><th scope="row">Fixed line-search grade ladder</th><td><code>fixed_point.py:77</code></td><td>36.2 s</td><td>0.69 s</td></tr>
+        <tr><th scope="row">Connectivity flood and reachability loops</th><td><code>flux_surface_connectivity.py:204</code></td><td>40.6 s</td><td>0.07 s</td></tr>
+        <tr><th scope="row">Split-spline Jacobi SVD condition estimates</th><td><code>split_spline.py:162</code></td><td>40.9 s</td><td>0.02 s</td></tr>
+      </tbody>
+    </table>
+    <p>Zero recompilations across three warm solves, so the flat cost is not compilation; 322 dynamic flood-fill loop iterations
+    per read, so it is not the while loops; and with both condition estimators replaced by constants the complete device trace
+    holds 308,591 kernel events summing to 0.65 s of GPU time inside a 0.96 s warm solve, dominated by small transpose, scatter
+    and reduce fusions. The conditioning discriminator builds a second Arnoldi basis and takes an SVD of its Hessenberg on the hot
+    path; its decisions are wanted, its cost is not, and GMRES already produces the Hessenberg it needs. Removing that work leaves
+    about 0.107 s per trip between the solve and the one-millisecond target, before the other rows compound.</p>
+  </section>
+
+  <section id="hessenberg-reuse-negative">
+    <h2>Exact re-evaluation of the condition ratio does not recover the trip (negative, held)</h2>
+    <p><strong>Commits:</strong> six held in worktree <code>msc-projected-krylov-condition-from-gmres-hessenberg</code>, tip
+    <code>25d4ec74</code>; receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-reuse/profile.json</code>
+    (H200 job 1262745). Five semantics-preserving evaluations of the projected-Krylov condition ratio were measured on the
+    same fused production solve of 22086/43 pure: the original projection reused, a GMRES-layout Hessenberg with a device SVD, a
+    Gram eigenspectrum, a host SVD callback, and a fixed-sweep Jacobi spectrum of the GMRES Gram matrix. All five leave the solve
+    between 40.2 and 40.9 s, 5.77 s per trip against the 5.86 s baseline, while the constant ratio gives 0.754 s. The decision
+    sequence is proven identical to the baseline on a fixture with a refused Krylov direction, and the 75-test gate is green.</p>
+    <p><strong>Reading.</strong> The spectrum arithmetic is not the cost. What the live ratio's data dependency does to the
+    compiled program is: with a constant, the Arnoldi and whatever depends on it are dead code and the trip runs in a tenth of a
+    second. Candidates are the Arnoldi's extra Jacobian-vector products, a conditional on the ratio that serialises the trip, or a
+    materialised Krylov basis breaking fusion. A device-trace and HLO comparison of the Jacobi variant against the constant names
+    the mechanism before another repair is written; a cheaper proxy or deferred telemetry would change the trusted-Krylov
+    admission meaning and is the lead's decision.</p>
+  </section>
+
+  <section id="discriminator-trace">
+    <h2>The compiled trip is half a second; the production trip is 5.8 s (correction)</h2>
+    <p><strong>Commit:</strong> <code>a801e9a4</code> (driver and receipts, banked at
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace/</code>; H200 job 1262754, one compiled trip of
+    22086/43 pure traced twice, exact Jacobi condition against a constant ratio).</p>
+    <table>
+      <caption>One compiled trip, exact ratio against constant</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Exact</th><th scope="col">Constant</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Kernel time per trip</th><td>0.257 s</td><td>0.213 s</td></tr>
+        <tr><th scope="row">Host inter-launch gaps per trip</th><td>0.229 s</td><td>0.183 s</td></tr>
+        <tr><th scope="row">Host launches</th><td>16,562</td><td>15,074</td></tr>
+        <tr><th scope="row">Condition evaluations / linear actions per trip</th><td>12 / 156</td><td>4 / 56</td></tr>
+        <tr><th scope="row">HLO operations (while, conditional, fusion)</th><td>145,268 (374, 14, 3613)</td><td>143,991 (375, 10, 3564)</td></tr>
+      </tbody>
+    </table>
+    <h3>Two corrections</h3>
+    <p>The constant-ratio ablation was not the same computation minus the spectrum: with the ratio constant the solver settles a
+    trip after 4 promotions instead of 12, so its 0.75 s solve came from a more permissive path. The exact evaluation costs
+    0.064 s per trip more than the constant, which is the entire removable arithmetic; the earlier 98 percent attribution to the
+    SVD is withdrawn. And the compiled trip itself costs about 0.49 s, kernels plus host gaps, while the production solve
+    averages 5.77 s per trip: nine tenths of a production trip lies outside the compiled trip, in the Python-level driver
+    (active-set loop, per-trip topology read and relinearisation, receipt assembly, host transfers of state and history
+    pytrees, or repeated dispatch of many small programs). A host-side profile of one warm production solve, cProfile with
+    device synchronisation and py-spy, is the next measurement.</p>
+  </section>
+
+  <section id="host-profile">
+    <h2>The host is not the cost: one dispatch, one compiled outer loop (merged)</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/</code> (synchronised cProfile,
+    native py-spy flame, transfer census; H200 job 1262767). The warm production solve of 22086/43 pure takes 41.13 s over seven
+    reported trips, and the compiled runtime owns 99.99 percent of it: the Python wrapper is 0.5 ms per trip and the
+    device-to-host transfers 0.1 ms per trip, 19 buffers and 17 kB. There is one Python dispatch for the whole solve; the
+    active-set loop is a <code>fori_loop</code> over the active-set budget at <code>fixed_point.py:3387</code> with a compiled
+    conditional skipping inactive iterations. So the gap between the 0.38 s one-trip program and the 5.88 s per trip of the full
+    solve lies inside the executable's outer loop, in what later iterations execute, which the next measurement records per
+    iteration with ordered timestamps: executed against active iterations, promotions and linear actions per iteration, and
+    whether the inner loops run to their static budgets after settlement.</p>
+  </section>
+
+  <section id="outer-loop-trace">
+    <h2>The looped trips cost twelve times the standalone trip for the same work (merged at 63ef993e)</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/</code> (profile.json,
+    outer-iterations.csv, the persisted callback event stream, figure; H200 job 1262779). Ordered timestamps delimit every
+    iteration of the compiled active-set loop of the production solve of 22086/43 pure.</p>
+    <table>
+      <caption>Active iterations of the compiled loop, identical counted work each (12 promotions, 156 linear actions, 72 grades)</caption>
+      <thead><tr><th scope="col">Iteration</th><th scope="col">Wall</th><th scope="col">Promotions accepted</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">initial frozen solve (outside the loop)</th><td>0.38 s, the one-trip program</td><td></td></tr>
+        <tr><th scope="row">1, 2, 3</th><td>3.37, 3.38, 3.82 s</td><td>12, 12, 12</td></tr>
+        <tr><th scope="row">4</th><td>5.61 s</td><td>12</td></tr>
+        <tr><th scope="row">5, 6</th><td>12.19, 12.24 s</td><td>5, 0</td></tr>
+        <tr><th scope="row">7 to 23 (inactive)</th><td>0.026 s in total</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The conditional skip of inactive iterations works, so a while-loop exit saves nothing material. The cost is that the
+    same trip, compiled inside the outer loop, runs 9 to 32 times slower than compiled alone, and slows further as the trip
+    index grows while its counted work stays constant. The repair does not need to explain the compiler: drive every trip as
+    one dispatch of the common fast executable with an explicit carry, from the host, until settlement, keeping the trip
+    executable vmap-able over a batch with per-lane active masks. Upper bound: 41 s to about 3 s per solve.</p>
+  </section>
+
+  <section id="common-trip-negative">
+    <h2>Driving the trip from the host is exact and slower (negative, held)</h2>
+    <p><strong>Commits:</strong> four held in worktree <code>msc-common-trip-executable</code>, tip <code>d703d0c2</code>; receipt
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/common-trip/profile.json</code> (H200 jobs 1262782, 1262783). The
+    host-driven common-trip driver carries state, residual, masks, histories, globalisation, conditioning and presettlement
+    state explicitly, is bit-identical to the fused loop on a mask-changing CPU fixture, settles a vmapped two-lane batch lane by
+    lane, and reproduces the production case's seven trips, class and termination with a residual delta of 4.5e-17.</p>
+    <table>
+      <caption>MAST 22086/43 pure, median of three warm solves</caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">Wall per solve</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">fused loop (baseline)</th><td>41.1 s</td></tr>
+        <tr><th scope="row">host-driven, active guard on device</th><td>82.8 s</td></tr>
+        <tr><th scope="row">host-driven, active guard on host</th><td>112.4 s</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The standalone 0.38 s first trip does not reproduce under repeated dispatch with the full carry, so the fused-loop
+    hypothesis is withdrawn alongside the host-overhead and condition-spectrum hypotheses. What every measurement agrees on is
+    that a trip's cost grows with its index for the same static budgets, from 3.4 s to 12.2 s, and that the slowest trips are
+    those where most promotions are rejected: the budgets hide dynamic work. The next measurement is a per-trip device trace
+    inside the fused solve with the dynamic loop counts the receipts carry.</p>
+  </section>
+
+  <section id="per-trip-kernels">
+    <h2>Late trips replay the recovery sequence: the growing cost is named</h2>
+    <p><strong>Receipts:</strong> <code>docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/</code> (per-trip
+    components, dynamic counts, kernel growth, figure, persisted trace events; five complete Perfetto traces under the run
+    directory of H200 job 1262787; the commit is held on the Jacobi-variant lineage because the exact SVD path crashes the CUPTI
+    replay, which also ended tracing at trip six).</p>
+    <table>
+      <caption>MAST 22086/43 pure, traced trips inside the fused solve</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Trip 2</th><th scope="col">Trip 5</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Traced wall</th><td>5.49 s</td><td>9.11 s (+66 percent)</td></tr>
+        <tr><th scope="row">Summed kernel time</th><td>2.95 s</td><td>4.31 s (+46 percent)</td></tr>
+        <tr><th scope="row">Host launches</th><td>213,938</td><td>353,942 (+65 percent)</td></tr>
+        <tr><th scope="row">Backtracks / recoveries / model rebuilds / descents</th><td>0 / 0 / 0 / 0</td><td>47 / 4 / 3 / 2</td></tr>
+        <tr><th scope="row">Dominant kernel median duration</th><td colspan="2">unchanged (6.624 to 6.625 µs); call counts grow 1.44 to 1.45 times</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>No kernel got slower; the same device loop bodies execute more often. The growth begins exactly where globalisation
+    recovery begins on rejected promotions: the rejected-promotion continuation re-scores the nonlinear map
+    (<code>fixed_point.py:1299</code>) and the rebuilt-model path re-linearises and restarts GMRES (lines 1438 to 1495), and both
+    re-enter the topology flood, reachability and stationary-point polish although the trip's partition is frozen at one read
+    and acceptance scores on the incumbent mask. Floor saving 3.6 s per late trip, ceiling 8.9 s. The repair makes every
+    recovery, rebuild and descent evaluation inside a trip reuse the frozen partition, bit-identical where the re-entry was
+    redundant.</p>
+  </section>
+
+  <section id="frozen-partition-scoring">
+    <h2>Acceptance scoring on the frozen partition: 41 s to 34 s, early trips at a fifth of a second (merged at 0efbf123)</h2>
+    <p><strong>Commits:</strong> <code>f5bf49ae</code> (the change), <code>aa344960</code>, <code>29978ede</code>, <code>93857669</code>
+    (receipts); evidence <code>docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/</code> and
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/</code> (H200 job 1262789). The merit
+    ladder, recovery, rebuilt-model and descent scoring evaluated each candidate's own topology and discarded it while
+    incumbent-partition acceptance is in force; the trip already carries the frozen partition, census and masks. The evaluation
+    is now made only where own-mask admission scores on it. On a CPU fixture exercising recovery and a model rebuild every result
+    leaf is bit-identical while partition-map evaluations fall from 47 to 27; 71 tests green including the nine referees and the
+    conditioning contracts.</p>
+    <table>
+      <caption>MAST 22086/43 pure on the H200, per active trip, before and after</caption>
+      <thead><tr><th scope="col">Trip</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">2, 3 (no rejected promotions)</th><td>3.37, 3.38 s</td><td>0.20, 0.20 s</td></tr>
+        <tr><th scope="row">4 (34 backtracks, 2 recoveries)</th><td>3.82 s</td><td>3.85 s</td></tr>
+        <tr><th scope="row">5 (47 backtracks, 4 recoveries, 3 rebuilds, 2 descents)</th><td>5.61 s</td><td>5.67 s</td></tr>
+        <tr><th scope="row">6, 7 (5 then 0 of 12 promotions accepted)</th><td>12.19, 12.24 s</td><td>12.30, 12.30 s</td></tr>
+        <tr><th scope="row">Whole solve</th><td>41.1 s</td><td>34.3 s</td></tr>
+      </tbody>
+    </table>
+    <p>The discarded candidate-topology evaluation was the whole cost of a trip without rejected promotions. What remains is a
+    second dynamic source that scales only the trips with rejected promotions; a per-promotion timing inside those trips is the
+    next measurement.</p>
+  </section>
+
+  <section id="late-trip-promotions">
+    <h2>The rejected-promotion trips replay the whole fallback cascade on an unchanged state (merged at c811b21f)</h2>
+    <p><strong>Commit:</strong> <code>0102026a</code>; receipts <code>docs/figures/millisecond-converged-solve/trip-quantum/late-trips/</code>
+    (84 promotion rows with wall, ladder grade, counted GMRES iterations, recovery radii, rebuild damping and descent flags; 748
+    ordered events persisted as they arrived; H200 job 1262797 at 0efbf123, 34.96 s per solve).</p>
+    <table>
+      <caption>MAST 22086/43 pure, per trip after the frozen-partition scoring</caption>
+      <thead><tr><th scope="col">Trip</th><th scope="col">Promotion wall</th><th scope="col">Accepted</th><th scope="col">Recovery / rebuild / descent</th><th scope="col">GMRES iterations</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">1, 2, 3</th><td>0.12, 0.13, 0.12 s</td><td>12 of 12</td><td>0 / 0 / 0</td><td>144</td></tr>
+        <tr><th scope="row">4</th><td>3.76 s</td><td>12 of 12</td><td>2 / 0 / 0</td><td>144</td></tr>
+        <tr><th scope="row">5</th><td>5.59 s</td><td>12 of 12</td><td>4 / 3 / 2</td><td>468</td></tr>
+        <tr><th scope="row">6</th><td>12.32 s</td><td>5 of 12</td><td>12 / 12 / 12</td><td>502</td></tr>
+        <tr><th scope="row">7</th><td>12.41 s</td><td>0 of 12</td><td>12 / 12 / 12</td><td>612</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Every promotion attempt in trips six and seven exhausts the Newton ladder, rebuilds and relinearises the model, restarts
+    the damped normal-equation GMRES inside the fixed damping ladder, evaluates descent and re-scores the candidate map, while
+    the state and the frozen partition do not change between rejected attempts and only the scalar globalisation state advances.
+    That fallback surcharge is 73.6 percent of their promotion wall; the rebuilt-model body alone is 24.2 percent; continuation
+    and descent bodies are 0.4 percent, so replaying the radius or the descent grades is not the cost. The repair carries the
+    primary linearisation, the map scores and the rebuilt normal model across damping attempts on an unchanged state, keeps every
+    acceptance decision, and exits the trip once the carried sequence is exhausted: an estimated 12.8 s of the 35 s solve.</p>
+  </section>
+
 </main>
 </body>
 </html>

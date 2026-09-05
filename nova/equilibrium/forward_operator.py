@@ -30,6 +30,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -174,6 +175,15 @@ class ForwardTopologyState:
         del aux_data
         *landmarks, _diverted, class_margin = children
         return cls(*landmarks, lambda: class_margin)
+
+
+class _FrozenTopologyPartition(NamedTuple):
+    """Discrete topology authority retained through one Newton solve."""
+
+    label: jax.Array
+    topology: TopologyState
+    profile_support: object
+    residual_shadow: jax.Array
 
 
 def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
@@ -786,6 +796,15 @@ class PrescribedCurrentField:
             )
         return self.response @ conductor
 
+    def flux_delta(self, current_delta) -> jax.Array:
+        """Return the flux image of one same-shaped circuit-current edit [Wb]."""
+        delta = jnp.asarray(current_delta, dtype=self.current.dtype)
+        if delta.shape != self.current.shape:
+            raise ValueError(
+                "prescribed current delta must match the stored circuit vector shape"
+            )
+        return self.response @ delta
+
 
 @dataclass
 class ForwardFluxOperator:
@@ -1290,13 +1309,44 @@ class ForwardFluxOperator:
             raise ValueError("clipped support moments are required")
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        profile_support = self._profile_support(masks, physical.dtype)
+        return masks, topology, sample_psi_norm, profile_support
+
+    def _profile_support(self, masks, dtype):
+        """Return the fixed clipped support selected by domain labels."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current moments")
         profile_support = self.moment_geometry.atomic_mesh.traced_clip(
             jnp.ones(
                 len(self.moment_geometry.atomic_mesh.node_coordinates),
-                dtype=physical.dtype,
+                dtype=dtype,
             )
         ).qualify(masks.profile_participation)
-        return masks, topology, sample_psi_norm, profile_support
+        return profile_support
+
+    def _partition_for_state(self, psi, frozen):
+        """Revalue one state on an already-decided discrete partition."""
+        topology = frozen.topology
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
+        psi_norm = self.topology.normalize(
+            topology.axis_flux, topology.boundary_flux, grid_flux
+        )
+        masks = DomainMasks(label=frozen.label, psi_norm=psi_norm)
+        sample_flux = self.sample_node_flux(psi)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        return masks, topology, sample_psi_norm, frozen.profile_support
+
+    def _internal_on_partition(self, psi, frozen, target_current=None):
+        """Return the plasma image while retaining one trip's partition."""
+        partition = self._partition_for_state(psi, frozen)
+        moments = self._partitioned_current_moments(partition)
+        if target_current is not None:
+            amplitude = self.current_normalisation_amplitude(
+                target_current, jnp.sum(moments.cell_current)
+            )
+            moments = self.scaled_current_moments(moments, amplitude)
+        return self.current_moment_image(moments)
 
     def _partitioned_current_moments(self, partition) -> CellCurrentMoments:
         masks, _topology, sample_psi_norm, profile_support = partition
@@ -1493,6 +1543,14 @@ class ForwardFluxOperator:
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
+        return self._residual_shadow_components_from_read(
+            physical, masks, topology, previous_shadow
+        )
+
+    def _residual_shadow_components_from_read(
+        self, physical, masks, topology, previous_shadow=None
+    ):
+        """Build residual shadows from one already-completed topology read."""
         reading = self._carrier_shadow_read(physical, masks)
         if previous_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
@@ -1511,6 +1569,31 @@ class ForwardFluxOperator:
             self._x_qualification_distance,
         )
         return masks.private_flux, wall_shadow
+
+    def _frozen_topology_partition(
+        self, psi, requested_class=None, previous_shadow=None
+    ):
+        """Read all discrete topology state once for an active-set boundary."""
+        if self.moment_geometry is None or not self.use_linear_moments:
+            raise ValueError("frozen topology requires clipped support moments")
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        masks, topology, _connected, _admitted = self._fixed_design_read(
+            physical, requested_class
+        )
+        flood_shadow, wall_shadow = self._residual_shadow_components_from_read(
+            physical, masks, topology, previous_shadow
+        )
+        direct_sample_shadow = jnp.zeros(
+            self.node_number - self.physical_node_number, dtype=bool
+        )
+        return _FrozenTopologyPartition(
+            label=masks.label,
+            topology=topology,
+            profile_support=self._profile_support(masks, physical.dtype),
+            residual_shadow=jnp.concatenate(
+                (flood_shadow, wall_shadow, direct_sample_shadow)
+            ),
+        )
 
     def cell_current(self, psi, requested_class=None, target_current=None) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""
@@ -1614,6 +1697,30 @@ class ForwardFluxOperator:
             image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
+            )
+
+        if self.moment_geometry is not None and self.use_linear_moments:
+
+            def read_partition(psi, previous_shadow=None):
+                return self._frozen_topology_partition(
+                    psi, requested_class, previous_shadow
+                )
+
+            def map_partition(psi, partition):
+                image = external + self._internal_on_partition(
+                    psi, partition, target_current
+                )
+                return self._exclude_shadow_residual(
+                    psi,
+                    image,
+                    requested_class,
+                    shadow=partition.residual_shadow,
+                )
+
+            mapped._read_frozen_partition = read_partition
+            mapped._map_frozen_partition = map_partition
+            mapped._frozen_partition_shadow = lambda partition: (
+                partition.residual_shadow
             )
 
         return mapped

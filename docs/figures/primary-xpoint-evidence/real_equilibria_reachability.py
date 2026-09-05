@@ -31,10 +31,7 @@ from benchmarks.diiid_forward_gs_match import (
     DEFAULT_MACHINE_ARTIFACT_CACHE,
     DEFAULT_MACHINE_ARTIFACT_DIGEST,
     POLOIDAL_CONDUCTORS,
-    TOPOLOGY_SURFACE_GMRES_ITERATIONS,
-    TOPOLOGY_SURFACE_NEWTON_STEPS,
     _build_profile,
-    _margin_graded_newton_krylov,
     _target_current,
     _terminal_xpoint_diagnostics,
     _wall_topology_row,
@@ -59,11 +56,13 @@ from nova.equilibrium.flux_surface_connectivity import (
     label_connected_components,
     private_flux_mask,
 )
-from nova.equilibrium.fixed_point import (
-    FixedPointTerminationReason,
-    KrylovActionQualification,
-)
+from nova.equilibrium.fixed_point import FixedPointTerminationReason
 from nova.equilibrium.forward import SaddleSeedGeometry
+from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
+)
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.io import geqdsk
@@ -100,6 +99,7 @@ class MastArmResult(NamedTuple):
     terminal_residual: float
     tolerance: float
     termination_reason: str
+    resolved_defaults: dict[str, object] | None
 
     def __jax_array__(self) -> jax.Array:
         """Keep state-only diagnostic consumers source compatible."""
@@ -123,8 +123,32 @@ def _densify_wall(wall: np.ndarray) -> np.ndarray:
     )
 
 
+def _solve_with_defaults(
+    profile,
+    seed,
+    *,
+    carrier_identity: str,
+    target_current: float,
+    current=None,
+) -> ForwardSolveReceipt:
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.asarray(seed)),
+        target_current=target_current,
+        current=current,
+    )
+    receipt = profile.solve(request)
+    receipt.equilibrium.flux.block_until_ready()
+    return receipt
+
+
 def _mast_states(
-    profile, seed: jax.Array, target_current: float
+    profile,
+    seed: jax.Array,
+    target_current: float,
+    *,
+    carrier_identity: str,
 ) -> dict[str, MastArmResult]:
     initial = jnp.stack((seed, seed))
     portfolio = profile.solve_portfolio(
@@ -149,37 +173,20 @@ def _mast_states(
         pure_reason = FixedPointTerminationReason(pure_reason_value).name.lower()
     except ValueError:
         pure_reason = f"unknown_{pure_reason_value}"
-    mapped = profile.flux_map(
-        requested_class=TopologyClass.DIVERTED, target_current=target_current
-    )
-    mixed_result = _margin_graded_newton_krylov(
-        mapped,
-        profile.operator.topology_margin,
+    mixed_receipt = _solve_with_defaults(
+        profile,
         seed,
-        newton_steps=NEWTON_STEPS,
-        gmres_iterations=GMRES_ITERATIONS,
+        carrier_identity=carrier_identity,
+        target_current=target_current,
     )
-    mixed_result.state.block_until_ready()
+    mixed_result = mixed_receipt.equilibrium.fixed_point
     mixed_residual = float(np.asarray(mixed_result.residual))
-    mixed_qualification = KrylovActionQualification(
-        int(np.asarray(mixed_result.krylov_action_qualification))
-    )
-    mixed_converged = bool(
-        np.isfinite(mixed_residual) and mixed_residual <= FIXED_POINT_CRITERION
-    )
-    mixed_reason = (
-        FixedPointTerminationReason.CONVERGED
-        if mixed_converged
-        else FixedPointTerminationReason.NONFINITE_RESIDUAL
-        if not np.isfinite(mixed_residual)
-        else FixedPointTerminationReason.KRYLOV_ACTION_REFUSED
-        if mixed_qualification
-        not in {
-            KrylovActionQualification.NOT_APPLICABLE,
-            KrylovActionQualification.ACCEPTED,
-        }
-        else FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED
-    )
+    mixed_converged = bool(np.asarray(mixed_receipt.qualified))
+    mixed_reason_value = int(np.asarray(mixed_receipt.termination_reason))
+    try:
+        mixed_reason = FixedPointTerminationReason(mixed_reason_value).name.lower()
+    except ValueError:
+        mixed_reason = f"unknown_{mixed_reason_value}"
     return {
         "pure": MastArmResult(
             state=pure_branch.equilibrium.flux,
@@ -187,18 +194,20 @@ def _mast_states(
             terminal_residual=float(np.asarray(pure_branch.residual)),
             tolerance=FIXED_POINT_CRITERION,
             termination_reason=pure_reason,
+            resolved_defaults=None,
         ),
         "mixed": MastArmResult(
-            state=mixed_result.state,
+            state=mixed_receipt.equilibrium.flux,
             converged=mixed_converged,
             terminal_residual=mixed_residual,
             tolerance=FIXED_POINT_CRITERION,
-            termination_reason=mixed_reason.name.lower(),
+            termination_reason=mixed_reason,
+            resolved_defaults=mixed_receipt.resolved_defaults.to_dict(),
         ),
     }
 
 
-def _diiid_state(shot_name: str, frame: int) -> tuple[Any, jax.Array]:
+def _diiid_state(shot_name: str, frame: int) -> tuple[Any, ForwardSolveReceipt]:
     row = _wall_topology_row(DIIID_DATA / shot_name)
     built = _build_profile(
         row,
@@ -235,18 +244,16 @@ def _diiid_state(shot_name: str, frame: int) -> tuple[Any, jax.Array]:
         diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(saddle)),
     )
     seed = cold.branches.flux[int(TopologyClass.DIVERTED)]
-    mapped = profile.flux_map(
-        jnp.asarray(current), TopologyClass.DIVERTED, target_current
-    )
-    state = _margin_graded_newton_krylov(
-        mapped,
-        profile.operator.topology_margin,
+    receipt = _solve_with_defaults(
+        profile,
         seed,
-        newton_steps=TOPOLOGY_SURFACE_NEWTON_STEPS,
-        gmres_iterations=TOPOLOGY_SURFACE_GMRES_ITERATIONS,
-    ).state
-    state.block_until_ready()
-    return profile, state
+        carrier_identity=(
+            f"diiid:{shot_name}:{frame}:{DEFAULT_MACHINE_ARTIFACT_DIGEST}"
+        ),
+        target_current=target_current,
+        current=jnp.asarray(current),
+    )
+    return profile, receipt
 
 
 def _grid_geometry(profile, state: jax.Array) -> dict[str, Any]:
@@ -661,7 +668,14 @@ def run() -> dict[str, Any]:
             raise RuntimeError("MAST reconstruction entered a direct response builder")
         seed = jnp.asarray(passive_case["state"])
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
-        for arm, arm_result in _mast_states(profile, seed, target_current).items():
+        for arm, arm_result in _mast_states(
+            profile,
+            seed,
+            target_current,
+            carrier_identity=(
+                f"mast:{key[0]}:{key[1]}:{response_carrier.SEMANTIC_RESPONSE_IDENTITY}"
+            ),
+        ).items():
             record, plot = _classify(_grid_geometry(profile, arm_result.state))
             reference = f"{key[0]}/{key[1]}"
             delta = before[(reference, arm)]
@@ -676,6 +690,7 @@ def run() -> dict[str, Any]:
                     "terminal_residual": arm_result.terminal_residual,
                     "tolerance": arm_result.tolerance,
                     "termination_reason": arm_result.termination_reason,
+                    "resolved_defaults": arm_result.resolved_defaults,
                     "field_source": (
                         "reconstructed terminal state from persisted response carrier"
                     ),
@@ -701,7 +716,8 @@ def run() -> dict[str, Any]:
     diiid_row = diiid_receipt["arms"]["physical_ring"]["frame_records"][0]
     shot_name = diiid_row["shot"]
     frame = int(diiid_row["frame"])
-    profile, state = _diiid_state(shot_name, frame)
+    profile, solve_receipt = _diiid_state(shot_name, frame)
+    state = solve_receipt.equilibrium.flux
     record, plot = _classify(_grid_geometry(profile, state))
     shot_label = shot_name.removeprefix("d3d_shot_").removesuffix(".parquet")
     record.update(
@@ -713,6 +729,7 @@ def run() -> dict[str, Any]:
             "arm": "physical ring",
             "field_source": "regenerated terminal behind margin-frame-remeasure.json",
             "selection_source_commit": "5acfe07b",
+            "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
         }
     )
     plot["record"] = record

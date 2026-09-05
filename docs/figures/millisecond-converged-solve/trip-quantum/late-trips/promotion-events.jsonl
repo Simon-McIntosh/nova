@@ -1,0 +1,748 @@
+{"kind": "promotion_start", "promotion": 1, "sequence": 0, "timestamp_ns": 6172632521209000, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 1, "timestamp_ns": 6172632524936742, "trip": 1}
+{"kind": "ladder_start", "promotion": 1, "sequence": 2, "timestamp_ns": 6172632528180309, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 1, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 3, "timestamp_ns": 6172632529418542, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 4, "timestamp_ns": 6172632531428556, "trip": 1}
+{"kind": "promotion_start", "promotion": 2, "sequence": 5, "timestamp_ns": 6172632536438939, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 6, "timestamp_ns": 6172632537776598, "trip": 1}
+{"kind": "ladder_start", "promotion": 2, "sequence": 7, "timestamp_ns": 6172632540877599, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 2, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 8, "timestamp_ns": 6172632542277041, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 9, "timestamp_ns": 6172632543943972, "trip": 1}
+{"kind": "promotion_start", "promotion": 3, "sequence": 10, "timestamp_ns": 6172632548713354, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 11, "timestamp_ns": 6172632549958880, "trip": 1}
+{"kind": "ladder_start", "promotion": 3, "sequence": 12, "timestamp_ns": 6172632553096969, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 3, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 13, "timestamp_ns": 6172632554739146, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 14, "timestamp_ns": 6172632556738914, "trip": 1}
+{"kind": "promotion_start", "promotion": 4, "sequence": 15, "timestamp_ns": 6172632561721070, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 16, "timestamp_ns": 6172632563059335, "trip": 1}
+{"kind": "ladder_start", "promotion": 4, "sequence": 17, "timestamp_ns": 6172632566244598, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 4, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 18, "timestamp_ns": 6172632567809984, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 19, "timestamp_ns": 6172632569927032, "trip": 1}
+{"kind": "promotion_start", "promotion": 5, "sequence": 20, "timestamp_ns": 6172632574923680, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 21, "timestamp_ns": 6172632576316991, "trip": 1}
+{"kind": "ladder_start", "promotion": 5, "sequence": 22, "timestamp_ns": 6172632582627231, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 5, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 23, "timestamp_ns": 6172632584558351, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 24, "timestamp_ns": 6172632587170873, "trip": 1}
+{"kind": "promotion_start", "promotion": 6, "sequence": 25, "timestamp_ns": 6172632592413673, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 26, "timestamp_ns": 6172632594331514, "trip": 1}
+{"kind": "ladder_start", "promotion": 6, "sequence": 27, "timestamp_ns": 6172632598124792, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 6, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 28, "timestamp_ns": 6172632600461875, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 29, "timestamp_ns": 6172632602990399, "trip": 1}
+{"kind": "promotion_start", "promotion": 7, "sequence": 30, "timestamp_ns": 6172632608233226, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 31, "timestamp_ns": 6172632610206619, "trip": 1}
+{"kind": "ladder_start", "promotion": 7, "sequence": 32, "timestamp_ns": 6172632613703279, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 7, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 33, "timestamp_ns": 6172632615912573, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 34, "timestamp_ns": 6172632618413733, "trip": 1}
+{"kind": "promotion_start", "promotion": 8, "sequence": 35, "timestamp_ns": 6172632623821581, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 36, "timestamp_ns": 6172632625544000, "trip": 1}
+{"kind": "ladder_start", "promotion": 8, "sequence": 37, "timestamp_ns": 6172632629234128, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 8, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 38, "timestamp_ns": 6172632631360298, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 39, "timestamp_ns": 6172632633822472, "trip": 1}
+{"kind": "promotion_start", "promotion": 9, "sequence": 40, "timestamp_ns": 6172632639431051, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 41, "timestamp_ns": 6172632641436831, "trip": 1}
+{"kind": "ladder_start", "promotion": 9, "sequence": 42, "timestamp_ns": 6172632645108859, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 9, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 43, "timestamp_ns": 6172632647068610, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 44, "timestamp_ns": 6172632650440373, "trip": 1}
+{"kind": "promotion_start", "promotion": 10, "sequence": 45, "timestamp_ns": 6172632655596652, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 46, "timestamp_ns": 6172632657407707, "trip": 1}
+{"kind": "ladder_start", "promotion": 10, "sequence": 47, "timestamp_ns": 6172632661124849, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 10, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 48, "timestamp_ns": 6172632663024910, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 49, "timestamp_ns": 6172632665192042, "trip": 1}
+{"kind": "promotion_start", "promotion": 11, "sequence": 50, "timestamp_ns": 6172632670213437, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 51, "timestamp_ns": 6172632672040386, "trip": 1}
+{"kind": "ladder_start", "promotion": 11, "sequence": 52, "timestamp_ns": 6172632675843106, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 11, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 53, "timestamp_ns": 6172632677922096, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 54, "timestamp_ns": 6172632680384072, "trip": 1}
+{"kind": "promotion_start", "promotion": 12, "sequence": 55, "timestamp_ns": 6172632685894756, "trip": 1}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 56, "timestamp_ns": 6172632687758960, "trip": 1}
+{"kind": "ladder_start", "promotion": 12, "sequence": 57, "timestamp_ns": 6172632691613263, "trip": 1}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 12, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 58, "timestamp_ns": 6172632693406614, "trip": 1}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 59, "timestamp_ns": 6172632695910139, "trip": 1}
+{"kind": "promotion_start", "promotion": 1, "sequence": 60, "timestamp_ns": 6172632814425371, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 61, "timestamp_ns": 6172632816503700, "trip": 2}
+{"kind": "ladder_start", "promotion": 1, "sequence": 62, "timestamp_ns": 6172632820683084, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 1, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 63, "timestamp_ns": 6172632822625679, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 64, "timestamp_ns": 6172632825325984, "trip": 2}
+{"kind": "promotion_start", "promotion": 2, "sequence": 65, "timestamp_ns": 6172632830277345, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 66, "timestamp_ns": 6172632832455656, "trip": 2}
+{"kind": "ladder_start", "promotion": 2, "sequence": 67, "timestamp_ns": 6172632836447395, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 2, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 68, "timestamp_ns": 6172632838482038, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 69, "timestamp_ns": 6172632841066142, "trip": 2}
+{"kind": "promotion_start", "promotion": 3, "sequence": 70, "timestamp_ns": 6172632846252377, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 71, "timestamp_ns": 6172632848187754, "trip": 2}
+{"kind": "ladder_start", "promotion": 3, "sequence": 72, "timestamp_ns": 6172632852347150, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 3, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 73, "timestamp_ns": 6172632854148631, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 74, "timestamp_ns": 6172632856430962, "trip": 2}
+{"kind": "promotion_start", "promotion": 4, "sequence": 75, "timestamp_ns": 6172632861132035, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 76, "timestamp_ns": 6172632863020318, "trip": 2}
+{"kind": "ladder_start", "promotion": 4, "sequence": 77, "timestamp_ns": 6172632867034740, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 4, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 78, "timestamp_ns": 6172632869265874, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 79, "timestamp_ns": 6172632871922247, "trip": 2}
+{"kind": "promotion_start", "promotion": 5, "sequence": 80, "timestamp_ns": 6172632877163860, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 81, "timestamp_ns": 6172632879176205, "trip": 2}
+{"kind": "ladder_start", "promotion": 5, "sequence": 82, "timestamp_ns": 6172632883293914, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 5, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 83, "timestamp_ns": 6172632885285523, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 84, "timestamp_ns": 6172632887829455, "trip": 2}
+{"kind": "promotion_start", "promotion": 6, "sequence": 85, "timestamp_ns": 6172632892887381, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 86, "timestamp_ns": 6172632894843648, "trip": 2}
+{"kind": "ladder_start", "promotion": 6, "sequence": 87, "timestamp_ns": 6172632898921581, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 6, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 88, "timestamp_ns": 6172632904952730, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 89, "timestamp_ns": 6172632906890223, "trip": 2}
+{"kind": "promotion_start", "promotion": 7, "sequence": 90, "timestamp_ns": 6172632911588344, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 91, "timestamp_ns": 6172632913390804, "trip": 2}
+{"kind": "ladder_start", "promotion": 7, "sequence": 92, "timestamp_ns": 6172632917156302, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 7, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 93, "timestamp_ns": 6172632918948462, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 94, "timestamp_ns": 6172632921391703, "trip": 2}
+{"kind": "promotion_start", "promotion": 8, "sequence": 95, "timestamp_ns": 6172632926448235, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 96, "timestamp_ns": 6172632928344926, "trip": 2}
+{"kind": "ladder_start", "promotion": 8, "sequence": 97, "timestamp_ns": 6172632932358753, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 8, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 98, "timestamp_ns": 6172632934323680, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 99, "timestamp_ns": 6172632936503207, "trip": 2}
+{"kind": "promotion_start", "promotion": 9, "sequence": 100, "timestamp_ns": 6172632941157657, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 101, "timestamp_ns": 6172632942969913, "trip": 2}
+{"kind": "ladder_start", "promotion": 9, "sequence": 102, "timestamp_ns": 6172632946792972, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 9, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 103, "timestamp_ns": 6172632948865825, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 104, "timestamp_ns": 6172632951236443, "trip": 2}
+{"kind": "promotion_start", "promotion": 10, "sequence": 105, "timestamp_ns": 6172632956194633, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 106, "timestamp_ns": 6172632958028233, "trip": 2}
+{"kind": "ladder_start", "promotion": 10, "sequence": 107, "timestamp_ns": 6172632961890953, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 10, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 108, "timestamp_ns": 6172632963840172, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 109, "timestamp_ns": 6172632966009147, "trip": 2}
+{"kind": "promotion_start", "promotion": 11, "sequence": 110, "timestamp_ns": 6172632971182595, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 111, "timestamp_ns": 6172632972969837, "trip": 2}
+{"kind": "ladder_start", "promotion": 11, "sequence": 112, "timestamp_ns": 6172632976924251, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 11, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 113, "timestamp_ns": 6172632978842723, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 114, "timestamp_ns": 6172632981092827, "trip": 2}
+{"kind": "promotion_start", "promotion": 12, "sequence": 115, "timestamp_ns": 6172632987904182, "trip": 2}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 116, "timestamp_ns": 6172632989802960, "trip": 2}
+{"kind": "ladder_start", "promotion": 12, "sequence": 117, "timestamp_ns": 6172632993843791, "trip": 2}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 12, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 118, "timestamp_ns": 6172632995864314, "trip": 2}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 119, "timestamp_ns": 6172632998182653, "trip": 2}
+{"kind": "promotion_start", "promotion": 1, "sequence": 120, "timestamp_ns": 6172633115053862, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 121, "timestamp_ns": 6172633117161687, "trip": 3}
+{"kind": "ladder_start", "promotion": 1, "sequence": 122, "timestamp_ns": 6172633121327858, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 1, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 123, "timestamp_ns": 6172633123329292, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 124, "timestamp_ns": 6172633125663119, "trip": 3}
+{"kind": "promotion_start", "promotion": 2, "sequence": 125, "timestamp_ns": 6172633130546044, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 126, "timestamp_ns": 6172633132426884, "trip": 3}
+{"kind": "ladder_start", "promotion": 2, "sequence": 127, "timestamp_ns": 6172633136499822, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 2, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 128, "timestamp_ns": 6172633138198647, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 129, "timestamp_ns": 6172633140314246, "trip": 3}
+{"kind": "promotion_start", "promotion": 3, "sequence": 130, "timestamp_ns": 6172633144981432, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 131, "timestamp_ns": 6172633149998095, "trip": 3}
+{"kind": "ladder_start", "promotion": 3, "sequence": 132, "timestamp_ns": 6172633153424686, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 3, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 133, "timestamp_ns": 6172633155467007, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 134, "timestamp_ns": 6172633157755204, "trip": 3}
+{"kind": "promotion_start", "promotion": 4, "sequence": 135, "timestamp_ns": 6172633162758091, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 136, "timestamp_ns": 6172633164711099, "trip": 3}
+{"kind": "ladder_start", "promotion": 4, "sequence": 137, "timestamp_ns": 6172633168569123, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 4, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 138, "timestamp_ns": 6172633170511678, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 139, "timestamp_ns": 6172633172841775, "trip": 3}
+{"kind": "promotion_start", "promotion": 5, "sequence": 140, "timestamp_ns": 6172633177641680, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 141, "timestamp_ns": 6172633179510388, "trip": 3}
+{"kind": "ladder_start", "promotion": 5, "sequence": 142, "timestamp_ns": 6172633183342468, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 5, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 143, "timestamp_ns": 6172633185070099, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 144, "timestamp_ns": 6172633187066453, "trip": 3}
+{"kind": "promotion_start", "promotion": 6, "sequence": 145, "timestamp_ns": 6172633191763849, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 146, "timestamp_ns": 6172633193733202, "trip": 3}
+{"kind": "ladder_start", "promotion": 6, "sequence": 147, "timestamp_ns": 6172633197517218, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 6, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 148, "timestamp_ns": 6172633199188749, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 149, "timestamp_ns": 6172633201331285, "trip": 3}
+{"kind": "promotion_start", "promotion": 7, "sequence": 150, "timestamp_ns": 6172633206009739, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 151, "timestamp_ns": 6172633207926676, "trip": 3}
+{"kind": "ladder_start", "promotion": 7, "sequence": 152, "timestamp_ns": 6172633211787692, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 7, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 153, "timestamp_ns": 6172633213830294, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 154, "timestamp_ns": 6172633216287178, "trip": 3}
+{"kind": "promotion_start", "promotion": 8, "sequence": 155, "timestamp_ns": 6172633221187590, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 156, "timestamp_ns": 6172633222893025, "trip": 3}
+{"kind": "ladder_start", "promotion": 8, "sequence": 157, "timestamp_ns": 6172633226812554, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 8, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 158, "timestamp_ns": 6172633228857172, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 159, "timestamp_ns": 6172633231096608, "trip": 3}
+{"kind": "promotion_start", "promotion": 9, "sequence": 160, "timestamp_ns": 6172633235949264, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 161, "timestamp_ns": 6172633237779486, "trip": 3}
+{"kind": "ladder_start", "promotion": 9, "sequence": 162, "timestamp_ns": 6172633241735186, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 9, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 163, "timestamp_ns": 6172633243497744, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 164, "timestamp_ns": 6172633245856195, "trip": 3}
+{"kind": "promotion_start", "promotion": 10, "sequence": 165, "timestamp_ns": 6172633250657425, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 166, "timestamp_ns": 6172633252509389, "trip": 3}
+{"kind": "ladder_start", "promotion": 10, "sequence": 167, "timestamp_ns": 6172633256415415, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 10, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 168, "timestamp_ns": 6172633257967486, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 169, "timestamp_ns": 6172633259991025, "trip": 3}
+{"kind": "promotion_start", "promotion": 11, "sequence": 170, "timestamp_ns": 6172633264546014, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 171, "timestamp_ns": 6172633266273881, "trip": 3}
+{"kind": "ladder_start", "promotion": 11, "sequence": 172, "timestamp_ns": 6172633269932322, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 11, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 173, "timestamp_ns": 6172633272132827, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 174, "timestamp_ns": 6172633278200465, "trip": 3}
+{"kind": "promotion_start", "promotion": 12, "sequence": 175, "timestamp_ns": 6172633282850640, "trip": 3}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 176, "timestamp_ns": 6172633284402201, "trip": 3}
+{"kind": "ladder_start", "promotion": 12, "sequence": 177, "timestamp_ns": 6172633288081205, "trip": 3}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 12, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 178, "timestamp_ns": 6172633289557605, "trip": 3}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 179, "timestamp_ns": 6172633291875255, "trip": 3}
+{"kind": "promotion_start", "promotion": 1, "sequence": 180, "timestamp_ns": 6172633411908322, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 181, "timestamp_ns": 6172633413658649, "trip": 4}
+{"kind": "ladder_start", "promotion": 1, "sequence": 182, "timestamp_ns": 6172633687269940, "trip": 4}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 1, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 183, "timestamp_ns": 6172633689171788, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 184, "timestamp_ns": 6172633691503719, "trip": 4}
+{"kind": "promotion_start", "promotion": 2, "sequence": 185, "timestamp_ns": 6172633696221751, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 186, "timestamp_ns": 6172633697839156, "trip": 4}
+{"kind": "ladder_start", "promotion": 2, "sequence": 187, "timestamp_ns": 6172633963390061, "trip": 4}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 2, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 188, "timestamp_ns": 6172633965256207, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 189, "timestamp_ns": 6172633967650971, "trip": 4}
+{"kind": "promotion_start", "promotion": 3, "sequence": 190, "timestamp_ns": 6172633972458330, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 191, "timestamp_ns": 6172633974368943, "trip": 4}
+{"kind": "ladder_start", "promotion": 3, "sequence": 192, "timestamp_ns": 6172634239704518, "trip": 4}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 3, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 193, "timestamp_ns": 6172634241915724, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 194, "timestamp_ns": 6172634244216233, "trip": 4}
+{"kind": "promotion_start", "promotion": 4, "sequence": 195, "timestamp_ns": 6172634249564383, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 196, "timestamp_ns": 6172634251470168, "trip": 4}
+{"kind": "ladder_start", "promotion": 4, "sequence": 197, "timestamp_ns": 6172634523086716, "trip": 4}
+{"accepted": true, "backtrack_count": 1, "kind": "ladder_end", "ladder_grade_reached": 2, "model_distrusted": false, "promotion": 4, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 198, "timestamp_ns": 6172634525037830, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 199, "timestamp_ns": 6172634527391517, "trip": 4}
+{"kind": "promotion_start", "promotion": 5, "sequence": 200, "timestamp_ns": 6172634532056421, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 201, "timestamp_ns": 6172634534133196, "trip": 4}
+{"kind": "ladder_start", "promotion": 5, "sequence": 202, "timestamp_ns": 6172634802604019, "trip": 4}
+{"accepted": true, "backtrack_count": 2, "kind": "ladder_end", "ladder_grade_reached": 3, "model_distrusted": false, "promotion": 5, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 203, "timestamp_ns": 6172634804684498, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 204, "timestamp_ns": 6172634807225595, "trip": 4}
+{"kind": "promotion_start", "promotion": 6, "sequence": 205, "timestamp_ns": 6172634811966726, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 206, "timestamp_ns": 6172634813826758, "trip": 4}
+{"kind": "ladder_start", "promotion": 6, "sequence": 207, "timestamp_ns": 6172635079232574, "trip": 4}
+{"accepted": true, "backtrack_count": 3, "kind": "ladder_end", "ladder_grade_reached": 4, "model_distrusted": false, "promotion": 6, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 208, "timestamp_ns": 6172635081097452, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 209, "timestamp_ns": 6172635083533873, "trip": 4}
+{"kind": "promotion_start", "promotion": 7, "sequence": 210, "timestamp_ns": 6172635088446526, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 211, "timestamp_ns": 6172635090383114, "trip": 4}
+{"kind": "ladder_start", "promotion": 7, "sequence": 212, "timestamp_ns": 6172635355878965, "trip": 4}
+{"accepted": true, "backtrack_count": 4, "kind": "ladder_end", "ladder_grade_reached": 5, "model_distrusted": false, "promotion": 7, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 213, "timestamp_ns": 6172635357939264, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 214, "timestamp_ns": 6172635360465226, "trip": 4}
+{"kind": "promotion_start", "promotion": 8, "sequence": 215, "timestamp_ns": 6172635365526323, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 216, "timestamp_ns": 6172635367358227, "trip": 4}
+{"kind": "ladder_start", "promotion": 8, "sequence": 217, "timestamp_ns": 6172635641086146, "trip": 4}
+{"accepted": true, "backtrack_count": 5, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": false, "promotion": 8, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 218, "timestamp_ns": 6172635643208053, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 219, "timestamp_ns": 6172635645342442, "trip": 4}
+{"kind": "promotion_start", "promotion": 9, "sequence": 220, "timestamp_ns": 6172635650483623, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 221, "timestamp_ns": 6172635652330911, "trip": 4}
+{"kind": "ladder_start", "promotion": 9, "sequence": 222, "timestamp_ns": 6172635917804373, "trip": 4}
+{"kind": "recovery_start", "promotion": 9, "sequence": 223, "timestamp_ns": 6172636146853547, "trip": 4}
+{"accepted": true, "kind": "recovery_end", "model_distrusted": true, "promotion": 9, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 224, "timestamp_ns": 6172636148782117, "trip": 4}
+{"accepted": true, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 9, "recovery_activated": true, "recovery_outcome": 1, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 225, "timestamp_ns": 6172636150641472, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 226, "timestamp_ns": 6172636152850266, "trip": 4}
+{"kind": "promotion_start", "promotion": 10, "sequence": 227, "timestamp_ns": 6172636157584565, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 228, "timestamp_ns": 6172636159393552, "trip": 4}
+{"kind": "ladder_start", "promotion": 10, "sequence": 229, "timestamp_ns": 6172636425019997, "trip": 4}
+{"accepted": true, "backtrack_count": 2, "kind": "ladder_end", "ladder_grade_reached": 3, "model_distrusted": false, "promotion": 10, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 230, "timestamp_ns": 6172636427064966, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 231, "timestamp_ns": 6172636429406930, "trip": 4}
+{"kind": "promotion_start", "promotion": 11, "sequence": 232, "timestamp_ns": 6172636434571579, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 233, "timestamp_ns": 6172636436351125, "trip": 4}
+{"kind": "ladder_start", "promotion": 11, "sequence": 234, "timestamp_ns": 6172636715233628, "trip": 4}
+{"accepted": true, "backtrack_count": 5, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": false, "promotion": 11, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 235, "timestamp_ns": 6172636717146310, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 236, "timestamp_ns": 6172636719214279, "trip": 4}
+{"kind": "promotion_start", "promotion": 12, "sequence": 237, "timestamp_ns": 6172636723767064, "trip": 4}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 238, "timestamp_ns": 6172636725393917, "trip": 4}
+{"kind": "ladder_start", "promotion": 12, "sequence": 239, "timestamp_ns": 6172636990542022, "trip": 4}
+{"kind": "recovery_start", "promotion": 12, "sequence": 240, "timestamp_ns": 6172637219247168, "trip": 4}
+{"accepted": true, "kind": "recovery_end", "model_distrusted": true, "promotion": 12, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 241, "timestamp_ns": 6172637221110353, "trip": 4}
+{"accepted": true, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 12, "recovery_activated": true, "recovery_outcome": 1, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 242, "timestamp_ns": 6172637222978964, "trip": 4}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 243, "timestamp_ns": 6172637224953230, "trip": 4}
+{"kind": "promotion_start", "promotion": 1, "sequence": 244, "timestamp_ns": 6172637341785349, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 245, "timestamp_ns": 6172637343333779, "trip": 5}
+{"kind": "ladder_start", "promotion": 1, "sequence": 246, "timestamp_ns": 6172637614431105, "trip": 5}
+{"accepted": true, "backtrack_count": 1, "kind": "ladder_end", "ladder_grade_reached": 2, "model_distrusted": false, "promotion": 1, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 247, "timestamp_ns": 6172637616369099, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 248, "timestamp_ns": 6172637618592224, "trip": 5}
+{"kind": "promotion_start", "promotion": 2, "sequence": 249, "timestamp_ns": 6172637623126488, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 250, "timestamp_ns": 6172637624883260, "trip": 5}
+{"kind": "ladder_start", "promotion": 2, "sequence": 251, "timestamp_ns": 6172637891931033, "trip": 5}
+{"accepted": true, "backtrack_count": 2, "kind": "ladder_end", "ladder_grade_reached": 3, "model_distrusted": false, "promotion": 2, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 252, "timestamp_ns": 6172637893837410, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 253, "timestamp_ns": 6172637896085556, "trip": 5}
+{"kind": "promotion_start", "promotion": 3, "sequence": 254, "timestamp_ns": 6172637900705722, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 255, "timestamp_ns": 6172637902312094, "trip": 5}
+{"kind": "ladder_start", "promotion": 3, "sequence": 256, "timestamp_ns": 6172638167694351, "trip": 5}
+{"accepted": true, "backtrack_count": 3, "kind": "ladder_end", "ladder_grade_reached": 4, "model_distrusted": false, "promotion": 3, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 257, "timestamp_ns": 6172638169537739, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 258, "timestamp_ns": 6172638171517671, "trip": 5}
+{"kind": "promotion_start", "promotion": 4, "sequence": 259, "timestamp_ns": 6172638175975465, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 260, "timestamp_ns": 6172638177705038, "trip": 5}
+{"kind": "ladder_start", "promotion": 4, "sequence": 261, "timestamp_ns": 6172638444326685, "trip": 5}
+{"kind": "recovery_start", "promotion": 4, "sequence": 262, "timestamp_ns": 6172638680410492, "trip": 5}
+{"accepted": true, "kind": "recovery_end", "model_distrusted": true, "promotion": 4, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 263, "timestamp_ns": 6172638682217118, "trip": 5}
+{"accepted": true, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 4, "recovery_activated": true, "recovery_outcome": 1, "recovery_radius_after": 1.0, "recovery_radius_before": 1.0, "sequence": 264, "timestamp_ns": 6172638683740934, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 265, "timestamp_ns": 6172638685426672, "trip": 5}
+{"kind": "promotion_start", "promotion": 5, "sequence": 266, "timestamp_ns": 6172638689871001, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 267, "timestamp_ns": 6172638691229120, "trip": 5}
+{"kind": "ladder_start", "promotion": 5, "sequence": 268, "timestamp_ns": 6172638956725605, "trip": 5}
+{"accepted": true, "backtrack_count": 0, "kind": "ladder_end", "ladder_grade_reached": 1, "model_distrusted": false, "promotion": 5, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 269, "timestamp_ns": 6172638958723118, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 270, "timestamp_ns": 6172638961206226, "trip": 5}
+{"kind": "promotion_start", "promotion": 6, "sequence": 271, "timestamp_ns": 6172638966061314, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 272, "timestamp_ns": 6172638968226114, "trip": 5}
+{"kind": "ladder_start", "promotion": 6, "sequence": 273, "timestamp_ns": 6172639233690979, "trip": 5}
+{"accepted": true, "backtrack_count": 3, "kind": "ladder_end", "ladder_grade_reached": 4, "model_distrusted": false, "promotion": 6, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 274, "timestamp_ns": 6172639235742827, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 275, "timestamp_ns": 6172639237894413, "trip": 5}
+{"kind": "promotion_start", "promotion": 7, "sequence": 276, "timestamp_ns": 6172639242512450, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 277, "timestamp_ns": 6172639244179219, "trip": 5}
+{"kind": "ladder_start", "promotion": 7, "sequence": 278, "timestamp_ns": 6172639509599187, "trip": 5}
+{"accepted": true, "backtrack_count": 5, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": false, "promotion": 7, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 1.0, "recovery_radius_before": null, "sequence": 279, "timestamp_ns": 6172639511702858, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 280, "timestamp_ns": 6172639514256807, "trip": 5}
+{"kind": "promotion_start", "promotion": 8, "sequence": 281, "timestamp_ns": 6172639519006628, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 282, "timestamp_ns": 6172639520842795, "trip": 5}
+{"kind": "ladder_start", "promotion": 8, "sequence": 283, "timestamp_ns": 6172639794099396, "trip": 5}
+{"kind": "recovery_start", "promotion": 8, "sequence": 284, "timestamp_ns": 6172640022824154, "trip": 5}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 8, "recovery_radius_after": 0.015625, "recovery_radius_before": 1.0, "sequence": 285, "timestamp_ns": 6172640024924006, "trip": 5}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 8, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 0.015625, "recovery_radius_before": 1.0, "sequence": 286, "timestamp_ns": 6172640026875620, "trip": 5}
+{"kind": "rebuild_start", "promotion": 8, "sequence": 287, "timestamp_ns": 6172640066246166, "trip": 5}
+{"arnoldi_iterations": 72, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 6, "sequence": 288, "timestamp_ns": 6172640116714742, "trip": 5}
+{"arnoldi_iterations": 48, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 4, "sequence": 289, "timestamp_ns": 6172640163613800, "trip": 5}
+{"arnoldi_iterations": 24, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 2, "sequence": 290, "timestamp_ns": 6172640206888685, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 291, "timestamp_ns": 6172640248535064, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 292, "timestamp_ns": 6172640290288203, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 293, "timestamp_ns": 6172640331845534, "trip": 5}
+{"accepted": true, "kind": "rebuild_end", "next_rebuild_damping": 10.0, "promotion": 8, "rebuild_damping": 100.0, "relinearized": true, "sequence": 294, "timestamp_ns": 6172640333994203, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": true, "rebuild_activated": true, "sequence": 295, "timestamp_ns": 6172640336374960, "trip": 5}
+{"kind": "promotion_start", "promotion": 9, "sequence": 296, "timestamp_ns": 6172640341535918, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 297, "timestamp_ns": 6172640343229286, "trip": 5}
+{"kind": "ladder_start", "promotion": 9, "sequence": 298, "timestamp_ns": 6172640611706309, "trip": 5}
+{"kind": "recovery_start", "promotion": 9, "sequence": 299, "timestamp_ns": 6172640856750132, "trip": 5}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 9, "recovery_radius_after": 0.000244140625, "recovery_radius_before": 0.015625, "sequence": 300, "timestamp_ns": 6172640858745262, "trip": 5}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 9, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 0.000244140625, "recovery_radius_before": 0.015625, "sequence": 301, "timestamp_ns": 6172640860860391, "trip": 5}
+{"kind": "rebuild_start", "promotion": 9, "sequence": 302, "timestamp_ns": 6172640900498875, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 303, "timestamp_ns": 6172640942437540, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 304, "timestamp_ns": 6172640984147626, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 305, "timestamp_ns": 6172641025809716, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 306, "timestamp_ns": 6172641069427797, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 307, "timestamp_ns": 6172641110914698, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 308, "timestamp_ns": 6172641152541005, "trip": 5}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 10000000.0, "promotion": 9, "rebuild_damping": 1000000.0, "relinearized": true, "sequence": 309, "timestamp_ns": 6172641154451687, "trip": 5}
+{"kind": "descent_start", "promotion": 9, "sequence": 310, "timestamp_ns": 6172641382840971, "trip": 5}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 9, "scale": 0.0001, "sequence": 311, "timestamp_ns": 6172641384828814, "trip": 5}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 312, "timestamp_ns": 6172641386957648, "trip": 5}
+{"kind": "promotion_start", "promotion": 10, "sequence": 313, "timestamp_ns": 6172641391947738, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 314, "timestamp_ns": 6172641393717844, "trip": 5}
+{"kind": "ladder_start", "promotion": 10, "sequence": 315, "timestamp_ns": 6172641665649220, "trip": 5}
+{"accepted": true, "backtrack_count": 4, "kind": "ladder_end", "ladder_grade_reached": 5, "model_distrusted": false, "promotion": 10, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 0.000244140625, "recovery_radius_before": null, "sequence": 316, "timestamp_ns": 6172641667496419, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 317, "timestamp_ns": 6172641669619763, "trip": 5}
+{"kind": "promotion_start", "promotion": 11, "sequence": 318, "timestamp_ns": 6172641676344720, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 319, "timestamp_ns": 6172641677873493, "trip": 5}
+{"kind": "ladder_start", "promotion": 11, "sequence": 320, "timestamp_ns": 6172641945975360, "trip": 5}
+{"accepted": true, "backtrack_count": 5, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": false, "promotion": 11, "recovery_activated": false, "recovery_outcome": 0, "recovery_radius_after": 0.000244140625, "recovery_radius_before": null, "sequence": 321, "timestamp_ns": 6172641947618743, "trip": 5}
+{"accepted": true, "descent_accepted": false, "descent_activated": false, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": false, "sequence": 322, "timestamp_ns": 6172641949760734, "trip": 5}
+{"kind": "promotion_start", "promotion": 12, "sequence": 323, "timestamp_ns": 6172641954659580, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 324, "timestamp_ns": 6172641956629685, "trip": 5}
+{"kind": "ladder_start", "promotion": 12, "sequence": 325, "timestamp_ns": 6172642222131096, "trip": 5}
+{"kind": "recovery_start", "promotion": 12, "sequence": 326, "timestamp_ns": 6172642450701001, "trip": 5}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 12, "recovery_radius_after": 3.814697265625e-06, "recovery_radius_before": 0.000244140625, "sequence": 327, "timestamp_ns": 6172642452630293, "trip": 5}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 12, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 3.814697265625e-06, "recovery_radius_before": 0.000244140625, "sequence": 328, "timestamp_ns": 6172642454439969, "trip": 5}
+{"kind": "rebuild_start", "promotion": 12, "sequence": 329, "timestamp_ns": 6172642493616969, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 330, "timestamp_ns": 6172642535182160, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 331, "timestamp_ns": 6172642576628485, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 332, "timestamp_ns": 6172642618297538, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 333, "timestamp_ns": 6172642663262494, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 334, "timestamp_ns": 6172642707846241, "trip": 5}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 335, "timestamp_ns": 6172642750992362, "trip": 5}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 10000000000000.0, "promotion": 12, "rebuild_damping": 1000000000000.0, "relinearized": true, "sequence": 336, "timestamp_ns": 6172642752621977, "trip": 5}
+{"kind": "descent_start", "promotion": 12, "sequence": 337, "timestamp_ns": 6172642984936004, "trip": 5}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 12, "scale": 1e-07, "sequence": 338, "timestamp_ns": 6172642986779701, "trip": 5}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 339, "timestamp_ns": 6172642989174098, "trip": 5}
+{"kind": "promotion_start", "promotion": 1, "sequence": 340, "timestamp_ns": 6172643105758210, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 341, "timestamp_ns": 6172643107557272, "trip": 6}
+{"kind": "ladder_start", "promotion": 1, "sequence": 342, "timestamp_ns": 6172643373342683, "trip": 6}
+{"kind": "recovery_start", "promotion": 1, "sequence": 343, "timestamp_ns": 6172643603201516, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 1, "recovery_radius_after": 5.960464477539063e-08, "recovery_radius_before": 3.814697265625e-06, "sequence": 344, "timestamp_ns": 6172643604961677, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 1, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 5.960464477539063e-08, "recovery_radius_before": 3.814697265625e-06, "sequence": 345, "timestamp_ns": 6172643606763357, "trip": 6}
+{"kind": "rebuild_start", "promotion": 1, "sequence": 346, "timestamp_ns": 6172643646093314, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 347, "timestamp_ns": 6172643688717908, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 348, "timestamp_ns": 6172643731720417, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 349, "timestamp_ns": 6172643775620598, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 350, "timestamp_ns": 6172643821999640, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 351, "timestamp_ns": 6172643862163443, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 352, "timestamp_ns": 6172643902379507, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1e+19, "promotion": 1, "rebuild_damping": 1e+18, "relinearized": true, "sequence": 353, "timestamp_ns": 6172643904184246, "trip": 6}
+{"kind": "descent_start", "promotion": 1, "sequence": 354, "timestamp_ns": 6172644132845251, "trip": 6}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 1, "scale": 1e-07, "sequence": 355, "timestamp_ns": 6172644134724789, "trip": 6}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 356, "timestamp_ns": 6172644136880908, "trip": 6}
+{"kind": "promotion_start", "promotion": 2, "sequence": 357, "timestamp_ns": 6172644141946407, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 358, "timestamp_ns": 6172644143514824, "trip": 6}
+{"kind": "ladder_start", "promotion": 2, "sequence": 359, "timestamp_ns": 6172644409358203, "trip": 6}
+{"kind": "recovery_start", "promotion": 2, "sequence": 360, "timestamp_ns": 6172644638259625, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 5.960464477539063e-08, "sequence": 361, "timestamp_ns": 6172644640304509, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 2, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 5.960464477539063e-08, "sequence": 362, "timestamp_ns": 6172644642251467, "trip": 6}
+{"kind": "rebuild_start", "promotion": 2, "sequence": 363, "timestamp_ns": 6172644682566147, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 364, "timestamp_ns": 6172644722635996, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 365, "timestamp_ns": 6172644763615402, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 366, "timestamp_ns": 6172644803890106, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 367, "timestamp_ns": 6172644844087796, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 368, "timestamp_ns": 6172644885653232, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 369, "timestamp_ns": 6172644926162614, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 9.999999999999999e+24, "promotion": 2, "rebuild_damping": 1e+24, "relinearized": true, "sequence": 370, "timestamp_ns": 6172644927941781, "trip": 6}
+{"kind": "descent_start", "promotion": 2, "sequence": 371, "timestamp_ns": 6172645156727103, "trip": 6}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 2, "scale": 1e-07, "sequence": 372, "timestamp_ns": 6172645158691597, "trip": 6}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 373, "timestamp_ns": 6172645160777741, "trip": 6}
+{"kind": "promotion_start", "promotion": 3, "sequence": 374, "timestamp_ns": 6172645165554811, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 375, "timestamp_ns": 6172645167313313, "trip": 6}
+{"kind": "ladder_start", "promotion": 3, "sequence": 376, "timestamp_ns": 6172645432589432, "trip": 6}
+{"kind": "recovery_start", "promotion": 3, "sequence": 377, "timestamp_ns": 6172645661361414, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 3, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 378, "timestamp_ns": 6172645663382950, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 3, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 379, "timestamp_ns": 6172645665417114, "trip": 6}
+{"kind": "rebuild_start", "promotion": 3, "sequence": 380, "timestamp_ns": 6172645707182659, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 381, "timestamp_ns": 6172645747118885, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 382, "timestamp_ns": 6172645787934384, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 383, "timestamp_ns": 6172645828123732, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 384, "timestamp_ns": 6172645871248932, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 385, "timestamp_ns": 6172645911414034, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 386, "timestamp_ns": 6172645951821654, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 9.999999999999999e+30, "promotion": 3, "rebuild_damping": 9.999999999999999e+29, "relinearized": true, "sequence": 387, "timestamp_ns": 6172645953587696, "trip": 6}
+{"kind": "descent_start", "promotion": 3, "sequence": 388, "timestamp_ns": 6172646181740960, "trip": 6}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 3, "scale": 1e-07, "sequence": 389, "timestamp_ns": 6172646183560118, "trip": 6}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 390, "timestamp_ns": 6172646185771370, "trip": 6}
+{"kind": "promotion_start", "promotion": 4, "sequence": 391, "timestamp_ns": 6172646190424732, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 392, "timestamp_ns": 6172646192332676, "trip": 6}
+{"kind": "ladder_start", "promotion": 4, "sequence": 393, "timestamp_ns": 6172646458280482, "trip": 6}
+{"kind": "recovery_start", "promotion": 4, "sequence": 394, "timestamp_ns": 6172646686951780, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 4, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 395, "timestamp_ns": 6172646688944624, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 4, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 396, "timestamp_ns": 6172646694274029, "trip": 6}
+{"kind": "rebuild_start", "promotion": 4, "sequence": 397, "timestamp_ns": 6172646733454279, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 398, "timestamp_ns": 6172646773615071, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 399, "timestamp_ns": 6172646813996954, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 400, "timestamp_ns": 6172646854058218, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 401, "timestamp_ns": 6172646895036099, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 402, "timestamp_ns": 6172646935074898, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 403, "timestamp_ns": 6172646975138339, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 9.999999999999998e+36, "promotion": 4, "rebuild_damping": 9.999999999999999e+35, "relinearized": true, "sequence": 404, "timestamp_ns": 6172646976922299, "trip": 6}
+{"kind": "descent_start", "promotion": 4, "sequence": 405, "timestamp_ns": 6172647205485082, "trip": 6}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 4, "scale": 1e-08, "sequence": 406, "timestamp_ns": 6172647207121959, "trip": 6}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 407, "timestamp_ns": 6172647208871586, "trip": 6}
+{"kind": "promotion_start", "promotion": 5, "sequence": 408, "timestamp_ns": 6172647213384217, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 409, "timestamp_ns": 6172647215473773, "trip": 6}
+{"kind": "ladder_start", "promotion": 5, "sequence": 410, "timestamp_ns": 6172647481245735, "trip": 6}
+{"kind": "recovery_start", "promotion": 5, "sequence": 411, "timestamp_ns": 6172647709606628, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 5, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 412, "timestamp_ns": 6172647711749999, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 5, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 413, "timestamp_ns": 6172647713312565, "trip": 6}
+{"kind": "rebuild_start", "promotion": 5, "sequence": 414, "timestamp_ns": 6172647752609601, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 415, "timestamp_ns": 6172647797434965, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 416, "timestamp_ns": 6172647838127599, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 417, "timestamp_ns": 6172647878266777, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 418, "timestamp_ns": 6172647920630489, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 419, "timestamp_ns": 6172647960601434, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 420, "timestamp_ns": 6172648000953877, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 9.999999999999999e+42, "promotion": 5, "rebuild_damping": 9.999999999999999e+41, "relinearized": true, "sequence": 421, "timestamp_ns": 6172648002794337, "trip": 6}
+{"kind": "descent_start", "promotion": 5, "sequence": 422, "timestamp_ns": 6172648231391244, "trip": 6}
+{"accepted": true, "grades_evaluated": 5, "kind": "descent_end", "promotion": 5, "scale": 1e-08, "sequence": 423, "timestamp_ns": 6172648233108733, "trip": 6}
+{"accepted": true, "descent_accepted": true, "descent_activated": true, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 424, "timestamp_ns": 6172648235372682, "trip": 6}
+{"kind": "promotion_start", "promotion": 6, "sequence": 425, "timestamp_ns": 6172648240195831, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 426, "timestamp_ns": 6172648241775400, "trip": 6}
+{"kind": "ladder_start", "promotion": 6, "sequence": 427, "timestamp_ns": 6172648507831942, "trip": 6}
+{"kind": "recovery_start", "promotion": 6, "sequence": 428, "timestamp_ns": 6172648736483159, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 6, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 429, "timestamp_ns": 6172648738288838, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 6, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 430, "timestamp_ns": 6172648740127430, "trip": 6}
+{"kind": "rebuild_start", "promotion": 6, "sequence": 431, "timestamp_ns": 6172648779317297, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 432, "timestamp_ns": 6172648821218569, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 433, "timestamp_ns": 6172648869697539, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 434, "timestamp_ns": 6172648909823676, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 435, "timestamp_ns": 6172648952224554, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 436, "timestamp_ns": 6172648992332011, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 437, "timestamp_ns": 6172649032290703, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+49, "promotion": 6, "rebuild_damping": 1e+48, "relinearized": true, "sequence": 438, "timestamp_ns": 6172649034024725, "trip": 6}
+{"kind": "descent_start", "promotion": 6, "sequence": 439, "timestamp_ns": 6172649263909936, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 6, "scale": 0.0, "sequence": 440, "timestamp_ns": 6172649265769233, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 441, "timestamp_ns": 6172649268038642, "trip": 6}
+{"kind": "promotion_start", "promotion": 7, "sequence": 442, "timestamp_ns": 6172649273177010, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 443, "timestamp_ns": 6172649274967753, "trip": 6}
+{"kind": "ladder_start", "promotion": 7, "sequence": 444, "timestamp_ns": 6172649540890974, "trip": 6}
+{"kind": "recovery_start", "promotion": 7, "sequence": 445, "timestamp_ns": 6172649769397094, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 7, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 446, "timestamp_ns": 6172649771445445, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 7, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 447, "timestamp_ns": 6172649773660551, "trip": 6}
+{"kind": "rebuild_start", "promotion": 7, "sequence": 448, "timestamp_ns": 6172649813505677, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 449, "timestamp_ns": 6172649855319550, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 450, "timestamp_ns": 6172649897704614, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 451, "timestamp_ns": 6172649938042515, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 452, "timestamp_ns": 6172649979892055, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 453, "timestamp_ns": 6172650020268595, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 454, "timestamp_ns": 6172650062059103, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+55, "promotion": 7, "rebuild_damping": 1e+54, "relinearized": true, "sequence": 455, "timestamp_ns": 6172650063977185, "trip": 6}
+{"kind": "descent_start", "promotion": 7, "sequence": 456, "timestamp_ns": 6172650298963131, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 7, "scale": 0.0, "sequence": 457, "timestamp_ns": 6172650300688490, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 458, "timestamp_ns": 6172650303449114, "trip": 6}
+{"kind": "promotion_start", "promotion": 8, "sequence": 459, "timestamp_ns": 6172650308269641, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 460, "timestamp_ns": 6172650309756437, "trip": 6}
+{"kind": "ladder_start", "promotion": 8, "sequence": 461, "timestamp_ns": 6172650575118567, "trip": 6}
+{"kind": "recovery_start", "promotion": 8, "sequence": 462, "timestamp_ns": 6172650803588649, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 8, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 463, "timestamp_ns": 6172650805381850, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 8, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 464, "timestamp_ns": 6172650807202526, "trip": 6}
+{"kind": "rebuild_start", "promotion": 8, "sequence": 465, "timestamp_ns": 6172650846665299, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 466, "timestamp_ns": 6172650888695088, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 467, "timestamp_ns": 6172650928635799, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 468, "timestamp_ns": 6172650969036376, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 469, "timestamp_ns": 6172651010775223, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 470, "timestamp_ns": 6172651052640823, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 471, "timestamp_ns": 6172651093147869, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+61, "promotion": 8, "rebuild_damping": 1.0000000000000001e+60, "relinearized": true, "sequence": 472, "timestamp_ns": 6172651095127823, "trip": 6}
+{"kind": "descent_start", "promotion": 8, "sequence": 473, "timestamp_ns": 6172651327218658, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 8, "scale": 0.0, "sequence": 474, "timestamp_ns": 6172651329197035, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 475, "timestamp_ns": 6172651331842262, "trip": 6}
+{"kind": "promotion_start", "promotion": 9, "sequence": 476, "timestamp_ns": 6172651342360252, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 477, "timestamp_ns": 6172651344451034, "trip": 6}
+{"kind": "ladder_start", "promotion": 9, "sequence": 478, "timestamp_ns": 6172651611814427, "trip": 6}
+{"kind": "recovery_start", "promotion": 9, "sequence": 479, "timestamp_ns": 6172651840266900, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 9, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 480, "timestamp_ns": 6172651841999567, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 9, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 481, "timestamp_ns": 6172651843907534, "trip": 6}
+{"kind": "rebuild_start", "promotion": 9, "sequence": 482, "timestamp_ns": 6172651883283582, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 483, "timestamp_ns": 6172651924938522, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 484, "timestamp_ns": 6172651966645966, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 485, "timestamp_ns": 6172652008519317, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 486, "timestamp_ns": 6172652050172442, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 487, "timestamp_ns": 6172652091631720, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 488, "timestamp_ns": 6172652131922932, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+67, "promotion": 9, "rebuild_damping": 1.0000000000000001e+66, "relinearized": true, "sequence": 489, "timestamp_ns": 6172652133756866, "trip": 6}
+{"kind": "descent_start", "promotion": 9, "sequence": 490, "timestamp_ns": 6172652373399655, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 9, "scale": 0.0, "sequence": 491, "timestamp_ns": 6172652375618548, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 492, "timestamp_ns": 6172652377779503, "trip": 6}
+{"kind": "promotion_start", "promotion": 10, "sequence": 493, "timestamp_ns": 6172652382763639, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 494, "timestamp_ns": 6172652387479653, "trip": 6}
+{"kind": "ladder_start", "promotion": 10, "sequence": 495, "timestamp_ns": 6172652656063977, "trip": 6}
+{"kind": "recovery_start", "promotion": 10, "sequence": 496, "timestamp_ns": 6172652884369504, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 10, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 497, "timestamp_ns": 6172652885959299, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 10, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 498, "timestamp_ns": 6172652887973737, "trip": 6}
+{"kind": "rebuild_start", "promotion": 10, "sequence": 499, "timestamp_ns": 6172652927245283, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 500, "timestamp_ns": 6172652968862386, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 501, "timestamp_ns": 6172653010370347, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 502, "timestamp_ns": 6172653050439909, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 503, "timestamp_ns": 6172653090587656, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 504, "timestamp_ns": 6172653132233682, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 505, "timestamp_ns": 6172653173746663, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+73, "promotion": 10, "rebuild_damping": 1.0000000000000001e+72, "relinearized": true, "sequence": 506, "timestamp_ns": 6172653175454743, "trip": 6}
+{"kind": "descent_start", "promotion": 10, "sequence": 507, "timestamp_ns": 6172653407437190, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 10, "scale": 0.0, "sequence": 508, "timestamp_ns": 6172653411736773, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 509, "timestamp_ns": 6172653413705880, "trip": 6}
+{"kind": "promotion_start", "promotion": 11, "sequence": 510, "timestamp_ns": 6172653418292246, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 511, "timestamp_ns": 6172653419589014, "trip": 6}
+{"kind": "ladder_start", "promotion": 11, "sequence": 512, "timestamp_ns": 6172653685455859, "trip": 6}
+{"kind": "recovery_start", "promotion": 11, "sequence": 513, "timestamp_ns": 6172653913617325, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 11, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 514, "timestamp_ns": 6172653915088587, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 11, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 515, "timestamp_ns": 6172653916850916, "trip": 6}
+{"kind": "rebuild_start", "promotion": 11, "sequence": 516, "timestamp_ns": 6172653956083937, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 517, "timestamp_ns": 6172653996120885, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 518, "timestamp_ns": 6172654037573999, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 519, "timestamp_ns": 6172654077795484, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 520, "timestamp_ns": 6172654117950717, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 521, "timestamp_ns": 6172654159463449, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 522, "timestamp_ns": 6172654200847775, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000001e+79, "promotion": 11, "rebuild_damping": 1.0000000000000002e+78, "relinearized": true, "sequence": 523, "timestamp_ns": 6172654202781608, "trip": 6}
+{"kind": "descent_start", "promotion": 11, "sequence": 524, "timestamp_ns": 6172654437160063, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 11, "scale": 0.0, "sequence": 525, "timestamp_ns": 6172654438840421, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 526, "timestamp_ns": 6172654442684823, "trip": 6}
+{"kind": "promotion_start", "promotion": 12, "sequence": 527, "timestamp_ns": 6172654447379626, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 528, "timestamp_ns": 6172654448847701, "trip": 6}
+{"kind": "ladder_start", "promotion": 12, "sequence": 529, "timestamp_ns": 6172654723756113, "trip": 6}
+{"kind": "recovery_start", "promotion": 12, "sequence": 530, "timestamp_ns": 6172654952345963, "trip": 6}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 12, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 531, "timestamp_ns": 6172654954335368, "trip": 6}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 12, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 532, "timestamp_ns": 6172654956020087, "trip": 6}
+{"kind": "rebuild_start", "promotion": 12, "sequence": 533, "timestamp_ns": 6172654995371134, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 534, "timestamp_ns": 6172655036877369, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 535, "timestamp_ns": 6172655077202734, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 536, "timestamp_ns": 6172655118749671, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 537, "timestamp_ns": 6172655158900855, "trip": 6}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 538, "timestamp_ns": 6172655200515867, "trip": 6}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 539, "timestamp_ns": 6172655240735704, "trip": 6}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000004e+85, "promotion": 12, "rebuild_damping": 1.0000000000000003e+84, "relinearized": true, "sequence": 540, "timestamp_ns": 6172655242576545, "trip": 6}
+{"kind": "descent_start", "promotion": 12, "sequence": 541, "timestamp_ns": 6172655477082810, "trip": 6}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 12, "scale": 0.0, "sequence": 542, "timestamp_ns": 6172655478857463, "trip": 6}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 543, "timestamp_ns": 6172655480854053, "trip": 6}
+{"kind": "promotion_start", "promotion": 1, "sequence": 544, "timestamp_ns": 6172655597898532, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 545, "timestamp_ns": 6172655599797020, "trip": 7}
+{"kind": "ladder_start", "promotion": 1, "sequence": 546, "timestamp_ns": 6172655865362402, "trip": 7}
+{"kind": "recovery_start", "promotion": 1, "sequence": 547, "timestamp_ns": 6172656093891072, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 1, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 548, "timestamp_ns": 6172656095585058, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 1, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 549, "timestamp_ns": 6172656097423431, "trip": 7}
+{"kind": "rebuild_start", "promotion": 1, "sequence": 550, "timestamp_ns": 6172656136786940, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 551, "timestamp_ns": 6172656178579314, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 552, "timestamp_ns": 6172656220060784, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 553, "timestamp_ns": 6172656262034568, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 554, "timestamp_ns": 6172656303718609, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 555, "timestamp_ns": 6172656345419801, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 1, "restart_cycles": 1, "sequence": 556, "timestamp_ns": 6172656387076226, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000004e+91, "promotion": 1, "rebuild_damping": 1.0000000000000004e+90, "relinearized": true, "sequence": 557, "timestamp_ns": 6172656388692662, "trip": 7}
+{"kind": "descent_start", "promotion": 1, "sequence": 558, "timestamp_ns": 6172656627516173, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 1, "scale": 0.0, "sequence": 559, "timestamp_ns": 6172656629596786, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 1, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 560, "timestamp_ns": 6172656631898656, "trip": 7}
+{"kind": "promotion_start", "promotion": 2, "sequence": 561, "timestamp_ns": 6172656636792596, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 562, "timestamp_ns": 6172656638852312, "trip": 7}
+{"kind": "ladder_start", "promotion": 2, "sequence": 563, "timestamp_ns": 6172656904682016, "trip": 7}
+{"kind": "recovery_start", "promotion": 2, "sequence": 564, "timestamp_ns": 6172657133374900, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 565, "timestamp_ns": 6172657135031756, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 2, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 566, "timestamp_ns": 6172657136826170, "trip": 7}
+{"kind": "rebuild_start", "promotion": 2, "sequence": 567, "timestamp_ns": 6172657176571530, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 568, "timestamp_ns": 6172657216750287, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 569, "timestamp_ns": 6172657258642409, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 570, "timestamp_ns": 6172657300287328, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 571, "timestamp_ns": 6172657340468127, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 572, "timestamp_ns": 6172657382123528, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 2, "restart_cycles": 1, "sequence": 573, "timestamp_ns": 6172657423688658, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+97, "promotion": 2, "rebuild_damping": 1.0000000000000006e+96, "relinearized": true, "sequence": 574, "timestamp_ns": 6172657427325671, "trip": 7}
+{"kind": "descent_start", "promotion": 2, "sequence": 575, "timestamp_ns": 6172657663838309, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 2, "scale": 0.0, "sequence": 576, "timestamp_ns": 6172657665724101, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 2, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 577, "timestamp_ns": 6172657667718725, "trip": 7}
+{"kind": "promotion_start", "promotion": 3, "sequence": 578, "timestamp_ns": 6172657672345848, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 579, "timestamp_ns": 6172657673695985, "trip": 7}
+{"kind": "ladder_start", "promotion": 3, "sequence": 580, "timestamp_ns": 6172657938848801, "trip": 7}
+{"kind": "recovery_start", "promotion": 3, "sequence": 581, "timestamp_ns": 6172658167121424, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 3, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 582, "timestamp_ns": 6172658168811860, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 3, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 583, "timestamp_ns": 6172658170552562, "trip": 7}
+{"kind": "rebuild_start", "promotion": 3, "sequence": 584, "timestamp_ns": 6172658210024589, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 585, "timestamp_ns": 6172658250291672, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 586, "timestamp_ns": 6172658290446353, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 587, "timestamp_ns": 6172658332008462, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 588, "timestamp_ns": 6172658372388437, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 589, "timestamp_ns": 6172658412638076, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 3, "restart_cycles": 1, "sequence": 590, "timestamp_ns": 6172658454133232, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+103, "promotion": 3, "rebuild_damping": 1.0000000000000006e+102, "relinearized": true, "sequence": 591, "timestamp_ns": 6172658456062896, "trip": 7}
+{"kind": "descent_start", "promotion": 3, "sequence": 592, "timestamp_ns": 6172658690957424, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 3, "scale": 0.0, "sequence": 593, "timestamp_ns": 6172658692825701, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 3, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 594, "timestamp_ns": 6172658694857882, "trip": 7}
+{"kind": "promotion_start", "promotion": 4, "sequence": 595, "timestamp_ns": 6172658699436578, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 596, "timestamp_ns": 6172658701290602, "trip": 7}
+{"kind": "ladder_start", "promotion": 4, "sequence": 597, "timestamp_ns": 6172658966818993, "trip": 7}
+{"kind": "recovery_start", "promotion": 4, "sequence": 598, "timestamp_ns": 6172659195273198, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 4, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 599, "timestamp_ns": 6172659196892026, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 4, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 600, "timestamp_ns": 6172659198828010, "trip": 7}
+{"kind": "rebuild_start", "promotion": 4, "sequence": 601, "timestamp_ns": 6172659238060472, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 602, "timestamp_ns": 6172659278822009, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 603, "timestamp_ns": 6172659320407138, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 604, "timestamp_ns": 6172659362067677, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 605, "timestamp_ns": 6172659402129338, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 606, "timestamp_ns": 6172659442225224, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 4, "restart_cycles": 1, "sequence": 607, "timestamp_ns": 6172659483545758, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+109, "promotion": 4, "rebuild_damping": 1.0000000000000006e+108, "relinearized": true, "sequence": 608, "timestamp_ns": 6172659485410718, "trip": 7}
+{"kind": "descent_start", "promotion": 4, "sequence": 609, "timestamp_ns": 6172659726820956, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 4, "scale": 0.0, "sequence": 610, "timestamp_ns": 6172659728806179, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 4, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 611, "timestamp_ns": 6172659731285674, "trip": 7}
+{"kind": "promotion_start", "promotion": 5, "sequence": 612, "timestamp_ns": 6172659736017042, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 613, "timestamp_ns": 6172659737949195, "trip": 7}
+{"kind": "ladder_start", "promotion": 5, "sequence": 614, "timestamp_ns": 6172660003580357, "trip": 7}
+{"kind": "recovery_start", "promotion": 5, "sequence": 615, "timestamp_ns": 6172660231786377, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 5, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 616, "timestamp_ns": 6172660233435899, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 5, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 617, "timestamp_ns": 6172660234864615, "trip": 7}
+{"kind": "rebuild_start", "promotion": 5, "sequence": 618, "timestamp_ns": 6172660276012837, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 619, "timestamp_ns": 6172660315941967, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 620, "timestamp_ns": 6172660357648226, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 621, "timestamp_ns": 6172660399147224, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 622, "timestamp_ns": 6172660440729915, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 623, "timestamp_ns": 6172660481239440, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 5, "restart_cycles": 1, "sequence": 624, "timestamp_ns": 6172660522789711, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000005e+115, "promotion": 5, "rebuild_damping": 1.0000000000000006e+114, "relinearized": true, "sequence": 625, "timestamp_ns": 6172660524592403, "trip": 7}
+{"kind": "descent_start", "promotion": 5, "sequence": 626, "timestamp_ns": 6172660759574306, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 5, "scale": 0.0, "sequence": 627, "timestamp_ns": 6172660761225195, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 5, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 628, "timestamp_ns": 6172660763421784, "trip": 7}
+{"kind": "promotion_start", "promotion": 6, "sequence": 629, "timestamp_ns": 6172660768087596, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 630, "timestamp_ns": 6172660769770899, "trip": 7}
+{"kind": "ladder_start", "promotion": 6, "sequence": 631, "timestamp_ns": 6172661034771702, "trip": 7}
+{"kind": "recovery_start", "promotion": 6, "sequence": 632, "timestamp_ns": 6172661263079532, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 6, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 633, "timestamp_ns": 6172661265017606, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 6, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 634, "timestamp_ns": 6172661267051622, "trip": 7}
+{"kind": "rebuild_start", "promotion": 6, "sequence": 635, "timestamp_ns": 6172661306443704, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 636, "timestamp_ns": 6172661346575630, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 637, "timestamp_ns": 6172661388354598, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 638, "timestamp_ns": 6172661428466911, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 639, "timestamp_ns": 6172661469952070, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 640, "timestamp_ns": 6172661510057745, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 6, "restart_cycles": 1, "sequence": 641, "timestamp_ns": 6172661550127021, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+121, "promotion": 6, "rebuild_damping": 1.0000000000000006e+120, "relinearized": true, "sequence": 642, "timestamp_ns": 6172661551914245, "trip": 7}
+{"kind": "descent_start", "promotion": 6, "sequence": 643, "timestamp_ns": 6172661792469256, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 6, "scale": 0.0, "sequence": 644, "timestamp_ns": 6172661794262614, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 6, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 645, "timestamp_ns": 6172661796268332, "trip": 7}
+{"kind": "promotion_start", "promotion": 7, "sequence": 646, "timestamp_ns": 6172661801040790, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 647, "timestamp_ns": 6172661803155038, "trip": 7}
+{"kind": "ladder_start", "promotion": 7, "sequence": 648, "timestamp_ns": 6172662068696128, "trip": 7}
+{"kind": "recovery_start", "promotion": 7, "sequence": 649, "timestamp_ns": 6172662297181079, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 7, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 650, "timestamp_ns": 6172662299071177, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 7, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 651, "timestamp_ns": 6172662300972170, "trip": 7}
+{"kind": "rebuild_start", "promotion": 7, "sequence": 652, "timestamp_ns": 6172662340371276, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 653, "timestamp_ns": 6172662381925704, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 654, "timestamp_ns": 6172662423535325, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 655, "timestamp_ns": 6172662463579939, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 656, "timestamp_ns": 6172662504966773, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 657, "timestamp_ns": 6172662545304336, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 7, "restart_cycles": 1, "sequence": 658, "timestamp_ns": 6172662585722511, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+127, "promotion": 7, "rebuild_damping": 1.0000000000000005e+126, "relinearized": true, "sequence": 659, "timestamp_ns": 6172662587250409, "trip": 7}
+{"kind": "descent_start", "promotion": 7, "sequence": 660, "timestamp_ns": 6172662827768143, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 7, "scale": 0.0, "sequence": 661, "timestamp_ns": 6172662829329000, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 7, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 662, "timestamp_ns": 6172662831783195, "trip": 7}
+{"kind": "promotion_start", "promotion": 8, "sequence": 663, "timestamp_ns": 6172662838284030, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 664, "timestamp_ns": 6172662840018731, "trip": 7}
+{"kind": "ladder_start", "promotion": 8, "sequence": 665, "timestamp_ns": 6172663105932552, "trip": 7}
+{"kind": "recovery_start", "promotion": 8, "sequence": 666, "timestamp_ns": 6172663334590486, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 8, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 667, "timestamp_ns": 6172663336478736, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 8, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 668, "timestamp_ns": 6172663338315058, "trip": 7}
+{"kind": "rebuild_start", "promotion": 8, "sequence": 669, "timestamp_ns": 6172663377521090, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 670, "timestamp_ns": 6172663419185044, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 671, "timestamp_ns": 6172663459314167, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 672, "timestamp_ns": 6172663499551280, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 673, "timestamp_ns": 6172663539485026, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 674, "timestamp_ns": 6172663579800059, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 8, "restart_cycles": 1, "sequence": 675, "timestamp_ns": 6172663619975653, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000005e+133, "promotion": 8, "rebuild_damping": 1.0000000000000005e+132, "relinearized": true, "sequence": 676, "timestamp_ns": 6172663621724846, "trip": 7}
+{"kind": "descent_start", "promotion": 8, "sequence": 677, "timestamp_ns": 6172663868375909, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 8, "scale": 0.0, "sequence": 678, "timestamp_ns": 6172663870210794, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 8, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 679, "timestamp_ns": 6172663872517136, "trip": 7}
+{"kind": "promotion_start", "promotion": 9, "sequence": 680, "timestamp_ns": 6172663877402918, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 681, "timestamp_ns": 6172663878987658, "trip": 7}
+{"kind": "ladder_start", "promotion": 9, "sequence": 682, "timestamp_ns": 6172664144772640, "trip": 7}
+{"kind": "recovery_start", "promotion": 9, "sequence": 683, "timestamp_ns": 6172664373432362, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 9, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 684, "timestamp_ns": 6172664375219731, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 9, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 685, "timestamp_ns": 6172664376823659, "trip": 7}
+{"kind": "rebuild_start", "promotion": 9, "sequence": 686, "timestamp_ns": 6172664416206654, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 687, "timestamp_ns": 6172664457742117, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 688, "timestamp_ns": 6172664497845665, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 689, "timestamp_ns": 6172664539639805, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 690, "timestamp_ns": 6172664581554362, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 691, "timestamp_ns": 6172664623063333, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 9, "restart_cycles": 1, "sequence": 692, "timestamp_ns": 6172664663087456, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000004e+139, "promotion": 9, "rebuild_damping": 1.0000000000000004e+138, "relinearized": true, "sequence": 693, "timestamp_ns": 6172664664973643, "trip": 7}
+{"kind": "descent_start", "promotion": 9, "sequence": 694, "timestamp_ns": 6172664906921092, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 9, "scale": 0.0, "sequence": 695, "timestamp_ns": 6172664908768034, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 9, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 696, "timestamp_ns": 6172664910543401, "trip": 7}
+{"kind": "promotion_start", "promotion": 10, "sequence": 697, "timestamp_ns": 6172664915172123, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 698, "timestamp_ns": 6172664916777325, "trip": 7}
+{"kind": "ladder_start", "promotion": 10, "sequence": 699, "timestamp_ns": 6172665182073432, "trip": 7}
+{"kind": "recovery_start", "promotion": 10, "sequence": 700, "timestamp_ns": 6172665410749613, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 10, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 701, "timestamp_ns": 6172665412515481, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 10, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 702, "timestamp_ns": 6172665414393548, "trip": 7}
+{"kind": "rebuild_start", "promotion": 10, "sequence": 703, "timestamp_ns": 6172665453817354, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 704, "timestamp_ns": 6172665494068921, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 705, "timestamp_ns": 6172665535748840, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 706, "timestamp_ns": 6172665576229331, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 707, "timestamp_ns": 6172665617623910, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 708, "timestamp_ns": 6172665661505509, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 10, "restart_cycles": 1, "sequence": 709, "timestamp_ns": 6172665701445737, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000005e+145, "promotion": 10, "rebuild_damping": 1.0000000000000005e+144, "relinearized": true, "sequence": 710, "timestamp_ns": 6172665703603631, "trip": 7}
+{"kind": "descent_start", "promotion": 10, "sequence": 711, "timestamp_ns": 6172665946429520, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 10, "scale": 0.0, "sequence": 712, "timestamp_ns": 6172665948108495, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 10, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 713, "timestamp_ns": 6172665950312056, "trip": 7}
+{"kind": "promotion_start", "promotion": 11, "sequence": 714, "timestamp_ns": 6172665955425282, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 715, "timestamp_ns": 6172665957009675, "trip": 7}
+{"kind": "ladder_start", "promotion": 11, "sequence": 716, "timestamp_ns": 6172666222887133, "trip": 7}
+{"kind": "recovery_start", "promotion": 11, "sequence": 717, "timestamp_ns": 6172666451549795, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 11, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 718, "timestamp_ns": 6172666453391290, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 11, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 719, "timestamp_ns": 6172666455127328, "trip": 7}
+{"kind": "rebuild_start", "promotion": 11, "sequence": 720, "timestamp_ns": 6172666494351967, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 721, "timestamp_ns": 6172666536152637, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 722, "timestamp_ns": 6172666576294600, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 723, "timestamp_ns": 6172666617857023, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 724, "timestamp_ns": 6172666658139956, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 725, "timestamp_ns": 6172666698511527, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 11, "restart_cycles": 1, "sequence": 726, "timestamp_ns": 6172666740290517, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000005e+151, "promotion": 11, "rebuild_damping": 1.0000000000000005e+150, "relinearized": true, "sequence": 727, "timestamp_ns": 6172666742043663, "trip": 7}
+{"kind": "descent_start", "promotion": 11, "sequence": 728, "timestamp_ns": 6172666997586753, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 11, "scale": 0.0, "sequence": 729, "timestamp_ns": 6172666999529128, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 11, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 730, "timestamp_ns": 6172667001810514, "trip": 7}
+{"kind": "promotion_start", "promotion": 12, "sequence": 731, "timestamp_ns": 6172667006581591, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": -1, "gmres_kind": "primary", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 732, "timestamp_ns": 6172667008371184, "trip": 7}
+{"kind": "ladder_start", "promotion": 12, "sequence": 733, "timestamp_ns": 6172667273932280, "trip": 7}
+{"kind": "recovery_start", "promotion": 12, "sequence": 734, "timestamp_ns": 6172667503105015, "trip": 7}
+{"accepted": false, "kind": "recovery_end", "model_distrusted": true, "promotion": 12, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 735, "timestamp_ns": 6172667505131448, "trip": 7}
+{"accepted": false, "backtrack_count": 6, "kind": "ladder_end", "ladder_grade_reached": 6, "model_distrusted": true, "promotion": 12, "recovery_activated": true, "recovery_outcome": 2, "recovery_radius_after": 1.4901161193847656e-08, "recovery_radius_before": 1.4901161193847656e-08, "sequence": 736, "timestamp_ns": 6172667507201647, "trip": 7}
+{"kind": "rebuild_start", "promotion": 12, "sequence": 737, "timestamp_ns": 6172667546293275, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 0, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 738, "timestamp_ns": 6172667587971219, "trip": 7}
+{"arnoldi_iterations": 12, "damping_trial": 1, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 739, "timestamp_ns": 6172667629654475, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 2, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 740, "timestamp_ns": 6172667669871669, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 3, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 741, "timestamp_ns": 6172667710066981, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 4, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 742, "timestamp_ns": 6172667760991979, "trip": 7}
+{"arnoldi_iterations": 1, "damping_trial": 5, "gmres_kind": "rebuild", "kind": "gmres_complete", "promotion": 12, "restart_cycles": 1, "sequence": 743, "timestamp_ns": 6172667811887510, "trip": 7}
+{"accepted": false, "kind": "rebuild_end", "next_rebuild_damping": 1.0000000000000006e+157, "promotion": 12, "rebuild_damping": 1.0000000000000006e+156, "relinearized": true, "sequence": 744, "timestamp_ns": 6172667813769507, "trip": 7}
+{"kind": "descent_start", "promotion": 12, "sequence": 745, "timestamp_ns": 6172668058024652, "trip": 7}
+{"accepted": false, "grades_evaluated": 5, "kind": "descent_end", "promotion": 12, "scale": 0.0, "sequence": 746, "timestamp_ns": 6172668060045901, "trip": 7}
+{"accepted": false, "descent_accepted": false, "descent_activated": true, "kind": "promotion_end", "promotion": 12, "rebuild_accepted": false, "rebuild_activated": true, "sequence": 747, "timestamp_ns": 6172668062282213, "trip": 7}

@@ -19,6 +19,11 @@ from nova.equilibrium.flux_surface_connectivity import (
 )
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
+from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +61,21 @@ def _selected_row(cache: Path) -> tuple[dict[str, object], str]:
     if len(matches) != 1:
         raise RuntimeError(f"expected one MAST 22086/43 mixed row, got {len(matches)}")
     return matches[0], identity
+
+
+def _topology_replay_request(
+    source_profile: object,
+    seed: object,
+    *,
+    source_identity: str,
+) -> ForwardSolveRequest:
+    """Declare the public defaults associated with one cached topology replay."""
+
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity=f"topology-cache:{source_identity}",
+        source_profile=source_profile,
+        seed_policy=ExplicitSolveSeed(seed),
+    )
 
 
 def run(
@@ -157,12 +177,20 @@ def run(
     )
     selected_matches = selected_index == cached_selected_index
     symmetric_difference = int(np.count_nonzero(differing))
+    request = _topology_replay_request(
+        generator,
+        values,
+        source_identity=source_identity,
+    )
     receipt = {
         "schema": "nova.topology-mask-cache-replay",
         "operand": "MAST 22086/43 mixed",
         "cache": str(cache.resolve()),
         "cache_source_identity": source_identity,
         "cache_staleness_check": "passed",
+        "resolved_defaults": ResolvedForwardSolveDefaults.from_policy(
+            request.policy
+        ).to_dict(),
         "grid_shape": list(shape),
         "cell_count": int(len(coordinate)),
         "x_candidate_count": int(np.count_nonzero(present)),

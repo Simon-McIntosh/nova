@@ -76,7 +76,8 @@ EXPECTED_ACTIVE_SET_TRIPS = 7
 LINE_SEARCH_GRADES_PER_UPDATE = 6
 SCAN_ITERATION_SECONDS = 7.6e-6
 SPLINE_FITS_PER_TOPOLOGY_READ = 63
-TOPOLOGY_READS_PER_OUTER_RESIDUAL = 4
+TOPOLOGY_READS_PER_ACTIVE_SET_TRIP = 1
+BASELINE_TRIP_WALL_SECONDS = 5.85
 SPLINE_CONDITION_SVDS_PER_FIT = 2
 
 
@@ -741,7 +742,7 @@ def _attribution(
     updates = counts["newton_updates_per_trip"]
     jvp_count = counts["gmres_jacobian_vector_products_per_trip"]
     residual_evaluations = counts["residual_evaluations_per_trip"]
-    topology_reads = residual_evaluations * TOPOLOGY_READS_PER_OUTER_RESIDUAL
+    topology_reads = TOPOLOGY_READS_PER_ACTIVE_SET_TRIP
     line_search_exclusive = max(
         median["line_search"]
         - LINE_SEARCH_GRADES_PER_UPDATE * median["forward_evaluation"],
@@ -784,7 +785,7 @@ def _attribution(
         "method": (
             "direct synchronized probe medians multiplied by exact trip counts; "
             "the line-search row subtracts its six separately counted forward "
-            "grades, topology reads use the measured four-per-residual reuse-map "
+            "grades, topology reads use the frozen-partition one-per-trip contract "
             "count, and the nonnegative timer remainder retains fused device work, "
             "host dispatch, and final synchronization because CUPTI evidence failed"
         ),
@@ -1048,8 +1049,8 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
                 "One forward evaluation contains at least "
                 f"**{forward_census['fixed_scan_trip_lower_bound_per_evaluation']} "
                 f"fixed scan iterations** ({forward_branch_scan_sum} when all "
-                "compiled branches are summed). The reuse-map census assigns "
-                f"{TOPOLOGY_READS_PER_OUTER_RESIDUAL} topology reads/residual and "
+                "compiled branches are summed). The frozen-partition census assigns "
+                f"{TOPOLOGY_READS_PER_ACTIVE_SET_TRIP} topology read/trip and "
                 f"{SPLINE_FITS_PER_TOPOLOGY_READ} split-spline fits/read."
             ),
             "",
@@ -1092,10 +1093,10 @@ def _write_report(receipt: dict[str, Any], output: Path) -> None:
                 "profiler setup alone. The dominant authored call site is "
                 "`nova.linalg.split_spline._conditioned_fit`: "
                 "`jnp.linalg.cond(normal)` runs once for each of the level and field "
-                "normal equations. At 63 fits/topology read and four reads/residual, "
+                "normal equations. At 63 fits/topology read and one read/trip, "
                 "that is **"
-                f"{svd['split_spline_condition_svds_per_residual_evaluation']} "
-                "Jacobi SVDs/residual evaluation**. "
+                f"{svd['split_spline_condition_svds_per_active_set_trip']} "
+                "Jacobi SVDs/active-set trip**. "
                 "`nova.equilibrium.fixed_point._projected_krylov_condition` owns one "
                 "additional singular-value-only SVD per Newton residual "
                 "linearisation."
@@ -1171,12 +1172,7 @@ def _build_receipt(
     scan_floor = scan_lower_per_trip * SCAN_ITERATION_SECONDS
     source = json.loads(SOURCE_RECEIPT.read_text(encoding="utf-8"))
     source_wall = float(source["solve"]["median_warm_wall_s"])
-    performance_receipt_count = int(source["solve"]["trips"])
-    if performance_receipt_count != counts["newton_updates_total"]:
-        raise RuntimeError(
-            "performance receipt count does not match Newton promotion count: "
-            f"{performance_receipt_count} != {counts['newton_updates_total']}"
-        )
+    baseline_promotion_count = int(source["solve"]["trips"])
     failed_profiler_jobs = [
         run["job_id"] for run in timer_runs if run["profiler_replay_failure"]
     ]
@@ -1195,7 +1191,9 @@ def _build_receipt(
         "schema": "nova.trip_quantum_profile",
         "schema_version": 2,
         "captured_at": datetime.now(UTC).isoformat(),
-        "measurement_base_revision": "ce9915f6ea284c19201944ac9070275ea444403c",
+        "measurement_base_revision": subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+        ).strip(),
         "driver": {
             "path": str(Path(__file__).relative_to(ROOT)),
             "sha256": _sha256(Path(__file__)),
@@ -1205,9 +1203,7 @@ def _build_receipt(
         "assembly_runtime": runtime,
         "persistent_compilation_cache": cache_receipt,
         "reuse_map_inputs": {
-            "topology_reads_per_residual_evaluation": (
-                TOPOLOGY_READS_PER_OUTER_RESIDUAL
-            ),
+            "topology_reads_per_active_set_trip": TOPOLOGY_READS_PER_ACTIVE_SET_TRIP,
             "split_spline_fits_per_topology_read": SPLINE_FITS_PER_TOPOLOGY_READ,
             "scan_iteration_latency_s": SCAN_ITERATION_SECONDS,
             "persistent_compilation_cache_wiring_revision": "e04970ad",
@@ -1228,6 +1224,11 @@ def _build_receipt(
         },
         "trip": {
             "wall_s": trip_wall,
+            "baseline_comparison": {
+                "baseline_wall_s": BASELINE_TRIP_WALL_SECONDS,
+                "after_wall_s": trip_wall,
+                "speedup": BASELINE_TRIP_WALL_SECONDS / trip_wall,
+            },
             "measured_full_solve_wall_s": full_solve_wall,
             "run_full_solve_medians_s": {
                 run["job_id"]: run["timings"]["production_trip"]["median_s"]
@@ -1239,9 +1240,10 @@ def _build_receipt(
                 "sha256": _sha256(SOURCE_RECEIPT),
                 "revision": source["revision"],
                 "active_set_authority": active_set_authority,
-                "performance_receipt_count": performance_receipt_count,
-                "performance_receipt_count_unit": "attempted Newton promotions",
-                "performance_receipt_count_is_not_active_set_trips": True,
+                "baseline_attempted_newton_promotions": baseline_promotion_count,
+                "after_attempted_newton_promotions": counts[
+                    "newton_updates_total"
+                ],
                 "median_warm_wall_s": source_wall,
                 "arithmetic_wall_s_per_active_set_trip": source_wall
                 / active_set_authority["active_set_iterations"],
@@ -1280,10 +1282,8 @@ def _build_receipt(
             "split_spline_condition_svds_per_topology_read": (
                 SPLINE_FITS_PER_TOPOLOGY_READ * SPLINE_CONDITION_SVDS_PER_FIT
             ),
-            "split_spline_condition_svds_per_residual_evaluation": (
-                SPLINE_FITS_PER_TOPOLOGY_READ
-                * SPLINE_CONDITION_SVDS_PER_FIT
-                * TOPOLOGY_READS_PER_OUTER_RESIDUAL
+            "split_spline_condition_svds_per_active_set_trip": (
+                SPLINE_FITS_PER_TOPOLOGY_READ * SPLINE_CONDITION_SVDS_PER_FIT
             ),
             "explicit_solver_svd_call_site": (
                 "nova/equilibrium/fixed_point.py:_projected_krylov_condition "

@@ -98,6 +98,8 @@ def test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts():
 
 
 def test_strictly_decreasing_residual_does_not_trigger_stagnation():
+    """Strict residual progress reaches the exact root before stagnation can fire."""
+
     def shadowed_map(state, _mask):
         return 0.5 * state + 1.0
 
@@ -116,10 +118,18 @@ def test_strictly_decreasing_residual_does_not_trigger_stagnation():
         )
 
     for result in (solve(), jax.jit(solve)()):
-        assert int(result.active_set_iterations) == 4
-        assert np.all(np.diff(np.asarray(result.active_set_residuals)) < 0.0)
-        np.testing.assert_array_equal(result.active_set_mask_differences, 0)
-        assert (
-            int(result.termination_reason)
-            == FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
+        executed = int(result.active_set_iterations)
+        executed_residuals = np.asarray(result.active_set_residuals[:executed])
+        residual_progress = np.concatenate(
+            (
+                np.asarray(result.inner_iteration_residuals_before[:1]),
+                executed_residuals,
+            )
         )
+        assert np.all(np.isfinite(executed_residuals))
+        assert np.all(np.diff(residual_progress) < 0.0)
+
+        termination_reason = int(result.termination_reason)
+        assert termination_reason != FixedPointTerminationReason.ACTIVE_SET_STAGNATED
+        assert termination_reason == FixedPointTerminationReason.CONVERGED
+        assert bool(result.converged)

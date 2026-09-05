@@ -40,6 +40,7 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_hessian,
 )
 from nova.equilibrium import ColdSeedConstruction, ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
@@ -1426,6 +1427,30 @@ def _plot(
     plt.close(figure)
 
 
+def _certificate_solve_request(
+    profile: ForwardProfile,
+    seed: object,
+    target_current: float,
+    *,
+    carrier_identity: str,
+) -> ForwardSolveRequest:
+    """Declare the certificate tolerance against the public solve policy."""
+
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(seed),
+        policy_overrides={
+            "newton_steps": recovery.NEWTON_STEPS,
+            "gmres_iterations": recovery.KRYLOV_ITERATIONS,
+            "warmup": 0,
+            "kernel_tolerance": TERMINAL_RESIDUAL_BOUND,
+            "qualification_tolerance": TERMINAL_RESIDUAL_BOUND,
+        },
+        target_current=target_current,
+    )
+
+
 def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     row_started = perf_counter()
     configure_dtypes()
@@ -1501,17 +1526,14 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         case_name=case_name,
         requested_cells=requested_cells,
     ):
-        equilibrium = profile.solve(
+        request = _certificate_solve_request(
+            profile,
             seed,
-            route="newton_krylov",
-            target_current=target_current,
-            newton_steps=recovery.NEWTON_STEPS,
-            gmres_iterations=recovery.KRYLOV_ITERATIONS,
-            warmup=0,
-            convergence_tolerance=TERMINAL_RESIDUAL_BOUND,
-            stream_active_set=True,
-            stream_inner_iterations=True,
+            target_current,
+            carrier_identity=f"solovev:{case_name}:{requested_cells}",
         )
+        solve_receipt = profile.solve(request)
+        equilibrium = solve_receipt.equilibrium
         jax.block_until_ready(equilibrium.flux)
     solve_seconds = stage_timings["production_solve"]
     terminal = equilibrium.fixed_point
@@ -1629,11 +1651,9 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "exit_marker": "SOLOVEV_ROW_EXIT=0",
         },
         "solver": {
-            "route": "profile.solve newton_krylov",
-            "call": (
-                "profile.solve(seed, route='newton_krylov', "
-                "target_current=Ip_closed_form, oracle budgets as keywords)"
-            ),
+            "route": f"profile.solve {request.route}",
+            "call": "profile.solve(ForwardSolveRequest)",
+            "carrier_identity": request.carrier_identity,
             "target_current_a": target_current,
             "target_current_argument": "Ip_closed_form",
             "requested_seed_class": TopologyClass(requested_class).name.lower(),
@@ -1650,6 +1670,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "qualification_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification": qualification,
             "solve_wall_seconds": solve_seconds,
+            "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
             "seed": seed_receipt,
             "production_telemetry": production_solver,
             "lambda_amplitude_history": {

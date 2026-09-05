@@ -507,6 +507,79 @@
     which stays as it is. The solver shape is the lead's decision; nothing is merged.</p>
   </section>
 
+  <section id="one-read-per-trip">
+    <h2>One topology read per trip, and the trip cost is not the read (merged at 72ae8431)</h2>
+    <p><strong>Commits:</strong> <code>acfefa64</code> (partition, census and masks frozen at one read per active-set trip in
+    <code>fixed_point.py</code> and <code>forward_operator.py</code>, with a read-counting test), <code>fcf6c4a0</code> (the profiler
+    compares promotion counts across profiles instead of pinning one), <code>0331bb94</code> (receipts); receipts
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code> and
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/one-read/four-rows.json</code> (H200 job 1262715). The
+    four bank rows are unchanged to the last digit against the repaired-cap production receipt, so the reads inside a trip were
+    redundant and their removal is behaviour-preserving.</p>
+    <table>
+      <caption>22086/43 pure on the H200, per active-set trip, isolated component probes scaled by exact call counts</caption>
+      <thead><tr><th scope="col">Component</th><th scope="col">Calls per trip</th><th scope="col">Wall per trip</th><th scope="col">Share</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Host dispatch, device sync or fused remainder</th><td></td><td>5.63 s</td><td>96.6 percent</td></tr>
+        <tr><th scope="row">Jacobian-vector product</th><td>144</td><td>78 ms</td><td>1.3 percent</td></tr>
+        <tr><th scope="row">Forward evaluation</th><td>84 (12 primal, 72 line-search grades)</td><td>50 ms</td><td>0.9 percent</td></tr>
+        <tr><th scope="row">Topology read</th><td>1</td><td>39 ms</td><td>0.7 percent</td></tr>
+        <tr><th scope="row">GMRES orthogonalisation and line search</th><td></td><td>30 ms</td><td>0.5 percent</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The per-trip wall is flat, 5.83 s against 5.85 s, so the earlier attribution of 63 percent of a trip to the topology read
+    was an extrapolation of per-call cost by an assumed call count and is withdrawn: with one read per trip the read is under one
+    percent. The fused production program costs about thirty times the sum of its isolated parts. Candidates that fit a flat
+    cost are recompilation per trip, dynamic while loops running far more iterations than the static census counts, and the 126
+    Jacobi SVDs per trip from the split-spline condition numbers and the projected-Krylov Hessenberg, which are also what crashes
+    the CUPTI replay. A device-trace and ablation node on millisecond-converged-solve measures which.</p>
+  </section>
+
+  <section id="vertical-elimination">
+    <h2>The first elimination attempt does not drive the compensating current to zero (negative receipt, held)</h2>
+    <p><strong>Commits:</strong> <code>e6b11552</code> (off-by-default outer secant over the target centroid on the constrained
+    solve, with CPU contracts), <code>0caf1fd1</code> (independent EFIT-class binding in the driver), <code>54488303</code>
+    (census), held in worktree <code>scr-vertical-mode-elimination</code>; receipt banked at
+    <code>docs/figures/solver-convergence-regression/vertical-mode/elimination/four-rows.json</code> (H200 job 1262679, 35 min,
+    persistent cache on). On a well-conditioned CPU fixture the bounded outer solve reaches a compensating current below 1e-6 A in
+    at most four iterates and reproduces the unconstrained equilibrium; omitted and explicit-off leaves are bit-identical.</p>
+    <table>
+      <caption>Pinned-at-seed against eliminated, five outer secant iterates, 1 A tolerance</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col">Pinned at the seed centroid</th><th scope="col">Eliminated</th><th scope="col">Stiffness dI/dZ</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">21986/46</th><td>1.28e-14, 3 trips, −4103 A, centroid 0.0656 m</td><td>1.18e-2, 10 trips, settled, −2422 A, centroid 0.0785 m</td><td>+67.8 kA/m</td></tr>
+        <tr><th scope="row">21989/55</th><td>3.48e-9, 7 trips, +3022 A, centroid 0.0509 m</td><td>4.81e-1, 6 trips, stagnated, +122 kA, centroid 0.310 m</td><td>−11.4 kA/m</td></tr>
+        <tr><th scope="row">21985/51 (control)</th><td colspan="3">free 9.14e-4, 6 trips, stagnated</td></tr>
+        <tr><th scope="row">22086/43 (control)</th><td colspan="3">free 3.38e-4, 7 trips, settled</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>Two mechanisms, both visible in the receipt. First, the inner constrained solve converges only at the seed's own centroid:
+    moved 1.3 cm on 21986/46 it settles at 1e-2, so the current it reports there is not an equilibrium's and the secant is fed
+    noise. The linear stiffness places the free root about 6 cm above the EFIT centroid, and every intermediate target is a
+    displaced plasma whose partition moves by tens of cells, the same mask-motion mechanism that stalls 21985/51. Second, the
+    secant is unsafeguarded: one noisy pair sent 21989/55 to a 0.31 m centroid and 122 kA. The narrow repair is a bracketed,
+    best-iterate outer solve with bounded centroid moves, warm-started as a continuation in height; the enabling repair is the
+    one-topology-read-per-trip restructure that makes the inner solve Newton-consistent across mask motion. The physics question
+    the stiffness raises, why the prescribed currents hold the plasma 6 cm from where EFIT found it, is under investigation
+    (passive structure currents EFIT reconstructs and the forward operator omits are the leading candidate). Nothing is merged;
+    the solver shape stays the lead's decision.</p>
+    <h3>Second attempt: continuation with inner-convergence gating (commits a63bbd0a, f5c892aa, held)</h3>
+    <p>Receipt <code>docs/figures/solver-convergence-regression/vertical-mode/elimination/continuation/four-rows.json</code> (H200
+    job 1262711, two rows before the fence). The driver <code>nova/equilibrium/vertical_elimination.py</code> admits an outer
+    sample only from a converged inner solve, warm-starts flux and multiplier, bounds each move to one vertical cell, halves a
+    refused step, keeps the best sample and refines inside a sign-changing bracket. The mechanism holds: every admitted inner
+    solve on 21986/46 converged to 1e-11 at displaced targets, which the first attempt never achieved. Two corrections follow
+    from the converged trace. The local stiffness is <strong>−78.8 kA/m</strong>, not the +67.8 kA/m the first attempt read from
+    unconverged iterates, so the free root lies about 5 cm <strong>below</strong> the seed centroid of 0.099 m, not above it; the
+    field-deficit census's root estimate inherits the same sign error and is withdrawn to that extent, its conclusion that no
+    conductor is missing standing. And the step policy, not the physics, exhausted the budget: the first +0.02 m step worsened
+    the current to −5764 A, four reverse-direction inner attempts were refused, the step fell to 0.00125 m and stayed there, so
+    24 iterations moved the current only from −4103 A to −3904 A. The repair in flight lets a reduced step regrow toward the cell
+    cap after each converged sample and aims it with the secant of the two most recent converged samples.</p>
+  </section>
+
   <section id="open-record">
     <h2>Open record</h2>
     <p>The regression is located to one commit and classified as a policy consequence; five remedies that leave

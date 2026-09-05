@@ -91,6 +91,54 @@
       that file.</li>
     </ul>
   </section>
+  <section id="route-migrations">
+    <h2>The two bypassing routes moved onto the public solve (merged at e0846d0b)</h2>
+    <p><strong>Commit:</strong> <code>384d759e</code>. The Solov'ev oracle rebaseline in
+    <code>scripts/oracle_rebaseline/measure.py</code> called the bare Newton–Krylov kernel without the current pin or the five
+    active-set safeguards, and the mixed MAST and DIII-D routes in
+    <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py</code> called the margin-graded kernel directly.
+    Both now build a request from the declared default table and call <code>ForwardProfile.solve</code>, keeping their Solov'ev
+    margins and reachability grading as reads of the returned receipt.</p>
+    <table>
+      <caption>Wiring audit over the seven production entry points, cells DEFAULT-ON</caption>
+      <thead><tr><th scope="col">Entry point</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Solov'ev oracle and rebaseline</th><td>3 of 9</td><td>9 of 9</td></tr>
+        <tr><th scope="row">Topology visuals</th><td>4 of 9</td><td>9 of 9</td></tr>
+        <tr><th scope="row">ForwardProfile.solve and routes</th><td>5 of 9</td><td>5 of 9 (node in flight)</td></tr>
+        <tr><th scope="row">Exact bank replay, EFIT parity, DIII-D match, Solov'ev certificate</th><td>9 of 9 each</td><td>9 of 9 each</td></tr>
+        <tr><th scope="row">Total</th><td>48 of 63</td><td>63 of 63 on the migrated routes' audit</td></tr>
+      </tbody>
+    </table>
+    <p><code>tests/test_route_default_wiring.py</code> names all 27 route-default cells and guards against a private kernel
+    dispatch, 28 green on CPU. The worktree predated the request seam's merge, so its tests imported the seam from the main
+    checkout; the merged head is that combination and the §2 wiring test verifies it there.</p>
+  </section>
+
+  <section id="public-solve-defaults">
+    <h2>The public solve reads its defaults from the one table (merged at 563e8b59)</h2>
+    <p><strong>Commit:</strong> <code>5327cf8c</code>. Every omitted option of <code>ForwardProfile.solve</code> and its routes
+    resolves through the version-keyed table in <code>solve_request.py</code>, translated to kernel options by the policy;
+    <code>forward.py</code> carries no literal public default, <code>PerturbedSeedPolicy</code> and the numerical factories read the
+    same table, and the persistent compilation cache is configured at the public boundary when the policy enables it while the
+    receipt's hit or miss stays an observation. A diagnostic absolute-source fixture must now declare its current-pin opt-out.</p>
+    <p><strong>Proof:</strong> a no-option keyword solve and a bare request give bit-identical fixed-point histories and terminal
+    flux, with resolved defaults nine of nine true and zero deviations; the wiring audit on the worktree moves the public solve
+    from five of nine to nine of nine, so all seven production entry points read DEFAULT-ON. Gate: three default-wiring cases,
+    the schema test and the seven referee IDs, 15 green, plus 11 current-pin propagation cases.</p>
+  </section>
+
+  <section id="default-wiring-test">
+    <h2>The fail-closed default-wiring test (merged at d3669921)</h2>
+    <p><strong>Commit:</strong> <code>31ed5d2d</code>, <code>tests/test_default_wiring.py</code> in the default lane. For each of the
+    seven production entry points it constructs the route with no options and asserts from the receipt's resolved-defaults block
+    that current pin, settled exit, own-mask acceptance, continuation, best-iterate retention, stagnation stop, exact kernels,
+    cached machine and compilation cache resolved on, and that no launcher passes a solver-control keyword past the public seam:
+    69 green, 63 receipt cells plus 6 launcher-boundary checks, in 32 s on CPU. Fail-closed proof: in a scratch copy with the
+    current pin removed from the version-keyed table, the first current-pin cell failed and the run exited 1. The wiring audit
+    against main reads 63 of 63 production cells DEFAULT-ON. With this the plan's two sections are landed.</p>
+  </section>
+
 </main>
 </body>
 </html>

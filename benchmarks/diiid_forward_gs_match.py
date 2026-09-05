@@ -79,6 +79,11 @@ from nova.equilibrium import fixed_point as fixed_point_solver
 from nova.equilibrium.map_extraction import extract_flux_functions
 from nova.equilibrium.observation import ConstraintViolationError
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+)
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
@@ -269,6 +274,7 @@ class FrameResult:
     seed_identity_detected: bool = False
     branch_selection: dict[str, Any] = field(default_factory=dict)
     conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
+    resolved_defaults: dict[str, object] = field(default_factory=dict)
     solve_exception_class: str | None = None
 
 
@@ -1200,6 +1206,33 @@ def gauge_metrics(
     return r_squared, fractional_rms, gauge, predicted + gauge
 
 
+def _registered_solve_request(
+    profile: ForwardProfile,
+    initial: object,
+    current: object,
+    target_current_a: float,
+    *,
+    carrier_identity: str,
+) -> ForwardSolveRequest:
+    """Declare the registered DIII-D budget against the public policy."""
+
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(initial),
+        policy_overrides={
+            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+            "warmup": REGISTERED_ACCELERATED_WARMUP,
+            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+            "qualification_tolerance": GATE_RESIDUAL_TOLERANCE,
+        },
+        current=current,
+        target_current=target_current_a,
+    )
+
+
 def _solve_registered(
     profile: ForwardProfile,
     label_seed: np.ndarray,
@@ -1210,14 +1243,6 @@ def _solve_registered(
 ):
     """Run the constrained cold portfolio and select only a diverted root."""
 
-    options = {
-        "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
-        "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-        "warmup": REGISTERED_ACCELERATED_WARMUP,
-        "relaxation": REGISTERED_ACCELERATED_RELAXATION,
-        "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
-        "stream_active_set": True,
-    }
     count = int(row["efit_lcfs_n"][frame])
     contour = np.c_[
         np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
@@ -1237,13 +1262,26 @@ def _solve_registered(
         cold.branches.flux[int(TopologyClass.DIVERTED)], dtype=float
     )
     seed_identity = bool(np.array_equal(diverted_seed, label_seed))
-    portfolio = profile.solve_portfolio(
+    request = _registered_solve_request(
+        profile,
         cold.branches.flux,
-        route=REGISTERED_SOLVER_ROUTE,
-        current=jnp.asarray(current),
-        target_current=target_current_a,
-        tolerance=GATE_RESIDUAL_TOLERANCE,
-        **options,
+        jnp.asarray(current),
+        target_current_a,
+        carrier_identity=f"diiid:{row.get('_source_path', 'corpus')}:{frame}",
+    )
+    policy = request.policy
+    portfolio = profile.solve_portfolio(
+        request.seed_policy.resolve(profile),
+        route=request.route,
+        current=request.current,
+        target_current=request.target_current,
+        tolerance=policy.qualification_tolerance,
+        newton_steps=policy.newton_steps,
+        gmres_iterations=policy.gmres_iterations,
+        warmup=policy.warmup,
+        relaxation=policy.relaxation,
+        step_cap=policy.step_cap,
+        stream_active_set=True,
     )
     selection = select_forward_branch(
         portfolio,
@@ -1296,6 +1334,7 @@ def _solve_registered(
         int(diverted.iterations),
         seed_identity,
         bool(diverted.converged and selected_diverted),
+        ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
     )
 
 
@@ -1339,6 +1378,7 @@ def solve_frame(
         iterations,
         seed_identity,
         branch_converged,
+        resolved_defaults,
     ) = _solve_registered(
         profile,
         seed,
@@ -1494,6 +1534,7 @@ def solve_frame(
         ),
         branch_selection=branch_selection,
         conductor_current_receipt=current_receipt,
+        resolved_defaults=resolved_defaults,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -1515,6 +1556,19 @@ def _retained_solve_failure(
     """Represent a qualified solve exception without dropping its frame."""
 
     exception_class = type(error).__name__
+    policy = ForwardSolveRequest.from_defaults(
+        carrier_identity=f"diiid:{row.get('_source_path', 'corpus')}:{frame}",
+        source_profile=row,
+        seed_policy=ExplicitSolveSeed(()),
+        policy_overrides={
+            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+            "warmup": REGISTERED_ACCELERATED_WARMUP,
+            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+            "qualification_tolerance": GATE_RESIDUAL_TOLERANCE,
+        },
+    ).policy
     result = FrameResult(
         shot=Path(row["_source_path"]).name,
         frame=frame,
@@ -1550,6 +1604,7 @@ def _retained_solve_failure(
             labelled_q95_nova=float("nan"),
             signed_relative_q95_error=float("nan"),
         ),
+        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
         solve_exception_class=exception_class,
     )
     return result, {"plot_unavailable_reason": exception_class}

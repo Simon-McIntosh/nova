@@ -168,6 +168,24 @@
       acceptance becomes the declared default.</li>
     </ul>
   </section>
+  <section id="request-and-receipt">
+    <h2>The typed request, policy and receipt (merged at a675c63f)</h2>
+    <p><strong>Commit:</strong> <code>7b6936bf</code>. <code>nova/equilibrium/solve_request.py</code> declares a frozen
+    <code>ForwardSolveRequest</code> carrying the carrier identity, source profile, seed policy, target current, constraint pins,
+    route and a nested frozen <code>ForwardSolvePolicy</code>; a default table keyed by the installed Nova version (public policy:
+    Newton 10, GMRES 30, warmup 0, kernel tolerance 1e-8, qualification 1e-10); and a frozen <code>ForwardSolveReceipt</code> with
+    qualification, termination reason, per-trip residual and mask histories, globalisation decisions, amplitude history, the
+    topology read with its polish receipt, compilation-cache hit or miss, wall seconds and the resolved defaults with the version
+    that resolved them. <code>ForwardProfile.solve</code> accepts a request and returns a receipt by delegating to the unchanged
+    keyword path; the CPU fixture proves the flux bit-identical between the two paths, and the resolved-defaults block
+    round-trips through JSON. <code>PerturbedSeedPolicy</code> reads its defaults from the same table.</p>
+    <p><strong>The migrated exemplar:</strong> the EFIT parity producer builds its request from the table and records Newton 12,
+    GMRES 12 and qualification 1e-8 as explicit deviations in its receipt, so a banked row can no longer be read as having run
+    under the public budget. Gate: the schema test plus the seven referee node IDs, 12 cases green on CPU. The remaining
+    production routes migrate onto the seam under §2; the default-wiring test reads <code>resolved_defaults</code> from these
+    receipts.</p>
+  </section>
+
 </main>
 </body>
 </html>

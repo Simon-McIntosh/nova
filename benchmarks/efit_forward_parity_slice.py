@@ -60,6 +60,7 @@ from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
     PrescribedCurrentField,
 )
+from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
@@ -778,6 +779,33 @@ def diagnose_branch(
     }
 
 
+def _parity_solve_request(
+    profile: ForwardProfile,
+    seed: object,
+    *,
+    shot: int,
+    row: int,
+    current_field: str,
+) -> ForwardSolveRequest:
+    """Declare the parity producer's bounded deviation from public defaults."""
+
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity=f"mast:{shot}:{row}:efm/{current_field}",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(seed),
+        policy_overrides={
+            "newton_steps": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+            "kernel_tolerance": FIXED_POINT_CRITERION,
+            "qualification_tolerance": FIXED_POINT_CRITERION,
+        },
+        compilation_cache_hit=False,
+    )
+
+
 def solve_arm(
     group: zarr.Group,
     shot: int,
@@ -795,14 +823,15 @@ def solve_arm(
         if include_diagnosis
         else None
     )
-    equilibrium = profile.solve(
+    request = _parity_solve_request(
+        profile,
         seed,
-        route="newton_krylov",
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
+        shot=shot,
+        row=row,
+        current_field=current_field,
     )
+    solve_receipt = profile.solve(request)
+    equilibrium = solve_receipt.equilibrium
     mapped = np.asarray(profile.flux_map()(equilibrium.flux), dtype=np.float64)
     solved = np.asarray(
         equilibrium.flux[: profile.lattice.node_count], dtype=np.float64
@@ -958,6 +987,10 @@ def solve_arm(
                 float(value) if np.isfinite(value) else None for value in trace
             ],
             "finite_receipt": bool(equilibrium.finite.passed),
+            "carrier_identity": request.carrier_identity,
+            "compilation_cache_hit": solve_receipt.compilation_cache_hit,
+            "wall_seconds": solve_receipt.wall_seconds,
+            "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
         },
         "branch": {
             "classification": "vacuum" if vacuum_branch else "plasma",

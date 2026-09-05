@@ -1,0 +1,752 @@
+{
+  "arms": [
+    {
+      "compilation_check": {
+        "jax_compilation_message_count": 0,
+        "jax_compilation_messages": [],
+        "method": "jax_log_compiles was enabled for the complete job log; no compilation message occurs between any arm's first and third ARM_SAMPLE records",
+        "persistent_cache_after_compile": null,
+        "persistent_cache_after_warm": null,
+        "persistent_cache_before_compile": null,
+        "persistent_cache_before_warm": null,
+        "persistent_cache_file_delta_across_warm_solves": null,
+        "warm_solve_count": 3
+      },
+      "compile_wall_s": null,
+      "first_execute_wall_s": null,
+      "name": "production",
+      "solve": {
+        "accepted_newton_promotions": 65,
+        "active_set_trips": 7,
+        "attempted_newton_promotions": 84,
+        "converged": null,
+        "terminal_residual": null,
+        "termination_reason": "active_set_settled"
+      },
+      "warm_full_solve": {
+        "maximum_s": 41.068949935,
+        "median_absolute_deviation_s": 0.004099805000002732,
+        "median_s": 41.053982189,
+        "minimum_s": 41.049882384,
+        "sample_count": 3,
+        "samples_s": [
+          41.049882384,
+          41.053982189,
+          41.068949935
+        ]
+      },
+      "warm_wall_s_per_observed_trip": 5.864854598428572
+    },
+    {
+      "compilation_check": {
+        "jax_compilation_message_count": 0,
+        "jax_compilation_messages": [],
+        "method": "jax_log_compiles was enabled for the complete job log; no compilation message occurs between any arm's first and third ARM_SAMPLE records",
+        "persistent_cache_after_compile": null,
+        "persistent_cache_after_warm": null,
+        "persistent_cache_before_compile": null,
+        "persistent_cache_before_warm": null,
+        "persistent_cache_file_delta_across_warm_solves": null,
+        "warm_solve_count": 3
+      },
+      "compile_wall_s": null,
+      "first_execute_wall_s": null,
+      "name": "split_spline_condition_constant",
+      "solve": {
+        "accepted_newton_promotions": null,
+        "active_set_trips": null,
+        "attempted_newton_promotions": null,
+        "converged": null,
+        "terminal_residual": null,
+        "termination_reason": "not retained before assembly failure"
+      },
+      "warm_full_solve": {
+        "maximum_s": 40.934713209,
+        "median_absolute_deviation_s": 0.0033658190000025456,
+        "median_s": 40.93134739,
+        "minimum_s": 40.92650211,
+        "sample_count": 3,
+        "samples_s": [
+          40.92650211,
+          40.934713209,
+          40.93134739
+        ]
+      },
+      "warm_wall_s_per_observed_trip": 5.847335341428571
+    },
+    {
+      "compilation_check": {
+        "jax_compilation_message_count": 0,
+        "jax_compilation_messages": [],
+        "method": "jax_log_compiles was enabled for the complete job log; no compilation message occurs between any arm's first and third ARM_SAMPLE records",
+        "persistent_cache_after_compile": null,
+        "persistent_cache_after_warm": null,
+        "persistent_cache_before_compile": null,
+        "persistent_cache_before_warm": null,
+        "persistent_cache_file_delta_across_warm_solves": null,
+        "warm_solve_count": 3
+      },
+      "compile_wall_s": null,
+      "first_execute_wall_s": null,
+      "name": "projected_krylov_condition_constant",
+      "solve": {
+        "accepted_newton_promotions": null,
+        "active_set_trips": null,
+        "attempted_newton_promotions": null,
+        "converged": null,
+        "terminal_residual": null,
+        "termination_reason": "not retained before assembly failure"
+      },
+      "warm_full_solve": {
+        "maximum_s": 0.756276293,
+        "median_absolute_deviation_s": 0.0018034789999999967,
+        "median_s": 0.7540094,
+        "minimum_s": 0.752205921,
+        "sample_count": 3,
+        "samples_s": [
+          0.756276293,
+          0.7540094,
+          0.752205921
+        ]
+      },
+      "warm_wall_s_per_observed_trip": 0.10771562857142858
+    },
+    {
+      "compilation_check": {
+        "jax_compilation_message_count": 0,
+        "jax_compilation_messages": [],
+        "method": "jax_log_compiles was enabled for the complete job log; no compilation message occurs between any arm's first and third ARM_SAMPLE records",
+        "persistent_cache_after_compile": null,
+        "persistent_cache_after_warm": null,
+        "persistent_cache_before_compile": null,
+        "persistent_cache_before_warm": null,
+        "persistent_cache_file_delta_across_warm_solves": null,
+        "warm_solve_count": 3
+      },
+      "compile_wall_s": null,
+      "first_execute_wall_s": null,
+      "name": "single_line_search_grade",
+      "solve": {
+        "accepted_newton_promotions": null,
+        "active_set_trips": null,
+        "attempted_newton_promotions": null,
+        "converged": null,
+        "terminal_residual": null,
+        "termination_reason": "not retained before assembly failure"
+      },
+      "warm_full_solve": {
+        "maximum_s": 36.199827348,
+        "median_absolute_deviation_s": 0.004611033000003317,
+        "median_s": 36.189234466,
+        "minimum_s": 36.184623433,
+        "sample_count": 3,
+        "samples_s": [
+          36.199827348,
+          36.189234466,
+          36.184623433
+        ]
+      },
+      "warm_wall_s_per_observed_trip": 5.169890638
+    },
+    {
+      "compilation_check": {
+        "jax_compilation_message_count": 0,
+        "jax_compilation_messages": [],
+        "method": "jax_log_compiles was enabled for the complete job log; no compilation message occurs between any arm's first and third ARM_SAMPLE records",
+        "persistent_cache_after_compile": null,
+        "persistent_cache_after_warm": null,
+        "persistent_cache_before_compile": null,
+        "persistent_cache_before_warm": null,
+        "persistent_cache_file_delta_across_warm_solves": null,
+        "warm_solve_count": 3
+      },
+      "compile_wall_s": null,
+      "first_execute_wall_s": null,
+      "name": "connectivity_zero_iterations",
+      "solve": {
+        "accepted_newton_promotions": null,
+        "active_set_trips": null,
+        "attempted_newton_promotions": null,
+        "converged": null,
+        "terminal_residual": null,
+        "termination_reason": "not retained before assembly failure"
+      },
+      "warm_full_solve": {
+        "maximum_s": 40.57639639,
+        "median_absolute_deviation_s": 0.0016119300000028147,
+        "median_s": 40.57478446,
+        "minimum_s": 40.570342199,
+        "sample_count": 3,
+        "samples_s": [
+          40.57639639,
+          40.57478446,
+          40.570342199
+        ]
+      },
+      "warm_wall_s_per_observed_trip": 5.7963977799999995
+    }
+  ],
+  "captured_at": "2026-09-04T17:47:48.669948+00:00",
+  "device_trace": {
+    "annotation_wall_s": 0.961706174,
+    "condition_solver_kernel_present": true,
+    "gpu_compute_event_count": 308591,
+    "gpu_process_ids": [
+      1
+    ],
+    "method": "GPU complete events whose start timestamps fall within the device-synchronised TraceAnnotation; summed time may exceed wall when streams overlap",
+    "path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-remainder-trace/plugins/profile/2026_09_04_19_21_41/perfetto_trace.json.gz",
+    "ranked_kernels": [
+      {
+        "call_count": 14157,
+        "kernel": "input_transpose_fusion_11",
+        "median_call_us": 6.56,
+        "share_of_summed_gpu_time": 0.14401017868695626,
+        "summed_wall_s_per_observed_trip": 0.013282450714285713,
+        "summed_wall_s_per_solve": 0.09297715499999999
+      },
+      {
+        "call_count": 14157,
+        "kernel": "input_scatter_fusion_14",
+        "median_call_us": 4.704,
+        "share_of_summed_gpu_time": 0.10281042635425026,
+        "summed_wall_s_per_observed_trip": 0.009482485428571427,
+        "summed_wall_s_per_solve": 0.06637739799999999
+      },
+      {
+        "call_count": 53552,
+        "kernel": "loop_add_fusion_62",
+        "median_call_us": 1.184,
+        "share_of_summed_gpu_time": 0.1004084696926068,
+        "summed_wall_s_per_observed_trip": 0.00926094642857143,
+        "summed_wall_s_per_solve": 0.064826625
+      },
+      {
+        "call_count": 49160,
+        "kernel": "memcpy32_post",
+        "median_call_us": 0.96,
+        "share_of_summed_gpu_time": 0.07565717330151552,
+        "summed_wall_s_per_observed_trip": 0.006978067,
+        "summed_wall_s_per_solve": 0.048846469
+      },
+      {
+        "call_count": 19602,
+        "kernel": "input_reduce_fusion_43",
+        "median_call_us": 2.112,
+        "share_of_summed_gpu_time": 0.06405749390604791,
+        "summed_wall_s_per_observed_trip": 0.005908197,
+        "summed_wall_s_per_solve": 0.041357379
+      },
+      {
+        "call_count": 5445,
+        "kernel": "input_transpose_fusion_1",
+        "median_call_us": 6.656,
+        "share_of_summed_gpu_time": 0.05620021116428975,
+        "summed_wall_s_per_observed_trip": 0.005183498428571428,
+        "summed_wall_s_per_solve": 0.036284488999999996
+      },
+      {
+        "call_count": 21780,
+        "kernel": "input_reduce_fusion_44",
+        "median_call_us": 1.44,
+        "share_of_summed_gpu_time": 0.04834079406999918,
+        "summed_wall_s_per_observed_trip": 0.004458603,
+        "summed_wall_s_per_solve": 0.031210221
+      },
+      {
+        "call_count": 5445,
+        "kernel": "wrapped_scatter",
+        "median_call_us": 5.184,
+        "share_of_summed_gpu_time": 0.042170182642540355,
+        "summed_wall_s_per_observed_trip": 0.0038894707142857142,
+        "summed_wall_s_per_solve": 0.027226295
+      },
+      {
+        "call_count": 19602,
+        "kernel": "loop_select_fusion_187",
+        "median_call_us": 1.249,
+        "share_of_summed_gpu_time": 0.038275955770150125,
+        "summed_wall_s_per_observed_trip": 0.0035302955714285713,
+        "summed_wall_s_per_solve": 0.024712069
+      },
+      {
+        "call_count": 14157,
+        "kernel": "input_scatter_fusion_23",
+        "median_call_us": 1.76,
+        "share_of_summed_gpu_time": 0.03820993024057711,
+        "summed_wall_s_per_observed_trip": 0.003524205857142857,
+        "summed_wall_s_per_solve": 0.024669441
+      },
+      {
+        "call_count": 21780,
+        "kernel": "loop_select_fusion_188",
+        "median_call_us": 1.024,
+        "share_of_summed_gpu_time": 0.03544428641269428,
+        "summed_wall_s_per_observed_trip": 0.003269123,
+        "summed_wall_s_per_solve": 0.022883861000000002
+      },
+      {
+        "call_count": 14157,
+        "kernel": "loop_reduce_fusion_1139",
+        "median_call_us": 1.504,
+        "share_of_summed_gpu_time": 0.03293842333622004,
+        "summed_wall_s_per_observed_trip": 0.0030380004285714282,
+        "summed_wall_s_per_solve": 0.021266003
+      },
+      {
+        "call_count": 521,
+        "kernel": "void gesvdbj_batch_32x16<double, double>(long, int const*, int const*, int const*, int, double const*, int, double, double*, double*, int*, double, int, double)",
+        "median_call_us": 44.833,
+        "share_of_summed_gpu_time": 0.03058326599371068,
+        "summed_wall_s_per_observed_trip": 0.002820777857142857,
+        "summed_wall_s_per_solve": 0.019745445
+      },
+      {
+        "call_count": 7623,
+        "kernel": "input_scatter_fusion_2",
+        "median_call_us": 1.824,
+        "share_of_summed_gpu_time": 0.021716329180484786,
+        "summed_wall_s_per_observed_trip": 0.002002956142857143,
+        "summed_wall_s_per_solve": 0.014020693
+      },
+      {
+        "call_count": 5445,
+        "kernel": "loop_reduce_fusion_1129",
+        "median_call_us": 1.632,
+        "share_of_summed_gpu_time": 0.013694662571805493,
+        "summed_wall_s_per_observed_trip": 0.001263096,
+        "summed_wall_s_per_solve": 0.008841672
+      },
+      {
+        "call_count": 1440,
+        "kernel": "loop_divide_fusion_54",
+        "median_call_us": 3.936,
+        "share_of_summed_gpu_time": 0.008889067168075743,
+        "summed_wall_s_per_observed_trip": 0.0008198628571428571,
+        "summed_wall_s_per_solve": 0.00573904
+      },
+      {
+        "call_count": 960,
+        "kernel": "loop_divide_fusion_52",
+        "median_call_us": 4.032,
+        "share_of_summed_gpu_time": 0.006007142946856027,
+        "summed_wall_s_per_observed_trip": 0.0005540551428571429,
+        "summed_wall_s_per_solve": 0.003878386
+      },
+      {
+        "call_count": 1440,
+        "kernel": "loop_dynamic_update_slice_fusion_216",
+        "median_call_us": 2.624,
+        "share_of_summed_gpu_time": 0.005897326017320122,
+        "summed_wall_s_per_observed_trip": 0.0005439264285714286,
+        "summed_wall_s_per_solve": 0.003807485
+      },
+      {
+        "call_count": 1042,
+        "kernel": "void svd_column_rotate_batch<double, 5, 3>(long, int const*, int const*, int, double*, int, double*, int, double const*, int*)",
+        "median_call_us": 3.68,
+        "share_of_summed_gpu_time": 0.005723179578547187,
+        "summed_wall_s_per_observed_trip": 0.0005278644285714285,
+        "summed_wall_s_per_solve": 0.003695051
+      },
+      {
+        "call_count": 740,
+        "kernel": "loop_dynamic_update_slice_fusion_198",
+        "median_call_us": 4.768,
+        "share_of_summed_gpu_time": 0.005668391151748219,
+        "summed_wall_s_per_observed_trip": 0.0005228111428571429,
+        "summed_wall_s_per_solve": 0.003659678
+      },
+      {
+        "call_count": 2160,
+        "kernel": "loop_select_fusion_67",
+        "median_call_us": 1.504,
+        "share_of_summed_gpu_time": 0.005093520799453617,
+        "summed_wall_s_per_observed_trip": 0.0004697892857142857,
+        "summed_wall_s_per_solve": 0.003288525
+      },
+      {
+        "call_count": 2656,
+        "kernel": "loop_reduce_fusion_379",
+        "median_call_us": 1.152,
+        "share_of_summed_gpu_time": 0.004734017150043021,
+        "summed_wall_s_per_observed_trip": 0.0004366312857142857,
+        "summed_wall_s_per_solve": 0.003056419
+      },
+      {
+        "call_count": 48,
+        "kernel": "input_concatenate_fusion_4",
+        "median_call_us": 54.656,
+        "share_of_summed_gpu_time": 0.004593292379589654,
+        "summed_wall_s_per_observed_trip": 0.00042365185714285717,
+        "summed_wall_s_per_solve": 0.002965563
+      },
+      {
+        "call_count": 592,
+        "kernel": "loop_dynamic_update_slice_fusion_203",
+        "median_call_us": 4.864,
+        "share_of_summed_gpu_time": 0.00457082127179559,
+        "summed_wall_s_per_observed_trip": 0.00042157928571428567,
+        "summed_wall_s_per_solve": 0.0029510549999999997
+      },
+      {
+        "call_count": 2656,
+        "kernel": "loop_reduce_fusion_378",
+        "median_call_us": 1.024,
+        "share_of_summed_gpu_time": 0.00432436396050586,
+        "summed_wall_s_per_observed_trip": 0.00039884785714285715,
+        "summed_wall_s_per_solve": 0.002791935
+      },
+      {
+        "call_count": 640,
+        "kernel": "loop_divide_fusion_55",
+        "median_call_us": 4.096,
+        "share_of_summed_gpu_time": 0.004089778791568039,
+        "summed_wall_s_per_observed_trip": 0.0003772114285714286,
+        "summed_wall_s_per_solve": 0.00264048
+      },
+      {
+        "call_count": 960,
+        "kernel": "loop_dynamic_update_slice_fusion_214",
+        "median_call_us": 2.656,
+        "share_of_summed_gpu_time": 0.003975005455570803,
+        "summed_wall_s_per_observed_trip": 0.00036662557142857143,
+        "summed_wall_s_per_solve": 0.002566379
+      },
+      {
+        "call_count": 521,
+        "kernel": "void svd_row_rotate_batch_32x16<double>(long, int const*, int const*, int, double*, int, double const*, int*)",
+        "median_call_us": 5.024,
+        "share_of_summed_gpu_time": 0.003910298020341095,
+        "summed_wall_s_per_observed_trip": 0.0003606574285714286,
+        "summed_wall_s_per_solve": 0.002524602
+      },
+      {
+        "call_count": 24,
+        "kernel": "input_concatenate_fusion_12",
+        "median_call_us": 68.289,
+        "share_of_summed_gpu_time": 0.0031860152463926224,
+        "summed_wall_s_per_observed_trip": 0.00029385485714285715,
+        "summed_wall_s_per_solve": 0.002056984
+      },
+      {
+        "call_count": 640,
+        "kernel": "loop_dynamic_update_slice_fusion_217",
+        "median_call_us": 2.688,
+        "share_of_summed_gpu_time": 0.0026715325113212725,
+        "summed_wall_s_per_observed_trip": 0.0002464027142857143,
+        "summed_wall_s_per_solve": 0.001724819
+      },
+      {
+        "call_count": 330,
+        "kernel": "loop_dynamic_update_slice_fusion_194",
+        "median_call_us": 4.896,
+        "share_of_summed_gpu_time": 0.0025972777981454246,
+        "summed_wall_s_per_observed_trip": 0.00023955399999999998,
+        "summed_wall_s_per_solve": 0.001676878
+      },
+      {
+        "call_count": 328,
+        "kernel": "loop_dynamic_update_slice_fusion_35",
+        "median_call_us": 4.992,
+        "share_of_summed_gpu_time": 0.0025401892889729957,
+        "summed_wall_s_per_observed_trip": 0.00023428857142857143,
+        "summed_wall_s_per_solve": 0.00164002
+      },
+      {
+        "call_count": 1350,
+        "kernel": "loop_reduce_fusion_375",
+        "median_call_us": 1.216,
+        "share_of_summed_gpu_time": 0.002467467964046122,
+        "summed_wall_s_per_observed_trip": 0.0002275812857142857,
+        "summed_wall_s_per_solve": 0.001593069
+      },
+      {
+        "call_count": 19,
+        "kernel": "void getrf_pivot<getrf_params_<double, 64, 1, 64, 64, 1> >(int, int, int, void*, int, long*, int, getrf_params_<double, 64, 1, 64, 64, 1>::data_type*, unsigned int*, unsigned int*, getrf_params_<double, 64, 1, 64, 64, 1>::data_type*, unsigned int, unsigned int, unsigned int, int*)",
+        "median_call_us": 77.6,
+        "share_of_summed_gpu_time": 0.002274606444250601,
+        "summed_wall_s_per_observed_trip": 0.00020979314285714284,
+        "summed_wall_s_per_solve": 0.001468552
+      },
+      {
+        "call_count": 1350,
+        "kernel": "loop_reduce_fusion_374",
+        "median_call_us": 1.024,
+        "share_of_summed_gpu_time": 0.0021598733790558627,
+        "summed_wall_s_per_observed_trip": 0.000199211,
+        "summed_wall_s_per_solve": 0.001394477
+      },
+      {
+        "call_count": 12,
+        "kernel": "input_concatenate_fusion_48",
+        "median_call_us": 136.113,
+        "share_of_summed_gpu_time": 0.0021477797472902126,
+        "summed_wall_s_per_observed_trip": 0.00019809557142857142,
+        "summed_wall_s_per_solve": 0.0013866689999999999
+      },
+      {
+        "call_count": 780,
+        "kernel": "loop_divide_fusion_164",
+        "median_call_us": 1.568,
+        "share_of_summed_gpu_time": 0.0019267503500241348,
+        "summed_wall_s_per_observed_trip": 0.00017770942857142858,
+        "summed_wall_s_per_solve": 0.001243966
+      },
+      {
+        "call_count": 18,
+        "kernel": "void batched_svd_parallel_jacobi_32x16<double, double>(int, int, int, int, double*, unsigned long, int, double*, double*, unsigned long, int, double*, unsigned long, int, double, int, int*, double, int, int*, int, double)",
+        "median_call_us": 63.72800000000001,
+        "share_of_summed_gpu_time": 0.001776193308253101,
+        "summed_wall_s_per_observed_trip": 0.00016382314285714284,
+        "summed_wall_s_per_solve": 0.001146762
+      },
+      {
+        "call_count": 840,
+        "kernel": "loop_reduce_fusion_356",
+        "median_call_us": 1.12,
+        "share_of_summed_gpu_time": 0.001460106230566753,
+        "summed_wall_s_per_observed_trip": 0.00013466957142857142,
+        "summed_wall_s_per_solve": 0.000942687
+      },
+      {
+        "call_count": 840,
+        "kernel": "loop_reduce_fusion_357",
+        "median_call_us": 1.088,
+        "share_of_summed_gpu_time": 0.0014287383731745986,
+        "summed_wall_s_per_observed_trip": 0.00013177642857142857,
+        "summed_wall_s_per_solve": 0.000922435
+      }
+    ],
+    "sha256": "e8538918b3915450db868ed0c69c2ddb8c45d774bee9df836b412bbbf0c649b8",
+    "size_bytes": 8408597,
+    "status": "complete",
+    "summed_gpu_compute_wall_s": 0.645629051,
+    "unique_kernel_count": 1133
+  },
+  "dominant_mechanism": {
+    "ablation_attempted_promotions": null,
+    "ablation_full_solve_wall_s": 0.7540094,
+    "ablation_observed_trips": null,
+    "ablation_termination_reason": "not retained before assembly failure",
+    "arm": "projected_krylov_condition_constant",
+    "baseline_attempted_promotions": 84,
+    "baseline_full_solve_wall_s": 41.053982189,
+    "baseline_observed_trips": 7,
+    "estimated_remaining_s_per_trip": 0.10671562857142847,
+    "estimated_saving_s_per_trip": 5.757138969857143,
+    "mechanism": "projected-Krylov Arnoldi condition diagnostic",
+    "repair": "Reuse the Hessenberg already produced by GMRES for qualification, or remove the second Arnoldi construction and its SVD from the hot path.",
+    "same_control_counts": null,
+    "saving_s_per_baseline_trip": 5.757138969857143,
+    "share_of_unattributed_remainder": 1.0222088588466314,
+    "source": "nova/equilibrium/fixed_point.py:808"
+  },
+  "driver": {
+    "path": "benchmarks/trip_remainder_attribution.py",
+    "sha256": "caf4ecec321f5ec94bbfb6061cd1930d6b33c18b4725962fb320b486a1dec45c"
+  },
+  "dynamic_iteration_census": {
+    "categories": {
+      "flood_fill": {
+        "body_iterations_per_observed_trip": 322.0,
+        "body_iterations_per_warm_solve": 322,
+        "call_count_per_warm_solve": 62,
+        "iteration_histogram": {
+          "17": 2,
+          "3": 42,
+          "9": 18
+        },
+        "maximum_iterations_per_call": 17,
+        "median_iterations_per_call": 3.0,
+        "minimum_iterations_per_call": 3
+      },
+      "wall_reachability": {
+        "body_iterations_per_observed_trip": 0.0,
+        "body_iterations_per_warm_solve": 0,
+        "call_count_per_warm_solve": 0,
+        "iteration_histogram": {},
+        "maximum_iterations_per_call": null,
+        "median_iterations_per_call": null,
+        "minimum_iterations_per_call": null
+      }
+    },
+    "method": "benchmark-only wrappers call each production with_steps kernel and return the unchanged array result; debug callbacks collect the scalar step count in a separate untimed topology read on the production 22086/43 operands",
+    "topology_reads_measured": 1,
+    "topology_reads_per_active_set_trip": 1,
+    "total_dynamic_while_body_iterations_per_observed_trip": 322.0,
+    "total_dynamic_while_body_iterations_per_warm_solve": 322
+  },
+  "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-remainder-slurm.log",
+  "measurement_boundaries": {
+    "ablation_control_counts": "baseline retained from the source receipt; ablation result counts were lost in the post-measure assembly exception",
+    "ablation_scope": "benchmark-only monkeypatches restored after tracing",
+    "accuracy_gate": "not asserted for ablations; this node attributes cost and leaves accuracy-preserving repair to a separate implementation node",
+    "dynamic_iteration_backend": "untimed CPU execution of the same production topology-read operands after the H200 job",
+    "nova_source_edited": false
+  },
+  "measurement_revision": "72ae8431d1b8c75bdb47736717f1f0b3dfa914c3",
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "production_identity": {
+    "active_set_trip_budget": 24,
+    "arm": "pure",
+    "expected_observed_trips": 7,
+    "reference": {
+      "shot": 22086,
+      "slice_index": 43
+    }
+  },
+  "ranked_ablation_attribution": [
+    {
+      "ablation_attempted_promotions": null,
+      "ablation_full_solve_wall_s": 0.7540094,
+      "ablation_observed_trips": null,
+      "ablation_termination_reason": "not retained before assembly failure",
+      "arm": "projected_krylov_condition_constant",
+      "baseline_attempted_promotions": 84,
+      "baseline_full_solve_wall_s": 41.053982189,
+      "baseline_observed_trips": 7,
+      "mechanism": "projected-Krylov Arnoldi condition diagnostic",
+      "same_control_counts": null,
+      "saving_s_per_baseline_trip": 5.757138969857143,
+      "share_of_unattributed_remainder": 1.0222088588466314,
+      "source": "nova/equilibrium/fixed_point.py:808"
+    },
+    {
+      "ablation_attempted_promotions": null,
+      "ablation_full_solve_wall_s": 36.189234466,
+      "ablation_observed_trips": null,
+      "ablation_termination_reason": "not retained before assembly failure",
+      "arm": "single_line_search_grade",
+      "baseline_attempted_promotions": 84,
+      "baseline_full_solve_wall_s": 41.053982189,
+      "baseline_observed_trips": 7,
+      "mechanism": "fixed line-search grade ladder",
+      "same_control_counts": null,
+      "saving_s_per_baseline_trip": 0.6949639604285716,
+      "share_of_unattributed_remainder": 0.12339433191532864,
+      "source": "nova/equilibrium/fixed_point.py:77"
+    },
+    {
+      "ablation_attempted_promotions": null,
+      "ablation_full_solve_wall_s": 40.57478446,
+      "ablation_observed_trips": null,
+      "ablation_termination_reason": "not retained before assembly failure",
+      "arm": "connectivity_zero_iterations",
+      "baseline_attempted_promotions": 84,
+      "baseline_full_solve_wall_s": 41.053982189,
+      "baseline_observed_trips": 7,
+      "mechanism": "connectivity flood and reachability fixed-point loops",
+      "same_control_counts": null,
+      "saving_s_per_baseline_trip": 0.06845681842857232,
+      "share_of_unattributed_remainder": 0.01215485097937081,
+      "source": "nova/equilibrium/flux_surface_connectivity.py:204"
+    },
+    {
+      "ablation_attempted_promotions": null,
+      "ablation_full_solve_wall_s": 40.93134739,
+      "ablation_observed_trips": null,
+      "ablation_termination_reason": "not retained before assembly failure",
+      "arm": "split_spline_condition_constant",
+      "baseline_attempted_promotions": 84,
+      "baseline_full_solve_wall_s": 41.053982189,
+      "baseline_observed_trips": 7,
+      "mechanism": "split-spline Jacobi SVD condition estimates",
+      "same_control_counts": null,
+      "saving_s_per_baseline_trip": 0.017519257000000517,
+      "share_of_unattributed_remainder": 0.0031106318259077497,
+      "source": "nova/linalg/split_spline.py:162"
+    }
+  ],
+  "runtime": {
+    "cuda_visible_devices": "0",
+    "device": "cuda:0",
+    "device_kind": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax": "0.11.0",
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "python": "3.14.2"
+  },
+  "scheduler": {
+    "accounting_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-remainder-sacct.log",
+    "exit_code": "1:0",
+    "failure": "source-anchor formatting after TRACE_DONE; no GPU evidence lost",
+    "job_id": "1262726",
+    "measurement_completed": true,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "state": "FAILED_POST_MEASUREMENT",
+    "stderr_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-remainder-job-1262726.err",
+    "stdout_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-remainder-job-1262726.out"
+  },
+  "schema": "nova.trip_remainder_attribution",
+  "schema_version": 1,
+  "source_anchors": {
+    "flood_fill_while": "nova/equilibrium/flux_surface_connectivity.py:204",
+    "projected_krylov_condition": "nova/equilibrium/fixed_point.py:808",
+    "split_spline_condition": "nova/linalg/split_spline.py:162",
+    "wall_reachability": "nova/equilibrium/connectivity_boundary.py:997"
+  },
+  "source_receipt": {
+    "path": "docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json",
+    "sha256": "e1322402c2eeb11770cd8b95ee98366b84a1eac76cfef796bdabeff28c8bb255"
+  },
+  "unattributed_baseline": {
+    "share_of_trip": 0.9662,
+    "wall_s_per_trip": 5.632057402
+  }
+}

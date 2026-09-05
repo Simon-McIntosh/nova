@@ -1,0 +1,398 @@
+{
+  "candidate_measured_full_solve_wall_s": 124.70404352899641,
+  "candidate_promotion_count_observation": {
+    "banked_field": "solve.trips",
+    "banked_performance_receipt_count": 24,
+    "banked_revision": "9a49568c",
+    "divergence": 144,
+    "interpretation": "the banked count predates the step-cap merge and is retained as an observation; it is not a validity gate on synchronized raw timings",
+    "matches": false,
+    "observed_attempted_newton_promotions": 168
+  },
+  "candidate_resume_provenance": {
+    "checks": {
+      "arm": true,
+      "authority_arm": true,
+      "authority_digest": true,
+      "authority_identity": true,
+      "counts_present": true,
+      "h200_runtime": true,
+      "incomplete_component_profile": true,
+      "only_production_serialised": true,
+      "production_probe_present": true,
+      "raw_schema": true,
+      "revision": true,
+      "scheduler_job_identity": true,
+      "scheduler_partition": true,
+      "scheduler_reservation": true,
+      "scheduler_tmp": true,
+      "three_synchronised_samples": true,
+      "x64_runtime": true
+    },
+    "policy": "reuse a complete three-sample production timing from the same arm and revision when it was measured on one H200 in betelgeuse under the gpu_0003_grpA reservation; component probes run in the resume job",
+    "resume_job_id": "1262723",
+    "source_job_id": "1262710",
+    "source_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3/docs/figures/polish-support-performance/candidate-2/profile-candidate.json",
+    "source_sha256": "7ec0c74f8c335de82e9c94f46aa77127462b9b25bc6a61dc0e0f23ac5af9ccfe",
+    "valid": true
+  },
+  "candidate_revision": "f001ce588d9ad3bde8387907e109dbf1226fff7c",
+  "candidate_wall_s_per_active_set_trip": 8.9074316806426,
+  "captured_at": "2026-09-04T17:04:08.109211+00:00",
+  "main_measured_full_solve_wall_s": 41.33267938438803,
+  "main_promotion_count_observation": {
+    "banked_field": "solve.trips",
+    "banked_performance_receipt_count": 24,
+    "banked_revision": "9a49568c",
+    "divergence": 60,
+    "interpretation": "the banked count predates the step-cap merge and is retained as an observation; it is not a validity gate on synchronized raw timings",
+    "matches": false,
+    "observed_attempted_newton_promotions": 84
+  },
+  "main_revision": "8df13859ac23838b27279e8b7e505ebf21bc11cd",
+  "main_wall_s_per_active_set_trip": 5.904668483484004,
+  "method": "rank by candidate-minus-main isolated direct-probe median multiplied by modeled calls per active-set trip; rows overlap and are not additive",
+  "rows": [
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 17.917370304465294,
+      "candidate_direct_wall_s_per_call": 0.05332550685852766,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "separatrix",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 8.503467634320259,
+      "delta_direct_wall_s_per_call": 0.025307939387857914,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 9.413902670145035,
+      "main_direct_wall_s_per_call": 0.028017567470669746,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 14.860593482851982,
+      "candidate_direct_wall_s_per_call": 0.04422795679420233,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "wall_reachability",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 6.378916025161743,
+      "delta_direct_wall_s_per_call": 0.018984869122505188,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 8.481677457690239,
+      "main_direct_wall_s_per_call": 0.02524308767169714,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 5.759334817528725,
+      "candidate_direct_wall_s_per_call": 0.017140877433121204,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "census",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 5.682114779949188,
+      "delta_direct_wall_s_per_call": 0.016911055892705917,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 0.07722003757953644,
+      "main_direct_wall_s_per_call": 0.00022982154041528702,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 2.24783818423748,
+      "candidate_direct_wall_s_per_call": 0.0066899945959448814,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "census_values_by_spline",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 1.2308170348405838,
+      "delta_direct_wall_s_per_call": 0.003663145937025547,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 1.0170211493968964,
+      "main_direct_wall_s_per_call": 0.0030268486589193344,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 5.48038150370121,
+      "candidate_direct_wall_s_per_call": 0.016310659237205982,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "limiter_tangency_along_spline",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.4135824590921402,
+      "delta_direct_wall_s_per_call": 0.0012309001758694649,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 5.06679904460907,
+      "main_direct_wall_s_per_call": 0.015079759061336517,
+      "main_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 0.34885624051094055,
+      "candidate_direct_wall_s_per_call": 0.0010382626205682755,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      },
+      "component": "spline_fits",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.01026923954486847,
+      "delta_direct_wall_s_per_call": 3.056321293115616e-05,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 0.3385870009660721,
+      "main_direct_wall_s_per_call": 0.0010076994076371193,
+      "main_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 0.023609519004821777,
+      "candidate_direct_wall_s_per_call": 7.026642560958862e-05,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "line_of_sight_rule",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.005087524652481079,
+      "delta_direct_wall_s_per_call": 1.514144241809845e-05,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 0.018521994352340698,
+      "main_direct_wall_s_per_call": 5.512498319149017e-05,
+      "main_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 144.0,
+      "candidate_direct_product_s_per_trip": 0.04935465753078461,
+      "candidate_direct_wall_s_per_call": 0.0003427406772971153,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "jacobian_vector_product",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.0014718621969223022,
+      "delta_direct_wall_s_per_call": 1.0221265256404877e-05,
+      "main_calls_per_trip": 144.0,
+      "main_direct_product_s_per_trip": 0.047882795333862305,
+      "main_direct_wall_s_per_call": 0.00033251941204071045,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 12.0,
+      "candidate_direct_product_s_per_trip": 0.04840843006968498,
+      "candidate_direct_wall_s_per_call": 0.004034035839140415,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "line_search",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.0008054673671722412,
+      "delta_direct_wall_s_per_call": 6.712228059768677e-05,
+      "main_calls_per_trip": 12.0,
+      "main_direct_product_s_per_trip": 0.04760296270251274,
+      "main_direct_wall_s_per_call": 0.003966913558542728,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 1.0,
+      "candidate_direct_product_s_per_trip": 0.0,
+      "candidate_direct_wall_s_per_call": 0.0,
+      "candidate_persistent_cache": {
+        "events": {},
+        "status": "not_applicable"
+      },
+      "component": "host_sync_remainder",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": 0.0,
+      "delta_direct_wall_s_per_call": 0.0,
+      "main_calls_per_trip": 1.0,
+      "main_direct_product_s_per_trip": 0.0,
+      "main_direct_wall_s_per_call": 0.0,
+      "main_persistent_cache": {
+        "events": {},
+        "status": "not_applicable"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 12.0,
+      "candidate_direct_product_s_per_trip": 0.015050835907459259,
+      "candidate_direct_wall_s_per_call": 0.001254236325621605,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      },
+      "component": "gmres_orthogonalisation",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": -0.0002065412700176239,
+      "delta_direct_wall_s_per_call": -1.721177250146866e-05,
+      "main_calls_per_trip": 12.0,
+      "main_direct_product_s_per_trip": 0.015257377177476883,
+      "main_direct_wall_s_per_call": 0.0012714480981230736,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 84.0,
+      "candidate_direct_product_s_per_trip": 0.019139159470796585,
+      "candidate_direct_wall_s_per_call": 0.0002278471365571022,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "forward_evaluation",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": -0.007101818919181824,
+      "delta_direct_wall_s_per_call": -8.454546332359314e-05,
+      "main_calls_per_trip": 84.0,
+      "main_direct_product_s_per_trip": 0.02624097838997841,
+      "main_direct_wall_s_per_call": 0.00031239259988069534,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    },
+    {
+      "candidate_calls_per_trip": 336.0,
+      "candidate_direct_product_s_per_trip": 4.493903964757919,
+      "candidate_direct_wall_s_per_call": 0.01337471418082714,
+      "candidate_persistent_cache": {
+        "events": {
+          "cache_misses": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "miss"
+      },
+      "component": "flood_fills",
+      "delta_calls_per_trip": 0.0,
+      "delta_direct_product_s_per_trip": -0.04835933446884155,
+      "delta_direct_wall_s_per_call": -0.00014392659068107605,
+      "main_calls_per_trip": 336.0,
+      "main_direct_product_s_per_trip": 4.542263299226761,
+      "main_direct_wall_s_per_call": 0.013518640771508217,
+      "main_persistent_cache": {
+        "events": {
+          "cache_hits": 1,
+          "compile_requests_use_cache": 1
+        },
+        "status": "hit"
+      }
+    }
+  ],
+  "scheduler": {
+    "accepted_time_limit": "01:00:00",
+    "cpus_per_task": "1",
+    "job_id": "1262710",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "temporary_directory": "/tmp"
+  },
+  "schema": "nova.paired_trip_component_attribution"
+}

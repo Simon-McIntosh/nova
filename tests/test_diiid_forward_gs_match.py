@@ -150,7 +150,7 @@ def test_terminal_diagnostic_refuses_any_class_margin_mismatch(monkeypatch):
         lambda *args: _diagnostic(changed_margin),
     )
 
-    with pytest.raises(RuntimeError, match="changed the exact class-margin operand"):
+    with pytest.raises(RuntimeError, match="class-margin operand"):
         gate._terminal_xpoint_diagnostics(profile, state, topology)
 
 

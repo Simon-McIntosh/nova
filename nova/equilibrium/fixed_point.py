@@ -43,7 +43,7 @@ import hashlib
 import math
 import os
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -456,6 +456,7 @@ class FixedPointResult(NamedTuple):
     inner_iteration_step_cap_factors: jax.Array | float = float("nan")
     trajectory_state: jax.Array | float = float("nan")
     trajectory_residual: jax.Array | float = float("nan")
+    row_jvp_projections: jax.Array | tuple[()] = ()
 
 
 class KinkAwareResult(NamedTuple):
@@ -587,6 +588,7 @@ class _ActiveSetIterationState(NamedTuple):
 
     state: jax.Array
     mask: jax.Array
+    partition: Any
     mask_history: jax.Array
     mask_history_count: jax.Array
     result: FixedPointResult
@@ -739,7 +741,8 @@ def _projected_krylov_condition(
     residual_vector: jax.Array,
     *,
     krylov_dimension: int,
-) -> tuple[jax.Array, jax.Array]:
+    return_direction: bool = False,
+) -> tuple[jax.Array, jax.Array] | tuple[jax.Array, jax.Array, jax.Array]:
     """Measure the rectangular Arnoldi projection condition at one iteration.
 
     The fixed-shape, twice-orthogonalised Arnoldi construction matches the
@@ -798,7 +801,7 @@ def _projected_krylov_condition(
         basis_valid = basis_valid.at[column + 1].set(next_valid)
         return basis, hessenberg, basis_valid
 
-    _basis, hessenberg, basis_valid = jax.lax.fori_loop(
+    basis, hessenberg, basis_valid = jax.lax.fori_loop(
         0,
         krylov_dimension,
         arnoldi_column,
@@ -813,10 +816,22 @@ def _projected_krylov_condition(
     median = singular_values[median_index]
     condition = largest / jnp.maximum(smallest, jnp.finfo(smallest.dtype).tiny)
     spectral_baseline = largest / jnp.maximum(median, jnp.finfo(median.dtype).tiny)
-    return (
+    measurement = (
         jnp.where(active_columns > 0, condition, 1.0),
         jnp.where(active_columns > 0, spectral_baseline, 1.0),
     )
+    if not return_direction:
+        return measurement
+    _left, _values, right = jnp.linalg.svd(hessenberg, full_matrices=False)
+    coordinates = right[smallest_index]
+    direction = coordinates @ basis[:-1]
+    direction_norm = jnp.linalg.norm(direction)
+    direction = jnp.where(
+        (active_columns > 0) & jnp.isfinite(direction_norm) & (direction_norm > 0.0),
+        direction / jnp.maximum(direction_norm, jnp.finfo(direction.dtype).tiny),
+        jnp.zeros_like(direction),
+    )
+    return (*measurement, direction)
 
 
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
@@ -893,6 +908,40 @@ def _nonlinear_model_error_fraction(
     """Measure local-model error relative to the accepted step's origin merit."""
     scale = jnp.maximum(jnp.abs(incumbent_merit), jnp.finfo(incumbent_merit.dtype).tiny)
     return jnp.abs(actual_merit - predicted_merit) / scale
+
+
+def _acceptance_map_on_selected_partition(
+    candidate: jax.Array,
+    previous_shadow: jax.Array,
+    use_incumbent_partition: jax.Array | bool,
+    frozen_map_fn: Callable[[jax.Array], jax.Array],
+    induced_shadow_fn: Callable[[jax.Array, jax.Array], jax.Array],
+    induced_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
+) -> jax.Array:
+    """Evaluate exactly one topology authority for a candidate score.
+
+    Incumbent-partition scoring already carries the trip's partition, census,
+    and masks.  Recovery, rebuilt-model, and descent candidates therefore get
+    the same score from that frozen authority, while evaluating their induced
+    topology would be discarded.  A scalar conditional keeps that duplicate
+    flood, reachability, and stationary-point work out of all three fallbacks.
+    Once incumbent-partition scoring is inactive, own-mask admission requires
+    the candidate-induced topology and retains that read as its authority.
+    """
+
+    def on_incumbent(_):
+        return frozen_map_fn(candidate)
+
+    def on_induced(_):
+        candidate_shadow = jnp.ravel(induced_shadow_fn(candidate, previous_shadow))
+        return induced_map_fn(candidate, candidate_shadow)
+
+    return jax.lax.cond(
+        jnp.asarray(use_incumbent_partition),
+        on_incumbent,
+        on_induced,
+        operand=None,
+    )
 
 
 def _backtracked_promotion(
@@ -2266,14 +2315,13 @@ def _newton_krylov_inner(
         def acceptance_map(candidate):
             if acceptance_shadow_mask_fn is None or not own_mask_acceptance:
                 return frozen_map(candidate)
-            candidate_shadow = jnp.ravel(
-                acceptance_shadow_mask_fn(candidate, carry.shadow_mask)
-            )
-            induced_map = acceptance_shadowed_map_fn(candidate, candidate_shadow)
-            return jnp.where(
-                jnp.asarray(presettlement_incumbent_scoring),
-                frozen_map(candidate),
-                induced_map,
+            return _acceptance_map_on_selected_partition(
+                candidate,
+                carry.shadow_mask,
+                presettlement_incumbent_scoring,
+                frozen_map,
+                acceptance_shadow_mask_fn,
+                acceptance_shadowed_map_fn,
             )
 
         mapped, tangent = jax.linearize(frozen_map, state)
@@ -2924,23 +2972,52 @@ def _active_set_newton_krylov(
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
     initial = _solver_state(initial, precision)
-    initial_mask = jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool))
+    partition_read = getattr(shadowed_map_fn, "_read_frozen_partition", None)
+    partitioned_map = getattr(shadowed_map_fn, "_map_frozen_partition", None)
+    partition_shadow = getattr(shadowed_map_fn, "_frozen_partition_shadow", None)
+    freeze_topology = (
+        partition_read is not None
+        and partitioned_map is not None
+        and partition_shadow is not None
+    )
+    if freeze_topology:
+        initial_partition = partition_read(initial, None)
+        initial_mask = jnp.ravel(
+            jnp.asarray(partition_shadow(initial_partition), dtype=bool)
+        )
+    else:
+        initial_mask = jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool))
+        initial_partition = initial_mask
     history = jnp.zeros((active_set_steps + 1, initial_mask.size), dtype=bool)
     history = history.at[0].set(initial_mask)
 
     def solve_frozen(
         state,
         mask,
+        partition,
         run_warmup,
         globalization_state=None,
         resume_globalization=False,
         presettlement=False,
     ):
         def frozen_map(candidate):
+            if freeze_topology:
+                return partitioned_map(candidate, partition)
             return shadowed_map_fn(candidate, mask)
 
         def frozen_mask(_candidate):
             return mask
+
+        def frozen_acceptance_map(candidate, _mask):
+            return frozen_map(candidate)
+
+        def frozen_acceptance_mask(_candidate, _previous):
+            return mask
+
+        acceptance_mask = (
+            frozen_acceptance_mask if freeze_topology else promoted_shadow_mask_fn
+        )
+        acceptance_map = frozen_acceptance_map if freeze_topology else shadowed_map_fn
 
         return _newton_krylov_inner(
             frozen_map,
@@ -2959,8 +3036,8 @@ def _active_set_newton_krylov(
             resume_globalization=resume_globalization,
             return_globalization_state=True,
             model_trust_selection=model_trust_selection,
-            acceptance_shadow_mask_fn=promoted_shadow_mask_fn,
-            acceptance_shadowed_map_fn=shadowed_map_fn,
+            acceptance_shadow_mask_fn=acceptance_mask,
+            acceptance_shadowed_map_fn=acceptance_map,
             own_mask_acceptance=own_mask_acceptance,
             presettlement_incumbent_scoring=presettlement,
             precision=precision,
@@ -2975,6 +3052,7 @@ def _active_set_newton_krylov(
         index,
         state,
         mask,
+        partition,
         mask_history,
         history_count,
         inner_result,
@@ -2983,9 +3061,20 @@ def _active_set_newton_krylov(
         previous_live_residual,
     ):
         solved_state = inner_result.state
-        observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
+        if freeze_topology:
+            observed_partition = partition_read(solved_state, mask)
+            observed_mask = jnp.ravel(
+                jnp.asarray(partition_shadow(observed_partition), dtype=bool)
+            )
+        else:
+            observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
+            observed_partition = observed_mask
         observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
-        observed_mapped = shadowed_map_fn(solved_state, observed_mask)
+        observed_mapped = (
+            partitioned_map(solved_state, observed_partition)
+            if freeze_topology
+            else shadowed_map_fn(solved_state, observed_mask)
+        )
         observed_residual = _relative_residual(observed_mapped, solved_state)
         observed_finite = jnp.isfinite(observed_residual)
         converged = (
@@ -3000,8 +3089,12 @@ def _active_set_newton_krylov(
         )
 
         damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
-        damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
-        damped_mapped = shadowed_map_fn(damped_state, damped_mask)
+        if freeze_topology:
+            damped_mask = observed_mask
+            damped_mapped = partitioned_map(damped_state, observed_partition)
+        else:
+            damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
+            damped_mapped = shadowed_map_fn(damped_state, damped_mask)
         damped_residual = _relative_residual(damped_mapped, damped_state)
         damped_finite = jnp.isfinite(damped_residual)
         damping_repeats = mask_seen(damped_mask, mask_history, history_count)
@@ -3009,15 +3102,23 @@ def _active_set_newton_krylov(
 
         selected_state = jnp.where(repeated, damped_state, solved_state)
         selected_mask = jnp.where(repeated, damped_mask, observed_mask)
+        selected_partition = observed_partition
         selected_residual = jnp.where(repeated, damped_residual, observed_residual)
         selected_finite = jnp.where(repeated, damped_finite, observed_finite)
         selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
-        incoming_mapped = shadowed_map_fn(state, mask)
+        incoming_mapped = (
+            partitioned_map(state, partition)
+            if freeze_topology
+            else shadowed_map_fn(state, mask)
+        )
         incoming_residual = _relative_residual(incoming_mapped, state)
         incoming_merit = _smooth_relative_sup_merit(incoming_mapped, state)
-        selected_merit = _smooth_relative_sup_merit(
-            shadowed_map_fn(selected_state, selected_mask), selected_state
+        selected_mapped = (
+            partitioned_map(selected_state, selected_partition)
+            if freeze_topology
+            else shadowed_map_fn(selected_state, selected_mask)
         )
+        selected_merit = _smooth_relative_sup_merit(selected_mapped, selected_state)
         retain_incoming = (
             retain_outer_best_iterate
             & (selected_difference == 0)
@@ -3026,12 +3127,24 @@ def _active_set_newton_krylov(
             & (~jnp.isfinite(selected_merit) | (selected_merit > incoming_merit))
         )
         trajectory_state = inner_result.trajectory_state
-        trajectory_mask = jnp.ravel(promoted_shadow_mask_fn(trajectory_state, mask))
+        trajectory_mask = (
+            observed_mask
+            if freeze_topology
+            else jnp.ravel(promoted_shadow_mask_fn(trajectory_state, mask))
+        )
         trajectory_finite = jnp.all(jnp.isfinite(trajectory_state)) & jnp.isfinite(
             inner_result.trajectory_residual
         )
         selected_state = jnp.where(retain_incoming, state, selected_state)
         selected_mask = jnp.where(retain_incoming, mask, selected_mask)
+        if freeze_topology:
+            selected_partition = jax.tree.map(
+                lambda incoming, observed: jnp.where(
+                    retain_incoming, incoming, observed
+                ),
+                partition,
+                selected_partition,
+            )
         selected_residual = jnp.where(
             retain_incoming, incoming_residual, selected_residual
         )
@@ -3092,6 +3205,7 @@ def _active_set_newton_krylov(
         return (
             selected_state,
             selected_mask,
+            selected_partition,
             mask_history,
             history_count,
             selected_residual,
@@ -3112,6 +3226,7 @@ def _active_set_newton_krylov(
     first_result, first_globalization = solve_frozen(
         initial,
         initial_mask,
+        initial_partition,
         jnp.asarray(True),
         presettlement=(
             jnp.asarray(True) if presettlement_incumbent_scoring else jnp.asarray(False)
@@ -3120,6 +3235,7 @@ def _active_set_newton_krylov(
     (
         first_state,
         first_mask,
+        first_partition,
         history,
         history_count,
         first_residual,
@@ -3139,6 +3255,7 @@ def _active_set_newton_krylov(
         0,
         initial,
         initial_mask,
+        initial_partition,
         history,
         jnp.asarray(1, dtype=jnp.int32),
         first_result,
@@ -3154,6 +3271,7 @@ def _active_set_newton_krylov(
     outer = _ActiveSetIterationState(
         state=first_state,
         mask=first_mask,
+        partition=first_partition,
         mask_history=history,
         mask_history_count=history_count,
         result=first_result,
@@ -3201,6 +3319,7 @@ def _active_set_newton_krylov(
             inner_result, inner_globalization = solve_frozen(
                 solve_state,
                 carry.mask,
+                carry.partition,
                 ~carry.continue_trajectory,
                 carry.globalization_state,
                 carry.continue_globalization,
@@ -3209,6 +3328,7 @@ def _active_set_newton_krylov(
             (
                 state,
                 mask,
+                partition,
                 mask_history,
                 history_count,
                 live_residual,
@@ -3228,6 +3348,7 @@ def _active_set_newton_krylov(
                 index,
                 carry.state,
                 carry.mask,
+                carry.partition,
                 carry.mask_history,
                 carry.mask_history_count,
                 inner_result,
@@ -3243,6 +3364,7 @@ def _active_set_newton_krylov(
             return _ActiveSetIterationState(
                 state=state,
                 mask=mask,
+                partition=partition,
                 mask_history=mask_history,
                 mask_history_count=history_count,
                 result=inner_result,
@@ -3361,6 +3483,7 @@ def newton_krylov(
     model_trust_selection: bool | None = None,
     own_mask_acceptance: bool | None = None,
     presettlement_incumbent_scoring: bool = True,
+    row_jvp_observers: tuple[Callable[[jax.Array, jax.Array], jax.Array], ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3491,6 +3614,32 @@ def newton_krylov(
             presettlement_incumbent_scoring=presettlement_incumbent_scoring,
             precision=precision,
         )
+    if row_jvp_observers:
+        telemetry_map = map_fn
+        if carry_shadows:
+            terminal_shadow = jnp.ravel(shadow_mask_fn(result.state))
+
+            def telemetry_map(state):
+                return shadowed_map_fn(state, terminal_shadow)
+
+        mapped, tangent = jax.linearize(telemetry_map, result.state)
+
+        def linear_action(vector):
+            return vector - tangent(vector)
+
+        _condition, _baseline, soft_direction = _projected_krylov_condition(
+            linear_action,
+            mapped - result.state,
+            krylov_dimension=gmres_iterations,
+            return_direction=True,
+        )
+        projections = jnp.concatenate(
+            tuple(
+                jnp.ravel(observer(result.state, soft_direction))
+                for observer in row_jvp_observers
+            )
+        )
+        result = result._replace(row_jvp_projections=projections)
     if checkpoint_path is not None:
         checkpoint = Path(checkpoint_path)
         jax.debug.callback(

@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -287,6 +287,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260904T043020189632-nia-admission-production-grid-repair" data-who="nia-admission-grid" data-when="2026-09-04T05:11:41Z">
     <div class="r-comment-body"><p>Candidate table widened to 30 with truncation telemetry, empty qualification returns a sentinel, rescue pass seeds from the centroid-nearest extremum, share floor at least one cell; eleven of twelve MAST rows admit an axis within 14 mm of R=0.90 m and the 136-cell exact oracle admits its axis; merged at 82949087</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260905T084051745035-nia-census-slot-exhaustion-repair" data-who="nia-dsv4-census-x" data-when="2026-09-05T10:56:32.403Z">
+    <div class="r-comment-body"><p>Over-capacity census repaired: the structured census routes through lax.cond to an all-origin lane (one work slot per origin) whenever admitted origins exceed the 2*maxsize work slots, publishes census_slots_exhausted, reconstructs root_uncertainty as where(admitted, scatter, floor), and the polish retain lane publishes the same converged value as the refine lane. On the seed-0 white-noise field (141 admitted against 60 slots) same_root_count 59/31, polished_count 63/41, overflow True/True match the all-origin census where the base published 25/16, 26/19, False/False. 41 passed, 2 pre-existing skips. Structural and telemetry keys byte-identical; the compiled path&#x27;s raw polish-value arrays reproduce the eager authority within 4e-8 on the noise field (last-ULP compiled-versus-eager drift on marginal polish), byte-exact on the analytic fields.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260904T043201409904-nia-test-health-repairs-codex" data-who="nia-test-health-x" data-when="2026-09-04T04:59:31Z">
     <div class="r-comment-body"><p>signature call fixed to the seven-parameter contract, the nineteen-amplitude sweep moved under the slow marker, the threshold assertion compares the parsed number; default lane green; run to completion the sweep fails a pre-existing 0.13025 mm selected-X-coordinate identity assertion, recorded for a follow-on; worker parked on that unmet slow-lane requirement and codex resume was refused by a stale hold</p></div>

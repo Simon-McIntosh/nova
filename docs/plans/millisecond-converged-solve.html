@@ -23,8 +23,9 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.4">
+<meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123">
 </head>
 <body>
 <main class="plan-doc">
@@ -103,6 +104,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T005403969899" data-who="coordinator" data-when="2026-09-05T00:55:00Z">
     <div class="r-comment-body"><p>The growing trip cost is named (report <code>~/.config/reckon/crew/reports/nova/millisecond/per-trip-kernel-breakdown.md</code>, receipts banked at <code>docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/</code>, evidence anchor <code>#per-trip-kernels</code>; H200 job 1262787 traced five of seven trips before the CUPTI replay died in the SVD path). From trip 2 to trip 5 the traced wall rises 66 percent, launches 65 percent, summed kernel time 46 percent, while every dominant kernel keeps its median duration and its call count grows 1.45 times: the same loop bodies run more often. The growth starts exactly where globalisation recovery starts on rejected promotions (trips 1 to 3 have zero backtracks; trip 5 has 47 backtracks, 4 recoveries, 3 model rebuilds, 2 descents). The rejected-promotion continuation re-scores the nonlinear map (<code>fixed_point.py:1299</code>) and the rebuilt-model path re-linearises and restarts GMRES (lines 1438 to 1495), both re-entering the topology flood, reachability and polish inside a trip whose partition is frozen at one read and whose acceptance scores on the incumbent mask. Floor saving 3.6 s per late trip, ceiling 8.9 s. Dispatched <code>msc-recovery-scoring-on-frozen-partition</code>: every recovery, rebuild and descent evaluation reuses the frozen partition, census and masks, bit-identical where the re-entry was redundant, gated on the referees, the conditioning contracts, a recovery-exercising fixture, the per-trip walls and the four public-route rows on the H200.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T021959834173" data-who="coordinator" data-when="2026-09-05T02:18:00Z">
+    <div class="r-comment-body"><p>First real speedup landed: frozen-partition acceptance scoring merged at <code>0efbf123</code> (<code>f5bf49ae</code> plus receipts; evidence <code>docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/</code>, H200 job 1262789). The merit ladder, recovery, rebuilt-model and descent scoring were evaluating each candidate's own topology and discarding it while incumbent-partition acceptance is in force; the trip already carries the frozen partition, census and masks, so the evaluation now happens only where own-mask admission scores on it. Every solver decision is bit-identical on a CPU fixture exercising recovery and a model rebuild (partition-map evaluations 47 to 27, reads unchanged), 71 tests green. Production solve of 22086/43 pure: 41.1 s to 34.3 s; trips 2 and 3 from 3.4 s to 0.20 s each. Trips 4 to 7, the ones with rejected promotions, are unchanged at 3.85, 5.67, 12.30 and 12.30 s, so a second dynamic source scales them. Dispatched <code>msc-late-trip-promotion-timing</code>: ordered timestamps around every promotion attempt and every recovery, rebuild and descent evaluation inside those trips, with the ladder grade, GMRES iterations used and the re-linearisation flag per promotion, to rank the promotion-level costs and name the mechanism (the rebuilt-model path restarting GMRES at full budget per rejected promotion is the leading candidate).</p></div>
 </div>
 </section>
 </main>

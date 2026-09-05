@@ -239,6 +239,32 @@
     redundant.</p>
   </section>
 
+  <section id="frozen-partition-scoring">
+    <h2>Acceptance scoring on the frozen partition: 41 s to 34 s, early trips at a fifth of a second (merged at 0efbf123)</h2>
+    <p><strong>Commits:</strong> <code>f5bf49ae</code> (the change), <code>aa344960</code>, <code>29978ede</code>, <code>93857669</code>
+    (receipts); evidence <code>docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/</code> and
+    <code>docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/</code> (H200 job 1262789). The merit
+    ladder, recovery, rebuilt-model and descent scoring evaluated each candidate's own topology and discarded it while
+    incumbent-partition acceptance is in force; the trip already carries the frozen partition, census and masks. The evaluation
+    is now made only where own-mask admission scores on it. On a CPU fixture exercising recovery and a model rebuild every result
+    leaf is bit-identical while partition-map evaluations fall from 47 to 27; 71 tests green including the nine referees and the
+    conditioning contracts.</p>
+    <table>
+      <caption>MAST 22086/43 pure on the H200, per active trip, before and after</caption>
+      <thead><tr><th scope="col">Trip</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">2, 3 (no rejected promotions)</th><td>3.37, 3.38 s</td><td>0.20, 0.20 s</td></tr>
+        <tr><th scope="row">4 (34 backtracks, 2 recoveries)</th><td>3.82 s</td><td>3.85 s</td></tr>
+        <tr><th scope="row">5 (47 backtracks, 4 recoveries, 3 rebuilds, 2 descents)</th><td>5.61 s</td><td>5.67 s</td></tr>
+        <tr><th scope="row">6, 7 (5 then 0 of 12 promotions accepted)</th><td>12.19, 12.24 s</td><td>12.30, 12.30 s</td></tr>
+        <tr><th scope="row">Whole solve</th><td>41.1 s</td><td>34.3 s</td></tr>
+      </tbody>
+    </table>
+    <p>The discarded candidate-topology evaluation was the whole cost of a trip without rejected promotions. What remains is a
+    second dynamic source that scales only the trips with rejected promotions; a per-promotion timing inside those trips is the
+    next measurement.</p>
+  </section>
+
 </main>
 </body>
 </html>

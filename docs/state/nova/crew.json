@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T03:47:00",
+  "updated": "2026-09-05T04:17:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1752,6 +1752,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-late-trip-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "msc-loop-trace-x",
@@ -99928,6 +99937,190 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-recovery-scoring-on-frozen-partition",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3919,
+                "cached_input_tokens": 781238,
+                "input_tokens": 785258,
+                "output_tokens": 4297,
+                "reasoning_output_tokens": 1069,
+                "total_tokens": 789555,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/fixed_point.py, tests/test_fixed_point.py, tests/test_recovery_frozen_partition.py, docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/ and docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/, in which a CPU test proves the recovery plus rebuild paths bit-identical to the current solver on a fixture exercising both, the nine referee node IDs plus tests/test_fixed_point.py plus tests/test_step_cap_model_error.py plus the conditioning contract tests green with logs, one H200 job writing recovery-frozen/profile.json with the per-solve wall plus per-trip walls beside the 41.1 s baseline and its 3.4 to 12.2 s trips, plus recovery-frozen/four-rows.json with per row terminal residual, trips, termination plus class beside docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json with every difference stated, the manifest written before the SLURM wait begins",
+          "estimated_hours": null,
+          "goal": "Remove the dynamic work that makes late active-set trips cost two to four times the early ones: the per-trip device traces (receipts docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/, report ~/.config/reckon/crew/reports/nova/millisecond/per-trip-kernel-breakdown.md, H200 job 1262787, five of seven trips of MAST 22086/43 pure traced) show trip 5 costing 9.1 s against 5.5 s for trip 2 with every dominant kernel keeping its median duration while its call count grows 1.45 times, launches 214k to 354k, and the growth begins exactly where globalization recovery begins (trips 1 to 3 zero backtracks, trip 4 34 backtracks plus 2 recoveries, trip 5 47 backtracks, 4 recoveries, 3 model rebuilds, 2 descents), the repeated work being nonlinear-map scoring in the rejected-promotion continuation at nova/equilibrium/fixed_point.py:1299 plus re-linearisation with restarted GMRES in the rebuilt-model path around lines 1438 to 1495, both of which re-enter the topology flood, reachability and stationary-point polish although the trip's partition is frozen at its single read (merged at 72ae8431) and the acceptance scores on the incumbent mask by the lead's pre-settlement decision, so this node makes every recovery, rebuild and descent evaluation inside a trip reuse the trip's frozen partition, census and masks instead of re-entering the topology read, states for each removed re-entry why its result was identical to the frozen read (or, where a re-entry reads a different state's topology, why the acceptance rule needs it, keeping that one), keeps the merit ladder, recovery radius, model-rebuild damping, descent scaling plus every acceptance decision unchanged, gates on the nine referee node IDs plus tests/test_fixed_point.py plus tests/test_step_cap_model_error.py plus the conditioning contracts plus a CPU bit-identity test on a fixture that exercises at least one recovery plus one model rebuild, plus one H200 job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile (payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly from the checkout root, JAX_PLATFORMS=cuda,cpu, the banked production driver copies under docs/figures/polish-support-performance/candidate-2/ for the timing, benchmarks/settled_mask_stall.py for the four public-route rows, benchmarks/compiled_outer_loop_trace.py for the per-trip walls) measuring the per-solve wall plus per-trip walls before against after plus the four rows before against after, polled in the foreground because a backgrounded wait ends the worker's turn, with authority for up to three submissions on any failure, the manifest written before the wait",
+          "id": "msc-recovery-scoring-on-frozen-partition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "150m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py",
+            "tests/test_recovery_frozen_partition.py",
+            "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/",
+            "docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-recovery-frozen-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T00:52:08Z",
+        "completed_at": "2026-09-05T02:14:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4940,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4940,
+        "stalled": false,
+        "time_budget": "150m",
+        "base_sha": "3368a7ce3b105c2f1d9c79c2d6d4cb6908baed44",
+        "commits": [
+          "f5bf49aeb9d730d63e4d2bb05e1ada508e32dc49",
+          "aa344960688a871590684f48f2e6b87b987e0955",
+          "29978ede4d37a8e1606fe35695efa74c1b02214b",
+          "9385766917998fb0c4bee8fc328fecab9318f9b5"
+        ],
+        "changed_lines": {
+          "added": 2893,
+          "removed": 8,
+          "files": 13
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_recovery_frozen_partition.py plus the nine referee node IDs plus tests/test_fixed_point.py tests/test_step_cap_model_error.py and the four conditioning contract files (71 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/logs/cpu-required-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06f0d-2a40-7891-aea1-51bfd982b996",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 66845,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 69245,
+              "external_wait": null,
+              "log_age_seconds": 68343,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 68399,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition",
+          "session_id": "01a06f0d-2a40-7891-aea1-51bfd982b996",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T02:14:28Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -100072,6 +100265,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1705
+    "_version": 1707
   }
 }

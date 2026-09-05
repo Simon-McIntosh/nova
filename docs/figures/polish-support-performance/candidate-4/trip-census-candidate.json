@@ -1,0 +1,22 @@
+{
+  "schema": "nova.held_tip_trip_topology.v1",
+  "captured_at": "2026-09-05",
+  "label": "candidate",
+  "revision": "7fa87203c3ad49978f3e8bcedd0539ce940ff444",
+  "base_revision": "3368a7ce3b105c2f1d9c79c2d6d4cb6908baed44",
+  "held_commit": "ed00ba0c",
+  "complete": false,
+  "provenance_complete": false,
+  "result": null,
+  "trips": [],
+  "scheduler": {
+    "job_id": "1262785",
+    "state": "TIMEOUT",
+    "elapsed": "01:00:16",
+    "time_limit": "01:00:00",
+    "host": "98dci4-gpu-0003.iter.org",
+    "stdout": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T000454486337-nia-candidate4-paired-remeasure/slurm-1262785.out",
+    "stderr": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T000454486337-nia-candidate4-paired-remeasure/slurm-1262785.err"
+  },
+  "not_run_reason": "The single authorized job reached its one-hour limit after both four-row arms completed and before the separate trip-census stage began. This file records absent evidence and contains no substituted measurements."
+}

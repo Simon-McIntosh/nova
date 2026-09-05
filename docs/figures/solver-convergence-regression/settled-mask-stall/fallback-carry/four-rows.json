@@ -1,0 +1,101 @@
+{
+  "baseline_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen/four-rows-after.json",
+  "captured_at": "2026-09-05T05:38:20.231833+00:00",
+  "measurement_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/four-rows-after.json",
+  "measurement_revision": "1b56a7c7126a5daec8ed96682161d76235e14e57",
+  "rows": [
+    {
+      "after": {
+        "class": "diverted",
+        "terminal_residual": 0.0006403305065683237,
+        "termination": "active_set_settled",
+        "trips": 8
+      },
+      "before": {
+        "class": "diverted",
+        "terminal_residual": 0.0006403305065683237,
+        "termination": "active_set_settled",
+        "trips": 8
+      },
+      "difference": {
+        "class_changed": false,
+        "terminal_residual": 0.0,
+        "termination_changed": false,
+        "trips": 0
+      },
+      "identical": true,
+      "identity": "21985/51"
+    },
+    {
+      "after": {
+        "class": "diverted",
+        "terminal_residual": 0.0013530525770449893,
+        "termination": "active_set_settled",
+        "trips": 4
+      },
+      "before": {
+        "class": "diverted",
+        "terminal_residual": 0.0013530525770449893,
+        "termination": "active_set_settled",
+        "trips": 4
+      },
+      "difference": {
+        "class_changed": false,
+        "terminal_residual": 0.0,
+        "termination_changed": false,
+        "trips": 0
+      },
+      "identical": true,
+      "identity": "21986/46"
+    },
+    {
+      "after": {
+        "class": "limited",
+        "terminal_residual": 0.0007331916379767382,
+        "termination": "active_set_settled",
+        "trips": 6
+      },
+      "before": {
+        "class": "limited",
+        "terminal_residual": 0.0007331916379767382,
+        "termination": "active_set_settled",
+        "trips": 6
+      },
+      "difference": {
+        "class_changed": false,
+        "terminal_residual": 0.0,
+        "termination_changed": false,
+        "trips": 0
+      },
+      "identical": true,
+      "identity": "21989/55"
+    },
+    {
+      "after": {
+        "class": "diverted",
+        "terminal_residual": 3.192874981840307e-16,
+        "termination": "converged",
+        "trips": 3
+      },
+      "before": {
+        "class": "diverted",
+        "terminal_residual": 3.192874981840307e-16,
+        "termination": "converged",
+        "trips": 3
+      },
+      "difference": {
+        "class_changed": false,
+        "terminal_residual": 0.0,
+        "termination_changed": false,
+        "trips": 0
+      },
+      "identical": true,
+      "identity": "22086/43"
+    }
+  ],
+  "schema": "nova.unchanged_state_fallback_carry_four_rows",
+  "verdict": {
+    "all_identical": true,
+    "row_count": 4
+  }
+}

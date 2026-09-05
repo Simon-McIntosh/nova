@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T16:23:56",
+  "updated": "2026-09-05T18:06:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -529,6 +529,15 @@
       {
         "id": "cank-compensator-x",
         "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "cank-dsv4-shape-x",
+        "harness": "clive",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -2054,6 +2063,24 @@
       },
       {
         "id": "nia-dsv4-pins-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-dsv4-repeat-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-dsv4-sweep-x",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -103968,6 +103995,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1741
+    "_version": 1744
   }
 }

@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="14">
 <meta name="plan-impl" content="0.33">
 <meta name="plan-commits" content="3afd3caf,81bec10b,672f3b43,d5e90aea">
 <meta name="plan-artifacts" content="docs/evidence/archive/playable-forward-solve-landed.html,nova/equilibrium/steering_frames.py,tests/test_steering_frames.py,nova/equilibrium/reduced_newton.py,tests/test_reduced_newton_constraints.py,benchmarks/reduced_newton_constrained_rows.py,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.json,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.png">
@@ -112,6 +112,64 @@
     event-to-push latency, the tunnel round trip is measured from the client, and the recording is the §5 session file, so the claim that a
     person steers the equilibrium at human response time is a receipt read from the client side rather than a projection from the node.</p>
 
+  <h2 id="s7">§7 — The page: the solve on the left, the decoded MAST camera on the right</h2>
+  <p>The lead's direction of 2026-09-05 23:00: the Bokeh layout carries a second window for the decoded MAST video that imas-ambix's
+    flux-conditioned decoder produces from the flux-surface solve. The physics and the picture sit side by side, driven by the same
+    keyframe: every key press re-solves, the frame of §5 goes to the poloidal view and to the decoder, and the decoded camera image comes
+    back to the second panel. The decoder is imas-ambix's deliverable (physics-carried-playable-plasma §4 and §5); this plan owns the
+    layout, the seam it plugs into, and a placeholder that renders when no decoder is present.</p>
+  <figure>
+    <svg viewBox="0 0 960 500" width="100%" role="img" aria-label="Wireframe of the playable page: poloidal view left, decoded camera right, controls and readouts below">
+      <style>.w{fill:none;stroke:#555;stroke-width:1.2}.t{font:13px sans-serif;fill:#333}.s{font:11px sans-serif;fill:#777}.p{fill:#d9c8ef;stroke:#8a6fb5;stroke-width:0.8}.c{fill:none;stroke:#444;stroke-width:0.8}</style>
+      <rect class="w" x="20" y="20" width="400" height="400"/>
+      <text class="t" x="30" y="40">poloidal view (no axes)</text>
+      <path class="c" d="M120 330 L110 260 L130 190 L180 140 L250 120 L320 150 L350 220 L330 300 L280 350 L200 360 Z"/>
+      <path class="c" d="M60 380 L45 300 L60 200 L110 120 L200 80 L300 90 L370 150 L395 250 L370 350 L300 400 L180 405 Z"/>
+      <g class="p"><polygon points="200,200 215,208 215,224 200,232 185,224 185,208"/><polygon points="230,200 245,208 245,224 230,232 215,224 215,208"/><polygon points="215,228 230,236 230,252 215,260 200,252 200,236"/><polygon points="185,228 200,236 200,252 185,260 170,252 170,236"/><polygon points="245,228 260,236 260,252 245,260 230,252 230,236"/><polygon points="200,256 215,264 215,280 200,288 185,280 185,264"/><polygon points="230,256 245,264 245,280 230,288 215,280 215,264"/><polygon points="260,200 275,208 275,224 260,232 245,224 245,208"/><polygon points="170,200 185,208 185,216 170,224 160,216 160,208"/><polygon points="255,258 265,264 268,280 255,288 245,280 245,264"/></g>
+      <ellipse class="c" cx="222" cy="240" rx="62" ry="78"/><ellipse class="c" cx="222" cy="240" rx="42" ry="54"/><ellipse class="c" cx="222" cy="240" rx="22" ry="28"/>
+      <text class="t" x="216" y="245" font-size="16">·</text>
+      <text class="t" x="215" y="338" font-size="14">×</text>
+      <rect class="w" x="40" y="130" width="22" height="34"/><rect class="w" x="40" y="280" width="22" height="34"/><rect class="w" x="380" y="110" width="18" height="40"/><rect class="w" x="380" y="300" width="18" height="40"/>
+      <text class="s" x="30" y="412">wall · coil outlines · light purple hex cells, edge cells clipped · dark grey unfilled contours · O-point · X-point</text>
+      <rect class="w" x="440" y="20" width="500" height="375"/>
+      <text class="t" x="450" y="40">decoded MAST camera (rbb), imas-ambix decoder</text>
+      <rect x="456" y="52" width="468" height="310" fill="#e9e9e9" stroke="#999"/>
+      <text class="s" x="600" y="212">image_rgba, decoder frame or held last good frame</text>
+      <text class="s" x="450" y="385">frame 0412 · decode 31 ms · keyframe 52 ms · HELD when the solve refuses</text>
+      <rect class="w" x="20" y="440" width="400" height="48"/>
+      <text class="s" x="30" y="458">keys: R Z κ δu δl Xr Xz gap-in gap-out · commanded values</text>
+      <text class="s" x="30" y="476">compensating current per circuit (thin bars)</text>
+      <rect class="w" x="440" y="440" width="500" height="48"/>
+      <text class="s" x="450" y="458">keyframe wall and trips per action (sparkline)</text>
+      <text class="s" x="450" y="476">record ● · playback ‹ ▮ › · session frame 0412 / 1180 · export</text>
+    </svg>
+    <figcaption>One document, two panels: the poloidal view of §4 on the left and the decoded camera on the right, controls and readouts
+      below. The same page served with <code>?view=camera</code> renders the camera panel alone for a second browser window on another screen.</figcaption>
+  </figure>
+  <p><strong>Layout.</strong> One Bokeh document: a <code>row</code> of the poloidal figure (square, no axes, the §4 renderer) and the camera
+    figure (the camera's own aspect, no axes, one <code>image_rgba</code> glyph fed from a single-cell <code>ColumnDataSource</code>), above a
+    <code>row</code> of two readout strips: the key legend with the commanded parameter values and the compensating current per circuit as
+    thin bars; the keyframe wall and trips per action as a sparkline with the record and playback strip (record toggle, frame counter,
+    playback slider over the §5 session, export). A status line under the camera carries the frame index, the decode latency, the keyframe
+    wall, and a HELD marker when the solve refuses or stagnates so the last good frame is shown and never interpolated (the imas-ambix rule).
+    The app serves the same document with a <code>view</code> request argument: the default is both panels; <code>camera</code> renders the
+    camera panel and its status line alone, so a second browser window on another screen shows the picture while the first carries the
+    controls, both reading one server-side session holder, both over the one tunnelled port of §6.</p>
+  <p><strong>The seam.</strong> Nova never imports imas-ambix (the coupled-repository rule runs one way), so the camera panel is fed through a
+    protocol the app owns: a <code>FrameDecoder</code> with <code>decode(frame: SteeringFrame) -&gt; DecodedFrame</code>, where the result carries an
+    RGB image array (height, width, 3, uint8), the decode wall, and the decoder identity (checkpoint, VQ decoder, corpus digest) that the
+    receipt of §5 records beside each frame. The app takes the decoder as a dotted path at launch (<code>--decoder
+    imas_ambix.…:FluxConditionedDecoder</code>) and loads it once per session on the same H200 as the solve; with no decoder given it uses the
+    placeholder, a grey frame carrying the frame index, so the layout, the keys and the recording work before the decoder exists. Per
+    keyframe the loop calls the decoder after the poloidal push, off the solve's critical path, so a slow decode delays only the picture.
+    imas-ambix implements the protocol against the §5 frame and consumes the same file a recorded session writes; the latency both sides
+    report comes from the same clock (nova's keyframe wall, the decoder's decode wall, the page's event-to-patch time from §6c).</p>
+  <p>Deliverables. <strong>A.</strong> The two-panel layout with the camera-only view argument, the decoder protocol and the placeholder, the
+    status line and the readout strips, measured by the session test driving ten keys through a stub solver and the placeholder decoder with
+    every pushed column shaped as its glyph binds and the camera image updated once per keyframe, and by a rendered PNG of the page on the
+    Solov'ev fixture committed for the record. <strong>B.</strong> The decoder implementation (foreign-owner, imas-ambix). <strong>C.</strong> The
+    live picture: the §6c receipt extended with the decoded stream on 22086/43 and the decode wall per frame beside the keyframe wall.</p>
+
   
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -162,6 +220,16 @@
     <h4 class="r-fu-title">The poloidal view in the locked style: clipped hex cells, unfilled contours, wall, coils, null markers</h4>
     <div class="r-fu-body"><p>Apply decision <code>plasma-view-style</code> to the shared poloidal renderer the §4a loop introduces (<code>apps/pulsedesign/poloidal_view.py</code>, consumed by <code>apps/playable</code>). Reuse, not reproduction: the pulse-design app already turns the plasma frame's polygons into a Bokeh <code>multi_polygons</code> with <code>fill_alpha</code> per cell (<code>apps/pulsedesign/simulator.py</code> <code>plasma_data</code> through <code>polygeo.polygons</code>) and hides the axis with <code>axis.visible = False</code>; imas-ink's <code>InkStyle</code> (<code>imas_ink/style.py</code>) is the reference for weights and markers (coil edge grey with no face, wall a thin dark line, axis marker a dot, X-point marker an x, figure drawn with <code>ax.axis("off")</code>). The view: no axes, grid, frame or bounding box; the first-wall profile as one dark grey polyline; each coil as a simple outline with no fill; the plasma as light purple hex cells at one alpha, where the cells the separatrix cuts are drawn as their clipped polygons from the solve's clipped supports (<code>nova/equilibrium/separatrix_clip.py</code>, <code>ClippedSupports</code> and <code>TracedClippedSupports</code> vertices, the same cut the solve integrates over) so the plasma edge is the solved boundary, not a stair; psi contour lines in dark grey, unfilled, at a fixed count of levels between axis and boundary with the separatrix as the outermost; markers on the primary X-point and the O-point read from the frame's labelled points, with the secondary X-point and strike points shown lighter when present. Measures in <code>tests/test_playable_session.py</code> or a sibling test: on the Solov'ev fixture's solved frame the pushed columns give one clipped polygon per cut cell whose vertices lie on the separatrix within the lattice pitch, no cell polygon crosses the separatrix by more than that pitch, the contour source carries the stated level count with the separatrix level present, the coil and wall sources carry outlines only (no fill columns), the figure has no visible axis, and a rendered PNG of that frame is committed under <code>docs/figures/playable-forward-solve/view/</code> for the record. Sequence after §4a lands, on the same files.</p></div>
     <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §4</pre>
+    </article>
+<article class="r-fu" data-id="f-pfs-009" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship playable-forward-solve §7" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The two-panel page: camera window, FrameDecoder protocol, placeholder, readout strips</h4>
+    <div class="r-fu-body"><p>Build §7 deliverable A on the §4a app: the row of poloidal figure and camera figure (one <code>image_rgba</code> glyph on a single-cell source, the camera's own aspect, no axes), the two readout strips (key legend with commanded values and compensating current per circuit as thin bars; keyframe wall and trips per action as a sparkline with the record and playback strip over the §5 session), the status line (frame index, decode wall, keyframe wall, HELD marker when the solve refuses and the last good frame is shown), the <code>view</code> request argument with <code>camera</code> rendering the camera panel and status line alone, the <code>FrameDecoder</code> protocol (<code>decode(frame: SteeringFrame) -&gt; DecodedFrame</code> with an RGB uint8 array, the decode wall and a decoder identity recorded beside each frame), the <code>--decoder</code> dotted-path launch argument loaded once per session, and the grey placeholder decoder carrying the frame index. Decode runs after the poloidal push so a slow decode delays only the picture. Measures: the session test drives ten keys through a stub solver and the placeholder decoder with every pushed column shaped as its glyph binds and the camera source updated once per keyframe with the status line carrying the decode wall; the camera-only view serves without the poloidal figure; a rendered PNG of the two-panel page on the Solov'ev fixture is committed under <code>docs/figures/playable-forward-solve/view/</code>. Sequence after §4a and the view-style node (same files); pin the protocol to the imas-ambix answer on frame history, image shape and rate when it arrives, defaulting to one frame in and (height, width, 3) out.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §7</pre>
+    </article>
+<article class="r-fu" data-id="f-pfs-010" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The flux-conditioned camera decoder behind the FrameDecoder protocol (foreign-owner)</h4>
+    <div class="r-fu-body"><p>Exemption <strong>foreign-owner</strong>: the decoder is imas-ambix's deliverable on physics-carried-playable-plasma §4 and §5. It implements nova's <code>FrameDecoder</code> protocol against the merged <code>SteeringFrame</code> record, consumes the same netCDF session a recorded steering run writes, and is loaded into the playable app by dotted path on the H200. Proposed to the imas-ambix coordinator on 2026-09-05 23:05 with two questions (one frame or a short history in; rbb image shape and rate). This followup closes when that project reports the dotted path of its implementation and the answers, which f-pfs-009 then pins.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §7</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -226,6 +294,10 @@
 <div class="r-dec" data-key="plasma-view-style" data-choice="ink-style-hex-cells-unfilled-contours" data-by="Simon McIntosh" data-when="2026-09-05T20:53:28+00:00">
     <p class="r-dec-q">plasma-view-style</p>
     <p class="r-dec-rat">Lead direction 2026-09-05 22:40: follow the style of the existing pulse-design plasma rendering and of imas-ink without reproducing either exactly; no bounding boxes or axes on the plasma plot; simple coil outlines and the first-wall profile; light purple plasma hex cells with the edge cells rendered clipped as they are solved; dark grey contour lines, not filled; the primary topological points (X-point, O-point) indicated.</p>
+    </div>
+<div class="r-dec" data-key="camera-window-layout" data-choice="two-panels-one-document-decoder-by-dotted-path" data-by="Simon McIntosh" data-when="2026-09-05T20:59:33+00:00">
+    <p class="r-dec-q">camera-window-layout</p>
+    <p class="r-dec-rat">Lead direction 2026-09-05 23:00 asked for a second window for the decoded MAST video supported by the flux-surface solve. One document keeps the two panels on the one keyframe and the one tunnelled port; the camera-only view argument gives the literal second window on another screen; the dotted-path plug-in keeps the coupled-repository rule one way (imas-ambix consumes nova, nova never imports imas-ambix) and lets the layout, keys and recording work before the decoder exists. Proposed to the imas-ambix coordinator on 2026-09-05 with two open questions: whether decode takes one frame or a short history, and the rbb image shape and rate.</p>
     </div>
 </section>
 </main>

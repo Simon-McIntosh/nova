@@ -1,0 +1,39 @@
+{
+  "arms": [
+    {
+      "arm": "main",
+      "completed": true,
+      "duration_s": 14.85,
+      "exit_status": 0,
+      "failed": 0,
+      "failure_ids": [],
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T023201808349-nia-candidate5-paired-remeasure/topology-main.log",
+      "passed": 2,
+      "revision": "5059f61a6f3e8ee93ccc97815604e9798716c222"
+    },
+    {
+      "arm": "candidate",
+      "completed": true,
+      "duration_s": 50.45,
+      "exit_status": 0,
+      "failed": 0,
+      "failure_ids": [],
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T023201808349-nia-candidate5-paired-remeasure/topology-candidate.log",
+      "passed": 2,
+      "revision": "ead87a9b1a1b37ffeeecd312dc042852198346b7"
+    }
+  ],
+  "candidate_only_failures": [],
+  "captured_at": "2026-09-05T03:56:12.094548+00:00",
+  "lane": "/home/ITER/mcintos/Code/nova/scripts/h200_test_lane/run.sh",
+  "scheduler": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "job_id": "1262796",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "schema": "nova.paired_topology_read_tests",
+  "schema_version": 1,
+  "test_path": "tests/test_plasma_cell_topology_read.py",
+  "verdict": "pass"
+}

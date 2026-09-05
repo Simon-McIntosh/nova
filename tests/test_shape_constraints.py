@@ -1,4 +1,4 @@
-"""Shape-control rows on the bootstrapped Solov'ev free-boundary machine.
+"""Bounding-box shape-control rows on the bootstrapped Solov'ev machine.
 
 The machine is the same one the forward-solve contract uses: a ring of
 external conductors fitted to hold an analytic seed, driven by an
@@ -7,12 +7,23 @@ conductors are given a prescribed-current field with a zero baseline, so a
 compensating circuit current is a pure actuator handle on a real Green
 response rather than an algebraic identity.
 
-Pinned here: the Miller parametrisation reproduces the shape figures it was
-handed; the constraint-response matrix of every shape row equals a central
-difference along the same circuit's flux image; a constrained solve drives the
-isoflux, stationary-point and wall-gap rows onto their commanded targets; and
-a moved target re-solved from the previous equilibrium costs fewer trips than
-the same target solved from the seed.
+The row set is the low-DOF pulse-design bounding box: boundary-flux rows at
+the outer, upper, inner and lower control points, a radial-field row at the
+outer and inner points (the vertical flux gradient vanishing, a radial
+turning point), a vertical-field row at the upper and lower points, and the
+two-gradient null row at the X-point.  The points come from
+:class:`~nova.equilibrium.constraint.BoundingBoxTarget`, either from the
+pulse-design parameter vocabulary through ControlPoints or from an achieved
+boundary's own turning points, so the unmoved command reproduces the
+boundary exactly with no curve fit.
+
+Pinned here: the target builders return the commanded turning points; every
+row's constraint-response matrix equals a central difference along the same
+circuit's flux image; a constrained solve with flux and field rows at the
+seed's own bounding box closes every row to its declared tolerance; the
+stationary-point and wall-gap rows command their points; and a moved target
+re-solved from the previous equilibrium costs fewer trips than the same
+target solved from the seed.
 """
 
 from __future__ import annotations
@@ -20,6 +31,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from scipy.constants import mu_0
+import xarray
 
 from nova.utilities.importmanager import skip_import
 
@@ -28,9 +40,11 @@ with skip_import("jax"):
 
     from nova.biot.greens import hybrid_greens
     from nova.equilibrium import (
+        BoundingBoxTarget,
         CircuitCurrentUnknown,
         ConstraintBinding,
         ConstraintPair,
+        FieldComponentConstraint,
         IsofluxConstraint,
         WallGapConstraint,
         WallGapTarget,
@@ -38,13 +52,14 @@ with skip_import("jax"):
         compensator_rule_name,
         constraint_response_matrix,
         derive_circuit_compensators,
-        miller_boundary_points,
     )
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.constraint import ConstraintContext
+    from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.forward_operator import PrescribedCurrentField
     from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.geometry.plasmapoints import ControlPoints
     from nova.jax.config import configure_dtypes
 
 
@@ -57,11 +72,6 @@ BOUNDARY_FIELD_FUNCTION = 5.0
 CONDUCTORS = 16
 NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
-#: Poloidal control points on the Miller target boundary. Four rows leave the
-#: sixteen-conductor response matrix comfortably over-determined, so the
-#: singular-distribution rule has room to move one row without dragging the
-#: others.
-CONTROL_POINTS = 4
 #: Commanded moves. Both are a few percent of the minor radius, the scale a
 #: shape controller actually steers in, and small enough that the previous
 #: equilibrium is a good warm start for the next.
@@ -200,23 +210,6 @@ def converged(machine):
     )
 
 
-def _shape(profile, flux):
-    """Return the achieved boundary extremes and the Miller figures they imply."""
-    boundary = _boundary_polygon(profile, flux)
-    radius, height = boundary[:, 0], boundary[:, 1]
-    inner, outer = float(np.min(radius)), float(np.max(radius))
-    lower, upper = float(np.min(height)), float(np.max(height))
-    minor = 0.5 * (outer - inner)
-    return {
-        "geometric_radius": 0.5 * (outer + inner),
-        "geometric_height": 0.5 * (upper + lower),
-        "minor_radius": minor,
-        "elongation": 0.5 * (upper - lower) / minor,
-        "triangularity": (0.5 * (outer + inner) - float(radius[int(np.argmax(height))]))
-        / minor,
-    }
-
-
 def _boundary_polygon(profile, flux, angles=181):
     """Ray-cast the boundary contour outward from the magnetic axis."""
     _masks, topology = profile.operator.read(jnp.asarray(flux))
@@ -258,133 +251,195 @@ def _reference_point(profile, flux):
     return np.asarray(topology.wall_point, dtype=float)
 
 
-def _isoflux_pair(profile, flux, points, *, scale, tolerance):
-    """Return an isoflux pair whose direction the response matrix decided."""
-    rows = int(np.shape(points)[0])
-    payload = jnp.concatenate(
-        (jnp.asarray(points), jnp.asarray(_reference_point(profile, flux))[None])
+def _seed_target(profile, flux):
+    """Return the bounding-box target at one flux map's own turning points."""
+    return BoundingBoxTarget.from_boundary(
+        _boundary_polygon(profile, flux),
+        reference_point=_reference_point(profile, flux),
     )
-    pair = ConstraintPair(
-        functional=IsofluxConstraint(point_count=rows, reference="reference_point"),
-        unknown=CircuitCurrentUnknown(
-            direction=jnp.zeros((CONDUCTORS, rows)).at[0].set(1.0),
-            ampere_scale=jnp.full((rows,), 1.0e3),
-        ),
-        binding=ConstraintBinding(
-            target=jnp.zeros(rows),
-            tolerance=jnp.full((rows,), tolerance),
-            scale=jnp.full((rows,), scale),
-            initial_unknown=jnp.zeros(rows),
-            payload=payload,
-        ),
-    )
-    (derived,), selection = derive_circuit_compensators(
-        profile, (pair,), jnp.asarray(flux), circuits=range(CONDUCTORS)
-    )
-    return derived, selection
 
 
-def test_miller_boundary_reproduces_the_shape_figures_it_was_handed():
-    """The parametrisation returns the extent, elongation and triangularity set."""
-    configure_dtypes()
-    points = np.asarray(
-        miller_boundary_points(
-            geometric_radius=1.0,
-            geometric_height=0.05,
-            minor_radius=0.3,
-            elongation=1.8,
-            triangularity=0.4,
-            count=720,
+def _bounding_box_pairs(
+    profile,
+    flux,
+    target,
+    *,
+    span,
+    ampere_scale=1.0e3,
+    flux_tolerance=None,
+    field_tolerance=None,
+):
+    """Return the isoflux and field pairs one bounding-box target produces.
+
+    The isoflux rows carry the four control points against the declared
+    reference point; the field rows carry a radial-field component on the
+    outer and inner points and a vertical-field component on the upper and
+    lower points, scaled so a flux-gradient row of one grid cell reads like
+    the flux rows do.  Both pairs start from a unit direction on circuit
+    zero; :func:`derive_circuit_compensators` replaces it from the response
+    matrix before any solve.
+    """
+    reference = target.reference_point
+    if reference is None:
+        raise ValueError("the bounding-box rows need a reference point")
+    flux_points = np.asarray(target.flux_points, dtype=float)
+    radial = np.asarray(target.radial_field_points, dtype=float)
+    vertical = np.asarray(target.vertical_field_points, dtype=float)
+    flux_rows = flux_points.shape[0]
+    field_rows = radial.shape[0] + vertical.shape[0]
+    if flux_tolerance is None:
+        flux_tolerance = 1.0e-6 * span
+    if field_tolerance is None:
+        field_tolerance = (
+            1.0e-6
+            * span
+            / (TOTAL_FLUX_FACTOR * AXIS_RADIUS * float(profile.lattice.radial_step))
         )
+    flux_payload = jnp.concatenate(
+        (jnp.asarray(flux_points), jnp.asarray(reference)[None])
     )
-    radius, height = points[:, 0], points[:, 1]
-    assert float(np.max(radius) + np.min(radius)) / 2.0 == pytest.approx(1.0, abs=1e-9)
-    assert float(np.max(radius) - np.min(radius)) / 2.0 == pytest.approx(0.3, abs=1e-9)
-    assert float(np.max(height) + np.min(height)) / 2.0 == pytest.approx(0.05, abs=1e-9)
-    assert float(np.max(height) - np.min(height)) / 2.0 == pytest.approx(
-        1.8 * 0.3, abs=1e-9
+    field_payload = jnp.concatenate((jnp.asarray(radial), jnp.asarray(vertical)))
+    field_scale = span / (
+        TOTAL_FLUX_FACTOR * AXIS_RADIUS * float(profile.lattice.radial_step)
     )
-    upper = float(radius[int(np.argmax(height))])
-    assert (1.0 - upper) / 0.3 == pytest.approx(0.4, abs=1.0e-9)
+    return (
+        ConstraintPair(
+            functional=IsofluxConstraint(
+                point_count=flux_rows, reference="reference_point"
+            ),
+            unknown=CircuitCurrentUnknown(
+                direction=jnp.zeros((CONDUCTORS, flux_rows)).at[0].set(1.0),
+                ampere_scale=jnp.full((flux_rows,), ampere_scale),
+            ),
+            binding=ConstraintBinding(
+                target=jnp.zeros(flux_rows),
+                tolerance=jnp.full((flux_rows,), flux_tolerance),
+                scale=jnp.full((flux_rows,), span),
+                initial_unknown=jnp.zeros(flux_rows),
+                payload=flux_payload,
+            ),
+        ),
+        ConstraintPair(
+            functional=FieldComponentConstraint(
+                components=("radial",) * radial.shape[0]
+                + ("vertical",) * vertical.shape[0]
+            ),
+            unknown=CircuitCurrentUnknown(
+                direction=jnp.zeros((CONDUCTORS, field_rows)).at[0].set(1.0),
+                ampere_scale=jnp.full((field_rows,), ampere_scale),
+            ),
+            binding=ConstraintBinding(
+                target=jnp.zeros(field_rows),
+                tolerance=jnp.full((field_rows,), field_tolerance),
+                scale=jnp.full((field_rows,), field_scale),
+                initial_unknown=jnp.zeros(field_rows),
+                payload=field_payload,
+            ),
+        ),
+    )
+
+
+def _move_upper(target, delta):
+    """Return the same target with the upper turning point moved by ``delta``."""
+    flux = np.asarray(target.flux_points, dtype=float).copy()
+    vertical = np.asarray(target.vertical_field_points, dtype=float).copy()
+    flux[1] = flux[1] + np.asarray([0.0, delta])
+    vertical[0] = vertical[0] + np.asarray([0.0, delta])
+    return BoundingBoxTarget(
+        flux_points=jnp.asarray(flux),
+        radial_field_points=target.radial_field_points,
+        vertical_field_points=jnp.asarray(vertical),
+        x_point=target.x_point,
+        reference_point=target.reference_point,
+    )
+
+
+def test_control_points_build_the_bounding_box_from_the_shape_figures():
+    """The parameter vocabulary places the four turning points it is handed."""
+    configure_dtypes()
+    target = BoundingBoxTarget.from_control_points(
+        geometric_axis=(1.0, 0.05),
+        minor_radius=0.3,
+        elongation=1.8,
+        triangularity_upper=0.4,
+        triangularity_lower=0.2,
+        triangularity_outer=0.1,
+        triangularity_inner=0.05,
+        square=True,
+        squareness=0.0,
+    )
+    points = np.asarray(target.flux_points, dtype=float)
+    assert points.shape == (8, 2)
+    # The four principal rows are the ControlPoints outer, upper, inner and
+    # lower points, so the builder hands the same geometry the inverse
+    # design reads its sliders through.
+    data = xarray.Dataset(
+        {
+            "geometric_axis": ("point", [1.0, 0.05]),
+            "minor_radius": 0.3,
+            "elongation": 1.8,
+            "triangularity_upper": 0.4,
+            "triangularity_lower": 0.2,
+            "elongation_upper": 0.1,
+            "elongation_lower": 0.05,
+            "squareness_upper_outer": 0.0,
+            "squareness_upper_inner": 0.0,
+            "squareness_lower_inner": 0.0,
+            "squareness_lower_outer": 0.0,
+        }
+    )
+    expected = ControlPoints(data, square=True)
+    for row, attr in (
+        (0, "outer"),
+        (1, "upper"),
+        (2, "inner"),
+        (3, "lower"),
+        (4, "upper_outer"),
+        (5, "upper_inner"),
+        (6, "lower_inner"),
+        (7, "lower_outer"),
+    ):
+        np.testing.assert_allclose(
+            points[row], np.asarray(getattr(expected, attr), dtype=float)
+        )
+    assert np.asarray(target.radial_field_points).shape == (2, 2)
+    assert np.asarray(target.vertical_field_points).shape == (2, 2)
+    # The radial rows sit on the outer and inner points, the vertical rows on
+    # the upper and lower points.
+    np.testing.assert_allclose(np.asarray(target.radial_field_points)[0], points[0])
+    np.testing.assert_allclose(np.asarray(target.vertical_field_points)[0], points[1])
+
+
+def test_boundary_turning_points_are_the_polygon_own_extrema():
+    """An unmoved command reads the contour's own extremes, nothing else."""
+    boundary = np.asarray(
+        [[1.00, 0.00], [0.95, 0.12], [1.00, 0.20], [1.05, 0.12], [1.06, 0.02]]
+    )
+    target = BoundingBoxTarget.from_boundary(boundary)
+    flux = np.asarray(target.flux_points, dtype=float)
+    assert flux.shape == (4, 2)
+    np.testing.assert_allclose(flux[0], boundary[4])  # outer, max R
+    np.testing.assert_allclose(flux[1], boundary[2])  # upper, max Z
+    np.testing.assert_allclose(flux[2], boundary[1])  # inner, min R
+    np.testing.assert_allclose(flux[3], boundary[0])  # lower, min Z
+    np.testing.assert_allclose(np.asarray(target.radial_field_points), flux[[0, 2]])
+    np.testing.assert_allclose(np.asarray(target.vertical_field_points), flux[[1, 3]])
+    assert len(target.rows) == 8
 
 
 @pytest.mark.slow
-def test_shape_rows_respond_to_a_circuit_as_a_central_difference_does(machine):
+def test_shape_rows_respond_to_a_circuit_as_a_central_difference_does(
+    machine,
+):
     """Every row's circuit response equals the difference along its flux image."""
     profile, seed = machine
     flux = jnp.asarray(seed)
-    lattice = profile.lattice
-    axis = np.asarray([AXIS_RADIUS, 0.0])
-    points = np.asarray(
-        miller_boundary_points(
-            geometric_radius=AXIS_RADIUS,
-            geometric_height=0.0,
-            minor_radius=0.2,
-            elongation=1.3,
-            triangularity=0.0,
-            count=CONTROL_POINTS,
-        )
-    )
-    wall = np.asarray(profile.operator.wall.null.coordinate, dtype=float)
-    origin = wall[int(np.argmax(wall[:, 0]))]
-    reference = _reference_point(profile, flux)
     span = float(jnp.max(jnp.abs(flux)))
-    pairs = (
-        ConstraintPair(
-            functional=IsofluxConstraint(
-                point_count=CONTROL_POINTS, reference="reference_point"
-            ),
-            unknown=CircuitCurrentUnknown(
-                direction=jnp.zeros((CONDUCTORS, CONTROL_POINTS)).at[0].set(1.0),
-                ampere_scale=jnp.full((CONTROL_POINTS,), 1.0e3),
-            ),
-            binding=ConstraintBinding(
-                target=jnp.zeros(CONTROL_POINTS),
-                tolerance=jnp.full((CONTROL_POINTS,), 1.0e-4),
-                scale=jnp.full((CONTROL_POINTS,), span),
-                initial_unknown=jnp.zeros(CONTROL_POINTS),
-                payload=jnp.concatenate(
-                    (jnp.asarray(points), jnp.asarray(reference)[None])
-                ),
-            ),
-        ),
-        ConstraintPair(
-            functional=XPointConstraint(),
-            unknown=CircuitCurrentUnknown(
-                direction=jnp.zeros((CONDUCTORS, 2)).at[1].set(1.0),
-                ampere_scale=jnp.full((2,), 1.0e3),
-            ),
-            binding=ConstraintBinding(
-                target=jnp.zeros(2),
-                tolerance=jnp.full((2,), 1.0e-4),
-                scale=jnp.full((2,), span / float(lattice.radial_step)),
-                initial_unknown=jnp.zeros(2),
-                payload=jnp.asarray(axis),
-            ),
-        ),
-        ConstraintPair(
-            functional=WallGapConstraint(reference="reference_point"),
-            unknown=CircuitCurrentUnknown(
-                direction=jnp.zeros((CONDUCTORS, 1)).at[2].set(1.0),
-                ampere_scale=jnp.full((1,), 1.0e3),
-            ),
-            binding=ConstraintBinding(
-                target=jnp.zeros(1),
-                tolerance=jnp.full((1,), 1.0e-4),
-                scale=jnp.full((1,), span),
-                initial_unknown=jnp.zeros(1),
-                payload=WallGapTarget(
-                    origin=jnp.asarray(origin),
-                    direction=jnp.asarray([-1.0, 0.0]),
-                    gap=jnp.asarray(0.05),
-                    reference_point=jnp.asarray(reference),
-                ),
-            ),
-        ),
-    )
+    target = _seed_target(profile, seed)
+    pairs = _bounding_box_pairs(profile, flux, target, span=span)
     matrix = np.asarray(constraint_response_matrix(profile, pairs, flux))
     response = np.asarray(profile.operator.prescribed_current_field.response)
-    assert matrix.shape == (CONTROL_POINTS + 3, CONDUCTORS)
+    assert matrix.shape == (8, CONDUCTORS)
 
     context = ConstraintContext(flux, None, None, None)
 
@@ -414,39 +469,42 @@ def test_shape_rows_respond_to_a_circuit_as_a_central_difference_does(machine):
 
 
 @pytest.mark.slow
-def test_isoflux_rows_steer_the_boundary_onto_a_moved_miller_target(machine, converged):
-    """Moving the Miller target moves the achieved boundary onto it."""
-    profile, _seed = machine
-    figures = _shape(profile, converged.flux)
-    moved = dict(figures, geometric_height=figures["geometric_height"] + VERTICAL_STEP)
-    points = miller_boundary_points(count=CONTROL_POINTS, **moved)
-    span = float(jnp.max(jnp.abs(converged.flux)))
-    pair, selection = _isoflux_pair(
-        profile,
-        converged.flux,
-        points,
-        scale=span,
-        tolerance=1.0e-6 * span,
+def test_bounding_box_rows_close_on_the_seed_own_turning_points(machine):
+    """Flux and field rows at the achieved box close without any move.
+
+    The unmoved command is the seed boundary's own bounding box, so no curve
+    fit stands between the command and the boundary: the unconstrained
+    equilibrium already satisfies every row, and the constrained solve closes
+    them to their declared tolerances on each row's own physical scale.
+    """
+    profile, seed = machine
+    span = float(jnp.max(jnp.abs(seed)))
+    target = _seed_target(profile, seed)
+    pairs = _bounding_box_pairs(profile, seed, target, span=span)
+    (derived_a, derived_b), selection = derive_circuit_compensators(
+        profile, pairs, jnp.asarray(seed), circuits=range(CONDUCTORS)
     )
     assert compensator_rule_name(np.asarray([int(selection.rule)])) in (
         "dominant_authority",
         "singular_distribution",
     )
     result = profile.solve(
-        converged.flux,
+        seed,
         route="newton_krylov",
-        constraint_pairs=(pair,),
+        constraint_pairs=(derived_a, derived_b),
         newton_steps=NEWTON_STEPS,
         gmres_iterations=GMRES_ITERATIONS,
     )
-    record = result.constraints[0]
-    assert bool(np.all(np.asarray(record.qualified)))
-    assert np.all(
-        np.abs(np.asarray(record.physical_residual)) <= np.asarray(record.tolerance)
-    )
-    achieved = _shape(profile, result.flux)
-    assert achieved["geometric_height"] > figures["geometric_height"]
-    assert np.all(np.abs(np.asarray(record.physical_unknown)) > 0.0)
+    for record in result.constraints:
+        assert bool(np.all(np.asarray(record.qualified)))
+        assert np.all(
+            np.abs(np.asarray(record.physical_residual)) <= np.asarray(record.tolerance)
+        )
+    # The boundary already passes through its own turning points, so the
+    # compensated currents that hold it there are small compared with the
+    # ampere scale the directions were normalised against.
+    for record in result.constraints:
+        assert float(np.max(np.abs(np.asarray(record.physical_unknown)))) < 1.0e-2
 
 
 @pytest.mark.slow
@@ -560,16 +618,15 @@ def test_a_warm_started_move_costs_fewer_trips_than_the_same_move_from_the_seed(
 ):
     """The previous equilibrium is a cheaper start than the analytic seed."""
     profile, seed = machine
-    figures = _shape(profile, converged.flux)
-    moved = dict(figures, elongation=figures["elongation"] * (1.0 + ELONGATION_STEP))
-    points = miller_boundary_points(count=CONTROL_POINTS, **moved)
     span = float(jnp.max(jnp.abs(converged.flux)))
-    pair, _selection = _isoflux_pair(
+    target = _seed_target(profile, converged.flux)
+    moved = _move_upper(target, VERTICAL_STEP)
+    pairs = _bounding_box_pairs(profile, converged.flux, moved, span=span)
+    (flux_derived, field_derived), _selection = derive_circuit_compensators(
         profile,
-        converged.flux,
-        points,
-        scale=span,
-        tolerance=1.0e-6 * span,
+        pairs,
+        jnp.asarray(converged.flux),
+        circuits=range(CONDUCTORS),
     )
 
     def trips(start):
@@ -577,7 +634,7 @@ def test_a_warm_started_move_costs_fewer_trips_than_the_same_move_from_the_seed(
         result = profile.solve(
             start,
             route="newton_krylov",
-            constraint_pairs=(pair,),
+            constraint_pairs=(flux_derived, field_derived),
             newton_steps=NEWTON_STEPS,
             gmres_iterations=GMRES_ITERATIONS,
         )
@@ -585,6 +642,8 @@ def test_a_warm_started_move_costs_fewer_trips_than_the_same_move_from_the_seed(
 
     warm_result, warm = trips(converged.flux)
     cold_result, cold = trips(seed)
-    assert bool(np.all(np.asarray(warm_result.constraints[0].qualified)))
     assert warm < cold
-    assert bool(np.all(np.asarray(cold_result.constraints[0].qualified)))
+    for record in warm_result.constraints:
+        assert bool(np.all(np.asarray(record.qualified)))
+    for record in cold_result.constraints:
+        assert bool(np.all(np.asarray(record.qualified)))

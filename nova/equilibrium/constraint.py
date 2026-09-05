@@ -17,6 +17,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
 
 if TYPE_CHECKING:
@@ -691,40 +692,6 @@ class CurrentCentroidConstraint:
         return jnp.moveaxis(jacobian, 0, -1)
 
 
-def miller_boundary_points(
-    *,
-    geometric_radius,
-    geometric_height,
-    minor_radius,
-    elongation,
-    triangularity,
-    count: int | None = None,
-    angle=None,
-):
-    """Return control points on one Miller-parametrised target boundary.
-
-    The parametrisation is the standard shaped-tokamak one,
-    ``R = R0 + a cos(theta + arcsin(delta) sin theta)`` and
-    ``Z = Z0 + kappa a sin theta``.  Supply ``count`` for equally spaced
-    poloidal angles closing the curve, or ``angle`` to place the points where
-    a caller wants them — a divertor leg is not described by this curve, so a
-    control-point set usually names its own angles.  Every shape figure is an
-    ordinary array leaf, so moving a knob moves the points without changing
-    the compiled program.
-    """
-    if (count is None) == (angle is None):
-        raise ValueError("a Miller target boundary needs either count or angle")
-    if count is not None:
-        if int(count) < 1:
-            raise ValueError("a Miller target boundary needs at least one point")
-        angle = 2.0 * jnp.pi * jnp.arange(int(count)) / float(count)
-    angle = jnp.asarray(angle)
-    tilt = jnp.arcsin(jnp.clip(jnp.asarray(triangularity), -1.0, 1.0))
-    radius = geometric_radius + minor_radius * jnp.cos(angle + tilt * jnp.sin(angle))
-    height = geometric_height + elongation * minor_radius * jnp.sin(angle)
-    return jnp.stack((radius, height), axis=-1)
-
-
 class WallGapTarget(NamedTuple):
     """Wall point, inward direction, the gap to close, and the flux reference."""
 
@@ -853,8 +820,9 @@ class IsofluxConstraint:
     boundary flux the topology read returns, so the rows vanish exactly when
     the boundary passes through every point.  The points arrive as the
     binding payload with shape ``(point_count, 2)`` in ``(R, Z)``, so steering
-    a shape knob is a new payload from :func:`miller_boundary_points` rather
-    than a new compiled program.
+    a shape knob is a new payload from
+    :class:`~nova.equilibrium.constraint.BoundingBoxTarget` rather than a new
+    compiled program.
     """
 
     point_count: int
@@ -962,6 +930,82 @@ class XPointConstraint:
 
 
 @dataclass(frozen=True)
+class FieldComponentConstraint:
+    """One poloidal-field component at each payload point.
+
+    Each row reads one field component off the flux map at a fixed point,
+    through the same interpolation the isoflux rows read.  Under the
+    solver's total-flux convention the poloidal field is
+    :math:`B_R = -(1/2\\pi R)\\,\\partial\\Phi/\\partial Z` and
+    :math:`B_Z = +(1/2\\pi R)\\,\\partial\\Phi/\\partial R`, so a ``radial``
+    row is the vertical flux gradient vanishing at the point — the condition
+    that it is a radial turning point of the separatrix, a vertical field
+    line through an outer or inner extremum — and a ``vertical`` row is the
+    radial flux gradient vanishing, the upper or lower turning-point
+    condition.
+
+    ``components`` names the row's component in order; the payload is the
+    matching ``(row_count, 2)`` ``(R, Z)`` table, so commanding a point is
+    moving a payload row and recompiling nothing.
+    """
+
+    components: tuple[Literal["radial", "vertical"], ...]
+
+    def __post_init__(self) -> None:
+        if not self.components:
+            raise ValueError("a field row set needs at least one control point")
+        if any(item not in ("radial", "vertical") for item in self.components):
+            raise ValueError("a field component row is 'radial' or 'vertical'")
+        object.__setattr__(self, "components", tuple(self.components))
+
+    @property
+    def row_count(self) -> int:
+        return len(self.components)
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        points = jnp.reshape(jnp.asarray(payload, dtype=jnp.float64), (-1, 2))[
+            : self.row_count
+        ]
+        grid = _lattice_grid(profile, context.flux)
+        rows = []
+        for point, component in zip(points, self.components, strict=True):
+            gradient = jax.grad(
+                lambda position: sample_lattice_flux(profile.lattice, grid, position)
+            )(point)
+            radius = jnp.maximum(point[0], 1.0e-6)
+            if component == "radial":
+                rows.append(-gradient[1] / (TOTAL_FLUX_FACTOR * radius))
+            else:
+                rows.append(gradient[0] / (TOTAL_FLUX_FACTOR * radius))
+        return jnp.stack(rows)
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
+
+
+@dataclass(frozen=True)
 class WallGapConstraint:
     """One wall clearance expressed as an isoflux row at the closing point.
 
@@ -1021,6 +1065,180 @@ class WallGapConstraint:
         payload: object,
     ) -> jax.Array:
         return _flux_jacobian_image(self, profile, context, payload)
+
+
+class BoundingBoxRowKind(IntEnum):
+    """Which physical condition one bounding-box control row applies.
+
+    A row is a point together with one such kind: the boundary-flux rows put
+    the boundary through the point, the radial-field rows put :math:`B_R=0`
+    there (a radial turning point), the vertical-field rows put
+    :math:`B_Z=0` there (a vertical turning point), and the null row at the
+    X-point asks both gradients to vanish.
+    """
+
+    BOUNDARY_FLUX = 0
+    RADIAL_FIELD = 1
+    VERTICAL_FIELD = 2
+
+
+@dataclass(frozen=True)
+class BoundingBoxTarget:
+    """Payload bundle for the low-DOF bounding-box shape row set.
+
+    The rows are grouped by the functional that owns them: ``flux_points``
+    become the boundary-flux (isoflux) rows, ``radial_field_points`` and
+    ``vertical_field_points`` become the single-component field rows, and
+    ``x_point`` the two-gradient null row.  Every shape figure is an ordinary
+    array leaf, so steering a knob is building a new payload and recompiling
+    nothing.
+
+    Two constructions exist.  :meth:`from_control_points` reads the
+    pulse-design parameter vocabulary (geometric axis, minor radius,
+    elongation, the two major triangularities, the outer and inner midplane
+    offsets and the quadrant squarenesses) through
+    :class:`~nova.geometry.plasmapoints.ControlPoints`, the same generator
+    the inverse design exposes as sliders.  :meth:`from_boundary` reads the
+    achieved separatrix's own turning points — the outer and inner radial
+    extrema and the upper and lower vertical extrema of the traced contour —
+    so an unmoved command reproduces the achieved boundary exactly, with no
+    curve fit standing between the command and the plasma.
+    """
+
+    flux_points: object
+    radial_field_points: object
+    vertical_field_points: object
+    x_point: object | None = None
+    reference_point: object | None = None
+
+    @classmethod
+    def from_boundary(
+        cls,
+        boundary: object,
+        *,
+        x_point: object | None = None,
+        reference_point: object | None = None,
+    ) -> "BoundingBoxTarget":
+        """Read the control rows from one traced separatrix's own extrema.
+
+        ``boundary`` is the ``(point_count, 2)`` ``(R, Z)`` contour whose own
+        turning points become the rows, so the unmoved command puts the
+        boundary through exactly the points it already passes.
+        """
+        contour = jnp.asarray(boundary, dtype=jnp.float64)
+        radius, height = contour[:, 0], contour[:, 1]
+        outer = contour[int(jnp.argmax(radius))]
+        inner = contour[int(jnp.argmin(radius))]
+        upper = contour[int(jnp.argmax(height))]
+        lower = contour[int(jnp.argmin(height))]
+        return cls(
+            flux_points=jnp.stack((outer, upper, inner, lower)),
+            radial_field_points=jnp.stack((outer, inner)),
+            vertical_field_points=jnp.stack((upper, lower)),
+            x_point=x_point,
+            reference_point=reference_point,
+        )
+
+    @classmethod
+    def from_control_points(
+        cls,
+        geometric_axis: object,
+        minor_radius: float,
+        elongation: float,
+        triangularity_upper: float = 0.0,
+        triangularity_lower: float = 0.0,
+        triangularity_outer: float = 0.0,
+        triangularity_inner: float = 0.0,
+        squareness: object = 0.0,
+        *,
+        square: bool = False,
+        x_point: object | None = None,
+        reference_point: object | None = None,
+    ) -> "BoundingBoxTarget":
+        """Build the control rows from the pulse-design parameter vocabulary.
+
+        The four principal points come from the geometric axis, minor radius,
+        elongation and the two major triangularities; ``triangularity_outer``
+        and ``triangularity_inner`` are the midplane offsets of the outer and
+        inner points as fractions of the minor radius.  ``squareness`` is one
+        value applied to all four quadrants or four values in
+        ``(upper_outer, upper_inner, lower_inner, lower_outer)`` order; with
+        ``square`` true the four quadrant points are added to the flux rows.
+        ControlPoints is imported lazily because it carries the graphics and
+        wall stack, which the constraint interface should not pull in.
+        """
+        import xarray
+
+        from nova.geometry.plasmapoints import ControlPoints
+
+        values = np.asarray(squareness, dtype=float)
+        if values.size == 1:
+            values = np.repeat(values, 4)
+        if values.shape != (4,):
+            raise ValueError(
+                "squareness is one value or four in "
+                "(upper_outer, upper_inner, lower_inner, lower_outer)"
+            )
+        axes = np.atleast_1d(np.asarray(geometric_axis, dtype=float))
+        if axes.shape != (2,):
+            raise ValueError("the geometric axis is one (R, Z) pair")
+        data = xarray.Dataset(
+            {
+                "geometric_axis": ("point", axes.tolist()),
+                "minor_radius": float(minor_radius),
+                "elongation": float(elongation),
+                "triangularity_upper": float(triangularity_upper),
+                "triangularity_lower": float(triangularity_lower),
+                "elongation_upper": float(triangularity_outer),
+                "elongation_lower": float(triangularity_inner),
+                "squareness_upper_outer": float(values[0]),
+                "squareness_upper_inner": float(values[1]),
+                "squareness_lower_inner": float(values[2]),
+                "squareness_lower_outer": float(values[3]),
+            }
+        )
+        control = ControlPoints(data, square=square)
+        principal = np.stack(
+            (
+                np.asarray(control.outer),
+                np.asarray(control.upper),
+                np.asarray(control.inner),
+                np.asarray(control.lower),
+            )
+        )
+        radial = np.stack((np.asarray(control.outer), np.asarray(control.inner)))
+        vertical = np.stack((np.asarray(control.upper), np.asarray(control.lower)))
+        flux_points = principal
+        if square:
+            quadrant = np.stack(
+                (
+                    np.asarray(control.upper_outer),
+                    np.asarray(control.upper_inner),
+                    np.asarray(control.lower_inner),
+                    np.asarray(control.lower_outer),
+                )
+            )
+            flux_points = np.concatenate((principal, quadrant))
+        return cls(
+            flux_points=jnp.asarray(flux_points, dtype=jnp.float64),
+            radial_field_points=jnp.asarray(radial, dtype=jnp.float64),
+            vertical_field_points=jnp.asarray(vertical, dtype=jnp.float64),
+            x_point=x_point,
+            reference_point=reference_point,
+        )
+
+    @property
+    def rows(self) -> list[tuple[BoundingBoxRowKind, object]]:
+        """Return every control row as its ``(kind, point)`` pair."""
+
+        def pairs(kind, points):
+            return [(kind, point) for point in np.asarray(points)]
+
+        return [
+            *pairs(BoundingBoxRowKind.BOUNDARY_FLUX, self.flux_points),
+            *pairs(BoundingBoxRowKind.RADIAL_FIELD, self.radial_field_points),
+            *pairs(BoundingBoxRowKind.VERTICAL_FIELD, self.vertical_field_points),
+        ]
 
 
 class ConstraintRecord(NamedTuple):
@@ -1231,6 +1449,8 @@ def constraint_records(
 
 __all__ = [
     "AugmentedConstraintSystem",
+    "BoundingBoxRowKind",
+    "BoundingBoxTarget",
     "CircuitCurrentUnknown",
     "CompensatingUnknown",
     "CompensatorRule",
@@ -1243,6 +1463,7 @@ __all__ = [
     "ConstraintPolicy",
     "ConstraintRecord",
     "CurrentCentroidConstraint",
+    "FieldComponentConstraint",
     "IsofluxConstraint",
     "IsofluxReference",
     "ProfileAmplitudeUnknown",
@@ -1256,7 +1477,6 @@ __all__ = [
     "constraint_response_matrix",
     "constraint_row_slices",
     "derive_circuit_compensators",
-    "miller_boundary_points",
     "sample_lattice_flux",
     "select_compensating_directions",
 ]

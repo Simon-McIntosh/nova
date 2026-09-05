@@ -24,6 +24,7 @@ from nova.equilibrium.domain import (
     classify_domains,
 )
 from nova.equilibrium.flux_surface_connectivity import (
+    census_stationary_receipt,
     hex_edge_admissibility,
     polish_census_stationary_points,
 )
@@ -799,7 +800,12 @@ class Topology(Pytree):
         else:
             flux = psi_grid[self.polish_gather]
             surface = None
-        vmap_o, vmap_x = self.grid(psi_grid)
+        census_authored = structured and hasattr(self.grid, "read_census")
+        if census_authored:
+            (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
+        else:
+            vmap_o, vmap_x = self.grid(psi_grid)
+            census = None
         data_w = self.wall(psi_wall, polarity)
         qualified_o = self.qualified_o_candidates(
             vmap_o,
@@ -822,7 +828,28 @@ class Topology(Pytree):
             boundary_is_xpoint = jnp.asarray(requested_class) == int(
                 TopologyClass.DIVERTED
             )
-        if structured:
+        if census_authored:
+            selected_index = jnp.stack(
+                (
+                    self.o_point_index(vmap_o, polarity, qualified_o),
+                    self.x_point_index(vmap_x, polarity, data_o[2]),
+                )
+            )
+            polish_receipt = census_stationary_receipt(
+                flux,
+                self.connectivity_radius,
+                self.connectivity_height,
+                census,
+                selected_index,
+                jnp.stack((data_o, data_x)),
+                jnp.stack(
+                    (
+                        selection.admitted,
+                        jnp.all(jnp.isfinite(data_x[:3])),
+                    )
+                ),
+            )
+        elif structured:
             data_o, data_x, polish_receipt = polish_census_stationary_points(
                 flux,
                 self.connectivity_radius,

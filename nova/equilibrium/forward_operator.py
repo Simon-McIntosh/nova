@@ -696,8 +696,8 @@ class _FixedDesignNull2D:
         }
 
     @jax.jit
-    def __call__(self, psi):
-        """Return fixed-capacity, polarity-consistent extrema and saddles."""
+    def read_census(self, psi):
+        """Return published candidate rows with their originating census."""
         census = self.candidate_census(psi)
         extremum_valid = (
             jnp.ones_like(census["retained_valid"][0])
@@ -713,11 +713,17 @@ class _FixedDesignNull2D:
             .at[0]
             .set(census["retained_valid"][0] & extremum_valid)
         )
-        return jnp.where(
+        rows = jnp.where(
             admitted[..., None],
             census["retained_candidate"],
             jnp.full_like(census["retained_candidate"], jnp.nan),
         )
+        return rows, census
+
+    @jax.jit
+    def __call__(self, psi):
+        """Return fixed-capacity, polarity-consistent extrema and saddles."""
+        return self.read_census(psi)[0]
 
     def tree_flatten(self):
         """Return immutable locator and spline geometry as pytree state."""

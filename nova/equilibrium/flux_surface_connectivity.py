@@ -86,6 +86,7 @@ __all__ = [
     "label_saddle_aware_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
+    "census_stationary_receipt",
     "polish_census_stationary_points",
     "polish_stationary_points",
     "private_flux_mask",
@@ -982,6 +983,79 @@ def _census_local_values(
         return basis @ coefficient
 
     return jax.vmap(evaluate)(census_position, evaluation_position)
+
+
+def census_stationary_receipt(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    census: dict[str, jnp.ndarray],
+    selected_index: jnp.ndarray,
+    selected_stationary: jnp.ndarray,
+    selected_valid: jnp.ndarray,
+) -> dict[str, jnp.ndarray]:
+    """Project selected authoritative census rows into a read receipt.
+
+    A structured fixed-design census has already polished every retained row
+    on the complete-map tensor spline and banked the gradient, Hessian
+    determinant, displacement, uncertainty, origin and multiplicity used to
+    retain it.  Selecting two rows must not fit or polish the same map again.
+    The local quadratic value remains an inexpensive independent interpolation
+    check for the boundary deadband; split-spline conditioning belongs to a
+    separately requested diagnostic rather than this production read.
+    """
+    values = jnp.asarray(values)
+    radial = jnp.asarray(radial, dtype=values.dtype)
+    vertical = jnp.asarray(vertical, dtype=values.dtype)
+    selected_index = jnp.asarray(selected_index, dtype=jnp.int32)
+    selected_stationary = jnp.asarray(selected_stationary, dtype=values.dtype)
+    selected_valid = jnp.asarray(selected_valid, dtype=bool)
+    kind = jnp.arange(2, dtype=jnp.int32)
+    safe_index = jnp.maximum(selected_index, 0)
+    retained_valid = census["retained_valid"][kind, safe_index]
+    valid = selected_valid & (selected_index >= 0) & retained_valid
+
+    def gather(name):
+        return census[name][kind, safe_index]
+
+    position = selected_stationary[:, :2]
+    value = selected_stationary[:, 2]
+    local_value = _census_local_values(
+        values,
+        radial,
+        vertical,
+        jnp.ones(values.shape, dtype=bool),
+        position,
+        position,
+    )
+    local_value = jnp.where(valid, local_value, jnp.nan)
+    hessian_determinant = gather("retained_spline_hessian_determinant")
+    spline_authored = valid & jnp.asarray(census["spline_authored"], dtype=bool)
+    return {
+        "converged": valid,
+        "position_rz": position,
+        "value": value,
+        "gradient": gather("retained_spline_gradient"),
+        "gradient_norm": gather("retained_spline_gradient_norm"),
+        "hessian_determinant": hessian_determinant,
+        "hessian_type": jnp.sign(hessian_determinant).astype(jnp.int8),
+        "in_domain": valid,
+        "local_value_evidence": local_value,
+        "spline_value": value,
+        "spline_authored": spline_authored,
+        "complete_map": jnp.broadcast_to(
+            jnp.asarray(census["spline_authored"], dtype=bool), valid.shape
+        ),
+        "value_replaced": jnp.zeros(valid.shape, dtype=bool),
+        "census_position_rz": position,
+        "selected_position_rz": position,
+        "selected_value": value,
+        "representative_origin_index": gather("retained_representative_origin_index"),
+        "representative_origin_rz": gather("retained_representative_origin_rz"),
+        "multiplicity": gather("retained_multiplicity"),
+        "requested_displacement": gather("retained_requested_displacement"),
+        "root_uncertainty": gather("retained_root_uncertainty"),
+    }
 
 
 @jax.jit

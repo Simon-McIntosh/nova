@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T04:32:00",
+  "updated": "2026-09-05T05:04:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1725,6 +1725,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-fallback-carry-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "msc-hessenberg-trace-x",
@@ -100326,6 +100335,185 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T021723571239-msc-late-trip-promotion-timing",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-late-trip-promotion-timing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2828,
+                "cached_input_tokens": 817701,
+                "input_tokens": 820630,
+                "output_tokens": 4321,
+                "reasoning_output_tokens": 971,
+                "total_tokens": 824951,
+                "uncached_input_tokens": 101
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commit confined to benchmarks/late_trip_promotion_timing.py and docs/figures/millisecond-converged-solve/trip-quantum/late-trips/ holding the per-promotion table for all seven trips (wall, grade, GMRES iterations, recovery plus rebuild plus descent flags), the persisted event stream plus one figure of promotion wall by trip, together with the report ~/.config/reckon/crew/reports/nova/millisecond/late-trip-promotion-timing.md naming the mechanism with file:line, its share of trips 6 and 7, plus the repair with an estimated saving, the SLURM job id plus log paths, the manifest written before the SLURM wait begins, no nova/ source change",
+          "estimated_hours": null,
+          "goal": "Attribute the remaining late-trip amplification of the production solve after the frozen-partition scoring landed (receipts docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/, H200 job 1262789: MAST 22086/43 pure now 34.3 s, trips 2 and 3 fell from 3.4 s to 0.20 s, while trips 4 to 7 stayed at 3.85, 5.67, 12.30 and 12.30 s, exactly the trips with rejected promotions: 34 backtracks plus 2 recoveries on trip 4, 47 backtracks, 4 recoveries, 3 model rebuilds plus 2 descents on trip 5, 5 of 12 promotions accepted on trip 6 and 0 of 12 on trip 7), so the discarded candidate-topology evaluation was the early-trip cost and something else scales the late trips, which this node measures per promotion inside those trips with ordered jax.debug.callback timestamps (JAX_PLATFORMS=cuda,cpu) around each promotion attempt plus each recovery, rebuilt-model plus descent evaluation in an in-benchmark copy of the solve entry (the pattern of benchmarks/compiled_outer_loop_trace.py, never a nova/ source change), recording per promotion the wall, the ladder grade reached, the GMRES iterations actually used, the recovery radius plus rebuild damping applied plus whether the rebuilt-model path re-linearised, every record appended to disk as it arrives, in one SLURM job on betelgeuse under reservation gpu_0003_grpA with the persistent compilation cache at /work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile, payload launched with /home/ITER/mcintos/Code/nova/.venv/bin/python directly from the checkout root, polled in the foreground because a backgrounded wait ends the worker's turn, with authority for up to three submissions on any failure, so that the report ranks the promotion-level costs of trips 4 to 7 against trips 2 to 3, names the mechanism with file:line (candidates: the rebuilt-model path re-linearising plus restarting GMRES at full budget per rejected promotion around fixed_point.py:1438 to 1495, the recovery replay re-scoring every ladder grade, the descent promotion evaluating the full grade set, a per-rejection topology read that the frozen-partition change did not cover), plus recommends the repair with an estimated saving",
+          "id": "msc-late-trip-promotion-timing",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T021723571239-msc-late-trip-promotion-timing/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "benchmarks/late_trip_promotion_timing.py",
+            "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/late-trip-promotion-timing.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-late-trip-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T02:17:36Z",
+        "completed_at": "2026-09-05T03:01:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2614,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2614,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "0efbf12314d9746e7ab99d1d1e303fd73a5d6548",
+        "commits": [
+          "0102026af7ab18986f56761ffcfec0acc23b38aa"
+        ],
+        "changed_lines": {
+          "added": 5613,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "receipt validation over profile.json plus promotions.csv (84 promotions, 748 ordered events, identical semantic summaries) plus ruff plus preflight of benchmarks/late_trip_promotion_timing.py; measurement node, H200 job 1262797 completed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T021723571239-msc-late-trip-promotion-timing/slurm-1262793.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T021723571239-msc-late-trip-promotion-timing/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06f5b-6e7e-78e1-9749-3cb92255ce5f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 71970,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 74370,
+              "external_wait": null,
+              "log_age_seconds": 73468,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 73524,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-late-trip-promotion-timing",
+          "session_id": "01a06f5b-6e7e-78e1-9749-3cb92255ce5f",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T03:01:10Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -100470,6 +100658,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1709
+    "_version": 1711
   }
 }

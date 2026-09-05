@@ -22,11 +22,16 @@ solve: a dense ``jax.jacfwd`` Jacobian formed once per trip, a dense linear
 solve per Newton step, and a backtracking line search that refreshes the
 Jacobian when a whole grade ladder is rejected.
 
-Two costs of driving that solve from the host are removed rather than paid.
-The backtracking grades are scored one at a time and scoring stops at the
-first grade below the incumbent merit, which is the grade the selection takes
-in either case, so a step accepted at full length evaluates the map once
-instead of eight times.  A trip closes inside one compiled program that
+Three costs of driving that solve from the host are removed rather than
+paid.  Scoring stops at the first grade below the incumbent merit, which is
+the grade the selection takes in either case, so a step accepted at full
+length evaluates the map once instead of eight times; the grades after the
+first are scored together, so a refused first grade costs one further round
+trip rather than one per remaining grade; and the residual sup norm the
+receipt reads comes back from the program that already holds the residual
+rather than from a reduction dispatched after it.
+
+A trip closes inside one compiled program that
 reconstructs the flux, promotes the residual shadow against the frozen one,
 maps the promoted state, gathers the next trip's amplitudes and measures the
 off-support leakage from a single topology read, with the frozen shadow as an
@@ -60,6 +65,7 @@ from nova.equilibrium.fixed_point import (
 __all__ = [
     "ReducedCoordinates",
     "ReducedNewtonResult",
+    "ReducedScores",
     "ReducedTrip",
     "reduced_coordinates",
     "solve_reduced_newton",
@@ -71,11 +77,16 @@ NEWTON_STEPS = 12
 SUPPORT_POLICY = "participation"
 _ACTIVE_SUPPORT_FLOOR = 0.0
 
-#: Score the backtracking grades one at a time and stop at the first that
-#: lowers the merit.  The production ladder takes the first grade below the
-#: incumbent merit, so scoring a later grade can only produce a value the
-#: selection discards.
-LADDER_SCORING = "first_accept"
+#: Score the first backtracking grade alone and, when it is refused, score
+#: every remaining grade in one dispatch.  The production ladder takes the
+#: first grade below the incumbent merit, so a grade after the accepted one
+#: can only produce a value the selection discards, while a refused grade
+#: leaves every later grade still to score and no ordering among them to
+#: exploit.
+LADDER_SCORING = "batched_tail"
+#: Score the grades strictly one at a time, stopping at the first below the
+#: incumbent merit.  Same selection, one synchronised round trip per grade.
+SERIAL_LADDER_SCORING = "first_accept"
 #: Score every grade before selecting, which is what the first prototype did
 #: and what the banked receipt measured.
 EAGER_LADDER_SCORING = "eager"
@@ -103,6 +114,22 @@ class ReducedCoordinates(NamedTuple):
     def size(self) -> int:
         """Return the reduced state dimension."""
         return int(self.cells.size) * len(self.leaves)
+
+
+class ReducedScores(NamedTuple):
+    """Residual, residual sup norm and flux scores at one reduced state.
+
+    The four are readings of a single write-then-read cycle, so one program
+    computes the moments once and returns all four together.  The sup norm is
+    a reduction over a residual that program already holds and nothing the
+    solve branches on reads it, so dispatching it separately would spend a
+    synchronised round trip on a number only the receipt reports.
+    """
+
+    residual: jax.Array
+    residual_norm: float
+    merit: float
+    flux_residual: float
 
 
 class ReducedTrip(NamedTuple):
@@ -303,18 +330,22 @@ def _reduced_kernels(
         return excluded / jnp.maximum(jnp.max(jnp.abs(current)), 1.0e-30)
 
     def step_scores(reduced, shadow, base_state):
-        """Return the reduced residual, the merit and the flux residual at once.
+        """Return the reduced residual, its sup norm and the flux scores.
 
-        The reduced residual and the two flux scores are three readings of a
-        single write-then-read cycle, so one program computes the moments
-        once and the three readings share it.
+        The residual, its sup norm and the two flux scores are four readings
+        of a single write-then-read cycle, so one program computes the
+        moments once and the four readings share it.  Folding the norm in
+        here is what keeps it off the host: the caller reads it beside the
+        merit it was going to synchronise on anyway.
         """
         state = reconstruct(reduced, shadow, base_state)
         moments = _current_moments(operator, state, requested_class, target_current)
         image = external + operator.current_moment_image(moments)
         mapped = jnp.where(shadow, state, image)
-        return (
-            reduced - _gather(coordinates, moments),
+        residual = reduced - _gather(coordinates, moments)
+        return ReducedScores(
+            residual,
+            jnp.max(jnp.abs(residual)),
             _smooth_relative_sup_merit(mapped, state),
             _relative_residual(mapped, state),
         )
@@ -329,8 +360,24 @@ def _reduced_kernels(
         one compiled program.
         """
         candidate = reduced + factor * step
-        residual, merit, flux_residual = step_scores(candidate, shadow, base_state)
-        return candidate, residual, merit, flux_residual
+        return candidate, step_scores(candidate, shadow, base_state)
+
+    def tail_grades(reduced, step, shadow, base_state):
+        """Score every backtracking grade after the first in one dispatch.
+
+        A refused first grade leaves the remaining grades with no ordering to
+        exploit: whichever of them the selection takes, the ones before it
+        must be scored to know that they are refused.  Scoring them together
+        pays one round trip for the whole tail instead of one per grade, and
+        the candidates leave the program beside their scores exactly as the
+        single-grade kernel returns them, so an accepted tail grade carries
+        its own residual and merit into the next Newton step.
+        """
+        factors = jnp.asarray(_BACKTRACKING_FACTORS[1:], dtype=reduced.dtype)
+        candidates = reduced[None, :] + factors[:, None] * step[None, :]
+        return candidates, jax.lax.map(
+            lambda candidate: step_scores(candidate, shadow, base_state), candidates
+        )
 
     def trip_boundary(reduced, shadow, base_state):
         """Close one trip inside a single program.
@@ -388,6 +435,7 @@ def _reduced_kernels(
         "direction": jax.jit(newton_direction),
         "step_scores": jax.jit(step_scores),
         "grade": jax.jit(grade_scores),
+        "tail": jax.jit(tail_grades),
         "boundary": jax.jit(trip_boundary),
         "initial_gather": jax.jit(initial_gather),
     }
@@ -407,6 +455,39 @@ def _eager_grades(kernels, reduced, direction, merit, shadow, base_state, census
     return accepted, len(_BACKTRACKING_FACTORS), None
 
 
+def _host_scores(scores: ReducedScores) -> ReducedScores:
+    """Return one device score tuple with its three scalars read together.
+
+    The three scalars leave the device in one transfer, so the norm the
+    receipt reports costs nothing beyond the merit the selection was going to
+    synchronise on.
+    """
+    norm, merit, flux_residual = jax.device_get(
+        (scores.residual_norm, scores.merit, scores.flux_residual)
+    )
+    return ReducedScores(
+        scores.residual, float(norm), float(merit), float(flux_residual)
+    )
+
+
+def _lowers(merit: float, incumbent: float) -> bool:
+    """Return whether one scored merit is admissible below the incumbent."""
+    return bool(np.isfinite(merit)) and merit < incumbent
+
+
+def _score_grade(kernels, reduced, direction, factor, shadow, base_state, census):
+    """Score one backtracking grade and read its scalars to the host."""
+    candidate, scores = kernels["grade"](
+        reduced,
+        direction,
+        jnp.asarray(factor, dtype=reduced.dtype),
+        shadow,
+        base_state,
+    )
+    census["map_evaluations"] += 1
+    return candidate, _host_scores(scores)
+
+
 def _first_accept_grades(
     kernels, reduced, direction, merit, shadow, base_state, census
 ):
@@ -415,36 +496,83 @@ def _first_accept_grades(
     The selection is the one the eager ladder makes, so scoring stops where
     that selection is already decided.  An accepted grade returns the state
     it scored together with its residual and merit, which the next Newton
-    step reads instead of evaluating the map again at the same point.
+    step reads instead of evaluating the map again at the same point.  Every
+    grade is its own dispatch, which is what the batched tail removes.
     """
     for index, factor in enumerate(_BACKTRACKING_FACTORS):
-        candidate, residual, candidate_merit, candidate_flux = kernels["grade"](
-            reduced,
-            direction,
-            jnp.asarray(factor, dtype=reduced.dtype),
-            shadow,
-            base_state,
+        candidate, scores = _score_grade(
+            kernels, reduced, direction, factor, shadow, base_state, census
         )
-        census["map_evaluations"] += 1
-        value = float(candidate_merit)
-        if np.isfinite(value) and value < merit:
-            promotion = (candidate, residual, value, float(candidate_flux))
-            return index, index + 1, promotion
+        if _lowers(scores.merit, merit):
+            return index, index + 1, (candidate, scores)
     return -1, len(_BACKTRACKING_FACTORS), None
 
 
+def _batched_tail_grades(
+    kernels, reduced, direction, merit, shadow, base_state, census
+):
+    """Score the first grade alone, then the whole refused tail at once.
+
+    The selection is unchanged: the earliest grade whose merit falls below
+    the incumbent, which is the grade the eager ladder and the serial route
+    both take.  A step accepted at full length still costs the one evaluation
+    the serial route pays, and a step whose first grade is refused pays one
+    further round trip for the remaining grades instead of one apiece.
+    """
+    candidate, scores = _score_grade(
+        kernels,
+        reduced,
+        direction,
+        _BACKTRACKING_FACTORS[0],
+        shadow,
+        base_state,
+        census,
+    )
+    if _lowers(scores.merit, merit):
+        return 0, 1, (candidate, scores)
+    candidates, tail = kernels["tail"](reduced, direction, shadow, base_state)
+    census["map_evaluations"] += len(_BACKTRACKING_FACTORS) - 1
+    norms, merits, flux_residuals = jax.device_get(
+        (tail.residual_norm, tail.merit, tail.flux_residual)
+    )
+    below = np.isfinite(merits) & (merits < merit)
+    if not bool(below.any()):
+        return -1, len(_BACKTRACKING_FACTORS), None
+    index = int(np.argmax(below))
+    promotion = (
+        candidates[index],
+        ReducedScores(
+            tail.residual[index],
+            float(norms[index]),
+            float(merits[index]),
+            float(flux_residuals[index]),
+        ),
+    )
+    return index + 1, index + 2, promotion
+
+
+#: The grader each scoring policy drives its backtracking ladder through.
+_GRADERS = {
+    LADDER_SCORING: _batched_tail_grades,
+    SERIAL_LADDER_SCORING: _first_accept_grades,
+    EAGER_LADDER_SCORING: _eager_grades,
+}
+
+
 def _incumbent_scores(kernels, reduced, shadow, base_state, census, scoring):
-    """Return the reduced residual, merit and flux residual at one state."""
-    if scoring == LADDER_SCORING:
-        residual, merit, flux_residual = kernels["step_scores"](
-            reduced, shadow, base_state
-        )
+    """Return the residual, its sup norm and the flux scores at one state."""
+    if scoring != EAGER_LADDER_SCORING:
         census["map_evaluations"] += 1
-        return residual, float(merit), float(flux_residual)
+        return _host_scores(kernels["step_scores"](reduced, shadow, base_state))
     residual, _ = _timed(kernels["reduced_residual"], reduced, shadow, base_state)
     scores, _ = _timed(kernels["flux_scores"], reduced, shadow, base_state)
     census["map_evaluations"] += 2
-    return residual, float(scores[0]), float(scores[1])
+    return ReducedScores(
+        residual,
+        float(jnp.max(jnp.abs(residual))),
+        float(scores[0]),
+        float(scores[1]),
+    )
 
 
 def _plain_newton_trip(
@@ -474,33 +602,33 @@ def _plain_newton_trip(
         "newton_wall": 0.0,
         "map_evaluations": 0,
     }
-    grader = _first_accept_grades if scoring == LADDER_SCORING else _eager_grades
+    grader = _GRADERS[scoring]
+    eager = scoring == EAGER_LADDER_SCORING
     factors = _BACKTRACKING_FACTORS
     fresh = True
-    carried: tuple[jax.Array, float, float] | None = None
+    carried: ReducedScores | None = None
     for index in range(newton_steps):
         started = time.perf_counter()
         before = census["map_evaluations"]
         if carried is None:
-            residual, merit, flux_residual = _incumbent_scores(
+            scores = _incumbent_scores(
                 kernels, reduced, shadow, base_state, census, scoring
             )
         else:
-            residual, merit, flux_residual = carried
-            carried = None
-        if not np.isfinite(flux_residual) or flux_residual <= tolerance:
+            scores, carried = carried, None
+        if not np.isfinite(scores.flux_residual) or scores.flux_residual <= tolerance:
             break
         accepted = -1
         refreshed = False
         direction = None
         promotion = None
         for _attempt in range(2):
-            if scoring == LADDER_SCORING:
-                direction = kernels["direction"](jacobian, residual)
+            if eager:
+                direction, _ = _timed(kernels["direction"], jacobian, scores.residual)
             else:
-                direction, _ = _timed(kernels["direction"], jacobian, residual)
+                direction = kernels["direction"](jacobian, scores.residual)
             accepted, _tried, promotion = grader(
-                kernels, reduced, direction, merit, shadow, base_state, census
+                kernels, reduced, direction, scores.merit, shadow, base_state, census
             )
             if accepted >= 0:
                 break
@@ -519,9 +647,9 @@ def _plain_newton_trip(
         record = ReducedNewtonStep(
             trip=trip,
             step=index,
-            reduced_residual=float(jnp.max(jnp.abs(residual))),
-            flux_residual=flux_residual,
-            merit=merit,
+            reduced_residual=scores.residual_norm,
+            flux_residual=scores.flux_residual,
+            merit=scores.merit,
             accepted_factor=None if accepted < 0 else float(factors[accepted]),
             grades_tried=(
                 len(factors) * (2 if refreshed else 1)
@@ -538,8 +666,7 @@ def _plain_newton_trip(
         if promotion is None:
             reduced = reduced + factors[accepted] * direction
         else:
-            reduced, promoted_residual, promoted_merit, promoted_flux = promotion
-            carried = (promoted_residual, promoted_merit, promoted_flux)
+            reduced, carried = promotion
         fresh = False
         census["steps"] += 1
     return reduced, census
@@ -594,7 +721,7 @@ def solve_reduced_newton(
     kernels = _reduced_kernels(
         operator, coordinates, external, requested_class, target_current
     )
-    if ladder_scoring not in (LADDER_SCORING, EAGER_LADDER_SCORING):
+    if ladder_scoring not in _GRADERS:
         raise ValueError(f"unknown ladder scoring {ladder_scoring!r}")
     if trip_boundary not in (TRIP_BOUNDARY, DISPATCHED_TRIP_BOUNDARY):
         raise ValueError(f"unknown trip boundary {trip_boundary!r}")

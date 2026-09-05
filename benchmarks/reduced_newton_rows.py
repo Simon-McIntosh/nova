@@ -1,12 +1,15 @@
 """Measure the reduced-state plain-Newton prototype on the four bank rows.
 
-Each row is solved from the same persisted pure-arm seed through two
-prototype routes: the first-accept ladder behind a fused trip boundary, and
-the eager ladder behind the dispatched boundary the first prototype measured.
-The second is the route the banked receipt beside this one recorded, so it
-re-derives that receipt's terminal flux in the same job and the first route's
-terminal flux is compared against it row by row.  Optionally each row is also
-solved through the production public route,
+Each row is solved from the same persisted pure-arm seed through three
+prototype routes: the batched-tail ladder behind a fused trip boundary, the
+serial per-grade ladder behind the same boundary, and the eager ladder behind
+the dispatched boundary the first prototype measured.  The eager route is what
+the banked receipt beside this one recorded, so it re-derives that receipt's
+terminal flux in the same job and the fast route's terminal flux is compared
+against it row by row; the serial route is the route the batched tail
+replaces, so the two stand side by side in the same job and the batched tail
+is judged a strict improvement or not on the rows that refuse grades.
+Optionally each row is also solved through the production public route,
 ``ForwardProfile.solve_branch(newton_krylov)``.
 
 Every arm reports the terminal residual, the trip count, the Newton steps and
@@ -84,10 +87,16 @@ PREVIOUS_RECEIPT = (
 #: reassociation is carried through the trips that follow it.
 CONVERGED_FLUX_AGREEMENT = 1.0e-9
 SETTLED_FLUX_AGREEMENT = 1.0e-6
-#: Both prototype routes, named by the mechanism each measures.
+#: Every prototype route, named by the mechanism each measures, in the order
+#: they are solved: a job that runs out of wall clock delivers the batched
+#: tail and the route it replaces before it reaches the eager reference.
 PROTOTYPE_ROUTES = {
     "prototype": {
         "ladder_scoring": reduced_newton.LADDER_SCORING,
+        "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+    },
+    "serial_prototype": {
+        "ladder_scoring": reduced_newton.SERIAL_LADDER_SCORING,
         "trip_boundary": reduced_newton.TRIP_BOUNDARY,
     },
     "eager_prototype": {
@@ -175,6 +184,70 @@ def _route_agreement(fast, eager, previous) -> dict[str, Any]:
             == eager["active_set_mask_differences"]
         ),
         "previous_receipt_reproduced": reproduced,
+    }
+
+
+def _median(values) -> float | None:
+    """Return the median of one sample, or None where the sample is empty."""
+    return float(np.median(values)) if len(values) else None
+
+
+def _difference(left, right) -> float | None:
+    """Return one signed wall difference, or None where a figure is absent."""
+    if left is None or right is None:
+        return None
+    return float(left) - float(right)
+
+
+def _tail_comparison(fast, serial, eager) -> dict[str, Any]:
+    """Read the batched refused tail against the routes it stands between.
+
+    A refused step is where the batching acts: the serial route dispatches
+    every remaining grade and the eager route scores them all in one
+    ``lax.map``, so the batched tail is a strict improvement only if its
+    refused step lands at the eager route's wall while its accepting step
+    keeps the serial route's.  Every decision is compared against the serial
+    route for exact equality, because the tail must move round trips and
+    nothing else.
+    """
+    fast_flux = jnp.asarray(fast["flux"])
+    serial_flux = jnp.asarray(serial["flux"])
+    return {
+        "reference_route": "serial per-grade ladder behind the fused boundary",
+        "refused_step_wall_s": fast["median_warm_refused_step_wall_s"],
+        "serial_refused_step_wall_s": serial["median_warm_refused_step_wall_s"],
+        "eager_refused_step_wall_s": eager["median_warm_refused_step_wall_s"],
+        "refused_step_wall_over_eager_s": _difference(
+            fast["median_warm_refused_step_wall_s"],
+            eager["median_warm_refused_step_wall_s"],
+        ),
+        "refused_step_wall_recovered_from_serial_s": _difference(
+            serial["median_warm_refused_step_wall_s"],
+            fast["median_warm_refused_step_wall_s"],
+        ),
+        "accepting_step_wall_s": fast["median_warm_accepting_step_wall_s"],
+        "serial_accepting_step_wall_s": serial["median_warm_accepting_step_wall_s"],
+        "accepting_step_wall_over_serial_s": _difference(
+            fast["median_warm_accepting_step_wall_s"],
+            serial["median_warm_accepting_step_wall_s"],
+        ),
+        "warm_refused_step_count": fast["warm_refused_step_count"],
+        "warm_accepting_step_count": fast["warm_accepting_step_count"],
+        "identical_decisions": (
+            fast["active_set_iterations"] == serial["active_set_iterations"]
+            and fast["newton_steps_per_trip"] == serial["newton_steps_per_trip"]
+            and fast["active_set_mask_differences"]
+            == serial["active_set_mask_differences"]
+            and fast["rejected_steps_per_trip"] == serial["rejected_steps_per_trip"]
+            and fast["termination_reason"] == serial["termination_reason"]
+            and [step["accepted_factor"] for step in fast["steps"]]
+            == [step["accepted_factor"] for step in serial["steps"]]
+        ),
+        "bitwise_identical_flux": bool(jnp.array_equal(fast_flux, serial_flux)),
+        "sup_flux_difference_wb": float(jnp.max(jnp.abs(fast_flux - serial_flux))),
+        "identical_terminal_residual": (
+            fast["terminal_residual"] == serial["terminal_residual"]
+        ),
     }
 
 
@@ -280,6 +353,8 @@ def _prototype_arm(
     warm_trips = result.trip_wall_per_trip[1:]
     warm_boundaries = result.boundary_wall_per_trip[1:]
     warm_newton = result.newton_wall_per_trip[1:]
+    warm_accepting = [step for step in warm_steps if step.accepted_factor is not None]
+    warm_refused = [step for step in warm_steps if step.accepted_factor is None]
     return {
         "route": "reduced_newton.solve_reduced_newton",
         "ladder_scoring": route["ladder_scoring"],
@@ -334,6 +409,17 @@ def _prototype_arm(
             if warm_steps
             else None
         ),
+        "warm_accepting_step_count": len(warm_accepting),
+        "warm_refused_step_count": len(warm_refused),
+        "median_warm_accepting_step_wall_s": _median(
+            [step.wall_s for step in warm_accepting]
+        ),
+        "median_warm_refused_step_wall_s": _median(
+            [step.wall_s for step in warm_refused]
+        ),
+        "median_warm_refused_step_map_evaluations": _median(
+            [float(step.map_evaluations) for step in warm_refused]
+        ),
         "steps": [
             {
                 "trip": step.trip,
@@ -376,10 +462,11 @@ def _fixed_point_agreement(operator, production, prototype, target_current):
 
 def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
     """Plot the warm step, the warm trip and the map evaluations, before/after."""
-    figure, axes = plt.subplots(1, 3, figsize=(13.5, 4.2))
+    figure, axes = plt.subplots(1, 4, figsize=(18.0, 4.4))
     identities = [row["identity"] for row in rows]
     index = np.arange(len(rows))
     before = "#c0504d"
+    middle = "#f0a04b"
     after = "#4f81bd"
 
     def series(name, field_name):
@@ -397,7 +484,7 @@ def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
         index + 0.2,
         series("prototype", "median_warm_step_wall_s"),
         0.4,
-        label="first accept, fused boundary",
+        label="batched tail, fused boundary",
         color=after,
     )
     axes[0].axhline(1.0e-3, color="black", linestyle="--", linewidth=1.0)
@@ -443,19 +530,45 @@ def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
         index + 0.2,
         series("prototype", "median_warm_step_map_evaluations"),
         0.4,
-        label="first accept",
+        label="batched tail",
         color=after,
     )
     axes[2].set_ylabel("map evaluations per warm Newton step")
     axes[2].set_title("map evaluations a step pays for")
     axes[2].legend(fontsize=7)
 
+    for offset, name, label, colour in (
+        (-0.27, "eager_prototype", "eager ladder", before),
+        (0.0, "serial_prototype", "serial per-grade ladder", middle),
+        (0.27, "prototype", "batched tail", after),
+    ):
+        axes[3].bar(
+            index + offset,
+            series(name, "median_warm_refused_step_wall_s"),
+            0.26,
+            label=label,
+            color=colour,
+        )
+    axes[3].plot(
+        index,
+        series("prototype", "median_warm_accepting_step_wall_s"),
+        "k_",
+        markersize=14,
+        label="batched tail, accepting step",
+    )
+    axes[3].axhline(1.0e-3, color="black", linestyle="--", linewidth=1.0)
+    axes[3].set_yscale("log")
+    axes[3].set_ylabel("median warm refused step wall [s]")
+    axes[3].set_title("a refused grade ladder, per route")
+    axes[3].legend(fontsize=7)
+
     for axis in axes:
         axis.set_xticks(index)
         axis.set_xticklabels(identities, rotation=20, fontsize=8)
         axis.grid(True, axis="y", alpha=0.3)
     figure.suptitle(
-        "Reduced-state plain Newton: first-accept scoring and a fused trip boundary"
+        "Reduced-state plain Newton: a batched refused grade tail behind a fused trip"
+        " boundary"
     )
     figure.tight_layout()
     figure_path.parent.mkdir(parents=True, exist_ok=True)
@@ -534,7 +647,16 @@ def measure(
                 "the eager ladder behind the dispatched boundary is the route "
                 "the previous receipt measured, re-derived in this job so the "
                 "fast route's terminal flux is compared against a terminal "
-                "flux measured here rather than against a stored scalar"
+                "flux measured here rather than against a stored scalar; the "
+                "serial per-grade ladder behind the same fused boundary is "
+                "the route the batched tail replaces, measured beside it so "
+                "the refused step's recovered wall and the unmoved decisions "
+                "are read against a route measured in the same job"
+            ),
+            "residual_norm_source": (
+                "the reduced residual sup norm each step reports is returned "
+                "by the scoring kernel that already holds the residual, not "
+                "reduced in a dispatch of its own"
             ),
             "pass_order": (
                 "both prototype routes of a row land before the next row, and "
@@ -608,7 +730,13 @@ def measure(
             arms["prototype"], arms["eager_prototype"], row["previous_prototype"]
         )
         row["repair"] = _speedup(row["prototype"], row["eager_prototype"])
+        row["batched_tail"] = _tail_comparison(
+            arms["prototype"], arms["serial_prototype"], arms["eager_prototype"]
+        )
         terminal_flux[f"{identity} fast"] = np.asarray(arms["prototype"]["flux"])
+        terminal_flux[f"{identity} serial"] = np.asarray(
+            arms["serial_prototype"]["flux"]
+        )
         terminal_flux[f"{identity} reference"] = np.asarray(
             arms["eager_prototype"]["flux"]
         )
@@ -624,6 +752,17 @@ def measure(
                 ],
                 "warm_step_speedup": row["repair"]["warm_step_speedup"],
                 "warm_trip_speedup": row["repair"]["warm_trip_speedup"],
+                "refused_step_wall_s": row["batched_tail"]["refused_step_wall_s"],
+                "refused_step_wall_over_eager_s": row["batched_tail"][
+                    "refused_step_wall_over_eager_s"
+                ],
+                "accepting_step_wall_s": row["batched_tail"]["accepting_step_wall_s"],
+                "batched_tail_decisions_identical": row["batched_tail"][
+                    "identical_decisions"
+                ],
+                "batched_tail_flux_bitwise_identical": row["batched_tail"][
+                    "bitwise_identical_flux"
+                ],
             }
         )
 
@@ -693,6 +832,33 @@ def measure(
         ),
         "every_row_trip_census_identical": all(
             row["route_agreement"]["identical_trip_census"] for row in published
+        ),
+        "every_row_batched_tail_decisions_identical": all(
+            row["batched_tail"]["identical_decisions"]
+            for row in published
+            if "batched_tail" in row
+        ),
+        "every_row_batched_tail_flux_bitwise_identical": all(
+            row["batched_tail"]["bitwise_identical_flux"]
+            for row in published
+            if "batched_tail" in row
+        ),
+        "maximum_refused_step_wall_over_eager_s": max(
+            (
+                row["batched_tail"]["refused_step_wall_over_eager_s"]
+                for row in published
+                if row.get("batched_tail", {}).get("refused_step_wall_over_eager_s")
+                is not None
+            ),
+            default=None,
+        ),
+        "maximum_accepting_step_wall_s": max(
+            (
+                row["batched_tail"]["accepting_step_wall_s"]
+                for row in published
+                if row.get("batched_tail", {}).get("accepting_step_wall_s") is not None
+            ),
+            default=None,
         ),
         "previous_receipt_reproduced": all(
             (row["route_agreement"]["previous_receipt_reproduced"] or {}).get(

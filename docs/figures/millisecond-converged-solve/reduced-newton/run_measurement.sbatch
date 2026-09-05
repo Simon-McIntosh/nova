@@ -47,8 +47,12 @@ printf 'MEASUREMENT_START job=%s host=%s root=%s revision=%s\n' \
   "${SLURM_JOB_ID:-none}" "$(hostname)" "$checkout_root" \
   "$(git -C "$checkout_root" rev-parse HEAD)"
 
+# A repeat of the same measurement is a stability sample, not a replacement:
+# naming its own receipt keeps both readings on disk to be compared.
+receipt="${NOVA_RECEIPT_OUTPUT:-$here/four-rows.json}"
+
 "$python_bin" -m benchmarks.reduced_newton_rows \
-  --output "$here/four-rows.json" \
+  --output "$receipt" \
   --cache-root "$cache_root" \
   --no-production
 

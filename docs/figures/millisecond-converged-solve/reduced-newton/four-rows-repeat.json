@@ -70,7 +70,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.005474667996168137
+        "warm_load_seconds": 0.0054772235453128815
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -85,11 +85,11 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024951 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022936 direct_builders=0 verdict=PASS"
       }
     }
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows.png",
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-repeat.png",
   "measurement_contract": {
     "convergence_tolerance": 1e-08,
     "newton_steps": 12,
@@ -196,18 +196,18 @@
         }
       },
       "batched_tail": {
-        "accepting_step_wall_over_serial_s": -0.0016099167987704277,
-        "accepting_step_wall_s": 0.004267687909305096,
+        "accepting_step_wall_over_serial_s": -0.0015124501660466194,
+        "accepting_step_wall_s": 0.004373722709715366,
         "bitwise_identical_flux": true,
-        "eager_refused_step_wall_s": 0.004378634504973888,
+        "eager_refused_step_wall_s": 0.0037820134311914444,
         "identical_decisions": true,
         "identical_terminal_residual": true,
         "reference_route": "serial per-grade ladder behind the fused boundary",
-        "refused_step_wall_over_eager_s": -0.00039693713188171387,
-        "refused_step_wall_recovered_from_serial_s": 0.003048752434551716,
-        "refused_step_wall_s": 0.0039816973730921745,
-        "serial_accepting_step_wall_s": 0.005877604708075523,
-        "serial_refused_step_wall_s": 0.00703044980764389,
+        "refused_step_wall_over_eager_s": 0.00030479300767183304,
+        "refused_step_wall_recovered_from_serial_s": 0.003277646377682686,
+        "refused_step_wall_s": 0.0040868064388632774,
+        "serial_accepting_step_wall_s": 0.005886172875761986,
+        "serial_refused_step_wall_s": 0.007364452816545963,
         "sup_flux_difference_wb": 0.0,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 3
@@ -228,14 +228,14 @@
           0.0009504270893105729
         ],
         "boundary_wall_per_trip_s": [
-          1.0982868298888206,
-          0.11446025036275387,
-          0.11690978519618511,
-          0.10630282945930958
+          1.1363605754449964,
+          0.10864697862416506,
+          0.11205082852393389,
+          0.11614580173045397
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.11107232701033354,
-        "first_step_wall_s": 2.3937552478164434,
+        "first_jacobian_wall_s": 0.10881367698311806,
+        "first_step_wall_s": 2.4843516517430544,
         "jacobian_builds_per_trip": [
           4,
           1,
@@ -243,10 +243,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.11107232701033354,
-          0.0005967859178781509,
-          0.0004690643399953842,
-          0.0006236536428332329
+          0.10881367698311806,
+          0.0005682827904820442,
+          0.0002863602712750435,
+          0.0007302192971110344
         ],
         "ladder_scoring": "eager",
         "map_evaluations_per_trip": [
@@ -255,15 +255,15 @@
           8,
           22
         ],
-        "median_warm_accepting_step_wall_s": 0.0034264028072357178,
-        "median_warm_boundary_wall_s": 0.11446025036275387,
-        "median_warm_jacobian_wall_s": 0.0005967859178781509,
-        "median_warm_newton_work_per_trip_s": 0.004378634504973888,
+        "median_warm_accepting_step_wall_s": 0.0044406503438949585,
+        "median_warm_boundary_wall_s": 0.11205082852393389,
+        "median_warm_jacobian_wall_s": 0.0005682827904820442,
+        "median_warm_newton_work_per_trip_s": 0.0037820134311914444,
         "median_warm_refused_step_map_evaluations": 8.0,
-        "median_warm_refused_step_wall_s": 0.004378634504973888,
+        "median_warm_refused_step_wall_s": 0.0037820134311914444,
         "median_warm_step_map_evaluations": 8.0,
-        "median_warm_step_wall_s": 0.00411577383056283,
-        "median_warm_trip_wall_s": 0.12869798205792904,
+        "median_warm_step_wall_s": 0.0041113318875432014,
+        "median_warm_trip_wall_s": 0.1261753048747778,
         "newton_steps_per_trip": [
           4,
           0,
@@ -271,10 +271,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          2.4232203355059028,
-          0.0038529131561517715,
-          0.004378634504973888,
-          0.009858131408691406
+          2.5087243262678385,
+          0.0037820134311914444,
+          0.003444983623921871,
+          0.01122363843023777
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 623,
@@ -297,7 +297,7 @@
             "reduced_residual": 99.97327744146969,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.3937552478164434
+            "wall_s": 2.4843516517430544
           },
           {
             "accepted_factor": 0.125,
@@ -309,7 +309,7 @@
             "reduced_residual": 295.653718324403,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.0043503521010279655
+            "wall_s": 0.004476689733564854
           },
           {
             "accepted_factor": 0.25,
@@ -321,7 +321,7 @@
             "reduced_residual": 305.0229366997641,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.006993817165493965
+            "wall_s": 0.006839670240879059
           },
           {
             "accepted_factor": 0.0625,
@@ -333,7 +333,7 @@
             "reduced_residual": 318.008633019875,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.011566927656531334
+            "wall_s": 0.006671762093901634
           },
           {
             "accepted_factor": null,
@@ -345,7 +345,7 @@
             "reduced_residual": 282.3717793439532,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.006553990766406059
+            "wall_s": 0.006384552456438541
           },
           {
             "accepted_factor": null,
@@ -357,7 +357,7 @@
             "reduced_residual": 43.753804618693806,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.0038529131561517715
+            "wall_s": 0.0037820134311914444
           },
           {
             "accepted_factor": null,
@@ -369,7 +369,7 @@
             "reduced_residual": 34.11776163754325,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.004378634504973888
+            "wall_s": 0.003444983623921871
           },
           {
             "accepted_factor": 0.03125,
@@ -381,7 +381,7 @@
             "reduced_residual": 32.90138013561932,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.0034264028072357178
+            "wall_s": 0.0044406503438949585
           },
           {
             "accepted_factor": null,
@@ -393,7 +393,7 @@
             "reduced_residual": 37.20794696861313,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.0064317286014556885
+            "wall_s": 0.006782988086342812
           }
         ],
         "support_cells": 623,
@@ -402,13 +402,13 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "dispatched",
         "trip_wall_per_trip_s": [
-          4.572415680624545,
-          0.12869798205792904,
-          0.1313060810789466,
-          0.12613052688539028
+          4.566113653592765,
+          0.12425274588167667,
+          0.1261753048747778,
+          0.15724344551563263
         ],
-        "wall_per_trip_s": 1.3412584983743727,
-        "wall_s": 5.365033993497491,
+        "wall_per_trip_s": 1.3640303572174162,
+        "wall_s": 5.456121428869665,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 3
       },
@@ -597,14 +597,14 @@
           0.0009504270893106479
         ],
         "boundary_wall_per_trip_s": [
-          3.1862430097535253,
-          0.04332679510116577,
-          0.04326351918280125,
-          0.04316370561718941
+          3.1663611102849245,
+          0.04486031364649534,
+          0.044617400504648685,
+          0.044715045019984245
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.22272071428596973,
-        "first_step_wall_s": 2.9259959403425455,
+        "first_jacobian_wall_s": 0.24008600320667028,
+        "first_step_wall_s": 2.7263892767950892,
         "jacobian_builds_per_trip": [
           4,
           1,
@@ -612,10 +612,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.22272071428596973,
-          0.0006621107459068298,
-          0.0003325212746858597,
-          0.0011479929089546204
+          0.24008600320667028,
+          0.0008201524615287781,
+          0.0005208151414990425,
+          0.001058756373822689
         ],
         "ladder_scoring": "batched_tail",
         "map_evaluations_per_trip": [
@@ -624,15 +624,15 @@
           7,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.004267687909305096,
-        "median_warm_boundary_wall_s": 0.04326351918280125,
-        "median_warm_jacobian_wall_s": 0.0006621107459068298,
-        "median_warm_newton_work_per_trip_s": 0.0039816973730921745,
+        "median_warm_accepting_step_wall_s": 0.004373722709715366,
+        "median_warm_boundary_wall_s": 0.044715045019984245,
+        "median_warm_jacobian_wall_s": 0.0008201524615287781,
+        "median_warm_newton_work_per_trip_s": 0.0040868064388632774,
         "median_warm_refused_step_map_evaluations": 7.0,
-        "median_warm_refused_step_wall_s": 0.0039816973730921745,
+        "median_warm_refused_step_wall_s": 0.0040868064388632774,
         "median_warm_step_map_evaluations": 7.0,
-        "median_warm_step_wall_s": 0.004124692641198635,
-        "median_warm_trip_wall_s": 0.048002622090280056,
+        "median_warm_step_wall_s": 0.004230264574289322,
+        "median_warm_trip_wall_s": 0.049815948121249676,
         "newton_steps_per_trip": [
           4,
           0,
@@ -640,10 +640,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          2.9492088854312897,
-          0.0039816973730921745,
-          0.003535487689077854,
-          0.010879402048885822
+          2.7494103917852044,
+          0.0040868064388632774,
+          0.003514455631375313,
+          0.011068753898143768
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 623,
@@ -666,7 +666,7 @@
             "reduced_residual": 99.97327744146469,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.9259959403425455
+            "wall_s": 2.7263892767950892
           },
           {
             "accepted_factor": 0.125,
@@ -678,7 +678,7 @@
             "reduced_residual": 295.6537183244027,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.0036411620676517487
+            "wall_s": 0.0036474307999014854
           },
           {
             "accepted_factor": 0.25,
@@ -690,7 +690,7 @@
             "reduced_residual": 305.02293669976444,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.006765295751392841
+            "wall_s": 0.00683475099503994
           },
           {
             "accepted_factor": 0.0625,
@@ -702,7 +702,7 @@
             "reduced_residual": 318.0086330198769,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.006397143937647343
+            "wall_s": 0.006552546285092831
           },
           {
             "accepted_factor": null,
@@ -714,7 +714,7 @@
             "reduced_residual": 282.371779343955,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.006409343332052231
+            "wall_s": 0.00598638691008091
           },
           {
             "accepted_factor": null,
@@ -726,7 +726,7 @@
             "reduced_residual": 43.753804618693806,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.0039816973730921745
+            "wall_s": 0.0040868064388632774
           },
           {
             "accepted_factor": null,
@@ -738,7 +738,7 @@
             "reduced_residual": 34.117761637546664,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.003535487689077854
+            "wall_s": 0.003514455631375313
           },
           {
             "accepted_factor": 0.03125,
@@ -750,7 +750,7 @@
             "reduced_residual": 32.901380135620954,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.004267687909305096
+            "wall_s": 0.004373722709715366
           },
           {
             "accepted_factor": null,
@@ -762,7 +762,7 @@
             "reduced_residual": 37.207946968615836,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.006611714139580727
+            "wall_s": 0.006695031188428402
           }
         ],
         "support_cells": 623,
@@ -771,31 +771,31 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          6.35687994863838,
-          0.048002622090280056,
-          0.04714862443506718,
-          0.05469958856701851
+          6.154807937331498,
+          0.049815948121249676,
+          0.04867074731737375,
+          0.05633166991174221
         ],
-        "wall_per_trip_s": 3.0566782765090466,
-        "wall_s": 12.226713106036186,
+        "wall_per_trip_s": 3.078464121557772,
+        "wall_s": 12.313856486231089,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 3
       },
       "repair": {
         "millisecond_target_s": 0.001,
-        "reference_warm_boundary_wall_s": 0.11446025036275387,
-        "reference_warm_newton_work_per_trip_s": 0.004378634504973888,
+        "reference_warm_boundary_wall_s": 0.11205082852393389,
+        "reference_warm_newton_work_per_trip_s": 0.0037820134311914444,
         "reference_warm_step_map_evaluations": 8.0,
-        "reference_warm_step_wall_s": 0.00411577383056283,
-        "reference_warm_trip_wall_s": 0.12869798205792904,
-        "warm_boundary_wall_s": 0.04326351918280125,
-        "warm_newton_work_per_trip_s": 0.0039816973730921745,
+        "reference_warm_step_wall_s": 0.0041113318875432014,
+        "reference_warm_trip_wall_s": 0.1261753048747778,
+        "warm_boundary_wall_s": 0.044715045019984245,
+        "warm_newton_work_per_trip_s": 0.0040868064388632774,
         "warm_step_map_evaluations": 7.0,
-        "warm_step_speedup": 0.9978377029728903,
-        "warm_step_wall_s": 0.004124692641198635,
-        "warm_step_walls_of_target": 4.124692641198635,
-        "warm_trip_speedup": 2.6810615015130352,
-        "warm_trip_wall_s": 0.048002622090280056
+        "warm_step_speedup": 0.9718852840862557,
+        "warm_step_wall_s": 0.004230264574289322,
+        "warm_step_walls_of_target": 4.230264574289322,
+        "warm_trip_speedup": 2.5328295381967445,
+        "warm_trip_wall_s": 0.049815948121249676
       },
       "route_agreement": {
         "bitwise_identical_flux": false,
@@ -844,14 +844,14 @@
           0.0009504270893106479
         ],
         "boundary_wall_per_trip_s": [
-          3.729601178318262,
-          0.045034920796751976,
-          0.04490854125469923,
-          0.04516061022877693
+          3.1535923527553678,
+          0.04497186467051506,
+          0.04486249107867479,
+          0.044831717386841774
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.1114941518753767,
-        "first_step_wall_s": 1.698281248100102,
+        "first_jacobian_wall_s": 0.2504269238561392,
+        "first_step_wall_s": 1.684012127108872,
         "jacobian_builds_per_trip": [
           4,
           1,
@@ -859,10 +859,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.1114941518753767,
-          0.0008653560653328896,
-          0.0005600424483418465,
-          0.0006039012223482132
+          0.2504269238561392,
+          0.0007579093798995018,
+          0.0004620524123311043,
+          0.0008448455482721329
         ],
         "ladder_scoring": "first_accept",
         "map_evaluations_per_trip": [
@@ -871,15 +871,15 @@
           7,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.005877604708075523,
-        "median_warm_boundary_wall_s": 0.045034920796751976,
-        "median_warm_jacobian_wall_s": 0.0006039012223482132,
-        "median_warm_newton_work_per_trip_s": 0.00703044980764389,
+        "median_warm_accepting_step_wall_s": 0.005886172875761986,
+        "median_warm_boundary_wall_s": 0.04486249107867479,
+        "median_warm_jacobian_wall_s": 0.0007579093798995018,
+        "median_warm_newton_work_per_trip_s": 0.007364452816545963,
         "median_warm_refused_step_map_evaluations": 7.0,
-        "median_warm_refused_step_wall_s": 0.00703044980764389,
+        "median_warm_refused_step_wall_s": 0.007364452816545963,
         "median_warm_step_map_evaluations": 7.0,
-        "median_warm_step_wall_s": 0.006532960571348667,
-        "median_warm_trip_wall_s": 0.05251826252788305,
+        "median_warm_step_wall_s": 0.0066841356456279755,
+        "median_warm_trip_wall_s": 0.05270664766430855,
         "newton_steps_per_trip": [
           4,
           0,
@@ -887,10 +887,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          1.7325003296136856,
-          0.006035471335053444,
-          0.00703044980764389,
-          0.017660953104496002
+          1.7178366854786873,
+          0.006003818474709988,
+          0.007364452816545963,
+          0.01803986169397831
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 623,
@@ -913,7 +913,7 @@
             "reduced_residual": 99.97327744146469,
             "step": 0,
             "trip": 0,
-            "wall_s": 1.698281248100102
+            "wall_s": 1.684012127108872
           },
           {
             "accepted_factor": 0.125,
@@ -925,7 +925,7 @@
             "reduced_residual": 295.6537183244027,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.004096996039152145
+            "wall_s": 0.004062130115926266
           },
           {
             "accepted_factor": 0.25,
@@ -937,7 +937,7 @@
             "reduced_residual": 305.02293669976444,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.009121346287429333
+            "wall_s": 0.00880548544228077
           },
           {
             "accepted_factor": 0.0625,
@@ -949,7 +949,7 @@
             "reduced_residual": 318.0086330198769,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.010174230672419071
+            "wall_s": 0.010032174177467823
           },
           {
             "accepted_factor": null,
@@ -961,7 +961,7 @@
             "reduced_residual": 282.371779343955,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.01082650851458311
+            "wall_s": 0.010924768634140491
           },
           {
             "accepted_factor": null,
@@ -973,7 +973,7 @@
             "reduced_residual": 43.753804618693806,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.006035471335053444
+            "wall_s": 0.006003818474709988
           },
           {
             "accepted_factor": null,
@@ -985,7 +985,7 @@
             "reduced_residual": 34.117761637546664,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.00703044980764389
+            "wall_s": 0.007364452816545963
           },
           {
             "accepted_factor": 0.03125,
@@ -997,7 +997,7 @@
             "reduced_residual": 32.901380135620954,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.005877604708075523
+            "wall_s": 0.005886172875761986
           },
           {
             "accepted_factor": null,
@@ -1009,7 +1009,7 @@
             "reduced_residual": 37.207946968615836,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.011783348396420479
+            "wall_s": 0.012153688818216324
           }
         ],
         "support_cells": 623,
@@ -1018,13 +1018,13 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          5.572422593832016,
-          0.05198467988520861,
-          0.05251826252788305,
-          0.06317049916833639
+          5.12072064448148,
+          0.05176182556897402,
+          0.05270664766430855,
+          0.0634541716426611
         ],
-        "wall_per_trip_s": 1.5805933161173016,
-        "wall_s": 6.322373264469206,
+        "wall_per_trip_s": 1.4455744519364089,
+        "wall_s": 5.7822978077456355,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 3
       }
@@ -1082,18 +1082,18 @@
         }
       },
       "batched_tail": {
-        "accepting_step_wall_over_serial_s": -0.0016147568821907043,
-        "accepting_step_wall_s": 0.004523579962551594,
+        "accepting_step_wall_over_serial_s": -0.001546463929116726,
+        "accepting_step_wall_s": 0.004458226263523102,
         "bitwise_identical_flux": true,
-        "eager_refused_step_wall_s": 0.0055067650973796844,
+        "eager_refused_step_wall_s": 0.005298696458339691,
         "identical_decisions": true,
         "identical_terminal_residual": true,
         "reference_route": "serial per-grade ladder behind the fused boundary",
-        "refused_step_wall_over_eager_s": -0.0001439894549548626,
-        "refused_step_wall_recovered_from_serial_s": 0.0031817667186260223,
-        "refused_step_wall_s": 0.005362775642424822,
-        "serial_accepting_step_wall_s": 0.006138336844742298,
-        "serial_refused_step_wall_s": 0.008544542361050844,
+        "refused_step_wall_over_eager_s": 0.00013742782175540924,
+        "refused_step_wall_recovered_from_serial_s": 0.0039062597788870335,
+        "refused_step_wall_s": 0.0054361242800951,
+        "serial_accepting_step_wall_s": 0.006004690192639828,
+        "serial_refused_step_wall_s": 0.009342384058982134,
         "sup_flux_difference_wb": 0.0,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 2
@@ -1112,22 +1112,22 @@
           0.001967697918924135
         ],
         "boundary_wall_per_trip_s": [
-          0.850955699570477,
-          0.11057918332517147,
-          0.1093261893838644
+          0.9483189778402448,
+          0.11671076901257038,
+          0.11031176242977381
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.11269111838191748,
-        "first_step_wall_s": 2.4112217035144567,
+        "first_jacobian_wall_s": 0.10761734377592802,
+        "first_step_wall_s": 2.423099637031555,
         "jacobian_builds_per_trip": [
           3,
           1,
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.11269111838191748,
-          0.0005541695281863213,
-          0.0006115948781371117
+          0.10761734377592802,
+          0.0005581509321928024,
+          0.0005569728091359138
         ],
         "ladder_scoring": "eager",
         "map_evaluations_per_trip": [
@@ -1135,24 +1135,24 @@
           8,
           22
         ],
-        "median_warm_accepting_step_wall_s": 0.003496237099170685,
-        "median_warm_boundary_wall_s": 0.10995268635451794,
-        "median_warm_jacobian_wall_s": 0.0005828822031617165,
-        "median_warm_newton_work_per_trip_s": 0.007254883646965027,
+        "median_warm_accepting_step_wall_s": 0.0033529652282595634,
+        "median_warm_boundary_wall_s": 0.1135112657211721,
+        "median_warm_jacobian_wall_s": 0.0005575618706643581,
+        "median_warm_newton_work_per_trip_s": 0.006975179072469473,
         "median_warm_refused_step_map_evaluations": 11.0,
-        "median_warm_refused_step_wall_s": 0.0055067650973796844,
+        "median_warm_refused_step_wall_s": 0.005298696458339691,
         "median_warm_step_map_evaluations": 8.0,
-        "median_warm_step_wall_s": 0.004299194552004337,
-        "median_warm_trip_wall_s": 0.12765375897288322,
+        "median_warm_step_wall_s": 0.004185541532933712,
+        "median_warm_trip_wall_s": 0.1345695834606886,
         "newton_steps_per_trip": [
           3,
           0,
           1
         ],
         "newton_wall_per_trip_s": [
-          2.429638920351863,
-          0.004299194552004337,
-          0.010210572741925716
+          2.4410522133111954,
+          0.004185541532933712,
+          0.009764816612005234
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 637,
@@ -1174,7 +1174,7 @@
             "reduced_residual": 106.16729464791018,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.4112217035144567
+            "wall_s": 2.423099637031555
           },
           {
             "accepted_factor": 0.125,
@@ -1186,7 +1186,7 @@
             "reduced_residual": 252.97627735121785,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.0042639560997486115
+            "wall_s": 0.004287411458790302
           },
           {
             "accepted_factor": 0.03125,
@@ -1198,7 +1198,7 @@
             "reduced_residual": 270.35900584648186,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.007260886020958424
+            "wall_s": 0.006813616491854191
           },
           {
             "accepted_factor": null,
@@ -1210,7 +1210,7 @@
             "reduced_residual": 261.9102869137793,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.006892374716699123
+            "wall_s": 0.006851548328995705
           },
           {
             "accepted_factor": null,
@@ -1222,7 +1222,7 @@
             "reduced_residual": 61.65767186003063,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.004299194552004337
+            "wall_s": 0.004185541532933712
           },
           {
             "accepted_factor": 0.03125,
@@ -1234,7 +1234,7 @@
             "reduced_residual": 55.23107887811307,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.003496237099170685
+            "wall_s": 0.0033529652282595634
           },
           {
             "accepted_factor": null,
@@ -1246,7 +1246,7 @@
             "reduced_residual": 68.00531063728178,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.006714335642755032
+            "wall_s": 0.00641185138374567
           }
         ],
         "support_cells": 637,
@@ -1255,12 +1255,12 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "dispatched",
         "trip_wall_per_trip_s": [
-          3.7039144840091467,
-          0.12555978074669838,
-          0.12974773719906807
+          3.840889765881002,
+          0.13305457681417465,
+          0.13608459010720253
         ],
-        "wall_per_trip_s": 1.465285117737949,
-        "wall_s": 4.395855353213847,
+        "wall_per_trip_s": 1.440904628795882,
+        "wall_s": 4.322713886387646,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 2
       },
@@ -1417,22 +1417,22 @@
           0.001967697918924222
         ],
         "boundary_wall_per_trip_s": [
-          3.1212206687778234,
-          0.04460624884814024,
-          0.04460147023200989
+          3.134749843738973,
+          0.04471314698457718,
+          0.04462649021297693
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.14431671053171158,
-        "first_step_wall_s": 2.7678506933152676,
+        "first_jacobian_wall_s": 0.13978813402354717,
+        "first_step_wall_s": 2.8653593407943845,
         "jacobian_builds_per_trip": [
           3,
           1,
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.14431671053171158,
-          0.0007866192609071732,
-          0.0009480249136686325
+          0.13978813402354717,
+          0.0006570871919393539,
+          0.0011550886556506157
         ],
         "ladder_scoring": "batched_tail",
         "map_evaluations_per_trip": [
@@ -1440,24 +1440,24 @@
           7,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.004523579962551594,
-        "median_warm_boundary_wall_s": 0.044603859540075064,
-        "median_warm_jacobian_wall_s": 0.0008673220872879028,
-        "median_warm_newton_work_per_trip_s": 0.007624565623700619,
+        "median_warm_accepting_step_wall_s": 0.004458226263523102,
+        "median_warm_boundary_wall_s": 0.044669818598777056,
+        "median_warm_jacobian_wall_s": 0.0009060879237949848,
+        "median_warm_newton_work_per_trip_s": 0.007665237411856651,
         "median_warm_refused_step_map_evaluations": 9.5,
-        "median_warm_refused_step_wall_s": 0.005362775642424822,
+        "median_warm_refused_step_wall_s": 0.0054361242800951,
         "median_warm_step_map_evaluations": 7.0,
-        "median_warm_step_wall_s": 0.004523579962551594,
-        "median_warm_trip_wall_s": 0.05288022290915251,
+        "median_warm_step_wall_s": 0.004458226263523102,
+        "median_warm_trip_wall_s": 0.052968157920986414,
         "newton_steps_per_trip": [
           3,
           0,
           1
         ],
         "newton_wall_per_trip_s": [
-          2.784539178945124,
-          0.004177378490567207,
-          0.01107175275683403
+          2.8825064031407237,
+          0.004135763272643089,
+          0.011194711551070213
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 637,
@@ -1479,7 +1479,7 @@
             "reduced_residual": 106.1672946479103,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.7678506933152676
+            "wall_s": 2.8653593407943845
           },
           {
             "accepted_factor": 0.125,
@@ -1491,7 +1491,7 @@
             "reduced_residual": 252.97627735121898,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.003635573200881481
+            "wall_s": 0.003614279441535473
           },
           {
             "accepted_factor": 0.03125,
@@ -1503,7 +1503,7 @@
             "reduced_residual": 270.35900584648317,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.006872573867440224
+            "wall_s": 0.006848231889307499
           },
           {
             "accepted_factor": null,
@@ -1515,7 +1515,7 @@
             "reduced_residual": 261.91028691378057,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.006180338561534882
+            "wall_s": 0.006684551015496254
           },
           {
             "accepted_factor": null,
@@ -1527,7 +1527,7 @@
             "reduced_residual": 61.65767186002347,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.004177378490567207
+            "wall_s": 0.004135763272643089
           },
           {
             "accepted_factor": 0.03125,
@@ -1539,7 +1539,7 @@
             "reduced_residual": 55.231078878112385,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.004523579962551594
+            "wall_s": 0.004458226263523102
           },
           {
             "accepted_factor": null,
@@ -1551,7 +1551,7 @@
             "reduced_residual": 68.00531063728236,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.006548172794282436
+            "wall_s": 0.0067364852875471115
           }
         ],
         "support_cells": 637,
@@ -1560,30 +1560,30 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          6.04925646726042,
-          0.04960767459124327,
-          0.05615277122706175
+          6.15602252073586,
+          0.04953173827379942,
+          0.05640457756817341
         ],
-        "wall_per_trip_s": 2.2464011752357087,
-        "wall_s": 6.739203525707126,
+        "wall_per_trip_s": 2.2665509978930154,
+        "wall_s": 6.799652993679047,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 2
       },
       "repair": {
         "millisecond_target_s": 0.001,
-        "reference_warm_boundary_wall_s": 0.10995268635451794,
-        "reference_warm_newton_work_per_trip_s": 0.007254883646965027,
+        "reference_warm_boundary_wall_s": 0.1135112657211721,
+        "reference_warm_newton_work_per_trip_s": 0.006975179072469473,
         "reference_warm_step_map_evaluations": 8.0,
-        "reference_warm_step_wall_s": 0.004299194552004337,
-        "reference_warm_trip_wall_s": 0.12765375897288322,
-        "warm_boundary_wall_s": 0.044603859540075064,
-        "warm_newton_work_per_trip_s": 0.007624565623700619,
+        "reference_warm_step_wall_s": 0.004185541532933712,
+        "reference_warm_trip_wall_s": 0.1345695834606886,
+        "warm_boundary_wall_s": 0.044669818598777056,
+        "warm_newton_work_per_trip_s": 0.007665237411856651,
         "warm_step_map_evaluations": 7.0,
-        "warm_step_speedup": 0.9503964973749047,
-        "warm_step_wall_s": 0.004523579962551594,
-        "warm_step_walls_of_target": 4.523579962551594,
-        "warm_trip_speedup": 2.414017036051278,
-        "warm_trip_wall_s": 0.05288022290915251
+        "warm_step_speedup": 0.9388356008710286,
+        "warm_step_wall_s": 0.004458226263523102,
+        "warm_step_walls_of_target": 4.458226263523102,
+        "warm_trip_speedup": 2.5405751066787814,
+        "warm_trip_wall_s": 0.052968157920986414
       },
       "route_agreement": {
         "bitwise_identical_flux": false,
@@ -1628,22 +1628,22 @@
           0.001967697918924222
         ],
         "boundary_wall_per_trip_s": [
-          3.1774395098909736,
-          0.04340312257409096,
-          0.043251363560557365
+          3.6893875934183598,
+          0.04340296797454357,
+          0.043302894569933414
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.13432979863137007,
-        "first_step_wall_s": 2.014209596440196,
+        "first_jacobian_wall_s": 0.3793214140459895,
+        "first_step_wall_s": 1.6864820709452033,
         "jacobian_builds_per_trip": [
           3,
           1,
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.13432979863137007,
-          0.0006549963727593422,
-          0.000781017355620861
+          0.3793214140459895,
+          0.0006656954064965248,
+          0.0008221594616770744
         ],
         "ladder_scoring": "first_accept",
         "map_evaluations_per_trip": [
@@ -1651,24 +1651,24 @@
           7,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.006138336844742298,
-        "median_warm_boundary_wall_s": 0.04332724306732416,
-        "median_warm_jacobian_wall_s": 0.0007180068641901016,
-        "median_warm_newton_work_per_trip_s": 0.011613710783421993,
+        "median_warm_accepting_step_wall_s": 0.006004690192639828,
+        "median_warm_boundary_wall_s": 0.04335293127223849,
+        "median_warm_jacobian_wall_s": 0.0007439274340867996,
+        "median_warm_newton_work_per_trip_s": 0.012344729155302048,
         "median_warm_refused_step_map_evaluations": 9.5,
-        "median_warm_refused_step_wall_s": 0.008544542361050844,
+        "median_warm_refused_step_wall_s": 0.009342384058982134,
         "median_warm_step_map_evaluations": 7.0,
-        "median_warm_step_wall_s": 0.0062791770324110985,
-        "median_warm_trip_wall_s": 0.0555414455011487,
+        "median_warm_step_wall_s": 0.006335911341011524,
+        "median_warm_trip_wall_s": 0.05632344912737608,
         "newton_steps_per_trip": [
           3,
           0,
           1
         ],
         "newton_wall_per_trip_s": [
-          2.039297917857766,
-          0.0062791770324110985,
-          0.016948244534432888
+          1.7120600445196033,
+          0.006335911341011524,
+          0.01835354696959257
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 637,
@@ -1690,7 +1690,7 @@
             "reduced_residual": 106.1672946479103,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.014209596440196
+            "wall_s": 1.6864820709452033
           },
           {
             "accepted_factor": 0.125,
@@ -1702,7 +1702,7 @@
             "reduced_residual": 252.97627735121898,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.003884255886077881
+            "wall_s": 0.003862665966153145
           },
           {
             "accepted_factor": 0.03125,
@@ -1714,7 +1714,7 @@
             "reduced_residual": 270.35900584648317,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.010556635446846485
+            "wall_s": 0.010916699655354023
           },
           {
             "accepted_factor": null,
@@ -1726,7 +1726,7 @@
             "reduced_residual": 261.91028691378057,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.010647430084645748
+            "wall_s": 0.01079860795289278
           },
           {
             "accepted_factor": null,
@@ -1738,7 +1738,7 @@
             "reduced_residual": 61.65767186002347,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.0062791770324110985
+            "wall_s": 0.006335911341011524
           },
           {
             "accepted_factor": 0.03125,
@@ -1750,7 +1750,7 @@
             "reduced_residual": 55.231078878112385,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.006138336844742298
+            "wall_s": 0.006004690192639828
           },
           {
             "accepted_factor": null,
@@ -1762,7 +1762,7 @@
             "reduced_residual": 68.00531063728236,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.01080990768969059
+            "wall_s": 0.012348856776952744
           }
         ],
         "support_cells": 637,
@@ -1771,12 +1771,12 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          5.350271343253553,
-          0.05036310479044914,
-          0.06071978621184826
+          5.779939968138933,
+          0.050431025214493275,
+          0.062215873040258884
         ],
-        "wall_per_trip_s": 2.13257034153988,
-        "wall_s": 6.397711024619639,
+        "wall_per_trip_s": 2.280047895697256,
+        "wall_s": 6.840143687091768,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 2
       }
@@ -1838,18 +1838,18 @@
         }
       },
       "batched_tail": {
-        "accepting_step_wall_over_serial_s": -0.002124614082276821,
-        "accepting_step_wall_s": 0.004370597191154957,
+        "accepting_step_wall_over_serial_s": -0.0011841719970107079,
+        "accepting_step_wall_s": 0.004887489601969719,
         "bitwise_identical_flux": true,
-        "eager_refused_step_wall_s": 0.007270778529345989,
+        "eager_refused_step_wall_s": 0.006539793685078621,
         "identical_decisions": true,
         "identical_terminal_residual": true,
         "reference_route": "serial per-grade ladder behind the fused boundary",
-        "refused_step_wall_over_eager_s": -0.0007807835936546326,
-        "refused_step_wall_recovered_from_serial_s": 0.004577120766043663,
-        "refused_step_wall_s": 0.006489994935691357,
-        "serial_accepting_step_wall_s": 0.006495211273431778,
-        "serial_refused_step_wall_s": 0.01106711570173502,
+        "refused_step_wall_over_eager_s": 8.08006152510643e-05,
+        "refused_step_wall_recovered_from_serial_s": 0.004755749367177486,
+        "refused_step_wall_s": 0.006620594300329685,
+        "serial_accepting_step_wall_s": 0.006071661598980427,
+        "serial_refused_step_wall_s": 0.011376343667507172,
         "sup_flux_difference_wb": 0.0,
         "warm_accepting_step_count": 3,
         "warm_refused_step_count": 3
@@ -1870,14 +1870,14 @@
           0.0009925831100648388
         ],
         "boundary_wall_per_trip_s": [
-          0.8770714895799756,
-          0.10816650185734034,
-          0.10743484180420637,
-          0.10723358485847712
+          0.8559086536988616,
+          0.10817414242774248,
+          0.10729842074215412,
+          0.10871167201548815
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.11228001210838556,
-        "first_step_wall_s": 2.395151142962277,
+        "first_jacobian_wall_s": 0.10834124963730574,
+        "first_step_wall_s": 2.216150788590312,
         "jacobian_builds_per_trip": [
           5,
           2,
@@ -1885,10 +1885,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.11228001210838556,
-          0.0008795354515314102,
-          0.0007977057248353958,
-          0.0009556533768773079
+          0.10834124963730574,
+          0.0009943684563040733,
+          0.0005827369168400764,
+          0.000769701786339283
         ],
         "ladder_scoring": "eager",
         "map_evaluations_per_trip": [
@@ -1897,15 +1897,15 @@
           22,
           22
         ],
-        "median_warm_accepting_step_wall_s": 0.003628683276474476,
-        "median_warm_boundary_wall_s": 0.10743484180420637,
-        "median_warm_jacobian_wall_s": 0.0008795354515314102,
-        "median_warm_newton_work_per_trip_s": 0.011173306964337826,
+        "median_warm_accepting_step_wall_s": 0.003284909762442112,
+        "median_warm_boundary_wall_s": 0.10817414242774248,
+        "median_warm_jacobian_wall_s": 0.000769701786339283,
+        "median_warm_newton_work_per_trip_s": 0.010320686735212803,
         "median_warm_refused_step_map_evaluations": 14.0,
-        "median_warm_refused_step_wall_s": 0.007270778529345989,
+        "median_warm_refused_step_wall_s": 0.006539793685078621,
         "median_warm_step_map_evaluations": 11.0,
-        "median_warm_step_wall_s": 0.005666081327944994,
-        "median_warm_trip_wall_s": 0.12941541522741318,
+        "median_warm_step_wall_s": 0.0049888016656041145,
+        "median_warm_trip_wall_s": 0.1294828774407506,
         "newton_steps_per_trip": [
           6,
           1,
@@ -1913,10 +1913,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          2.434404986910522,
-          0.011581500992178917,
-          0.010650123469531536,
-          0.011173306964337826
+          2.2513916194438934,
+          0.010320686735212803,
+          0.009481620043516159,
+          0.010641831904649734
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 622,
@@ -1939,7 +1939,7 @@
             "reduced_residual": 181.7692207615409,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.395151142962277
+            "wall_s": 2.216150788590312
           },
           {
             "accepted_factor": 0.5,
@@ -1951,7 +1951,7 @@
             "reduced_residual": 694.2836340402679,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.00481028389185667
+            "wall_s": 0.004370599985122681
           },
           {
             "accepted_factor": 0.125,
@@ -1963,7 +1963,7 @@
             "reduced_residual": 644.7836324041324,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.0037965355440974236
+            "wall_s": 0.0035819439217448235
           },
           {
             "accepted_factor": 0.25,
@@ -1975,7 +1975,7 @@
             "reduced_residual": 644.1779480315436,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.007932630367577076
+            "wall_s": 0.006578988395631313
           },
           {
             "accepted_factor": 0.5,
@@ -1987,7 +1987,7 @@
             "reduced_residual": 548.0300105776212,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.007924770005047321
+            "wall_s": 0.006967880763113499
           },
           {
             "accepted_factor": 0.125,
@@ -1999,7 +1999,7 @@
             "reduced_residual": 622.9840759658515,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.007401729933917522
+            "wall_s": 0.007426413707435131
           },
           {
             "accepted_factor": null,
@@ -2011,7 +2011,7 @@
             "reduced_residual": 494.42122902150294,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.007387894205749035
+            "wall_s": 0.006315004080533981
           },
           {
             "accepted_factor": 0.0625,
@@ -2023,7 +2023,7 @@
             "reduced_residual": 67.33655800024542,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.004310722462832928
+            "wall_s": 0.003780893050134182
           },
           {
             "accepted_factor": null,
@@ -2035,7 +2035,7 @@
             "reduced_residual": 73.7818507675153,
             "step": 1,
             "trip": 1,
-            "wall_s": 0.007270778529345989
+            "wall_s": 0.006539793685078621
           },
           {
             "accepted_factor": 0.03125,
@@ -2047,7 +2047,7 @@
             "reduced_residual": 40.67525197896453,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.003628683276474476
+            "wall_s": 0.003284909762442112
           },
           {
             "accepted_factor": null,
@@ -2059,7 +2059,7 @@
             "reduced_residual": 41.493419932977744,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.00702144019305706
+            "wall_s": 0.006196710281074047
           },
           {
             "accepted_factor": 0.03125,
@@ -2071,7 +2071,7 @@
             "reduced_residual": 39.17558216071143,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.003553922288119793
+            "wall_s": 0.0032553523778915405
           },
           {
             "accepted_factor": null,
@@ -2083,7 +2083,7 @@
             "reduced_residual": 40.27366179554316,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.007619384676218033
+            "wall_s": 0.007386479526758194
           }
         ],
         "support_cells": 622,
@@ -2092,13 +2092,13 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "dispatched",
         "trip_wall_per_trip_s": [
-          4.028512428514659,
-          0.13010585587471724,
-          0.12941541522741318,
-          0.1291017308831215
+          3.699388198554516,
+          0.12952776812016964,
+          0.1267675319686532,
+          0.1294828774407506
         ],
-        "wall_per_trip_s": 1.1942950596567243,
-        "wall_s": 4.777180238626897,
+        "wall_per_trip_s": 1.164781566010788,
+        "wall_s": 4.659126264043152,
         "warm_accepting_step_count": 3,
         "warm_refused_step_count": 3
       },
@@ -2331,14 +2331,14 @@
           0.0009925831100648396
         ],
         "boundary_wall_per_trip_s": [
-          3.2506559751927853,
-          0.04540245793759823,
-          0.05833281856030226,
-          0.044481304474174976
+          3.349059572443366,
+          0.045022180303931236,
+          0.05119133275002241,
+          0.0449335090816021
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.2335524307563901,
-        "first_step_wall_s": 2.9225722793489695,
+        "first_jacobian_wall_s": 0.1694985693320632,
+        "first_step_wall_s": 2.8391673965379596,
         "jacobian_builds_per_trip": [
           5,
           2,
@@ -2346,10 +2346,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.2335524307563901,
-          0.0011731535196304321,
-          0.0008630966767668724,
-          0.0006433399394154549
+          0.1694985693320632,
+          0.0013375841081142426,
+          0.0012256959453225136,
+          0.0006977422162890434
         ],
         "ladder_scoring": "batched_tail",
         "map_evaluations_per_trip": [
@@ -2358,15 +2358,15 @@
           19,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.004370597191154957,
-        "median_warm_boundary_wall_s": 0.04540245793759823,
-        "median_warm_jacobian_wall_s": 0.0008630966767668724,
-        "median_warm_newton_work_per_trip_s": 0.011349081061780453,
+        "median_warm_accepting_step_wall_s": 0.004887489601969719,
+        "median_warm_boundary_wall_s": 0.045022180303931236,
+        "median_warm_jacobian_wall_s": 0.0012256959453225136,
+        "median_warm_newton_work_per_trip_s": 0.011508083902299404,
         "median_warm_refused_step_map_evaluations": 12.0,
-        "median_warm_refused_step_wall_s": 0.006489994935691357,
+        "median_warm_refused_step_wall_s": 0.006620594300329685,
         "median_warm_step_map_evaluations": 9.5,
-        "median_warm_step_wall_s": 0.005356234963983297,
-        "median_warm_trip_wall_s": 0.05763424467295408,
+        "median_warm_step_wall_s": 0.006471096538007259,
+        "median_warm_trip_wall_s": 0.057361830957233906,
         "newton_steps_per_trip": [
           6,
           1,
@@ -2374,10 +2374,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          2.9557778537273407,
-          0.011349081061780453,
-          0.016771765425801277,
-          0.009745373390614986
+          2.873828060925007,
+          0.011508083902299404,
+          0.02149266004562378,
+          0.010287381708621979
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 622,
@@ -2400,7 +2400,7 @@
             "reduced_residual": 181.76922076154852,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.9225722793489695
+            "wall_s": 2.8391673965379596
           },
           {
             "accepted_factor": 0.5,
@@ -2412,7 +2412,7 @@
             "reduced_residual": 694.2836340402689,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.003633943386375904
+            "wall_s": 0.003721201792359352
           },
           {
             "accepted_factor": 0.125,
@@ -2424,7 +2424,7 @@
             "reduced_residual": 644.7836324041274,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.0034036729484796524
+            "wall_s": 0.003535882569849491
           },
           {
             "accepted_factor": 0.25,
@@ -2436,7 +2436,7 @@
             "reduced_residual": 644.1779480315431,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.0067652082070708275
+            "wall_s": 0.006597862578928471
           },
           {
             "accepted_factor": 0.5,
@@ -2448,7 +2448,7 @@
             "reduced_residual": 548.0300105776429,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.0066807810217142105
+            "wall_s": 0.007038767449557781
           },
           {
             "accepted_factor": 0.125,
@@ -2460,7 +2460,7 @@
             "reduced_residual": 622.9840759658141,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.006557365879416466
+            "wall_s": 0.007202114909887314
           },
           {
             "accepted_factor": null,
@@ -2472,7 +2472,7 @@
             "reduced_residual": 494.42122902147173,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.0061646029353141785
+            "wall_s": 0.006564835086464882
           },
           {
             "accepted_factor": 0.0625,
@@ -2484,7 +2484,7 @@
             "reduced_residual": 67.33655800025117,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.004859086126089096
+            "wall_s": 0.004887489601969719
           },
           {
             "accepted_factor": null,
@@ -2496,7 +2496,7 @@
             "reduced_residual": 73.7818507675174,
             "step": 1,
             "trip": 1,
-            "wall_s": 0.006489994935691357
+            "wall_s": 0.006620594300329685
           },
           {
             "accepted_factor": 0.03125,
@@ -2508,7 +2508,7 @@
             "reduced_residual": 40.675251978970934,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.004370597191154957
+            "wall_s": 0.009647390805184841
           },
           {
             "accepted_factor": null,
@@ -2520,7 +2520,7 @@
             "reduced_residual": 41.493419932968436,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.01240116823464632
+            "wall_s": 0.011845269240438938
           },
           {
             "accepted_factor": 0.03125,
@@ -2532,7 +2532,7 @@
             "reduced_residual": 39.17558216071711,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.003891989588737488
+            "wall_s": 0.003965782932937145
           },
           {
             "accepted_factor": null,
@@ -2544,7 +2544,7 @@
             "reduced_residual": 40.27366179552255,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.005853383801877499
+            "wall_s": 0.0063215987756848335
           }
         ],
         "support_cells": 622,
@@ -2553,31 +2553,31 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          6.4385615810751915,
-          0.05763424467295408,
-          0.07549574133008718,
-          0.054588052444159985
+          6.39059501234442,
+          0.057361830957233906,
+          0.07307575363665819,
+          0.0556097561493516
         ],
-        "wall_per_trip_s": 1.8404467951040715,
-        "wall_s": 7.361787180416286,
+        "wall_per_trip_s": 1.8117696270346642,
+        "wall_s": 7.247078508138657,
         "warm_accepting_step_count": 3,
         "warm_refused_step_count": 3
       },
       "repair": {
         "millisecond_target_s": 0.001,
-        "reference_warm_boundary_wall_s": 0.10743484180420637,
-        "reference_warm_newton_work_per_trip_s": 0.011173306964337826,
+        "reference_warm_boundary_wall_s": 0.10817414242774248,
+        "reference_warm_newton_work_per_trip_s": 0.010320686735212803,
         "reference_warm_step_map_evaluations": 11.0,
-        "reference_warm_step_wall_s": 0.005666081327944994,
-        "reference_warm_trip_wall_s": 0.12941541522741318,
-        "warm_boundary_wall_s": 0.04540245793759823,
-        "warm_newton_work_per_trip_s": 0.011349081061780453,
+        "reference_warm_step_wall_s": 0.0049888016656041145,
+        "reference_warm_trip_wall_s": 0.1294828774407506,
+        "warm_boundary_wall_s": 0.045022180303931236,
+        "warm_newton_work_per_trip_s": 0.011508083902299404,
         "warm_step_map_evaluations": 9.5,
-        "warm_step_speedup": 1.0578477916008509,
-        "warm_step_wall_s": 0.005356234963983297,
-        "warm_step_walls_of_target": 5.356234963983297,
-        "warm_trip_speedup": 2.245460419613059,
-        "warm_trip_wall_s": 0.05763424467295408
+        "warm_step_speedup": 0.7709360594920733,
+        "warm_step_wall_s": 0.006471096538007259,
+        "warm_step_walls_of_target": 6.471096538007259,
+        "warm_trip_speedup": 2.2573002862702642,
+        "warm_trip_wall_s": 0.057361830957233906
       },
       "route_agreement": {
         "bitwise_identical_flux": false,
@@ -2626,14 +2626,14 @@
           0.0009925831100648396
         ],
         "boundary_wall_per_trip_s": [
-          3.1225062943995,
-          0.04441646579653025,
-          0.04427708778530359,
-          0.04422608856111765
+          3.111669915728271,
+          0.0448552742600441,
+          0.04473023023456335,
+          0.044587098993360996
         ],
         "converged": false,
-        "first_jacobian_wall_s": 0.11154139041900635,
-        "first_step_wall_s": 1.7363137565553188,
+        "first_jacobian_wall_s": 0.1093614436686039,
+        "first_step_wall_s": 1.907444030046463,
         "jacobian_builds_per_trip": [
           5,
           2,
@@ -2641,10 +2641,10 @@
           2
         ],
         "jacobian_wall_per_trip_s": [
-          0.11154139041900635,
-          0.0011583222076296806,
-          0.0007162997499108315,
-          0.0007848134264349937
+          0.1093614436686039,
+          0.0012364191934466362,
+          0.000919293612241745,
+          0.0008098268881440163
         ],
         "ladder_scoring": "first_accept",
         "map_evaluations_per_trip": [
@@ -2653,15 +2653,15 @@
           19,
           19
         ],
-        "median_warm_accepting_step_wall_s": 0.006495211273431778,
-        "median_warm_boundary_wall_s": 0.04427708778530359,
-        "median_warm_jacobian_wall_s": 0.0007848134264349937,
-        "median_warm_newton_work_per_trip_s": 0.017482958734035492,
+        "median_warm_accepting_step_wall_s": 0.006071661598980427,
+        "median_warm_boundary_wall_s": 0.04473023023456335,
+        "median_warm_jacobian_wall_s": 0.000919293612241745,
+        "median_warm_newton_work_per_trip_s": 0.01725568249821663,
         "median_warm_refused_step_map_evaluations": 12.0,
-        "median_warm_refused_step_wall_s": 0.01106711570173502,
+        "median_warm_refused_step_wall_s": 0.011376343667507172,
         "median_warm_step_map_evaluations": 9.5,
-        "median_warm_step_wall_s": 0.008781407494097948,
-        "median_warm_trip_wall_s": 0.06260696239769459,
+        "median_warm_step_wall_s": 0.009027989581227303,
+        "median_warm_trip_wall_s": 0.06232817471027374,
         "newton_steps_per_trip": [
           6,
           1,
@@ -2669,10 +2669,10 @@
           1
         ],
         "newton_wall_per_trip_s": [
-          1.7808544347062707,
-          0.017482958734035492,
-          0.01787180732935667,
-          0.01735115423798561
+          1.9533644719049335,
+          0.01876569539308548,
+          0.01702812872827053,
+          0.01725568249821663
         ],
         "off_support_leakage": 0.0,
         "reduced_dimension": 622,
@@ -2695,7 +2695,7 @@
             "reduced_residual": 181.76922076154852,
             "step": 0,
             "trip": 0,
-            "wall_s": 1.7363137565553188
+            "wall_s": 1.907444030046463
           },
           {
             "accepted_factor": 0.5,
@@ -2707,7 +2707,7 @@
             "reduced_residual": 694.2836340402689,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.002681748941540718
+            "wall_s": 0.0029555028304457664
           },
           {
             "accepted_factor": 0.125,
@@ -2719,7 +2719,7 @@
             "reduced_residual": 644.7836324041274,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.003777904435992241
+            "wall_s": 0.004227054305374622
           },
           {
             "accepted_factor": 0.25,
@@ -2731,7 +2731,7 @@
             "reduced_residual": 644.1779480315431,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.008811349980533123
+            "wall_s": 0.009671983309090137
           },
           {
             "accepted_factor": 0.5,
@@ -2743,7 +2743,7 @@
             "reduced_residual": 548.0300105776429,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.007863406091928482
+            "wall_s": 0.00859405379742384
           },
           {
             "accepted_factor": 0.125,
@@ -2755,7 +2755,7 @@
             "reduced_residual": 622.9840759658141,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.009165281429886818
+            "wall_s": 0.009454851038753986
           },
           {
             "accepted_factor": null,
@@ -2767,7 +2767,7 @@
             "reduced_residual": 494.42122902147173,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.01224098727107048
+            "wall_s": 0.011016996577382088
           },
           {
             "accepted_factor": 0.0625,
@@ -2779,7 +2779,7 @@
             "reduced_residual": 67.33655800025117,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.006415843032300472
+            "wall_s": 0.006871958263218403
           },
           {
             "accepted_factor": null,
@@ -2791,7 +2791,7 @@
             "reduced_residual": 73.7818507675174,
             "step": 1,
             "trip": 1,
-            "wall_s": 0.01106711570173502
+            "wall_s": 0.011893737129867077
           },
           {
             "accepted_factor": 0.03125,
@@ -2803,7 +2803,7 @@
             "reduced_residual": 40.675251978970934,
             "step": 0,
             "trip": 2,
-            "wall_s": 0.006706872023642063
+            "wall_s": 0.005651785060763359
           },
           {
             "accepted_factor": null,
@@ -2815,7 +2815,7 @@
             "reduced_residual": 41.493419932968436,
             "step": 1,
             "trip": 2,
-            "wall_s": 0.011164935305714607
+            "wall_s": 0.011376343667507172
           },
           {
             "accepted_factor": 0.03125,
@@ -2827,7 +2827,7 @@
             "reduced_residual": 39.17558216071711,
             "step": 0,
             "trip": 3,
-            "wall_s": 0.006495211273431778
+            "wall_s": 0.006071661598980427
           },
           {
             "accepted_factor": null,
@@ -2839,7 +2839,7 @@
             "reduced_residual": 40.27366179552255,
             "step": 1,
             "trip": 3,
-            "wall_s": 0.010855942964553833
+            "wall_s": 0.011184020899236202
           }
         ],
         "support_cells": 622,
@@ -2848,13 +2848,13 @@
         "termination_reason": "active_set_settled",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          5.013347250409424,
-          0.06279489304870367,
-          0.06260696239769459,
-          0.06207384541630745
+          5.172909713350236,
+          0.06444576382637024,
+          0.06228423025459051,
+          0.06232817471027374
         ],
-        "wall_per_trip_s": 1.4560468399431556,
-        "wall_s": 5.824187359772623,
+        "wall_per_trip_s": 1.4923870356287807,
+        "wall_s": 5.969548142515123,
         "warm_accepting_step_count": 3,
         "warm_refused_step_count": 3
       }
@@ -2910,8 +2910,8 @@
         }
       },
       "batched_tail": {
-        "accepting_step_wall_over_serial_s": 2.0703300833702087e-06,
-        "accepting_step_wall_s": 0.0031642401590943336,
+        "accepting_step_wall_over_serial_s": -0.00023253075778484344,
+        "accepting_step_wall_s": 0.002941897138953209,
         "bitwise_identical_flux": true,
         "eager_refused_step_wall_s": null,
         "identical_decisions": true,
@@ -2920,7 +2920,7 @@
         "refused_step_wall_over_eager_s": null,
         "refused_step_wall_recovered_from_serial_s": null,
         "refused_step_wall_s": null,
-        "serial_accepting_step_wall_s": 0.0031621698290109634,
+        "serial_accepting_step_wall_s": 0.0031744278967380524,
         "serial_refused_step_wall_s": null,
         "sup_flux_difference_wb": 0.0,
         "warm_accepting_step_count": 1,
@@ -2940,22 +2940,22 @@
           1.0253049766248483e-13
         ],
         "boundary_wall_per_trip_s": [
-          0.8664343459531665,
-          0.10855056811124086,
-          0.1080671614035964
+          0.8398062353953719,
+          0.1085606599226594,
+          0.10677758883684874
         ],
         "converged": true,
-        "first_jacobian_wall_s": 0.2670739348977804,
-        "first_step_wall_s": 2.395847395993769,
+        "first_jacobian_wall_s": 0.11638676468282938,
+        "first_step_wall_s": 2.2610957315191627,
         "jacobian_builds_per_trip": [
           1,
           1,
           1
         ],
         "jacobian_wall_per_trip_s": [
-          0.2670739348977804,
-          0.0005550552159547806,
-          0.0004131365567445755
+          0.11638676468282938,
+          0.0005267709493637085,
+          0.0002839425578713417
         ],
         "ladder_scoring": "eager",
         "map_evaluations_per_trip": [
@@ -2963,23 +2963,23 @@
           10,
           2
         ],
-        "median_warm_accepting_step_wall_s": 0.00480920635163784,
-        "median_warm_boundary_wall_s": 0.10830886475741863,
-        "median_warm_jacobian_wall_s": 0.00048409588634967804,
-        "median_warm_newton_work_per_trip_s": 0.00240460317581892,
+        "median_warm_accepting_step_wall_s": 0.004007384181022644,
+        "median_warm_boundary_wall_s": 0.10766912437975407,
+        "median_warm_jacobian_wall_s": 0.0004053567536175251,
+        "median_warm_newton_work_per_trip_s": 0.002003692090511322,
         "median_warm_refused_step_map_evaluations": null,
         "median_warm_refused_step_wall_s": null,
         "median_warm_step_map_evaluations": 8.0,
-        "median_warm_step_wall_s": 0.00480920635163784,
-        "median_warm_trip_wall_s": 0.12148290779441595,
+        "median_warm_step_wall_s": 0.004007384181022644,
+        "median_warm_trip_wall_s": 0.1209185691550374,
         "newton_steps_per_trip": [
           12,
           1,
           0
         ],
         "newton_wall_per_trip_s": [
-          2.4405504828318954,
-          0.00480920635163784,
+          2.300370584242046,
+          0.004007384181022644,
           0.0
         ],
         "off_support_leakage": 0.0,
@@ -3002,7 +3002,7 @@
             "reduced_residual": 137.16214464848622,
             "step": 0,
             "trip": 0,
-            "wall_s": 2.395847395993769
+            "wall_s": 2.2610957315191627
           },
           {
             "accepted_factor": 1.0,
@@ -3014,7 +3014,7 @@
             "reduced_residual": 568.9023244342956,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.0049541061744093895
+            "wall_s": 0.004427035339176655
           },
           {
             "accepted_factor": 1.0,
@@ -3026,7 +3026,7 @@
             "reduced_residual": 63.031067466213244,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.003882122226059437
+            "wall_s": 0.0035308636724948883
           },
           {
             "accepted_factor": 1.0,
@@ -3038,7 +3038,7 @@
             "reduced_residual": 73.66867570163816,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.004079679027199745
+            "wall_s": 0.0034000901505351067
           },
           {
             "accepted_factor": 1.0,
@@ -3050,7 +3050,7 @@
             "reduced_residual": 18.081151641525878,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.004088509827852249
+            "wall_s": 0.003275180235505104
           },
           {
             "accepted_factor": 1.0,
@@ -3062,7 +3062,7 @@
             "reduced_residual": 5.758385328167691,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.003992196172475815
+            "wall_s": 0.0034397225826978683
           },
           {
             "accepted_factor": 1.0,
@@ -3074,7 +3074,7 @@
             "reduced_residual": 2.770406178247981,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.0038292687386274338
+            "wall_s": 0.00331991259008646
           },
           {
             "accepted_factor": 1.0,
@@ -3086,7 +3086,7 @@
             "reduced_residual": 0.6604392265421737,
             "step": 7,
             "trip": 0,
-            "wall_s": 0.003818625584244728
+            "wall_s": 0.003323734737932682
           },
           {
             "accepted_factor": 1.0,
@@ -3098,7 +3098,7 @@
             "reduced_residual": 0.5029958132935235,
             "step": 8,
             "trip": 0,
-            "wall_s": 0.003932970575988293
+            "wall_s": 0.003718024119734764
           },
           {
             "accepted_factor": 1.0,
@@ -3110,7 +3110,7 @@
             "reduced_residual": 0.055865088631698256,
             "step": 9,
             "trip": 0,
-            "wall_s": 0.004006139934062958
+            "wall_s": 0.0035094954073429108
           },
           {
             "accepted_factor": 1.0,
@@ -3122,7 +3122,7 @@
             "reduced_residual": 0.07401696041409878,
             "step": 10,
             "trip": 0,
-            "wall_s": 0.004305248148739338
+            "wall_s": 0.0036511290818452835
           },
           {
             "accepted_factor": 1.0,
@@ -3134,7 +3134,7 @@
             "reduced_residual": 0.011038842918196679,
             "step": 11,
             "trip": 0,
-            "wall_s": 0.003814220428466797
+            "wall_s": 0.0036796648055315018
           },
           {
             "accepted_factor": 1.0,
@@ -3146,7 +3146,7 @@
             "reduced_residual": 0.0009628902202223344,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.00480920635163784
+            "wall_s": 0.004007384181022644
           }
         ],
         "support_cells": 661,
@@ -3155,12 +3155,12 @@
         "termination_reason": "converged",
         "trip_boundary": "dispatched",
         "trip_wall_per_trip_s": [
-          5.7291801907122135,
-          0.12450761068612337,
-          0.11845820490270853
+          3.763442532159388,
+          0.12418325711041689,
+          0.11765388119965792
         ],
-        "wall_per_trip_s": 2.0720653931299844,
-        "wall_s": 6.216196179389954,
+        "wall_per_trip_s": 1.4060164876282215,
+        "wall_s": 4.2180494628846645,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 0
       },
@@ -3383,22 +3383,22 @@
           1.0270974678427239e-13
         ],
         "boundary_wall_per_trip_s": [
-          3.127365075983107,
-          0.044494849629700184,
-          0.044450387358665466
+          3.1683995109051466,
+          0.044688880443573,
+          0.045695310458540916
         ],
         "converged": true,
-        "first_jacobian_wall_s": 0.1403806870803237,
-        "first_step_wall_s": 1.8195369066670537,
+        "first_jacobian_wall_s": 0.13951163738965988,
+        "first_step_wall_s": 1.8255583941936493,
         "jacobian_builds_per_trip": [
           1,
           1,
           1
         ],
         "jacobian_wall_per_trip_s": [
-          0.1403806870803237,
-          0.0008086962625384331,
-          0.0005378704518079758
+          0.13951163738965988,
+          0.000685499981045723,
+          0.00032621249556541443
         ],
         "ladder_scoring": "batched_tail",
         "map_evaluations_per_trip": [
@@ -3406,23 +3406,23 @@
           2,
           1
         ],
-        "median_warm_accepting_step_wall_s": 0.0031642401590943336,
-        "median_warm_boundary_wall_s": 0.044472618494182825,
-        "median_warm_jacobian_wall_s": 0.0006732833571732044,
-        "median_warm_newton_work_per_trip_s": 0.0015821200795471668,
+        "median_warm_accepting_step_wall_s": 0.002941897138953209,
+        "median_warm_boundary_wall_s": 0.04519209545105696,
+        "median_warm_jacobian_wall_s": 0.0005058562383055687,
+        "median_warm_newton_work_per_trip_s": 0.0014709485694766045,
         "median_warm_refused_step_map_evaluations": null,
         "median_warm_refused_step_wall_s": null,
         "median_warm_step_map_evaluations": 2.0,
-        "median_warm_step_wall_s": 0.0031642401590943336,
-        "median_warm_trip_wall_s": 0.04701441526412964,
+        "median_warm_step_wall_s": 0.002941897138953209,
+        "median_warm_trip_wall_s": 0.047402181662619114,
         "newton_steps_per_trip": [
           12,
           1,
           0
         ],
         "newton_wall_per_trip_s": [
-          1.8444239534437656,
-          0.0031642401590943336,
+          1.8504536747932434,
+          0.002941897138953209,
           0.0
         ],
         "off_support_leakage": 0.0,
@@ -3445,7 +3445,7 @@
             "reduced_residual": 137.1621446484893,
             "step": 0,
             "trip": 0,
-            "wall_s": 1.8195369066670537
+            "wall_s": 1.8255583941936493
           },
           {
             "accepted_factor": 1.0,
@@ -3457,7 +3457,7 @@
             "reduced_residual": 568.9023244342958,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.002319570630788803
+            "wall_s": 0.0023318324238061905
           },
           {
             "accepted_factor": 1.0,
@@ -3469,7 +3469,7 @@
             "reduced_residual": 63.031067466216314,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.0023801270872354507
+            "wall_s": 0.0022376226261258125
           },
           {
             "accepted_factor": 1.0,
@@ -3481,7 +3481,7 @@
             "reduced_residual": 73.6686757016418,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.0022640954703092575
+            "wall_s": 0.002269422635436058
           },
           {
             "accepted_factor": 1.0,
@@ -3493,7 +3493,7 @@
             "reduced_residual": 18.08115164152605,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.0023547960445284843
+            "wall_s": 0.002212831750512123
           },
           {
             "accepted_factor": 1.0,
@@ -3505,7 +3505,7 @@
             "reduced_residual": 5.75838532816767,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.002475968562066555
+            "wall_s": 0.0022173216566443443
           },
           {
             "accepted_factor": 1.0,
@@ -3517,7 +3517,7 @@
             "reduced_residual": 2.770406178244343,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.0021792761981487274
+            "wall_s": 0.0021789083257317543
           },
           {
             "accepted_factor": 1.0,
@@ -3529,7 +3529,7 @@
             "reduced_residual": 0.6604392265450052,
             "step": 7,
             "trip": 0,
-            "wall_s": 0.0021861549466848373
+            "wall_s": 0.0022458648309111595
           },
           {
             "accepted_factor": 1.0,
@@ -3541,7 +3541,7 @@
             "reduced_residual": 0.5029958132901129,
             "step": 8,
             "trip": 0,
-            "wall_s": 0.002193792723119259
+            "wall_s": 0.0022400282323360443
           },
           {
             "accepted_factor": 1.0,
@@ -3553,7 +3553,7 @@
             "reduced_residual": 0.05586508862512929,
             "step": 9,
             "trip": 0,
-            "wall_s": 0.002235868014395237
+            "wall_s": 0.002180381678044796
           },
           {
             "accepted_factor": 1.0,
@@ -3565,7 +3565,7 @@
             "reduced_residual": 0.07401696042109052,
             "step": 10,
             "trip": 0,
-            "wall_s": 0.0021383175626397133
+            "wall_s": 0.0024837814271450043
           },
           {
             "accepted_factor": 1.0,
@@ -3577,7 +3577,7 @@
             "reduced_residual": 0.011038842918139835,
             "step": 11,
             "trip": 0,
-            "wall_s": 0.002159079536795616
+            "wall_s": 0.0022972850129008293
           },
           {
             "accepted_factor": 1.0,
@@ -3589,7 +3589,7 @@
             "reduced_residual": 0.0009628902165559339,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.0031642401590943336
+            "wall_s": 0.002941897138953209
           }
         ],
         "support_cells": 661,
@@ -3598,30 +3598,30 @@
         "termination_reason": "converged",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          5.1122701689600945,
-          0.048501383513212204,
-          0.04552744701504707
+          5.158470679074526,
+          0.048351471312344074,
+          0.046452892012894154
         ],
-        "wall_per_trip_s": 1.9077382665127516,
-        "wall_s": 5.723214799538255,
+        "wall_per_trip_s": 1.9465414586787422,
+        "wall_s": 5.839624376036227,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 0
       },
       "repair": {
         "millisecond_target_s": 0.001,
-        "reference_warm_boundary_wall_s": 0.10830886475741863,
-        "reference_warm_newton_work_per_trip_s": 0.00240460317581892,
+        "reference_warm_boundary_wall_s": 0.10766912437975407,
+        "reference_warm_newton_work_per_trip_s": 0.002003692090511322,
         "reference_warm_step_map_evaluations": 8.0,
-        "reference_warm_step_wall_s": 0.00480920635163784,
-        "reference_warm_trip_wall_s": 0.12148290779441595,
-        "warm_boundary_wall_s": 0.044472618494182825,
-        "warm_newton_work_per_trip_s": 0.0015821200795471668,
+        "reference_warm_step_wall_s": 0.004007384181022644,
+        "reference_warm_trip_wall_s": 0.1209185691550374,
+        "warm_boundary_wall_s": 0.04519209545105696,
+        "warm_newton_work_per_trip_s": 0.0014709485694766045,
         "warm_step_map_evaluations": 2.0,
-        "warm_step_speedup": 1.5198613600221569,
-        "warm_step_wall_s": 0.0031642401590943336,
-        "warm_step_walls_of_target": 3.1642401590943336,
-        "warm_trip_speedup": 2.5839502014843343,
-        "warm_trip_wall_s": 0.04701441526412964
+        "warm_step_speedup": 1.3621768511079073,
+        "warm_step_wall_s": 0.002941897138953209,
+        "warm_step_walls_of_target": 2.941897138953209,
+        "warm_trip_speedup": 2.5509072560344324,
+        "warm_trip_wall_s": 0.047402181662619114
       },
       "route_agreement": {
         "bitwise_identical_flux": false,
@@ -3666,22 +3666,22 @@
           1.0270974678427239e-13
         ],
         "boundary_wall_per_trip_s": [
-          3.088370925746858,
-          0.04348363820463419,
-          0.04321100562810898
+          3.1523494981229305,
+          0.043210540898144245,
+          0.04294504411518574
         ],
         "converged": true,
-        "first_jacobian_wall_s": 0.4120445270091295,
-        "first_step_wall_s": 1.7247848259285092,
+        "first_jacobian_wall_s": 0.11006927210837603,
+        "first_step_wall_s": 2.001862732693553,
         "jacobian_builds_per_trip": [
           1,
           1,
           1
         ],
         "jacobian_wall_per_trip_s": [
-          0.4120445270091295,
-          0.0006772391498088837,
-          0.000546034425497055
+          0.11006927210837603,
+          0.0007749404758214951,
+          0.0004642736166715622
         ],
         "ladder_scoring": "first_accept",
         "map_evaluations_per_trip": [
@@ -3689,23 +3689,23 @@
           2,
           1
         ],
-        "median_warm_accepting_step_wall_s": 0.0031621698290109634,
-        "median_warm_boundary_wall_s": 0.043347321916371584,
-        "median_warm_jacobian_wall_s": 0.0006116367876529694,
-        "median_warm_newton_work_per_trip_s": 0.0015810849145054817,
+        "median_warm_accepting_step_wall_s": 0.0031744278967380524,
+        "median_warm_boundary_wall_s": 0.04307779250666499,
+        "median_warm_jacobian_wall_s": 0.0006196070462465286,
+        "median_warm_newton_work_per_trip_s": 0.0015872139483690262,
         "median_warm_refused_step_map_evaluations": null,
         "median_warm_refused_step_wall_s": null,
         "median_warm_step_map_evaluations": 2.0,
-        "median_warm_step_wall_s": 0.0031621698290109634,
-        "median_warm_trip_wall_s": 0.04586187144741416,
+        "median_warm_step_wall_s": 0.0031744278967380524,
+        "median_warm_trip_wall_s": 0.04557167552411556,
         "newton_steps_per_trip": [
           12,
           1,
           0
         ],
         "newton_wall_per_trip_s": [
-          1.748819069005549,
-          0.0031621698290109634,
+          2.0260236682370305,
+          0.0031744278967380524,
           0.0
         ],
         "off_support_leakage": 0.0,
@@ -3728,7 +3728,7 @@
             "reduced_residual": 137.1621446484893,
             "step": 0,
             "trip": 0,
-            "wall_s": 1.7247848259285092
+            "wall_s": 2.001862732693553
           },
           {
             "accepted_factor": 1.0,
@@ -3740,7 +3740,7 @@
             "reduced_residual": 568.9023244342958,
             "step": 1,
             "trip": 0,
-            "wall_s": 0.002288728952407837
+            "wall_s": 0.0022105081006884575
           },
           {
             "accepted_factor": 1.0,
@@ -3752,7 +3752,7 @@
             "reduced_residual": 63.031067466216314,
             "step": 2,
             "trip": 0,
-            "wall_s": 0.0021800855174660683
+            "wall_s": 0.0021488936617970467
           },
           {
             "accepted_factor": 1.0,
@@ -3764,7 +3764,7 @@
             "reduced_residual": 73.6686757016418,
             "step": 3,
             "trip": 0,
-            "wall_s": 0.0021700654178857803
+            "wall_s": 0.0021374402567744255
           },
           {
             "accepted_factor": 1.0,
@@ -3776,7 +3776,7 @@
             "reduced_residual": 18.08115164152605,
             "step": 4,
             "trip": 0,
-            "wall_s": 0.0021442510187625885
+            "wall_s": 0.0021327482536435127
           },
           {
             "accepted_factor": 1.0,
@@ -3788,7 +3788,7 @@
             "reduced_residual": 5.75838532816767,
             "step": 5,
             "trip": 0,
-            "wall_s": 0.002188469283282757
+            "wall_s": 0.002226073294878006
           },
           {
             "accepted_factor": 1.0,
@@ -3800,7 +3800,7 @@
             "reduced_residual": 2.770406178244343,
             "step": 6,
             "trip": 0,
-            "wall_s": 0.0022083893418312073
+            "wall_s": 0.0022236602380871773
           },
           {
             "accepted_factor": 1.0,
@@ -3812,7 +3812,7 @@
             "reduced_residual": 0.6604392265450052,
             "step": 7,
             "trip": 0,
-            "wall_s": 0.002169894054532051
+            "wall_s": 0.002135166898369789
           },
           {
             "accepted_factor": 1.0,
@@ -3824,7 +3824,7 @@
             "reduced_residual": 0.5029958132901129,
             "step": 8,
             "trip": 0,
-            "wall_s": 0.002162868157029152
+            "wall_s": 0.0022214138880372047
           },
           {
             "accepted_factor": 1.0,
@@ -3836,7 +3836,7 @@
             "reduced_residual": 0.05586508862512929,
             "step": 9,
             "trip": 0,
-            "wall_s": 0.002199309878051281
+            "wall_s": 0.002240324392914772
           },
           {
             "accepted_factor": 1.0,
@@ -3848,7 +3848,7 @@
             "reduced_residual": 0.07401696042109052,
             "step": 10,
             "trip": 0,
-            "wall_s": 0.00215231254696846
+            "wall_s": 0.0022992808371782303
           },
           {
             "accepted_factor": 1.0,
@@ -3860,7 +3860,7 @@
             "reduced_residual": 0.011038842918139835,
             "step": 11,
             "trip": 0,
-            "wall_s": 0.0021698689088225365
+            "wall_s": 0.0021854257211089134
           },
           {
             "accepted_factor": 1.0,
@@ -3872,7 +3872,7 @@
             "reduced_residual": 0.0009628902165559339,
             "step": 0,
             "trip": 1,
-            "wall_s": 0.0031621698290109634
+            "wall_s": 0.0031744278967380524
           }
         ],
         "support_cells": 661,
@@ -3881,12 +3881,12 @@
         "termination_reason": "converged",
         "trip_boundary": "fused",
         "trip_wall_per_trip_s": [
-          5.249331217259169,
-          0.04735864233225584,
-          0.04436510056257248
+          5.28854092489928,
+          0.04719374515116215,
+          0.04394960589706898
         ],
-        "wall_per_trip_s": 1.9777483738337953,
-        "wall_s": 5.933245121501386,
+        "wall_per_trip_s": 1.9651033192252119,
+        "wall_s": 5.895309957675636,
         "warm_accepting_step_count": 1,
         "warm_refused_step_count": 0
       }
@@ -3899,7 +3899,7 @@
     "jax": "0.11.0",
     "python": "3.14.2",
     "scheduler": {
-      "job_id": "1262998",
+      "job_id": "1263000",
       "node": "98dci4-gpu-0003",
       "partition": "betelgeuse",
       "reservation": "gpu_0003_grpA"
@@ -3912,14 +3912,14 @@
     "every_row_batched_tail_flux_bitwise_identical": true,
     "every_row_flux_agrees": true,
     "every_row_trip_census_identical": true,
-    "maximum_accepting_step_wall_s": 0.004523579962551594,
+    "maximum_accepting_step_wall_s": 0.004887489601969719,
     "maximum_off_support_leakage": 0.0,
-    "maximum_refused_step_wall_over_eager_s": -0.0001439894549548626,
-    "maximum_warm_step_wall_s": 0.005356234963983297,
-    "minimum_warm_step_wall_s": 0.0031642401590943336,
+    "maximum_refused_step_wall_over_eager_s": 0.00030479300767183304,
+    "maximum_warm_step_wall_s": 0.006471096538007259,
+    "minimum_warm_step_wall_s": 0.002941897138953209,
     "previous_receipt_reproduced": true,
     "prototype_converged_count": 1,
     "row_count": 4,
-    "terminal_flux": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-terminal-flux.npz"
+    "terminal_flux": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-repeat-terminal-flux.npz"
   }
 }

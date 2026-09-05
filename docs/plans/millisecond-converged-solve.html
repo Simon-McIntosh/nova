@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-impl" content="0.4">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563">
 </head>
@@ -69,6 +69,11 @@
 <article class="r-fu" data-id="f-msc-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The bank rows&#x27; public route never attaches the frozen-partition hooks</h4>
     <div class="r-fu-body"><p>The four bank rows are built by <code>benchmarks/efit_forward_parity_slice._passive_inclusive_case</code> with <code>use_linear_moments</code> False and <code>moment_geometry</code> None, so <code>flux_map_with_shadow</code> never attaches <code>_read_frozen_partition</code> or <code>_map_frozen_partition</code>, and the frozen-partition revaluation path the active-set solver prefers is unreachable on those rows: both the production arm and the reduced prototype pay a full topology read inside every map evaluation. The frozen-partition savings banked on this plan were measured on a construction that does attach the hooks. Decide whether the public route should build the bank rows with linear moments, or make the hooks independent of the moment geometry, then re-measure the four rows.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-msc-004" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship millisecond-converged-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adaptive Jacobian refresh in the reduced Newton trip</h4>
+    <div class="r-fu-body"><p>Replace the refresh-on-rejection policy in <code>nova/equilibrium/reduced_newton.py</code> with an adaptive one: after each accepted step compute the contraction factor (the ratio of successive reduced-residual norms) and rebuild the dense Jacobian when that factor exceeds a threshold or when a grade ladder is refused; expose the threshold as a solve parameter with the refusal-only policy recoverable at threshold one. Measure on the same four bank rows with the same receipt shape: steps per trip, Jacobian builds per trip, warm step wall, whole-trip wall, terminal residual; the synthetic CPU machine should need close to the production twelve-step budget rather than the chord's twenty-four. Sequence after the millisecond-step node releases the module.</p></div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve §2</pre>
     </article>
 </section>
@@ -151,8 +156,9 @@
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="q-msc-jacobian-refresh" data-section="" data-status="open" data-opened-by="" data-opened-at="" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-msc-jacobian-refresh" data-section="" data-status="resolved" data-opened-by="" data-opened-at="" data-resolved-at="2026-09-05T13:12:50+00:00" data-resolved-by="smc">
     <p class="r-q-body"><p>The prototype holds one dense Jacobian per trip and refreshes it only when a whole grade ladder is refused, which makes the inner iteration a chord method: on the MAST rows it still contracts to 1e-13 in twelve steps, on the small synthetic CPU machine it contracts linearly at about a quarter per step and needs a 24-step budget where production needs 12. Refreshing the Jacobian every step costs 0.4 to 0.9 ms (warm, H200) and buys quadratic contraction. Options: keep the chord (cheapest step, more steps), refresh every step (fewer steps, plus up to 0.9 ms each), or refresh when the contraction factor of the last step exceeds a threshold (adaptive). Recommendation: adaptive refresh, since the step budget is the quantity the millisecond target constrains and the Jacobian is not the binding cost.</p></p>
+    <p class="r-q-resolution">Lead decision 2026-09-05: adaptive refresh. Hold one dense Jacobian per trip by default and rebuild it when the contraction factor of the last accepted step exceeds a threshold, or when a grade ladder is refused, so the step budget stays near the fresh-Jacobian count while the Jacobian cost (0.4 to 0.9 ms warm) is paid only where the chord is contracting slowly.</p>
     </div>
 </section>
 </main>

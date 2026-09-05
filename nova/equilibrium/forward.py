@@ -103,8 +103,12 @@ from nova.equilibrium.conservation import (
 )
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
+    CompensatorRule,
+    CompensatorSelection,
     ConstraintPair,
     ConstraintRecord,
+    constraint_response_matrix,
+    derive_circuit_compensators,
     assemble_augmented_system,
     constraint_records,
 )
@@ -1582,6 +1586,57 @@ class ForwardProfile:
             target_current,
             current,
             prescribed_current,
+        )
+
+    def constraint_response_matrix(
+        self,
+        constraint_pairs: Sequence[ConstraintPair],
+        flux,
+        *,
+        requested_class=None,
+        target_current=None,
+    ) -> jax.Array:
+        """Return each registered row's sensitivity to every circuit current.
+
+        One row per residual row and one column per prescribed circuit, in the
+        observation's own physical unit per ampere. It is the matrix a caller
+        reads to see where a constraint's authority actually lives before any
+        direction is chosen.
+        """
+        return constraint_response_matrix(
+            self,
+            tuple(constraint_pairs),
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+
+    def derived_constraint_pairs(
+        self,
+        constraint_pairs: Sequence[ConstraintPair],
+        flux,
+        *,
+        requested_class=None,
+        target_current=None,
+        rule: CompensatorRule | None = None,
+        competition_threshold: float = 0.5,
+        participation_floor: float = 0.0,
+    ) -> tuple[tuple[ConstraintPair, ...], CompensatorSelection]:
+        """Return the same rows with matrix-led compensating circuit directions.
+
+        The returned pairs go into :meth:`solve` unchanged; only the direction
+        inside each circuit unknown differs from what the caller supplied, so a
+        caller that names its own circuit simply does not call this.
+        """
+        return derive_circuit_compensators(
+            self,
+            tuple(constraint_pairs),
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+            rule=rule,
+            competition_threshold=competition_threshold,
+            participation_floor=participation_floor,
         )
 
     def _solve_augmented_constraints(

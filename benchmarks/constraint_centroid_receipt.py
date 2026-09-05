@@ -21,6 +21,8 @@ from nova.equilibrium.constraint import (
     ConstraintBinding,
     ConstraintPair,
     CurrentCentroidConstraint,
+    compensator_rule_name,
+    derive_circuit_compensators,
 )
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.topology import TopologyClass
@@ -39,6 +41,11 @@ DEFAULT_PROTOTYPE = Path(
     "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/"
     "s19-relaunch/scr-vertical-position-constraint-prototype/docs/figures/"
     "solver-convergence-regression/vertical-mode/constraint/four-rows.json"
+)
+SELECTION_OUTPUT = (
+    ROOT
+    / "docs/figures/constraint-augmented-newton-krylov"
+    / "compensator-selection/two-rows.json"
 )
 ROWS = ((21986, 46), (21989, 55))
 
@@ -138,6 +145,265 @@ def _summary(branch, profile, target_current):
             None if record is None else _strict_float(record.soft_mode_projection[0])
         ),
     }
+
+
+def _circuit_names(policy) -> dict[int, str]:
+    """Return the zero-based circuit index of every named active family."""
+    return {
+        int(item["stored_circuit"]) - 1: str(item["family"])
+        for item in policy["active_mapping"]
+    }
+
+
+def _pair_projection(delta, actuator) -> float:
+    """Return the antisymmetric pair current one full circuit delta carries."""
+    upper = int(actuator["upper_stored_circuit"]) - 1
+    lower = int(actuator["lower_stored_circuit"]) - 1
+    delta = np.asarray(delta)
+    return 0.5 * float(delta[upper] - delta[lower])
+
+
+def _authority_report(selection, names, *, count=8):
+    """Rank the circuits by the row scale each moves per ampere."""
+    authority = np.asarray(selection.authority)[0]
+    order = np.argsort(np.abs(authority))[::-1][:count]
+    return [
+        {
+            "circuit": int(index),
+            "family": names.get(int(index)),
+            "row_scales_per_ampere": float(authority[index]),
+            "direction_component": float(np.asarray(selection.directions)[index, 0]),
+        }
+        for index in order
+    ]
+
+
+def _derived_pair(profile, fixed, seed, *, target_current, requested_class):
+    """Return the same centroid row with a matrix-led compensating direction."""
+    (derived,), selection = derive_circuit_compensators(
+        profile,
+        (fixed,),
+        seed,
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+    return derived, selection
+
+
+def _arm(branch, profile, target_current, pair, actuator):
+    """Summarise one solved arm together with the circuits it actually drove."""
+    summary = _summary(branch, profile, target_current)
+    record = branch.equilibrium.constraints[0]
+    direction = np.asarray(pair.unknown.direction)
+    delta = direction @ np.asarray(record.physical_unknown)
+    singular = (
+        None
+        if record.compensator_singular_values is None
+        else [float(value) for value in np.asarray(record.compensator_singular_values)]
+    )
+    summary.update(
+        {
+            "compensator_rule": compensator_rule_name(record.compensator_rule),
+            "singular_values_row_scales_per_ampere": singular,
+            "pair_projected_current_a": _pair_projection(delta, actuator),
+            "circuit_current_delta_norm_a": float(np.linalg.norm(delta)),
+            "driven_circuits": [
+                {"circuit": int(index), "current_a": float(delta[index])}
+                for index in np.argsort(np.abs(delta))[::-1][:6]
+                if abs(float(delta[index])) > 1.0e-9 * float(np.max(np.abs(delta)))
+            ],
+        }
+    )
+    return summary
+
+
+def _render_selection(receipt, output):
+    """Draw the derived and fixed arms side by side on the two bank rows."""
+    rows = receipt["rows"]
+    labels = [row["identity"] for row in rows]
+    x = np.arange(len(rows))
+    width = 0.35
+    figure, axes = plt.subplots(1, 3, figsize=(12.5, 4.5))
+    for offset, arm, label in (
+        (-width / 2, "fixed", "named pair"),
+        (width / 2, "derived", "matrix-led"),
+    ):
+        axes[0].bar(
+            x + offset,
+            [row[arm]["terminal_residual"] for row in rows],
+            width,
+            label=label,
+        )
+        axes[1].bar(
+            x + offset,
+            [row[arm]["pair_projected_current_a"] / 1.0e3 for row in rows],
+            width,
+            label=label,
+        )
+        axes[2].bar(
+            x + offset,
+            [row[arm]["active_set_trips"] for row in rows],
+            width,
+            label=label,
+        )
+    axes[0].set_yscale("log")
+    axes[0].set_ylabel("terminal residual")
+    axes[1].set_ylabel("pair-projected compensating current [kA]")
+    axes[1].axhline(0.0, color="0.4", linewidth=0.8)
+    axes[2].set_ylabel("active-set trips")
+    for axis in axes:
+        axis.set_xticks(x, labels)
+        axis.grid(axis="y", alpha=0.2)
+        axis.legend(frameon=False)
+    figure.suptitle(
+        "Compensating direction: named pair against the constraint-response matrix",
+        y=0.96,
+    )
+    figure.subplots_adjust(left=0.07, right=0.99, bottom=0.14, top=0.80, wspace=0.30)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output, dpi=180)
+    plt.close(figure)
+
+
+def measure_selection(
+    *, operands: Path, output: Path, figure: Path, cache_root: Path | None = None
+):
+    """Compare the named P6 pair with the derived direction on the bank rows."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, carrier_evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = {
+        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
+        for row, qualification in settled.select_slices_by_shot(
+            settled.DECOMPOSITION_BANK
+        )
+    }
+    receipt = {
+        "receipt": "compensating circuit direction from the constraint response",
+        "source": {
+            "revision": _source_revision(),
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+        },
+        "configuration": {
+            "route": "ForwardProfile.solve_branch public defaults",
+            "constraint_policy": "imposed",
+            "support": MomentIntegralSupport.ALL_DOMAIN.value,
+            "authority": "row scale moved per ampere; the direction is normalised "
+            "so the largest participating circuit carries unity",
+            "persistent_compilation_cache": {
+                "directory": str(cache.directory),
+                "version": cache.version_key,
+            },
+        },
+        "inputs": {"operands": str(operands), "carrier_evidence": carrier_evidence},
+        "rows": [],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    for key in ROWS:
+        identity = f"{key[0]}/{key[1]}"
+        print(f"COMPENSATOR-SELECTION {identity}", flush=True)
+        selected_row, qualification = selected[key]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        if int(policy["section_kernel_evaluations_this_shot"]) != 0:
+            raise RuntimeError("profile rebuild entered the direct response builder")
+        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+        seed = jnp.asarray(passive_case["state"])
+        seed_centroid = _centroid(profile, seed, target_current)
+        fixed, actuator = _p6_pair(
+            policy,
+            profile,
+            target=seed_centroid,
+            span=float(passive_case["span_wb"]),
+        )
+        names = _circuit_names(policy)
+        derived, selection = _derived_pair(
+            profile,
+            fixed,
+            seed,
+            target_current=target_current,
+            requested_class=requested,
+        )
+        fixed_branch = profile.solve_branch(
+            seed,
+            requested,
+            target_current=target_current,
+            constraint_pairs=(fixed,),
+        )
+        fixed_branch.equilibrium.flux.block_until_ready()
+        derived_branch = profile.solve_branch(
+            seed,
+            requested,
+            target_current=target_current,
+            constraint_pairs=(derived,),
+        )
+        derived_branch.equilibrium.flux.block_until_ready()
+        chosen = selection.leading_circuits(0, count=6)
+        row = {
+            "identity": identity,
+            "seed_vertical_centroid_m": _strict_float(seed_centroid),
+            "actuator": actuator,
+            "selection": {
+                "rule": selection.rule.name.lower(),
+                "competing_rows": bool(selection.competing),
+                "singular_values_row_scales_per_ampere": [
+                    float(value) for value in np.asarray(selection.singular_values)
+                ],
+                "direction_authority_row_scales_per_ampere": [
+                    float(value) for value in np.asarray(selection.direction_authority)
+                ],
+                "chosen_circuits": [
+                    {
+                        "circuit": int(index),
+                        "family": names.get(int(index)),
+                        "component": float(np.asarray(selection.directions)[index, 0]),
+                    }
+                    for index in chosen
+                ],
+                "authority_ranking": _authority_report(selection, names),
+            },
+            "fixed": _arm(fixed_branch, profile, target_current, fixed, actuator),
+            "derived": _arm(derived_branch, profile, target_current, derived, actuator),
+        }
+        receipt["rows"].append(row)
+        output.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        print(
+            "COMPENSATOR-SELECTION-DONE " + json.dumps(row, sort_keys=True), flush=True
+        )
+    receipt["verdict"] = {
+        "row_count": len(receipt["rows"]),
+        "derived_qualified_count": sum(
+            row["derived"]["qualified"] for row in receipt["rows"]
+        ),
+        "pair_projected_current_max_abs_difference_a": max(
+            abs(
+                row["derived"]["pair_projected_current_a"]
+                - row["fixed"]["pair_projected_current_a"]
+            )
+            for row in receipt["rows"]
+        ),
+        "vertical_error_max_abs_m": max(
+            abs(row["derived"]["vertical_error_m"]) for row in receipt["rows"]
+        ),
+        "rules": sorted({row["selection"]["rule"] for row in receipt["rows"]}),
+    }
+    output.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    _render_selection(receipt, figure)
+    return receipt
 
 
 def _prototype_rows(path: Path):
@@ -332,16 +598,35 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--operands", type=Path, default=settled.DEFAULT_OPERANDS)
     parser.add_argument("--prototype", type=Path, default=DEFAULT_PROTOTYPE)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--figure", type=Path, default=None)
+    parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument(
-        "--figure", type=Path, default=DEFAULT_OUTPUT.with_suffix(".png")
+        "--selection",
+        action="store_true",
+        help="compare the named pair with the matrix-led compensating direction",
     )
     args = parser.parse_args()
+    default = SELECTION_OUTPUT if args.selection else DEFAULT_OUTPUT
+    output = default if args.output is None else args.output
+    figure = output.with_suffix(".png") if args.figure is None else args.figure
+    if args.selection:
+        receipt = measure_selection(
+            operands=args.operands,
+            output=output,
+            figure=figure,
+            cache_root=args.cache_root,
+        )
+        print(
+            "COMPENSATOR-SELECTION-RESULT "
+            + json.dumps(receipt["verdict"], sort_keys=True)
+        )
+        return
     receipt = measure(
         operands=args.operands,
         prototype=args.prototype,
-        output=args.output,
-        figure=args.figure,
+        output=output,
+        figure=figure,
     )
     print(
         "CONSTRAINT-CENTROID-RESULT " + json.dumps(receipt["verdict"], sort_keys=True)

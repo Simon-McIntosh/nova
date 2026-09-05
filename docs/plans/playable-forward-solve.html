@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.33">
 <meta name="plan-commits" content="3afd3caf,81bec10b,672f3b43,d5e90aea">
 <meta name="plan-artifacts" content="docs/evidence/archive/playable-forward-solve-landed.html,nova/equilibrium/steering_frames.py,tests/test_steering_frames.py,nova/equilibrium/reduced_newton.py,tests/test_reduced_newton_constraints.py,benchmarks/reduced_newton_constrained_rows.py,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.json,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.png">
@@ -170,6 +170,45 @@
     Solov'ev fixture committed for the record. <strong>B.</strong> The decoder implementation (foreign-owner, imas-ambix). <strong>C.</strong> The
     live picture: the §6c receipt extended with the decoded stream on 22086/43 and the decode wall per frame beside the keyframe wall.</p>
 
+  <h2 id="s8">§8 — The forward solve as a labeller: batch throughput and the decoder corpus</h2>
+  <p>The lead's direction of 2026-09-05 23:10: imas-ambix trains the video decoder, nova supplies the labels, and the decoder works from
+    the physics state (the flux map, the LCFS, the divertor strike points, the O-point and the X-points), never from pixels. This section
+    asks what it costs to run the forward solve as that labeller over the decoder's corpus: how fast the solve labels a slice, whether that
+    rate can feed training, and whether the labels must be written to file ahead of training or could be produced online. The lead
+    authorises using the original EFIT plasma centre height as a constraint row to stabilise the solve, since the vertical mode is what
+    the Newton walk spends its trips on, and the constrained route of §3 already carries that row.</p>
+  <p><strong>The contract as it stands.</strong> On the training side the label a frame carries is the §5 <code>SteeringFrame</code> record:
+    raster <code>psi</code>, <code>psi_norm</code>, <code>domain_label</code> and separatrix on the rectangular grid, the O-point, the two X-point
+    slots, the strike points, the LCFS polyline, the coil currents and the request identity, written as a session with time as the last axis
+    in the imas-ambix key vocabulary. On the evaluation side imas-ambix's <code>equilibrium_labels.py</code> reads the L2 reconstruction store
+    into a 14-component target per camera frame time (axis R and Z, an unordered set of up to two nulls, eight LCFS radii at fixed
+    poloidal angles about the axis, with a finite mask) and declares that store evaluator-only: a third-party label that scores the
+    model and is never a model input. The forward labeller sits on the training side, so its output is admissible conditioning, with one
+    caveat the authorisation carries: a solve stabilised on the EFIT centre height inherits one scalar of the reconstruction per slice, and
+    whether that touches the evaluator firewall is imas-ambix's judgement to record, not nova's.</p>
+  <p><strong>What is already measured, and the arithmetic it implies.</strong> The constrained reduced route solves a warm keyframe on
+    22086/43 in three trips of about 50 ms and converges to nanometres (§3). A labeller stepping through one shot's slices in time order
+    warm-starts each slice from the previous one, so the expected cost per slice is one to three trips, 50 to 150 ms, once the program for
+    that shot's operator is compiled; the operator is a trace constant today, so each distinct operator compiles once per session (minutes
+    cold, seconds from the persistent cache) and every slice of a shot then runs the same program with its coil currents as arguments. The
+    corpus census counts 1,341,435 slices; at 10 to 20 slices per second on one H200 that is 19 to 37 hours of one GPU for a complete pass,
+    or an eighth of that across the reservation's eight GPUs, while a training loop that decodes at even eight frames per second per
+    process cannot wait tens of milliseconds for a label. So the prior reading is that the labels are produced once, ahead of training,
+    written to file per shot in the §5 session shape, and the study below measures whether the prior holds and what would change it: a
+    batched entry over the slices of one shot (the same operator, different currents) is the lever that could take the rate from tens to
+    hundreds of slices per second, and the reduced route has no batched entry yet.</p>
+  <p>Deliverables. <strong>A.</strong> The contract scout: what the decoder training corpus actually consumes and at which frame times (the
+    manifest and cohort the physics-carried-playable-plasma plan names, the camera frame times per shot, the shots the frozen-six response
+    carrier covers and how many corpus shots share an operator), what the efm store carries for the plasma centre height per slice, and the
+    exact file the labeller must write, as a report with the field list and the shot and slice counts. <strong>B.</strong> The throughput
+    study on the H200: one shot's slices in time order through the constrained reduced route, warm-started slice to slice, free against the
+    EFIT centre-height row, recording per slice the trips, Newton steps, wall, converged and qualified flags and the compensating current,
+    the compile and cache-hit cost per program, and a probe of a batched entry over eight and sixteen slices of one shot if the route admits
+    it, with the receipt extrapolated to slices per GPU-hour and to the corpus; the report answers the three questions in numbers.
+    <strong>C.</strong> The dataset, conditional on B: the labeller sharded across H200 jobs over the decoder's shot list, each shot's session
+    file written as it lands with a digest manifest, resumable, in the shape A names, so imas-ambix trains on exactly what the forward solve
+    produced.</p>
+
   
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -231,6 +270,26 @@
     <div class="r-fu-body"><p>Exemption <strong>foreign-owner</strong>: the decoder is imas-ambix's deliverable on physics-carried-playable-plasma §4 and §5. It implements nova's <code>FrameDecoder</code> protocol against the merged <code>SteeringFrame</code> record, consumes the same netCDF session a recorded steering run writes, and is loaded into the playable app by dotted path on the H200. Proposed to the imas-ambix coordinator on 2026-09-05 23:05 with two questions (one frame or a short history in; rbb image shape and rate). This followup closes when that project reports the dotted path of its implementation and the answers, which f-pfs-009 then pins.</p></div>
     <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §7</pre>
     </article>
+<article class="r-fu" data-id="f-pfs-011" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship playable-forward-solve §8" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The labeller contract scout: corpus, frame times, carrier coverage, centre height, output file</h4>
+    <div class="r-fu-body"><p>Read-only, through the imas-ambix checkout at /home/ITER/mcintos/Code/imas-ambix as data and the nova shot store: which manifest and shot cohort the physics-carried-playable-plasma plan names for the decoder corpus (the unified six-camera window manifest minus the labeller cohort) and how many shots and camera frames it holds; the camera frame times per shot and their rate; which corpus shots the frozen-six response carrier at /work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers covers and how many shots share one operator; what the efm reconstruction group of the MAST shot store carries per slice for the plasma centre height (current centroid or magnetic axis Z) and on what time base; the exact firewall text of imas_ambix/eval/efit_referee.py and what it means for a conditioned label; and the exact per-shot file the labeller must write for imas-ambix to train on, in the §5 session shape with the corpus key vocabulary plus a per-slice conditioning flag and target source. Report with the field list, the shot list, the slice and frame counts and the operator-sharing count, no code written.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §8</pre>
+    </article>
+<article class="r-fu" data-id="f-pfs-012" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship playable-forward-solve §8" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The labeller throughput study on the H200: slices per GPU-hour, free against the EFIT centre-height row</h4>
+    <div class="r-fu-body"><p>A driver beside benchmarks/reduced_newton_constrained_rows.py steps one shot's efm slices in time order through the constrained reduced route on the H200, warm-started slice to slice from the previous equilibrium and unknown, in two arms: free, and with the current-centroid row targeted on the EFIT centre height of that slice (decision labeller-vertical-constraint), recording per slice the trips, Newton steps, wall, converged and qualified flags, achieved against target, the compensating current and the conditioning flag with its target source, persisted as each slice lands; the compile cost and cache-hit count per program; and a probe of a batched entry over eight and sixteen slices of one shot through vmap of the fused trip if the route admits it, or the reason it does not. The receipt states slices per second and per GPU-hour for each arm, the converged and qualified fraction, and the extrapolation to the 1,341,435-slice census on one and on eight H200s, and the report answers in numbers whether the rate feeds training online or the labels must be written ahead of it. Harness: submitted from the checkout root with the root environment interpreter, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache configured, no new callback instrumentation, jobs kept under one hour each.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §8</pre>
+    </article>
+<article class="r-fu" data-id="f-pfs-013" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship playable-forward-solve §8" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The decoder corpus: the labeller sharded across H200 jobs writing every shot&#x27;s session file</h4>
+    <div class="r-fu-body"><p>Conditional on f-pfs-012 reading favourable and f-pfs-011 naming the file: the labeller over the decoder's shot list, sharded across H200 jobs under one hour each, every shot's session written as it lands in the §5 shape with the per-slice conditioning flag and target source and a digest manifest (nova revision, carrier identity, policy digest, constraint row per slice), resumable by shot, with a completion receipt counting shots, slices, converged and qualified fractions and total GPU-hours. Lead authorisation 2026-09-05 to scale the batches up and write the full dataset the imas-ambix video decoder requires once the findings are favourable; whether the conditioned slices may train is the imas-ambix lead's decision, which the flag makes enforceable on data.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §8</pre>
+    </article>
+<article class="r-fu" data-id="f-pfs-014" data-status="open" data-written-by="reckon-ship-s19-playable" data-written-at="2026-09-05" data-recommends-skill="/reckon-ship playable-forward-solve §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repairs from the independent review of the merged solver diffs</h4>
+    <div class="r-fu-body"><p>From the review report at ~/.config/reckon/crew/reports/nova/playable/review-merged-solver-diffs.md, on nova/equilibrium/reduced_newton.py, nova/equilibrium/forward.py and their tests after the traced-targets node lands: M3, bound or renormalise the compensating unknown in the augmented scoring denominator so a warm-started loop cannot loosen the tolerance on the whole system, with a contract at a normalised unknown of order one hundred; M1, a default-lane gate on the serial-to-batched equivalence; M2, a row-response contract that calls the constrained route's own augmentation; a contract on the augmented line search where the row block and the flux block disagree on the accepted grade; L3, the constraint gate inside _solve_accelerated tests the accelerated-and-constrainable intersection so a reduced_newton request can never fall through to the Krylov solver; L4, the request-path history selection extended to the reduced routes; L5, soft_mode_projection as a typed absence rather than NaN; L6, either fold the compensation into the receipt when no prescribed field exists or refuse that configuration; I2, flux_scale as a traced argument beside the target if the traced-targets node did not already thread it; and a gate on the real derived compensating direction from a banked response matrix rather than the synthetically full-coupling fixture response.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship playable-forward-solve §3</pre>
+    </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260905T173000-handoff" data-who="reckon-ship-s19-playable" data-when="2026-09-05T17:30:00Z">
@@ -250,6 +309,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260905T203800-constrained-route-landed" data-who="reckon-ship-s19-playable" data-when="2026-09-05T20:38:00Z">
     <div class="r-comment-body"><p><strong>§3 constrained route landed</strong> (pfs-constrained-reduced-route, Opus, refused once on the spend limit at dispatch and resumed; merged at <code>f3e9d85f</code>, gate 6 of 6 on CPU, H200 job 1263043, evidence anchor <code>constrained-route</code>). Position steering works on the millisecond route: a one or two centimetre centroid move on 22086/43 re-solves in three trips of about 50 ms warm, achieved to nanometres, with the compensating current on the derived direction. The keyframe budget of order 100 ms is therefore met per trip on a warm program, and what stands between this and the loop is that the target is a trace constant (f-pfs-007): the second move recompiled for 16.6 s. Plan progress 3 of 9 nodes.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260905T205247075941-pfs-review-merged-solver-diffs" data-who="pfs-review-x" data-when="2026-09-05T21:01:03.707Z">
+    <div class="r-comment-body"><p>Independent line review of the three merged production diffs delivered at ~/.config/reckon/crew/reports/nova/playable/review-merged-solver-diffs.md: the augmented merit cannot hide a row under the flux block (the exit test is a true sup, the p-norm merit dilutes a single row by at most (n+1)^(1/8), about 2.2 to 2.9), but the normalised compensating unknown enters the scoring denominator unbounded (M3, inherited from the Newton-Krylov augmentation, first reached by a keyframe loop); the serial-to-batched equivalence gate is slow-marked and absent from the default lane (M1); the row-response contract never calls the merged code (M2); the widened constraint gate inside _solve_accelerated could route a reduced_newton request to the Krylov solver (L3, latent); the request-path history literal was not extended (L4); soft_mode_projection published as NaN (L5); compensation dropped from the receipt when no prescribed field exists (L6); flux_scale is seed-derived and also a trace constant (I2); the CPU compensating response is synthetically well conditioned while the real derived direction is banked, not gated; seven coverage holes listed</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260905T211500-review-landed" data-who="reckon-ship-s19-playable" data-when="2026-09-05T21:15:00Z">
+    <div class="r-comment-body"><p><strong>Independent review of the three merged diffs delivered</strong> (pfs-review-merged-solver-diffs, Opus, read-only, 8 minutes). The fenced question is answered: the augmented merit cannot hide a row under the flux block; the exit test is a true sup over both blocks and the p-norm merit dilutes a single row by at most (n+1)^(1/8), about 2.2 on the Solov'ev fixture and 2.9 on 22086/43. What it found instead: the normalised compensating unknown enters the scoring denominator unbounded (inherited from the Newton–Krylov augmentation, first reached by a warm-started loop); the serial-to-batched equivalence gate is slow-marked and absent from the default lane; one of the six quoted CPU contracts never calls the merged code; the widened constraint gate in _solve_accelerated could route a reduced_newton request to the Krylov solver (latent); the request-path history literal was not extended; flux_scale is seed-derived and a trace constant too; the CPU compensating response is synthetically full-coupling while the real derived direction is banked, not gated. Repairs are f-pfs-014, sequenced after the traced-targets node on the same files.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260905T173200-s5-consumer" data-who="reckon-ship-s19-playable" data-when="2026-09-05T17:32:00Z">
     <div class="r-comment-body"><p><strong>What the consumer reads.</strong> imas-ambix's physics-carried-playable-plasma (S19, M4) is blocked on nova's forward-solve-api §5, whose receipt must carry, at no extra compile, psi and psi_N on the hex mesh, the O-point, primary and secondary X-points, the LCFS, the strike points and the per-cell domain labels the plasma-cell authority resolves (core, private flux, wall shadow; every other cell outside the LCFS simply open, no scrape-off-layer class). The frame record this section defines carries those fields per frame together with the action that produced the frame (the control parameter moved, its delta, the commanded control-point set), the coil and compensating currents per circuit, the keyframe wall and trip count, and the solve request identity (carrier identity, Nova version, resolved policy), so a recorded steering session is a sequence of forward-solve-api §5 receipts with actions attached and the decoder never re-derives topology from psi.</p></div>
@@ -298,6 +363,14 @@
 <div class="r-dec" data-key="camera-window-layout" data-choice="two-panels-one-document-decoder-by-dotted-path" data-by="Simon McIntosh" data-when="2026-09-05T20:59:33+00:00">
     <p class="r-dec-q">camera-window-layout</p>
     <p class="r-dec-rat">Lead direction 2026-09-05 23:00 asked for a second window for the decoded MAST video supported by the flux-surface solve. One document keeps the two panels on the one keyframe and the one tunnelled port; the camera-only view argument gives the literal second window on another screen; the dotted-path plug-in keeps the coupled-repository rule one way (imas-ambix consumes nova, nova never imports imas-ambix) and lets the layout, keys and recording work before the decoder exists. Proposed to the imas-ambix coordinator on 2026-09-05 with two open questions: whether decode takes one frame or a short history, and the rbb image shape and rate.</p>
+    </div>
+<div class="r-dec" data-key="labeller-vertical-constraint" data-choice="efit-centre-height-row-flagged" data-by="Simon McIntosh" data-when="2026-09-05T21:06:25+00:00">
+    <p class="r-dec-q">labeller-vertical-constraint</p>
+    <p class="r-dec-rat">Lead authorisation 2026-09-05 23:10: the vertical mode is what the Newton walk spends its trips on, so pinning the centre height to the reconstruction&#x27;s value per slice stabilises the solve and raises throughput. Firewall text from imas-ambix (eval/efit_referee.py, relayed by a peer session 2026-09-05 23:20): EFIT reconstruction outputs are evaluator-only and must never become a training label or model input; sensor geometry is free. A label conditioned on the centre height carries one reconstruction scalar per slice and neither imas-ambix guard sees data handed across the seam, so every label slice carries an explicit conditioning flag and target source, the study measures the free arm beside the conditioned arm, and whether conditioned slices may train is the imas-ambix lead&#x27;s decision on their plan.</p>
+    </div>
+<div class="r-dec" data-key="decoder-input-is-physics-state" data-choice="physics-state-labels" data-by="Simon McIntosh" data-when="2026-09-05T21:06:25+00:00">
+    <p class="r-dec-q">decoder-input-is-physics-state</p>
+    <p class="r-dec-rat">Lead clarification 2026-09-05 23:05: imas-ambix does the training, nova supplies the labels, nova does not import imas-ambix, and the decoder works from the flux map, the LCFS, the divertor strike points, the O-point and the X-points, never from pixels. The FrameDecoder seam takes one SteeringFrame in. Facts from the imas-ambix code verified by a peer session: native decoder output 256 by 256 grayscale (sensor aspect 112 by 156), playback constant 8 frames per second, no live holder for that plan tonight; the lead resumes the conversation with a new imas-ambix worker once nova&#x27;s capabilities are measured.</p>
     </div>
 </section>
 </main>

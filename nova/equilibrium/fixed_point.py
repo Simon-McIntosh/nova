@@ -1718,6 +1718,40 @@ def _complete_newton_promotion(
     )
 
 
+def _apply_krylov_conditioning(
+    unconditioned_step: jax.Array,
+    projected_condition: jax.Array,
+    condition_baseline: jax.Array,
+    *,
+    trusted_linear_solve: jax.Array,
+    nonlinear_residual: jax.Array,
+    condition_ratio_limit: float,
+) -> tuple[jax.Array, jax.Array]:
+    """Scale a linear-action step by the shared conditioning rule.
+
+    Both the first-attempt qualification and the unchanged-state requalification
+    route through this single rule so the fallback carry cannot diverge from the
+    first attempt.  A step is damped only while its projected condition exceeds
+    the ratio limit against the online baseline, the recomputed linear residual
+    is still too large to trust at the working precision, and the nonlinear
+    residual is above the fourth root of machine precision, below which local
+    convergence finishes without trajectory control.
+    """
+    conditioning_applied = (
+        jnp.isfinite(projected_condition)
+        & jnp.isfinite(condition_baseline)
+        & (projected_condition > condition_ratio_limit * condition_baseline)
+        & ~trusted_linear_solve
+        & (nonlinear_residual > jnp.finfo(nonlinear_residual.dtype).eps ** 0.25)
+    )
+    damping = jnp.where(
+        conditioning_applied,
+        condition_baseline / (condition_ratio_limit * projected_condition),
+        1.0,
+    )
+    return unconditioned_step * damping, conditioning_applied
+
+
 def _qualified_krylov_step(
     linear_action: Callable[[jax.Array], jax.Array],
     residual_vector: jax.Array,
@@ -1778,23 +1812,17 @@ def _qualified_krylov_step(
         nonlinear_residual > material_residual_floor
     )
 
-    finite_condition = jnp.isfinite(projected_condition)
     trusted_linear_solve = achieved_reduction <= jnp.sqrt(
         jnp.finfo(residual_vector.dtype).eps
     )
-    conditioning_applied = (
-        finite_condition
-        & jnp.isfinite(condition_baseline)
-        & (projected_condition > condition_ratio_limit * condition_baseline)
-        & ~trusted_linear_solve
-        & (nonlinear_residual > jnp.finfo(residual_vector.dtype).eps ** 0.25)
+    step, conditioning_applied = _apply_krylov_conditioning(
+        unconditioned_step,
+        projected_condition,
+        condition_baseline,
+        trusted_linear_solve=trusted_linear_solve,
+        nonlinear_residual=nonlinear_residual,
+        condition_ratio_limit=condition_ratio_limit,
     )
-    damping = jnp.where(
-        conditioning_applied,
-        condition_baseline / (condition_ratio_limit * projected_condition),
-        1.0,
-    )
-    step = step * damping
 
     qualification = jnp.asarray(KrylovActionQualification.ACCEPTED, dtype=jnp.int32)
     qualification = jnp.where(
@@ -1839,7 +1867,7 @@ def _requalify_krylov_step(
     condition_ratio_limit: float,
     preceding_condition_baseline: jax.Array,
 ) -> _QualifiedKrylovStep:
-    """Reapply scalar conditioning to an unchanged linear solve."""
+    """Reapply the shared scalar conditioning to an unchanged linear solve."""
 
     has_preceding_baseline = jnp.isfinite(preceding_condition_baseline) & (
         preceding_condition_baseline > 0.0
@@ -1852,20 +1880,16 @@ def _requalify_krylov_step(
     trusted_linear_solve = cached.achieved_reduction <= jnp.sqrt(
         jnp.finfo(nonlinear_residual.dtype).eps
     )
-    conditioning_applied = (
-        jnp.isfinite(cached.projected_condition)
-        & jnp.isfinite(condition_baseline)
-        & (cached.projected_condition > condition_ratio_limit * condition_baseline)
-        & ~trusted_linear_solve
-        & (nonlinear_residual > jnp.finfo(nonlinear_residual.dtype).eps ** 0.25)
-    )
-    damping = jnp.where(
-        conditioning_applied,
-        condition_baseline / (condition_ratio_limit * cached.projected_condition),
-        1.0,
+    step, conditioning_applied = _apply_krylov_conditioning(
+        cached.unconditioned_step,
+        cached.projected_condition,
+        condition_baseline,
+        trusted_linear_solve=trusted_linear_solve,
+        nonlinear_residual=nonlinear_residual,
+        condition_ratio_limit=condition_ratio_limit,
     )
     return cached._replace(
-        step=cached.unconditioned_step * damping,
+        step=step,
         conditioning_applied=conditioning_applied,
         condition_baseline=condition_baseline,
     )

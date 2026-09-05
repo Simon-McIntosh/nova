@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T10:46:46",
+  "updated": "2026-09-05T10:50:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1739,6 +1739,15 @@
         "id": "msc-diff-review-x",
         "harness": "claude",
         "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "msc-dsv4-carry-x",
+        "harness": "clive",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -102741,6 +102750,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1733
+    "_version": 1734
   }
 }

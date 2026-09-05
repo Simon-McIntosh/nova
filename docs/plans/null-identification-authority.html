@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -333,6 +333,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T042539184731" data-who="coordinator" data-when="2026-09-05T04:25:00Z">
     <div class="r-comment-body"><p>Fifth paired remeasure (report <code>~/.config/reckon/crew/reports/nova/integration/candidate-5/paired-remeasure.md</code>, receipts banked at <code>docs/figures/polish-support-performance/candidate-5/</code>; H200 jobs 1262795, 1262796, 1262799): candidate <code>ead87a9b</code> 40.7 s per solve against 34.0 s on main and 40.2 against 38.4 ms per read; behaviour equal or improved on the production case, the four rows and both topology-read tests. The solve comparison is not like for like: main carried the frozen-partition scoring (<code>0efbf123</code>) and the candidate lineage did not, so the coordinator merged main into the candidate (clean auto-merge of forward_operator.py, tip <code>74d81363</code>, the first candidate that contains everything on main). The read comparison stands: the remaining 1.8 ms per read is the limiter tangency path (+1.7 ms per call in the component attribution) and the containment census's own ring evaluation (probe 5.2 against 0.5 ms), which is the price of containment admission. Dispatched <code>nia-candidate6-gate-and-paired-remeasure</code> (combined CPU gate on the merged tip first, then the paired H200 measurement on the proven drivers in two jobs) and <code>nia-limiter-tangency-cost</code> (stage timing of the selected-segment path, removal where bit-identical). Merge verdict follows the sixth measurement.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T051151712198" data-who="coordinator" data-when="2026-09-05T05:12:00Z">
+    <div class="r-comment-body"><p>Limiter tangency compaction landed into the candidate lineage: commit <code>4e3cfefe</code>, candidate advanced to <code>b1e2630e</code>. The selected-segment path now compacts its active derivative and reachability candidates (on the production operand 10 endpoints, zero derivative roots after the sign screen, 12 combined candidates in 67 slots) into one combined exact reachability call, falling back to the dense fixed-shape path above capacity; knot splitting, the four derivative bins per piece, the twelve bisection steps, node qualification, endpoint and root line of sight, score ordering and the masked argmin are unchanged, and the tangency point and minimum keep their exact bits on the exact-root fixture and the production operand (36 tests green). The CPU stage census puts the gain at 1.5 percent of the selected path; the fixed bisection and the derivative-bin evaluation, which carry the path's cost, are the algorithm itself. The sixth remeasure runs on <code>74d81363</code>, one commit behind this bit-identical change; its verdict applies to the candidate with this disclosure.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

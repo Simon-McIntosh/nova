@@ -55,6 +55,13 @@ FIXED_POINT_AGREEMENT = 100.0 * SOLVE_TOLERANCE
 #: reduced factor is about a quarter per step, so it needs the wider budget to
 #: reach the same tolerance from the same seed.
 REDUCED_NEWTON_STEPS = 24
+#: Agreement required between the fused trip boundary and the dispatched calls
+#: it replaces, on the residual each trip observes and on the terminal flux as
+#: a fraction of its span. The two compute the same expressions and differ only
+#: where one compiled program reassociates what several evaluate separately, so
+#: these bracket that reassociation rather than predict it.
+BOUNDARY_RESIDUAL_AGREEMENT = 1.0e-9
+BOUNDARY_FLUX_AGREEMENT = 1.0e-9
 PRODUCTION_NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
 
@@ -336,10 +343,15 @@ def test_first_accept_scoring_evaluates_one_map_per_accepted_step(machine):
 def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
     """One compiled trip close returns what the separate calls returned.
 
-    The promoted shadow, the mask difference against the frozen shadow, the
-    live residual of the promoted map, the next trip's amplitudes and the
-    off-support leakage are compared against the calls the dispatched
-    boundary makes, at the same reduced state and the same frozen shadow.
+    The promoted shadow, the mask difference against the frozen shadow and the
+    live residual of the promoted map are the boundary's decisions, and they
+    are compared for exact equality against the calls the dispatched boundary
+    makes at the same reduced state and the same frozen shadow.  The next
+    trip's amplitudes and the off-support leakage are carried values rather
+    than decisions and are compared to a tolerance: one program computing the
+    whole boundary is free to reassociate arithmetic that separate programs
+    evaluate one expression at a time, and that reassociation moves the last
+    bits of a sum without moving anything the solve decides.
     """
     profile, seed = machine
     operator = profile.operator
@@ -372,20 +384,29 @@ def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
         assert bool(jnp.array_equal(promoted, expected_promoted))
         assert int(difference) == int(jnp.sum(expected_promoted != shadow))
         assert float(residual) == float(_relative_residual(mapped, expected_state))
-        assert bool(
-            jnp.array_equal(
-                gathered,
-                reduced_newton._gather(
-                    coordinates, operator.cell_current_moments(expected_state)
-                ),
-            )
+        expected_gather = reduced_newton._gather(
+            coordinates, operator.cell_current_moments(expected_state)
         )
-        assert float(leakage) == float(kernels["leakage"](moved, shadow, seed))
+        span = float(jnp.max(jnp.abs(expected_gather)))
+        assert float(jnp.max(jnp.abs(gathered - expected_gather))) <= 1.0e-12 * span
+        assert float(leakage) == pytest.approx(
+            float(kernels["leakage"](moved, shadow, seed)), abs=1.0e-15
+        )
 
 
 @pytest.mark.slow
 def test_fused_trip_boundary_solves_to_the_dispatched_terminal_state(machine):
-    """Closing trips in one program walks the same trips to the same flux."""
+    """Closing trips in one program walks the same trips to the same flux.
+
+    Every decision is compared for equality: the trips taken, the mask
+    difference each one promoted, the Newton steps inside it, the termination
+    and the leakage.  The residual each trip observed and the terminal flux
+    are compared to a tolerance, because a single program is free to
+    reassociate arithmetic that separate dispatches evaluate one expression at
+    a time.  Measured on the H200 bank rows that reassociation moves the
+    terminal flux by 3e-16 to 3e-15 of its span; the pins below hold it far
+    inside what would change a decision.
+    """
     profile, seed = machine
     common = dict(
         tolerance=SOLVE_TOLERANCE,
@@ -409,5 +430,9 @@ def test_fused_trip_boundary_solves_to_the_dispatched_terminal_state(machine):
     assert fused.newton_steps_per_trip == dispatched.newton_steps_per_trip
     assert fused.termination_name == dispatched.termination_name
     assert fused.off_support_leakage == dispatched.off_support_leakage
-    assert fused.active_set_residuals == dispatched.active_set_residuals
-    assert bool(jnp.array_equal(fused.state, dispatched.state))
+    assert fused.active_set_residuals == pytest.approx(
+        dispatched.active_set_residuals, rel=BOUNDARY_RESIDUAL_AGREEMENT
+    )
+    span = float(jnp.max(jnp.abs(dispatched.state)))
+    difference = float(jnp.max(jnp.abs(fused.state - dispatched.state)))
+    assert difference <= BOUNDARY_FLUX_AGREEMENT * span

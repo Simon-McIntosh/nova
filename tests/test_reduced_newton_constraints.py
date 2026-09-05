@@ -370,6 +370,14 @@ def test_the_public_route_carries_the_rows_into_a_receipt(steered):
         )
 
 
+#: Agreement required between a scored scalar read out of a program that
+#: traces its constraint targets and one that folds them in as constants.
+#: The two evaluate the same expressions, and XLA is free to reassociate the
+#: reductions behind the merit and the relative residual differently in each;
+#: measured on this machine that moves the terminal residual by 6.7e-09 of
+#: itself.  This figure brackets that reassociation two decades wide rather
+#: than predicting it, and no decision reads the numbers it covers.
+SCORE_REASSOCIATION = 1.0e-6
 #: Kernels a constrained solve drives on this machine.  Each must compile
 #: once across a sequence of moved targets that re-enters one program.
 STEERED_KERNELS = ("initial_gather", "jacobian", "direction", "grade", "boundary")
@@ -429,13 +437,20 @@ def test_consecutive_moved_targets_share_one_compiled_program(steered):
 
 
 def test_a_traced_target_decides_what_a_captured_one_decides(steered):
-    """Where a kernel finds its target changes no number the solve reports.
+    """Where a kernel finds its target changes no decision and no answer.
 
-    Baking the tuple into the program is what the route did before it could
-    be steered, and it is the reference the traced route has to reproduce:
-    the same commanded target solved both ways must walk the same trips,
-    accept the same grades and land on the same flux, bit for bit, or the
-    saving is being taken out of the answer.
+    Baking the tuple into the program is the reference the traced route has
+    to reproduce: the same commanded target solved both ways must walk the
+    same trips, accept the same grades and land on the same flux, bit for
+    bit, or the saving is being taken out of the answer.
+
+    The scored scalars are bracketed rather than pinned.  A target that
+    arrives as a program parameter and a target folded in as a constant leave
+    XLA free to reassociate the reductions that produce the merit and the
+    relative residual, and measured on this machine that moves the terminal
+    residual by about 7e-09 of itself - some fifteen decades below the
+    tolerance either solve stops at, and on a number no decision reads:
+    every decision below is required to match exactly.
     """
     profile, _seed, free = steered
     commanded = _centroid(profile, free.state) + CENTROID_MOVE
@@ -456,8 +471,10 @@ def test_a_traced_target_decides_what_a_captured_one_decides(steered):
         np.asarray(captured.compensating_unknown),
         np.asarray(traced.compensating_unknown),
     )
+    assert abs(captured.terminal_residual - traced.terminal_residual) <= (
+        SCORE_REASSOCIATION * abs(captured.terminal_residual)
+    )
     for name in (
-        "terminal_residual",
         "active_set_iterations",
         "converged",
         "termination_reason",
@@ -470,9 +487,16 @@ def test_a_traced_target_decides_what_a_captured_one_decides(steered):
         "off_support_leakage",
     ):
         assert getattr(captured, name) == getattr(traced, name), name
+    assert captured.active_set_mask_differences == traced.active_set_mask_differences
     assert len(captured.steps) == len(traced.steps)
     for one, other in zip(captured.steps, traced.steps, strict=True):
-        assert one._replace(wall_s=0.0) == other._replace(wall_s=0.0)
+        for name in ("trip", "step", "accepted_factor", "grades_tried"):
+            assert getattr(one, name) == getattr(other, name), name
+        for name in ("map_evaluations", "jacobian_refreshed"):
+            assert getattr(one, name) == getattr(other, name), name
+        for name in ("reduced_residual", "flux_residual", "merit"):
+            left, right = getattr(one, name), getattr(other, name)
+            assert abs(left - right) <= SCORE_REASSOCIATION * abs(left), name
 
 
 def test_the_reduced_route_refuses_a_state_reading_compensator(steered):

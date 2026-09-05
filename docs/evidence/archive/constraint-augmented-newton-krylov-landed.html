@@ -95,6 +95,36 @@
     the machine would have driven for vertical control is the lead's question (<code>q-cank-compensator-reading</code>).</p>
   </section>
 
+  <section id="wall-null-tangent">
+    <h2>The wall-point boundary flux tangent is exact where a derivative exists; the 51 percent was a kink (84b23ee6, merged at be67af33)</h2>
+    <p><strong>Node:</strong> <code>cank-wall-null-flux-tangent</code>, Opus, run <code>r-20260905T172708183399</code> against base
+    <code>194c79fc</code>, 29 minutes; commit adds <code>tests/test_wall_null_flux_tangent.py</code> (20 CPU contracts, 8 s, no solve) and
+    changes nothing under <code>nova/biot</code>. Gate: 71 passed over the null, admission, import and tangent files on CPU.</p>
+    <p><strong>The reported figures reproduce exactly and are not a gradient defect.</strong> On the bootstrapped Solov'ev free-boundary
+    machine, differentiating the wall read along conductor 0's flux image at the analytic seed gives autodiff 2.314332e-06 against a
+    central difference of 1.534682e-06 Wb/A (error 5.08e-01) while the axis-flux tangent agrees to 6.9e-08. The seed puts the material
+    boundary on a seed flux surface, so the sampled wall flux is bit-exactly constant (max minus min 0.0 Wb), every node is a maximiser
+    and the extremum is a kink: the forward quotient promotes the node where the image is largest (2.314612e-06), the backward quotient
+    the node where it is smallest (7.547510e-07), and the central difference is exactly their mean, which no tangent can equal. The
+    autodiff value is the forward slope to 1.2e-04 relative, the derivative that exists on that side.</p>
+    <p><strong>At a strict extremum the tangent is correct.</strong> On the converged limited free-boundary equilibrium (newton_krylov,
+    tolerance 1e-8, wall flux spread 0.0955 Wb, promoted node 59) autodiff 2.27875170e-06 against central difference 2.27875161e-06,
+    3.99e-08 relative at a step of 1e-4 of the span and 1.32e-05 at 1e-6, the latter being the quotient's own cancellation noise.
+    Probing sixteen conductor images: conductor 0 agrees to 3.3e-12 at every step from 1e-2 to 1e-6 of the span; conductors 2 and 6 sit
+    at step-independent 1.58e-05 and 4.77e-05 because the promoted cluster index flips (31 to 30) between the backward and forward
+    states, so the central difference averages two different three-node fits; against the side that keeps the base cluster the tangent
+    agrees to 3.2e-07. Ruled out with measurements: the least-squares JVP (1e-13 against a dense solve, condition 3654), the vertex-length
+    gradient path (bit-identical under an envelope form), and the generic non-degenerate case (an independent analytic probe agreed to
+    5.5e-10).</p>
+    <p><strong>What is real, and outside the node's fence.</strong> The wall polish selects its three-node bracket by a discrete argmax, so
+    the boundary flux is piecewise-smooth in the flux state with a slope jump wherever the promoted wall node changes, and a Newton step,
+    a constraint row or an elimination on a limited machine can cross that jump. A selection-continuous polish (blended adjacent
+    brackets, or a fixed window on a continuous arclength estimate) in <code>nova/geometry/select.py</code> (<code>traced_wall_flux</code>,
+    <code>traced_wall_index</code>) would remove it; recorded as the next followup on the plan. Two fence clauses were unreachable by
+    construction and the contract states the reachable figures: 1e-4 relative at the fine step (cancellation noise) and no 1e-8 axis
+    agreement by central difference at double precision (floor near 5e-07).</p>
+  </section>
+
 </main>
 </body>
 </html>

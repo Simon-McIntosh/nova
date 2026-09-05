@@ -1,0 +1,41 @@
+{
+  "revision": "74d81363fcf88855f0e73f430618d77c260b9b23",
+  "main_revision": "35d3dcca1aa57f42407382b821a4c46a3455a168",
+  "environment": {
+    "JAX_PLATFORMS": "cpu",
+    "UV_PROJECT_ENVIRONMENT": "/home/ITER/mcintos/Code/nova/.venv",
+    "pytest_flags": ["--no-sync", "-p", "no:cacheprovider"]
+  },
+  "overall": {
+    "passed": true,
+    "invocations": 19,
+    "exit_status": 0,
+    "passed_tests": 145,
+    "failed_tests": 0,
+    "skipped_tests": 2,
+    "summed_wall_seconds": 1096
+  },
+  "invocations": [
+    {"name": "census-spline-value-authority", "exit_status": 0, "passed": 3, "failed": 0, "wall_seconds": 44, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/census-spline-value-authority.log"},
+    {"name": "split-polish-nulls", "exit_status": 0, "passed": 15, "failed": 0, "wall_seconds": 54, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/split-polish-nulls.log"},
+    {"name": "limiter-spline-minimum", "exit_status": 0, "passed": 9, "failed": 0, "wall_seconds": 114, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/limiter-spline-minimum.log"},
+    {"name": "limiter-line-of-sight", "exit_status": 0, "passed": 6, "failed": 0, "wall_seconds": 39, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/limiter-line-of-sight.log"},
+    {"name": "shared-spline-authority", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 42, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/shared-spline-authority.log"},
+    {"name": "forward-census", "exit_status": 0, "passed": 7, "failed": 0, "skipped": 2, "wall_seconds": 60, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/forward-census.log"},
+    {"name": "oracle-axis-admission", "exit_status": 0, "passed": 1, "failed": 0, "wall_seconds": 39, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/oracle-axis-admission.log"},
+    {"name": "stationary-point-admission", "exit_status": 0, "passed": 9, "failed": 0, "wall_seconds": 37, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/stationary-point-admission.log"},
+    {"name": "flux-surface-connectivity", "exit_status": 0, "passed": 19, "failed": 0, "wall_seconds": 39, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/flux-surface-connectivity.log"},
+    {"name": "topology-o-qualification", "exit_status": 0, "passed": 6, "failed": 0, "wall_seconds": 47, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/topology-o-qualification.log"},
+    {"name": "topology-domain-partition", "exit_status": 0, "passed": 5, "failed": 0, "wall_seconds": 16, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/topology-domain-partition.log"},
+    {"name": "mask-threshold-consistency", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 211, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/mask-threshold-consistency.log"},
+    {"name": "census-polish-compaction", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 37, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/census-polish-compaction.log"},
+    {"name": "structured-read-census-rows", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 33, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/structured-read-census-rows.log"},
+    {"name": "connectivity-class-reader", "exit_status": 0, "passed": 1, "failed": 0, "wall_seconds": 56, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/connectivity-class-reader.log"},
+    {"name": "plasma-cell-topology-read", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 47, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/plasma-cell-topology-read.log"},
+    {"name": "recovery-frozen-partition", "exit_status": 0, "passed": 2, "failed": 0, "wall_seconds": 15, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/recovery-frozen-partition.log"},
+    {"name": "fixed-point", "exit_status": 0, "passed": 41, "failed": 0, "wall_seconds": 94, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/fixed-point.log"},
+    {"name": "referee-node-ids", "exit_status": 0, "passed": 11, "failed": 0, "wall_seconds": 73, "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/candidate-6/logs/referee-node-ids.log"}
+  ],
+  "failure_ids": [],
+  "baseline_reproductions": []
+}

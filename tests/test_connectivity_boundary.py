@@ -629,6 +629,12 @@ def _psi_sweep(r, z, amp):
     )
 
 
+# The operand X table selects the saddle at grid resolution, while the topology
+# read refines the same candidate on the fitted tensor spline, so the two agree
+# only to the fixture grid cell pitch (T/80 = 12.5 mm in both radius and height).
+_PERSISTENT_FIELD_CELL_PITCH = (1.5 - 0.5) / 80
+
+
 def _persistent_saddle_field(nr=81, nz=81):
     """A resolved axis/saddle pair whose wall level can cross the saddle."""
     rg = np.linspace(0.5, 1.5, nr)
@@ -780,11 +786,14 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
         profile, limited[1], limited_topology
     )
     assert xpoint_diagnostics["typed_saddle_candidate_count"] >= 1
+    # The diagnosed X is the operand-table selection at grid resolution while
+    # the topology read refines it on the tensor spline; bound the two by the
+    # fixture cell pitch rather than requiring bit-identical positions.
     np.testing.assert_allclose(
         xpoint_diagnostics["selected_x_coordinate_m"],
         np.asarray(limited_topology.x_point),
         rtol=0.0,
-        atol=0.0,
+        atol=_PERSISTENT_FIELD_CELL_PITCH,
     )
     assert xpoint_diagnostics["selected_x_flux_wb"] == float(
         limited_topology.x_point_flux

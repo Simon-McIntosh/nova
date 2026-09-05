@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T04:17:21",
+  "updated": "2026-09-05T04:32:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1892,6 +1892,15 @@
       },
       {
         "id": "nia-candidate4-measure-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-candidate5-measure-x",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -100121,6 +100130,202 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T014730456899-nia-structured-read-consumes-census-rows",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-structured-read-consumes-census-rows",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3992,
+                "cached_input_tokens": 809348,
+                "input_tokens": 813342,
+                "output_tokens": 1633,
+                "reasoning_output_tokens": 41,
+                "total_tokens": 814975,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "e049cee9-3c2b-431a-8bb1-ba8bbe5f4954",
+            "session_id": "s19-relaunch"
+          },
+          "done_when": "Worktree commits confined to nova/equilibrium/forward_operator.py, nova/equilibrium/topology.py, nova/equilibrium/flux_surface_connectivity.py and tests/test_structured_read_census_rows.py, in which the new test proves the structured read's O plus X data, values plus telemetry bit-identical before against after on the forward-census fixtures, the census, admission, spline-authority, connectivity, partition, mask-threshold plus compaction tests (tests/test_forward_census.py, tests/test_stationary_point_admission.py, tests/test_census_spline_value_authority.py, tests/test_oracle_axis_admission.py, tests/test_flux_surface_connectivity.py, tests/test_topology_domain_partition.py, tests/test_mask_threshold_consistency.py, tests/test_census_polish_compaction.py, tests/test_plasma_cell_topology_read.py) stay green on CPU with logs, the manifest quoting the topology-read CPU timing before against after",
+          "estimated_hours": null,
+          "goal": "Remove the duplicate stationary-point polish from the integration candidate's topology read at this tip, per the component attribution (report ~/.config/reckon/crew/reports/nova/integration/candidate-4/read-component-attribution.md, receipts docs/figures/polish-support-performance/candidate-4/components/, H200 job 1262790): the whole-read gap to main is 3.9 ms per read (43.0 against 39.1 ms) and the census probe alone is 4.32 against 0.24 ms, because the structured census in nova/equilibrium/forward_operator.py (_FixedDesignNull2D._structured_census, spline fit plus ring sampling at roughly lines 395 to 418, polished values at 464 to 470, retained rows with gradient, Hessian plus uncertainty evidence published at 597 to 612) already authors the selected positions and values, yet the structured branch of Topology.read_qualification in nova/equilibrium/topology.py (around lines 825 to 854) afterwards calls polish_census_stationary_points in nova/equilibrium/flux_surface_connectivity.py (988 to 1245) and recomputes them, so this repair makes the structured census return its selected retained rows with the polish plus Hessian evidence already needed for selection, makes the structured branch consume those rows directly as the O and X data with the telemetry projected into the qualification receipt, keeps polish_census_stationary_points for carriers without a tensor authority, moves any split-spline condition evidence still wanted for structured diagnostics onto the explicit receipt path outside the production read, with every published position, value plus telemetry field bit-identical on the census, admission, spline-authority plus mask-threshold fixtures, plus a CPU timing of the topology read before against after on the production operand MAST 22086/43 pure quoted in the manifest (estimated saving 3.9 ms per read on the H200), no change to connectivity_boundary.py or fixed_point.py",
+          "id": "nia-structured-read-consumes-census-rows",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T014730456899-nia-structured-read-consumes-census-rows/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "120m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_structured_read_census_rows.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-census-rows-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T01:47:41Z",
+        "completed_at": "2026-09-05T02:29:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2520,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2520,
+        "stalled": false,
+        "time_budget": "120m",
+        "base_sha": "3d471c8301bbb44358559ea6db9a02277881c492",
+        "commits": [
+          "e0eb49560f8a0740cb1c5b4afc7867d65877ee38"
+        ],
+        "changed_lines": {
+          "added": 277,
+          "removed": 5,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_structured_read_census_rows.py plus the census, admission, spline-authority, connectivity, partition, mask-threshold, compaction and topology-read files (52 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T014730456899-nia-structured-read-consumes-census-rows/after-focused.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T014730456899-nia-structured-read-consumes-census-rows/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06f40-06a5-7783-9719-a048ed7d05ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29302144,
+            "cached_input_tokens_cumulative": 29302144,
+            "input_tokens": 29608993,
+            "input_tokens_cumulative": 29608993,
+            "output_tokens": 46742,
+            "output_tokens_cumulative": 46742,
+            "reasoning_output_tokens": 16925,
+            "reasoning_output_tokens_cumulative": 16925
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 70176,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 72576,
+              "external_wait": null,
+              "log_age_seconds": 71674,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 71730,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 63667,
+          "peak_input_tokens": 58911137
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-structured-read-consumes-census-rows",
+          "session_id": "01a06f40-06a5-7783-9719-a048ed7d05ee",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T02:29:41Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -100265,6 +100470,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1707
+    "_version": 1709
   }
 }

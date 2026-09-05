@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -327,6 +327,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T014953497529" data-who="coordinator" data-when="2026-09-05T01:48:00Z">
     <div class="r-comment-body"><p>Read component attribution on the fourth candidate (report <code>~/.config/reckon/crew/reports/nova/integration/candidate-4/read-component-attribution.md</code>, receipts banked at <code>docs/figures/polish-support-performance/candidate-4/components/</code>, candidate advanced with them to <code>3d471c83</code>; H200 job 1262790, eight direct probes, five steady samples per arm). The whole-read gap of 3.9 ms is the census probe: 4.32 ms against 0.24 ms, because the structured branch of the topology read calls <code>polish_census_stationary_points</code> after the structured census has already authored the selected positions, values, gradient and Hessian evidence, a duplicate polish. Limiter tangency along the spline adds 1.7 ms and is the last read item; flood fills, the spline fit, the line-of-sight rule and the census values by spline are within spread. Dispatched <code>nia-structured-read-consumes-census-rows</code> on the candidate lineage: the structured read consumes the census's retained rows directly with the telemetry projected into the qualification receipt, keeping the polish for carriers without a tensor authority, published fields bit-identical. If the H200 confirms the 3.9 ms, the candidate reads within a millisecond of main.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T023423886898" data-who="coordinator" data-when="2026-09-05T02:33:00Z">
+    <div class="r-comment-body"><p>Duplicate polish removed on the candidate lineage: commit <code>e0eb4956</code>, candidate advanced to <code>ead87a9b</code>. The fixed-design topology read now consumes the polarity-filtered rows the structured census already authored and projects their gradient, Hessian determinant and type, root uncertainty, displacement, origin and multiplicity into the qualification receipt; <code>polish_census_stationary_points</code> stays for raw and non-tensor carriers and the explicit split-spline diagnostics. Two new identity tests prove the O and X data, values and telemetry byte-identical against the former stage; 52 tests green. CPU same-operand timing: qualification 14.7 ms per read cheaper, the complete read 8.4 ms cheaper, against the H200 attribution's 3.9 ms gap. Fifth paired remeasure dispatched (<code>nia-candidate5-paired-remeasure</code>, two SLURM jobs to stay inside the hour), both arms now carrying the frozen-partition scoring from main; this is the merge verdict.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

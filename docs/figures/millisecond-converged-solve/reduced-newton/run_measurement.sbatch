@@ -14,9 +14,20 @@
 set -euo pipefail
 
 # The receipt resolves the checkout root from its own committed location so it
-# runs unchanged from any clone or worktree this revision is checked into.
+# runs unchanged from any clone or worktree this revision is checked into.  A
+# batch launcher copies the script to a node-local spool directory, so the
+# script's own location identifies the receipt directory only when it is run
+# directly; the submission directory carries it in a batch job.
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ ! -f "$here/four-rows-before.json" ] && [ -n "${SLURM_SUBMIT_DIR:-}" ]; then
+  here="$SLURM_SUBMIT_DIR"
+fi
 checkout_root="${NOVA_CHECKOUT_ROOT:-$(cd "$here/../../../.." && pwd)}"
+if [ ! -f "$checkout_root/benchmarks/reduced_newton_rows.py" ]; then
+  printf 'checkout root %s holds no measurement driver; ' "$checkout_root" >&2
+  printf 'submit from the receipt directory or set NOVA_CHECKOUT_ROOT\n' >&2
+  exit 2
+fi
 
 export TMPDIR=/tmp
 export OMP_NUM_THREADS=1
@@ -32,8 +43,9 @@ cache_root="${NOVA_JAX_CACHE_ROOT:-/work/projects/imas_gpu/sophelio/jax-cache/tr
 
 cd "$checkout_root"
 
-printf 'MEASUREMENT_START job=%s host=%s revision=%s\n' \
-  "${SLURM_JOB_ID:-none}" "$(hostname)" "$(git -C "$checkout_root" rev-parse HEAD)"
+printf 'MEASUREMENT_START job=%s host=%s root=%s revision=%s\n' \
+  "${SLURM_JOB_ID:-none}" "$(hostname)" "$checkout_root" \
+  "$(git -C "$checkout_root" rev-parse HEAD)"
 
 "$python_bin" -m benchmarks.reduced_newton_rows \
   --output "$here/four-rows.json" \

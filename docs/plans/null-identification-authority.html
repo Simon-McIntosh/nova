@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087">
 <meta name="plan-impl" content="0.8">
@@ -336,6 +336,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T051151712198" data-who="coordinator" data-when="2026-09-05T05:12:00Z">
     <div class="r-comment-body"><p>Limiter tangency compaction landed into the candidate lineage: commit <code>4e3cfefe</code>, candidate advanced to <code>b1e2630e</code>. The selected-segment path now compacts its active derivative and reachability candidates (on the production operand 10 endpoints, zero derivative roots after the sign screen, 12 combined candidates in 67 slots) into one combined exact reachability call, falling back to the dense fixed-shape path above capacity; knot splitting, the four derivative bins per piece, the twelve bisection steps, node qualification, endpoint and root line of sight, score ordering and the masked argmin are unchanged, and the tangency point and minimum keep their exact bits on the exact-root fixture and the production operand (36 tests green). The CPU stage census puts the gain at 1.5 percent of the selected path; the fixed bisection and the derivative-bin evaluation, which carry the path's cost, are the algorithm itself. The sixth remeasure runs on <code>74d81363</code>, one commit behind this bit-identical change; its verdict applies to the candidate with this disclosure.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T054012263657" data-who="coordinator" data-when="2026-09-05T05:40:00Z">
+    <div class="r-comment-body"><p><strong>The integration candidate is merged at <code>47b9f996</code>.</strong> Sixth gate and paired remeasure on the main-integrated tip (report <code>~/.config/reckon/crew/reports/nova/integration/candidate-6/gate-and-paired-remeasure.md</code>, receipts <code>docs/figures/polish-support-performance/candidate-6/</code>; H200 jobs 1262802 and 1262803): CPU gate 145 of 145 across 19 fresh-process invocations; production solve of 22086/43 pure 33.99 s against 34.07 s on main, faster on every sample; trips, promotions and per-trip mask movement identical; residual 4.77e-4 against 4.79e-4; the four public-route rows keep 21989/55 diverted with an admitted saddle and the other three classes unchanged; both topology-read tests green on both arms. The isolated topology read is 40.3 against 38.7 ms, 1.6 ms from the containment census evaluating every cell ring, which does not reach the process. Under the lead's condition that the processes stay fast the decision <code>polish-support-merge-gated-on-performance</code> is satisfied and the candidate lands: containment admission (one null per containing cell, the 30-slot overflow gone), the common spline authority for census values, limiter tangency and the wall minimum, the line-of-sight rule, the supplied-wall shadow rule, the mask deadband, the compacted census and limiter paths, the structured read's row reuse and the polarity-consistent raster fixtures. Eleven prototype and candidate worktrees removed. Dispatched <code>nia-rebank-public-route-integrated</code> to regenerate the twelve-row bank on the public route at HEAD.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

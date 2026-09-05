@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T07:35:23",
+  "updated": "2026-09-05T07:38:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2152,6 +2152,15 @@
       },
       {
         "id": "nia-read-components-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "nia-rebank-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -101235,6 +101244,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1717
+    "_version": 1718
   }
 }

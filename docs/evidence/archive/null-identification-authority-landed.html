@@ -439,6 +439,35 @@
     rediscovered candidate, and the mask threshold made spline-consistent with a pinned trip-one regression.</p>
   </section>
 
+  <section id="integration-merged">
+    <h2>The integration candidate is merged (47b9f996)</h2>
+    <p><strong>What landed together:</strong> the containment census admission with its oracle expectations, the common tensor
+    spline authority for census values, limiter tangency and the spline-restricted wall minimum with the line-of-sight rule, the
+    class repair and shared spline, the selected-wall early branch, the supplied-wall shadow rule, the spline-consistent mask
+    deadband, the compacted census polish, the structured read's reuse of census rows, the compacted limiter candidates and the
+    polarity-consistent raster fixtures. Six paired H200 measurements led here; receipts under
+    <code>docs/figures/polish-support-performance/candidate-2/</code> to <code>candidate-6/</code>.</p>
+    <table>
+      <caption>Sixth paired measurement, main-integrated candidate against main (H200 jobs 1262802, 1262803)</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Main</th><th scope="col">Candidate</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">CPU correctness gate</th><td colspan="2">145 passed, 0 failed, 2 skipped across 19 fresh-process invocations</td></tr>
+        <tr><th scope="row">Production solve, 22086/43 pure (median of 3)</th><td>34.07 s</td><td>33.99 s, faster on every sample</td></tr>
+        <tr><th scope="row">Trips / promotions / mask movement</th><td colspan="2">7 / 84 / [29, 28, 0, 0, 0, 0, 0] on both</td></tr>
+        <tr><th scope="row">Terminal residual</th><td>4.788e-4</td><td>4.775e-4</td></tr>
+        <tr><th scope="row">21989/55 class on the public route</th><td>limited, no admitted saddle</td><td>diverted, saddle admitted (EFIT: diverted)</td></tr>
+        <tr><th scope="row">Isolated topology read</th><td>38.7 ms</td><td>40.3 ms</td></tr>
+      </tbody>
+    </table>
+    <h3>Reading</h3>
+    <p>The process is not slower and its behaviour is equal or better, which is the lead's condition. The isolated read costs
+    1.6 ms more because the containment census evaluates every cell ring for containment; that is the price of one null per
+    containing cell and does not reach the solve. The road here: the first candidate doubled the trips (a class flip from a wall
+    reader ignoring its own shadow verdict, and a one-cell mask flip from the spline-authored values), then cost 48, 5 and 4
+    percent more per solve as the census was compacted, the duplicate polish removed and the frozen-partition scoring inherited
+    from main. The bank is regenerated on the public route next.</p>
+  </section>
+
 </main>
 </body>
 </html>

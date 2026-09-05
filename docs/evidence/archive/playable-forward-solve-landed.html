@@ -97,6 +97,56 @@
     constrained solve.</p>
   </section>
 
+  <section id="constrained-route">
+    <h2>The constrained reduced Newton route: position steered through a compensating current (81bec10b, 672f3b43, d5e90aea)</h2>
+    <p><strong>Node:</strong> <code>pfs-constrained-reduced-route</code> (§3), Opus, run <code>r-20260905T184635614727</code> against base
+    <code>2ecfb516</code>; refused once on the Opus spend limit at dispatch and resumed at 21:12, complete at 22:33. Files:
+    <code>nova/equilibrium/reduced_newton.py</code> (+658/-110), <code>nova/equilibrium/forward.py</code> (+102), <code>solve_request.py</code>,
+    <code>tests/test_reduced_newton_constraints.py</code> (400 lines), <code>benchmarks/reduced_newton_constrained_rows.py</code> (482 lines) and the
+    receipt under <code>docs/figures/playable-forward-solve/constrained-route/</code>. <code>constraint.py</code> and <code>__init__.py</code> untouched
+    (held by the shape-rows run).</p>
+    <p><strong>What landed.</strong> <code>solve_constrained_reduced_newton</code> extends the plasma-cell amplitude vector by one compensating
+    unknown per constraint row and the amplitude residual by the authored rows; the flux a state reconstructs is <code>external + sum
+    flux_delta(unknowns) + P scatter(amplitudes)</code> behind the frozen shadow, the merit and relative residual are read on the flux normalised by
+    its span beside the unknowns (the augmented Newton–Krylov scoring), and the dense Jacobian is one <code>jacfwd</code> over the extended state
+    per trip. The trip loop the two entries drive is one function, and with an empty tuple every kernel evaluates the unaugmented expression, so
+    the constrained entry reproduces <code>solve_reduced_newton</code> exactly rather than nearly. Only a circuit-current compensator is admitted
+    (a compensator whose flux image read the state would make the reconstruction implicit) and the dispatched trip boundary is refused.
+    <code>ForwardProfile.solve(route="reduced_newton")</code> reaches it and builds the receipt; the gate that refused constraints off the
+    Newton–Krylov route now names the routes that carry an unknown vector.</p>
+    <table>
+      <caption>CPU contract on the Solov'ev free-boundary machine, 6 of 6 in one log (1304 s)</caption>
+      <thead><tr><th scope="col">Contract</th><th scope="col">Measure</th></tr></thead>
+      <tbody>
+        <tr><td>empty tuple</td><td>every non-timing leaf equal to the unconstrained solve, terminal flux array included</td></tr>
+        <tr><td>centroid row at the free centroid</td><td>one trip, zero accepted steps, compensating unknown exactly zero (gate 1e-10 of the row scale)</td></tr>
+        <tr><td>row response against a central difference</td><td>2.6e-7 relative at a step of 1e-7 of the span, at the converged equilibrium where the wall flux has a strict extremum (the quotient converged first order over five decades)</td></tr>
+        <tr><td>target moved by 1 cm</td><td>reached to well inside 1e-6 m warm and cold; warm start no more trips and strictly fewer Newton steps</td></tr>
+        <tr><td>state-reading compensator</td><td>refused with the reason</td></tr>
+        <tr><td>public route</td><td>a qualified terminal record at the commanded centroid; the Picard route refuses the row</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Deviation stated.</strong> The measure asked for fewer trips from a warm start; on this machine the analytic seed already induces the
+    converged shadow, so every solve settles in one trip from either start and the saving lives in the Newton steps, which the contract pins.</p>
+    <table>
+      <caption>H200 receipt, 22086/43, job 1263043, reduced dimension 661, source 81bec10b</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Trips / Newton steps</th><th scope="col">Residual</th><th scope="col">Achieved vs commanded</th><th scope="col">Compensating current</th><th scope="col">Median warm trip</th><th scope="col">First-trip wall</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">free</th><td>3 / 14</td><td>2.07e-9</td><td>centroid 0.031748 m</td><td></td><td>47.2 ms</td><td>4.54 s</td></tr>
+        <tr><th scope="row">+1 cm</th><td>3 / 25</td><td>3.78e-9</td><td>-2.3e-9 m</td><td>-240.8 A</td><td>49.9 ms</td><td>5.51 s</td></tr>
+        <tr><th scope="row">+2 cm, warm from +1 cm</th><td>3 / 25</td><td>2.08e-9</td><td>+1.3e-9 m</td><td>-305.2 A</td><td>50.9 ms</td><td>16.60 s</td></tr>
+      </tbody>
+    </table>
+    <p>Every move converged and every row qualified; the rows cost about three milliseconds per warm trip. The compensating direction the
+    response matrix chose unaided is up-down antisymmetric over the P3, P6 and P4 pairs (P3 lower +240.8 A, P3 upper -227.8 A, P6 lower
+    +213.1 A, P6 upper -183.6 A, P4 lower +181.6 A, P4 upper -160.5 A at +1 cm, rule dominant_authority).</p>
+    <p><strong>Found by the coordinator's read, and it governs the loop.</strong> The constraint target and scale enter the compiled kernels
+    through the pair closed over in <code>_RowAugmentation.rows</code> (<code>jnp.asarray(pair.binding.target)</code>), so a moved target is a
+    new trace constant and every keyframe pays a first-trip compile: the second move's first trip cost 16.6 s although its warm trips cost
+    51 ms. A steering loop cannot afford that; the target, scale and initial unknown must be traced arguments of the kernels so a moved target
+    re-solves in the same compiled program. Recorded as the next node on this plan, ahead of the keyframe receipt.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -491,6 +491,35 @@
     admission defect. The class margin serialises as positive infinity on every row and stays a qualifier to read.</p>
   </section>
 
+  <section id="census-slot-exhaustion">
+    <h2>The compacted census truncates silently beyond its work slots (found by review, repair in flight)</h2>
+    <p><strong>Source:</strong> independent line review of the three solver commits merged on 2026-09-05 with green gates that no
+    human had read, report <code>~/.config/reckon/crew/reports/nova/millisecond/merged-solver-diffs-line-review.md</code>. The compaction
+    at <code>ed00ba0c</code> keeps the first <code>2 * maxsize</code> admitted origins through <code>jnp.where(size=)</code> while
+    <code>compact_valid</code> stays all-true, so a field admitting more origins than the work slots is truncated with no telemetry:
+    on the gate lattice (17 by 19 nodes, <code>maxsize</code> 30, 60 slots) an N(0, 1e-3) psi admits 147 origins, 31 of 39 published
+    census keys differ from the all-origin census, <code>same_root_count</code> falls from 60 to 24, and <code>overflow</code> reports
+    False for the condition it exists to report. The gate's two analytic fields admit 2 origins each, so no identity assertion over them
+    could see it. Two low-severity companions: the offset <code>root_uncertainty</code> reconstruction is one ULP off for 0.33 percent
+    of operative pairs, and the two polish <code>lax.cond</code> branches publish different <code>converged</code> values (dead today,
+    overwritten downstream). The census is the topology authority evaluated on every scored candidate, including noisy backtracked
+    states, so the defect is a contract error, not a telemetry nit. Repair node <code>nia-census-slot-exhaustion-repair</code>: the
+    all-origin computation as a <code>lax.cond</code> fallback whenever admission exceeds capacity, a <code>census_slots_exhausted</code>
+    field, the exact <code>where</code>-based reconstruction, branch agreement, and an over-capacity fixture.</p>
+  </section>
+
+  <section id="finite-class-margin">
+    <h2>An always-finite class margin beside the infinite one (d3d81888, merged at c1792d53)</h2>
+    <p>The banked class margin is positive infinity on every diverted row because a diverted read admits no reachable wall minimum,
+    so a receipt could not tell a comfortably diverted row from one a hair from limited. The corroboration producer now threads the
+    X-point normalised level, the accepted wall level, the supplied wall candidate's level before shadow admission and the
+    candidate-present flag through its operand cache (schema revision 6 to 7) and emits
+    <code>nova_post_cutover_class_margin_finite</code>, the visible wall level minus the X-point level, finite on every resolved row and
+    negative exactly when the class is limited, with a wall-source label recording whether the accepted minimum or the rejected
+    candidate fed it. Gate: 12 focused tests on CPU. The stored twelve-row bank keeps its infinite margins until the next
+    regeneration re-solves the rows, which belongs with the rebank that follows the census repair above.</p>
+  </section>
+
 </main>
 </body>
 </html>

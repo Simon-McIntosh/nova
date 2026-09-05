@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-impl" content="0.4">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563">
 </head>
@@ -116,6 +116,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260905T054427134215" data-who="coordinator" data-when="2026-09-05T05:46:00Z">
     <div class="r-comment-body"><p>Unchanged-state fallback carry merged at <code>e1e1e563</code> after its four-row gate (H200 job 1262804, 46 minutes): all four public-route rows identical to the frozen-partition receipt to the last digit (21985/51 6.403e-4 in 8 trips diverted, 21986/46 1.353e-3 in 4 diverted, 21989/55 7.332e-4 in 6 limited, 22086/43 3.2e-16 in 3 converged), all 84 production acceptance decisions identical, receipts <code>docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/</code> and <code>docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/</code>. The frozen-mask benchmark's callback accounting now attributes a carried iteration to the linear action it reuses and still refuses a missing action on a changed state (its own test). Production solve of 22086/43 pure: 30.9 s, from 41.1 s at the start of the day, with 34.3 s after the frozen-partition scoring; trips 6 and 7 at 11.0 and 9.8 s remain the damped GMRES ladder per rejected promotion, whose further reduction is a policy question recorded above for the lead.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260905T073026439425" data-who="coordinator" data-when="2026-09-05T07:32:00Z">
+    <div class="r-comment-body"><p>Lead direction 2026-09-05: a production solve at 30 s is far too long, the target is fixed points at one millisecond, and no runtime cost may be built in that cannot be removed later. Where the day's accounting leaves the hot path: a trip with no rejected promotions costs 0.12 s for 12 Newton–Krylov promotions, about 10 ms each (a 12-iteration GMRES of 0.3 ms Jacobian-vector products plus a six-grade line search) against 0.3 ms of physics per evaluation; a trip with rejected promotions costs 4 to 10 s in the damped GMRES fallback ladder; the topology read costs 40 ms once per trip. So the per-step floor of the Krylov design is roughly ten times the target even before any rejection, and the fallback ladder is not removable without a policy change. Dispatched <code>msc-reduced-state-plain-newton-prototype</code> on the claude-opus lane: pose the fixed point on the reduced state the frozen partition defines (tens of unknowns against 1126 flux nodes), form the dense Jacobian once per trip by <code>jacfwd</code> (N products at 0.3 ms), take plain Newton steps with a dense solve and the production merit, refresh the Jacobian only on rejection, keep the topology read once per trip and the settled exit and incumbent-mask acceptance as they are; report per row the steps per trip, the wall per step and whether rejected steps persist. Worker lanes moved from codex (94 percent utilised) to claude and claude-opus, with the local deepseek-v4-flash lane for scouts, at the lead's word.</p></div>
 </div>
 </section>
 </main>

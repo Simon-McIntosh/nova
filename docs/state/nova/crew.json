@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T07:46:10",
+  "updated": "2026-09-05T09:28:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1797,6 +1797,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-plain-newton-x",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "msc-recovery-frozen-x",
@@ -101449,6 +101458,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1720
+    "_version": 1721
   }
 }

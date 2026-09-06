@@ -1524,12 +1524,22 @@ class ForwardProfile:
         constraint_pairs: tuple[ConstraintPair, ...] = (),
         **options,
     ) -> ForwardEquilibrium:
-        """Drive the map with the shared fixed-point ladder."""
+        """Drive the map with the shared fixed-point ladder.
+
+        The augmented solver this method can reach is the Krylov one, so a
+        constraint tuple is served only on routes this ladder solves with a
+        compensating unknown: the accelerated-and-constrainable intersection,
+        which excludes the reduced routes (they carry their own entry and must
+        never fall through to a Krylov solve the caller did not ask for).
+        """
         if constraint_pairs:
-            if route not in _CONSTRAINABLE:
+            if route not in _CONSTRAINABLE or route not in _ACCELERATED:
                 raise ValueError(
-                    "augmented constraints require a route carrying a compensating "
-                    f"unknown vector; available: {', '.join(_CONSTRAINABLE)}"
+                    "augmented constraints require a route this ladder solves "
+                    "with a compensating unknown vector; available: "
+                    + ", ".join(
+                        name for name in _CONSTRAINABLE if name in _ACCELERATED
+                    )
                 )
             return self._solve_augmented_constraints(
                 initial_flux,
@@ -1917,14 +1927,20 @@ class ForwardProfile:
                     tuple(record.qualified for record in terminal_constraints)
                 )
             )
+        # Active-set solvers (the Krylov route and the reduced routes) report
+        # per-trip residuals and mask differences; the remaining routes report
+        # a plain trace.  The reduced receipt aliases the two pairs today, so
+        # the literal is what keeps the right selection if that alias is ever
+        # dropped.
+        reduced_or_krylov = (
+            request.route == "newton_krylov" or request.route in _REDUCED
+        )
         residual_history = (
-            history.active_set_residuals
-            if request.route == "newton_krylov"
-            else history.trace
+            history.active_set_residuals if reduced_or_krylov else history.trace
         )
         mask_history = (
             history.active_set_mask_differences
-            if request.route == "newton_krylov"
+            if reduced_or_krylov
             else history.shadow_mask_changes
         )
         amplitude = getattr(

@@ -351,15 +351,17 @@ def test_ladder_scoring_evaluates_one_map_per_accepted_step(machine):
 def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
     """One compiled trip close returns what the separate calls returned.
 
-    The promoted shadow, the mask difference against the frozen shadow and the
-    live residual of the promoted map are the boundary's decisions, and they
-    are compared for exact equality against the calls the dispatched boundary
-    makes at the same reduced state and the same frozen shadow.  The next
-    trip's amplitudes and the off-support leakage are carried values rather
-    than decisions and are compared to a tolerance: one program computing the
-    whole boundary is free to reassociate arithmetic that separate programs
-    evaluate one expression at a time, and that reassociation moves the last
-    bits of a sum without moving anything the solve decides.
+    The promoted shadow and the mask difference against the frozen shadow are
+    the boundary's decisions and are compared for exact equality against the
+    calls the dispatched boundary makes at the same reduced state and the same
+    frozen shadow.  The live residual against the promoted map is bracketed
+    rather than pinned: the fused program rebuilds the mapped flux from its
+    own captured external and image while the reference recomputation drives
+    the production map, and one fused program is free to reassociate that
+    arithmetic so the two agree to a few units in the last place (measured
+    here at about 9e-16 of the residual) without any decision moving.  The
+    next trip's amplitudes and the off-support leakage are carried values
+    rather than decisions and are compared to a tolerance for the same reason.
     """
     profile, seed = machine
     operator = profile.operator
@@ -391,7 +393,10 @@ def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
         assert bool(jnp.array_equal(state, expected_state))
         assert bool(jnp.array_equal(promoted, expected_promoted))
         assert int(difference) == int(jnp.sum(expected_promoted != shadow))
-        assert float(residual) == float(_relative_residual(mapped, expected_state))
+        assert float(residual) == pytest.approx(
+            float(_relative_residual(mapped, expected_state)),
+            rel=TAIL_RESIDUAL_AGREEMENT,
+        )
         expected_gather = reduced_newton._gather(
             coordinates, operator.cell_current_moments(expected_state)
         )
@@ -578,3 +583,52 @@ def test_batched_tail_scoring_walks_the_serial_route(machine):
     span = float(jnp.max(jnp.abs(serial.state)))
     difference = float(jnp.max(jnp.abs(batched.state - serial.state)))
     assert difference <= BOUNDARY_FLUX_AGREEMENT * span
+
+
+def test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane(machine):
+    """The serial-to-batched decision equivalence runs on the default lane.
+
+    The full-solve equivalence above is slow-marked, so the claim that batching
+    the refused tail leaves every decision unmoved is not checked by the
+    path-free default lane.  This bounded slice runs on it: the same decision
+    identity on a few trips from the cold seed, so a regression in the batched
+    tail's grade bookkeeping cannot go green under an ordinary ``pytest`` run.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=8,
+        active_set_steps=3,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    serial = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.SERIAL_LADDER_SCORING,
+        **common,
+    )
+    batched = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    assert serial.steps
+    assert len(batched.steps) == len(serial.steps)
+    for taken, reference in zip(batched.steps, serial.steps, strict=True):
+        assert (taken.trip, taken.step) == (reference.trip, reference.step)
+        assert taken.accepted_factor == reference.accepted_factor
+        assert taken.grades_tried == reference.grades_tried
+        assert taken.jacobian_refreshed == reference.jacobian_refreshed
+        assert taken.merit == reference.merit
+        assert taken.flux_residual == reference.flux_residual
+        assert taken.reduced_residual == pytest.approx(
+            reference.reduced_residual, rel=TAIL_RESIDUAL_AGREEMENT
+        )
+    assert batched.active_set_iterations == serial.active_set_iterations
+    assert batched.newton_steps_per_trip == serial.newton_steps_per_trip
+    assert batched.active_set_mask_differences == serial.active_set_mask_differences
+    assert batched.termination_name == serial.termination_name
+    assert batched.active_set_residuals == pytest.approx(
+        serial.active_set_residuals, rel=BOUNDARY_RESIDUAL_AGREEMENT
+    )

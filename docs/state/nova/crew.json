@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T16:39:23",
+  "updated": "2026-09-06T16:51:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4050,6 +4050,60 @@
           "gpt-5.6-sol": "01a0617b-150b-7ea1-a118-8d77b794c6d5"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "wt-triage-c1",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-c2",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-k1",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-k2",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-s1",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-s2",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "xpoint-map",
@@ -111489,6 +111543,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1868
+    "_version": 1874
   }
 }

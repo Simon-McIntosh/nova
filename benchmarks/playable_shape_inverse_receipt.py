@@ -162,6 +162,10 @@ def _command_diagnostic(
     flux_rows = sum(kind == "flux" for kind in inverse.row_kinds)
     return {
         "command": name,
+        "previous_turning_points_m": _points(
+            achieved_target(machine.profile, previous.flux)
+        ).tolist(),
+        "commanded_turning_points_m": _points(target).tolist(),
         "formulation": {
             "unknown": "total active-circuit currents",
             "field_weight": inverse.field_weight,
@@ -416,11 +420,14 @@ def measure(
         # by passive and vessel currents that are state, not shape actuators.
         drivable_circuits=tuple(range(int(policy["active_circuit_count"]))),
     )
+    prime_solver = ProductionSolver(machine)
+    prime, _trips, _program = prime_solver._forward(
+        profile, machine.seed, prime_solver.prescribed_current
+    )
+    previous_target = achieved_target(profile, prime.flux)
     if diagnose_inverse:
-        previous = type("Previous", (), {"flux": machine.seed})()
-        previous_target = achieved_target(profile, previous.flux)
         diagnostics = [
-            _command_diagnostic(name, machine, previous, target, circuit_names)
+            _command_diagnostic(name, machine, prime, target, circuit_names)
             for name, target in (
                 ("upper-point-plus-20mm", _upper_point_target(previous_target)),
                 ("elongation-plus-5pct", _elongation_target(previous_target)),
@@ -434,11 +441,6 @@ def measure(
         _write(directory / "pulse-design-inverse-diagnostic.json", payload)
         print("INVERSE-DIAGNOSTIC " + json.dumps(payload), flush=True)
         return payload
-    prime_solver = ProductionSolver(machine)
-    prime, _trips, _program = prime_solver._forward(
-        profile, machine.seed, prime_solver.prescribed_current
-    )
-    previous_target = achieved_target(profile, prime.flux)
     null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
     definitions = (

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ast
 import os
+import sys
 from pathlib import Path
 from subprocess import Popen
 from time import perf_counter, sleep
@@ -389,9 +390,8 @@ def test_bokeh_serve_serves_the_playable_document_on_the_default_machine(tmp_pat
             TMPDIR=os.environ.get("TMPDIR", "/tmp"),
         )
         command = [
-            "uv",
-            "run",
-            "--no-sync",
+            sys.executable,
+            "-m",
             "bokeh",
             "serve",
             str(REPO_ROOT / "apps/playable"),

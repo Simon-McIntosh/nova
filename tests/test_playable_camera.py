@@ -31,6 +31,9 @@ import pytest
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
 from apps.playable.camera import (
+    FLUX_CONDITIONED_DECODER_IDENTITY_FORMAT,
+    FLUX_CONDITIONED_DECODER_PATH,
+    DecodedFrame,
     PlaceholderDecoder,
     camera_push,
     command_legend_text,
@@ -69,7 +72,18 @@ class StubEquilibrium(SimpleNamespace):
         radius = np.linspace(0.6, 1.42, 12) if radius is None else radius
         height = np.linspace(-0.42, 0.42, 10) if height is None else height
         n_radius, n_height = len(radius), len(height)
+        count = n_radius * n_height
         nan_point = np.full(2, np.nan)
+        history = SimpleNamespace(
+            trace=np.asarray([0.0]),
+            termination_reason=np.asarray(0, dtype=np.int32),
+            active_set_iterations=np.asarray(StubSolver.trips, dtype=np.int32),
+            active_set_residuals=np.asarray([0.0]),
+            active_set_mask_differences=np.asarray([0], dtype=np.int32),
+            shadow_mask_changes=np.asarray([0], dtype=np.int32),
+            inner_iteration_decisions=np.asarray([], dtype=np.int32),
+            inner_iteration_applied_factors=np.asarray([], dtype=float),
+        )
         super().__init__(
             raster_flux=SimpleNamespace(
                 radius=np.asarray(radius),
@@ -90,6 +104,19 @@ class StubEquilibrium(SimpleNamespace):
                 strike_points=np.full((2, 2), np.nan),
             ),
             constraints=(),
+            coil_current=np.empty((0,), dtype=float),
+            cell_current=np.ones(count, dtype=float),
+            fixed_point=history,
+            finite=SimpleNamespace(passed=True, flux=True),
+            normalisation=SimpleNamespace(amplitude=np.asarray(1.0)),
+            topology=SimpleNamespace(
+                axis=np.asarray([1.0, 0.0]),
+                axis_flux=np.asarray(0.0),
+                boundary_flux=np.asarray(1.0),
+                flux_span=np.asarray(1.0),
+                diverted=False,
+            ),
+            flux=np.zeros(count, dtype=float),
         )
 
 
@@ -149,7 +176,9 @@ def _bound_fields(glyph) -> set[str]:
 
 def test_placeholder_decoder_paints_the_frame_index_and_reports_its_wall():
     decoder = PlaceholderDecoder(height=48, width=64)
-    frame = _stub_session().current_frame()
+    session = _stub_session()
+    session.prime()
+    frame = session.current_frame()
     first = decoder.decode(frame)
     second = decoder.decode(frame)
     assert isinstance(first, tuple)
@@ -175,6 +204,65 @@ def test_load_decoder_resolves_dotted_paths_and_defaults_to_placeholder():
     )
     with pytest.raises(ImportError):
         load_decoder("apps.playable.camera:NoSuchDecoder")
+
+
+def test_decoder_without_reset_loads_and_preserves_the_decoded_frame(monkeypatch):
+    class DecodeOnly:
+        decoder_identity = "decode-only"
+
+        def decode(self, frame):
+            del frame
+            return DecodedFrame(
+                np.zeros((256, 256, 3), dtype=np.uint8),
+                0.0,
+                self.decoder_identity,
+            )
+
+    module = SimpleNamespace(DecodeOnly=DecodeOnly)
+    monkeypatch.setattr(
+        "apps.playable.camera.importlib.import_module", lambda name: module
+    )
+    decoder = load_decoder("example.decoder:DecodeOnly")
+    decoded = decoder.decode(object())
+    assert not hasattr(decoder, "reset")
+    assert np.asarray(decoded.image).shape == (256, 256, 3)
+    assert np.asarray(decoded.image).dtype == np.uint8
+    assert decoded.decoder_identity == "decode-only"
+
+
+def test_flux_conditioned_decoder_path_and_receipt_identity_are_pinned(monkeypatch):
+    class FluxConditionedDecoder:
+        decoder_identity = "a19c2f:vq-camera-7:9e37b1"
+
+        def decode(self, frame):
+            del frame
+            return DecodedFrame(
+                np.zeros((256, 256, 3), dtype=np.uint8),
+                0.0,
+                self.decoder_identity,
+            )
+
+        def reset(self):
+            pass
+
+    assert FLUX_CONDITIONED_DECODER_PATH == (
+        "imas_ambix.worldmodel.flux_conditioned_decoder:FluxConditionedDecoder"
+    )
+    assert FLUX_CONDITIONED_DECODER_IDENTITY_FORMAT == (
+        "<checkpoint-sha>:<vq-decoder-id>:<corpus-digest>"
+    )
+    module = SimpleNamespace(FluxConditionedDecoder=FluxConditionedDecoder)
+    monkeypatch.setattr(
+        "apps.playable.camera.importlib.import_module", lambda name: module
+    )
+    decoder = load_decoder(FLUX_CONDITIONED_DECODER_PATH)
+    decoded = decoder.decode(object())
+    assert np.asarray(decoded.image).shape == (256, 256, 3)
+    assert np.asarray(decoded.image).dtype == np.uint8
+
+    FluxConditionedDecoder.decoder_identity = "missing-corpus-digest"
+    with pytest.raises(ValueError, match="checkpoint-sha"):
+        load_decoder(FLUX_CONDITIONED_DECODER_PATH)
 
 
 def test_camera_push_shapes_the_single_cell_and_the_sparkline(session):

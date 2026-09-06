@@ -315,6 +315,47 @@ def test_decoder_receives_the_same_frame_the_session_pushes():
     assert decoder.received is session.current_frame()
 
 
+def test_decoder_resets_at_session_start_and_base_observation_changes():
+    """Stateful decoder history follows session provenance boundaries."""
+    from apps.playable.camera import DecodedFrame
+
+    class RecordingDecoder:
+        decoder_identity = "test:recording-decoder"
+
+        def __init__(self):
+            self.reset_calls = 0
+
+        def reset(self):
+            self.reset_calls += 1
+
+        def decode(self, frame):
+            del frame
+            return DecodedFrame(
+                image=np.zeros((256, 256, 3), dtype=np.uint8),
+                decode_wall=0.001,
+                decoder_identity=self.decoder_identity,
+            )
+
+    decoder = RecordingDecoder()
+    session = _stub_session(decoder=decoder, base_shot=30420, base_slice=8)
+    assert decoder.reset_calls == 1
+
+    session.base_shot = 30420
+    session.base_slice = 8
+    assert decoder.reset_calls == 1
+
+    session.base_shot = 30421
+    assert decoder.reset_calls == 2
+    session.base_slice = 9
+    assert decoder.reset_calls == 3
+
+    session.step("bulk_r+")
+    decoded = session.decode_frame()
+    assert decoded is not None
+    assert np.asarray(decoded.image).shape == (256, 256, 3)
+    assert np.asarray(decoded.image).dtype == np.uint8
+
+
 def test_document_pushes_ten_assembled_frames_to_bound_sources():
     """The playable callback reduces each assembled frame into live sources."""
     with skip_import("bokeh.document"):

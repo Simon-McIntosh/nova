@@ -256,6 +256,19 @@
     declared wait and spent nothing until woken at 12:49Z (the sweep did not match the JSON terminal list, a reckon parser defect now specified); the
     wait and wake turns cost 8.3M charged input against 46.3M for the polled gate of the traced-currents node.</p>
   </section>
+  <section id="converged-compensator">
+    <h2>Is the seed-derived compensating direction stable under the solve? (98b1c93e, a7944a5d; main 078ff847)</h2>
+    <p><strong>Node:</strong> <code>cank-converged-state-compensator-sol</code> (run <code>r-20260906T102805234456</code>, codex sol at high effort, declared-wait
+    arm). Driver <code>benchmarks/constraint_centroid_receipt.py</code> gained a second derivation: re-derive the compensating direction from the
+    converged flux and warm-start a constrained re-solve. Receipt and figure <code>docs/figures/constraint-augmented-newton-krylov/centroid/converged-compensator.{json,png}</code>;
+    report <code>~/.config/reckon/crew/reports/nova/cank/converged-state-compensator.md</code>; H200 job 1263331, 53 minutes.</p>
+    <p><strong>Result.</strong> Under the <code>dominant_authority</code> rule on the two bank rows: 21986/46 rotates the direction by 12.6 degrees and the
+    leading circuit set changes (P3 upper leads at convergence), the compensating current vector moving 755 A, 22 percent of its 3377 A seed norm;
+    21989/55 rotates 4.1 degrees with both leading members preserved, the vector moving 162 A, 7 percent of 2249 A. Both rows close to 3e-13 m in
+    either derivation. <strong>Reading.</strong> The seed-derived direction is a fair first approximation everywhere and a stable one on the
+    well-conditioned row; on the marginal row the leading membership is a property of the converged state, so a diagnostic-placement row that
+    reuses a seed compensator across a trajectory should re-derive when the plasma moves by more than the centroid shift measured here.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -41,6 +41,7 @@ from apps.playable.production import ForwardMachine, ProductionSolver
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = (22086, 43)
 DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
+NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
 
 
 def _source_revision() -> str:
@@ -89,12 +90,64 @@ def _write(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def _circuit_names(policy: dict[str, Any]) -> dict[int, str]:
+    """Return active-family names keyed by zero-based response column."""
+    return {
+        int(item["stored_circuit"]) - 1: str(item["family"])
+        for item in policy["active_mapping"]
+    }
+
+
+def _circuit_label(index: int, names: dict[int, str]) -> str:
+    """Return a stable circuit label, including an active family when known."""
+    family = names.get(index)
+    return f"circuit_{index:02d}" if family is None else f"circuit_{index:02d}_{family}"
+
+
+def _null_modes(inverse, names: dict[int, str]) -> list[dict[str, Any]]:
+    """Describe every circuit combination with no authority on the active rows."""
+    response = inverse.response[:, inverse.free_circuits]
+    zero_singular_modes = inverse.singular_values.size - inverse.numerical_rank
+    modes = []
+    for index, weights in enumerate(inverse.right_null_space):
+        largest_weight = float(np.max(np.abs(weights)))
+        dominant = [
+            {
+                "circuit": int(circuit),
+                "family": names[int(circuit)],
+                "weight": float(weight),
+            }
+            for circuit, weight in zip(inverse.free_circuits, weights, strict=True)
+            if abs(float(weight)) >= 0.25 * largest_weight
+        ]
+        modes.append(
+            {
+                "index": index,
+                "origin": (
+                    "zero_singular_value"
+                    if index < zero_singular_modes
+                    else "rectangular_right_null_space"
+                ),
+                "response_l2": float(np.linalg.norm(response @ weights)),
+                "dominant_combination": dominant,
+                "circuit_weights": {
+                    _circuit_label(int(circuit), names): float(weight)
+                    for circuit, weight in zip(
+                        inverse.free_circuits, weights, strict=True
+                    )
+                },
+            }
+        )
+    return modes
+
+
 def _arm_receipt(
     name: str,
     machine: ForwardMachine,
     previous,
     target,
     null_points: np.ndarray,
+    circuit_names: dict[int, str],
 ) -> tuple[dict[str, Any], object]:
     """Run one arm through ``ProductionSolver`` and return its receipt."""
     solver = ProductionSolver(machine)
@@ -106,6 +159,18 @@ def _arm_receipt(
             "index": index,
             "coil_current_a": item.inverse.currents.tolist(),
             "coil_delta_a": item.inverse.delta.tolist(),
+            "free_circuit_current_by_family_a": {
+                _circuit_label(int(circuit), circuit_names): float(
+                    item.inverse.currents[circuit]
+                )
+                for circuit in item.inverse.free_circuits
+            },
+            "current_change_by_family_a": {
+                _circuit_label(int(circuit), circuit_names): float(delta)
+                for circuit, delta in zip(
+                    item.inverse.free_circuits, item.inverse.delta, strict=True
+                )
+            },
             "current_change_l2_a": float(np.linalg.norm(item.inverse.delta)),
             "linear_row_prediction": (
                 item.inverse.response[:, item.inverse.free_circuits]
@@ -115,6 +180,14 @@ def _arm_receipt(
                 item.inverse.target - item.inverse.observed
             ).tolist(),
             "least_squares_residual": item.inverse.least_squares_residual,
+            "response_singular_values": item.inverse.singular_values.tolist(),
+            "response_numerical_rank": item.inverse.numerical_rank,
+            "response_rank_threshold": item.inverse.rank_threshold,
+            "response_conditioning_span": float(
+                item.inverse.singular_values[0]
+                / item.inverse.singular_values[item.inverse.numerical_rank - 1]
+            ),
+            "null_modes": _null_modes(item.inverse, circuit_names),
             "turning_point_error_m": item.turning_point_error,
             "trips": item.trips,
             "wall_s": item.wall,
@@ -129,7 +202,7 @@ def _arm_receipt(
         "null_turning_points_m": null_points.tolist(),
         "relative_turning_point_motion_m": (_points(achieved) - null_points).tolist(),
         "coil_current_by_circuit_a": {
-            f"circuit_{index:02d}": float(current)
+            _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
         "rounds": rounds,
@@ -142,7 +215,11 @@ def _arm_receipt(
     return payload, achieved
 
 
-def _null_receipt(machine: ForwardMachine, previous) -> tuple[dict[str, Any], object]:
+def _null_receipt(
+    machine: ForwardMachine,
+    previous,
+    circuit_names: dict[int, str],
+) -> tuple[dict[str, Any], object]:
     """Re-solve unchanged currents and return the physical motion baseline."""
     solver = ProductionSolver(machine)
     started = perf_counter()
@@ -158,7 +235,7 @@ def _null_receipt(machine: ForwardMachine, previous) -> tuple[dict[str, Any], ob
         "achieved_turning_points_m": _points(achieved).tolist(),
         "turning_point_drift_m": (_points(achieved) - _points(prior)).tolist(),
         "coil_current_by_circuit_a": {
-            f"circuit_{index:02d}": float(current)
+            _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
         "trips": int(trips),
@@ -233,6 +310,7 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
     passive_case, profile, policy = _passive_inclusive_case(
         case, context, response_cache
     )
+    circuit_names = _circuit_names(policy)
     machine = ForwardMachine(
         profile=profile,
         seed=jnp.asarray(passive_case["state"]),
@@ -247,7 +325,7 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)
-    null_arm, null_equilibrium = _null_receipt(machine, prime)
+    null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
     definitions = (
         ("upper-point-plus-20mm", _upper_point_target(previous_target)),
@@ -265,7 +343,14 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
             "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
         },
         "carrier": carrier_evidence,
-        "policy": str(policy),
+        "policy": policy,
+        "active_circuits": [
+            {
+                "index": index,
+                "family": circuit_names[index],
+            }
+            for index in sorted(circuit_names)
+        ],
         "compilation_cache": cache.receipt(),
         "prime": {
             "converged": bool(np.asarray(prime.fixed_point.converged)),
@@ -276,7 +361,9 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
     null_arm["runtime"] = runtime
     _write(directory / "null-resolve.json", null_arm)
     for name, target in definitions:
-        arm, _achieved = _arm_receipt(name, machine, prime, target, null_points)
+        arm, _achieved = _arm_receipt(
+            name, machine, prime, target, null_points, circuit_names
+        )
         arm["runtime"] = runtime
         arms.append(arm)
         _write(directory / f"{name}.json", arm)
@@ -287,7 +374,27 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
             f"wall_s={arm['total_wall_s']:.6g}",
             flush=True,
         )
-    receipt = {"runtime": runtime, "null_arm": null_arm, "arms": arms}
+    negative_control_path = directory / NEGATIVE_CONTROL
+    if not negative_control_path.exists():
+        raise FileNotFoundError(
+            "the all-prescribed negative control must be retained beside the receipt"
+        )
+    negative_control = json.loads(negative_control_path.read_text(encoding="utf-8"))
+    receipt = {
+        "runtime": runtime,
+        "null_arm": null_arm,
+        "arms": arms,
+        "active_response_block": arms[0]["rounds"][0],
+        "all_prescribed_negative_control": {
+            "interpretation": (
+                "Driving passive and vessel circuits as shape actuators is an "
+                "unphysical negative control. Its large errors are retained as "
+                "evidence rather than used to judge active-circuit authority."
+            ),
+            "source_path": NEGATIVE_CONTROL,
+            "receipt": negative_control,
+        },
+    }
     _write(directory / "shape-inverse-receipt.json", receipt)
     _draw(arms, directory / "shape-inverse-receipt.png")
     return receipt

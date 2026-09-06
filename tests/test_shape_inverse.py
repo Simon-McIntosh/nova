@@ -21,6 +21,7 @@ from nova.equilibrium.shape_inverse import (
     response_matrix,
     shape_response_matrix,
     shape_row_target,
+    shape_steering_target,
     shape_values,
     solve_shape_inverse,
 )
@@ -62,6 +63,25 @@ def test_x_point_adds_both_field_components(machine, seed_target):
     response = shape_response_matrix(machine.profile, target, machine.seed)
     assert values.shape == (10,)
     assert response.shape == (10, machine.circuit_count)
+
+
+def test_shape_steering_target_carries_the_full_boundary_polygon(machine, seed_target):
+    """The inverse constrains every measured boundary point, not four extrema."""
+    rows, previous = shape_steering_target(machine.profile, seed_target, machine.seed)
+    assert rows.flux_points.shape[0] > 100
+    np.testing.assert_allclose(rows.flux_points[:4], seed_target.flux_points)
+    np.testing.assert_allclose(previous[:4], seed_target.flux_points)
+
+
+def test_shape_steering_target_keeps_a_moved_x_point_commanded(machine, seed_target):
+    """Null rows are evaluated where the operator commands the X-point."""
+    commanded_x_point = np.asarray([1.05, -0.15])
+    rows, _previous = shape_steering_target(
+        machine.profile,
+        replace(seed_target, x_point=commanded_x_point),
+        machine.seed,
+    )
+    np.testing.assert_allclose(rows.x_point, commanded_x_point)
 
 
 def test_response_matrix_matches_central_differences(machine, seed_target):
@@ -107,24 +127,23 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
         rtol=0.0,
         atol=1.0e-12,
     )
-    assert solved.row_kinds == ("flux",) * 4 + ("field",) * 4
+    assert solved.row_kinds == ("flux",) * solved.flux_points.shape[0] + ("field",) * 4
+    assert solved.flux_points.shape[0] > 100
+    assert np.all(solved.consistency_floor > 0.0)
     assert solved.gamma == pytest.approx(GAMMA * solved.plasma_current)
     assert solved.picard_currents.shape[0] == PICARD_ROUNDS + 1
-    expected_target = shape_row_target(machine.profile, seed_target, machine.seed)
+    row_target, _previous = shape_steering_target(
+        machine.profile, seed_target, machine.seed
+    )
+    expected_target = shape_row_target(machine.profile, row_target, machine.seed)
     np.testing.assert_allclose(solved.target, expected_target, rtol=0.0, atol=0.0)
     assert solved.picard_boundary_flux[0] == pytest.approx(expected_target[0])
-    weight = np.asarray(
-        [
-            1.0 if kind == "flux" else np.sqrt(solved.field_weight)
-            for kind in solved.row_kinds
-        ]
-    )
-    matrix = solved.response[:, solved.free_circuits] * weight[:, None]
-    vector = solved.right_hand_side * weight
+    matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
+    vector = solved.right_hand_side * solved.row_weight
     normal_residual = (
         matrix.T @ (matrix @ solved.delta - vector) + solved.gamma**2 * solved.delta
     )
-    assert np.linalg.norm(normal_residual) < 1.0e-10
+    assert np.linalg.norm(normal_residual) < 3.0e-10 * np.sqrt(matrix.shape[0])
     assert solved.right_null_space.shape == (
         solved.free_circuits.size - solved.numerical_rank,
         solved.free_circuits.size,

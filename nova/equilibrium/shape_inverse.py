@@ -9,18 +9,19 @@ operator's prescribed-current carrier, so a playable solve can drive the coil
 currents straight toward a commanded shape and let the forward solve answer,
 instead of compensating one constrained row at a time.
 
-The rows are the bounding-box set the constraint module already reads: the
-boundary flux at the four turning points (outer, upper, inner, lower), zero
-radial field at the outer and inner points, zero vertical field at the upper
-and lower points, and both field components at the commanded X-point. Every
-row is evaluated by the same lattice interpolation the constraint rows use
+The rows are the full boundary polygon continuously deformed by the commanded
+bounding box, with its four turning points retained explicitly; zero radial
+field at the outer and inner points; zero vertical field at the upper and
+lower points; and both field components at the commanded X-point. Every row
+is evaluated by the same lattice interpolation the constraint rows use
 (``sample_lattice_flux`` and the field reads of ``FieldComponentConstraint``),
 and its response to every drivable circuit current is the observation
 Jacobian contracted with the operator's response carrier. The unknowns are
 free-circuit current changes about the equilibrium's original seed currents.
 The fixed-conductor, plasma and seed-current contributions are moved to the
-right-hand side. Field rows are weighted by ``sqrt(field_weight)`` and the
-Tikhonov ``gamma`` is scaled by the plasma current.
+right-hand side. Each row is weighted by the reciprocal of its seed-level
+consistency floor, field rows retain the ``sqrt(field_weight)`` priority, and
+the Tikhonov ``gamma`` is scaled by the plasma current.
 
 Three Picard placement rounds alternate the current solve with one forward-map
 evaluation, which re-evaluates the fixed plasma profile inside the boundary
@@ -32,7 +33,7 @@ one warm-started reduced forward solve on those prescribed currents.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
 import jax
@@ -93,6 +94,10 @@ class ShapeInverseResult:
     current_step_limited: bool
     least_squares_residual: float
     uncapped_least_squares_residual: float
+    flux_points: np.ndarray
+    previous_flux_points: np.ndarray
+    consistency_floor: np.ndarray
+    row_weight: np.ndarray
 
 
 def _cap_current_delta(
@@ -270,6 +275,127 @@ def achieved_target(profile: ForwardProfile, flux) -> BoundingBoxTarget:
         # otherwise unmoved command.
         reference_point=outer,
     )
+
+
+def _deform_boundary_polygon(
+    boundary: np.ndarray,
+    previous_turning_points: np.ndarray,
+    commanded_turning_points: np.ndarray,
+) -> np.ndarray:
+    """Map a measured separatrix onto its commanded bounding box.
+
+    The four cardinal points carry the low-dimensional command, while the
+    complete measured polygon supplies the isoflux rows.  Radius is an affine
+    box map with upper and lower triangularity corrections; height is an
+    affine box map.  The construction maps all four cardinal points exactly
+    and gives every intervening boundary point a continuous commanded place.
+    """
+    previous = np.asarray(previous_turning_points, dtype=float)
+    commanded = np.asarray(commanded_turning_points, dtype=float)
+    if previous.shape != (4, 2) or commanded.shape != (4, 2):
+        raise ValueError("shape steering needs four ordered turning points")
+    source = np.asarray(boundary, dtype=float)
+    radial_centre = 0.5 * (previous[0, 0] + previous[2, 0])
+    commanded_radial_centre = 0.5 * (commanded[0, 0] + commanded[2, 0])
+    radial_half_width = 0.5 * (previous[0, 0] - previous[2, 0])
+    commanded_radial_half_width = 0.5 * (commanded[0, 0] - commanded[2, 0])
+    height_centre = 0.5 * (previous[1, 1] + previous[3, 1])
+    commanded_height_centre = 0.5 * (commanded[1, 1] + commanded[3, 1])
+    height_half_span = 0.5 * (previous[1, 1] - previous[3, 1])
+    commanded_height_half_span = 0.5 * (commanded[1, 1] - commanded[3, 1])
+    if radial_half_width <= 0.0 or height_half_span <= 0.0:
+        raise ValueError("the measured boundary must have nonzero box spans")
+    height_coordinate = (source[:, 1] - height_centre) / height_half_span
+    mapped_radius = (
+        commanded_radial_centre
+        + (source[:, 0] - radial_centre)
+        * commanded_radial_half_width
+        / radial_half_width
+    )
+    mapped_height = (
+        commanded_height_centre
+        + (source[:, 1] - height_centre) * commanded_height_half_span / height_half_span
+    )
+    upper_affine = (
+        commanded_radial_centre
+        + (previous[1, 0] - radial_centre)
+        * commanded_radial_half_width
+        / radial_half_width
+    )
+    lower_affine = (
+        commanded_radial_centre
+        + (previous[3, 0] - radial_centre)
+        * commanded_radial_half_width
+        / radial_half_width
+    )
+    mapped_radius += np.maximum(height_coordinate, 0.0) * (
+        commanded[1, 0] - upper_affine
+    )
+    mapped_radius += np.maximum(-height_coordinate, 0.0) * (
+        commanded[3, 0] - lower_affine
+    )
+    return np.column_stack((mapped_radius, mapped_height))
+
+
+def shape_steering_target(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux,
+) -> tuple[BoundingBoxTarget, np.ndarray]:
+    """Expand four commanded extrema into a full boundary-polygon row set.
+
+    The first four rows stay at the exact commanded turning points, retaining
+    the explicit cardinal control semantics.  The remaining rows are every
+    point of the measured boundary polygon after its continuous bounding-box
+    deformation.  X-point rows remain attached to ``target.x_point`` so a
+    moved null is read at its commanded location rather than at the seed.
+    """
+    previous = achieved_target(profile, flux)
+    source_polygon = boundary_polygon(profile, flux)
+    commanded_turning_points = np.asarray(target.flux_points, dtype=float)[:4]
+    if commanded_turning_points.shape != (4, 2):
+        raise ValueError("shape steering targets must start with four turning points")
+    transformed_polygon = _deform_boundary_polygon(
+        source_polygon,
+        np.asarray(previous.flux_points, dtype=float),
+        commanded_turning_points,
+    )
+    previous_points = np.concatenate(
+        (np.asarray(previous.flux_points, dtype=float), source_polygon)
+    )
+    commanded_points = np.concatenate((commanded_turning_points, transformed_polygon))
+    return (
+        replace(target, flux_points=jnp.asarray(commanded_points, dtype=jnp.float64)),
+        previous_points,
+    )
+
+
+def _consistency_floor(
+    profile: ForwardProfile,
+    flux,
+    observed: np.ndarray,
+    response: np.ndarray,
+    current: np.ndarray,
+    target: np.ndarray,
+    *,
+    flux_rows: int,
+) -> np.ndarray:
+    """Return each row's seed-extraction floor in its own physical units.
+
+    A symmetry-exact seed can make a field component numerically zero on both
+    sides of the observation split.  The constraint extraction floor prevents
+    such a row acquiring infinite authority merely because its measured scale
+    happened to vanish.
+    """
+    active_image = response @ current
+    fixed_and_plasma = observed - active_image
+    characteristic = np.maximum.reduce(
+        (np.abs(target), np.abs(active_image), np.abs(fixed_and_plasma))
+    )
+    span = _flux_span(profile, flux)
+    extraction_floor = np.full(target.shape, 1.0e-6 * span)
+    extraction_floor[flux_rows:] = 1.0e-6 * _row_scale(profile, span, "field")
+    return np.maximum(0.01 * characteristic, extraction_floor)
 
 
 def _row_scale(profile: ForwardProfile, span: float, kind: str) -> float:
@@ -561,7 +687,7 @@ def solve_shape_inverse(
     """Solve seed-anchored free-circuit changes with plasma-placement rounds.
 
     At each round, the coil coupling is solved for a current change about the
-    original seed after the fixed-conductor, plasma and seed-current images
+    fixed seed after the fixed-conductor, plasma and seed-current images
     have been subtracted from the target. Every round remains anchored to that
     same seed rather than accumulating changes from the prior round. Between
     solves one forward-map evaluation re-evaluates the plasma profile inside
@@ -599,9 +725,36 @@ def solve_shape_inverse(
             "current_step_reference must match the response column count "
             f"{field.circuit_count}"
         )
+    row_target, previous_flux_points = shape_steering_target(profile, target, state)
     target_rows = shape_row_target(
-        profile, target, state, requested_class=requested_class
+        profile, row_target, state, requested_class=requested_class
     )
+    initial_observed = shape_values(
+        profile,
+        row_target,
+        state,
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+    initial_response = shape_response_matrix(
+        profile,
+        row_target,
+        state,
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+    flux_rows = int(jnp.shape(row_target.flux_points)[0])
+    consistency_floor = _consistency_floor(
+        profile,
+        state,
+        initial_observed,
+        initial_response,
+        initial_current,
+        target_rows,
+        flux_rows=flux_rows,
+    )
+    row_weight = 1.0 / consistency_floor
+    row_weight[flux_rows:] *= np.sqrt(field_weight)
     picard_current_history = []
     picard_boundary_history = []
     current_step_limited = False
@@ -610,14 +763,14 @@ def solve_shape_inverse(
         picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
         full_observed = shape_values(
             profile,
-            target,
+            row_target,
             state,
             requested_class=requested_class,
             target_current=target_current,
         )
         response = shape_response_matrix(
             profile,
-            target,
+            row_target,
             state,
             requested_class=requested_class,
             target_current=target_current,
@@ -629,11 +782,8 @@ def solve_shape_inverse(
         base = full_observed - response[:, free] @ current[free]
         seed_observed = base + response[:, free] @ initial_current[free]
         right_hand_side = target_rows - seed_observed
-        flux_rows = int(jnp.shape(target.flux_points)[0])
-        weight = np.ones(target_rows.size)
-        weight[flux_rows:] = np.sqrt(field_weight)
-        weighted = response[:, free] * weight[:, None]
-        weighted_rhs = right_hand_side * weight
+        weighted = response[:, free] * row_weight[:, None]
+        weighted_rhs = right_hand_side * row_weight
         ip = plasma_current(profile, state, target_current=target_current)
         regularisation = gamma * abs(ip)
         solved_delta = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
@@ -688,6 +838,10 @@ def solve_shape_inverse(
         uncapped_least_squares_residual=float(
             np.linalg.norm(weighted @ solved_delta - weighted_rhs)
         ),
+        flux_points=np.asarray(row_target.flux_points, dtype=float),
+        previous_flux_points=previous_flux_points,
+        consistency_floor=consistency_floor,
+        row_weight=row_weight,
     )
 
 
@@ -721,6 +875,7 @@ __all__ = [
     "reference_point",
     "response_matrix",
     "shape_response_matrix",
+    "shape_steering_target",
     "shape_row_target",
     "shape_values",
     "solve_shape_inverse",

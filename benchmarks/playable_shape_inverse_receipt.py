@@ -30,6 +30,7 @@ from benchmarks.efit_forward_parity_slice import (
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium.shape_inverse import (
     achieved_target,
+    boundary_polygon,
     shape_response_matrix,
     shape_row_target,
     shape_values,
@@ -254,6 +255,36 @@ def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
     return names[: len(kinds)]
 
 
+def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
+    """Report each polygon target beside its prior and one-solve achieved point."""
+    achieved = np.concatenate(
+        (
+            np.asarray(achieved_target(profile, flux).flux_points, dtype=float),
+            boundary_polygon(profile, flux),
+        )
+    )
+    return [
+        {
+            "index": index,
+            "previous_m": previous.tolist(),
+            "commanded_m": commanded.tolist(),
+            "achieved_m": actual.tolist(),
+            "consistency_floor": float(floor),
+            "row_weight": float(weight),
+        }
+        for index, (previous, commanded, actual, floor, weight) in enumerate(
+            zip(
+                inverse.previous_flux_points,
+                inverse.flux_points,
+                achieved,
+                inverse.consistency_floor[: inverse.flux_points.shape[0]],
+                inverse.row_weight[: inverse.flux_points.shape[0]],
+                strict=True,
+            )
+        )
+    ]
+
+
 def _seed_consistency_diagnostic(
     directory: Path,
     machine: ForwardMachine,
@@ -391,7 +422,9 @@ def _seed_consistency_diagnostic(
         "boundary_consistency_tolerance_wb": boundary_tolerance,
         "boundary_stable_within_consistency_floor": bool(boundary_passes),
         "passes": bool(current_passes and boundary_passes),
-        "linear_row_closure": _linear_closure(null_inverse, tolerances),
+        "linear_row_closure": _linear_closure(
+            null_inverse, null_inverse.consistency_floor
+        ),
     }
     _write(path, payload)
 
@@ -428,9 +461,8 @@ def _seed_consistency_diagnostic(
                 )
             else:
                 closure = inverse.linear_prediction - inverse.right_hand_side
-                weighted_closure = closure.copy()
-                weighted_closure[4:] *= np.sqrt(inverse.field_weight)
-                row_closure = _linear_closure(inverse, tolerances)
+                weighted_closure = closure * inverse.row_weight
+                row_closure = _linear_closure(inverse, inverse.consistency_floor)
                 max_change = float(np.max(np.abs(inverse.delta)))
                 all_rows_close = all(
                     row["closes_at_least_eighty_percent"] for row in row_closure
@@ -619,6 +651,8 @@ def _arm_receipt(
         ),
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "commanded_change_against_consistency_floor": row_floor_table,
+        "row_consistency_floor": inverse.consistency_floor.tolist(),
+        "row_weight": inverse.row_weight.tolist(),
         "inverse_wall_s": inverse_wall,
     }
     _write(arm_path, persisted)
@@ -696,6 +730,7 @@ def _arm_receipt(
         "commanded_change_against_consistency_floor": row_floor_table,
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
+        "target_point_rows": _boundary_point_rows(inverse, profile, equilibrium.flux),
         "turning_point_error_m": error,
         "trips": int(trips),
         "inverse_wall_s": inverse_wall,
@@ -739,8 +774,17 @@ def _null_receipt(
     previous,
     circuit_names: dict[int, str],
 ) -> tuple[dict[str, Any], object]:
-    """Re-solve unchanged currents and return the physical motion baseline."""
+    """Run the null inverse command and return its one-solve motion baseline."""
     solver = ProductionSolver(machine)
+    target = achieved_target(machine.profile, previous.flux)
+    inverse = solve_shape_inverse(
+        machine.profile,
+        target,
+        previous.flux,
+        prescribed_current=solver.prescribed_current,
+        free_circuits=machine.drivable_circuits,
+    )
+    solver.prescribed_current = inverse.currents
     started = perf_counter()
     equilibrium, trips, _program = solver._forward(
         machine.profile, previous.flux, solver.prescribed_current
@@ -751,12 +795,21 @@ def _null_receipt(
     payload = {
         "arm": "null-resolve",
         "previous_turning_points_m": _points(prior).tolist(),
+        "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
         "turning_point_drift_m": (_points(achieved) - _points(prior)).tolist(),
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
+        "current_change_by_circuit_a": {
+            _circuit_label(int(circuit), circuit_names): float(delta)
+            for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
+        },
+        "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
+        "target_point_rows": _boundary_point_rows(
+            inverse, machine.profile, equilibrium.flux
+        ),
         "trips": int(trips),
         "wall_s": float(wall),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),

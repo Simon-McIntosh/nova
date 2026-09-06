@@ -497,20 +497,55 @@ def _measure_full_trip(
     }
 
 
-def _measure_baselines(repeats: int) -> dict[str, Any]:
-    """Re-measure the 0.784 ms map and 25.0 ms per-trip quantum at HEAD."""
+def _map_and_substages(repeats: int) -> dict[str, Any]:
+    """The fast baseline components at width 1024: map and per-trip sub-stages.
+
+    The complete-map probe re-measures the stale 0.784 ms floor; the three
+    sub-stage probes re-measure the mask-reconciliation and Newton
+    re-linearization constituents of the stale 25.0 ms quantum.  Both are
+    minutes-fast and are persisted before the full-trip solve is attempted.
+    """
     workload, seed = build_workload()
     scalar = _scalar_probe(repeats)
     map_probe = _complete_map_probe(workload, seed)
     arguments, programs = _substage_programs(workload, seed)
-    probes = {
-        name: _measure_program(name, function, arguments, repeats)
-        for name, function in programs.items()
+    probes = {}
+    for name, function in programs.items():
+        probes[name] = _measure_program(name, function, arguments, repeats)
+        print(
+            f"STAGE SUBSTAGE_DONE name={name} "
+            f"ms_per_member={probes[name]['steady']['median_ms_per_member']:.6f}",
+            flush=True,
+        )
+    return {
+        "workload": workload,
+        "seed": seed,
+        "scalar_compiled_dispatch_probe": scalar,
+        "map": {
+            "median_ms_per_member_width_1024": map_probe["steady"][
+                "median_ms_per_member"
+            ],
+            "compile_seconds": map_probe["compile_seconds"],
+            "banked_ms": 0.7836647878320946,
+            "banked_source": str(MAP_PROFILE_RECEIPT.relative_to(ROOT)),
+        },
+        "direct_width_1024_probes": probes,
     }
+
+
+def _full_trip_with_apportionment(
+    workload, seed, probes: dict[str, Any], repeats: int
+) -> dict[str, Any]:
+    """The slow full-sixteen-trip width-1024 solve and its sub-stage shares."""
     solve, initial, current = _full_trip_solver(workload, seed)
+    print("STAGE FULL_TRIP_COMPILE_START", flush=True)
     started = time.perf_counter()
     compiled = jax.jit(solve).lower(initial, current, jnp.asarray(False)).compile()
     full_trip_compile_seconds = time.perf_counter() - started
+    print(
+        f"STAGE FULL_TRIP_COMPILE_DONE seconds={full_trip_compile_seconds:.6f}",
+        flush=True,
+    )
     control = _measure_full_trip(compiled, initial, current, False, repeats)
     settled = _measure_full_trip(compiled, initial, current, True, repeats)
     control_quantum = control["quantum_ms_per_member_per_trip"]
@@ -542,15 +577,8 @@ def _measure_baselines(repeats: int) -> dict[str, Any]:
         0.0,
     )
     return {
-        "map": {
-            "median_ms_per_member_width_1024": map_probe["steady"][
-                "median_ms_per_member"
-            ],
-            "compile_seconds": map_probe["compile_seconds"],
-            "banked_ms": 0.7836647878320946,
-            "banked_source": str(MAP_PROFILE_RECEIPT.relative_to(ROOT)),
-        },
         "per_trip_quantum": {
+            "state": "complete",
             "control_ms_per_member_per_trip": control_quantum,
             "control_active_set_iterations": control["active_set_iterations"],
             "settled_ms_per_member": settled["steady"]["median_ms_per_member"],
@@ -559,8 +587,6 @@ def _measure_baselines(repeats: int) -> dict[str, Any]:
             "banked_ms": 24.99596260986329,
             "banked_source": str(SOLVER_QUANTUM_RECEIPT.relative_to(ROOT)),
         },
-        "scalar_compiled_dispatch_probe": scalar,
-        "direct_width_1024_probes": probes,
         "substage_apportionment": substages,
         "mask_reconciliation_ms_per_member_per_trip": by_name[
             "mask_reconciliation_gather_scatter_comparison"
@@ -692,14 +718,27 @@ def _baseline_summary(payload: dict[str, Any]) -> dict[str, Any]:
     old_map = baselines["map"]["banked_ms"]
     new_map = baselines["map"]["median_ms_per_member_width_1024"]
     old_quantum = baselines["per_trip_quantum"]["banked_ms"]
-    new_quantum = baselines["per_trip_quantum"]["control_ms_per_member_per_trip"]
+    quantum = baselines["per_trip_quantum"]
+    new_quantum = quantum.get("control_ms_per_member_per_trip")
     return {
         "stale_baseline_map_ms": old_map,
         "head_map_ms": new_map,
         "map_delta_x": new_map / old_map,
         "stale_baseline_quantum_ms": old_quantum,
         "head_quantum_ms": new_quantum,
-        "quantum_delta_x": new_quantum / old_quantum,
+        "quantum_delta_x": (new_quantum / old_quantum if new_quantum else None),
+        "quantum_state": quantum.get("state", "complete"),
+        "quantum_qualification": (
+            None
+            if new_quantum is not None
+            else (
+                "the full sixteen-trip width-1024 solve could not recompile "
+                "inside the shared-job budget; the sub-stage probes and map "
+                "floor were re-measured at HEAD"
+                if quantum.get("state") == "failed"
+                else "the full-trip solve was not attempted in this job"
+            )
+        ),
     }
 
 
@@ -738,23 +777,32 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
 
     baseline_axis = figure.add_subplot(grid[0, 1])
     summary = payload["baseline_summary"]
-    names = [
-        "stale map\n(1024)",
-        "HEAD map\n(1024)",
-        "stale trip\n(1024)",
-        "HEAD trip\n(1024)",
-    ]
+    names = ["stale map\n(1024)", "HEAD map\n(1024)", "stale trip\n(1024)"]
     values = [
         summary["stale_baseline_map_ms"],
         summary["head_map_ms"],
         summary["stale_baseline_quantum_ms"],
-        summary["head_quantum_ms"],
     ]
-    baseline_axis.bar(np.arange(len(names)), values, color="#8da0cb")
+    colors = ("#8da0cb", "#4c78a8", "#b279a2")
+    baseline_axis.bar(np.arange(len(names)), values, color=colors)
     for index, value in enumerate(values):
         baseline_axis.text(
             index, value, f" {value:.3f}", ha="left", va="center", fontsize=8
         )
+    head_quantum = summary["head_quantum_ms"]
+    baseline_axis.text(
+        2.35,
+        summary["stale_baseline_quantum_ms"],
+        (
+            f"  HEAD trip\n  {head_quantum:.4f} ms"
+            if head_quantum is not None
+            else "  HEAD trip\n  not re-measured"
+        ),
+        ha="left",
+        va="center",
+        fontsize=8,
+        color="#b279a2",
+    )
     baseline_axis.set_xticks(
         np.arange(len(names)), names, rotation=30, ha="right", fontsize=8
     )
@@ -784,6 +832,21 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
     )
     retrace = np.asarray([row["retrace_total_s"] for row in members], dtype=float)
     total = float(np.sum(host + boundary + sync + retrace))
+    if total <= 0.0:
+        lines = [
+            "# Per-trip quantum at batch width one — which stage owns the trip",
+            "",
+            f"measured on `{payload['assignment']['device']}` at revision "
+            f"`{payload['source']['measurement_revision'][:10]}` in job "
+            f"`{payload['assignment']['job_id']}`.",
+            "",
+            "This job ran the baseline re-measurement only; no width-one member "
+            "rows were harvested here.  See the full-job receipt for the width-one "
+            "per-trip split.",
+        ]
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text("\n".join(lines), encoding="utf-8")
+        return
     shares = {
         "host reconciliation": 100.0 * float(np.sum(host)) / total,
         "compiled boundary dispatch": 100.0 * float(np.sum(boundary)) / total,
@@ -799,6 +862,13 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
     host_broad = f"{1.0e3 * np.mean(host):.4f}"
     sync_broad = f"{1.0e3 * np.mean(sync):.4f}"
     retrace_broad = "0.0000"
+    head_quantum = summary["head_quantum_ms"]
+    quantum_cell = (
+        f"{head_quantum:.4f}" if head_quantum is not None else "not re-measured"
+    )
+    quantum_delta = (
+        f"{summary['quantum_delta_x']:.3f}x" if head_quantum is not None else "n/a"
+    )
     lines = [
         "# Per-trip quantum at batch width one — which stage owns the trip",
         "",
@@ -813,13 +883,21 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
         f"| complete map ms/member | {summary['stale_baseline_map_ms']:.4f} | "
         f"{summary['head_map_ms']:.4f} | {summary['map_delta_x']:.3f}x |",
         "| per-trip quantum ms/member/trip | "
-        f"{summary['stale_baseline_quantum_ms']:.4f} | "
-        f"{summary['head_quantum_ms']:.4f} | {summary['quantum_delta_x']:.3f}x |",
+        f"{summary['stale_baseline_quantum_ms']:.4f} | {quantum_cell} | "
+        f"{quantum_delta} |",
         "",
         "The 0.784 ms map and 25.0 ms per-trip quantum were stale because the "
-        "census null polish entered the jitted topology read; both are re-measured "
-        "at HEAD as "
-        f"{summary['head_map_ms']:.4f} ms and {summary['head_quantum_ms']:.4f} ms.",
+        "census null polish entered the jitted topology read; the map floor is "
+        f"re-measured at HEAD as {summary['head_map_ms']:.4f} ms"
+        + (
+            f" and the per-trip quantum as {head_quantum:.4f} ms."
+            if head_quantum is not None
+            else (
+                "; the per-trip quantum was not re-measured ("
+                + (summary["quantum_qualification"] or "skipped")
+                + ")."
+            )
+        ),
         "",
         "## Width-1 per-member per-trip quantum",
         "",
@@ -897,6 +975,7 @@ def run(
     member_repeats: int,
     newton_steps: int,
     active_set_steps: int,
+    baselines_only: bool,
 ) -> dict[str, Any]:
     total_started = time.perf_counter()
     revision = _require_revision()
@@ -918,6 +997,7 @@ def run(
             "required_ancestor": REQUIRED_ANCESTOR,
         },
         "configuration": {
+            "baselines_only": baselines_only,
             "width_one_member_repeats": member_repeats,
             "baseline_width": WIDTH,
             "baseline_trip_limit": TRIP_LIMIT,
@@ -934,55 +1014,87 @@ def run(
     }
     _write_json(output, receipt)
 
-    # --- First the stale baselines re-measured at HEAD (fast, robust) ---
+    # --- Width-one converged solves on the real MAST bank first, so a
+    #     scheduler timeout on the heavy baseline cannot erase the primary
+    #     measurement (every member row is persisted as it lands). ---
+    if not baselines_only:
+        print("SECTION WIDTH_ONE_START", flush=True)
+        members, member_inputs = _build_members()
+        receipt["width_one"]["inputs"] = member_inputs
+        _write_json(output, receipt)
+        for number, member in enumerate(members, start=1):
+            print(
+                f"STAGE WIDTH_ONE_MEMBER_{number}_START identity={member.identity!r} "
+                f"rss_mib={_peak_rss_mib():.3f}",
+                flush=True,
+            )
+            try:
+                row = _measure_member_width_one(
+                    member,
+                    repeats=member_repeats,
+                    newton_steps=newton_steps,
+                    active_set_steps=active_set_steps,
+                )
+            except Exception as error:  # noqa: BLE001 - one member's failure
+                # must not strand the members already persisted
+                row = {
+                    "identity": member.identity,
+                    "failure": f"{type(error).__name__}: {error}",
+                }
+            receipt["width_one"]["members"].append(row)
+            _write_json(output, receipt)
+            del member
+            gc.collect()
+            jax.clear_caches()
+            gc.collect()
+            print(
+                f"STAGE WIDTH_ONE_MEMBER_{number}_DONE "
+                f"identity={row.get('identity')!r} trips={row.get('trips')} "
+                f"rss_mib={_peak_rss_mib():.3f}",
+                flush=True,
+            )
+        print("SECTION WIDTH_ONE_DONE", flush=True)
+    else:
+        print("SECTION WIDTH_ONE_SKIPPED baselines_only=1", flush=True)
+
+    # --- The stale width-1024 baselines re-measured at HEAD.  The map and
+    #     sub-stage probes are persisted immediately, and the full sixteen-trip
+    #     solve is attempted last and best-effort: its executable (3.8 GiB) can
+    #     never persist, so it recompiles every run and may exceed the shared
+    #     job budget under node contention; a failure still banks the map floor
+    #     and the sub-stage probes. ---
     print("SECTION BASELINES_START", flush=True)
-    baselines = _measure_baselines(receipt["configuration"]["baseline_probe_repeats"])
-    receipt["baselines"] = baselines
-    receipt["baseline_summary"] = _baseline_summary(receipt)
+    fast = _map_and_substages(receipt["configuration"]["baseline_probe_repeats"])
+    receipt["baselines"] = {
+        "scalar_compiled_dispatch_probe": fast["scalar_compiled_dispatch_probe"],
+        "map": fast["map"],
+        "direct_width_1024_probes": fast["direct_width_1024_probes"],
+        "per_trip_quantum": {"state": "not_attempted"},
+    }
     _write_json(output, receipt)
     print(
-        "SECTION BASELINES_DONE "
-        f"map_ms={baselines['map']['median_ms_per_member_width_1024']:.6f} "
-        f"quantum_ms={baselines['per_trip_quantum']['control_ms_per_member_per_trip']:.6f}",
+        "SECTION MAP_AND_SUBSTAGES_DONE "
+        f"map_ms={fast['map']['median_ms_per_member_width_1024']:.6f}",
         flush=True,
     )
-
-    # --- Then the width-one converged solves on the real MAST bank ---
-    print("SECTION WIDTH_ONE_START", flush=True)
-    members, member_inputs = _build_members()
-    receipt["width_one"]["inputs"] = member_inputs
+    try:
+        full = _full_trip_with_apportionment(
+            fast["workload"], fast["seed"], fast["direct_width_1024_probes"], repeats
+        )
+        receipt["baselines"].update(full)
+    except Exception as error:  # noqa: BLE001 - the fast baselines are already
+        # persisted; record the failed full-trip and finalize with what exists
+        receipt["baselines"]["per_trip_quantum"] = {
+            "state": "failed",
+            "error": f"{type(error).__name__}: {error}",
+        }
+        print(
+            f"STAGE FULL_TRIP_FAILED error={type(error).__name__}: {error}",
+            flush=True,
+        )
+    receipt["baseline_summary"] = _baseline_summary(receipt)
     _write_json(output, receipt)
-    for number, member in enumerate(members, start=1):
-        print(
-            f"STAGE WIDTH_ONE_MEMBER_{number}_START identity={member.identity!r} "
-            f"rss_mib={_peak_rss_mib():.3f}",
-            flush=True,
-        )
-        try:
-            row = _measure_member_width_one(
-                member,
-                repeats=member_repeats,
-                newton_steps=newton_steps,
-                active_set_steps=active_set_steps,
-            )
-        except Exception as error:  # noqa: BLE001 - one member's failure must
-            # not strand the members already persisted
-            row = {
-                "identity": member.identity,
-                "failure": f"{type(error).__name__}: {error}",
-            }
-        receipt["width_one"]["members"].append(row)
-        _write_json(output, receipt)
-        del member
-        gc.collect()
-        jax.clear_caches()
-        gc.collect()
-        print(
-            f"STAGE WIDTH_ONE_MEMBER_{number}_DONE "
-            f"identity={row.get('identity')!r} trips={row.get('trips')} "
-            f"rss_mib={_peak_rss_mib():.3f}",
-            flush=True,
-        )
+
     receipt["execution"] = {
         "elapsed_seconds": time.perf_counter() - total_started,
         "exit_marker": 0,
@@ -1010,6 +1122,7 @@ def main() -> None:
     parser.add_argument("--member-repeats", type=int, default=2)
     parser.add_argument("--newton-steps", type=int, default=12)
     parser.add_argument("--active-set-steps", type=int, default=16)
+    parser.add_argument("--baselines-only", action="store_true")
     parser.add_argument("--preflight", action="store_true")
     arguments = parser.parse_args()
     if arguments.preflight:
@@ -1024,6 +1137,7 @@ def main() -> None:
         member_repeats=arguments.member_repeats,
         newton_steps=arguments.newton_steps,
         active_set_steps=arguments.active_set_steps,
+        baselines_only=arguments.baselines_only,
     )
 
 

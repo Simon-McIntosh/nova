@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T10:31:46",
+  "updated": "2026-09-06T11:31:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2500,6 +2500,17 @@
         "created": "2026-08-13"
       },
       {
+        "id": "pfs-contract-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": "4d31686f-4f03-4298-9f6d-93bdda180ca2",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "4d31686f-4f03-4298-9f6d-93bdda180ca2"
+        },
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-frames-x",
         "harness": "clive",
         "role": "implement",
@@ -2608,6 +2619,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "pfs-traced-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-view-x",
         "harness": "clive",
         "role": "implement",
@@ -2620,6 +2640,15 @@
       },
       {
         "id": "pfs-view-x2",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-view-x3",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -108546,6 +108575,160 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T001839779328-pfs-review-repairs",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-review-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3130,
+                "cached_input_tokens": 852529,
+                "input_tokens": 855691,
+                "output_tokens": 2400,
+                "reasoning_output_tokens": 259,
+                "total_tokens": 858091,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "tests/test_reduced_newton.py and tests/test_reduced_newton_constraints.py pass on the CPU lane under JAX_PLATFORMS=cpu in one gate log on a compute node with these additions green: a contract at a normalised compensating unknown of order one hundred showing the augmented merit and exit test no longer loosen with the unknown (the denominator bounded or the unknown renormalised, the choice stated in the module docstring), a default-lane test of the serial-to-batched decision equivalence, a row-response contract that calls solve_constrained_reduced_newton's own augmentation and matches a central difference to 1e-6, a contract where the row block and the flux block disagree on the accepted grade and the selection is shown to follow the augmented merit, a test that a reduced_newton request with constraints can never reach _solve_augmented_constraints in nova/equilibrium/forward.py, the request-path history selection covering the reduced routes, soft_mode_projection carried as None or a typed absence on the reduced route with the consumer paths tolerating it, a constrained solve with neither prescribed_current nor a prescribed current field either folding the compensation into the receipt or refusing with a stated reason under test, and every existing contract in both files still passing bit for bit where it asserts identity, with nova/equilibrium/constraint.py and nova/equilibrium/__init__.py untouched because a peer run holds them",
+          "estimated_hours": null,
+          "goal": "The repairs the independent review named on the constrained reduced route: a bounded compensating unknown in the augmented scoring, default-lane gates on the serial-to-batched equivalence, a row-response contract through the route's own augmentation, a line-search contract where the row block disagrees with the flux block, the accelerated-route constraint gate narrowed, the request-path history literal extended, a typed absence for the soft-mode projection, the missing-prescribed-field compensation case settled",
+          "id": "pfs-review-repairs",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T001839779328-pfs-review-repairs/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_reduced_newton.py",
+            "tests/test_reduced_newton_constraints.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-repairs-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T00:18:48Z",
+        "completed_at": "2026-09-06T09:28:06.670Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 32896,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 32958,
+        "stalled": true,
+        "time_budget": "90m",
+        "base_sha": "9973e0c4038d7b0b41c5d1e8a14b515e24db28be",
+        "commits": [
+          "894f1030261505eb411ecd65f20e156022b7b660"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch 1263214 on partition all (03:00:00 cap, node 98dci4-clu-3125, JAX_PLATFORMS=cpu, root venv python, PYTHONPATH the worktree): ten isolated pytest groups over tests/test_reduced_newton.py and tests/test_reduced_newton_constraints.py with -m \"slow or not slow\", 27 passed, every group on its first attempt, GATE_SUITES_FAILED=0, wall 6269 s",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T001839779328-pfs-review-repairs/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T001839779328-pfs-review-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "2945b6f9-f463-4491-9cb8-fab32e2986d4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": "backpressure",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 30095909,
+            "input_tokens_cumulative": 30095909,
+            "output_tokens": 128305,
+            "output_tokens_cumulative": 128305,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run died after 15 consumer-queue retries (api_retry 429); the lane refused (queue full) \u2014 backpressure on an unmetered lane, not a spent budget",
+          "lane_backpressure": true,
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 10478.772,
+          "generated_tokens": 128305,
+          "generation_seconds": 8785.295,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 29.9,
+          "machine_seconds": 1693.477,
+          "peak_input_tokens": 303492,
+          "tokens_per_second": 14.6,
+          "wall_tokens_per_second": 12.24
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-review-repairs",
+          "session_id": "2945b6f9-f463-4491-9cb8-fab32e2986d4",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T09:28:06.670Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -108718,6 +108901,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1807
+    "_version": 1812
   }
 }

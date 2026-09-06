@@ -428,6 +428,41 @@
     <code>machine=mast</code> path still raises) is the node that exercises it.</p>
   </section>
 
+  <section id="review-repairs">
+    <h2>The review repairs: a bounded scoring denominator, refusals where the route used to guess, and a gate that had to be split (fb846c67, 619f6e38, 894f1030)</h2>
+    <p><strong>Node:</strong> <code>pfs-review-repairs</code>, local DeepSeek lane, run <code>r-20260906T001839779328</code> against base <code>9973e0c4</code>,
+    eleven hours across two attempts (the first killed by a lane queue-full loop while its gate ran; resumed with its commits intact);
+    <code>nova/equilibrium/reduced_newton.py</code> (+96/-18), <code>nova/equilibrium/forward.py</code> (+32/-10),
+    <code>tests/test_reduced_newton_constraints.py</code> (+328), <code>tests/test_reduced_newton.py</code> (+74). Source: the Opus review report of the three
+    merged solver diffs (anchor <code>constrained-route</code> and followup f-pfs-014).</p>
+    <p><strong>What changed.</strong> The augmented merit and exit test of the constrained reduced route divided by the concatenated augmented vector, so a
+    normalised compensating unknown of order a hundred set the denominator and loosened the tolerance on both blocks by that factor; both now divide by
+    the flux block alone (finding M3). The route refuses a constrained solve with neither a prescribed current nor an operator-side prescribed field
+    rather than solving an equilibrium whose receipt cannot record its compensation (L6), publishes the soft-mode projection as a typed absence
+    where the dense route computes none (L5), and the accelerated-route gate names the routes its ladder serves so a reduced request cannot fall
+    through to the Krylov augmented solver (L3); the request path's history selection covers the reduced routes (L4). The traced flux scale (I2)
+    was already on main from the traced-targets node.</p>
+    <table>
+      <caption>Probe figures behind the contracts (CPU, Solov'ev fixture)</caption>
+      <thead><tr><th scope="col">Probe</th><th scope="col">Measured</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">bounded scoring at unknown 0, 1, 10, 100</th><td>merit 1.853e-8 and exit 9.965e-9, flat; the unbounded expressions loosened to 1.0e-10, a hundredfold</td></tr>
+        <tr><th scope="row">line search</th><td>flux-only merit worsens 1.37e-9 to 4.24e-3 at the full candidate while the augmented merit improves 1.09e-2 to 3.63e-3; the route takes the full step</td></tr>
+        <tr><th scope="row">row response through the route's own augmentation</th><td>agrees with a central difference of the centroid to 4.0e-10 relative</td></tr>
+        <tr><th scope="row">fused boundary against the production map (pre-existing exact pin)</th><td>differs by about 9e-16 of the residual on the compute node; bracketed at the file's 1e-12 convention</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The gate.</strong> Twenty-seven tests across the two files, all green, in ten isolated pytest groups on one compute-node job (wall 6,269 s, the
+    Krylov group alone 39 min 47 s). Three earlier combined submissions passed every test they reached and then aborted at teardown inside XLA's CPU
+    persistent-cache read, once at test fifteen of fifteen; the worker measured that the CPU backend aborts a pytest process after eight to fifteen
+    accumulated compilations while every process of four or fewer tests was clean, and split accordingly. The job ran on the <code>all</code> partition
+    under two- and then three-hour caps instead of the debug partition under one hour; the coordinator let it run rather than cancel a passing gate,
+    and the deviation is recorded here and on the ledger.</p>
+    <p><strong>Left open by scope.</strong> The Krylov augmented solver keeps the silent no-prescribed-field drop the reduced route now refuses;
+    <code>ConstraintBinding.initial_unknown</code> given as a plain list crashes the traced reduced route inside the constraint module; the derived
+    compensating direction has no banked real-data gate. All three are recorded as followups on the constraint plan.</p>
+  </section>
+
 </main>
 </body>
 </html>

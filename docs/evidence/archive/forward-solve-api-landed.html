@@ -202,6 +202,33 @@
     <p><strong>Trial reading.</strong> Four H200 jobs for one verdict: two died on guessed imports that a CPU prepare-only pass now catches,
     one on the confound; 8 turns, 20.4M charged input (97.6 percent cached), 80k output.</p>
   </section>
+
+  <section id="seam-guidance">
+    <h2>§4 — Agents find the seam first (guidance merged at d5c95d14; scout confirmed)</h2>
+    <p><strong>Nodes:</strong> <code>fsa-agents-seam-guidance</code> (run <code>r-20260906T194721133352</code>, local DSv4 lane, documentation
+    role, spec exact, 26 min wall; commit <code>e87d2acb</code>) and <code>fsa-seam-scout</code> (run <code>r-20260906T202753349450</code>,
+    codex spark, read-only investigate, spec exact; report
+    <code>~/.config/reckon/crew/reports/nova/forward-solve-api/seam-scout.md</code>).</p>
+    <p><strong>Guidance landed.</strong> <code>nova/equilibrium/AGENTS.md</code> gained a 35-line section naming
+    <code>ForwardSolveRequest</code> to <code>ForwardProfile.solve</code> to <code>ForwardSolveReceipt</code> as the only supported way to run a
+    forward solve, <code>FORWARD_SOLVE_DEFAULTS</code> keyed by the installed Nova version with deviations on
+    <code>resolved_defaults.deviations</code>, the rule that a benchmark never calls a private fixed-point kernel or hand-configures a default, and
+    <code>tests/test_route_default_wiring.py</code> plus <code>tests/test_default_wiring.py</code> as the post-route check; a new
+    <code>nova/transport/AGENTS.md</code> (45 lines) states the same discipline for the coupled forward over the symbols that exist today
+    (<code>ForwardTransport.solve</code>, <code>ForwardTransportInput</code>, <code>ForwardTransportReceipt</code>, <code>TransportProvenance</code>,
+    <code>forward_source_from_receipt</code>, <code>torax_geometry_from_fsa</code>), noting that the transport request is not yet routed through the
+    equilibrium seam (§3's work); the root <code>AGENTS.md</code> gained one pointer row to each. Gate: every path, class and test the sections
+    name exists at the head (worker shell check reproduced in its report; coordinator re-verified fifteen symbols by grep); the added lines pass
+    the naming checks.</p>
+    <p><strong>Scout confirmed.</strong> A fresh read-only worker asked only "how does a script run a forward solve with production defaults in
+    this repository" returned the seam as its first row, citing <code>nova/equilibrium/AGENTS.md</code> lines 9 to 13, with
+    <code>solve_branch</code>, <code>solve_diverted_perturbations</code>, <code>solve_portfolio</code> and <code>solve_batch</code> ranked below it
+    as variants the guidance does not name as the sole default entry. The worker also tried to execute the two default-wiring tests inside its
+    read-only sandbox through the reckon interpreter and hit a missing <code>jax</code> import; that is an environment misuse outside the node's
+    measure and is recorded here so the ledger row's blocked manifests are not read as a finding against the guidance.</p>
+    <p><strong>Follow-on outside this repository.</strong> The reckon-ship prior-art scout brief should name the seam so future nodes cite it in their
+    reuse maps; that text lives in the reckon skill, not in nova.</p>
+  </section>
 </main>
 </body>
 </html>

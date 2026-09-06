@@ -30,6 +30,7 @@ with skip_import("jax"):
         ResolvedForwardSolveDefaults,
         resolve_forward_solve_policy,
     )
+    from nova.equilibrium.observation import MomentIntegralSupport
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.flux_surface_geometry import (
         FluxSurfaceGeometry,
@@ -40,6 +41,7 @@ with skip_import("jax"):
         FINITE_MASK_COMPONENTS,
         SteeringAction,
         SteeringFrame,
+        _current_centroid,
         assemble_frame,
         frames_from_session,
         policy_digest,
@@ -167,6 +169,8 @@ def _synthetic_geometry_fields(index: int) -> dict[str, object]:
         "flux_surface_z": height,
         "flux_surface_angle": angle,
         "rho_face_norm": faces,
+        "p_prime_face": -2.0e5 * (1.0 - faces),
+        "ff_prime_face": -0.2 * (1.0 - faces),
         **profiles,
         "R_major": 1.0,
         "a_minor": 0.35,
@@ -236,6 +240,7 @@ def _receipt_for_geometry_assembly(radius, height, psi, geometry):
         labelled_flux=labelled,
         fixed_point=SimpleNamespace(active_set_iterations=np.int32(1)),
         constraints=(),
+        cell_current=np.ones(radius.size * height.size),
     )
     return ForwardSolveReceipt(
         terminal_state=equilibrium,
@@ -384,6 +389,11 @@ def _synthetic_frame(
         carrier_identity="frozen-six",
         nova_version="9.9.9",
         policy_digest="0" * 64,
+        p_prime_source="efm",
+        current_centroid_r=axis_radius,
+        current_centroid_z=0.02 * index,
+        reference_centroid_z=0.02 * index + (0.01 if index != 2 else 0.06),
+        branch_guard_ok=index != 2,
         **_synthetic_geometry_fields(index),
     )
 
@@ -420,6 +430,7 @@ def test_synthetic_session_round_trips_bitwise(tmp_path) -> None:
     actual = read_session(filename="session", dirname=str(tmp_path))
 
     assert int(actual.attrs.get("cocos")) == COCOS
+    assert actual.attrs["p_prime_source"] == "efm"
     assert actual.sizes["time"] == 3
     _assert_dataset_variables_bitwise(expected, actual)
 
@@ -483,6 +494,22 @@ def test_session_declares_cocos_17() -> None:
     assert int(dataset.attrs["cocos"]) == 17
 
 
+def test_centroid_channels_are_diagnostic_only() -> None:
+    """Centroid branch references never enter the decoder training inputs."""
+    dataset = session_dataset(_synthetic_session())
+    training = set(dataset.attrs["training_inputs"].split(","))
+    diagnostic = set(dataset.attrs["diagnostic_only"].split(","))
+    assert {"p_prime_face", "ff_prime_face"} <= training
+    centroid_fields = {
+        "current_centroid_r",
+        "current_centroid_z",
+        "reference_centroid_z",
+        "branch_guard_ok",
+    }
+    assert centroid_fields <= diagnostic
+    assert centroid_fields.isdisjoint(training)
+
+
 def test_policy_digest_is_deterministic() -> None:
     """The same resolved policy always names the same digest."""
     policy = resolve_forward_solve_policy()
@@ -493,10 +520,11 @@ def test_policy_digest_is_deterministic() -> None:
     assert all(char in "0123456789abcdef" for char in first)
 
 
-def test_assemble_frame_carries_supplied_internal_geometry() -> None:
-    """Assembly copies finite producer loops into the decoder frame."""
+def test_assemble_frame_carries_supplied_internal_geometry(tmp_path) -> None:
+    """Assembly and storage preserve producer loops and face flux functions."""
     radius, height, psi, geometry = _circular_internal_geometry()
     receipt = _receipt_for_geometry_assembly(radius, height, psi, geometry)
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
     frame = assemble_frame(
         receipt,
         action=SteeringAction(
@@ -506,6 +534,12 @@ def test_assemble_frame_carries_supplied_internal_geometry() -> None:
         ),
         carrier_identity="circular-map",
         applied_current=np.asarray([0.0]),
+        p_prime_psi_norm=profile_psi_norm,
+        p_prime=profile_psi_norm,
+        ff_prime_psi_norm=profile_psi_norm,
+        ff_prime=-profile_psi_norm,
+        p_prime_source="efm",
+        reference_centroid_z=0.05,
         compensating_current=np.empty(0),
         internal_geometry=geometry,
     )
@@ -518,6 +552,72 @@ def test_assemble_frame_carries_supplied_internal_geometry() -> None:
         frame.flux_surface_r[0],
         np.full_like(frame.flux_surface_r[0], frame.flux_surface_r[0, 0]),
     )
+    assert frame.p_prime_face.dtype == np.float64
+    assert frame.ff_prime_face.dtype == np.float64
+    np.testing.assert_array_equal(frame.p_prime_face, frame.psi_norm_face)
+    np.testing.assert_array_equal(frame.ff_prime_face, -frame.psi_norm_face)
+    assert frame.p_prime_source == "efm"
+    assert frame.current_centroid_z == pytest.approx(0.0, abs=1.0e-15)
+    assert frame.reference_centroid_z == 0.05
+    assert frame.branch_guard_ok
+    write_session((frame,), filename="linear-profiles", dirname=str(tmp_path))
+    restored = frames_from_session(
+        read_session(filename="linear-profiles", dirname=str(tmp_path))
+    )[0]
+    np.testing.assert_array_equal(restored.p_prime_face, frame.psi_norm_face)
+    np.testing.assert_array_equal(restored.ff_prime_face, -frame.psi_norm_face)
+
+
+def test_current_centroid_matches_the_labeller_observation(machine) -> None:
+    """The carried-current first moment matches the labeller driver definition."""
+    profile, seed, _conductor_current = machine
+    equilibrium = SimpleNamespace(cell_current=profile.operator.cell_current(seed))
+    raster = SimpleNamespace(
+        radius=profile.lattice.radius,
+        height=profile.lattice.height,
+    )
+    achieved_r, achieved_z = _current_centroid(equilibrium, raster)
+    expected = profile.current_moment_observation(
+        seed,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+    )
+    assert achieved_r == pytest.approx(float(expected.centroid_r), abs=1.0e-12)
+    assert achieved_z == pytest.approx(float(expected.centroid_z), abs=1.0e-12)
+
+
+def test_centroid_branch_guard_flips_beyond_five_centimetres() -> None:
+    """The branch guard includes 5 cm and rejects the next larger float."""
+    radius, height, psi, geometry = _circular_internal_geometry()
+    receipt = _receipt_for_geometry_assembly(radius, height, psi, geometry)
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
+    arguments = {
+        "action": SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[2.5, 0.0], [3.5, 0.0]]),
+        ),
+        "carrier_identity": "circular-map",
+        "applied_current": np.asarray([0.0]),
+        "p_prime_psi_norm": profile_psi_norm,
+        "p_prime": profile_psi_norm,
+        "ff_prime_psi_norm": profile_psi_norm,
+        "ff_prime": -profile_psi_norm,
+        "p_prime_source": "efm",
+        "compensating_current": np.empty(0),
+        "internal_geometry": geometry,
+    }
+    at_limit = assemble_frame(receipt, reference_centroid_z=0.05, **arguments)
+    beyond = assemble_frame(
+        receipt,
+        reference_centroid_z=np.nextafter(0.05, np.inf),
+        **arguments,
+    )
+    absent = assemble_frame(receipt, reference_centroid_z=None, **arguments)
+
+    assert at_limit.branch_guard_ok
+    assert not beyond.branch_guard_ok
+    assert np.isnan(absent.reference_centroid_z)
+    assert not absent.branch_guard_ok
 
 
 @pytest.mark.slow
@@ -586,11 +686,24 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
         n_theta=64,
         n_rho=25,
     )
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
+    p_prime = np.asarray(profile.source.core.p_prime(profile_psi_norm))
+    ff_prime = np.asarray(profile.source.core.ff_prime(profile_psi_norm))
+    centroid = profile.current_moment_observation(
+        equilibrium.flux,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+    )
     frame = assemble_frame(
         receipt,
         action=action,
         carrier_identity=CARRIER_IDENTITY,
         applied_current=conductor_current,
+        p_prime_psi_norm=profile_psi_norm,
+        p_prime=p_prime,
+        ff_prime_psi_norm=profile_psi_norm,
+        ff_prime=ff_prime,
+        p_prime_source="efm",
+        reference_centroid_z=float(centroid.centroid_z),
         compensating_current=np.array([-1.25e4, 3.1e3]),
         internal_geometry=internal_geometry,
     )
@@ -641,6 +754,21 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     )
     assert frame.rho_face_norm.shape == (26,)
     assert frame.vpr.shape == (26,)
+    assert frame.p_prime_face.shape == (26,)
+    assert frame.ff_prime_face.shape == (26,)
+    assert frame.p_prime_face.dtype == np.float64
+    assert frame.ff_prime_face.dtype == np.float64
+    assert frame.p_prime_source == "efm"
+    assert frame.current_centroid_r == pytest.approx(
+        float(centroid.centroid_r), abs=1.0e-12
+    )
+    assert frame.current_centroid_z == pytest.approx(
+        float(centroid.centroid_z), abs=1.0e-12
+    )
+    assert frame.reference_centroid_z == pytest.approx(
+        float(centroid.centroid_z), abs=0.0
+    )
+    assert frame.branch_guard_ok
     assert frame.divertor_leg_r.shape == (4, 32)
     assert not np.any(frame.divertor_leg_finite)
 
@@ -657,4 +785,7 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     write_session((frame,), filename="session", dirname=str(tmp_path))
     actual = read_session(filename="session", dirname=str(tmp_path))
     expected = session_dataset((frame,))
+    assert actual.attrs["p_prime_source"] == "efm"
+    assert "reference_centroid_z" in actual.attrs["diagnostic_only"]
+    assert "branch_guard_ok" in actual.attrs["diagnostic_only"]
     _assert_dataset_variables_bitwise(expected, actual)

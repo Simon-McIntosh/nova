@@ -399,6 +399,35 @@
     with shape control moving to the inverse step that row's authority is recorded rather than repaired.</p>
   </section>
 
+  <section id="view-style">
+    <h2>The locked plasma view style on the shared poloidal renderer, with the machine's own conductors (43148bd2, d39ba24e)</h2>
+    <p><strong>Nodes:</strong> three runs on the local lane. <code>pfs-poloidal-view-style</code> wrote the renderer and died reading its own PNG on
+    the text-only model, twice (the resume replayed the read); <code>pfs-view-style-landing</code> on a fresh member applied the carried diff,
+    reviewed it against the locked decision and committed <code>43148bd2</code>; <code>pfs-view-real-coil-outlines</code> on the same member replaced
+    the constructed coil rings the coordinator's review caught and committed <code>d39ba24e</code> on top. <code>apps/pulsedesign/poloidal_view.py</code>
+    (+520 lines), <code>apps/playable/main.py</code>, <code>apps/playable/machines.py</code>, <code>apps/playable/solovev.py</code>,
+    <code>tests/test_poloidal_view.py</code> (13 tests). Gate: 33 tests on a compute node (job 1263226, 4 min 48 s).</p>
+    <p><strong>What the view draws</strong> (decision <code>plasma-view-style</code>): no axis, grid, frame or bounding box; the first wall as one
+    dark polyline; each coil as an outline with no fill; the plasma as the forward operator's own cells at one light-purple alpha, with the cells the
+    separatrix cuts drawn as the polygons the solve itself clips through the shared-node flux, so the plasma edge is the solved boundary and not a
+    staircase (hexagonal on the production mesh, rectangular on the fixture's lattice); dark grey unfilled flux contours from a marching-squares trace
+    on the raster with the separatrix outermost; a dot on the magnetic axis and a cross on the primary X-point with the secondary X-point and strike
+    points lighter, every marker drawn only inside the closed first-wall polygon. The coil channel is the machine's conductors: the Solov'ev fixture
+    exposes its sixteen fitted conductor centres as small rings, MAST reads its thirteen pf_active element rectangles from the content-addressed
+    machine description through imas-python at the manifest DD pin. Every channel source is pre-bound so a served document logs no missing-column
+    warning before its first keyframe.</p>
+    <figure>
+      <img src="/nova/figures/playable-forward-solve/view/styled-poloidal-view.png" alt="The styled poloidal view on the Solov'ev fixture: a ring of sixteen small coil outlines around a dark wall polyline, a light purple plasma of rectangular cells clipped at the separatrix, seven dark grey unfilled contours, and a dot on the magnetic axis; no axes or frame" style="max-width:100%">
+      <figcaption>The styled frame on the Solov'ev fixture, rendered from the channel data. The fixture is limited, so no X-point marker falls inside the wall and only the axis is drawn.</figcaption>
+    </figure>
+    <p><strong>Two things the record keeps.</strong> The first landing placed one decorative ring per circuit on a circle around the wall because the
+    fixture machine carried no coil geometry on its carrier; the coordinator's read of the figure caught it and the fix exposes the conductors the
+    fixture already had. And the styled PNG is a matplotlib rendering of the Bokeh channel data with the same style constants, because headless Chrome
+    on this host draws no Bokeh canvas in any flag combination the worker tried; the served page is the Bokeh figure itself. The MAST coil reader is
+    smoke-verified on the login node only, since the machine-description cache is node-local; the MAST forward profile assembly (the app's
+    <code>machine=mast</code> path still raises) is the node that exercises it.</p>
+  </section>
+
 </main>
 </body>
 </html>

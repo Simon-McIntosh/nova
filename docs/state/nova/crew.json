@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T09:52:08",
+  "updated": "2026-09-06T10:31:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -108416,6 +108416,136 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T071314844031-pfs-view-real-coil-outlines",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-view-real-coil-outlines",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5419,
+                "cached_input_tokens": 463166,
+                "input_tokens": 468587,
+                "output_tokens": 3474,
+                "reasoning_output_tokens": 974,
+                "total_tokens": 472061,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "external_coil_rings in apps/pulsedesign/poloidal_view.py is deleted together with its call in apps/playable/main.py; the coil channel is filled from the machine geometry: on the Solovev fixture the sixteen fitted conductors in apps/playable/solovev.py (the conductor array at 1.0 plus 0.62 cos, 0.62 sin), exposed on the fixture machine as conductor outlines, each drawn as a small ring at its centre; on the MAST machine the pf_active element outlines (rectangles from the machine description the carrier was built from, located the way nova/imas/AGENTS.md describes, opened through imas-python at the manifest DD pin), exposed by apps/playable/machines.py beside the wall. The O-point, X-point and strike markers are drawn only when they lie inside the closed first-wall polygon (a point-in-polygon test), so a limited fixture shows no off-vessel cross. tests/test_poloidal_view.py gains contracts that the Solovev coil channel carries sixteen outlines centred on the fixture conductors to 1e-9 and that no marker lies outside the wall; the existing 27 tests stay green. Gate in the FOREGROUND under one bounded sbatch on the all_debug partition (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, the root environment interpreter, PYTHONPATH the worktree) with the log captured whole. Re-render docs/figures/playable-forward-solve/view/styled-poloidal-view.png through the same matplotlib path and verify it through PIL only: NEVER call Read on an image file, the model serving you is text-only and a Read of a PNG returns a 400 that ends your process; three runs died exactly there tonight. Commit on top of 43148bd2 with a conventional subject plus body; write the manifest at the path the dispatch names before any wait.",
+          "estimated_hours": 2.0,
+          "goal": "Replace the decorative coil rings in the styled poloidal view with the machine own conductor outlines, keep topology markers inside the first wall, on top of your landed commit 43148bd2 which the coordinator holds unmerged until this lands",
+          "id": "pfs-view-real-coil-outlines",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071314844031-pfs-view-real-coil-outlines/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "apps/pulsedesign/poloidal_view.py",
+            "apps/playable/main.py",
+            "apps/playable/machines.py",
+            "apps/playable/solovev.py",
+            "tests/test_poloidal_view.py",
+            "docs/figures/playable-forward-solve/view",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/view-coil-outlines.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-view-x2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T07:13:23Z",
+        "completed_at": "2026-09-06T08:30:27.659Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4598,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4624,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "43148bd27133ba004b0efb8bea85dcb6c7768466",
+        "commits": [
+          "d39ba24ed8970fbcbe01ef50f890304bb6b27f7f"
+        ],
+        "changed_lines": {
+          "added": 383,
+          "removed": 56,
+          "files": 7
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_poloidal_view.py tests/test_playable_session.py on all_debug (sbatch 1263226, JAX_PLATFORMS=cpu, PYTHONPATH the worktree): 33 passed in 288 s",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071314844031-pfs-view-real-coil-outlines/logs/view-coil-outlines-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071314844031-pfs-view-real-coil-outlines/manifest.md",
+        "scope_changed": false,
+        "session_id": "1c0a16c8-d5ab-4d2a-879d-5831b2212670",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-view-real-coil-outlines",
+          "session_id": "1c0a16c8-d5ab-4d2a-879d-5831b2212670",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T08:30:27.659Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -108588,6 +108718,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1806
+    "_version": 1807
   }
 }

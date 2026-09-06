@@ -46,8 +46,16 @@ from nova.equilibrium.solve_request import (
 )
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.steering_frames import (
+    N_DIVERTOR_LEG_POINTS,
+    N_DIVERTOR_LEGS,
+    N_RHO,
+    N_SURFACE,
+    N_THETA,
+    TORAX_PROFILE_FIELDS,
     SteeringAction,
+    SteeringFrame,
     assemble_frame,
+    policy_digest,
     write_session,
 )
 from nova.equilibrium.topology import TopologyClass
@@ -321,10 +329,11 @@ def _forward_receipt(
 
 
 def _slice_inputs(group: zarr.Group, row: int) -> dict[str, Any] | None:
-    """Return finite inputs for one reconstruction row, or no buildable row."""
+    """Return inputs only for a row carrying a finite reconstruction."""
     current = np.asarray(group["fcoil_c"][row], dtype=np.float64)
     scalars = {
         "time": float(group["time"][row]),
+        "magnetic_axis_z": float(group["magnetic_axis_z"][row]),
         "target_centroid_z": float(group["current_centrd_z"][row]),
         "reference_plasma_current": float(group["plasma_current_c"][row]),
     }
@@ -333,6 +342,170 @@ def _slice_inputs(group: zarr.Group, row: int) -> dict[str, Any] | None:
     ):
         return None
     return {**scalars, "current": current}
+
+
+def _update_slice_counts(manifest: dict[str, Any]) -> None:
+    """Refresh disjoint admitted, converged, unconverged and excluded counts."""
+    rows = manifest["slices"]
+    excluded = sum(bool(item.get("excluded")) for item in rows)
+    admitted = len(rows) - excluded
+    converged = sum(
+        bool(item.get("converged")) for item in rows if not item.get("excluded")
+    )
+    manifest.update(
+        {
+            "slice_count": len(rows),
+            "admitted_slice_count": admitted,
+            "written_slice_count": admitted,
+            "converged_slice_count": converged,
+            "unconverged_slice_count": admitted - converged,
+            "excluded_slice_count": excluded,
+        }
+    )
+
+
+def _persist_slice(manifest: dict[str, Any], path: Path, row: dict[str, Any]) -> None:
+    """Checkpoint one slice record before work advances to the next row."""
+    manifest["slices"].append(row)
+    _update_slice_counts(manifest)
+    _write_json(manifest, path)
+
+
+def _masked_frame(
+    prepared: PreparedLabeller,
+    *,
+    current: np.ndarray,
+    wall_seconds: float,
+    trips: int,
+    template: SteeringFrame | None,
+) -> SteeringFrame:
+    """Return a typed frame whose solved geometry is explicitly absent."""
+    action = SteeringAction(
+        name="label",
+        delta=0.0,
+        commanded_control_points=np.empty((0, 2), dtype=float),
+    )
+    if template is not None:
+        return template._replace(
+            psi=np.full_like(np.asarray(template.psi), np.nan, dtype=float),
+            psi_norm=np.full_like(np.asarray(template.psi_norm), np.nan, dtype=float),
+            domain_label=np.zeros_like(
+                np.asarray(template.domain_label), dtype=np.int8
+            ),
+            separatrix=np.full_like(
+                np.asarray(template.separatrix), np.nan, dtype=float
+            ),
+            separatrix_vertex_count=np.int32(0),
+            magnetic_axis_r=np.nan,
+            magnetic_axis_z=np.nan,
+            x_point_r=np.full_like(np.asarray(template.x_point_r), np.nan, dtype=float),
+            x_point_z=np.full_like(np.asarray(template.x_point_z), np.nan, dtype=float),
+            strike_points_r=np.full_like(
+                np.asarray(template.strike_points_r), np.nan, dtype=float
+            ),
+            strike_points_z=np.full_like(
+                np.asarray(template.strike_points_z), np.nan, dtype=float
+            ),
+            lcfs_r=np.full_like(np.asarray(template.lcfs_r), np.nan, dtype=float),
+            lcfs_z=np.full_like(np.asarray(template.lcfs_z), np.nan, dtype=float),
+            n_boundary_coords=np.int32(0),
+            finite_mask=np.zeros_like(np.asarray(template.finite_mask), dtype=bool),
+            coil_current=np.asarray(current, dtype=np.float64),
+            compensating_current=np.zeros_like(
+                np.asarray(template.compensating_current), dtype=np.float64
+            ),
+            action=action,
+            wall_seconds=wall_seconds,
+            trip_count=trips,
+            flux_surface_psi=np.full_like(
+                np.asarray(template.flux_surface_psi), np.nan, dtype=float
+            ),
+            flux_surface_r=np.full_like(
+                np.asarray(template.flux_surface_r), np.nan, dtype=float
+            ),
+            flux_surface_z=np.full_like(
+                np.asarray(template.flux_surface_z), np.nan, dtype=float
+            ),
+            **{
+                name: np.full_like(
+                    np.asarray(getattr(template, name)), np.nan, dtype=float
+                )
+                for name in TORAX_PROFILE_FIELDS
+                if name != "rho_face_norm"
+            },
+            R_major=np.nan,
+            a_minor=np.nan,
+            B_0=np.nan,
+            boundary_toroidal_flux=np.nan,
+            magnetic_axis_z_scalar=np.nan,
+            diverted=False,
+            divertor_leg_r=np.full_like(
+                np.asarray(template.divertor_leg_r), np.nan, dtype=float
+            ),
+            divertor_leg_z=np.full_like(
+                np.asarray(template.divertor_leg_z), np.nan, dtype=float
+            ),
+            divertor_leg_finite=np.zeros_like(
+                np.asarray(template.divertor_leg_finite), dtype=bool
+            ),
+        )
+
+    radius, height, shape = prepared.profile.operator.raster_geometry()
+    radial_count, vertical_count = tuple(int(slot) for slot in shape)
+    policy = _solve_policy()
+    resolved = ResolvedForwardSolveDefaults.from_policy(
+        policy,
+        compilation_cache_directory=prepared.cache_directory,
+    )
+    profile_channels = {
+        name: np.full(N_RHO + 1, np.nan)
+        for name in TORAX_PROFILE_FIELDS
+        if name != "rho_face_norm"
+    }
+    return SteeringFrame(
+        radius=np.asarray(radius),
+        height=np.asarray(height),
+        shape=np.asarray(shape, dtype=np.int32),
+        psi=np.full((radial_count, vertical_count), np.nan),
+        psi_norm=np.full((radial_count, vertical_count), np.nan),
+        domain_label=np.zeros((radial_count, vertical_count), dtype=np.int8),
+        separatrix=np.full((1, 2), np.nan),
+        separatrix_vertex_count=np.int32(0),
+        magnetic_axis_r=np.nan,
+        magnetic_axis_z=np.nan,
+        x_point_r=np.full(2, np.nan),
+        x_point_z=np.full(2, np.nan),
+        strike_points_r=np.full(2, np.nan),
+        strike_points_z=np.full(2, np.nan),
+        lcfs_r=np.full(1, np.nan),
+        lcfs_z=np.full(1, np.nan),
+        n_boundary_coords=np.int32(0),
+        finite_mask=np.zeros(6, dtype=bool),
+        coil_current=np.asarray(current, dtype=np.float64),
+        compensating_current=np.empty(0, dtype=np.float64),
+        action=action,
+        wall_seconds=wall_seconds,
+        trip_count=trips,
+        carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
+        nova_version=resolved.nova_version,
+        policy_digest=policy_digest(policy),
+        flux_surface_psi_norm=np.linspace(0.0, 1.0, N_SURFACE),
+        flux_surface_psi=np.full(N_SURFACE, np.nan),
+        flux_surface_r=np.full((N_SURFACE, N_THETA), np.nan),
+        flux_surface_z=np.full((N_SURFACE, N_THETA), np.nan),
+        flux_surface_angle=np.linspace(0.0, 2.0 * np.pi, N_THETA, endpoint=False),
+        rho_face_norm=np.linspace(0.0, 1.0, N_RHO + 1),
+        **profile_channels,
+        R_major=np.nan,
+        a_minor=np.nan,
+        B_0=np.nan,
+        boundary_toroidal_flux=np.nan,
+        magnetic_axis_z_scalar=np.nan,
+        diverted=False,
+        divertor_leg_r=np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        divertor_leg_z=np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        divertor_leg_finite=np.zeros(N_DIVERTOR_LEGS, dtype=bool),
+    )
 
 
 def _internal_geometry(prepared: PreparedLabeller, equilibrium, diverted: bool):
@@ -406,7 +579,7 @@ def label_shot(
     setup_wall_seconds: float,
     max_slices: int | None,
 ) -> tuple[reduced_newton.ReducedProgram | None, dict[str, Any]]:
-    """Label every buildable slice of one shot and persist one session."""
+    """Label every admitted slice while isolating failures within the shot."""
     session_path = output_root / f"{shot}.nc"
     companion_path = output_root / f"{shot}.npz"
     manifest_path = output_root / f"{shot}.manifest.json"
@@ -417,118 +590,181 @@ def label_shot(
     group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
     full_r = np.asarray(group["gridr"], dtype=np.float64)
     full_z = np.asarray(group["gridz"], dtype=np.float64)
-    frame_rows = []
-    frames = []
-    companion_rows = []
+    manifest = {
+        "schema": "nova-forward-labeller-shot",
+        "shot": shot,
+        "status": "working",
+        "session": str(session_path.resolve()),
+        "companion": str(companion_path.resolve()),
+        "nova_revision": source_revision(),
+        "carrier_identity": response_carrier.DEFAULT_CARRIER.stem,
+        "carrier": prepared.carrier_evidence,
+        "policy_digest": policy_digest(_solve_policy()),
+        "policy": _solve_policy().to_dict(),
+        "constraint": {
+            "mode": "diagnostic_branch_guard",
+            "target_source": "efm/current_centrd_z",
+            "tolerance_m": BRANCH_GUARD_TOLERANCE_M,
+            "conditioning_flag": False,
+        },
+        "include_raster": include_raster,
+        "setup_wall_seconds": setup_wall_seconds,
+        "shot_wall_seconds": 0.0,
+        "slice_count": 0,
+        "admitted_slice_count": 0,
+        "written_slice_count": 0,
+        "converged_slice_count": 0,
+        "unconverged_slice_count": 0,
+        "excluded_slice_count": 0,
+        "slices": [],
+    }
+    _write_json(manifest, manifest_path)
+    frame_slots: list[SteeringFrame | None] = []
+    frame_contexts: list[dict[str, Any]] = []
+    companion_rows: list[dict[str, Any]] = []
     state = None
+    admitted = 0
     for row in range(int(group["time"].shape[0])):
-        if max_slices is not None and len(frames) >= max_slices:
-            break
         inputs = _slice_inputs(group, row)
         if inputs is None:
-            frame_rows.append(
+            state = None
+            _persist_slice(
+                manifest,
+                manifest_path,
                 {
                     "row": row,
+                    "time": float(group["time"][row]),
                     "written": False,
+                    "excluded": True,
                     "converged": False,
                     "qualified": False,
-                    "exclusion": "non-finite fitted currents or reference scalars",
+                    "exclusion": "no reconstruction",
                     "target_source": "efm/current_centrd_z",
                     "branch_guard_ok": False,
-                }
+                },
             )
             continue
-        seed = _slices_seed(group, row, full_r, full_z)
-        if not np.all(np.isfinite(seed)):
-            frame_rows.append(
-                {
-                    "row": row,
-                    "time": inputs["time"],
-                    "written": False,
-                    "converged": False,
-                    "qualified": False,
-                    "exclusion": "non-finite reconstruction flux seed",
-                    "target_source": "efm/current_centrd_z",
-                    "branch_guard_ok": False,
-                }
-            )
-            continue
-        if state is None:
-            state = jnp.asarray(seed)
-        requested_value = _requested_class(group, row)
-        requested = jnp.asarray(requested_value, dtype=jnp.int8)
-        target_current = abs(inputs["reference_plasma_current"])
-        current = jnp.asarray(inputs["current"])
+        if max_slices is not None and admitted >= max_slices:
+            break
+        admitted += 1
+        result = None
         started = time.perf_counter()
-        result = reduced_newton.solve_reduced_newton(
-            prepared.profile.operator,
-            state,
-            requested_class=requested,
-            target_current=target_current,
-            prescribed_current=current,
-            tolerance=FIXED_POINT_CRITERION,
-            newton_steps=NEWTON_STEPS,
-            program=program,
-            stream=False,
+        try:
+            seed = _slices_seed(group, row, full_r, full_z)
+            if not np.all(np.isfinite(seed)):
+                raise ValueError("non-finite reconstruction flux seed")
+            if state is None:
+                state = jnp.asarray(seed)
+            requested_value = _requested_class(group, row)
+            requested = jnp.asarray(requested_value, dtype=jnp.int8)
+            target_current = abs(inputs["reference_plasma_current"])
+            current = jnp.asarray(inputs["current"])
+            result = reduced_newton.solve_reduced_newton(
+                prepared.profile.operator,
+                state,
+                requested_class=requested,
+                target_current=target_current,
+                prescribed_current=current,
+                tolerance=FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=program,
+                stream=False,
+            )
+            program = result.program
+            solve_wall_seconds = time.perf_counter() - started
+            solve_receipt = _forward_receipt(
+                prepared,
+                result,
+                requested_class=requested,
+                target_current=target_current,
+                prescribed_current=current,
+                solve_wall_seconds=solve_wall_seconds,
+            )
+            equilibrium = solve_receipt.terminal_state
+            geometry = _internal_geometry(
+                prepared,
+                equilibrium,
+                diverted=requested_value == int(TopologyClass.DIVERTED),
+            )
+            frame = assemble_frame(
+                solve_receipt,
+                action=SteeringAction(
+                    name="label",
+                    delta=0.0,
+                    commanded_control_points=np.empty((0, 2), dtype=float),
+                ),
+                carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
+                applied_current=inputs["current"],
+                internal_geometry=geometry,
+                wall=prepared.wall,
+            )
+            centroid_r, centroid_z = _centroid_coordinates(
+                prepared, result.state, target_current
+            )
+            centroid_error = centroid_z - inputs["target_centroid_z"]
+            branch_guard_ok = bool(
+                np.isfinite(centroid_error)
+                and abs(centroid_error) <= BRANCH_GUARD_TOLERANCE_M
+            )
+            row_record = {
+                "row": row,
+                "time": inputs["time"],
+                "written": True,
+                "excluded": False,
+                "geometry_masked": False,
+                "converged": bool(result.converged),
+                "qualified": bool(solve_receipt.qualified),
+                "terminal_residual": float(result.terminal_residual),
+                "trips": int(result.active_set_iterations),
+                "newton_steps": int(sum(result.newton_steps_per_trip)),
+                "wall_seconds": solve_wall_seconds,
+                "termination": result.termination_name,
+                "conditioning_flag": False,
+                "achieved_current_centroid_r": centroid_r,
+                "achieved_current_centroid_z": centroid_z,
+                "target_current_centroid_z": inputs["target_centroid_z"],
+                "centroid_error_m": centroid_error,
+                "target_source": "efm/current_centrd_z",
+                "branch_guard_ok": branch_guard_ok,
+            }
+            frame_slots.append(frame)
+            state = result.state
+        except Exception as error:
+            solve_wall_seconds = time.perf_counter() - started
+            trips = int(result.active_set_iterations) if result is not None else 0
+            row_record = {
+                "row": row,
+                "time": inputs["time"],
+                "written": True,
+                "excluded": False,
+                "geometry_masked": True,
+                "converged": False,
+                "qualified": False,
+                "trips": trips,
+                "wall_seconds": solve_wall_seconds,
+                "conditioning_flag": False,
+                "exception": f"{type(error).__name__}: {error}",
+                "traceback": traceback.format_exc(),
+                "achieved_current_centroid_r": None,
+                "achieved_current_centroid_z": None,
+                "target_current_centroid_z": inputs["target_centroid_z"],
+                "centroid_error_m": None,
+                "target_source": "efm/current_centrd_z",
+                "branch_guard_ok": False,
+            }
+            frame_slots.append(None)
+            centroid_r = np.nan
+            centroid_z = np.nan
+            branch_guard_ok = False
+            state = None
+
+        frame_contexts.append(
+            {
+                "current": inputs["current"],
+                "wall_seconds": solve_wall_seconds,
+                "trips": int(row_record["trips"]),
+            }
         )
-        solve_wall_seconds = time.perf_counter() - started
-        program = result.program
-        state = result.state
-        solve_receipt = _forward_receipt(
-            prepared,
-            result,
-            requested_class=requested,
-            target_current=target_current,
-            prescribed_current=current,
-            solve_wall_seconds=solve_wall_seconds,
-        )
-        equilibrium = solve_receipt.terminal_state
-        geometry = _internal_geometry(
-            prepared,
-            equilibrium,
-            diverted=requested_value == int(TopologyClass.DIVERTED),
-        )
-        frame = assemble_frame(
-            solve_receipt,
-            action=SteeringAction(
-                name="label",
-                delta=0.0,
-                commanded_control_points=np.empty((0, 2), dtype=float),
-            ),
-            carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
-            applied_current=inputs["current"],
-            internal_geometry=geometry,
-            wall=prepared.wall,
-        )
-        centroid_r, centroid_z = _centroid_coordinates(
-            prepared, result.state, target_current
-        )
-        centroid_error = centroid_z - inputs["target_centroid_z"]
-        branch_guard_ok = bool(
-            np.isfinite(centroid_error)
-            and abs(centroid_error) <= BRANCH_GUARD_TOLERANCE_M
-        )
-        row_record = {
-            "row": row,
-            "time": inputs["time"],
-            "written": True,
-            "converged": bool(result.converged),
-            "qualified": bool(solve_receipt.qualified),
-            "terminal_residual": float(result.terminal_residual),
-            "trips": int(result.active_set_iterations),
-            "newton_steps": int(sum(result.newton_steps_per_trip)),
-            "wall_seconds": solve_wall_seconds,
-            "termination": result.termination_name,
-            "conditioning_flag": False,
-            "achieved_current_centroid_r": centroid_r,
-            "achieved_current_centroid_z": centroid_z,
-            "target_current_centroid_z": inputs["target_centroid_z"],
-            "centroid_error_m": centroid_error,
-            "target_source": "efm/current_centrd_z",
-            "branch_guard_ok": branch_guard_ok,
-        }
-        frame_rows.append(row_record)
-        frames.append(frame)
         companion_rows.append(
             {
                 "row": row,
@@ -544,6 +780,7 @@ def label_shot(
                 "branch_guard_ok": branch_guard_ok,
             }
         )
+        _persist_slice(manifest, manifest_path, row_record)
         print(
             "LABELLED "
             + json.dumps(
@@ -560,44 +797,29 @@ def label_shot(
             flush=True,
         )
 
-    if not frames:
-        raise RuntimeError(f"shot {shot} has no buildable EFM slices")
+    if not frame_slots:
+        raise RuntimeError(f"shot {shot} has no admitted EFM slices")
+    template = next((frame for frame in frame_slots if frame is not None), None)
+    frames = [
+        frame
+        if frame is not None
+        else _masked_frame(prepared, template=template, **context)
+        for frame, context in zip(frame_slots, frame_contexts, strict=True)
+    ]
     temporary_stem = f"{shot}-partial-{uuid.uuid4().hex}"
     store = write_session(
         frames,
         filename=temporary_stem,
-        dirname=str(output_root),
-        time=[item["time"] for item in frame_rows if item.get("written")],
+        dirname=output_root,
+        time=[item["time"] for item in manifest["slices"] if item.get("written")],
         include_raster=include_raster,
     )
     os.replace(Path(store.filepath), session_path)
     _write_companion(companion_rows, companion_path)
-    manifest = {
-        "schema": "nova-forward-labeller-shot",
-        "shot": shot,
-        "status": "complete",
-        "session": str(session_path.resolve()),
-        "companion": str(companion_path.resolve()),
-        "nova_revision": source_revision(),
-        "carrier_identity": response_carrier.DEFAULT_CARRIER.stem,
-        "carrier": prepared.carrier_evidence,
-        "policy_digest": frames[0].policy_digest,
-        "policy": _solve_policy().to_dict(),
-        "constraint": {
-            "mode": "diagnostic_branch_guard",
-            "target_source": "efm/current_centrd_z",
-            "tolerance_m": BRANCH_GUARD_TOLERANCE_M,
-            "conditioning_flag": False,
-        },
-        "include_raster": include_raster,
-        "setup_wall_seconds": setup_wall_seconds,
-        "shot_wall_seconds": time.perf_counter() - shot_started,
-        "slice_count": len(frame_rows),
-        "written_slice_count": len(frames),
-        "companion_slice_count": len(companion_rows),
-        "flux_function_grid_points": int(companion_rows[0]["psi_norm"].size),
-        "slices": frame_rows,
-    }
+    manifest["status"] = "complete"
+    manifest["shot_wall_seconds"] = time.perf_counter() - shot_started
+    manifest["companion_slice_count"] = len(companion_rows)
+    manifest["flux_function_grid_points"] = int(companion_rows[0]["psi_norm"].size)
     _write_json(manifest, manifest_path)
     return program, manifest
 

@@ -26,7 +26,14 @@ def aggregate(root: Path, *, expected_shots: int | None = None) -> dict[str, Any
     slices = [
         row for item in complete for row in item.get("slices", ()) if row.get("written")
     ]
+    excluded = [
+        row
+        for item in complete
+        for row in item.get("slices", ())
+        if row.get("excluded")
+    ]
     converged = sum(bool(row.get("converged")) for row in slices)
+    unconverged = len(slices) - converged
     qualified = sum(bool(row.get("qualified")) for row in slices)
     guarded = [
         row for row in slices if row.get("target_source") == "efm/current_centrd_z"
@@ -60,7 +67,10 @@ def aggregate(root: Path, *, expected_shots: int | None = None) -> dict[str, Any
         "failed_shots": len(failed),
         "completion_fraction": _fraction(len(complete), expected),
         "slices": len(slices),
+        "admitted_slices": len(slices),
+        "excluded_slices": len(excluded),
         "converged_slices": converged,
+        "unconverged_slices": unconverged,
         "qualified_slices": qualified,
         "converged_fraction": _fraction(converged, len(slices)),
         "qualified_fraction": _fraction(qualified, len(slices)),

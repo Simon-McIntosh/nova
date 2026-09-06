@@ -240,7 +240,7 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         identity="mast-22086/43",
     )
     prime_solver = ProductionSolver(machine)
-    prime, _program = prime_solver._forward(
+    prime, _trips, _program = prime_solver._forward(
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)

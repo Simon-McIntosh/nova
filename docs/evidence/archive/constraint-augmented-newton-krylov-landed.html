@@ -125,6 +125,37 @@
     agreement by central difference at double precision (floor near 5e-07).</p>
   </section>
 
+  <section id="wall-polish">
+    <h2>A selection-continuous wall polish: no slope jump when the promoted node changes (0081c3e9, merged at 3fbd24a7)</h2>
+    <p><strong>Node:</strong> <code>cank-selection-continuous-wall-polish</code>, local DeepSeek lane, run <code>r-20260905T205338987536</code> against
+    base <code>a4451bec</code>, about 3.3 hours; <code>nova/geometry/select.py</code> (+164/-?), <code>tests/test_wall_polish_continuity.py</code> (308 lines,
+    six contracts) and <code>tests/test_wall_null_flux_tangent.py</code> (flip cases against a central difference, one-sided checks upgraded to a
+    second-order quotient). Gate 62 passed on CPU over the continuity, tangent and null files; one failure in the adjacent
+    <code>tests/test_forward_operator_tangent.py</code> reproduces identically at the base revision and is pre-existing.</p>
+    <p><strong>Mechanism.</strong> The wall read names the argmax three-node bracket and its strongest adjacent neighbour and blends the two
+    fitted stationary points by a C<sup>2</sup> smoothstep weight in the sampled-flux margin between them, with a window of 2 percent of the
+    wall-flux span (chosen by sweeping 0.5 to 10 percent: agreement with a central difference sits near 7e-10 across the range) and a
+    1e-30 floor below which a bit-flat wall keeps the discrete bracket, since a kink has no selection to smooth. Host and traced routes share
+    the logic; closed-ring duplicate points are excluded from the competitor margin.</p>
+    <table>
+      <caption>Tangent against a central difference, Solov'ev strict-extremum fixture, CPU</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">conductor 2 (bracket flips 31 to 30)</th><td>1.6e-5</td><td>7.4e-10</td></tr>
+        <tr><th scope="row">conductor 6</th><td>4.8e-5</td><td>1.3e-10</td></tr>
+        <tr><th scope="row">worst of 16 conductors, coarse step</th><td></td><td>1.27e-9</td></tr>
+        <tr><th scope="row">worst of 16 conductors, fine step</th><td></td><td>1.22e-7</td></tr>
+        <tr><th scope="row">stable brackets, limited and diverted fixtures</th><td colspan="2">value bit-identical to the discrete fit</td></tr>
+        <tr><th scope="row">flat analytic seed (kink)</th><td colspan="2">value and tangent bit-identical to the discrete bracket</td></tr>
+      </tbody>
+    </table>
+    <p>Two facts scope the contract. The limited strict-extremum state has an exact tie between wall nodes 30 and 31 by midplane
+    symmetry, so every probe starts at the flip and the tangent contract gates all sixteen conductors. The diverted fixture's promoted index
+    flips between nodes 21 and 11, a non-adjacent double maximum along a nearly flat top arc that no local three-node blend can smooth, so
+    the tangent contract is scoped to the limited fixture and the diverted read is bit-identical wherever its maximum is unambiguous; the
+    diverted bank rows do not route through the wall polish at all.</p>
+  </section>
+
 </main>
 </body>
 </html>

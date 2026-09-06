@@ -147,6 +147,38 @@
     re-solves in the same compiled program. Recorded as the next node on this plan, ahead of the keyframe receipt.</p>
   </section>
 
+  <section id="traced-targets">
+    <h2>A moved constraint target re-enters the compiled program (afdba34d, d4838cdb, f37907f9, merged at 47c02f31)</h2>
+    <p><strong>Node:</strong> <code>pfs-traced-constraint-targets</code>, Opus, run <code>r-20260905T203754293193</code> against base
+    <code>3c993b61</code>; the run hit its 60-minute fence once while re-running its own gate in the background and was resumed to run it in the
+    foreground. The constraint tuple (target, tolerance, scale, initial unknown, compensating direction and ampere scale) and the seed-derived
+    flux scale reach every reduced kernel as traced arguments bound through a trailing <code>rows</code> parameter, a <code>ReducedProgram</code>
+    handle (coordinates, external flux, kernels, row count) lets a chain of keyframes re-enter one compiled program, and the captured route
+    (targets folded in as constants) stays reachable as the reference the traced route must reproduce.</p>
+    <table>
+      <caption>H200 job 1263061, 22086/43, three commanded centroid moves each warm-started from the last, one program</caption>
+      <thead><tr><th scope="col">Move</th><th scope="col">Trips / Newton steps</th><th scope="col">First-trip wall</th><th scope="col">Median warm trip</th><th scope="col">Ratio</th><th scope="col">Centroid error</th><th scope="col">Compensating current</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">free</th><td>3 / 14</td><td>4.49 s</td><td>47.6 ms</td><td></td><td></td><td></td></tr>
+        <tr><th scope="row">+1 cm (builds the program)</th><td>3 / 25</td><td>17.23 s</td><td>50.7 ms</td><td></td><td>-2.30e-9 m</td><td>-240.8 A</td></tr>
+        <tr><th scope="row">+2 cm, reused program</th><td>3 / 25</td><td>129 ms</td><td>50.8 ms</td><td>2.54</td><td>+1.32e-9 m</td><td>-305.2 A</td></tr>
+        <tr><th scope="row">+3 cm, reused program</th><td>3 / 6</td><td>66.9 ms</td><td>47.6 ms</td><td>1.40</td><td>+8.22e-9 m</td><td>-358.9 A</td></tr>
+      </tbody>
+    </table>
+    <p>Per-kernel program counts after all three moves read 1 for every kernel the solve drives (jacobian, direction, step scores, grade,
+    boundary, initial gather), so the compilation half of the gate is met exactly, against 16.6 s of recompilation on the second move in the
+    banked receipt. The second move's first trip sits at 2.54 times its warm trip where the fence asked for two; that 78 ms is not a compile
+    (the counts say so) but the one-off host cost of the first dispatch into a reused program at a new argument set, and it decays to 1.40 by
+    the third move. CPU gate 8 of 8 on compute node 98dci4-clu-3141 at <code>f37907f9</code>: an empty tuple reproduces the unconstrained solve
+    leaf for leaf; a row at the free centroid costs one trip and no step; the row response matches a central difference to 2.6e-7; a
+    commanded centimetre is reached warm and cold with the warm start costing fewer steps; the public route carries the rows; three
+    consecutive moved targets compile each kernel exactly once; a traced target decides what a captured one decides (every decision and the
+    terminal flux exact, the three scored scalars within 1e-6 after a first pin at bit identity found a 6.7e-9 reassociation in the terminal
+    residual); a state-reading compensator is refused.</p>
+    <p>Still open on this route: the unconstrained entry carries no program handle, so a loop alternating free and constrained solves rebuilds
+    the free program; no batched or branch entry; <code>soft_mode_projection</code> is NaN, a Krylov reading with no subspace to read from.</p>
+  </section>
+
 </main>
 </body>
 </html>

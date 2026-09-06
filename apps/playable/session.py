@@ -110,6 +110,9 @@ class PlayableSession:
     #: (radius bounds, height bounds) of the carrier's raster flux image.
     raster_bounds: tuple[tuple[float, float], tuple[float, float]] | None = None
     program: object | None = None
+    #: Base observation provenance used to seed a stateful camera decoder.
+    base_shot: int | None = None
+    base_slice: int | None = None
     #: The camera decoder loaded once per session (the placeholder by
     #: default); ``decode_frame`` calls it after each poloidal push.
     decoder: FrameDecoder | None = None
@@ -131,6 +134,25 @@ class PlayableSession:
     #: measurable session evidence.
     frame_assembly_walls: list[float] = field(default_factory=list)
     frame_assembly_routes: list[str] = field(default_factory=list)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        """Reset decoder history at decoder and base-observation boundaries."""
+        if name in {"base_shot", "base_slice"}:
+            unset = object()
+            previous = getattr(self, name, unset)
+            object.__setattr__(self, name, value)
+            if previous is not unset and previous != value:
+                self._reset_decoder()
+            return
+        object.__setattr__(self, name, value)
+        if name == "decoder" and value is not None:
+            self._reset_decoder()
+
+    def _reset_decoder(self) -> None:
+        """Invoke the decoder's optional history reset hook."""
+        decoder = getattr(self, "decoder", None)
+        if decoder is not None:
+            getattr(decoder, "reset", lambda: None)()
 
     @property
     def frame_index(self) -> int:

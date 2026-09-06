@@ -48,6 +48,17 @@ if TYPE_CHECKING:
 PLACEHOLDER_HEIGHT = 480
 PLACEHOLDER_WIDTH = 640
 
+#: Production decoder supplied by imas-ambix.  Nova imports this only when a
+#: playable session explicitly selects it by dotted path.
+FLUX_CONDITIONED_DECODER_PATH = (
+    "imas_ambix.worldmodel.flux_conditioned_decoder:FluxConditionedDecoder"
+)
+
+#: Receipt identity exposed by the production decoder, in field order.
+FLUX_CONDITIONED_DECODER_IDENTITY_FORMAT = (
+    "<checkpoint-sha>:<vq-decoder-id>:<corpus-digest>"
+)
+
 #: Grey placeholder face and the painted index ink.
 PLACEHOLDER_FACE = (63, 63, 68)
 PLACEHOLDER_INK = (235, 235, 235)
@@ -73,12 +84,18 @@ class FrameDecoder(Protocol):
     keyframe; imas-ambix implements this protocol against that record and is
     loaded into the app by dotted path on the same machine as the solve.  A
     slow decode runs after the poloidal push, so it delays only the picture,
-    and the returned wall and identity are recorded beside the frame.
+    and the returned wall and identity are recorded beside the frame.  A
+    stateful decoder may implement ``reset``; the session invokes it through
+    an optional runtime hook at session and base-observation boundaries.
     """
 
     decoder_identity: str
 
     def decode(self, frame: SteeringFrame) -> DecodedFrame: ...
+
+    def reset(self) -> None:
+        """Discard history before a session or base-shot boundary."""
+        ...
 
 
 class PlaceholderDecoder:
@@ -104,6 +121,10 @@ class PlaceholderDecoder:
         image = _painted_index(self._count + 1, height=self.height, width=self.width)
         self._count += 1
         return DecodedFrame(image, perf_counter() - started, self.decoder_identity)
+
+    def reset(self) -> None:
+        """Restart the painted frame index for a session boundary."""
+        self._count = 0
 
 
 def _painted_index(index: int, *, height: int, width: int) -> np.ndarray:
@@ -143,11 +164,20 @@ def load_decoder(dotted_path: str | None) -> FrameDecoder:
         raise ImportError(
             f"decoder dotted path {dotted!r} names no {attribute!r} in {module_name!r}"
         ) from error
-    if not isinstance(decoder, FrameDecoder):
+    if not callable(getattr(decoder, "decode", None)) or not isinstance(
+        getattr(decoder, "decoder_identity", None), str
+    ):
         raise TypeError(
             f"dotted path {dotted!r} names {type(decoder).__name__}, "
             "which does not implement the FrameDecoder protocol"
         )
+    if dotted == FLUX_CONDITIONED_DECODER_PATH:
+        parts = decoder.decoder_identity.split(":")
+        if len(parts) != 3 or any(not part for part in parts):
+            raise ValueError(
+                f"decoder {dotted!r} must expose decoder_identity as "
+                f"{FLUX_CONDITIONED_DECODER_IDENTITY_FORMAT}"
+            )
     return decoder
 
 

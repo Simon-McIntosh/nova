@@ -817,6 +817,7 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
         flux=limited[1],
         fixed_point=SimpleNamespace(residual=jnp.asarray(0.0)),
         finite=SimpleNamespace(passed=jnp.asarray(True)),
+        constraints=(),
     )
     profile._solve_accelerated = lambda *_args, **_kwargs: equilibrium
     receipt = profile._branch_receipt(
@@ -843,6 +844,31 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
         "negative_reachable_wall_operand=false, "
         "unreachable_wall_vertex_ignored=true, terminal_wrong_class_rejected=true"
     )
+
+
+def test_forward_topology_persistent_saddle_margin_is_positive_infinity():
+    """The persistent-saddle sweep stays diverted at an infinite wall margin.
+
+    The axis and saddle positions, values, and the wall level are read on one
+    tensor spline, and the wall operand sits behind the pre-saddle axis
+    component, so every shift across the saddle keeps the shadowed +infinity
+    margin. Three shifts span the crossing while keeping the gate fast.
+    """
+    configure_dtypes()
+    psi, rg, zg, _axis, lr, lz, inside = _persistent_saddle_field()
+    wall_r, wall_z = _dense_wall(lr, lz, m=160)
+    operator, _lattice = _forward_operator(rg, zg, inside, wall_r, wall_z)
+    wall_psi = _persistent_saddle_psi(wall_r, wall_z)
+    _base_masks, base = operator.read(_forward_state(psi, wall_psi))
+    crossing_shift = float(base.x_point_flux) - float(np.max(wall_psi))
+    scale = abs(float(base.axis_flux) - float(base.x_point_flux))
+    shifts = crossing_shift + scale * np.linspace(-0.75, 0.75, 17)[[0, 8, 16]]
+
+    for shift in shifts:
+        state = _forward_state(psi, wall_psi + float(shift))
+        _masks, topology = operator.read(state)
+        assert bool(topology.diverted)
+        assert np.isposinf(float(topology.class_margin))
 
 
 def test_forward_topology_nan_is_explicitly_indeterminate(monkeypatch):

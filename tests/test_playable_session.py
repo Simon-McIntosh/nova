@@ -77,7 +77,8 @@ class StubSolver:
             equilibrium if equilibrium is not None else StubEquilibrium()
         )
 
-    def __call__(self, previous, commanded, *, action=None):
+    def __call__(self, previous, commanded, *, action=None, program=None):
+        del previous, action, program
         return SolveResult(self._equilibrium, wall=self.wall, trips=self.trips)
 
 
@@ -330,11 +331,17 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
 
     configure_dtypes()
     solver = ProductionSolver(machine)
+    assert solver.route == "reduced_newton"
     session = PlayableSession(solver=solver, shape=PlasmaShape(), machine="solovev")
 
+    # the prime converges on the Solov'ev machine from the seed and builds the
+    # compiled program the session carries
     prime = session.prime()
     assert prime.wall > 0.0 and isinstance(prime.trips, int) and prime.trips >= 0
+    assert prime.reused is False
+    assert session.program is not None
     assert session.equilibrium is not None
+    assert bool(session.equilibrium.fixed_point.converged)
     assert session.equilibrium.finite.passed or session.equilibrium.finite.flux
 
     centroid = np.asarray(
@@ -344,15 +351,27 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
     )
     assert np.all(np.isfinite(centroid))
 
-    # one moved keyframe, warm-started from the prime
-    started = perf_counter()
+    # one moved keyframe re-enters the session's program and converges.  The
+    # first moved target on the CPU lane pays the reduced route's one-time
+    # dispatch cost (measured ~27-35 s; the warm steady state sits around
+    # 1.1-1.5 s, dominated by the fused-trip dispatch in reduced_newton.py),
+    # so the assertion here is a generous correctness bound and the receipt
+    # row is what records the program reuse.
     keyframe = session.step("bulk_r+")
-    moved = perf_counter() - started
     assert keyframe.wall > 0.0
+    assert keyframe.wall < 60.0
     assert keyframe.trips >= 0
-    assert moved < keyframe.wall + 60.0  # solve call reports its own wall
+    assert keyframe.reused is True
+    assert session.program is not None
     assert session.receipts[-1].parameter == "bulk_r"
+    assert bool(session.equilibrium.fixed_point.converged)
     assert session.equilibrium.finite.flux
+    # a second moved key shows the dispatch cost de-cay, still bounded and
+    # still re-entering the same program (no recompile from the second press)
+    settled = session.step("bulk_r-")
+    assert settled.reused is True
+    assert settled.wall < 30.0
+    assert bool(session.equilibrium.fixed_point.converged)
 
     # the current-centroid row was carried: a constraint record qualified
     assert len(session.equilibrium.constraints) == 1
@@ -361,6 +380,19 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
     # compensation pushed per circuit has the circuit count the carrier owns
     pushed = frame_push(session)
     assert pushed["compensation"]["circuit"].size == machine.circuit_count
+
+
+@pytest.mark.slow
+def test_newton_krylov_route_stays_reachable_as_the_reference(machine):
+    from apps.playable.production import ProductionSolver
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    reference = ProductionSolver(machine, route="newton_krylov")
+    assert reference.route == "newton_krylov"
+    # the reference shares the frozen compensating direction with the
+    # reduced-route solver it was kept for
+    assert len(reference.frozen_pairs) == 1
 
 
 # --------------------------------------------------------------------------

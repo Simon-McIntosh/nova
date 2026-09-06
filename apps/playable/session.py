@@ -1,13 +1,15 @@
 """Server-side session holder over the forward solve.
 
 The session owns the current equilibrium, the commanded control-point set,
-the key map, and a solve callable typed as a protocol, so the slow production
+the key map, and a solve callable typed as a protocol, so the production
 constrained solve can be swapped for the constrained reduced route without
 the app changing.  Each key press steps one control parameter by its stated
 signed size, re-solves as a warm start from the previous equilibrium, and
-records a receipt row of keyframe wall and trips.  ``frame_push`` reduces the
-session to the ``ColumnDataSource`` channels the shared poloidal renderers
-bound, so a keyframe is pushed by writing those columns verbatim.
+records a receipt row of keyframe wall and trips.  The session also carries
+the compiled-program handle the reduced route returns, handing it back on
+every later solve so a keyframe chain re-enters one program.  ``frame_push``
+reduces the session to the ``ColumnDataSource`` channels the shared poloidal
+renderers bound, so a keyframe is pushed by writing those columns verbatim.
 """
 
 from __future__ import annotations
@@ -31,6 +33,7 @@ class KeyframeReceipt(NamedTuple):
     delta: float
     wall: float  # seconds inside the solve callable
     trips: int  # active-set trips spent by the solve
+    reused: bool  # whether the solve re-entered a carried compiled program
 
 
 class SolveResult(NamedTuple):
@@ -39,16 +42,21 @@ class SolveResult(NamedTuple):
     equilibrium: ForwardEquilibrium | object
     wall: float
     trips: int
+    program: object | None = None  # the compiled program a chain re-enters
+    reused: bool = False  # whether a carried program was re-entered this solve
 
 
 @runtime_checkable
 class KeyframeSolver(Protocol):
     """Solve one commanded shape warm-started from the previous equilibrium.
 
-    The first implementation is the production constrained solve on the
-    Newton-Krylov route; the constrained reduced route replaces it without
-    the app changing.  ``action`` is the ``(parameter, delta)`` pair the key
-    press named, and the result carries the receipt row of wall and trips.
+    The production implementation runs the constrained reduced route and
+    hands its compiled-program handle back so the session carries it and the
+    next solve re-enters one program; the constrained Newton-Krylov route
+    stays reachable as the reference.  ``action`` is the ``(parameter,
+    delta)`` pair the key press named, ``program`` is the handle the session
+    carried from the previous keyframe, and the result carries the receipt
+    row of wall and trips plus the program to carry on.
     """
 
     def __call__(
@@ -56,7 +64,8 @@ class KeyframeSolver(Protocol):
         previous: ForwardEquilibrium | None,
         commanded: PlasmaShape,
         *,
-        action: tuple[str, float] | None,
+        action: tuple[str, float] | None = None,
+        program: object | None = None,
     ) -> SolveResult: ...
 
 
@@ -67,7 +76,9 @@ class PlayableSession:
     ``machine`` names the carrier the session was built on — the Solov'ev
     default or the MAST frozen-six response carrier selected by a session
     argument — and is recorded on every receipt so a replay can state what
-    produced each frame.
+    produced each frame.  ``program`` is the compiled-program handle the
+    production solver returns; it is handed back on every later solve so a
+    keyframe chain re-enters one program after the first build.
     """
 
     solver: KeyframeSolver
@@ -79,6 +90,7 @@ class PlayableSession:
     wall: np.ndarray | None = None
     #: (radius bounds, height bounds) of the carrier's raster flux image.
     raster_bounds: tuple[tuple[float, float], tuple[float, float]] | None = None
+    program: object | None = None
 
     def prime(self) -> KeyframeReceipt:
         """Solve the commanded shape from a cold start as the first frame."""
@@ -89,7 +101,9 @@ class PlayableSession:
 
         A ``None`` key primes the session: the commanded shape is solved as-is
         from the previous equilibrium (or a cold seed) and the frame it names
-        is the initial view.
+        is the initial view.  The compiled program carried from the previous
+        solve is handed back in and the one the solve returns is stored, so
+        the second press onwards re-enters one program.
         """
         if key is None:
             action = None
@@ -103,8 +117,11 @@ class PlayableSession:
                 ) from error
             parameter, delta = action
             commanded = self.shape.apply(parameter, delta)
-        result = self.solver(self.equilibrium, commanded, action=action)
+        result = self.solver(
+            self.equilibrium, commanded, action=action, program=self.program
+        )
         self.equilibrium = result.equilibrium
+        self.program = result.program
         self.shape = commanded
         parameter, delta = (None, 0.0) if action is None else action
         receipt = KeyframeReceipt(
@@ -113,6 +130,7 @@ class PlayableSession:
             delta=delta,
             wall=result.wall,
             trips=result.trips,
+            reused=result.reused,
         )
         self.receipts.append(receipt)
         return receipt

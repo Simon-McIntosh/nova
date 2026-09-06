@@ -11,6 +11,7 @@ written through the group-backed netCDF store is bit-identical on read.
 from __future__ import annotations
 
 import time
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -177,6 +178,81 @@ def _synthetic_geometry_fields(index: int) -> dict[str, object]:
         "divertor_leg_z": np.full((4, 32), np.nan),
         "divertor_leg_finite": np.zeros(4, dtype=bool),
     }
+
+
+def _circular_internal_geometry():
+    """Return a small analytic geometry block for frame-assembly tests."""
+    major_radius = 3.0
+    minor_radius = 0.5
+    radius = np.linspace(major_radius - 0.6, major_radius + 0.6, 65)
+    height = np.linspace(-0.6, 0.6, 65)
+    mesh_radius, mesh_height = np.meshgrid(radius, height, indexing="ij")
+    psi = -0.2 * (
+        ((mesh_radius - major_radius) / minor_radius) ** 2
+        + (mesh_height / minor_radius) ** 2
+    )
+
+    def field_function(psi_norm):
+        """Return the circular map's constant toroidal-field function."""
+        return np.full_like(psi_norm, 2.0 * major_radius)
+
+    geometry = FluxSurfaceGeometry.internal_geometry(
+        FluxLattice(radius, height),
+        psi,
+        field_function,
+        axis=(major_radius, 0.0),
+        boundary_flux=-0.2,
+        reference_radius=major_radius,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
+    return radius, height, psi, geometry
+
+
+def _receipt_for_geometry_assembly(radius, height, psi, geometry):
+    """Return a typed receipt with lightweight solved-state carriers."""
+    boundary = np.column_stack((geometry.surface_r[-1], geometry.surface_z[-1]))
+    raster = SimpleNamespace(
+        radius=radius,
+        height=height,
+        shape=np.asarray([radius.size, height.size], dtype=np.int32),
+        psi=psi,
+        psi_norm=psi / -0.2,
+        domain_label=np.zeros_like(psi, dtype=np.int8),
+        separatrix=boundary,
+        separatrix_vertex_count=np.int32(boundary.shape[0]),
+    )
+    labelled = SimpleNamespace(
+        o_point=np.asarray([3.0, 0.0]),
+        primary_x_point=np.full(2, np.nan),
+        secondary_x_point=np.full(2, np.nan),
+        strike_points=np.full((2, 2), np.nan),
+        lcfs=boundary,
+        lcfs_vertex_count=np.int32(boundary.shape[0]),
+    )
+    equilibrium = SimpleNamespace(
+        raster_flux=raster,
+        labelled_flux=labelled,
+        fixed_point=SimpleNamespace(active_set_iterations=np.int32(1)),
+        constraints=(),
+    )
+    return ForwardSolveReceipt(
+        terminal_state=equilibrium,
+        qualified=True,
+        termination_reason=np.int32(0),
+        residual_history=np.empty(0),
+        mask_history=np.empty(0),
+        globalisation_decisions=(np.empty(0), np.empty(0)),
+        amplitude_history=np.empty(0),
+        topology_read=None,
+        polish_receipt=None,
+        compilation_cache_hit=False,
+        wall_seconds=0.01,
+        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
+            resolve_forward_solve_policy()
+        ),
+    )
 
 
 @pytest.fixture(scope="module")
@@ -417,6 +493,33 @@ def test_policy_digest_is_deterministic() -> None:
     assert all(char in "0123456789abcdef" for char in first)
 
 
+def test_assemble_frame_carries_supplied_internal_geometry() -> None:
+    """Assembly copies finite producer loops into the decoder frame."""
+    radius, height, psi, geometry = _circular_internal_geometry()
+    receipt = _receipt_for_geometry_assembly(radius, height, psi, geometry)
+    frame = assemble_frame(
+        receipt,
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[2.5, 0.0], [3.5, 0.0]]),
+        ),
+        carrier_identity="circular-map",
+        applied_current=np.asarray([0.0]),
+        compensating_current=np.empty(0),
+        internal_geometry=geometry,
+    )
+
+    assert np.all(np.isfinite(frame.flux_surface_r))
+    assert np.all(np.isfinite(frame.flux_surface_z))
+    np.testing.assert_array_equal(frame.flux_surface_r, geometry.surface_r)
+    np.testing.assert_array_equal(frame.flux_surface_z, geometry.surface_z)
+    np.testing.assert_array_equal(
+        frame.flux_surface_r[0],
+        np.full_like(frame.flux_surface_r[0], frame.flux_surface_r[0, 0]),
+    )
+
+
 @pytest.mark.slow
 def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     """A frame from the solved Solov'ev fixture carries every decoder channel.
@@ -532,7 +635,10 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     assert frame.flux_surface_psi.shape == (11,)
     assert frame.flux_surface_r.shape == (11, 64)
     assert frame.flux_surface_z.shape == (11, 64)
-    assert np.array_equal(frame.flux_surface_r[0], frame.flux_surface_r[0, 0])
+    np.testing.assert_array_equal(
+        frame.flux_surface_r[0],
+        np.full_like(frame.flux_surface_r[0], frame.flux_surface_r[0, 0]),
+    )
     assert frame.rho_face_norm.shape == (26,)
     assert frame.vpr.shape == (26,)
     assert frame.divertor_leg_r.shape == (4, 32)

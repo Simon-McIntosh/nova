@@ -216,7 +216,7 @@ def test_an_empty_tuple_reproduces_the_unconstrained_solve(steered):
     assert constrained.row_count == 0
     compared = 0
     for item in dataclasses.fields(ReducedNewtonResult):
-        if item.name.endswith("_wall_per_trip"):
+        if item.name.endswith("_wall_per_trip") or item.name == "program":
             continue
         left = getattr(unconstrained, item.name)
         right = getattr(constrained, item.name)
@@ -229,7 +229,10 @@ def test_an_empty_tuple_reproduces_the_unconstrained_solve(steered):
         else:
             assert left == right, item.name
         compared += 1
-    assert compared == len(dataclasses.fields(ReducedNewtonResult)) - 4
+    assert compared == sum(
+        not item.name.endswith("_wall_per_trip") and item.name != "program"
+        for item in dataclasses.fields(ReducedNewtonResult)
+    )
 
 
 def test_a_row_at_the_free_centroid_costs_nothing(steered):
@@ -441,6 +444,47 @@ def test_consecutive_moved_targets_share_one_compiled_program(steered):
     assert set(STEERED_KERNELS) <= set(sizes)
     assert max(sizes.values()) == 1, sizes
     assert all(sizes[name] == 1 for name in STEERED_KERNELS), sizes
+
+
+def test_prescribed_currents_reuse_one_constrained_program(steered):
+    """A constrained program accepts a new prescribed current vector as data."""
+    profile, _seed, free = steered
+    target = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, target)
+    base = np.asarray(profile.operator.prescribed_current_field.current, dtype=float)
+    edited = base.copy()
+    edited[0] += 1.0e-6
+    common = dict(
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=1,
+    )
+    first = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        prescribed_current=jnp.asarray(base),
+        **common,
+    )
+    reused = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        prescribed_current=jnp.asarray(edited),
+        program=first.program,
+        **common,
+    )
+    reference = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        prescribed_current=jnp.asarray(edited),
+        **common,
+    )
+    assert np.array_equal(np.asarray(reused.state), np.asarray(reference.state))
+    assert len(reused.steps) == len(reference.steps)
+    for left, right in zip(reused.steps, reference.steps, strict=True):
+        assert left._replace(wall_s=0.0) == right._replace(wall_s=0.0)
+    assert reused.terminal_residual == reference.terminal_residual
+    sizes = _cache_sizes(first.program)
+    assert max(sizes.values()) == 1, sizes
 
 
 def test_a_traced_target_decides_what_a_captured_one_decides(steered):
@@ -675,12 +719,8 @@ def test_the_line_search_follows_the_augmented_merit_when_the_blocks_disagree(st
         operator, coordinates, operator.external(), None, None
     )
     candidate_flux = amplitudes + direction[: coordinates.size]
-    flux_only_incumbent = unaugmented["flux_scores"](
-        amplitudes, shadow, base_state
-    )
-    flux_only_candidate = unaugmented["flux_scores"](
-        candidate_flux, shadow, base_state
-    )
+    flux_only_incumbent = unaugmented["flux_scores"](amplitudes, shadow, base_state)
+    flux_only_candidate = unaugmented["flux_scores"](candidate_flux, shadow, base_state)
     assert float(flux_only_incumbent[1]) <= SOLVE_TOLERANCE
     assert float(flux_only_candidate[0]) > float(flux_only_incumbent[0])
 

@@ -81,12 +81,17 @@ ELONGATION_STEP = 0.05
 #: this machine the circuit set cannot independently carry the bounding-box
 #: rows: the drivable response spectrum spans 2.2e-6 down to 1e-10 row units
 #: per ampere, and the singular-distribution directions that hold competing
-#: rows settle with the worst row at five percent of its scale under a few
-#: kilo-ampere compensator.  The solved rows close to that floor, not to the
-#: residual accuracy the map itself reaches, so a contract that demands the
-#: floor must state it; the benchmark receipt on the bank row sees the same
-#: limit and the compensation followup owns the improvement.
-SOLVE_TOLERANCE_FRACTION = 0.1
+#: rows settle with the worst row at 5.4e-2 of its scale on the seed bounding
+#: box and 7.5e-3 on the null command, under a few kilo-ampere compensator.
+#: The solved rows close to that floor, not to the residual accuracy the map
+#: itself reaches, so a contract that demands the floor must state it.  The
+#: steering-authority receipt on the bank row confirms the floor is intrinsic
+#: rather than a solver stop: lifting the active-set stop and exhausting a
+#: twenty-trip budget leaves the bank rows at 1.4e-3 to 5.8e-3 of row scale
+#: and the achieved boundary unchanged, so the tolerance stands at 1.3 times
+#: this machine's own measured floor of 5.4e-2.  The compensation followup owns
+#: improving the floor itself.
+SOLVE_TOLERANCE_FRACTION = 0.07
 
 
 def _terms():

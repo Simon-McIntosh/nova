@@ -41,7 +41,7 @@ from nova.equilibrium.constraint import (
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.reduced_newton import solve_constrained_reduced_newton
 from nova.equilibrium.solve_request import resolve_forward_solve_policy
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -352,6 +352,7 @@ def _solve_reduced_newton(
             active_set_steps=(
                 STEERING_TRIP_BUDGET if active_set_steps is None else active_set_steps
             ),
+            stream=True,
         )
         return _SolvedArmView(
             flux=result.state,
@@ -459,7 +460,19 @@ def _arm(
         else solve
     )
     view = solver(derived, jnp.asarray(previous_flux))
-    achieved = _achieved_turning_points(profile, view.flux)
+    try:
+        achieved = _achieved_turning_points(profile, view.flux)
+        achieved_boundary = _boundary_polygon(profile, view.flux)
+        landmarks = _landmarks(profile, view.flux)
+        topology_valid = True
+    except NoQualifiedAxisError:
+        # An arm that drives the read off a qualified axis is a result, not a
+        # crash: the row record and the compensation still stand, and the
+        # achieved geometry is reported as unreadable.
+        achieved = None
+        achieved_boundary = None
+        landmarks = None
+        topology_valid = False
     compensated = []
     for pair, record in zip(derived, view.constraints, strict=True):
         direction = np.asarray(pair.unknown.direction)
@@ -546,20 +559,41 @@ def _arm(
         "currents_per_circuit": _currents_payload(
             compensation, baseline_current, names, circuits
         ),
-        "movement_rz_m": _movement_record(
-            np.asarray(previous_points),
-            np.asarray(target.flux_points),
-            np.asarray(achieved.flux_points),
+        "topology_valid": topology_valid,
+        "movement_rz_m": (
+            None
+            if achieved is None
+            else _movement_record(
+                np.asarray(previous_points),
+                np.asarray(target.flux_points),
+                np.asarray(achieved.flux_points),
+            )
         ),
-        "achieved_turning_points": {
-            "outer_m": [float(value) for value in np.asarray(achieved.flux_points)[0]],
-            "upper_m": [float(value) for value in np.asarray(achieved.flux_points)[1]],
-            "inner_m": [float(value) for value in np.asarray(achieved.flux_points)[2]],
-            "lower_m": [float(value) for value in np.asarray(achieved.flux_points)[3]],
-        },
-        "turning_point_error_m": _turning_error(target, achieved),
-        "landmarks": _landmarks(profile, view.flux),
-        "achieved_boundary_rz_m": _boundary_polygon(profile, view.flux).tolist(),
+        "achieved_turning_points": (
+            None
+            if achieved is None
+            else {
+                "outer_m": [
+                    float(value) for value in np.asarray(achieved.flux_points)[0]
+                ],
+                "upper_m": [
+                    float(value) for value in np.asarray(achieved.flux_points)[1]
+                ],
+                "inner_m": [
+                    float(value) for value in np.asarray(achieved.flux_points)[2]
+                ],
+                "lower_m": [
+                    float(value) for value in np.asarray(achieved.flux_points)[3]
+                ],
+            }
+        ),
+        "turning_point_error_m": (
+            None if achieved is None else _turning_error(target, achieved)
+        ),
+        "landmarks": landmarks,
+        "achieved_boundary_rz_m": (
+            None if achieved_boundary is None else achieved_boundary.tolist()
+        ),
     }
 
 
@@ -870,6 +904,7 @@ def measure_steering_authority(
                         "compensating_current_norm_a": arm[
                             "compensating_current_norm_a"
                         ],
+                        "topology_valid": arm["topology_valid"],
                         "movement_rz_m": arm["movement_rz_m"],
                         "landmarks": arm["landmarks"],
                     },
@@ -937,13 +972,15 @@ def _render_steering_authority(receipt, output: Path):
                 label="previous boundary",
             )
             for record in panel:
-                achieved = np.asarray(record["arm"]["achieved_boundary_rz_m"])
-                axis.plot(
-                    achieved[:, 0],
-                    achieved[:, 1],
-                    linewidth=1.5,
-                    label=f"achieved, {record['command_label']}",
-                )
+                achieved_polygon = record["arm"]["achieved_boundary_rz_m"]
+                if achieved_polygon is not None:
+                    achieved = np.asarray(achieved_polygon)
+                    axis.plot(
+                        achieved[:, 0],
+                        achieved[:, 1],
+                        linewidth=1.5,
+                        label=f"achieved, {record['command_label']}",
+                    )
                 commanded = np.asarray(
                     list(record["arm"]["commanded_turning_points"].values())
                 ).reshape(-1, 2)

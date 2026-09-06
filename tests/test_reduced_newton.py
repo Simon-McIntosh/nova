@@ -578,3 +578,52 @@ def test_batched_tail_scoring_walks_the_serial_route(machine):
     span = float(jnp.max(jnp.abs(serial.state)))
     difference = float(jnp.max(jnp.abs(batched.state - serial.state)))
     assert difference <= BOUNDARY_FLUX_AGREEMENT * span
+
+
+def test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane(machine):
+    """The serial-to-batched decision equivalence runs on the default lane.
+
+    The full-solve equivalence above is slow-marked, so the claim that batching
+    the refused tail leaves every decision unmoved is not checked by the
+    path-free default lane.  This bounded slice runs on it: the same decision
+    identity on a few trips from the cold seed, so a regression in the batched
+    tail's grade bookkeeping cannot go green under an ordinary ``pytest`` run.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=8,
+        active_set_steps=3,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    serial = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.SERIAL_LADDER_SCORING,
+        **common,
+    )
+    batched = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        ladder_scoring=reduced_newton.LADDER_SCORING,
+        **common,
+    )
+    assert serial.steps
+    assert len(batched.steps) == len(serial.steps)
+    for taken, reference in zip(batched.steps, serial.steps, strict=True):
+        assert (taken.trip, taken.step) == (reference.trip, reference.step)
+        assert taken.accepted_factor == reference.accepted_factor
+        assert taken.grades_tried == reference.grades_tried
+        assert taken.jacobian_refreshed == reference.jacobian_refreshed
+        assert taken.merit == reference.merit
+        assert taken.flux_residual == reference.flux_residual
+        assert taken.reduced_residual == pytest.approx(
+            reference.reduced_residual, rel=TAIL_RESIDUAL_AGREEMENT
+        )
+    assert batched.active_set_iterations == serial.active_set_iterations
+    assert batched.newton_steps_per_trip == serial.newton_steps_per_trip
+    assert batched.active_set_mask_differences == serial.active_set_mask_differences
+    assert batched.termination_name == serial.termination_name
+    assert batched.active_set_residuals == pytest.approx(
+        serial.active_set_residuals, rel=BOUNDARY_RESIDUAL_AGREEMENT
+    )

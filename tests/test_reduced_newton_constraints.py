@@ -47,9 +47,16 @@ with skip_import("jax"):
         CurrentCentroidConstraint,
         ProfileAmplitudeUnknown,
     )
+    from nova.equilibrium.fixed_point import _relative_residual
+    from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.forward_operator import PrescribedCurrentField
     from nova.equilibrium.observation import MomentIntegralSupport
     from nova.equilibrium.reduced_newton import ReducedNewtonResult
+    from nova.equilibrium.solve_request import (
+        ExplicitSolveSeed,
+        ForwardSolveReceipt,
+        ForwardSolveRequest,
+    )
 
     from tests.test_reduced_newton import machine  # noqa: F401
 
@@ -531,3 +538,324 @@ def test_the_reduced_route_refuses_a_state_reading_compensator(steered):
         reduced_newton.solve_constrained_reduced_newton(
             profile, free.state, constraint_pairs=(pair,)
         )
+
+
+def test_row_response_through_the_routes_own_augmentation_matches_a_central_difference(
+    steered,
+):
+    """The row the merged solve drives responds as a central difference reads.
+
+    The response certified is the one the route's own program solves with: the
+    Jacobian it forms at the terminal augmented state carries the row's
+    derivative with respect to the compensating unknown, and the central
+    difference perturbs that unknown through the same program's reconstruct, so
+    the observation read is the same function the solve minimised.  The
+    perturbation stays inside one plasma labelling, which the labels confirm.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    coordinates = result.program.coordinates
+    operator = profile.operator
+    terminal = jnp.asarray(result.state)
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(terminal, None), dtype=bool)
+    )
+    moments = operator.cell_current_moments(terminal)
+    amplitudes = reduced_newton._gather(coordinates, moments)
+    unknown = float(np.asarray(result.compensating_unknown)[0])
+    kernels = result.program.kernels
+
+    def flux_at(value):
+        reduced = jnp.concatenate(
+            (amplitudes, jnp.asarray([value], dtype=amplitudes.dtype))
+        )
+        return kernels["reconstruct"](reduced, shadow, terminal)
+
+    span = float(np.ptp(np.asarray(result.state)))
+    probe = 1.0e-3 * max(abs(unknown), 1.0)
+    unit_flux = (
+        float(jnp.max(jnp.abs(flux_at(unknown + probe) - flux_at(unknown)))) / probe
+    )
+    # Perturb the flux by a tenth of the step the response matrix contract
+    # uses, so the labels cannot move and the quotient sits decades inside the
+    # agreement it is certified against.
+    step = (RESPONSE_STEP / 10.0) * span / max(unit_flux, 1.0e-12)
+    labels = operator.current_domain_masks(terminal, None)
+    for value in (unknown + step, unknown - step):
+        probed = operator.current_domain_masks(flux_at(value), None)
+        assert np.array_equal(
+            np.asarray(labels.profile_participation),
+            np.asarray(probed.profile_participation),
+        )
+    difference = (
+        _centroid(profile, flux_at(unknown + step))
+        - _centroid(profile, flux_at(unknown - step))
+    ) / (2.0 * step)
+    reduced = jnp.concatenate(
+        (amplitudes, jnp.asarray([unknown], dtype=amplitudes.dtype))
+    )
+    jacobian = kernels["jacobian"](reduced, shadow, terminal)
+    scale = float(np.asarray(pair.binding.scale)[0])
+    row_block = float(
+        np.ravel(np.asarray(jacobian[coordinates.size :, coordinates.size :]))[0]
+    )
+    # rows = (observed - target) / scale, so d(observed)/dc = scale * d(rows)/dc.
+    tangent = scale * row_block
+    assert abs(difference) > 0.0
+    assert abs(tangent - difference) <= RESPONSE_AGREEMENT * abs(difference)
+
+
+def test_the_line_search_follows_the_augmented_merit_when_the_blocks_disagree(steered):
+    """Where the flux block is done and the row block is not, the row decides.
+
+    At the converged free state a moved row leaves the flux block already
+    inside the tolerance while the augmented merit is still far above it.  A
+    ladder that scored the flux alone would declare the state converged and
+    take no step, so the only thing that can make the route move is the row
+    block, and the grade it accepts is the one the augmented merit accepts.
+    """
+    profile, _seed, free = steered
+    assert free.terminal_residual <= SOLVE_TOLERANCE
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    assert result.newton_steps_per_trip and result.newton_steps_per_trip[0] >= 1
+    first = result.steps[0]
+    assert first.accepted_factor == 1.0
+    # The augmented exit metric at the incumbent was above the tolerance the
+    # free solve had cleared, so the row block is what the step is for.
+    assert first.flux_residual > SOLVE_TOLERANCE
+
+    # The full-length candidate is where the blocks disagree.  The flux block
+    # alone at the incumbent is done, and its own merit at the candidate is
+    # worse than the incumbent, so a ladder that scored the flux alone would
+    # refuse this grade; the augmented merit at the candidate is below the
+    # incumbent because the row block improves, so the augmented selection
+    # accepts it - and the step the route actually took is grade zero.
+    coordinates = result.program.coordinates
+    operator = profile.operator
+    base_state = jnp.asarray(free.state)
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(base_state, None), dtype=bool)
+    )
+    amplitudes = reduced_newton._gather(
+        coordinates, operator.cell_current_moments(base_state)
+    )
+    incumbent = jnp.concatenate(
+        (amplitudes, jnp.asarray([0.0], dtype=amplitudes.dtype))
+    )
+    kernels = result.program.kernels
+    direction = kernels["direction"](
+        kernels["jacobian"](incumbent, shadow, base_state),
+        kernels["reduced_residual"](incumbent, shadow, base_state),
+    )
+    candidate = incumbent + direction
+    augmented_incumbent = kernels["step_scores"](incumbent, shadow, base_state)
+    augmented_candidate = kernels["step_scores"](candidate, shadow, base_state)
+    assert float(augmented_candidate.merit) < float(augmented_incumbent.merit)
+    # The flux-only program carries no unknown block, so it scores the
+    # amplitudes alone and the flux part of the augmented route's direction.
+    unaugmented = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    candidate_flux = amplitudes + direction[: coordinates.size]
+    flux_only_incumbent = unaugmented["flux_scores"](
+        amplitudes, shadow, base_state
+    )
+    flux_only_candidate = unaugmented["flux_scores"](
+        candidate_flux, shadow, base_state
+    )
+    assert float(flux_only_incumbent[1]) <= SOLVE_TOLERANCE
+    assert float(flux_only_candidate[0]) > float(flux_only_incumbent[0])
+
+
+def test_a_large_compensating_unknown_does_not_loosen_the_scoring(steered):
+    """Holding the augmented residual fixed, a hundred-fold unknown moves nothing.
+
+    The exit test and the merit divide by a reference.  When that reference is
+    the concatenated augmented vector, a normalised compensating unknown of
+    order one hundred sets it and divides the residuals down by that factor, so
+    the tolerance the whole system stops on loosens as a keyframe loop's
+    unknown accumulates.  This contract builds the scored and imaged vectors
+    exactly as the route's scoring builds them, holds the residual and the flux
+    reference fixed while the unknown block grows from zero to one hundred, and
+    requires the bounded scoring to return identical merit and exit values at
+    every unknown, while the unbounded expressions the augmented route used to
+    evaluate would have loosened by the same amount.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    scale = float(np.max(np.abs(np.asarray(free.state))))
+    rows = float(np.asarray(result.constraints[0].scaled_residual)[0])
+    flux_scored = jnp.asarray(result.state, dtype=jnp.float64) / scale
+    flux_imaged = flux_scored + 1.0e-8
+    reference = flux_imaged
+
+    def scored_imaged(unknown):
+        scored = jnp.concatenate((flux_scored, jnp.asarray([unknown])))
+        imaged = jnp.concatenate((flux_imaged, jnp.asarray([unknown - rows])))
+        return scored, imaged
+
+    bounded = {}
+    for unknown in (0.0, 1.0, 10.0, 100.0):
+        scored, imaged = scored_imaged(unknown)
+        bounded[unknown] = (
+            reduced_newton._augmented_smooth_relative_sup_merit(
+                imaged, scored, reference
+            ),
+            reduced_newton._augmented_relative_residual(imaged, scored, reference),
+        )
+    for unknown in (1.0, 10.0, 100.0):
+        assert float(bounded[unknown][0]) == float(bounded[0.0][0])
+        assert float(bounded[unknown][1]) == float(bounded[0.0][1])
+    # The unbounded expressions the merged code replaced loosen with the
+    # unknown; asserting they do shows the bounded scoring is doing the work.
+    old = _relative_residual(*scored_imaged(100.0))
+    old_base = _relative_residual(*scored_imaged(0.0))
+    assert float(old) <= 0.2 * float(old_base)
+
+
+def test_the_reduced_route_publishes_soft_mode_projection_as_a_typed_absence(steered):
+    """No soft-mode projection exists on a dense route; the record says so.
+
+    The Krylov augmented solver publishes the projection it measured; the dense
+    reduced route has none, and a NaN would read as a number rather than as the
+    absence it is.  The rest of the record stays real.
+    """
+    profile, _seed, free = steered
+    achieved = _centroid(profile, free.state)
+    pair, _selection = _centroid_pair(profile, free.state, achieved + CENTROID_MOVE)
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    assert all(record.soft_mode_projection is None for record in result.constraints)
+    record = result.constraints[0]
+    assert bool(np.asarray(record.qualified)[0])
+    assert np.isfinite(float(np.asarray(record.physical_residual)[0]))
+    assert np.all(np.isfinite(np.asarray(result.prescribed_current)))
+
+
+def test_a_constrained_solve_without_a_prescribed_field_is_refused(steered):
+    """Compensation with nowhere to fold into is refused, with the reason stated.
+
+    A circuit compensator's flux image is the machine's prescribed response, so
+    with neither ``prescribed_current`` nor an operator-side field a constrained
+    solve has no machine to drive and no receipt to fold into; the route refuses
+    up front rather than letting the individual compensator raise mid-trace.
+    """
+    profile, _seed, free = steered
+    achieved = _centroid(profile, free.state)
+    pair, _selection = _centroid_pair(profile, free.state, achieved + CENTROID_MOVE)
+    saved = profile.operator.prescribed_field
+    profile.operator.prescribed_field = None
+    try:
+        with pytest.raises(ValueError, match="prescribed current field"):
+            reduced_newton.solve_constrained_reduced_newton(
+                profile,
+                free.state,
+                constraint_pairs=(pair,),
+                tolerance=SOLVE_TOLERANCE,
+                newton_steps=NEWTON_STEPS,
+            )
+    finally:
+        profile.operator.prescribed_field = saved
+
+
+def test_reduced_requests_with_constraints_never_reach_the_krylov_solver(
+    steered, monkeypatch
+):
+    """The widened accelerated gate cannot hand a reduced request to Krylov.
+
+    ``solve`` routes the reduced routes to their own entry before the shared
+    ladder is consulted, and the ladder itself refuses a constrained reduced
+    route outright, so the Krylov augmented solver is unreachable from a
+    ``reduced_newton`` request no matter how the routing evolves.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+
+    def fail(*args, **kwargs):
+        raise AssertionError(
+            "a reduced_newton request must never reach the Krylov augmented solver"
+        )
+
+    monkeypatch.setattr(ForwardProfile, "_solve_augmented_constraints", fail)
+    equilibrium = profile.solve(
+        free.state,
+        route="reduced_newton",
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert bool(np.asarray(equilibrium.fixed_point.converged))
+    with pytest.raises(ValueError, match="compensating unknown vector"):
+        profile._solve_accelerated(
+            "reduced_newton", free.state, None, constraint_pairs=(pair,)
+        )
+
+
+def test_the_request_path_reports_the_reduced_active_set_history(steered):
+    """A typed reduced request selects the reduced active-set arrays.
+
+    The request-path history selection covers the reduced routes beside the
+    Krylov route, so the receipt reports the per-trip residuals and mask
+    differences the reduced solve publishes rather than a plain flux trace.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="pfs-reduced-history",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(np.asarray(free.state)),
+        policy_overrides={
+            "route": "reduced_newton",
+            "kernel_tolerance": SOLVE_TOLERANCE,
+            "newton_steps": NEWTON_STEPS,
+            "compilation_cache": False,
+        },
+        constraint_pairs=(pair,),
+    )
+    receipt = profile.solve(request)
+    assert isinstance(receipt, ForwardSolveReceipt)
+    history = receipt.equilibrium.fixed_point
+    assert len(receipt.residual_history) >= 1
+    np.testing.assert_array_equal(
+        np.asarray(receipt.residual_history),
+        np.asarray(history.active_set_residuals),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(receipt.mask_history),
+        np.asarray(history.active_set_mask_differences),
+    )

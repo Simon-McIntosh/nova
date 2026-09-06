@@ -11,6 +11,7 @@ written through the group-backed netCDF store is bit-identical on read.
 from __future__ import annotations
 
 import time
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -30,6 +31,10 @@ with skip_import("jax"):
         resolve_forward_solve_policy,
     )
     from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.equilibrium.flux_surface_geometry import (
+        FluxSurfaceGeometry,
+        source_field_function,
+    )
     from nova.equilibrium.steering_frames import (
         COCOS,
         FINITE_MASK_COMPONENTS,
@@ -113,6 +118,141 @@ def _edge_vanishing_profile(amplitude):
         return amplitude * (1.0 - jnp.clip(jnp.asarray(psi_norm), 0.0, 1.0))
 
     return gradient
+
+
+def _synthetic_geometry_fields(index: int) -> dict[str, object]:
+    """Return deterministic internal geometry for the session contract."""
+    surface = np.linspace(0.0, 1.0, 11)
+    angle = np.linspace(0.0, 2.0 * np.pi, 64, endpoint=False)
+    radius = 1.0 + 0.25 * surface[:, None] * np.cos(angle)[None, :]
+    height = 0.02 * index + 0.35 * surface[:, None] * np.sin(angle)[None, :]
+    faces = np.linspace(0.0, 1.0, 26)
+    scale = 1.0 + index * 0.01
+    profiles = {
+        name: scale * (0.1 + faces)
+        for name in (
+            "rho_tor",
+            "Phi",
+            "psi_face",
+            "Ip_profile",
+            "R_in",
+            "R_out",
+            "F",
+            "int_dl_over_Bp",
+            "inv_R",
+            "inv_R2",
+            "grad_psi",
+            "grad_psi2",
+            "grad_psi2_over_R2",
+            "B2",
+            "inv_B2",
+            "delta_upper",
+            "delta_lower",
+            "elongation",
+            "vpr",
+            "volume",
+            "area",
+            "q",
+            "g0",
+            "g1",
+            "g2",
+            "g3",
+            "psi_norm_face",
+        )
+    }
+    return {
+        "flux_surface_psi_norm": surface,
+        "flux_surface_psi": scale * surface,
+        "flux_surface_r": radius,
+        "flux_surface_z": height,
+        "flux_surface_angle": angle,
+        "rho_face_norm": faces,
+        **profiles,
+        "R_major": 1.0,
+        "a_minor": 0.35,
+        "B_0": 2.0,
+        "boundary_toroidal_flux": 0.5,
+        "magnetic_axis_z_scalar": 0.02 * index,
+        "diverted": False,
+        "divertor_leg_r": np.full((4, 32), np.nan),
+        "divertor_leg_z": np.full((4, 32), np.nan),
+        "divertor_leg_finite": np.zeros(4, dtype=bool),
+    }
+
+
+def _circular_internal_geometry():
+    """Return a small analytic geometry block for frame-assembly tests."""
+    major_radius = 3.0
+    minor_radius = 0.5
+    radius = np.linspace(major_radius - 0.6, major_radius + 0.6, 65)
+    height = np.linspace(-0.6, 0.6, 65)
+    mesh_radius, mesh_height = np.meshgrid(radius, height, indexing="ij")
+    psi = -0.2 * (
+        ((mesh_radius - major_radius) / minor_radius) ** 2
+        + (mesh_height / minor_radius) ** 2
+    )
+
+    def field_function(psi_norm):
+        """Return the circular map's constant toroidal-field function."""
+        return np.full_like(psi_norm, 2.0 * major_radius)
+
+    geometry = FluxSurfaceGeometry.internal_geometry(
+        FluxLattice(radius, height),
+        psi,
+        field_function,
+        axis=(major_radius, 0.0),
+        boundary_flux=-0.2,
+        reference_radius=major_radius,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
+    return radius, height, psi, geometry
+
+
+def _receipt_for_geometry_assembly(radius, height, psi, geometry):
+    """Return a typed receipt with lightweight solved-state carriers."""
+    boundary = np.column_stack((geometry.surface_r[-1], geometry.surface_z[-1]))
+    raster = SimpleNamespace(
+        radius=radius,
+        height=height,
+        shape=np.asarray([radius.size, height.size], dtype=np.int32),
+        psi=psi,
+        psi_norm=psi / -0.2,
+        domain_label=np.zeros_like(psi, dtype=np.int8),
+        separatrix=boundary,
+        separatrix_vertex_count=np.int32(boundary.shape[0]),
+    )
+    labelled = SimpleNamespace(
+        o_point=np.asarray([3.0, 0.0]),
+        primary_x_point=np.full(2, np.nan),
+        secondary_x_point=np.full(2, np.nan),
+        strike_points=np.full((2, 2), np.nan),
+        lcfs=boundary,
+        lcfs_vertex_count=np.int32(boundary.shape[0]),
+    )
+    equilibrium = SimpleNamespace(
+        raster_flux=raster,
+        labelled_flux=labelled,
+        fixed_point=SimpleNamespace(active_set_iterations=np.int32(1)),
+        constraints=(),
+    )
+    return ForwardSolveReceipt(
+        terminal_state=equilibrium,
+        qualified=True,
+        termination_reason=np.int32(0),
+        residual_history=np.empty(0),
+        mask_history=np.empty(0),
+        globalisation_decisions=(np.empty(0), np.empty(0)),
+        amplitude_history=np.empty(0),
+        topology_read=None,
+        polish_receipt=None,
+        compilation_cache_hit=False,
+        wall_seconds=0.01,
+        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
+            resolve_forward_solve_policy()
+        ),
+    )
 
 
 @pytest.fixture(scope="module")
@@ -244,6 +384,7 @@ def _synthetic_frame(
         carrier_identity="frozen-six",
         nova_version="9.9.9",
         policy_digest="0" * 64,
+        **_synthetic_geometry_fields(index),
     )
 
 
@@ -352,6 +493,33 @@ def test_policy_digest_is_deterministic() -> None:
     assert all(char in "0123456789abcdef" for char in first)
 
 
+def test_assemble_frame_carries_supplied_internal_geometry() -> None:
+    """Assembly copies finite producer loops into the decoder frame."""
+    radius, height, psi, geometry = _circular_internal_geometry()
+    receipt = _receipt_for_geometry_assembly(radius, height, psi, geometry)
+    frame = assemble_frame(
+        receipt,
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[2.5, 0.0], [3.5, 0.0]]),
+        ),
+        carrier_identity="circular-map",
+        applied_current=np.asarray([0.0]),
+        compensating_current=np.empty(0),
+        internal_geometry=geometry,
+    )
+
+    assert np.all(np.isfinite(frame.flux_surface_r))
+    assert np.all(np.isfinite(frame.flux_surface_z))
+    np.testing.assert_array_equal(frame.flux_surface_r, geometry.surface_r)
+    np.testing.assert_array_equal(frame.flux_surface_z, geometry.surface_z)
+    np.testing.assert_array_equal(
+        frame.flux_surface_r[0],
+        np.full_like(frame.flux_surface_r[0], frame.flux_surface_r[0, 0]),
+    )
+
+
 @pytest.mark.slow
 def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     """A frame from the solved Solov'ev fixture carries every decoder channel.
@@ -407,12 +575,24 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
             [[0.85, 0.0], [1.15, 0.1], [1.0, 0.2], [1.0, -0.2]]
         ),
     )
+    axis = np.asarray(equilibrium.topology.axis, dtype=float)
+    internal_geometry = FluxSurfaceGeometry.internal_geometry(
+        profile.lattice,
+        np.asarray(equilibrium.flux),
+        source_field_function(profile.source, float(equilibrium.topology.flux_span)),
+        axis=(float(axis[0]), float(axis[1])),
+        boundary_flux=float(equilibrium.topology.boundary_flux),
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
     frame = assemble_frame(
         receipt,
         action=action,
         carrier_identity=CARRIER_IDENTITY,
         applied_current=conductor_current,
         compensating_current=np.array([-1.25e4, 3.1e3]),
+        internal_geometry=internal_geometry,
     )
 
     radial_count, vertical_count = (
@@ -451,6 +631,18 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     assert frame.compensating_current.shape == (2,)
     assert frame.compensating_current.dtype == np.float64
     assert np.all(np.isfinite(frame.compensating_current))
+    assert frame.flux_surface_psi_norm.shape == (11,)
+    assert frame.flux_surface_psi.shape == (11,)
+    assert frame.flux_surface_r.shape == (11, 64)
+    assert frame.flux_surface_z.shape == (11, 64)
+    np.testing.assert_array_equal(
+        frame.flux_surface_r[0],
+        np.full_like(frame.flux_surface_r[0], frame.flux_surface_r[0, 0]),
+    )
+    assert frame.rho_face_norm.shape == (26,)
+    assert frame.vpr.shape == (26,)
+    assert frame.divertor_leg_r.shape == (4, 32)
+    assert not np.any(frame.divertor_leg_finite)
 
     assert frame.action.name == "minor_radius"
     assert frame.action.delta == -0.03

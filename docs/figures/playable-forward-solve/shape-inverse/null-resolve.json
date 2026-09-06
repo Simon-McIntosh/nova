@@ -1,0 +1,267 @@
+{
+  "arm": "null-resolve",
+  "previous_turning_points_m": [
+    [
+      1.4033222108735979,
+      0.011597952807894621
+    ],
+    [
+      0.5917077219797813,
+      1.2377459740638033
+    ],
+    [
+      0.2678445844287929,
+      0.02275846108762876
+    ],
+    [
+      0.6479403295878997,
+      -1.0166726794942358
+    ]
+  ],
+  "achieved_turning_points_m": [
+    [
+      1.4033222108670076,
+      0.011597952808481627
+    ],
+    [
+      0.5911331232607246,
+      1.2389646453286605
+    ],
+    [
+      0.26784458442743125,
+      0.022758461087947726
+    ],
+    [
+      0.6479403295855162,
+      -1.016672679488621
+    ]
+  ],
+  "turning_point_drift_m": [
+    [
+      -6.590283874174929e-12,
+      5.870061381418878e-13
+    ],
+    [
+      -0.0005745987190566293,
+      0.0012186712648571962
+    ],
+    [
+      -1.3616330285515232e-12,
+      3.1896707497480747e-13
+    ],
+    [
+      -2.3835378115677486e-12,
+      5.614841924739267e-12
+    ]
+  ],
+  "coil_current_by_circuit_a": {
+    "circuit_00": -25381.810546875,
+    "circuit_01": 50267.71875,
+    "circuit_02": 33341.1796875,
+    "circuit_03": 50319.8671875,
+    "circuit_04": 33416.35546875,
+    "circuit_05": 29.57099151611328,
+    "circuit_06": 46.641414642333984,
+    "circuit_07": -185433.671875,
+    "circuit_08": -185195.171875,
+    "circuit_09": -138156.90625,
+    "circuit_10": -138175.46875,
+    "circuit_11": -554.8970947265625,
+    "circuit_12": 926.8552856445312,
+    "circuit_13": 1257.3311767578125,
+    "circuit_14": 1867.960205078125,
+    "circuit_15": 1066.3206787109375,
+    "circuit_16": 641.0380249023438,
+    "circuit_17": 775.0189208984375,
+    "circuit_18": 1718.53466796875,
+    "circuit_19": 703.6361694335938,
+    "circuit_20": 2026.234130859375,
+    "circuit_21": -0.27942585945129395,
+    "circuit_22": 0.09518745541572571,
+    "circuit_23": 3778.736083984375,
+    "circuit_24": 5194.57080078125,
+    "circuit_25": 6156.0703125,
+    "circuit_26": 6275.279296875,
+    "circuit_27": 6268.58154296875,
+    "circuit_28": 6180.56689453125,
+    "circuit_29": 5247.57958984375,
+    "circuit_30": 3813.4140625,
+    "circuit_31": 245.28907775878906,
+    "circuit_32": 1049.990966796875,
+    "circuit_33": 1636.4842529296875,
+    "circuit_34": 1886.26171875,
+    "circuit_35": 1923.7152099609375,
+    "circuit_36": 2791.22412109375,
+    "circuit_37": 250.09170532226562,
+    "circuit_38": 1065.805419921875,
+    "circuit_39": 1654.10498046875,
+    "circuit_40": 1895.2508544921875,
+    "circuit_41": 1925.63818359375,
+    "circuit_42": 2803.581787109375,
+    "circuit_43": -6.427796840667725,
+    "circuit_44": 2.501694679260254,
+    "circuit_45": 52.160404205322266,
+    "circuit_46": 47.23615646362305,
+    "circuit_47": -44.56344985961914,
+    "circuit_48": -21.70099449157715,
+    "circuit_49": 8.450414657592773,
+    "circuit_50": 51.18608856201172,
+    "circuit_51": 46.006004333496094,
+    "circuit_52": 49.822540283203125,
+    "circuit_53": -151.190673828125,
+    "circuit_54": -266.54766845703125,
+    "circuit_55": 5921.36962890625,
+    "circuit_56": -8354.6416015625,
+    "circuit_57": -4728.77001953125,
+    "circuit_58": -2990.78515625,
+    "circuit_59": 1579.34130859375,
+    "circuit_60": 4501.08203125,
+    "circuit_61": 2863.458984375,
+    "circuit_62": 7563.9697265625,
+    "circuit_63": 209.08929443359375,
+    "circuit_64": 74.75963592529297,
+    "circuit_65": 810.333984375,
+    "circuit_66": 1031.466064453125,
+    "circuit_67": -19.61410903930664,
+    "circuit_68": -264.4586486816406,
+    "circuit_69": -1655.669677734375,
+    "circuit_70": 3526.185791015625,
+    "circuit_71": -954.8402709960938,
+    "circuit_72": 404.6587219238281,
+    "circuit_73": -653.9049072265625,
+    "circuit_74": 2120.304931640625,
+    "circuit_75": 142.03111267089844,
+    "circuit_76": 20.160320281982422,
+    "circuit_77": 42.47112274169922,
+    "circuit_78": -309.69842529296875,
+    "circuit_79": 1161.21826171875,
+    "circuit_80": 269.29022216796875,
+    "circuit_81": 1356.5936279296875,
+    "circuit_82": 779.3143310546875,
+    "circuit_83": 1016.7299194335938,
+    "circuit_84": 843.5001831054688,
+    "circuit_85": 284.28558349609375,
+    "circuit_86": 1049.042236328125,
+    "circuit_87": 740.0038452148438,
+    "circuit_88": 127.16990661621094,
+    "circuit_89": 36.94565200805664,
+    "circuit_90": -14.850179672241211,
+    "circuit_91": 22.833417892456055,
+    "circuit_92": 335.2781677246094,
+    "circuit_93": 279.9428405761719,
+    "circuit_94": 313.85992431640625,
+    "circuit_95": -387.17828369140625,
+    "circuit_96": -355.4259948730469,
+    "circuit_97": -279.23095703125,
+    "circuit_98": 312.7547607421875,
+    "circuit_99": 280.88702392578125,
+    "circuit_100": 295.2450256347656
+  },
+  "trips": 1,
+  "wall_s": 16.001781502738595,
+  "converged": true,
+  "runtime": {
+    "source_commit": "13e432711867c8dd3338060e80ac0cf47f45982b",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1263304",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    },
+    "carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.006117331795394421,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-inverse-step-shape-control-sol-2/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.028836 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "policy": "{'policy': 'explicit prescribed-current response matrix', 'current_source': 'efm/fcoil_c in zero-based fcoil_n order', 'stored_circuit_count': 101, 'active_circuit_count': 13, 'passive_or_vessel_circuit_count': 88, 'section_kernel_evaluations': 938, 'section_kernel_evaluations_this_shot': 0, 'passive_registry_minimum_overlap_fraction': 0.26603493820443475, 'passive_registry_maximum_separation_m': 0.0, 'response_shape': [1126, 101], 'ordinary_active_drive_zeroed_to_avoid_double_counting': True, 'free_standing_default': 'policy absent; ordinary conductor drive unchanged', 'stored_field_closure_sup_wb': 1.1102230246251565e-15, 'stored_field_closure_rms_wb': 1.4821494410218056e-16, 'all_currents_prescribed': True, 'response_matrix_reused': True, 'response_input_digests': {'algorithm': 'sha256', 'combined_sha256': '1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994', 'inputs': {'gridr': {'sha256': 'ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b', 'dtype': '<f4', 'shape': [65]}, 'gridz': {'sha256': '649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70', 'dtype': '<f4', 'shape': [65]}, 'limiterr': {'sha256': '0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db', 'dtype': '<f4', 'shape': [37]}, 'limiterz': {'sha256': '85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d', 'dtype': '<f4', 'shape': [37]}, 'fcoil_n': {'sha256': 'defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab', 'dtype': '<f4', 'shape': [101]}, 'fcoil_circ': {'sha256': '99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12', 'dtype': '<f8', 'shape': [938]}, 'fcoil_r': {'sha256': '9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3', 'dtype': '<f4', 'shape': [938]}, 'fcoil_z': {'sha256': '0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024', 'dtype': '<f4', 'shape': [938]}, 'fcoil_width': {'sha256': '030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9', 'dtype': '<f4', 'shape': [938]}, 'fcoil_height': {'sha256': 'b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb', 'dtype': '<f4', 'shape': [938]}, 'fcoil_ang1': {'sha256': '3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4', 'dtype': '<f4', 'shape': [938]}, 'fcoil_ang2': {'sha256': '18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962', 'dtype': '<f4', 'shape': [938]}, 'fcoil_turns': {'sha256': 'e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8', 'dtype': '<f4', 'shape': [938]}, 'fcoil_xmult': {'sha256': '7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f', 'dtype': '<f4', 'shape': [938]}, 'resolved_response_targets': {'sha256': '5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9', 'dtype': '<f8', 'shape': [1126, 2]}}}, 'active_mapping_recomputed_for_shot': True, 'active_mapping': [{'family': 'p2_inner_lower', 'stored_circuit': 4, 'centroid_separation_m': 3.020663818271642e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': 50319.8671875, 'filament_turn_multiplier_sum': 0.9999960064888, 'effective_drive_a_turn': 50319.66623454681}, {'family': 'p2_inner_upper', 'stored_circuit': 2, 'centroid_separation_m': 4.610138552976278e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': 50267.71875, 'filament_turn_multiplier_sum': 0.9999960064888, 'effective_drive_a_turn': 50267.518005302176}, {'family': 'p2_outer_lower', 'stored_circuit': 5, 'centroid_separation_m': 3.794706373301994e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': 33416.35546875, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': 33416.35546875}, {'family': 'p2_outer_upper', 'stored_circuit': 3, 'centroid_separation_m': 3.882122250270243e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': 33341.1796875, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': 33341.1796875}, {'family': 'p3_lower', 'stored_circuit': 7, 'centroid_separation_m': 1.2310483904636694e-07, 'current_field': 'efm/fcoil_c', 'raw_current_a': 46.641414642333984, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': 46.641414642333984}, {'family': 'p3_upper', 'stored_circuit': 6, 'centroid_separation_m': 1.1378064254653142e-07, 'current_field': 'efm/fcoil_c', 'raw_current_a': 29.57099151611328, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': 29.57099151611328}, {'family': 'p4_lower', 'stored_circuit': 9, 'centroid_separation_m': 0.002284428762164253, 'current_field': 'efm/fcoil_c', 'raw_current_a': -185195.171875, 'filament_turn_multiplier_sum': 1.0000008754432201, 'effective_drive_a_turn': -185195.33400285762}, {'family': 'p4_upper', 'stored_circuit': 8, 'centroid_separation_m': 0.003039636783399228, 'current_field': 'efm/fcoil_c', 'raw_current_a': -185433.671875, 'filament_turn_multiplier_sum': 1.0000008754432201, 'effective_drive_a_turn': -185433.83421165083}, {'family': 'p5_lower', 'stored_circuit': 11, 'centroid_separation_m': 0.0022829440191137885, 'current_field': 'efm/fcoil_c', 'raw_current_a': -138175.46875, 'filament_turn_multiplier_sum': 1.0000008754432201, 'effective_drive_a_turn': -138175.5897147773}, {'family': 'p5_upper', 'stored_circuit': 10, 'centroid_separation_m': 0.0022872695201792835, 'current_field': 'efm/fcoil_c', 'raw_current_a': -138156.90625, 'filament_turn_multiplier_sum': 1.0000008754432201, 'effective_drive_a_turn': -138157.0271985269}, {'family': 'p6_lower', 'stored_circuit': 13, 'centroid_separation_m': 5.527338696549878e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': 926.8552856445312, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': 926.8552856445312}, {'family': 'p6_upper', 'stored_circuit': 12, 'centroid_separation_m': 1.4493967305635352e-08, 'current_field': 'efm/fcoil_c', 'raw_current_a': -554.8970947265625, 'filament_turn_multiplier_sum': 1.0, 'effective_drive_a_turn': -554.8970947265625}, {'family': 'sol', 'stored_circuit': 1, 'centroid_separation_m': 2.5307005105576235e-06, 'current_field': 'efm/fcoil_c', 'raw_current_a': -25381.810546875, 'filament_turn_multiplier_sum': 328.0, 'effective_drive_a_turn': -8325233.859375}]}",
+    "compilation_cache": {
+      "selection": "explicit_per_recipe",
+      "root": "/home/ITER/mcintos/.cache",
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "version_key": "runtime-0745ecebea4cb264e054",
+      "runtime_identity": {
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_enable_x64": true,
+          "jax_default_matmul_precision": null,
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "process_index": 0,
+            "id": 0
+          }
+        ]
+      },
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "minimum_compile_seconds": 1.0,
+      "maximum_bytes": 8589934592
+    },
+    "prime": {
+      "converged": true,
+      "trips": 4
+    }
+  }
+}

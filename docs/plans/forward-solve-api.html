@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="32">
-<meta name="plan-impl" content="0.45">
+<meta name="plan-version" content="34">
+<meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 </head>
@@ -155,6 +155,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T203715706706" data-who="coordinator" data-when="2026-09-04T20:36:00Z">
     <div class="r-comment-body"><p>Compilation-cache default made node-local: commit <code>938f5c51</code> merged at <code>32382c3b</code>. An unconfigured public solve now resolves its cache beneath TMPDIR (falling back to /tmp), scoped by user and host, with the runtime-versioned directory below that root; an explicitly named <code>jax_compilation_cache_dir</code> from a launcher or the environment is preserved; the receipt's resolved defaults record <code>compilation_cache_directory</code> while <code>compilation_cache_hit</code> stays an observation. Two simultaneous CPU processes compiling into the default location exit clean (4 new tests), the request, defaults and wiring suites plus the referees stay green (84). Attribution of the abort that motivated it: the stack dies at <code>executable.serialize()</code> before the cache file is written, and JAX 0.11.0's cache uses a file lock plus write_bytes rather than a no-clobber rename, so neither a GPFS rename failure nor a concurrent-writer race is supported by the evidence; a cheap two-writer GPFS reproduction did not abort. The native serialization abort remains unexplained and is recorded here as open; the node-local default removes the shared-directory exposure regardless.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260906T194721133352-fsa-agents-seam-guidance" data-who="fsa-docs-c" data-when="2026-09-06T20:13:45.445Z">
+    <div class="r-comment-body"><p>Forward-solve seam wired into the guidance: seam section in nova/equilibrium/AGENTS.md (+35), new nova/transport/AGENTS.md (+45) for the coupled forward, two pointer rows in the root AGENTS.md; every named symbol verified present by the coordinator; the scout half of the section done-when is a separate node</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260906T202200-seam-guidance-landed" data-who="reckon-ship-s19-batched" data-when="2026-09-06T20:22:00Z">
+    <div class="r-comment-body">fsa-agents-seam-guidance landed: commit e87d2acb merged at d5c95d14 (local DSv4 lane, 26 min wall, documentation role, spec exact). Gate passed: every path, class and test the new sections name exists at the head (coordinator re-verified the fifteen symbols against nova/equilibrium/solve_request.py, nova/transport/forward.py, evolved_state.py, torax_geometry.py and the two default-wiring test files; naming checks clean on the added lines). Delivered: a seam section in nova/equilibrium/AGENTS.md (+35 lines: ForwardSolveRequest to ForwardProfile.solve to ForwardSolveReceipt as the only supported route, FORWARD_SOLVE_DEFAULTS keyed by the Nova package version, deviations on resolved_defaults.deviations, the two default-wiring tests as the post-route check), a new nova/transport/AGENTS.md (+45 lines) for the coupled forward stating the same discipline over the symbols that exist today (the transport request is not yet wired through the equilibrium seam, which stays section 3's work), and two pointer rows in the root AGENTS.md. Second half of the section's done-when, the fresh read-only scout answering how to run a forward solve with production defaults, is node fsa-seam-scout. Worker follow-on outside this repository: the reckon-ship prior-art scout brief should name the seam (foreign-owner: reckon skill).</div>
 </div>
 </section>
 </main>

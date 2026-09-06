@@ -839,6 +839,7 @@ class FluxSurfaceGeometry:
         # LCFS at psi_norm 1, traced for coordinates only because the poloidal
         # gradient vanishes at an X-point there
         surface_psi_norm = np.linspace(0.0, 1.0, int(n_surface))
+        trace_n_theta = 2 * int(n_theta)
         trace = _trace_surfaces(
             interpolant,
             centre,
@@ -847,14 +848,14 @@ class FluxSurfaceGeometry:
             surface_psi_norm[1:],
             node_radius,
             node_height,
-            int(n_theta),
+            trace_n_theta,
         )
         surface_r = np.empty((int(n_surface), int(n_theta)))
         surface_z = np.empty((int(n_surface), int(n_theta)))
         surface_r[0] = float(centre[0])
         surface_z[0] = float(centre[1])
-        surface_r[1:] = trace.radius.T
-        surface_z[1:] = trace.height.T
+        surface_r[1:] = trace.radius[::2].T
+        surface_z[1:] = trace.height[::2].T
 
         # the profile block is the reader record placed directly on the TORAX
         # face grid, so a consumer interpolating its own profiles onto those
@@ -878,7 +879,7 @@ class FluxSurfaceGeometry:
             surface_psi=axis_flux + surface_psi_norm * span,
             surface_r=surface_r,
             surface_z=surface_z,
-            surface_angle=trace.angle,
+            surface_angle=trace.angle[::2],
             r_major=r_major,
             a_minor=a_minor,
             b0=float(record.field_function[-1]) / r_major,

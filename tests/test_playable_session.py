@@ -399,8 +399,6 @@ def test_bokeh_serve_serves_the_playable_document_on_the_default_machine(tmp_pat
             str(port),
             "--allow-websocket-origin",
             f"127.0.0.1:{port}",
-            "--host",
-            f"127.0.0.1:{port}",
         ]
         with open(log_path, "w") as log_file:
             server = Popen(
@@ -426,15 +424,25 @@ def test_bokeh_serve_serves_the_playable_document_on_the_default_machine(tmp_pat
             assert served, f"startup log never reported serving: {log_path.read_text()}"
             # a client session drives the document on the default Solov'ev machine
             session = pull_session(
-                session_id=None,
-                url=f"http://127.0.0.1:{port}/apps/playable",
-                arguments={"machine": [b"solovev"]},
+                session_id=None, url=f"http://127.0.0.1:{port}/playable"
             )
             try:
                 names = {root.name for root in session.document.roots}
                 assert "poloidal" in names
-                assert "compensation" in names
-                assert "receipt" in names
+                # the compensation chart and the keyframe receipt table live
+                # inside the named receipts column, bound to the same sources
+                nested = set()
+                for root in session.document.roots:
+                    if root.name != "receipts":
+                        continue
+                    for child in root.children:
+                        if getattr(child, "name", None):
+                            nested.add(child.name)
+                        for sub in getattr(child, "children", ()) or ():
+                            if getattr(sub, "name", None):
+                                nested.add(sub.name)
+                assert "compensation" in nested, f"receipts nested: {nested}"
+                assert "receipt" in nested
             finally:
                 session.close()
         finally:

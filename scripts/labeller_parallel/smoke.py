@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -64,6 +65,7 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
     npz_differences: dict[str, int] = {}
     session_differences: dict[str, int] = {}
     addition_occurrences: dict[str, int] = {}
+    revision_transitions: list[dict[str, Any]] = []
 
     def observe(counts: dict[str, int], name: str, differs: bool) -> None:
         counts.setdefault(name, 0)
@@ -92,6 +94,21 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
                 )
             elif name in MANIFEST_PATH_FIELDS:
                 differs = Path(str(expected_value)).name != Path(str(actual_value)).name
+            elif name == "nova_revision" and expected_value != actual_value:
+                valid_revisions = all(
+                    isinstance(value, str)
+                    and re.fullmatch(r"[0-9a-f]{40}", value) is not None
+                    for value in (expected_value, actual_value)
+                )
+                differs = not valid_revisions
+                if valid_revisions:
+                    revision_transitions.append(
+                        {
+                            "shot": shot,
+                            "reference_process_revision": expected_value,
+                            "scheduler_process_revision": actual_value,
+                        }
+                    )
             else:
                 differs = expected_value != actual_value
             observe(manifest_differences, name, differs)
@@ -172,6 +189,7 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
             + [f"slices.{name}" for name in sorted(DECLARED_SLICE_ADDITIONS)],
             "occurrences": dict(sorted(addition_occurrences.items())),
         },
+        "accepted_process_revision_transitions": revision_transitions,
         "comparison_policy": {
             "exact_values": "all fields except independent wall-clock values",
             "manifest_wall_clock_fields": sorted(

@@ -48,5 +48,6 @@ scripts/labeller_parallel/run.sh --submit \
 ```
 
 The launcher uses one H200, four host CPUs, 128 GiB and a one-hour bound. It
-runs the independent reference first, then the one-device compiled scheduler,
-then the comparison. The three-device throughput arm is a separate follow-on.
+reuses the completed independent reference, then runs the one-device compiled
+scheduler and comparison. A clean initial run adds `--run-reference` to the
+driver command. The three-device throughput arm is a separate follow-on.

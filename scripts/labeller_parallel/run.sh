@@ -50,7 +50,7 @@ fi
 CPUS=4
 MEMORY_GIB=128
 LOG="${OUTPUT_ROOT}/h200-one-device/labeller-parallel-%j.log"
-WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu JAX_ENABLE_COMPILATION_CACHE=true PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}' --devices 1 --batch-per-device '${BATCH_PER_DEVICE}' --host-workers 3 --max-slices 4 --run-reference --condition-on-guard-failure --replace"
+WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu JAX_ENABLE_COMPILATION_CACHE=true PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}' --devices 1 --batch-per-device '${BATCH_PER_DEVICE}' --host-workers 3 --max-slices 4 --condition-on-guard-failure --replace"
 COMMAND=(
   sbatch --parsable
   --job-name=nova-labeller-parallel-identity

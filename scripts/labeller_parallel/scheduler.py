@@ -7,6 +7,7 @@ from collections import deque
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
 from dataclasses import dataclass, field, replace
 import multiprocessing
+import os
 from pathlib import Path
 import subprocess
 import time
@@ -50,6 +51,7 @@ from scripts.labeller_batch.shard import (
     _write_json,
     _write_session_file,
     policy_digest,
+    prepare_labeller,
 )
 
 STATE_SIZE = 1_126
@@ -444,6 +446,14 @@ class SequentialCompiledEngine:
 
 _ASSEMBLY_PREPARED: PreparedLabeller | None = None
 _CONDITION_ON_GUARD_FAILURE = False
+
+
+def _initialize_assembly_worker(condition_on_guard_failure: bool) -> None:
+    """Build an isolated CPU assembly context in a freshly spawned worker."""
+    os.environ["JAX_PLATFORMS"] = "cpu"
+    global _ASSEMBLY_PREPARED, _CONDITION_ON_GUARD_FAILURE
+    _ASSEMBLY_PREPARED = prepare_labeller()
+    _CONDITION_ON_GUARD_FAILURE = condition_on_guard_failure
 
 
 @dataclass(frozen=True)
@@ -871,12 +881,12 @@ class CorpusScheduler:
 
         for index in range(self.capacity):
             refill(index)
-        global _ASSEMBLY_PREPARED, _CONDITION_ON_GUARD_FAILURE
-        _ASSEMBLY_PREPARED = prepared
-        _CONDITION_ON_GUARD_FAILURE = self.condition_on_guard_failure
-        context = multiprocessing.get_context("fork")
+        context = multiprocessing.get_context("spawn")
         with ProcessPoolExecutor(
-            max_workers=self.host_workers, mp_context=context
+            max_workers=self.host_workers,
+            mp_context=context,
+            initializer=_initialize_assembly_worker,
+            initargs=(self.condition_on_guard_failure,),
         ) as pool:
             while any(slot is not None for slot in slots) or futures:
                 batch = self._pack(slots)

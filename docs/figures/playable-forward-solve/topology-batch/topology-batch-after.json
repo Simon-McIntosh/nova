@@ -1,0 +1,521 @@
+{
+  "artifact": "topology batch probe",
+  "tag": "after",
+  "identity": "22086/[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]",
+  "source_commit": "c358440959cf456461927bc31a27646150aecd6d",
+  "runtime": {
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1263380",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "lattice": {
+    "nz": 33,
+    "nr": 33,
+    "n_iters_cap": 1089,
+    "stride": 2
+  },
+  "inputs": {
+    "flood_fill_trips_per_slice": {
+      "1": 2,
+      "2": 2,
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 2,
+      "7": 2,
+      "8": 2,
+      "9": 2,
+      "10": 2,
+      "11": 2,
+      "12": 2,
+      "13": 2,
+      "14": 2,
+      "15": 2,
+      "16": 2,
+      "17": 2,
+      "18": 2,
+      "19": 2,
+      "20": 2,
+      "21": 2,
+      "22": 2,
+      "23": 2,
+      "24": 2,
+      "25": 2,
+      "26": 2,
+      "27": 2,
+      "28": 2,
+      "29": 2,
+      "30": 2,
+      "31": 2,
+      "32": 2,
+      "33": 2,
+      "34": 2,
+      "35": 2,
+      "36": 4,
+      "37": 4,
+      "38": 4,
+      "39": 4,
+      "40": 4,
+      "41": 4,
+      "42": 4,
+      "43": 4,
+      "44": 4,
+      "45": 4,
+      "46": 4,
+      "47": 4,
+      "48": 4,
+      "49": 4,
+      "50": 4,
+      "51": 4,
+      "52": 4,
+      "53": 4,
+      "54": 4,
+      "55": 4,
+      "56": 4,
+      "57": 4
+    },
+    "labels_trips_per_slice": {
+      "1": 3,
+      "2": 3,
+      "3": 3,
+      "4": 3,
+      "5": 3,
+      "6": 3,
+      "7": 3,
+      "8": 3,
+      "9": 3,
+      "10": 3,
+      "11": 3,
+      "12": 3,
+      "13": 3,
+      "14": 3,
+      "15": 3,
+      "16": 3,
+      "17": 3,
+      "18": 3,
+      "19": 3,
+      "20": 3,
+      "21": 3,
+      "22": 3,
+      "23": 3,
+      "24": 3,
+      "25": 3,
+      "26": 3,
+      "27": 3,
+      "28": 4,
+      "29": 4,
+      "30": 3,
+      "31": 3,
+      "32": 3,
+      "33": 3,
+      "34": 4,
+      "35": 4,
+      "36": 4,
+      "37": 4,
+      "38": 4,
+      "39": 4,
+      "40": 4,
+      "41": 4,
+      "42": 4,
+      "43": 4,
+      "44": 5,
+      "45": 4,
+      "46": 4,
+      "47": 4,
+      "48": 4,
+      "49": 4,
+      "50": 4,
+      "51": 4,
+      "52": 4,
+      "53": 4,
+      "54": 4,
+      "55": 4,
+      "56": 4,
+      "57": 4
+    },
+    "hex_trips_per_slice": {
+      "1": 8,
+      "2": 8,
+      "3": 8,
+      "4": 9,
+      "5": 9,
+      "6": 10,
+      "7": 11,
+      "8": 11,
+      "9": 11,
+      "10": 12,
+      "11": 12,
+      "12": 12,
+      "13": 12,
+      "14": 12,
+      "15": 12,
+      "16": 12,
+      "17": 13,
+      "18": 13,
+      "19": 13,
+      "20": 13,
+      "21": 13,
+      "22": 13,
+      "23": 13,
+      "24": 13,
+      "25": 13,
+      "26": 13,
+      "27": 13,
+      "28": 14,
+      "29": 14,
+      "30": 13,
+      "31": 13,
+      "32": 13,
+      "33": 13,
+      "34": 13,
+      "35": 13,
+      "36": 17,
+      "37": 17,
+      "38": 17,
+      "39": 16,
+      "40": 16,
+      "41": 16,
+      "42": 16,
+      "43": 19,
+      "44": 18,
+      "45": 16,
+      "46": 15,
+      "47": 16,
+      "48": 16,
+      "49": 15,
+      "50": 15,
+      "51": 15,
+      "52": 15,
+      "53": 16,
+      "54": 16,
+      "55": 16,
+      "56": 16,
+      "57": 15
+    },
+    "n_slices": 57,
+    "batch_kind": "the labeller's consecutive finite rows, cycled"
+  },
+  "kernels": {
+    "flood_fill_core": {
+      "hlo_trips": {
+        "known_trip_count_n": [
+          "66"
+        ]
+      },
+      "kind": "data_dependent_while",
+      "trip_kind": "data-dependent while loop; per-slice trips in inputs",
+      "batches": {
+        "1": {
+          "serial_per_element_s": 0.0067147500813007355,
+          "vmap_per_element_s": 0.006818112917244434,
+          "vmap_over_serial_per_element": 1.015393400304137,
+          "vmap_wall_s": 0.006818112917244434,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 13464064.0
+        },
+        "8": {
+          "serial_per_element_s": 0.006648069131188095,
+          "vmap_per_element_s": 0.0010472078574821353,
+          "vmap_over_serial_per_element": 0.1575206028723991,
+          "vmap_wall_s": 0.008377662859857082,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 1683008.0
+        },
+        "16": {
+          "serial_per_element_s": 0.006678597652353346,
+          "vmap_per_element_s": 0.0005191270029172301,
+          "vmap_over_serial_per_element": 0.07772994121517482,
+          "vmap_wall_s": 0.008306032046675682,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 841504.0
+        },
+        "64": {
+          "serial_per_element_s": 0.006684730018605478,
+          "vmap_per_element_s": 4.580130917020142e-05,
+          "vmap_over_serial_per_element": 0.006851631859884174,
+          "vmap_wall_s": 0.002931283786892891,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 210376.0
+        }
+      }
+    },
+    "label_connected_components": {
+      "hlo_trips": {
+        "known_trip_count_n": [
+          "66"
+        ]
+      },
+      "kind": "fixed_fori",
+      "trip_kind": "fixed cap (nz*nz); active trips in inputs",
+      "batches": {
+        "1": {
+          "serial_per_element_s": 0.008544827811419964,
+          "vmap_per_element_s": 0.002046973444521427,
+          "vmap_over_serial_per_element": 0.2395570150384651,
+          "vmap_wall_s": 0.002046973444521427,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 13464064.0
+        },
+        "8": {
+          "serial_per_element_s": 0.008551243459805846,
+          "vmap_per_element_s": 0.00038622599095106125,
+          "vmap_over_serial_per_element": 0.045166061844277135,
+          "vmap_wall_s": 0.00308980792760849,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 1683008.0
+        },
+        "16": {
+          "serial_per_element_s": 0.00854129291838035,
+          "vmap_per_element_s": 0.00017544458387419581,
+          "vmap_over_serial_per_element": 0.02054075250090646,
+          "vmap_wall_s": 0.002807113341987133,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 841504.0
+        },
+        "64": {
+          "serial_per_element_s": 0.008581071451772004,
+          "vmap_per_element_s": 4.98929584864527e-05,
+          "vmap_over_serial_per_element": 0.005814304048959961,
+          "vmap_wall_s": 0.0031931493431329727,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 210376.0
+        }
+      }
+    },
+    "label_hex_connected_components": {
+      "hlo_trips": {
+        "known_trip_count_n": [
+          "66"
+        ]
+      },
+      "kind": "fixed_fori",
+      "trip_kind": "fixed cap (nz*nz); active trips in inputs",
+      "batches": {
+        "1": {
+          "serial_per_element_s": 0.0008400529623031616,
+          "vmap_per_element_s": 0.000902099534869194,
+          "vmap_over_serial_per_element": 1.073860310421286,
+          "vmap_wall_s": 0.000902099534869194,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 13464064.0
+        },
+        "8": {
+          "serial_per_element_s": 0.0010319051798433065,
+          "vmap_per_element_s": 0.00015630945563316345,
+          "vmap_over_serial_per_element": 0.151476568473955,
+          "vmap_wall_s": 0.0012504756450653076,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 1683008.0
+        },
+        "16": {
+          "serial_per_element_s": 0.0011611556983552873,
+          "vmap_per_element_s": 9.975419379770756e-05,
+          "vmap_over_serial_per_element": 0.08590940382844768,
+          "vmap_wall_s": 0.001596067100763321,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 841504.0
+        },
+        "64": {
+          "serial_per_element_s": 0.001132783989305608,
+          "vmap_per_element_s": 2.590824442449957e-05,
+          "vmap_over_serial_per_element": 0.02287130173898487,
+          "vmap_wall_s": 0.0016581276431679726,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 210376.0
+        }
+      }
+    },
+    "label_saddle_aware_hex_connected_components": {
+      "hlo_trips": {
+        "known_trip_count_n": [
+          "66"
+        ]
+      },
+      "kind": "fixed_fori",
+      "trip_kind": "fixed cap (nz*nz); active trips in inputs",
+      "batches": {
+        "1": {
+          "serial_per_element_s": 0.0008829468861222267,
+          "vmap_per_element_s": 0.0007453793659806252,
+          "vmap_over_serial_per_element": 0.8441950220292662,
+          "vmap_wall_s": 0.0007453793659806252,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 13464064.0
+        },
+        "8": {
+          "serial_per_element_s": 0.0008079624967649579,
+          "vmap_per_element_s": 0.00018165097571909428,
+          "vmap_over_serial_per_element": 0.22482599928389727,
+          "vmap_wall_s": 0.0014532078057527542,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 1683008.0
+        },
+        "16": {
+          "serial_per_element_s": 0.0011832290911115706,
+          "vmap_per_element_s": 8.473446359857917e-05,
+          "vmap_over_serial_per_element": 0.07161289748122773,
+          "vmap_wall_s": 0.0013557514175772667,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 841504.0
+        },
+        "64": {
+          "serial_per_element_s": 0.001005909507512115,
+          "vmap_per_element_s": 3.359078255016357e-05,
+          "vmap_over_serial_per_element": 0.03339344374350593,
+          "vmap_wall_s": 0.0021498100832104683,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 210376.0
+        }
+      }
+    },
+    "traced_flux_surface_bins": {
+      "kind": "fsa",
+      "trip_kind": "contains the flood-fill while loop",
+      "batches": {
+        "1": {
+          "serial_per_element_s": 0.006778622046113014,
+          "vmap_per_element_s": 0.00687456876039505,
+          "vmap_over_serial_per_element": 1.0141543094790266,
+          "vmap_wall_s": 0.00687456876039505,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 13464064.0
+        },
+        "8": {
+          "serial_per_element_s": 0.00672783050686121,
+          "vmap_per_element_s": 0.0010445446241647005,
+          "vmap_over_serial_per_element": 0.15525727396066946,
+          "vmap_wall_s": 0.008356356993317604,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 1683008.0
+        },
+        "16": {
+          "serial_per_element_s": 0.006629715033341199,
+          "vmap_per_element_s": 0.0005234702839516103,
+          "vmap_over_serial_per_element": 0.07895818769269111,
+          "vmap_wall_s": 0.008375524543225765,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 841504.0
+        },
+        "64": {
+          "serial_per_element_s": 0.006740811877534725,
+          "vmap_per_element_s": 4.6656496124342084e-05,
+          "vmap_over_serial_per_element": 0.006921495062016992,
+          "vmap_wall_s": 0.0029860157519578934,
+          "serial_peak_device_bytes": 13464064,
+          "vmap_peak_device_bytes": 13464064,
+          "vmap_bytes_per_element": 210376.0
+        }
+      }
+    }
+  },
+  "verdict": {
+    "flood_fill_core": {
+      "wall_per_element_s": {
+        "1": 0.006818112917244434,
+        "8": 0.0010472078574821353,
+        "16": 0.0005191270029172301,
+        "64": 4.580130917020142e-05
+      },
+      "wall_grows_with_batch": false,
+      "bytes_per_element_by_batch": {
+        "1": 13464064.0,
+        "8": 1683008.0,
+        "16": 841504.0,
+        "64": 210376.0
+      },
+      "memory_grows_with_batch": false
+    },
+    "label_connected_components": {
+      "wall_per_element_s": {
+        "1": 0.002046973444521427,
+        "8": 0.00038622599095106125,
+        "16": 0.00017544458387419581,
+        "64": 4.98929584864527e-05
+      },
+      "wall_grows_with_batch": false,
+      "bytes_per_element_by_batch": {
+        "1": 13464064.0,
+        "8": 1683008.0,
+        "16": 841504.0,
+        "64": 210376.0
+      },
+      "memory_grows_with_batch": false
+    },
+    "label_hex_connected_components": {
+      "wall_per_element_s": {
+        "1": 0.000902099534869194,
+        "8": 0.00015630945563316345,
+        "16": 9.975419379770756e-05,
+        "64": 2.590824442449957e-05
+      },
+      "wall_grows_with_batch": false,
+      "bytes_per_element_by_batch": {
+        "1": 13464064.0,
+        "8": 1683008.0,
+        "16": 841504.0,
+        "64": 210376.0
+      },
+      "memory_grows_with_batch": false
+    },
+    "label_saddle_aware_hex_connected_components": {
+      "wall_per_element_s": {
+        "1": 0.0007453793659806252,
+        "8": 0.00018165097571909428,
+        "16": 8.473446359857917e-05,
+        "64": 3.359078255016357e-05
+      },
+      "wall_grows_with_batch": false,
+      "bytes_per_element_by_batch": {
+        "1": 13464064.0,
+        "8": 1683008.0,
+        "16": 841504.0,
+        "64": 210376.0
+      },
+      "memory_grows_with_batch": false
+    },
+    "traced_flux_surface_bins": {
+      "wall_per_element_s": {
+        "1": 0.00687456876039505,
+        "8": 0.0010445446241647005,
+        "16": 0.0005234702839516103,
+        "64": 4.6656496124342084e-05
+      },
+      "wall_grows_with_batch": false,
+      "bytes_per_element_by_batch": {
+        "1": 13464064.0,
+        "8": 1683008.0,
+        "16": 841504.0,
+        "64": 210376.0
+      },
+      "memory_grows_with_batch": false
+    },
+    "grown_kernels": []
+  }
+}

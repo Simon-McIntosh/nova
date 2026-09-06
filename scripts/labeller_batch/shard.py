@@ -30,6 +30,8 @@ from benchmarks.forward_labeller_throughput import (
     KEYFRAME_SLICE,
     NEWTON_STEPS,
     SHOT_STORE,
+    _centroid_pair,
+    _circuit_names,
     _persisted_response_cache,
     _requested_class,
     _slices_seed,
@@ -101,6 +103,14 @@ class ShotWork:
 
     shot: int
     camera_frames: int
+
+
+@dataclass(frozen=True)
+class LabellerPrograms:
+    """Compiled free and conditioned routes carried across slices and shots."""
+
+    free: reduced_newton.ReducedProgram | None = None
+    conditioned: reduced_newton.ReducedProgram | None = None
 
 
 def source_revision() -> str:
@@ -298,6 +308,7 @@ def _forward_receipt(
         target_current,
         None,
         prescribed_current,
+        constraints=tuple(getattr(result, "constraints", ())),
     )
     policy = _solve_policy()
     finite = bool(np.asarray(equilibrium.finite.passed))
@@ -378,6 +389,12 @@ def _masked_frame(
     wall_seconds: float,
     trips: int,
     template: SteeringFrame | None,
+    p_prime_psi_norm: np.ndarray,
+    p_prime: np.ndarray,
+    ff_prime_psi_norm: np.ndarray,
+    ff_prime: np.ndarray,
+    reference_centroid_z: float,
+    compensating_slots: int,
 ) -> SteeringFrame:
     """Return a typed frame whose solved geometry is explicitly absent."""
     action = SteeringAction(
@@ -386,6 +403,7 @@ def _masked_frame(
         commanded_control_points=np.empty((0, 2), dtype=float),
     )
     if template is not None:
+        face = np.asarray(template.psi_norm_face, dtype=np.float64)
         return template._replace(
             psi=np.full_like(np.asarray(template.psi), np.nan, dtype=float),
             psi_norm=np.full_like(np.asarray(template.psi_norm), np.nan, dtype=float),
@@ -417,6 +435,13 @@ def _masked_frame(
             action=action,
             wall_seconds=wall_seconds,
             trip_count=trips,
+            p_prime_source="efm",
+            p_prime_face=np.interp(face, p_prime_psi_norm, p_prime),
+            ff_prime_face=np.interp(face, ff_prime_psi_norm, ff_prime),
+            current_centroid_r=np.nan,
+            current_centroid_z=np.nan,
+            reference_centroid_z=reference_centroid_z,
+            branch_guard_ok=False,
             flux_surface_psi=np.full_like(
                 np.asarray(template.flux_surface_psi), np.nan, dtype=float
             ),
@@ -462,6 +487,8 @@ def _masked_frame(
         for name in TORAX_PROFILE_FIELDS
         if name != "rho_face_norm"
     }
+    face = np.linspace(0.0, 1.0, N_RHO + 1)
+    profile_channels["psi_norm_face"] = face
     return SteeringFrame(
         radius=np.asarray(radius),
         height=np.asarray(height),
@@ -482,20 +509,27 @@ def _masked_frame(
         n_boundary_coords=np.int32(0),
         finite_mask=np.zeros(6, dtype=bool),
         coil_current=np.asarray(current, dtype=np.float64),
-        compensating_current=np.empty(0, dtype=np.float64),
+        compensating_current=np.zeros(compensating_slots, dtype=np.float64),
         action=action,
         wall_seconds=wall_seconds,
         trip_count=trips,
         carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
         nova_version=resolved.nova_version,
         policy_digest=policy_digest(policy),
+        p_prime_source="efm",
         flux_surface_psi_norm=np.linspace(0.0, 1.0, N_SURFACE),
         flux_surface_psi=np.full(N_SURFACE, np.nan),
         flux_surface_r=np.full((N_SURFACE, N_THETA), np.nan),
         flux_surface_z=np.full((N_SURFACE, N_THETA), np.nan),
         flux_surface_angle=np.linspace(0.0, 2.0 * np.pi, N_THETA, endpoint=False),
-        rho_face_norm=np.linspace(0.0, 1.0, N_RHO + 1),
+        rho_face_norm=face,
         **profile_channels,
+        p_prime_face=np.interp(face, p_prime_psi_norm, p_prime),
+        ff_prime_face=np.interp(face, ff_prime_psi_norm, ff_prime),
+        current_centroid_r=np.nan,
+        current_centroid_z=np.nan,
+        reference_centroid_z=reference_centroid_z,
+        branch_guard_ok=False,
         R_major=np.nan,
         a_minor=np.nan,
         B_0=np.nan,
@@ -544,26 +578,47 @@ def _centroid_coordinates(
 
 
 def _write_companion(rows: Sequence[dict[str, Any]], path: Path) -> None:
-    """Atomically persist per-slice flux functions and centroid evidence."""
+    """Persist conditioning fields that have no steering-frame channel."""
     temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp.npz")
     np.savez_compressed(
         temporary,
         row=np.asarray([item["row"] for item in rows], dtype=np.int32),
         time=np.asarray([item["time"] for item in rows], dtype=np.float64),
-        psi_norm=np.stack([item["psi_norm"] for item in rows]),
-        p_prime=np.stack([item["p_prime"] for item in rows]),
-        ff_prime=np.stack([item["ff_prime"] for item in rows]),
-        current_centroid_r=np.asarray(
-            [item["current_centroid_r"] for item in rows], dtype=np.float64
+        conditioned=np.asarray([item["conditioned"] for item in rows], dtype=bool),
+        conditioning_target_source=np.asarray(
+            [item["conditioning_target_source"] or "none" for item in rows],
+            dtype=str,
         ),
-        current_centroid_z=np.asarray(
-            [item["current_centroid_z"] for item in rows], dtype=np.float64
+        free_guard_evaluated=np.asarray(
+            [item["free_branch_guard_ok"] is not None for item in rows], dtype=bool
         ),
-        reference_centroid_z=np.asarray(
-            [item["reference_centroid_z"] for item in rows], dtype=np.float64
+        free_branch_guard_ok=np.asarray(
+            [bool(item["free_branch_guard_ok"]) for item in rows], dtype=bool
         ),
-        branch_guard_ok=np.asarray(
-            [item["branch_guard_ok"] for item in rows], dtype=bool
+        conditioned_guard_evaluated=np.asarray(
+            [item["conditioned_branch_guard_ok"] is not None for item in rows],
+            dtype=bool,
+        ),
+        conditioned_branch_guard_ok=np.asarray(
+            [bool(item["conditioned_branch_guard_ok"]) for item in rows], dtype=bool
+        ),
+        free_centroid_error_m=np.asarray(
+            [
+                np.nan
+                if item["free_centroid_error_m"] is None
+                else item["free_centroid_error_m"]
+                for item in rows
+            ],
+            dtype=np.float64,
+        ),
+        conditioned_centroid_error_m=np.asarray(
+            [
+                np.nan
+                if item["conditioned_centroid_error_m"] is None
+                else item["conditioned_centroid_error_m"]
+                for item in rows
+            ],
+            dtype=np.float64,
         ),
     )
     os.replace(temporary, path)
@@ -574,17 +629,18 @@ def label_shot(
     shot: int,
     output_root: Path,
     *,
-    program: reduced_newton.ReducedProgram | None,
+    programs: LabellerPrograms,
     include_raster: bool,
+    condition_on_guard_failure: bool,
     setup_wall_seconds: float,
     max_slices: int | None,
-) -> tuple[reduced_newton.ReducedProgram | None, dict[str, Any]]:
+) -> tuple[LabellerPrograms, dict[str, Any]]:
     """Label every admitted slice while isolating failures within the shot."""
     session_path = output_root / f"{shot}.nc"
     companion_path = output_root / f"{shot}.npz"
     manifest_path = output_root / f"{shot}.manifest.json"
     if session_path.is_file() and manifest_path.is_file():
-        return program, {"shot": shot, "status": "skipped", "resumed": True}
+        return programs, {"shot": shot, "status": "skipped", "resumed": True}
 
     shot_started = time.perf_counter()
     group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
@@ -605,8 +661,19 @@ def label_shot(
             "mode": "diagnostic_branch_guard",
             "target_source": "efm/current_centrd_z",
             "tolerance_m": BRANCH_GUARD_TOLERANCE_M,
-            "conditioning_flag": False,
+            "condition_on_guard_failure": condition_on_guard_failure,
+            "conditioning_trigger": (
+                "free solve raised, did not converge, or missed the branch guard"
+            ),
         },
+        "companion_fields_without_frame_home": [
+            "conditioned",
+            "conditioning_target_source",
+            "free_branch_guard_ok",
+            "conditioned_branch_guard_ok",
+            "free_centroid_error_m",
+            "conditioned_centroid_error_m",
+        ],
         "include_raster": include_raster,
         "setup_wall_seconds": setup_wall_seconds,
         "shot_wall_seconds": 0.0,
@@ -622,6 +689,9 @@ def label_shot(
     frame_slots: list[SteeringFrame | None] = []
     frame_contexts: list[dict[str, Any]] = []
     companion_rows: list[dict[str, Any]] = []
+    free_program = programs.free
+    conditioned_program = programs.conditioned
+    circuit_names = _circuit_names(prepared.policy_evidence)
     state = None
     admitted = 0
     for row in range(int(group["time"].shape[0])):
@@ -641,143 +711,295 @@ def label_shot(
                     "exclusion": "no reconstruction",
                     "target_source": "efm/current_centrd_z",
                     "branch_guard_ok": False,
+                    "conditioned": False,
+                    "conditioning_target_source": None,
+                    "free_branch_guard_ok": None,
+                    "conditioned_branch_guard_ok": None,
                 },
             )
             continue
         if max_slices is not None and admitted >= max_slices:
             break
         admitted += 1
-        result = None
         started = time.perf_counter()
+        free_result = None
+        conditioned_result = None
+        selected_result = None
+        frame = None
+        free_exception = None
+        conditioning_exception = None
+        processing_exception = None
+        free_centroid_r = None
+        free_centroid_z = None
+        free_centroid_error = None
+        free_guard = None
+        conditioned_centroid_r = None
+        conditioned_centroid_z = None
+        conditioned_centroid_error = None
+        conditioned_guard = None
+        conditioned = False
+        free_wall_seconds = 0.0
+        conditioned_wall_seconds = 0.0
+        seed = _slices_seed(group, row, full_r, full_z)
+        if not np.all(np.isfinite(seed)):
+            free_exception = "ValueError: non-finite reconstruction flux seed"
+        slice_seed = (
+            None
+            if free_exception
+            else (jnp.asarray(seed) if state is None else jnp.asarray(state))
+        )
+        requested_value = _requested_class(group, row)
+        requested = jnp.asarray(requested_value, dtype=jnp.int8)
+        target_current = abs(inputs["reference_plasma_current"])
+        current = jnp.asarray(inputs["current"])
+        psi_norm_grid = np.asarray(group["psi_norm"], dtype=np.float64)
+        p_prime = (
+            -np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+        )
+        ff_prime = (
+            -np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+        )
+
+        free_started = time.perf_counter()
         try:
-            seed = _slices_seed(group, row, full_r, full_z)
-            if not np.all(np.isfinite(seed)):
+            if slice_seed is None:
                 raise ValueError("non-finite reconstruction flux seed")
-            if state is None:
-                state = jnp.asarray(seed)
-            requested_value = _requested_class(group, row)
-            requested = jnp.asarray(requested_value, dtype=jnp.int8)
-            target_current = abs(inputs["reference_plasma_current"])
-            current = jnp.asarray(inputs["current"])
-            result = reduced_newton.solve_reduced_newton(
+            free_result = reduced_newton.solve_reduced_newton(
                 prepared.profile.operator,
-                state,
+                slice_seed,
                 requested_class=requested,
                 target_current=target_current,
                 prescribed_current=current,
                 tolerance=FIXED_POINT_CRITERION,
                 newton_steps=NEWTON_STEPS,
-                program=program,
+                program=free_program,
                 stream=False,
             )
-            program = result.program
-            solve_wall_seconds = time.perf_counter() - started
-            solve_receipt = _forward_receipt(
-                prepared,
-                result,
-                requested_class=requested,
-                target_current=target_current,
-                prescribed_current=current,
-                solve_wall_seconds=solve_wall_seconds,
+            free_program = free_result.program
+            free_wall_seconds = time.perf_counter() - free_started
+            free_centroid_r, free_centroid_z = _centroid_coordinates(
+                prepared, free_result.state, target_current
             )
-            equilibrium = solve_receipt.terminal_state
-            geometry = _internal_geometry(
-                prepared,
-                equilibrium,
-                diverted=requested_value == int(TopologyClass.DIVERTED),
+            free_centroid_error = free_centroid_z - inputs["target_centroid_z"]
+            free_guard = bool(
+                np.isfinite(free_centroid_error)
+                and abs(free_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
             )
-            frame = assemble_frame(
-                solve_receipt,
-                action=SteeringAction(
-                    name="label",
-                    delta=0.0,
-                    commanded_control_points=np.empty((0, 2), dtype=float),
-                ),
-                carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
-                applied_current=inputs["current"],
-                internal_geometry=geometry,
-                wall=prepared.wall,
-            )
-            centroid_r, centroid_z = _centroid_coordinates(
-                prepared, result.state, target_current
-            )
-            centroid_error = centroid_z - inputs["target_centroid_z"]
-            branch_guard_ok = bool(
-                np.isfinite(centroid_error)
-                and abs(centroid_error) <= BRANCH_GUARD_TOLERANCE_M
-            )
-            row_record = {
-                "row": row,
-                "time": inputs["time"],
-                "written": True,
-                "excluded": False,
-                "geometry_masked": False,
-                "converged": bool(result.converged),
-                "qualified": bool(solve_receipt.qualified),
-                "terminal_residual": float(result.terminal_residual),
-                "trips": int(result.active_set_iterations),
-                "newton_steps": int(sum(result.newton_steps_per_trip)),
-                "wall_seconds": solve_wall_seconds,
-                "termination": result.termination_name,
-                "conditioning_flag": False,
-                "achieved_current_centroid_r": centroid_r,
-                "achieved_current_centroid_z": centroid_z,
-                "target_current_centroid_z": inputs["target_centroid_z"],
-                "centroid_error_m": centroid_error,
-                "target_source": "efm/current_centrd_z",
-                "branch_guard_ok": branch_guard_ok,
-            }
-            frame_slots.append(frame)
-            state = result.state
         except Exception as error:
-            solve_wall_seconds = time.perf_counter() - started
-            trips = int(result.active_set_iterations) if result is not None else 0
-            row_record = {
-                "row": row,
-                "time": inputs["time"],
-                "written": True,
-                "excluded": False,
-                "geometry_masked": True,
-                "converged": False,
-                "qualified": False,
-                "trips": trips,
-                "wall_seconds": solve_wall_seconds,
-                "conditioning_flag": False,
-                "exception": f"{type(error).__name__}: {error}",
-                "traceback": traceback.format_exc(),
-                "achieved_current_centroid_r": None,
-                "achieved_current_centroid_z": None,
-                "target_current_centroid_z": inputs["target_centroid_z"],
-                "centroid_error_m": None,
-                "target_source": "efm/current_centrd_z",
-                "branch_guard_ok": False,
-            }
-            frame_slots.append(None)
-            centroid_r = np.nan
-            centroid_z = np.nan
-            branch_guard_ok = False
-            state = None
+            free_wall_seconds = time.perf_counter() - free_started
+            free_exception = f"{type(error).__name__}: {error}"
+
+        should_condition = condition_on_guard_failure and (
+            free_result is None
+            or not bool(free_result.converged)
+            or free_guard is not True
+        )
+        if should_condition:
+            conditioned = True
+            conditioned_started = time.perf_counter()
+            try:
+                if slice_seed is None:
+                    raise ValueError("non-finite reconstruction flux seed")
+                pair, _selection = _centroid_pair(
+                    prepared.profile,
+                    slice_seed,
+                    target=inputs["target_centroid_z"],
+                    unknown=None,
+                    target_current=target_current,
+                    requested=requested,
+                    names=circuit_names,
+                )
+                conditioned_result = reduced_newton.solve_constrained_reduced_newton(
+                    prepared.profile,
+                    slice_seed,
+                    constraint_pairs=(pair,),
+                    requested_class=requested,
+                    target_current=target_current,
+                    prescribed_current=current,
+                    tolerance=FIXED_POINT_CRITERION,
+                    newton_steps=NEWTON_STEPS,
+                    program=conditioned_program,
+                    stream=False,
+                )
+                conditioned_program = conditioned_result.program
+                conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                conditioned_centroid_r, conditioned_centroid_z = _centroid_coordinates(
+                    prepared, conditioned_result.state, target_current
+                )
+                conditioned_centroid_error = (
+                    conditioned_centroid_z - inputs["target_centroid_z"]
+                )
+                conditioned_guard = bool(
+                    np.isfinite(conditioned_centroid_error)
+                    and abs(conditioned_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
+                )
+            except Exception as error:
+                conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                conditioning_exception = f"{type(error).__name__}: {error}"
+
+        selected_result = conditioned_result if conditioned else free_result
+        solve_wall_seconds = time.perf_counter() - started
+        applied_current = inputs["current"]
+        if (
+            selected_result is not None
+            and getattr(selected_result, "prescribed_current", None) is not None
+        ):
+            applied_current = np.asarray(selected_result.prescribed_current)
+        if selected_result is not None:
+            try:
+                solve_receipt = _forward_receipt(
+                    prepared,
+                    selected_result,
+                    requested_class=requested,
+                    target_current=target_current,
+                    prescribed_current=applied_current,
+                    solve_wall_seconds=solve_wall_seconds,
+                )
+                equilibrium = solve_receipt.terminal_state
+                geometry = _internal_geometry(
+                    prepared,
+                    equilibrium,
+                    diverted=requested_value == int(TopologyClass.DIVERTED),
+                )
+                frame = assemble_frame(
+                    solve_receipt,
+                    action=SteeringAction(
+                        name="label",
+                        delta=0.0,
+                        commanded_control_points=np.empty((0, 2), dtype=float),
+                    ),
+                    carrier_identity=response_carrier.DEFAULT_CARRIER.stem,
+                    applied_current=applied_current,
+                    p_prime_psi_norm=psi_norm_grid,
+                    p_prime=p_prime,
+                    ff_prime_psi_norm=psi_norm_grid,
+                    ff_prime=ff_prime,
+                    p_prime_source="efm",
+                    reference_centroid_z=inputs["target_centroid_z"],
+                    compensating_current=(
+                        None
+                        if conditioned
+                        else np.zeros(int(condition_on_guard_failure))
+                    ),
+                    internal_geometry=geometry,
+                    wall=prepared.wall,
+                )
+            except Exception as error:
+                processing_exception = f"{type(error).__name__}: {error}"
+                frame = None
+
+        final_centroid_r = conditioned_centroid_r if conditioned else free_centroid_r
+        final_centroid_z = conditioned_centroid_z if conditioned else free_centroid_z
+        final_centroid_error = (
+            conditioned_centroid_error if conditioned else free_centroid_error
+        )
+        final_solve_exception = (
+            conditioning_exception if conditioned else free_exception
+        )
+        exceptions = [
+            value
+            for value in (final_solve_exception, processing_exception)
+            if value is not None
+        ]
+        final_ok = selected_result is not None and frame is not None and not exceptions
+        row_record = {
+            "row": row,
+            "time": inputs["time"],
+            "written": True,
+            "excluded": False,
+            "geometry_masked": not final_ok,
+            "converged": bool(selected_result.converged) if final_ok else False,
+            "qualified": bool(solve_receipt.qualified) if final_ok else False,
+            "terminal_residual": (
+                float(selected_result.terminal_residual)
+                if selected_result is not None
+                else None
+            ),
+            "trips": (
+                int(selected_result.active_set_iterations)
+                if selected_result is not None
+                else 0
+            ),
+            "newton_steps": (
+                int(sum(selected_result.newton_steps_per_trip))
+                if selected_result is not None
+                else 0
+            ),
+            "free_trips": (
+                int(free_result.active_set_iterations) if free_result is not None else 0
+            ),
+            "conditioned_trips": (
+                int(conditioned_result.active_set_iterations)
+                if conditioned_result is not None
+                else 0
+            ),
+            "wall_seconds": solve_wall_seconds,
+            "free_wall_seconds": free_wall_seconds,
+            "conditioned_wall_seconds": conditioned_wall_seconds,
+            "termination": (
+                selected_result.termination_name
+                if selected_result is not None
+                else "slice_exception"
+            ),
+            "conditioned": conditioned,
+            "conditioning_flag": conditioned,
+            "conditioning_target_source": (
+                "efm/current_centrd_z" if conditioned else None
+            ),
+            "free_converged": (
+                bool(free_result.converged) if free_result is not None else False
+            ),
+            "conditioned_converged": (
+                bool(conditioned_result.converged)
+                if conditioned_result is not None
+                else None
+            ),
+            "free_branch_guard_ok": free_guard,
+            "conditioned_branch_guard_ok": conditioned_guard,
+            "free_centroid_error_m": free_centroid_error,
+            "conditioned_centroid_error_m": conditioned_centroid_error,
+            "achieved_current_centroid_r": final_centroid_r,
+            "achieved_current_centroid_z": final_centroid_z,
+            "target_current_centroid_z": inputs["target_centroid_z"],
+            "centroid_error_m": final_centroid_error,
+            "target_source": "efm/current_centrd_z",
+            "branch_guard_ok": bool(frame.branch_guard_ok) if final_ok else False,
+        }
+        if exceptions:
+            row_record["exception"] = "; ".join(exceptions)
+        if free_exception is not None:
+            row_record["free_solve_exception"] = free_exception
+        if conditioning_exception is not None:
+            row_record["conditioning_exception"] = conditioning_exception
+        if processing_exception is not None:
+            row_record["frame_exception"] = processing_exception
+
+        frame_slots.append(frame)
+        state = selected_result.state if final_ok else None
 
         frame_contexts.append(
             {
-                "current": inputs["current"],
+                "current": np.asarray(applied_current),
                 "wall_seconds": solve_wall_seconds,
                 "trips": int(row_record["trips"]),
+                "p_prime_psi_norm": psi_norm_grid,
+                "p_prime": p_prime,
+                "ff_prime_psi_norm": psi_norm_grid,
+                "ff_prime": ff_prime,
+                "reference_centroid_z": inputs["target_centroid_z"],
+                "compensating_slots": int(condition_on_guard_failure),
             }
         )
         companion_rows.append(
             {
                 "row": row,
                 "time": inputs["time"],
-                "psi_norm": np.asarray(group["psi_norm"], dtype=np.float64),
-                "p_prime": -np.asarray(group["pprime"][row], dtype=np.float64)
-                / TOTAL_FLUX_FACTOR,
-                "ff_prime": -np.asarray(group["ffprime"][row], dtype=np.float64)
-                / TOTAL_FLUX_FACTOR,
-                "current_centroid_r": centroid_r,
-                "current_centroid_z": centroid_z,
-                "reference_centroid_z": inputs["target_centroid_z"],
-                "branch_guard_ok": branch_guard_ok,
+                "conditioned": conditioned,
+                "conditioning_target_source": row_record["conditioning_target_source"],
+                "free_branch_guard_ok": free_guard,
+                "conditioned_branch_guard_ok": conditioned_guard,
+                "free_centroid_error_m": free_centroid_error,
+                "conditioned_centroid_error_m": conditioned_centroid_error,
             }
         )
         _persist_slice(manifest, manifest_path, row_record)
@@ -790,6 +1012,7 @@ def label_shot(
                     "converged": row_record["converged"],
                     "qualified": row_record["qualified"],
                     "branch_guard_ok": row_record["branch_guard_ok"],
+                    "conditioned": row_record["conditioned"],
                     "wall_seconds": row_record["wall_seconds"],
                 },
                 sort_keys=True,
@@ -819,9 +1042,9 @@ def label_shot(
     manifest["status"] = "complete"
     manifest["shot_wall_seconds"] = time.perf_counter() - shot_started
     manifest["companion_slice_count"] = len(companion_rows)
-    manifest["flux_function_grid_points"] = int(companion_rows[0]["psi_norm"].size)
+    manifest["flux_function_grid_points"] = int(psi_norm_grid.size)
     _write_json(manifest, manifest_path)
-    return program, manifest
+    return LabellerPrograms(free_program, conditioned_program), manifest
 
 
 def run_shard(
@@ -829,22 +1052,24 @@ def run_shard(
     output_root: Path,
     *,
     include_raster: bool,
+    condition_on_guard_failure: bool,
     max_slices: int | None,
 ) -> int:
     """Prepare once, then label every requested shot with one carried program."""
     output_root.mkdir(parents=True, exist_ok=True)
     prepared = prepare_labeller()
-    program = None
+    programs = LabellerPrograms()
     failures = []
     setup_unassigned = prepared.setup_wall_seconds
     for shot in shots:
         try:
-            program, record = label_shot(
+            programs, record = label_shot(
                 prepared,
                 int(shot),
                 output_root,
-                program=program,
+                programs=programs,
                 include_raster=include_raster,
+                condition_on_guard_failure=condition_on_guard_failure,
                 setup_wall_seconds=setup_unassigned,
                 max_slices=max_slices,
             )
@@ -889,6 +1114,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--shots", type=int, nargs="*")
     parser.add_argument("--shot-list", type=Path)
     parser.add_argument("--include-raster", action="store_true")
+    parser.add_argument("--condition-on-guard-failure", action="store_true")
     parser.add_argument("--max-slices", type=int)
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--enumerate-corpus", action="store_true")
@@ -960,6 +1186,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         shots,
         arguments.output_root,
         include_raster=arguments.include_raster,
+        condition_on_guard_failure=arguments.condition_on_guard_failure,
         max_slices=arguments.max_slices,
     )
 

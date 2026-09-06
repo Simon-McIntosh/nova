@@ -12,9 +12,10 @@ SHARDS=8
 TRANCHE_SHARDS=8
 SLICES_PER_SECOND=
 INCLUDE_RASTER=0
+CONDITION_ON_GUARD_FAILURE=0
 
 usage() {
-  echo "usage: $0 (--dry-run|--submit) --output-root DIR --slices-per-second RATE [--shards N] [--tranche-shards N] [--include-raster]" >&2
+  echo "usage: $0 (--dry-run|--submit) --output-root DIR --slices-per-second RATE [--shards N] [--tranche-shards N] [--include-raster] [--condition-on-guard-failure]" >&2
 }
 
 while (($#)); do
@@ -42,6 +43,10 @@ while (($#)); do
       ;;
     --include-raster)
       INCLUDE_RASTER=1
+      shift
+      ;;
+    --condition-on-guard-failure)
+      CONDITION_ON_GUARD_FAILURE=1
       shift
       ;;
     *)
@@ -119,6 +124,9 @@ for LIST in "${OUTPUT_ROOT}"/.shards/shard-*.txt; do
   WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' '${OUTPUT_ROOT}' --shot-list '${LIST}'"
   if ((INCLUDE_RASTER)); then
     WRAP="${WRAP} --include-raster"
+  fi
+  if ((CONDITION_ON_GUARD_FAILURE)); then
+    WRAP="${WRAP} --condition-on-guard-failure"
   fi
   JOB_ID="$(sbatch --parsable \
     --job-name="nova-labeller-${NAME}" \

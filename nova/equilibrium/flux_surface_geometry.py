@@ -163,6 +163,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+from scipy.constants import mu_0
 from scipy.interpolate import CubicSpline, RectBivariateSpline
 
 from nova.equilibrium.convention import flux_function_toroidal_field
@@ -173,9 +174,23 @@ if TYPE_CHECKING:
 __all__ = [
     "FluxSurfaceGeometry",
     "GridMotion",
+    "PlasmaInternalGeometry",
     "SurfaceGeometryError",
     "source_field_function",
 ]
+
+#: Default number of nested surfaces in the decoder loop block, laid out on
+#: ``psi_norm = k / n_surface`` for ``k = 0 .. n_surface`` with the axis row
+#: (``psi_norm = 0``) carried as the repeated magnetic-axis point and the
+#: outermost row the LCFS (``psi_norm = 1``).
+DEFAULT_SURFACES = 11
+
+#: Default number of stored angles on each traced loop surface.
+DEFAULT_ANGLES = 64
+
+#: Default TORAX radial face count; the profile block publishes the
+#: ``n_rho + 1`` face values on ``rho_norm = k / n_rho``.
+DEFAULT_N_RHO = 25
 
 #: Innermost traced surfaces the axis fit is taken over, and its degree in
 #: normalised flux. Two coefficients beyond the limit absorb the leading
@@ -244,6 +259,25 @@ class FluxSurfaceGeometry:
     gradient_rho: NDArray[np.float64]
     gradient_rho_squared: NDArray[np.float64]
     gradient_rho_squared_over_radius_squared: NDArray[np.float64]
+
+    # -- the same surface family read one level down: the averages TORAX
+    # consumes as its standard geometry (grad psi per radian of toroidal
+    # angle, magnetic-field averages) and the fixed-shape extrema -- they are
+    # all line integrals or extremum reads of the loops already traced --
+    inverse_radius: NDArray[np.float64]
+    gradient_psi: NDArray[np.float64]
+    gradient_psi_squared: NDArray[np.float64]
+    gradient_psi_squared_over_radius_squared: NDArray[np.float64]
+    field_squared: NDArray[np.float64]
+    inverse_field_squared: NDArray[np.float64]
+    area_derivative: NDArray[np.float64]
+    r_in: NDArray[np.float64]
+    r_out: NDArray[np.float64]
+    elongation: NDArray[np.float64]
+    triangularity_upper: NDArray[np.float64]
+    triangularity_lower: NDArray[np.float64]
+    enclosed_toroidal_current: NDArray[np.float64]
+
     boundary_rho_tor: float
     vacuum_field: float
     reference_radius: float
@@ -292,6 +326,19 @@ class FluxSurfaceGeometry:
             "gradient_rho",
             "gradient_rho_squared",
             "gradient_rho_squared_over_radius_squared",
+            "inverse_radius",
+            "gradient_psi",
+            "gradient_psi_squared",
+            "gradient_psi_squared_over_radius_squared",
+            "field_squared",
+            "inverse_field_squared",
+            "area_derivative",
+            "r_in",
+            "r_out",
+            "elongation",
+            "triangularity_upper",
+            "triangularity_lower",
+            "enclosed_toroidal_current",
         )
 
     @property
@@ -398,7 +445,7 @@ class FluxSurfaceGeometry:
             raise SurfaceGeometryError(
                 "too few surfaces lie outside the axis floor to fit its limit"
             )
-        contour = _trace_surfaces(
+        trace = _trace_surfaces(
             interpolant,
             centre,
             axis_flux,
@@ -411,7 +458,7 @@ class FluxSurfaceGeometry:
         return cls._assemble(
             psi_norm,
             traced,
-            contour,
+            trace,
             field_function,
             axis_flux=axis_flux,
             span=span,
@@ -448,7 +495,7 @@ class FluxSurfaceGeometry:
         cls,
         psi_norm: NDArray[np.float64],
         traced: NDArray[np.bool_],
-        contour: _SurfaceIntegrals,
+        trace: _TracedSurfaces,
         field_function: Callable[[NDArray[np.float64]], ArrayLike],
         *,
         axis_flux: float,
@@ -458,7 +505,9 @@ class FluxSurfaceGeometry:
         rho_tor_norm: ArrayLike | None,
     ) -> FluxSurfaceGeometry:
         """Return the record the traced surfaces and the source imply."""
+        contour = trace.integrals
         inner = psi_norm[traced]
+        traced_field = np.asarray(field_function(inner), dtype=float)
         field = np.asarray(field_function(psi_norm), dtype=float)
         # the reference field is the vacuum one at the plasma boundary rather
         # than the outermost resolved surface, so it stays a machine constant
@@ -520,6 +569,107 @@ class FluxSurfaceGeometry:
             traced,
         )
 
+        # the TORAX-read averages live one level down from the gradient_rho
+        # family: per-radian poloidal-flux gradients and the magnetic-field
+        # averages, all formed as ratios of the same traced loops, so each is
+        # analytic in normalised flux at the axis like every other average
+        inverse_radius = _to_axis(
+            psi_norm,
+            inner,
+            contour.perimeter_inverse_gradient / contour.inverse_gradient,
+            traced,
+        )
+        gradient_psi = _to_axis(
+            psi_norm,
+            inner,
+            contour.radius_perimeter / (2.0 * np.pi * contour.inverse_gradient),
+            traced,
+        )
+        gradient_psi_squared = _to_axis(
+            psi_norm,
+            inner,
+            contour.gradient_radius / ((2.0 * np.pi) ** 2 * contour.inverse_gradient),
+            traced,
+        )
+        gradient_psi_squared_over_radius_squared = _to_axis(
+            psi_norm,
+            inner,
+            contour.gradient_inverse_radius
+            / ((2.0 * np.pi) ** 2 * contour.inverse_gradient),
+            traced,
+        )
+        field_squared = _to_axis(
+            psi_norm,
+            inner,
+            (
+                contour.gradient_inverse_radius / (2.0 * np.pi) ** 2
+                + traced_field**2 * contour.pitch_loop
+            )
+            / contour.inverse_gradient,
+            traced,
+        )
+        # 1/B^2 carries the field function inside an inverse-gradient loop, so
+        # its loop is formed on the raw traced geometry rather than on a
+        # precomputed one
+        angle_weight = 2.0 * np.pi / trace.radius.shape[0]
+        inverse_field_numerator = (
+            np.sum(
+                trace.radius**3
+                * trace.arc
+                / (
+                    trace.gradient
+                    * (
+                        trace.gradient**2 / (2.0 * np.pi) ** 2
+                        + traced_field[None, :] ** 2
+                    )
+                ),
+                axis=0,
+            )
+            * angle_weight
+        )
+        inverse_field_squared = _to_axis(
+            psi_norm,
+            inner,
+            inverse_field_numerator / contour.inverse_gradient,
+            traced,
+        )
+        enclosed_toroidal_current = _to_axis_linear(
+            psi_norm,
+            inner,
+            contour.gradient_inverse_radius / (2.0 * np.pi * mu_0),
+            traced,
+        )
+
+        # the fixed-shape extrema collapse onto the axis point, so the rows
+        # inside the axis floor are pinned directly instead of fitted; the
+        # geometry itself (not the flux label) is the smooth coordinate
+        axis_radius_value = float(centre[0])
+        axis_height_value = float(centre[1])
+        r_in = np.empty_like(psi_norm)
+        r_out = np.empty_like(psi_norm)
+        z_upper = np.empty_like(psi_norm)
+        z_lower = np.empty_like(psi_norm)
+        r_in[traced], r_in[~traced] = trace.r_in, axis_radius_value
+        r_out[traced], r_out[~traced] = trace.r_out, axis_radius_value
+        z_upper[traced], z_upper[~traced] = trace.z_upper, axis_height_value
+        z_lower[traced], z_lower[~traced] = trace.z_lower, axis_height_value
+        minor_radius = np.empty_like(r_in)
+        major_radius_local = np.empty_like(r_in)
+        minor_radius[traced] = 0.5 * (trace.r_out - trace.r_in)
+        major_radius_local[traced] = 0.5 * (trace.r_out + trace.r_in)
+        elongation = np.ones_like(psi_norm)
+        elongation[traced] = (trace.z_upper - trace.z_lower) / (
+            trace.r_out - trace.r_in
+        )
+        triangularity_upper = np.zeros_like(psi_norm)
+        triangularity_lower = np.zeros_like(psi_norm)
+        triangularity_upper[traced] = (
+            major_radius_local[traced] - trace.r_upper
+        ) / minor_radius[traced]
+        triangularity_lower[traced] = (
+            major_radius_local[traced] - trace.r_lower
+        ) / minor_radius[traced]
+
         boundary_rho_tor = float(rho_tor[-1])
         internal = rho_tor / boundary_rho_tor
         internal[0], internal[-1] = 0.0, 1.0
@@ -557,6 +707,28 @@ class FluxSurfaceGeometry:
         published_field = resample(field)
         published_pitch = published_field * loop_pitch
         published_inverse_square = loop_pitch / loop_inverse
+        published_volume_derivative = (
+            4.0
+            * np.pi**2
+            * vacuum_field
+            * radius
+            / (published_field * published_inverse_square)
+        )
+        published_inverse_radius = resample(inverse_radius)
+        published_gradient_psi = resample(gradient_psi)
+        published_gradient_psi_squared = resample(gradient_psi_squared)
+        published_gradient_psi_squared_over_radius_squared = resample(
+            gradient_psi_squared_over_radius_squared
+        )
+        published_field_squared = resample(field_squared)
+        published_inverse_field_squared = resample(inverse_field_squared)
+        published_r_in = resample(r_in)
+        published_r_out = resample(r_out)
+        published_elongation = resample(elongation)
+        published_triangularity_upper = resample(triangularity_upper)
+        published_triangularity_lower = resample(triangularity_lower)
+        published_enclosed_current = resample(enclosed_toroidal_current)
+        published_enclosed_current[0] = 0.0
         return cls(
             rho_tor_norm=requested,
             rho_tor=radius,
@@ -565,11 +737,7 @@ class FluxSurfaceGeometry:
             toroidal_flux=np.pi * vacuum_field * radius**2,
             volume=resample(volume),
             area=resample(area),
-            volume_derivative=4.0
-            * np.pi**2
-            * vacuum_field
-            * radius
-            / (published_field * published_inverse_square),
+            volume_derivative=published_volume_derivative,
             volume_flux_derivative=2.0 * np.pi * loop_inverse * np.sign(span),
             field_function=published_field,
             safety_factor=published_pitch,
@@ -579,6 +747,23 @@ class FluxSurfaceGeometry:
             gradient_rho_squared_over_radius_squared=resample(
                 gradient_rho_squared_over_radius_squared
             ),
+            inverse_radius=published_inverse_radius,
+            gradient_psi=published_gradient_psi,
+            gradient_psi_squared=published_gradient_psi_squared,
+            gradient_psi_squared_over_radius_squared=(
+                published_gradient_psi_squared_over_radius_squared
+            ),
+            field_squared=published_field_squared,
+            inverse_field_squared=published_inverse_field_squared,
+            area_derivative=published_inverse_radius
+            * published_volume_derivative
+            / (2.0 * np.pi),
+            r_in=published_r_in,
+            r_out=published_r_out,
+            elongation=published_elongation,
+            triangularity_upper=published_triangularity_upper,
+            triangularity_lower=published_triangularity_lower,
+            enclosed_toroidal_current=published_enclosed_current,
             boundary_rho_tor=boundary_rho_tor,
             vacuum_field=float(vacuum_field),
             reference_radius=float(reference_radius),
@@ -586,6 +771,145 @@ class FluxSurfaceGeometry:
             boundary_flux=float(axis_flux + span),
             magnetic_axis=(float(centre[0]), float(centre[1])),
         )
+
+    @classmethod
+    def internal_geometry(
+        cls,
+        lattice: FluxLattice,
+        flux: ArrayLike,
+        field_function: Callable[[NDArray[np.float64]], ArrayLike],
+        *,
+        axis: tuple[float, float],
+        boundary_flux: float,
+        reference_radius: float | None = None,
+        n_surface: int = DEFAULT_SURFACES,
+        n_theta: int = DEFAULT_ANGLES,
+        n_rho: int = DEFAULT_N_RHO,
+        edge_psi_norm: float = 0.995,
+        axis_psi_norm: float = 0.02,
+        diverted: bool = False,
+    ) -> PlasmaInternalGeometry:
+        """Return the fixed-shape loop block and the TORAX face profiles.
+
+        Two grids, deliberately: the decoder loop block carries the nested
+        surface *positions* at ``n_surface`` levels ``psi_norm = k / n_surface``
+        (the axis row is the repeated magnetic axis, the last row the LCFS at
+        ``psi_norm = 1``, traced for coordinates only because at an X-point the
+        gradient is not defined there), and the profile block carries every
+        surface average on the ``(n_rho + 1)`` TORAX faces
+        ``rho_norm = k / n_rho`` so a consumer that interpolates its own
+        profiles onto those faces reads the record without resampling error.
+        """
+        if int(n_surface) < 2:
+            raise SurfaceGeometryError(
+                "the loop block needs an axis row and at least one traced row"
+            )
+        if int(n_theta) < 4:
+            raise SurfaceGeometryError("the loop block needs at least four angles")
+        if int(n_rho) < 1:
+            raise SurfaceGeometryError("the profile block needs at least one face")
+
+        node_radius = np.ascontiguousarray(lattice.radius, dtype=float)
+        node_height = np.ascontiguousarray(lattice.height, dtype=float)
+        count = node_radius.size * node_height.size
+        state = np.asarray(flux, dtype=float).ravel()
+        if state.size < count:
+            raise SurfaceGeometryError(
+                f"the flux map carries {state.size} nodes; the lattice indexes {count}"
+            )
+        interpolant = RectBivariateSpline(
+            node_radius,
+            node_height,
+            state[:count].reshape(node_radius.size, node_height.size),
+            kx=3,
+            ky=3,
+            s=0,
+        )
+        centre = _refine_axis(interpolant, axis, node_radius, node_height)
+        axis_flux = float(interpolant.ev(*centre))
+        span = float(boundary_flux) - axis_flux
+        if span == 0.0:
+            raise SurfaceGeometryError("the axis and the boundary carry the same flux")
+
+        # the loop block reuses the reader's own rays; the outermost row is the
+        # LCFS at psi_norm 1, traced for coordinates only because the poloidal
+        # gradient vanishes at an X-point there
+        surface_psi_norm = np.linspace(0.0, 1.0, int(n_surface))
+        trace = _trace_surfaces(
+            interpolant,
+            centre,
+            axis_flux,
+            span,
+            surface_psi_norm[1:],
+            node_radius,
+            node_height,
+            int(n_theta),
+        )
+        surface_r = np.empty((int(n_surface), int(n_theta)))
+        surface_z = np.empty((int(n_surface), int(n_theta)))
+        surface_r[0] = float(centre[0])
+        surface_z[0] = float(centre[1])
+        surface_r[1:] = trace.radius.T
+        surface_z[1:] = trace.height.T
+
+        # the profile block is the reader record placed directly on the TORAX
+        # face grid, so a consumer interpolating its own profiles onto those
+        # faces reads the record without resampling error
+        record = cls.from_flux_map(
+            lattice,
+            flux,
+            field_function,
+            axis=axis,
+            boundary_flux=boundary_flux,
+            reference_radius=reference_radius,
+            rho_tor_norm=np.linspace(0.0, 1.0, int(n_rho) + 1),
+            edge_psi_norm=edge_psi_norm,
+            axis_psi_norm=axis_psi_norm,
+        )
+        r_major = 0.5 * (float(record.r_in[-1]) + float(record.r_out[-1]))
+        a_minor = 0.5 * (float(record.r_out[-1]) - float(record.r_in[-1]))
+        return PlasmaInternalGeometry(
+            record=record,
+            surface_psi_norm=surface_psi_norm,
+            surface_psi=axis_flux + surface_psi_norm * span,
+            surface_r=surface_r,
+            surface_z=surface_z,
+            surface_angle=trace.angle,
+            r_major=r_major,
+            a_minor=a_minor,
+            b0=float(record.field_function[-1]) / r_major,
+            boundary_toroidal_flux=float(record.toroidal_flux[-1]),
+            n_rho=int(n_rho),
+            n_theta=int(n_theta),
+            n_surface=int(n_surface),
+            diverted=bool(diverted),
+        )
+
+
+class PlasmaInternalGeometry(NamedTuple):
+    """Fixed-shape loop block and TORAX face profiles of one converged map.
+
+    ``record`` is the reader's own geometry record placed on the TORAX face
+    grid and carries every profile column the frame publishes; the loop block
+    is the fixed ``(n_surface, n_theta)`` surface coordinates a decoder draws
+    without re-deriving them, with row 0 the repeated magnetic axis and row
+    ``n_surface - 1`` the LCFS.
+    """
+
+    record: FluxSurfaceGeometry
+    surface_psi_norm: NDArray[np.float64]
+    surface_psi: NDArray[np.float64]
+    surface_r: NDArray[np.float64]
+    surface_z: NDArray[np.float64]
+    surface_angle: NDArray[np.float64]
+    r_major: float
+    a_minor: float
+    b0: float
+    boundary_toroidal_flux: float
+    n_rho: int
+    n_theta: int
+    n_surface: int
+    diverted: bool
 
 
 class _SurfaceIntegrals(NamedTuple):
@@ -598,6 +922,36 @@ class _SurfaceIntegrals(NamedTuple):
     radius_perimeter: NDArray[np.float64]
     volume: NDArray[np.float64]
     area: NDArray[np.float64]
+
+    #: ``\oint dl / |\nabla\Phi|``, the ``<1/R>`` numerator: the same
+    #: inverse-gradient loop as the pitch loop without the extra ``1/R``.
+    perimeter_inverse_gradient: NDArray[np.float64]
+
+
+class _TracedSurfaces(NamedTuple):
+    """One traced surface family: the loops plus the raw traced geometry.
+
+    ``radius``/``height``/``arc``/``gradient`` are packed
+    ``(angles, n_surface)`` in the same angle order the loops are summed over,
+    and the six extrema arrays are per surface.  The raw geometry is what
+    lets a later assembly read off the fixed-shape columns (R_in, R_out,
+    elongation, triangularity) and the two field averages whose integrand
+    carries the toroidal-field function, which the geometry-only loop can not
+    hold.
+    """
+
+    integrals: _SurfaceIntegrals
+    angle: NDArray[np.float64]
+    radius: NDArray[np.float64]
+    height: NDArray[np.float64]
+    arc: NDArray[np.float64]
+    gradient: NDArray[np.float64]
+    r_in: NDArray[np.float64]
+    r_out: NDArray[np.float64]
+    z_lower: NDArray[np.float64]
+    z_upper: NDArray[np.float64]
+    r_lower: NDArray[np.float64]
+    r_upper: NDArray[np.float64]
 
 
 def source_field_function(source, flux_span: float) -> Callable:
@@ -811,12 +1165,33 @@ def _trace_surfaces(
         """Return one closed line integral over the traced angles."""
         return weight * np.sum(integrand, axis=0)
 
-    return _SurfaceIntegrals(
-        inverse_gradient=loop(radius * arc / gradient),
-        pitch_loop=loop(arc / (radius * gradient)),
-        gradient_radius=loop(gradient * radius * arc),
-        gradient_inverse_radius=loop(gradient * arc / radius),
-        radius_perimeter=loop(radius * arc),
-        volume=np.pi * loop(radius**2 * vertical_step),
-        area=loop(radius * vertical_step),
+    # the fixed-shape columns come straight off the traced points, so the
+    # family also carries the per-surface extrema and the raw geometry the
+    # field averages need
+    lower = np.argmin(height, axis=0)
+    upper = np.argmax(height, axis=0)
+    r_in = np.min(radius, axis=0)
+    r_out = np.max(radius, axis=0)
+    return _TracedSurfaces(
+        integrals=_SurfaceIntegrals(
+            inverse_gradient=loop(radius * arc / gradient),
+            pitch_loop=loop(arc / (radius * gradient)),
+            gradient_radius=loop(gradient * radius * arc),
+            gradient_inverse_radius=loop(gradient * arc / radius),
+            radius_perimeter=loop(radius * arc),
+            volume=np.pi * loop(radius**2 * vertical_step),
+            area=loop(radius * vertical_step),
+            perimeter_inverse_gradient=loop(arc / gradient),
+        ),
+        angle=angle,
+        radius=radius,
+        height=height,
+        arc=arc,
+        gradient=gradient,
+        r_in=r_in,
+        r_out=r_out,
+        z_lower=height[lower, np.arange(psi_norm.size)],
+        z_upper=height[upper, np.arange(psi_norm.size)],
+        r_lower=radius[lower, np.arange(psi_norm.size)],
+        r_upper=radius[upper, np.arange(psi_norm.size)],
     )

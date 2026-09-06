@@ -1,0 +1,124 @@
+{
+  "schema": "nova-forward-labeller-completion",
+  "root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T151122970233-pfs-labeller-batch-driver/sessions",
+  "expected_shots": 2,
+  "manifest_count": 2,
+  "completed_shots": 2,
+  "failed_shots": 0,
+  "completion_fraction": 1.0,
+  "slices": 118,
+  "admitted_slices": 118,
+  "excluded_slices": 6,
+  "converged_slices": 91,
+  "unconverged_slices": 27,
+  "qualified_slices": 19,
+  "converged_fraction": 0.7711864406779662,
+  "qualified_fraction": 0.16101694915254236,
+  "branch_guard_evaluated_slices": 118,
+  "branch_guard_agreement_slices": 57,
+  "branch_guard_agreement_fraction": 0.4830508474576271,
+  "current_centroid_slices": 101,
+  "companion_shots": 2,
+  "companion_slices": 118,
+  "companion_completion_fraction": 1.0,
+  "flux_function_grid_points": [
+    65
+  ],
+  "slices_per_second_per_card": 0.9478807545993704,
+  "warm_rate_definition": "admitted slices in shots after the setup and compilation-bearing first shot of each shard, divided by their summed per-slice wall time",
+  "warm_shots": 1,
+  "warm_slices": 61,
+  "warm_wall_seconds": 15.505356850102544,
+  "warm_slices_per_second_per_card": 3.9341242249188597,
+  "gpu_hours": 0.03458006465341896,
+  "nova_revisions": [
+    "e16873d04cd4be4794b65c9f1330d6fcd5611865"
+  ],
+  "carrier_identities": [
+    "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+  ],
+  "policy_digests": [
+    "b5f9ef456f665c593a40010b9756b16fb36abd4ebbd1fea4d83a3d628c77bc7d"
+  ],
+  "shots": [
+    {
+      "shot": 22056,
+      "admitted_slices": 61,
+      "excluded_slices": 3,
+      "converged_slices": 43,
+      "unconverged_slices": 18,
+      "qualified_slices": 4,
+      "unqualified_slices": 57,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 7,
+        "residual_above_qualification_tolerance": 39,
+        "slice_exception": 11
+      },
+      "branch_guard_agreement_slices": 21,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 50,
+          "median": -183.17026333000388,
+          "p90": 1.7946031402879083,
+          "maximum": 20.78030640719162
+        },
+        "absolute": {
+          "count": 50,
+          "median": 183.17026333000388,
+          "p90": 527.0000780900787,
+          "maximum": 551.5205934594036
+        }
+      },
+      "slice_wall_seconds": 15.505356850102544,
+      "mean_slice_wall_seconds": 0.2541861778705335,
+      "slices_per_second_per_card": 3.9341242249188597,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22086,
+      "admitted_slices": 57,
+      "excluded_slices": 3,
+      "converged_slices": 48,
+      "unconverged_slices": 9,
+      "qualified_slices": 15,
+      "unqualified_slices": 42,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 3,
+        "residual_above_qualification_tolerance": 33,
+        "slice_exception": 6
+      },
+      "branch_guard_agreement_slices": 36,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 51,
+          "median": -15.882783142244335,
+          "p90": 7.914024614269433,
+          "maximum": 22.07030971160022
+        },
+        "absolute": {
+          "count": 51,
+          "median": 16.718865526891765,
+          "p90": 277.7476072161743,
+          "maximum": 356.6231065779637
+        }
+      },
+      "slice_wall_seconds": 24.755632954649627,
+      "mean_slice_wall_seconds": 0.4343093500815724,
+      "slices_per_second_per_card": 2.3025062661261586,
+      "warm_rate_eligible": false
+    }
+  ],
+  "failed": []
+}

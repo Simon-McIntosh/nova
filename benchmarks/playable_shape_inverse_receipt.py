@@ -782,27 +782,27 @@ def _arm_receipt(
 
 def _null_receipt(
     machine: ForwardMachine,
+    previous,
     circuit_names: dict[int, str],
 ) -> tuple[dict[str, Any], object]:
-    """Run the seed-derived null command and return its one-solve baseline."""
+    """Run the seed-frame null command and return its one-solve baseline."""
     solver = ProductionSolver(machine)
-    seed_flux = machine.seed
     seed_current = np.asarray(machine.profile.operator.prescribed_current_field.current)
-    target = achieved_target(machine.profile, seed_flux)
+    target = achieved_target(machine.profile, previous.flux)
     inverse = solve_shape_inverse(
         machine.profile,
         target,
-        seed_flux,
+        previous.flux,
         prescribed_current=solver.prescribed_current,
         free_circuits=machine.drivable_circuits,
     )
     solver.prescribed_current = inverse.currents
     started = perf_counter()
     equilibrium, trips, _program = solver._forward(
-        machine.profile, seed_flux, solver.prescribed_current
+        machine.profile, previous.flux, solver.prescribed_current
     )
     wall = perf_counter() - started
-    prior = achieved_target(machine.profile, seed_flux)
+    prior = achieved_target(machine.profile, previous.flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
     current_change = inverse.currents - seed_current
     turning_point_drift = _points(achieved) - _points(prior)
@@ -1064,7 +1064,7 @@ def measure(
         },
     }
     if command in {None, "null-resolve"}:
-        null_arm, null_equilibrium = _null_receipt(machine, circuit_names)
+        null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
         null_points = _points(achieved_target(profile, null_equilibrium.flux))
         null_arm["runtime"] = runtime
         _write_command_receipt(directory / "null-resolve.json", null_arm)

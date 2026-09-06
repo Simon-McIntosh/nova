@@ -149,21 +149,25 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
     )
 
 
-def test_null_command_preserves_seed_through_one_forward_solve(machine, seed_target):
+def test_null_command_preserves_seed_through_one_forward_solve(machine):
     """A seed-derived target leaves its boundary and circuit currents unchanged."""
     from apps.playable.production import ProductionSolver
 
     profile = machine.profile
     seed_current = np.asarray(profile.operator.prescribed_current_field.current)
+    solver = ProductionSolver(machine)
+    seed_result = solver._reduced(profile, machine.seed, seed_current)
+    seed = ProductionSolver._reduced_receipt(profile, seed_result)
+    seed_target = achieved_target(profile, seed.flux)
     inverse = solve_shape_inverse(
         profile,
         seed_target,
-        machine.seed,
+        seed.flux,
         prescribed_current=seed_current,
         free_circuits=machine.drivable_circuits,
     )
-    equilibrium, _trips, _program = ProductionSolver(machine)._forward(
-        profile, machine.seed, inverse.currents
+    equilibrium, _trips, _program = solver._forward(
+        profile, seed.flux, inverse.currents
     )
     achieved = achieved_target(profile, equilibrium.flux)
     drift = np.linalg.norm(

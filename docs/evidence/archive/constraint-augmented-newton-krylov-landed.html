@@ -156,6 +156,49 @@
     diverted bank rows do not route through the wall polish at all.</p>
   </section>
 
+  <section id="shape-rows">
+    <h2>The pulse-design bounding-box row set on the forward solve: wired and exact when unmoved, open when steered (595cdd0f, merged at 6b9c4f25)</h2>
+    <p><strong>Node:</strong> <code>cank-bounding-box-shape-rows</code>, local DeepSeek lane, run <code>r-20260905T162101540255</code> against the held
+    Miller-era tip <code>66aea76b</code>, about 12.5 hours across two attempts; <code>nova/equilibrium/constraint.py</code> (+561/-1) gains
+    <code>FieldComponentConstraint</code> (one poloidal-field component read off the flux map at each payload point, radial for the vertical flux
+    gradient over R and vertical for the radial flux gradient over R) and <code>BoundingBoxTarget</code> (the payload bundle with
+    <code>from_control_points</code> through <code>ControlPoints</code> and <code>from_boundary</code> off a traced separatrix's own extrema),
+    <code>nova/equilibrium/__init__.py</code> re-exports the constraint and compensator-selection names, <code>tests/test_shape_constraints.py</code>
+    (655 lines) and <code>benchmarks/constraint_shape_receipt.py</code> (619 lines) are new. Gate: 7 slow contracts passed on the H200 lane
+    (128 GiB, 1 h 56 min, three benchmark fixes on the way because the committed Miller-era driver passed no kernel options to a budgeted
+    <code>solve_branch</code>) and 12 protocol tests on CPU.</p>
+    <p><strong>Row set.</strong> Ten rows: boundary flux at the outer, upper, inner and lower turning points (isoflux against the reference point at the
+    read saddle), radial field vanishing at the outer and inner points, vertical field vanishing at the upper and lower points, and the two-gradient
+    null at the X-point. Compensating directions from <code>derive_circuit_compensators</code> over the thirteen drivable MAST circuits; the rows
+    compete, so the singular-distribution rule applies. The drivable singular spectrum on 22086/43 runs from 2.38e-6 down to 7.1e-11 row scales
+    per ampere, four and a half decades.</p>
+    <p><strong>Unmoved command.</strong> <code>from_boundary</code> on the achieved separatrix reproduces it: 3 trips, terminal residual 3.2e-16,
+    qualified, topology consistent. No curve fit stands between the command and the plasma, which is what the Miller receipt lacked.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png" alt="Two panels of the 22086/43 boundary, previous and achieved, with commanded and previous turning points marked; the achieved boundary lies almost on the previous one in both arms" style="max-width:100%">
+      <figcaption>Commanded turning points against the achieved boundary for both steering arms. The achieved boundary sits almost on the previous one: the upper-point arm shifts the whole plasma up by 4 mm, the elongation arm leaves the top and bottom where they were.</figcaption>
+    </figure>
+    <table>
+      <caption>Steering arms on 22086/43 (H200, <code>solve_branch</code> public defaults, row tolerance 1e-6 of scale)</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Commanded move</th><th scope="col">Achieved move</th><th scope="col">Trips, termination</th><th scope="col">Terminal residual</th><th scope="col">Compensation</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">upper point plus 2 cm</th><td>upper Z +20.0 mm, other points held</td><td>upper Z +4.0 mm; outer, inner and lower Z also +4.0 mm (a rigid shift); axis +4.0 mm; X-point (-3, +9) mm</td><td>2, active-set cycle detected</td><td>1.42e-3 of row scale, rows open</td><td>45.7 A 2-norm: P6 upper -26.2, P4 upper +16.1, P2 outer lower -15.9 A</td></tr>
+        <tr><th scope="row">elongation plus 5 percent</th><td>upper Z +48.3 mm, lower Z -48.3 mm</td><td>upper Z -2.2 mm, lower Z -4.8 mm (span +2.6 of +96.6 mm); inner turning point relocated 88 mm up the column; X-point (+57, +7) mm</td><td>4, active set settled</td><td>2.85e-3 of row scale, rows open</td><td>104.9 A 2-norm: P6 upper +65.5, P4 upper -45.3, P2 outer lower +27.0 A</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> The compensating currents carry the commanded sign on both arms, and that is all the manifest's phrase "steers in the
+    commanded direction" can mean: the boundary itself moves a fifth of the command as a rigid shift in the first arm and not at all along the
+    commanded axis in the second. Both solves ended on the Newton-Krylov route's active-set termination after two and four trips with the rows
+    three decades above tolerance, and tens of amperes on circuits that need hundreds to move a MAST boundary by centimetres. Two mechanisms are
+    on the table and the receipt does not separate them: the worker's, that the four-and-a-half-decade compensator spectrum sets a closure floor
+    near 1e-3 of row scale, so the singular-distribution direction cannot close ten competing rows; and the coordinator's, that the active-set
+    stop cut the solve short before the currents grew, since a cycle detected at trip two is a termination and not a convergence. The CPU
+    contracts on the Solov'ev machine were widened to accept a row within ten percent of its scale (measured floor 5.4e-2 on the seed bounding
+    box, 7.5e-3 on the null command), so the green gate measures wiring and direction, not closure. The steering-effectiveness measurement is the
+    next node on the plan; until it lands the bounding-box rows are a vocabulary the playable solve can command but not yet a control that
+    reaches its target.</p>
+  </section>
+
 </main>
 </body>
 </html>

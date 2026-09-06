@@ -1,0 +1,490 @@
+{
+  "receipt": "steering authority arm record",
+  "identity": "22086/43",
+  "route": "reduced",
+  "arm_family": "upper-scan",
+  "command_label": "5 mm",
+  "command_millimetres": 5,
+  "baseline_current_per_circuit_a": [
+    {
+      "circuit": 0,
+      "family": "sol",
+      "current_a": -25381.810546875
+    },
+    {
+      "circuit": 1,
+      "family": "p2_inner_upper",
+      "current_a": 50267.71875
+    },
+    {
+      "circuit": 2,
+      "family": "p2_outer_upper",
+      "current_a": 33341.1796875
+    },
+    {
+      "circuit": 3,
+      "family": "p2_inner_lower",
+      "current_a": 50319.8671875
+    },
+    {
+      "circuit": 4,
+      "family": "p2_outer_lower",
+      "current_a": 33416.35546875
+    },
+    {
+      "circuit": 5,
+      "family": "p3_upper",
+      "current_a": 29.57099151611328
+    },
+    {
+      "circuit": 6,
+      "family": "p3_lower",
+      "current_a": 46.641414642333984
+    },
+    {
+      "circuit": 7,
+      "family": "p4_upper",
+      "current_a": -185433.671875
+    },
+    {
+      "circuit": 8,
+      "family": "p4_lower",
+      "current_a": -185195.171875
+    },
+    {
+      "circuit": 9,
+      "family": "p5_upper",
+      "current_a": -138156.90625
+    },
+    {
+      "circuit": 10,
+      "family": "p5_lower",
+      "current_a": -138175.46875
+    },
+    {
+      "circuit": 11,
+      "family": "p6_upper",
+      "current_a": -554.8970947265625
+    },
+    {
+      "circuit": 12,
+      "family": "p6_lower",
+      "current_a": 926.8552856445312
+    }
+  ],
+  "arm": {
+    "arm": "upper turning point plus 5 mm",
+    "commanded_turning_points": {
+      "outer_m": [
+        1.3987159929204653,
+        0.005267443820381176
+      ],
+      "upper_m": [
+        0.8444709849406152,
+        0.9956806490939126
+      ],
+      "inner_m": [
+        0.2618024184664478,
+        0.011333393978444961
+      ],
+      "lower_m": [
+        0.8109030086844996,
+        -0.9431135203614804
+      ]
+    },
+    "selection": {
+      "rule": "singular_distribution",
+      "competing_rows": true,
+      "singular_values_row_scales_per_ampere": [
+        2.380350990972817e-06,
+        1.8560461394631649e-06,
+        1.108785926406541e-06,
+        5.888497076987798e-07,
+        1.4981602826051263e-08,
+        5.577118492178154e-09,
+        3.245409685257273e-09,
+        1.7749875793520366e-09,
+        6.698075640393315e-10,
+        7.095398482533831e-11
+      ],
+      "leading_circuits_per_row": [
+        [
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 7,
+            "family": "p4_upper"
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper"
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper"
+          }
+        ],
+        [
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          }
+        ],
+        [
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower"
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 7,
+            "family": "p4_upper"
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          }
+        ],
+        [
+          {
+            "circuit": 7,
+            "family": "p4_upper"
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper"
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper"
+          }
+        ]
+      ]
+    },
+    "qualified": true,
+    "topology_consistent": null,
+    "terminal_residual": 6.271889996346182e-11,
+    "trips": 2,
+    "termination": "converged",
+    "rows_qualified": true,
+    "rows": [
+      {
+        "row_kind": "IsofluxConstraint",
+        "qualified": true,
+        "max_relative_error": 5.14060772777163e-08,
+        "physical_residual": [
+          8.142555957268982e-08,
+          2.75002676047853e-08,
+          7.583228586738322e-09,
+          2.8594924206259975e-08
+        ]
+      },
+      {
+        "row_kind": "FieldComponentConstraint",
+        "qualified": true,
+        "max_relative_error": 4.681062714569567e-09,
+        "physical_residual": [
+          6.94386674020577e-08,
+          2.9609546992789475e-09,
+          5.9330037303161295e-08,
+          3.2442019853427113e-07
+        ]
+      },
+      {
+        "row_kind": "XPointConstraint",
+        "qualified": true,
+        "max_relative_error": 7.666232896729061e-17,
+        "physical_residual": [
+          -2.0029796822174447e-15,
+          1.1657341758564144e-15
+        ]
+      }
+    ],
+    "compensated_circuits": [
+      {
+        "row_kind": "IsofluxConstraint",
+        "current_a": [
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "current_a": 1195860.586836826
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "current_a": 1083309.2074449605
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "current_a": -695160.0172140248
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower",
+            "current_a": -516567.34006493125
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper",
+            "current_a": -433120.8008045921
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "current_a": -407688.5457272666
+          }
+        ],
+        "current_norm_a": 1976503.0313545708
+      },
+      {
+        "row_kind": "FieldComponentConstraint",
+        "current_a": [
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "current_a": -1885841.228174912
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "current_a": -1587796.6685707995
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "current_a": 1341190.4163146047
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "current_a": 1051656.643262275
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower",
+            "current_a": 942755.4533247123
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper",
+            "current_a": 861582.4375783565
+          }
+        ],
+        "current_norm_a": 3386505.6285092197
+      },
+      {
+        "row_kind": "XPointConstraint",
+        "current_a": [
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper",
+            "current_a": 159403.6348444827
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower",
+            "current_a": 148937.0573228861
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower",
+            "current_a": 116145.30107186803
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "current_a": 104314.34251128952
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "current_a": -94388.41767040687
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper",
+            "current_a": 77101.68296376713
+          }
+        ],
+        "current_norm_a": 305699.2585901145
+      }
+    ],
+    "compensating_current_norm_a": 3932993.3436990427,
+    "currents_per_circuit": [
+      {
+        "circuit": 12,
+        "family": "p6_lower",
+        "compensating_a": -865515.321275481,
+        "applied_total_a": -864588.4659898365
+      },
+      {
+        "circuit": 7,
+        "family": "p4_upper",
+        "compensating_a": -780525.3467612847,
+        "applied_total_a": -965959.0186362847
+      },
+      {
+        "circuit": 6,
+        "family": "p3_lower",
+        "compensating_a": 668264.4414477681,
+        "applied_total_a": 668311.0828624105
+      },
+      {
+        "circuit": 5,
+        "family": "p3_upper",
+        "compensating_a": 640912.5211871583,
+        "applied_total_a": 640942.0921786744
+      },
+      {
+        "circuit": 11,
+        "family": "p6_upper",
+        "compensating_a": -486324.49940438033,
+        "applied_total_a": -486879.3964991069
+      },
+      {
+        "circuit": 10,
+        "family": "p5_lower",
+        "compensating_a": 449538.3934932047,
+        "applied_total_a": 311362.9247432047
+      },
+      {
+        "circuit": 9,
+        "family": "p5_upper",
+        "compensating_a": 443303.70842681325,
+        "applied_total_a": 305146.80217681325
+      },
+      {
+        "circuit": 8,
+        "family": "p4_lower",
+        "compensating_a": -285659.20553813776,
+        "applied_total_a": -470854.37741313776
+      },
+      {
+        "circuit": 4,
+        "family": "p2_outer_lower",
+        "compensating_a": -127248.46162833608,
+        "applied_total_a": -93832.10615958608
+      },
+      {
+        "circuit": 3,
+        "family": "p2_inner_lower",
+        "compensating_a": -108472.54696873289,
+        "applied_total_a": -58152.67978123289
+      },
+      {
+        "circuit": 1,
+        "family": "p2_inner_upper",
+        "compensating_a": 103308.1842143713,
+        "applied_total_a": 153575.90296437131
+      },
+      {
+        "circuit": 2,
+        "family": "p2_outer_upper",
+        "compensating_a": 90054.68534287544,
+        "applied_total_a": 123395.86503037544
+      },
+      {
+        "circuit": 0,
+        "family": "sol",
+        "compensating_a": 2034.8830338590633,
+        "applied_total_a": -23346.927513015937
+      }
+    ],
+    "topology_valid": false,
+    "movement_rz_m": null,
+    "achieved_turning_points": null,
+    "turning_point_error_m": null,
+    "landmarks": null,
+    "achieved_boundary_rz_m": null
+  }
+}

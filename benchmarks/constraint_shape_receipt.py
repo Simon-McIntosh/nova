@@ -921,6 +921,8 @@ def assemble_steering_authority(*, directory: Path):
     baseline = json.loads((directory / "converged.json").read_text(encoding="utf-8"))
     records = []
     for path in sorted(directory.glob("steering-*.json")):
+        if path.name == "steering-authority.json":
+            continue
         records.append(json.loads(path.read_text(encoding="utf-8")))
     if not records:
         raise RuntimeError(f"no steering arm records under {directory}")

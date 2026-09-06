@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T16:26:00",
+  "updated": "2026-09-06T16:27:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1897,6 +1897,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-hooks-l",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "msc-hooks-x",
@@ -111329,6 +111338,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1866
+    "_version": 1867
   }
 }

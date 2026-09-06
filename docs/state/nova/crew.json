@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T23:34:22",
+  "updated": "2026-09-06T23:46:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -115387,6 +115387,144 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T213824817647-pfs-launch-arguments",
+        "plan": "playable-forward-solve",
+        "section": "\u00a77",
+        "node": "pfs-launch-arguments",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 309,
+                "cached_input_tokens": 626824,
+                "input_tokens": 627137,
+                "output_tokens": 34,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 627171,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "Tests covering launch-argument default, URL override and neither pass with exit 0 together with the existing fast playable tests (JAX_PLATFORMS=cpu, -m \"not slow\"; run on all_debug through srun if the file is heavy), and the report names the exact bokeh serve line imas-ambix should use: bokeh serve apps/playable --args --decoder imas_ambix.worldmodel.flux_conditioned_decoder:FluxConditionedDecoder",
+          "estimated_hours": 0.5,
+          "goal": "apps/playable/main.py parses --decoder, --machine and --view once from sys.argv after bokeh serve --args as session defaults, with the request URL arguments overriding them per session and the placeholder decoder when neither is given",
+          "id": "pfs-launch-arguments",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T213824817647-pfs-launch-arguments/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "apps/playable/main.py",
+            "tests/test_playable_server.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/launch-arguments.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-appframe-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T21:38:34Z",
+        "completed_at": "2026-09-06T21:45:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 425,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 425,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "90573c75adc17e30f71e5abcb864927b29173db3",
+        "commits": [
+          "2e52568c499ed0441ce2e47f5e015e25e82ced80"
+        ],
+        "changed_lines": {
+          "added": 113,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_playable_server.py tests/test_playable_camera.py tests/test_playable_session.py -m \"not slow\" on all_debug (48 passed; baseline 45 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T213824817647-pfs-launch-arguments/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T213824817647-pfs-launch-arguments/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6629888,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6729186,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13471,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4588
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 18059,
+          "peak_input_tokens": 13359074
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-launch-arguments",
+          "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T21:45:39Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -115699,6 +115837,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1953
+    "_version": 1954
   }
 }

@@ -238,6 +238,9 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         seed=jnp.asarray(passive_case["state"]),
         wall=np.asarray(profile.operator.wall.coordinate),
         identity="mast-22086/43",
+        # The response carrier stores the active PF circuits first, followed
+        # by passive and vessel currents that are state, not shape actuators.
+        drivable_circuits=tuple(range(int(policy["active_circuit_count"]))),
     )
     prime_solver = ProductionSolver(machine)
     prime, _trips, _program = prime_solver._forward(

@@ -51,6 +51,7 @@ class ForwardMachine:
     seed: np.ndarray
     wall: np.ndarray
     identity: str
+    drivable_circuits: tuple[int, ...] | None = None
 
     @property
     def circuit_count(self) -> int:
@@ -204,6 +205,7 @@ class ProductionSolver:
                 target,
                 flux,
                 prescribed_current=self.prescribed_current,
+                free_circuits=self.machine.drivable_circuits,
             )
             self.prescribed_current = inverse.currents
             equilibrium, round_trips, program_out = self._forward(

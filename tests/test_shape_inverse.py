@@ -121,7 +121,8 @@ def test_production_solver_uses_at_most_two_unconstrained_forward_rounds(
         production, "achieved_target", lambda _profile, _flux: seed_target
     )
 
-    def inverse(_profile, _target, _flux, *, prescribed_current):
+    def inverse(_profile, _target, _flux, *, prescribed_current, free_circuits):
+        assert free_circuits is None
         return SimpleNamespace(currents=np.asarray(prescribed_current) + 1.0)
 
     monkeypatch.setattr(production, "solve_shape_inverse", inverse)

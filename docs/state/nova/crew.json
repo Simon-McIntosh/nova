@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T12:41:19",
+  "updated": "2026-09-06T12:42:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -109616,6 +109616,139 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T095215102962-pfs-inverse-step-shape-control-sol",
+        "plan": "playable-forward-solve",
+        "section": "\u00a72",
+        "node": "pfs-inverse-step-shape-control-sol",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5002,
+                "cached_input_tokens": 642845,
+                "input_tokens": 647879,
+                "output_tokens": 4558,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 652437,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "Start from the carried module at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse-carried.py (a previous worker five hours of work, uncommitted when its lane died): copy it to nova/equilibrium/shape_inverse.py, read it critically, keep what is sound. The module returns the prescribed current vector for a commanded BoundingBoxTarget by Tikhonov-regularised least squares over the free circuits the way InverseDesign.solve_current in nova/equilibrium/inverse.py does (MoorePenrose, gamma scaled by the plasma current, field rows weighted by sqrt(field_weight)), with the response rows read off the operator response carrier plus the lattice interpolation the constraint module already uses (sample_lattice_flux, the field reads of FieldComponentConstraint) with the plasma own contribution at the current iterate subtracted. apps/playable/production.py ProductionSolver runs: inverse step, reduced-route forward solve on the prescribed currents warm-started from the previous frame, one more inverse step if the turning-point error exceeds a stated tolerance, no constraint pairs on the control path. bulk R plus Z move the four points rigidly through apps/playable/shape.py. The previous worker found the row set conflicted on the limited Solovev fixture (no X-point, a sixteen-conductor ring with weak shaping authority) and the forward solve refusing to converge on moved currents: verify the response matrix against central differences first, drop the null row on a limited machine, keep the flux and field rows, and if the fixture cannot close a 2 cm command say so with numbers and pin instead that the inverse step reproduces the seed own currents from its own turning points and that the achieved motion has the commanded sign and grows monotonically with a 5, 10, 20 mm command. CPU contracts in the FOREGROUND on a compute node under one bounded sbatch (all_debug partition, --time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shape_inverse.py tests/test_playable_session.py -m \"not slow\", PYTHONPATH the worktree) with the log captured whole, the fast subset of tests/test_playable_session.py unchanged. Receipt on the H200 (betelgeuse, --reservation=gpu_0003_grpA --gres=gpu:1 --mem=128G --time=00:55:00, JAX_PLATFORMS=cuda,cpu, persistent compilation cache, foreground, persisted per arm) through the app on MAST 22086/43 with the two arms of the shape-row receipt (upper point plus 2 cm, elongation plus 5 percent): previous, commanded, achieved turning points, coil currents per circuit, trips, wall per round, under docs/figures/playable-forward-solve/shape-inverse/ with a PNG. Path-scoped ruff check and format, conventional commit subject plus body per coherent change, never git add -A. Write the manifest at the path the dispatch names before any wait, opening its outcome with the exact phrase: continuation of r-20260906T062332333142 on another lane, not rework. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse.md with achieved against commanded per arm beside the shape-row receipt figures.",
+          "estimated_hours": 6.0,
+          "goal": "Build the shape-control step the playable solve now uses, as followup f-pfs-019 on the plan specifies: coil currents by regularised least squares against the bounding-box targets on the response matrix, followed by the reduced-route forward solve on those prescribed currents, continuing run r-20260906T062332333142 on another lane",
+          "id": "pfs-inverse-step-shape-control-sol",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T095215102962-pfs-inverse-step-shape-control-sol/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/shape_inverse.py",
+            "tests/test_shape_inverse.py",
+            "apps/playable/production.py",
+            "apps/playable/shape.py",
+            "tests/test_playable_session.py",
+            "benchmarks/playable_shape_inverse_receipt.py",
+            "docs/figures/playable-forward-solve/shape-inverse",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-sol-x2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T09:52:33Z",
+        "completed_at": "2026-09-06T10:34:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2489,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2489,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9758190b49e2cfc17bb2272f597ac0006bca2618",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T095215102962-pfs-inverse-step-shape-control-sol/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07622-4be0-7462-86f0-5e3b4fbdeb0c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 24438528,
+            "cached_input_tokens_cumulative": 24438528,
+            "input_tokens": 24694264,
+            "input_tokens_cumulative": 24694264,
+            "output_tokens": 41410,
+            "output_tokens_cumulative": 41410,
+            "reasoning_output_tokens": 11245,
+            "reasoning_output_tokens_cumulative": 11245
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 52655,
+          "peak_input_tokens": 49132792
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the worker stopped at its fence after two corrected attempts left the directional-motion contract failing (achieved -1.75, -1.67, -1.88 mm for +5, +10, +20 mm commands on the limited Solovev fixture) and asked for a decision; five hours of uncommitted work carried to reports/nova/playable/shape-inverse-carried-2",
+        "resume_waiver": {
+          "session_id": "01a07622-4be0-7462-86f0-5e3b4fbdeb0c",
+          "source": "pointer",
+          "reason": "resume was refused twice on a stale 2026-09-02 ledger refusal for backend codex while the account surface read 97 percent, and the lane move applies the dispatch ceiling with no override; the session cannot be reached, the work is carried, the successor is dispatched fresh"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -109816,6 +109949,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1829
+    "_version": 1830
   }
 }

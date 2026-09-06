@@ -587,6 +587,29 @@
     <code>~/.config/reckon/crew/reports/nova/attribution/persistent-sweep/</code>; the repair is the next followup on this plan.</p>
   </section>
 
+  <section id="persistent-sweep-probe">
+    <h2>The persistent-sweep class-margin regression was the probe, not the read (e76bc389)</h2>
+    <p><strong>Node:</strong> <code>nia-persistent-sweep-margin-regression</code>, local DeepSeek lane, run <code>r-20260905T162256973255</code> against
+    base <code>2fa71ece</code>, dispatched 18:23 and complete 04:39 after its process ended once and was resumed. One test-only commit (26 lines in
+    <code>tests/test_connectivity_boundary.py</code>); no production file changed, though three were in scope.</p>
+    <p><strong>Finding.</strong> The preserved probe under <code>~/.config/reckon/crew/reports/nova/attribution/persistent-sweep/probe_sweep.py</code>
+    does not reproduce the fixture: its dense wall interpolates <code>linspace(0, 1, m, endpoint=False)</code> against <code>arange(len(lr))</code>, which
+    traces only the first limiter segment, so all 160 wall samples sit on the bottom edge at z = -0.45. With that wall the X candidate at (0.8, 0)
+    fails containment, <code>class_u_x</code> reads positive infinity beside a shadowed <code>class_u_wall</code> of positive infinity, and the margin is
+    the NaN of infinity minus infinity with <code>is_diverted</code> false, at every revision, including the parents of both suspected merges
+    (7bff1d5d and 47b9f996 read NaN identically). A probe with the fixture's uniform-arc-length closed-loop wall reads diverted true and margin
+    positive infinity on all 17 shifts at head; the head census is sane (X (0.8, 0, -0.00533), O (1.2, 0, +0.00533), 2 admitted of 6241,
+    no slot exhaustion). So there is no production regression, and neither of the review's candidate mechanisms (the lax.cond census lane
+    routing, the polish retain lane's masked converged) is on a fault path. The slow sweep test's red was a stale <code>SimpleNamespace</code>
+    receipt stub missing the <code>constraints</code> attribute the branch receipt now reads, repaired in the same commit, and a fast regression test
+    pins the positive-infinity margin and diverted class on three shifts.</p>
+    <p><strong>Gate.</strong> 25 passed on CPU over the connectivity, census-compaction and axes files, run as fresh-process per-file lanes: the
+    combined long-lived process aborts natively in JAX's CPU backend (<code>backend_compile_and_load</code>) when the axes test compiles as the
+    23rd read, the documented compile-accumulation failure of a mega-lane, and the 64 GiB login cgroup OOM-killed parallel probes (nine kills
+    recorded). Follow-ons left: repair the preserved probe's wall so its readings are faithful, and the four-revision question the brief posed is
+    vacuous now that the reading is revision-independent.</p>
+  </section>
+
 </main>
 </body>
 </html>

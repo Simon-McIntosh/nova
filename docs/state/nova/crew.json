@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T12:27:18",
+  "updated": "2026-09-06T12:41:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2584,6 +2584,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-luna-x3",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-reduced-route-x",
         "harness": "claude-opus",
         "role": "implement",
@@ -2651,6 +2660,17 @@
       },
       {
         "id": "pfs-sol-x2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a07622-4be0-7462-86f0-5e3b4fbdeb0c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07622-4be0-7462-86f0-5e3b4fbdeb0c"
+        },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-sol-x3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -109451,6 +109471,151 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T085225254813-pfs-frame-contract-internal-geometry",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-frame-contract-internal-geometry",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 798,
+                "cached_input_tokens": 518119,
+                "input_tokens": 518949,
+                "output_tokens": 4783,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 523732,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "nova/equilibrium/steering_frames.py: SteeringFrame gains a surface block on a fixed grid of n_surface levels (default 30) laid out uniformly in psi_norm between a recorded axis floor and a recorded edge level: flux_surface_psi_norm (n_surface,), flux_surface_psi (n_surface,) in Wb under COCOS 17, flux_surface_r plus flux_surface_z (n_surface, n_theta) with n_theta fixed (default 128) and the polar angle grid about the magnetic axis recorded, and on the same surfaces the TORAX standard-geometry metrics: rho_tor_norm, rho_tor, toroidal flux, volume, area, dV/drho, dS/drho, F, q, surface averages of 1/R, 1/R^2, |grad psi|, |grad psi|^2, |grad psi|^2/R^2, B^2, 1/B^2, the loop integral of dl/B_p, R_in, R_out, elongation, upper plus lower triangularity, enclosed toroidal current; scalars B0, R_major, a_minor, magnetic axis z, boundary toroidal flux. The session dataset writes them with time as the last axis (dims n_surface, n_theta, nt) and the COCOS attribute; frames_from_session reconstructs every new field. Producer: FluxSurfaceGeometry in nova/equilibrium/flux_surface_geometry.py, whose _trace_surfaces already casts n_theta rays from the axis and bisects each level; extend it to publish the traced contour coordinates (radius, height per surface per angle) and the metrics it does not yet carry, each a line integral over the loops it already traces (R_in and R_out as the ray extrema on the midplane side, elongation and triangularities from the surface extrema, the field averages from the interpolant gradient plus the field function, the enclosed current from the poloidal-field loop integral). NEVER write a new contourer or marching squares. assemble_frame fills the block from the equilibrium plus the source field function. Contracts in tests/test_steering_frames.py plus tests/test_flux_surface_geometry.py: the synthetic session round-trips bitwise with the new variables; on the Solovev fixture the traced surface at each psi_norm agrees with nova.biot.contour.Contour (contourpy) cut at the same psi within one raster cell size in Hausdorff distance; each metric agrees with the device path traced_flux_surface_geometry (nova/equilibrium/flux_surface_extraction.py) where both define the quantity, at a stated tolerance or with the disagreement measured and explained in the report; the existing tests in both files stay green. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_steering_frames.py tests/test_flux_surface_geometry.py -m \"not slow\", PYTHONPATH the worktree) with the log captured whole; run the slow fixture test of test_steering_frames.py the same way if it fits the hour, else state so. NEVER call Read on an image file: the model serving you is text-only and a Read of a PNG returns a 400 that ends your process. Write the manifest at the path the dispatch names before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-internal-geometry.md with the variable table (name, dims, units, producer) imas-ambix will read.",
+          "estimated_hours": 5.0,
+          "goal": "Extend the labeller contract (SteeringFrame plus its netCDF session store) with the plasma internal geometry, as followup f-pfs-021 on the plan specifies: about thirty nested flux surfaces in fixed shape with their psi_norm and psi values, plus the flux-surface metrics TORAX consumes, produced by nova existing FluxSurfaceGeometry tracer",
+          "id": "pfs-frame-contract-internal-geometry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T085225254813-pfs-frame-contract-internal-geometry/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "nova/equilibrium/flux_surface_geometry.py",
+            "tests/test_steering_frames.py",
+            "tests/test_flux_surface_geometry.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-internal-geometry.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-contract-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T08:52:46Z",
+        "completed_at": "2026-09-06T10:21:14.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5291,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5308,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "cf08c944fe4e3e119fb37b44448f0e79f606e64f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T085225254813-pfs-frame-contract-internal-geometry/manifest.md",
+        "scope_changed": false,
+        "session_id": "4d31686f-4f03-4298-9f6d-93bdda180ca2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": "backpressure",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6516476,
+            "input_tokens_cumulative": 6516476,
+            "output_tokens": 48653,
+            "output_tokens_cumulative": 48653,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run died after 20 consumer-queue retries (api_retry 429); the lane refused (queue full) \u2014 backpressure on an unmetered lane, not a spent budget",
+          "lane_backpressure": true,
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2669.873,
+          "generated_tokens": 48653,
+          "generation_seconds": 2505.93,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 25.8,
+          "machine_seconds": 163.943,
+          "peak_input_tokens": 262450,
+          "tokens_per_second": 19.42,
+          "wall_tokens_per_second": 18.22
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "no_commit": "killed at 12:21 by the local lane queue-full retry loop for the third time on this run (two earlier coordinator stops were deliberate repoints before any edit); 387 uncommitted lines in nova/equilibrium/flux_surface_geometry.py carried to reports/nova/playable/contract-carried",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-internal-geometry",
+          "session_id": "4d31686f-4f03-4298-9f6d-93bdda180ca2",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T10:21:14.645Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -109621,8 +109786,36 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "resume",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906103626",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T10:36:26Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
+        "closed_by_purpose": null,
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-luna-20260906103919",
+        "backend": "codex-luna",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-06T10:39:19Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 97.0,
+        "resets_at": "2026-09-11T04:24:27Z",
+        "effective_ceiling_pct": 95.0,
+        "reason": "utilisation 97% with burn multiple 3.0x is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1823
+    "_version": 1829
   }
 }

@@ -69,3 +69,23 @@ def test_banked_solovev_direction_selection_matches_record() -> None:
             rtol=1.0e-9,
             atol=0.0,
         )
+
+
+def test_exports_match_constraint_module_objects() -> None:
+    from nova.equilibrium import (
+        CompensatorRule,
+        CompensatorSelection,
+        constraint_response_matrix,
+        derive_circuit_compensators,
+    )
+    from nova.equilibrium.constraint import (
+        CompensatorRule as module_CompensatorRule,
+        CompensatorSelection as module_CompensatorSelection,
+        constraint_response_matrix as module_constraint_response_matrix,
+        derive_circuit_compensators as module_derive_circuit_compensators,
+    )
+
+    assert CompensatorRule is module_CompensatorRule
+    assert CompensatorSelection is module_CompensatorSelection
+    assert constraint_response_matrix is module_constraint_response_matrix
+    assert derive_circuit_compensators is module_derive_circuit_compensators

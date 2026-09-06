@@ -249,6 +249,65 @@
     CPU lane finishes in minutes and a keyframe of tens of milliseconds on the H200.</p>
   </section>
 
+  <section id="labeller-throughput">
+    <h2>The forward solve as a labeller: 12 to 14 slices a second warm, 0.06 to 0.21 as built, so labels are written ahead of training (bc08cd49, merged at the labeller merge)</h2>
+    <p><strong>Node:</strong> <code>pfs-labeller-throughput</code>, local DeepSeek lane, run <code>r-20260905T211013371009</code> against base
+    <code>9789e0b5</code>, 8.3 hours over two attempts; <code>benchmarks/forward_labeller_throughput.py</code> (925 lines), the receipt, figure, human
+    receipt and sbatch harness under <code>docs/figures/playable-forward-solve/labeller/</code>. The measurement is H200 job 1263148 on the reserved
+    node (<code>gpu_0003_grpA</code>), source revision <code>14c353c4</code> plus the seed-fallback fix committed after the run at <code>147051cc</code>;
+    four smoke jobs preceded it, three of which crashed on the defects that fix addresses. No unit suite: the driver is a measurement, not library
+    code. Two sibling resumed sessions edited the driver concurrently during the run; the worker adopted their fixes intact and re-derived the summary
+    from the persisted per-slice data.</p>
+    <p><strong>What was measured.</strong> Shot 22086, the 57 consecutive efm slices with finite EFIT centre heights and fitted currents (rows 1 to 57 of
+    60, 5 ms cadence, 0.020 to 0.300 s), stepped in time order through the reduced-Newton route on one H200, warm-started slice to slice from the
+    previous equilibrium, one operator from the calibrated keyframe through the frozen-six passive-inclusive carrier, each slice's own fitted
+    circuit currents as the prescribed current. Two arms: free, and conditioned by the vertical current-centroid row pinned to that slice's EFIT
+    centre height (decision <code>labeller-vertical-constraint</code>). Every slice carries its conditioning flag and target source.</p>
+    <figure>
+      <img src="/nova/figures/playable-forward-solve/labeller/forward-labeller-throughput.png" alt="Three panels: per-slice wall against time for the free and the conditioned arm, each with an as-built line near seconds and a warm steady-state line near fifty milliseconds, and a bar chart of median as-built wall per slice, free about five seconds and conditioned about seventeen" style="max-width:100%">
+      <figcaption>Per-slice wall over the shot. The as-built line pays one program compile per slice because the currents enter the kernels as trace constants; the warm line is what the same trips cost once the program is hot.</figcaption>
+    </figure>
+    <table>
+      <caption>Slice rates on one H200, shot 22086, 57 slices</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Solved</th><th scope="col">Converged</th><th scope="col">Qualified</th><th scope="col">As built, median per slice</th><th scope="col">As built, slices per GPU-hour</th><th scope="col">Warm trip</th><th scope="col">Warm, slices per second</th><th scope="col">Warm, slices per GPU-hour</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">free</th><td>56 of 57</td><td>49</td><td>not reported</td><td>4.88 s</td><td>764</td><td>48.6 ms</td><td>12.2</td><td>43,835</td></tr>
+        <tr><th scope="row">conditioned on the EFIT centre height</th><td>47 of 57</td><td>38</td><td>38 of 38</td><td>17.3 s</td><td>232</td><td>50.3 ms</td><td>13.9</td><td>49,851</td></tr>
+      </tbody>
+    </table>
+    <p>The unsolved rows are the free arm's row 2 and the conditioned arm's rows 1, 12, 48, 49 and 52 to 57, the ramp-up and ramp-down frames where
+    the topology class or the pinned-row derivation fails; both arms solve the flat-top window cleanly. The warm figure is billed as trips times
+    the arm's median warm trip, so it is a projection of the loop once the per-slice compile is gone, not a measured steady state.</p>
+    <table>
+      <caption>Corpus pass on one H200 (eight H200s divide by eight)</caption>
+      <thead><tr><th scope="col">Scenario</th><th scope="col">1,341,435 slices (full catalogue, the plan's figure)</th><th scope="col">639,041 slices (the decoder corpus the contract scout counted)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">free, as built</th><td>1,755 h</td><td>836 h</td></tr>
+        <tr><th scope="row">conditioned, as built</th><td>5,792 h</td><td>2,759 h</td></tr>
+        <tr><th scope="row">free, warm</th><td>30.6 h</td><td>14.6 h</td></tr>
+        <tr><th scope="row">conditioned, warm</th><td>26.9 h</td><td>12.8 h</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The three answers.</strong> How fast: 12 to 14 labels a second per GPU once a program is hot, 0.06 to 0.21 a second as the route stands,
+    because the currents, the reduced coordinates and the constraint target are trace constants and every slice compiles its own program (56 compiles
+    in the free arm, 47 in the conditioned). Sufficient for online training: no. The decoder consumes 8 frames a second per process, 125 ms a label,
+    against 72 to 82 ms per warm label, so one hot program could feed one process with no margin for decode, transfer or host overhead, and the
+    as-built rate cannot feed it at all. Written ahead: yes, once per shot to file in the session shape, so the solve rate bounds the corpus build,
+    about 15 GPU-hours warm for the decoder corpus on one H200, not the training read.</p>
+    <p><strong>The height pin did not raise throughput.</strong> The lead authorised the EFIT centre height as a stabilising constraint to raise
+    throughput. Measured, the conditioned arm solves fewer slices (47 against 56), pays three and a half times the as-built wall (a heavier augmented
+    program per slice) and runs at the same warm rate; what it buys is qualification, every converged conditioned slice topology-consistent on its
+    branch, where the free arm's qualification was not reported. Every conditioned label also inherits one reconstruction scalar per slice on the
+    axis position, so a held-out figure scored by the EFIT referee on such labels is flattered on exactly that number; the flag and target source
+    carried beside each slice are the removal mechanism, and the pin is for the demo until a Thomson forward model supplies the height.</p>
+    <p><strong>Batching does not help; tracing the currents does.</strong> A vmap of the fused trip over 8 and 16 states of one program runs 1.49 and
+    1.57 times slower per element than the serial loop (0.257 against 0.173 s, 0.067 against 0.043 s per slice), since the fused close is a
+    write-then-read topology pass whose per-element work does not amortise; a cross-slice batch does not exist because distinct currents are distinct
+    programs and the Newton ladder is a host loop. The traced-target change on main lets a moved target reuse the program but leaves the prescribed
+    currents as trace constants, so the labeller's per-slice compile stands on main today. The rate lever is one program per shot with the currents
+    traced, recorded as the next followup; the dataset write waits on it.</p>
+  </section>
+
 </main>
 </body>
 </html>

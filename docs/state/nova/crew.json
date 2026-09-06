@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T12:56:50",
+  "updated": "2026-09-06T13:44:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2569,9 +2569,11 @@
         "id": "pfs-luna-x",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07617-dd2d-75a3-99ec-1f9363dc1871",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07617-dd2d-75a3-99ec-1f9363dc1871"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2589,9 +2591,11 @@
         "id": "pfs-luna-x3",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07652-2a88-7911-9908-534582e47c41",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07652-2a88-7911-9908-534582e47c41"
+        },
         "created": "2026-09-06"
       },
       {
@@ -109751,6 +109755,149 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T095348653273-pfs-traced-currents-one-program-luna",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-traced-currents-one-program-luna",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5002,
+                "cached_input_tokens": 642845,
+                "input_tokens": 647879,
+                "output_tokens": 4558,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 652437,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "In nova/equilibrium/reduced_newton.py the prescribed current (and every per-slice leaf it feeds, the external flux and the circuit current the route folds compensation into) enters every compiled kernel as a traced argument threaded the way the row target and scale already are through _RowArguments and ReducedProgram, for solve_reduced_newton and solve_constrained_reduced_newton alike. The ReducedProgram handle is keyed by the operator identity plus the static shapes so two slices of one machine configuration reuse one program while a different configuration period compiles its own. Contracts in tests/test_reduced_newton.py plus tests/test_reduced_newton_constraints.py on the Solovev machine: two consecutive solves with different prescribed currents compile each kernel exactly once (a compile count through jax compile logging or a cache-hit count) and reuse the program, decisions and terminal flux bit-identical to the current code on the same inputs, the empty-constraint route unchanged bit for bit, the existing 27 tests green. Gate in the FOREGROUND on a compute node under one bounded sbatch (all_debug partition, --time under one hour, --mem=96G, JAX_PLATFORMS=cpu, the root environment interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python, PYTHONPATH the worktree) with the log captured whole, run as pytest groups of at most four tests per process because XLA CPU aborts a process after eight to fifteen accumulated compilations in these files. Receipt on the H200 (betelgeuse, --reservation=gpu_0003_grpA --gres=gpu:1 --mem=128G --time=00:55:00, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache, foreground, each slice persisted as it lands): benchmarks/forward_labeller_throughput.py re-run on 22086 in both arms (free, and the centroid row as a flagged branch guard) shows the as-built median per slice at the warm figure from the second slice on with the compile count per arm at one, persisted under docs/figures/playable-forward-solve/labeller/ beside the current receipt with a PNG, stating slices per second and per GPU-hour per arm. Path-scoped ruff check and format, conventional commit subject plus body per coherent change, never git add -A. Write the manifest at the path the dispatch names before any wait, opening its outcome with the exact phrase: continuation of r-20260906T093217764046 on another lane, not rework. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/traced-currents.md.",
+          "estimated_hours": 5.0,
+          "goal": "Make the prescribed circuit currents traced arguments of the reduced-Newton kernels so one compiled program serves every slice of a shot and every shot of one machine configuration, as followup f-pfs-016 on the plan specifies, continuing run r-20260906T093217764046 on another lane",
+          "id": "pfs-traced-currents-one-program-luna",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T095348653273-pfs-traced-currents-one-program-luna/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py",
+            "tests/test_reduced_newton_constraints.py",
+            "benchmarks/forward_labeller_throughput.py",
+            "docs/figures/playable-forward-solve/labeller",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/traced-currents.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-luna-x2",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T09:54:07Z",
+        "completed_at": "2026-09-06T11:41:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6460,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6460,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9758190b49e2cfc17bb2272f597ac0006bca2618",
+        "commits": [
+          "56a773a867d77e96cf44f90b557fc3716a9712c0"
+        ],
+        "changed_lines": {
+          "added": 1291,
+          "removed": 1241,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "eight parallel all_debug sbatch jobs (1263288 to 1263295, JAX_PLATFORMS=cpu, at most four tests per pytest process, the dense production comparison alone) over tests/test_reduced_newton.py and tests/test_reduced_newton_constraints.py: 27 of 27 passed, every job exit 0:0, no abort; the two current-reuse contracts also passed in jobs 1263269 and 1263280; H200 labeller job 1263277 exited 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T095348653273-pfs-traced-currents-one-program-luna/group-reduced-production.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T095348653273-pfs-traced-currents-one-program-luna/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07623-b97b-7d40-8ca4-b2a4285aede3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 45860096,
+            "cached_input_tokens_cumulative": 45860096,
+            "input_tokens": 46304902,
+            "input_tokens_cumulative": 46304902,
+            "output_tokens": 71269,
+            "output_tokens_cumulative": 71269,
+            "reasoning_output_tokens": 21854,
+            "reasoning_output_tokens_cumulative": 21854
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 93123,
+          "peak_input_tokens": 92164998
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-traced-currents-one-program-luna",
+          "session_id": "01a07623-b97b-7d40-8ca4-b2a4285aede3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T11:41:47Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest groups",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -109949,8 +110096,22 @@
         "reason": "utilisation 97% with burn multiple 3.0x is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906111807",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T11:18:07Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1833
+    "_version": 1837
   }
 }

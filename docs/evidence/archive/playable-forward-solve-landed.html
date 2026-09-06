@@ -520,6 +520,35 @@
     that file updates it, and the plan records it as a known failure with its owner.</p>
   </section>
 
+  <section id="traced-currents">
+    <h2>One program per machine: the coil currents become traced arguments and the labeller's as-built cost falls thirtyfold (45ac7533, 56a773a8)</h2>
+    <p><strong>Node:</strong> <code>pfs-traced-currents-one-program-luna</code>, codex luna at effort high, run <code>r-20260906T095348653273</code> against base
+    <code>9758190b</code>, 3.8 hours including one fence stop for an incomplete gate answered by resume; its clive predecessor
+    <code>r-20260906T093217764046</code> was lane-killed three minutes after dispatch. <code>nova/equilibrium/reduced_newton.py</code> (+455 lines
+    changed), <code>tests/test_reduced_newton_constraints.py</code> (+56), <code>tests/test_reduced_newton.py</code> (+38),
+    <code>benchmarks/forward_labeller_throughput.py</code> (+53) and the re-run receipt under the labeller figure directory.</p>
+    <p><strong>Mechanism.</strong> Every reduced kernel takes the external flux, the prescribed current, the target current and the topology class as
+    traced arguments, threaded the way the row target and scale already were, on <code>solve_reduced_newton</code> and
+    <code>solve_constrained_reduced_newton</code> alike; a carried <code>ReducedProgram</code> defaults to the external flux it was built with when none is
+    passed, which is also the seam through which the app's control path was silently ignoring new coil currents (anchor <code>two-panel-page</code>'s
+    inverse-step note). Two contracts pin the change: a solve that re-enters a program with a different prescribed current returns bit-identical
+    terminal state, step decisions and residual to a fresh solve, with every kernel cache at one entry.</p>
+    <table>
+      <caption>Labeller receipt on 22086, 57 slices, one H200, before and after (job 1263277)</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Programs compiled</th><th scope="col">As built per slice, before</th><th scope="col">As built per slice, after (from the second slice on)</th><th scope="col">Warm rate</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">free</th><td>56 then 1</td><td>4.88 s</td><td>0.15 s (first slice 10.9 s, second 0.48 s)</td><td>12.0 slices a second</td></tr>
+        <tr><th scope="row">height-guarded (centroid row, flagged)</th><td>47 then 1</td><td>17.3 s</td><td>0.45 s (first slice 18.1 s, second 5.7 s)</td><td>14.1 slices a second</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> The labeller's rate lever named by the throughput study is real: as built, the free arm now labels at about 6.5 slices a
+    second on one H200 and the guarded arm at about 2, against 0.21 and 0.06 before, with one compile per arm for the whole shot and, by the operator
+    identity in the program key, for every shot of one machine configuration. The remaining gap to the lead's one-hour target for the full MAST
+    batch is the trip loop on the host and the sequential topology pass, which the batched-labeller followup takes up. The gate ran as eight
+    parallel compute-node jobs of at most four tests each after a single combined job was cut at thirty minutes by one dense production test
+    that alone runs 38 minutes; all 27 tests green with no abort.</p>
+  </section>
+
 </main>
 </body>
 </html>

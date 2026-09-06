@@ -590,6 +590,26 @@
     (top +32 mm, bottom +44 mm, error 46.6 mm, 3 trips, 25 s); the elongation arm lost the axis. Receipts under
     <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the row set continues as f-pfs-026.</p>
   </section>
+  <section id="labeller-batch-launch">
+    <h2>The decoder-corpus labeller: driver, guard conditioning and the launch (bc3ba323 to 83b6d15c; main 656f4ae7 and 76906a29)</h2>
+    <p><strong>Nodes:</strong> <code>pfs-labeller-batch-driver</code> and <code>pfs-labeller-guard-conditioning</code> (both codex sol at high effort).
+    <code>scripts/labeller_batch/</code>: <code>shard.py</code> labels one shot list on one card through the free reduced route with one program for the
+    machine, admits only slices with a finite reconstruction (rows before the plasma are recorded as excluded), isolates per-slice failures so an
+    unconverged or failed slice is written flagged rather than dropped, and writes per shot a steering-session file with the frame contract and
+    ride-alongs plus a per-slice manifest; <code>run.sh</code> orders the 8,012 decoder shots by camera-frame count, shards them into one-hour
+    single-card jobs and prints cumulative coverage per tranche; <code>receipt.py</code> aggregates. Opt-in <code>--condition-on-guard-failure</code>
+    re-solves a slice with the vertical current-centroid row imposed at the reconstruction centroid when the free solve fails the 50 mm branch guard
+    or does not converge, marking it conditioned with both guard readings.</p>
+    <p><strong>Smokes.</strong> Two shots free (job 1263436): 22086 converged 48 of 57 admitted, guard within 50 mm 36; 22056 converged 43 of 61, guard 21,
+    absolute centroid difference median 183 mm (the free solve sits on the other vertical branch for most of that shot); warm 3.9 slices a second a card.
+    Paired arms on 22056 (job 1263490): guard 21 of 61 free against 47 of 61 conditioned, 20 slices conditioned, warm 3.0 against 0.94 slices a second
+    with the constrained program's compile amortised over one shot. Qualification (terminal residual within 1e-10) is a policy constant and reads 4 to 15
+    of 61 on both arms.</p>
+    <p><strong>Launch.</strong> Lead decision 2026-09-06 18:33 local: wait for conditioning, then launch. Submitted 18:30Z from main 76906a29: 192 shards,
+    four-card tranches, <code>--condition-on-guard-failure</code>, output root <code>/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/</code>;
+    at the conservative 0.94 slices a second a card, tranche 11 (12 hours) covers 2,003 shots and 76 percent of the corpus camera frames; 144 shots have
+    no efm time base and are recorded excluded. The completion receipt is written when the shards finish.</p>
+  </section>
 </main>
 </body>
 </html>

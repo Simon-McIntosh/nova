@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T20:02:44",
+  "updated": "2026-09-06T20:29:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -113341,6 +113341,152 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T163249892932-pfs-labeller-guard-conditioning",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-labeller-guard-conditioning",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 6388,
+                "cached_input_tokens": 620394,
+                "input_tokens": 626784,
+                "output_tokens": 2042,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 628826,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "scripts/labeller_batch/shard.py gains an opt-in flag --condition-on-guard-failure: after the free solve of a slice, when branch_guard_ok is false (achieved current centroid more than 0.05 m from efm/current_centrd_z) or the free solve raised or did not converge, the slice is re-solved once with the vertical current-centroid row imposed at efm/current_centrd_z through reduced_newton.solve_constrained_reduced_newton exactly as benchmarks/forward_labeller_throughput.py's conditioned arm does (reuse its _centroid_pair at line 145 and its row construction; grep before importing), warm-started from the same seed; the per-slice manifest and the companion record carry conditioned (bool), conditioning_target_source (efm/current_centrd_z or none), the free-solve guard reading and the conditioned guard reading, so a consumer can exclude conditioned slices; the free-only path is unchanged when the flag is off. Second change: now that main carries the frame fields, pass p_prime, ff_prime with the efm psi_norm grid and reference_centroid_z through assemble_frame (nova/equilibrium/steering_frames.py, keywords p_prime, ff_prime, psi_norm grid and reference_centroid_z; read its signature) so the session file carries p_prime_face, ff_prime_face, current_centroid_r, current_centroid_z, reference_centroid_z and branch_guard_ok, and drop the companion npz for those fields (keep it only if a field has no frame home, and say which). Evidence: CPU prepare-only pass exit 0; one H200 smoke shard (--gres=gpu:1 --cpus-per-task=4 --mem=128G --reservation=gpu_0003_grpA --time=00:30:00, no --qos, JAX_PLATFORMS=cuda,cpu inside the wrapped command, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python, persistent compilation cache) over shot 22056 with the flag ON and, in the same job, shot 22056 with the flag OFF, reporting per arm: admitted, converged, qualified, guard-within-50mm before and after conditioning, conditioned count, exceptions, and slices per second warm; both sessions read back through frames_from_session with the new fields present and finite where expected; the receipt under docs/figures/playable-forward-solve/labeller-batch/guard-conditioning-receipt.json and the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-guard-conditioning.md. Do not launch the corpus. Per-slice failures stay isolated and written with converged false. Declared wait for the smoke: status waiting, wait_probe as a JSON argv list of squeue -h -j the job id -o %T, wait_terminal as the comma-separated bare list COMPLETED,FAILED,CANCELLED,TIMEOUT,exit:0, unquoted ISO wait_started_at, resume_brief, then end your turn. Run everything from the worktree through UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; commit each coherent step with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 2.0,
+          "goal": "Give the labeller batch driver an opt-in conditioned re-solve when the centroid branch guard fails, and pass the ride-along fields through the frame",
+          "id": "pfs-labeller-guard-conditioning",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "scripts/labeller_batch/",
+            "docs/figures/playable-forward-solve/labeller-batch/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-guard-conditioning.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-guard-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T16:33:08Z",
+        "completed_at": "2026-09-06T18:28:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 6930,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "039210ee847205e82aae275f6e6273cb9baac478",
+        "commits": [
+          "1b0d56b98a2bdc906218918956a520772bcdee42",
+          "4a2c512bec88d08350da4e09a955c0f2c1503c29",
+          "cca693e589f0ee3d23f4f46782a1a719f555db70",
+          "19d3aac1d28cb06a61cf676acf1a0f32339012bd",
+          "83b6d15cb48561eb40ad146cc25cc1783472bfa7"
+        ],
+        "changed_lines": {
+          "added": 793,
+          "removed": 140,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "CPU prepare-only exit 0; sbatch 1263490 paired smoke (both arms, shot 22056) ran to completion with the receipt aggregated from the persisted arms after the serializer fix; frames_from_session reads both sessions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/guard-conditioning-smoke-1263490.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07791-090e-7391-b9e5-32cde0a85947",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1713152,
+            "cached_input_tokens_cumulative": 1713152,
+            "input_tokens": 1746468,
+            "input_tokens_cumulative": 1746468,
+            "output_tokens": 14447,
+            "output_tokens_cumulative": 14447,
+            "reasoning_output_tokens": 4058,
+            "reasoning_output_tokens_cumulative": 4058
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 18505,
+          "peak_input_tokens": 3459620
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-labeller-guard-conditioning",
+          "session_id": "01a07791-090e-7391-b9e5-32cde0a85947",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T18:28:38Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -113623,8 +113769,36 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "resume",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906182142",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T18:21:42Z",
+        "closed_at": "2026-09-06T18:22:43Z",
+        "held_seconds": 61,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906182549",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T18:25:49Z",
+        "closed_at": "2026-09-06T18:26:45Z",
+        "held_seconds": 56,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1914
+    "_version": 1919
   }
 }

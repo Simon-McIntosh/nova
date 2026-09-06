@@ -20,6 +20,7 @@ from nova.equilibrium.shape_inverse import (
     observed_values,
     response_matrix,
     shape_response_matrix,
+    shape_row_target,
     shape_values,
     solve_shape_inverse,
 )
@@ -109,6 +110,9 @@ def test_unmoved_inverse_solves_total_currents(machine, seed_target):
     assert solved.row_kinds == ("flux",) * 4 + ("field",) * 4
     assert solved.gamma == pytest.approx(GAMMA * solved.plasma_current)
     assert solved.picard_currents.shape[0] == PICARD_ROUNDS + 1
+    expected_target = shape_row_target(machine.profile, seed_target, machine.seed)
+    np.testing.assert_allclose(solved.target, expected_target, rtol=0.0, atol=0.0)
+    assert solved.picard_boundary_flux[0] == pytest.approx(expected_target[0])
     weight = np.asarray(
         [
             1.0 if kind == "flux" else np.sqrt(solved.field_weight)

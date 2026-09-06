@@ -597,10 +597,15 @@ def solve_shape_inverse(
             "current_step_reference must match the response column count "
             f"{field.circuit_count}"
         )
+    target_rows = shape_row_target(
+        profile, target, state, requested_class=requested_class
+    )
     picard_current_history = []
     picard_boundary_history = []
     current_step_limited = False
     for iteration in range(picard_rounds + 1):
+        _masks, topology = profile.operator.read(state, requested_class=requested_class)
+        picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
         full_observed = shape_values(
             profile,
             target,
@@ -614,9 +619,6 @@ def solve_shape_inverse(
             state,
             requested_class=requested_class,
             target_current=target_current,
-        )
-        target_rows = shape_row_target(
-            profile, target, state, requested_class=requested_class
         )
         # Removing the present free-circuit image leaves the plasma plus every
         # fixed conductor. Solving for total free currents against that base is
@@ -640,7 +642,6 @@ def solve_shape_inverse(
         current_step_limited = current_step_limited or limited
         current[free] = current[free] + applied_round_delta
         picard_current_history.append(current.copy())
-        picard_boundary_history.append(float(target_rows[0]))
         if iteration < picard_rounds:
             state = profile.flux_map(
                 requested_class=requested_class,

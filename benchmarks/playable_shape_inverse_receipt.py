@@ -28,7 +28,13 @@ from benchmarks.efit_forward_parity_slice import (
     select_slices_by_shot,
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
-from nova.equilibrium.shape_inverse import achieved_target, solve_shape_inverse
+from nova.equilibrium.shape_inverse import (
+    achieved_target,
+    shape_response_matrix,
+    shape_row_target,
+    shape_values,
+    solve_shape_inverse,
+)
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
     configure_dtypes,
@@ -42,6 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGET = (22086, 43)
 DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
 NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
+CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
 
 
 def _source_revision() -> str:
@@ -139,6 +146,275 @@ def _null_modes(inverse, names: dict[int, str]) -> list[dict[str, Any]]:
             }
         )
     return modes
+
+
+def _row_names(target) -> list[str]:
+    """Name the absolute flux and field rows in their assembled order."""
+    names = [
+        "psi_outer",
+        "psi_upper",
+        "psi_inner",
+        "psi_lower",
+        "br_outer",
+        "br_inner",
+        "bz_upper",
+        "bz_lower",
+    ]
+    if target.x_point is not None and np.shape(target.x_point) == (2,):
+        names.extend(("br_x_point", "bz_x_point"))
+    return names
+
+
+def _current_comparison(
+    inverse,
+    seed: np.ndarray,
+    circuit_names: dict[int, str],
+) -> list[dict[str, Any]]:
+    """Report solved total currents and changes beside the carrier seed."""
+    rows = []
+    for circuit, total, delta in zip(
+        inverse.free_circuits,
+        inverse.currents[inverse.free_circuits],
+        inverse.delta,
+        strict=True,
+    ):
+        seed_current = float(seed[circuit])
+        absolute_change = abs(float(delta))
+        rows.append(
+            {
+                "circuit": int(circuit),
+                "family": circuit_names[int(circuit)],
+                "seed_current_a": seed_current,
+                "solved_total_current_a": float(total),
+                "current_change_a": float(delta),
+                "absolute_change_a": absolute_change,
+                "change_fraction_of_seed": (
+                    absolute_change / abs(seed_current) if seed_current != 0.0 else None
+                ),
+            }
+        )
+    return rows
+
+
+def _linear_closure(inverse) -> list[dict[str, Any]]:
+    """Report every final linear row against the assembled right-hand side."""
+    names = _row_names_from_kinds(inverse.row_kinds)
+    closure = inverse.linear_prediction - inverse.right_hand_side
+    return [
+        {
+            "row": name,
+            "unit": "Wb" if kind == "flux" else "T",
+            "linear_prediction": float(prediction),
+            "right_hand_side": float(target),
+            "residual": float(residual),
+        }
+        for name, kind, prediction, target, residual in zip(
+            names,
+            inverse.row_kinds,
+            inverse.linear_prediction,
+            inverse.right_hand_side,
+            closure,
+            strict=True,
+        )
+    ]
+
+
+def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
+    """Name a standard eight- or ten-row shape block."""
+    names = [
+        "psi_outer",
+        "psi_upper",
+        "psi_inner",
+        "psi_lower",
+        "br_outer",
+        "br_inner",
+        "bz_upper",
+        "bz_lower",
+        "br_x_point",
+        "bz_x_point",
+    ]
+    if len(names) != len(kinds):
+        names = [f"{kind}_{index}" for index, kind in enumerate(kinds)]
+    return names[: len(kinds)]
+
+
+def _seed_consistency_diagnostic(
+    directory: Path,
+    machine: ForwardMachine,
+    prime,
+    previous_target,
+    circuit_names: dict[int, str],
+) -> dict[str, Any]:
+    """Persist the seed rows, null inverse and admitted command diagnostic."""
+    path = directory / CONSISTENCY_DIAGNOSTIC
+    profile = machine.profile
+    seed = np.asarray(profile.operator.prescribed_current_field.current, dtype=float)
+    free = np.asarray(machine.drivable_circuits, dtype=int)
+    values = shape_values(profile, previous_target, prime.flux)
+    targets = shape_row_target(profile, previous_target, prime.flux)
+    response = shape_response_matrix(profile, previous_target, prime.flux)
+    active_image = response[:, free] @ seed[free]
+    fixed_and_plasma = values - active_image
+    assembled = fixed_and_plasma + active_image
+    residual = assembled - targets
+    kinds = ("flux",) * 4 + ("field",) * (targets.size - 4)
+    tolerances = np.asarray([1.0e-8 if kind == "flux" else 1.0e-7 for kind in kinds])
+    rows = [
+        {
+            "row": name,
+            "unit": "Wb" if kind == "flux" else "T",
+            "assembled_value": float(value),
+            "assembled_target": float(target),
+            "residual": float(error),
+            "active_circuit_contribution": float(active),
+            "fixed_circuit_and_plasma_contribution": float(base),
+            "absolute_tolerance": float(tolerance),
+            "passes": bool(abs(error) <= tolerance),
+        }
+        for name, kind, value, target, error, active, base, tolerance in zip(
+            _row_names(previous_target),
+            kinds,
+            assembled,
+            targets,
+            residual,
+            active_image,
+            fixed_and_plasma,
+            tolerances,
+            strict=True,
+        )
+    ]
+    payload: dict[str, Any] = {
+        "source_commit": _source_revision(),
+        "machine": machine.identity,
+        "policy": {
+            "active_circuit_count": int(free.size),
+            "field_weight": 50.0,
+            "picard_rounds": 3,
+            "h200_forward_arms_admitted": False,
+        },
+        "previous_turning_points_m": _points(previous_target).tolist(),
+        "check_1_seed_rows": {
+            "description": (
+                "Absolute shape rows evaluated at the seed total currents and "
+                "the previous equilibrium turning points."
+            ),
+            "rows": rows,
+            "maximum_absolute_flux_residual_wb": float(np.max(np.abs(residual[:4]))),
+            "maximum_absolute_field_residual_t": float(np.max(np.abs(residual[4:]))),
+            "passes": bool(np.all(np.abs(residual) <= tolerances)),
+        },
+        "check_2_null_inverse": {"status": "not_run"},
+        "check_3_upper_point_plus_20mm": {"status": "not_run"},
+    }
+    _write(path, payload)
+    if not payload["check_1_seed_rows"]["passes"]:
+        payload["outcome"] = "seed_row_consistency_failed"
+        _write(path, payload)
+        return payload
+
+    null_inverse = solve_shape_inverse(
+        profile,
+        previous_target,
+        prime.flux,
+        prescribed_current=seed,
+        free_circuits=free,
+    )
+    current_rows = _current_comparison(null_inverse, seed, circuit_names)
+    fractions = [
+        row["change_fraction_of_seed"]
+        for row in current_rows
+        if row["change_fraction_of_seed"] is not None
+    ]
+    zero_seed_changes = [
+        row["absolute_change_a"]
+        for row in current_rows
+        if row["change_fraction_of_seed"] is None
+    ]
+    current_passes = all(fraction <= 0.05 for fraction in fractions) and all(
+        change <= 1.0 for change in zero_seed_changes
+    )
+    boundary = np.asarray(null_inverse.picard_boundary_flux)
+    boundary_excursion = float(np.max(np.abs(boundary - boundary[0])))
+    boundary_passes = boundary_excursion <= 1.0e-6
+    payload["check_2_null_inverse"] = {
+        "status": "complete",
+        "total_current_by_circuit": current_rows,
+        "total_current_by_round_a": null_inverse.picard_currents.tolist(),
+        "boundary_flux_target_wb": float(null_inverse.target[0]),
+        "boundary_flux_by_round_wb": boundary.tolist(),
+        "maximum_boundary_flux_excursion_wb": boundary_excursion,
+        "current_change_l2_a": float(np.linalg.norm(null_inverse.delta)),
+        "maximum_absolute_current_change_a": float(np.max(np.abs(null_inverse.delta))),
+        "maximum_change_fraction_of_nonzero_seed": float(max(fractions)),
+        "current_within_five_percent": bool(current_passes),
+        "boundary_stable_within_1e-6_wb": bool(boundary_passes),
+        "passes": bool(current_passes and boundary_passes),
+        "linear_row_closure": _linear_closure(null_inverse),
+    }
+    _write(path, payload)
+    if not payload["check_2_null_inverse"]["passes"]:
+        payload["outcome"] = "null_inverse_consistency_failed"
+        _write(path, payload)
+        return payload
+
+    command = _upper_point_target(previous_target)
+    gamma_factors = (1.0e-12,)
+    default_inverse = solve_shape_inverse(
+        profile,
+        command,
+        prime.flux,
+        prescribed_current=seed,
+        free_circuits=free,
+        gamma=gamma_factors[0],
+    )
+    if float(np.max(np.abs(default_inverse.delta))) > 5.0e4:
+        gamma_factors = (1.0e-12, 1.0e-11, 1.0e-10, 1.0e-9)
+    sweep = []
+    for gamma_factor in gamma_factors:
+        inverse = (
+            default_inverse
+            if gamma_factor == 1.0e-12
+            else solve_shape_inverse(
+                profile,
+                command,
+                prime.flux,
+                prescribed_current=seed,
+                free_circuits=free,
+                gamma=gamma_factor,
+            )
+        )
+        closure = inverse.linear_prediction - inverse.right_hand_side
+        weighted_closure = closure.copy()
+        weighted_closure[4:] *= np.sqrt(inverse.field_weight)
+        sweep.append(
+            {
+                "gamma_factor_per_ampere": gamma_factor,
+                "tikhonov_gamma": inverse.gamma,
+                "total_current_by_circuit": _current_comparison(
+                    inverse, seed, circuit_names
+                ),
+                "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+                "maximum_absolute_current_change_a": float(
+                    np.max(np.abs(inverse.delta))
+                ),
+                "linear_row_closure": _linear_closure(inverse),
+                "linear_row_closure_l2_mixed": float(np.linalg.norm(closure)),
+                "weighted_linear_row_closure_l2_mixed": float(
+                    np.linalg.norm(weighted_closure)
+                ),
+                "boundary_flux_by_round_wb": (inverse.picard_boundary_flux.tolist()),
+            }
+        )
+        payload["check_3_upper_point_plus_20mm"] = {
+            "status": "running",
+            "commanded_turning_points_m": _points(command).tolist(),
+            "gamma_sweep": sweep,
+        }
+        _write(path, payload)
+    payload["check_3_upper_point_plus_20mm"]["status"] = "complete"
+    payload["outcome"] = "cpu_consistency_table_complete"
+    _write(path, payload)
+    return payload
 
 
 def _command_diagnostic(
@@ -391,7 +667,10 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
 
 
 def measure(
-    directory: Path = DEFAULT_DIRECTORY, *, diagnose_inverse: bool = False
+    directory: Path = DEFAULT_DIRECTORY,
+    *,
+    diagnose_inverse: bool = False,
+    diagnose_consistency: bool = False,
 ) -> dict[str, Any]:
     """Run both commanded-shape arms on MAST 22086/43."""
     configure_dtypes()
@@ -425,6 +704,12 @@ def measure(
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)
+    if diagnose_consistency:
+        payload = _seed_consistency_diagnostic(
+            directory, machine, prime, previous_target, circuit_names
+        )
+        print("SEED-CONSISTENCY " + json.dumps(payload), flush=True)
+        return payload
     if diagnose_inverse:
         diagnostics = [
             _command_diagnostic(name, machine, prime, target, circuit_names)
@@ -521,8 +806,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
     parser.add_argument("--diagnose-inverse", action="store_true")
+    parser.add_argument("--diagnose-consistency", action="store_true")
     arguments = parser.parse_args()
-    measure(arguments.directory, diagnose_inverse=arguments.diagnose_inverse)
+    measure(
+        arguments.directory,
+        diagnose_inverse=arguments.diagnose_inverse,
+        diagnose_consistency=arguments.diagnose_consistency,
+    )
 
 
 if __name__ == "__main__":

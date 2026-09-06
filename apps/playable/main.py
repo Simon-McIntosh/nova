@@ -29,8 +29,12 @@ alone, so a second browser window on another screen shows the picture while
 the first carries the controls, both reading the one server-side session.
 """
 
+import argparse
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+import sys
+from typing import Sequence
 
 import numpy as np
 from bokeh.io import curdoc
@@ -46,6 +50,7 @@ from apps.playable.camera import (
     sparkline_figure,
 )
 from apps.playable.machines import (
+    AVAILABLE_MACHINES,
     MachineUnavailable,
     build_session,
     machine_argument,
@@ -64,6 +69,42 @@ from apps.pulsedesign.poloidal_view import (
 
 #: View layouts the ``view`` request argument may select.
 VIEWS = ("both", "camera")
+
+
+@dataclass(frozen=True)
+class LaunchArguments:
+    """Application defaults supplied after ``bokeh serve --args``."""
+
+    decoder: str | None = None
+    machine: str = "solovev"
+    view: str = "both"
+
+
+def parse_launch_arguments(argv: Sequence[str] | None = None) -> LaunchArguments:
+    """Parse optional server-wide defaults from the application arguments.
+
+    Bokeh replaces ``sys.argv`` for the application with the values following
+    ``bokeh serve ... --args``.  Unknown values are left alone so importing the
+    document builder under a test runner or another embedding host remains
+    safe.
+    """
+    parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+    parser.add_argument("--decoder")
+    parser.add_argument("--machine", choices=AVAILABLE_MACHINES, default="solovev")
+    parser.add_argument("--view", choices=VIEWS, default="both")
+    parsed, _unknown = parser.parse_known_args(
+        sys.argv[1:] if argv is None else list(argv)
+    )
+    return LaunchArguments(
+        decoder=parsed.decoder,
+        machine=parsed.machine,
+        view=parsed.view,
+    )
+
+
+# Parse once at module import from the values Bokeh places in ``sys.argv``.
+# Each session resolves its request URL over these launch defaults below.
+LAUNCH_ARGUMENTS = parse_launch_arguments()
 
 #: Install a window-level keydown listener once the document is ready; every
 #: key press bumps the channel source with the released key so the server-side
@@ -104,6 +145,18 @@ def decoder_argument(arguments, default: str | None = None) -> str | None:
         return default
     value = values[0].decode() if isinstance(values[0], bytes) else str(values[0])
     return value or default
+
+
+def session_arguments(
+    arguments, defaults: LaunchArguments | None = None
+) -> LaunchArguments:
+    """Resolve one request's URL arguments over the launch defaults."""
+    defaults = LAUNCH_ARGUMENTS if defaults is None else defaults
+    return LaunchArguments(
+        decoder=decoder_argument(arguments, default=defaults.decoder),
+        machine=machine_argument(arguments, default=defaults.machine),
+        view=view_argument(arguments, default=defaults.view),
+    )
 
 
 def make_sources():
@@ -336,11 +389,13 @@ def main():
         # builder directly); with no session there is nothing to populate and
         # no carrier to build.
         return
-    arguments = context.request.arguments
-    machine = machine_argument(arguments)
-    view = view_argument(arguments)
-    decoder = decoder_argument(arguments)
-    build_document(curdoc(), machine=machine, decoder=decoder, view=view)
+    selected = session_arguments(context.request.arguments)
+    build_document(
+        curdoc(),
+        machine=selected.machine,
+        decoder=selected.decoder,
+        view=selected.view,
+    )
 
 
 main()

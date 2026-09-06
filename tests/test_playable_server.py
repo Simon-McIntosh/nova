@@ -15,9 +15,62 @@ import subprocess
 
 import pytest
 
+from apps.playable.camera import PlaceholderDecoder, load_decoder
+from apps.playable.main import parse_launch_arguments, session_arguments
+
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "scripts" / "playable_server" / "run.sh"
 STATUS = ROOT / "scripts" / "playable_server" / "status.sh"
+
+
+def test_launch_arguments_supply_session_defaults():
+    defaults = parse_launch_arguments(
+        [
+            "--decoder",
+            "example.decoder:CameraDecoder",
+            "--machine",
+            "mast",
+            "--view",
+            "camera",
+        ]
+    )
+
+    assert session_arguments({}, defaults=defaults) == defaults
+
+
+def test_request_url_arguments_override_every_launch_default():
+    defaults = parse_launch_arguments(
+        [
+            "--decoder",
+            "example.decoder:LaunchDecoder",
+            "--machine",
+            "mast",
+            "--view",
+            "camera",
+        ]
+    )
+    selected = session_arguments(
+        {
+            "decoder": [b"example.decoder:RequestDecoder"],
+            "machine": [b"solovev"],
+            "view": [b"both"],
+        },
+        defaults=defaults,
+    )
+
+    assert selected.decoder == "example.decoder:RequestDecoder"
+    assert selected.machine == "solovev"
+    assert selected.view == "both"
+
+
+def test_no_launch_or_request_decoder_uses_the_placeholder():
+    defaults = parse_launch_arguments([])
+    selected = session_arguments({}, defaults=defaults)
+
+    assert selected.decoder is None
+    assert selected.machine == "solovev"
+    assert selected.view == "both"
+    assert isinstance(load_decoder(selected.decoder), PlaceholderDecoder)
 
 
 def run_launcher(

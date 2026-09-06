@@ -204,6 +204,44 @@ def test_reduced_coordinates_carry_the_whole_plasma_current(machine):
     assert not np.any(current[~carried])
 
 
+def test_prescribed_currents_reuse_one_program(machine):
+    """Changing the conductor current changes data, not the compiled program."""
+    profile, seed = machine
+    base = np.asarray(profile.operator.external_current, dtype=float)
+    edited = base.copy()
+    edited[0] += 1.0e-6
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=1,
+        active_set_steps=1,
+    )
+    first = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, current=jnp.asarray(base), **common
+    )
+    reused = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        current=jnp.asarray(edited),
+        program=first.program,
+        **common,
+    )
+    reference = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, current=jnp.asarray(edited), **common
+    )
+    assert np.array_equal(np.asarray(reused.state), np.asarray(reference.state))
+    assert len(reused.steps) == len(reference.steps)
+    for left, right in zip(reused.steps, reference.steps, strict=True):
+        assert left._replace(wall_s=0.0) == right._replace(wall_s=0.0)
+    assert reused.terminal_residual == reference.terminal_residual
+    sizes = {
+        name: kernel._cache_size()
+        for name, kernel in first.program.kernels.items()
+        if hasattr(kernel, "_cache_size")
+    }
+    assert sizes
+    assert max(sizes.values()) == 1, sizes
+
+
 def test_reconstruction_reproduces_the_production_flux_map(machine):
     """Flux rebuilt from the reduced amplitudes equals the production map."""
     profile, seed = machine

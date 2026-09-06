@@ -11,11 +11,9 @@ conditioning flag with its target source, persisted as each slice lands.
 The operator for the shot is built once (from the calibrated keyframe slice);
 each slice supplies its own fitted circuit currents as the ``prescribed``
 current argument and, in the conditioned arm, its own EFIT centre-height
-target.  In the code as merged these enter the compiled kernels as trace
-constants, so the first trip of each slice's solve also pays the program
-compile; the receipt states that compile wall beside the warm steady-state
-figure, which is what the same loop costs once the traced-argument change
-lands.
+target.  These are traced kernel arguments, so one reduced program serves
+the arm's slices while the receipt still states the first compile wall beside
+the warm steady-state figure.
 
 The receipt states slices per second and per GPU-hour per arm, the converged
 and qualified fractions, and the extrapolation to the 1,341,435-slice census
@@ -336,6 +334,9 @@ def _vmap_probe(operator, coordinates, external, requested, target_current, seed
     kernels = reduced_newton._reduced_kernels(
         operator, coordinates, external, requested, target_current
     )
+    kernels = reduced_newton._bind_dynamic_arguments(
+        kernels, external, jnp.asarray(target_current), requested
+    )
     reduced = np.asarray(kernels["initial_gather"](jnp.asarray(seed)), dtype=float)
     shadow = np.ravel(
         np.asarray(
@@ -383,9 +384,8 @@ def _vmap_probe(operator, coordinates, external, requested, target_current, seed
             }
     result["route_refusal_reason"] = (
         "a full batched entry over distinct-current slices does not exist in the "
-        "route: the external currents, the reduced coordinates and the "
-        "constraint target enter the compiled kernels as trace constants, so "
-        "distinct slices compile distinct programs, and the Newton ladder is a "
+        "route: the reduced program now accepts external fields, prescribed "
+        "currents and row leaves as traced arguments, but the Newton ladder is a "
         "host loop whose backtracking selection is data-dependent; only the "
         "fused trip-boundary kernel admits a vmap, and only over states of one "
         "program"
@@ -456,6 +456,17 @@ def _compiled_flag(item: dict[str, Any]) -> bool:
     if warm is not None:
         return bool(first > 5.0 * warm)
     return bool(first > 0.25)
+
+
+def _program_cache_sizes(program) -> dict[str, int]:
+    """Return the compiled-entry count for every kernel in one program."""
+    if program is None:
+        return {}
+    return {
+        name: int(kernel._cache_size())
+        for name, kernel in program.kernels.items()
+        if hasattr(kernel, "_cache_size")
+    }
 
 
 def _warm_slice_wall(item: dict[str, Any], global_trip_wall: float | None) -> float:
@@ -645,6 +656,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
 
     # --- Free arm ---
     state = jnp.asarray(seeds[SLICES[0]])
+    program = None
     for index, row in enumerate(SLICES):
         current = table[row]["current_a"]
         requested = jnp.asarray(_requested_class(group, row), dtype=jnp.int8)
@@ -662,6 +674,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
                 prescribed_current=jnp.asarray(current),
                 tolerance=FIXED_POINT_CRITERION,
                 newton_steps=NEWTON_STEPS,
+                program=program,
                 stream=False,
             )
             item["solved"] = True
@@ -685,6 +698,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             item["compensating_current_a"] = 0.0
             item["compensator_rule"] = None
             state = result.state
+            program = result.program
             try:
                 achieved = _centroid(profile, result.state, target_current)
                 item["achieved_centroid_m"] = achieved
@@ -721,8 +735,10 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
         )
 
     # --- Conditioned arm ---
+    free_program = program
     state = jnp.asarray(seeds[SLICES[0]])
     unknown = None
+    program = None
     for index, row in enumerate(SLICES):
         current = table[row]["current_a"]
         target = table[row]["centre_height_m"]
@@ -751,6 +767,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
                 prescribed_current=jnp.asarray(current),
                 tolerance=FIXED_POINT_CRITERION,
                 newton_steps=NEWTON_STEPS,
+                program=program,
                 stream=False,
             )
             record = result.constraints[0]
@@ -785,6 +802,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             )
             item.update(_walls(result))
             state = result.state
+            program = result.program
             unknown = float(np.asarray(result.compensating_unknown)[0])
             try:
                 achieved = _centroid(profile, result.state, target_current)
@@ -818,6 +836,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
         )
 
     # --- vmap probe over the keyframe program ---
+    conditioned_program = program
     if KEYFRAME_SLICE not in table:
         receipt["vmap_probe"] = {
             "skipped": f"keyframe slice {KEYFRAME_SLICE} outside the driven window",
@@ -825,18 +844,24 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
     else:
         fixed_current = jnp.asarray(table[KEYFRAME_SLICE]["current_a"])
         external = operator.external(None, fixed_current)
+        fixed_requested = jnp.asarray(
+            _requested_class(group, KEYFRAME_SLICE), dtype=jnp.int8
+        )
+        fixed_target_current = abs(
+            float(table[KEYFRAME_SLICE]["reference_plasma_current_a"])
+        )
         coordinates = reduced_newton.reduced_coordinates(
             operator,
             seed_43,
-            requested_class=requested,
-            target_current=target_current,
+            requested_class=fixed_requested,
+            target_current=fixed_target_current,
         )
         probe, _kernels = _vmap_probe(
             operator,
             coordinates,
             external,
-            requested,
-            target_current,
+            fixed_requested,
+            fixed_target_current,
             np.asarray(seed_43),
         )
         receipt["vmap_probe"] = probe
@@ -845,6 +870,10 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
     for arm in ("free", "conditioned"):
         slices = receipt["arms"][arm]["slices"]
         summary = _arm_rate_summary(slices)
+        program_handle = free_program if arm == "free" else conditioned_program
+        cache_sizes = _program_cache_sizes(program_handle)
+        summary["program_cache_sizes"] = cache_sizes
+        summary["program_compile_count"] = max(cache_sizes.values(), default=0)
         receipt["arms"][arm]["summary"] = summary
         trip_wall = summary["median_warm_trip_wall_s_global"]
         for item in (slice_ for slice_ in slices if slice_ is not None):

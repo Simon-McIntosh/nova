@@ -1,7 +1,7 @@
 {
   "artifact": "forward labeller throughput on one MAST shot",
   "identity": "22086/43-keyframe",
-  "source_commit": "14c353c4442d64121fbb4e9df5e495f91c75673c",
+  "source_commit": "45ac7533ec047419bb45886000c8091871bb89cd",
   "runtime": {
     "python": "3.14.2",
     "jax": "0.11.0",
@@ -9,7 +9,7 @@
       "cuda:0"
     ],
     "scheduler": {
-      "job_id": "1263148",
+      "job_id": "1263277",
       "node": "98dci4-gpu-0003",
       "partition": "betelgeuse",
       "reservation": "gpu_0003_grpA"
@@ -29,21 +29,21 @@
         ],
         "stored_circuit_count": 101,
         "frozen_reference_count": 6,
-        "warm_load_seconds": 0.005099372006952763,
+        "warm_load_seconds": 0.005447648465633392,
         "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
         "size_bytes": 645864
       },
       "named_cache_only_check": {
         "command": [
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-labeller-throughput/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-labeller-throughput/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-traced-currents-one-program-luna/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
           "--receipt",
           "docs/figures/plateau-input-attribution/mast-response-carrier.json"
         ],
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.061074 direct_builders=0 verdict=PASS",
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.028142 direct_builders=0 verdict=PASS",
         "direct_green_operator_builder_entries": 0,
         "passes": true
       }
@@ -299,7 +299,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 10.64659392181784,
+          "solve_wall_s": 10.946565689519048,
           "terminal_residual": 1.4723030007871104e-09,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -308,9 +308,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.9834203673526645
+            4.508094951510429
           ],
-          "first_trip_wall_s": 3.9834203673526645,
+          "first_trip_wall_s": 4.508094951510429,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -322,7 +322,7 @@
           "centroid_error_against_efit_target_m": null,
           "centroid_read_failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 2,
@@ -433,12 +433,32 @@
           "centre_height_m": -0.001232970505952835,
           "axis_z_m": -0.0022846434731036425,
           "reference_plasma_current_a": 139796.609375,
-          "converged": false,
-          "solved": false,
-          "solve_wall_s": 0.18440198712050915,
-          "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
-          "program_compiled": false,
-          "steady_wall_s": 0.0
+          "converged": true,
+          "solved": true,
+          "route": "free",
+          "solve_wall_s": 0.47932661417871714,
+          "terminal_residual": 2.0867816502285403e-10,
+          "active_set_trips": 1,
+          "newton_step_count": 2,
+          "termination": "converged",
+          "reduced_dimension": 684,
+          "off_support_leakage": 0.0,
+          "trip_count": 1,
+          "trip_wall_per_trip_s": [
+            0.37792893312871456
+          ],
+          "first_trip_wall_s": 0.37792893312871456,
+          "median_warm_trip_wall_s": null,
+          "warm_wall_s": null,
+          "conditioning_flag": false,
+          "target_source": null,
+          "row_qualified": null,
+          "compensating_current_a": 0.0,
+          "compensator_rule": null,
+          "achieved_centroid_m": -0.003421859600279279,
+          "centroid_error_against_efit_target_m": -0.002188889094326444,
+          "program_compiled": true,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 3,
@@ -552,18 +572,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.359238099306822,
-          "terminal_residual": 2.759493661155545e-10,
+          "solve_wall_s": 0.15205107256770134,
+          "terminal_residual": 1.833140915706306e-09,
           "active_set_trips": 1,
-          "newton_step_count": 3,
+          "newton_step_count": 2,
           "termination": "converged",
           "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.948820600286126
+            0.05434425827115774
           ],
-          "first_trip_wall_s": 2.948820600286126,
+          "first_trip_wall_s": 0.05434425827115774,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -571,10 +591,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.003405235544970353,
-          "centroid_error_against_efit_target_m": 0.006123881949851195,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.003405235544322672,
+          "centroid_error_against_efit_target_m": 0.006123881950498877,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 4,
@@ -688,7 +708,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.5720795849338174,
+          "solve_wall_s": 0.1530638737604022,
           "terminal_residual": 2.2728739017093475e-09,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -697,9 +717,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.0161126470193267
+            0.05356541555374861
           ],
-          "first_trip_wall_s": 3.0161126470193267,
+          "first_trip_wall_s": 0.05356541555374861,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -707,10 +727,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.0033742168690016907,
-          "centroid_error_against_efit_target_m": 0.00791402461426943,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.0033742168690016894,
+          "centroid_error_against_efit_target_m": 0.007914024614269433,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 5,
@@ -824,7 +844,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.236851190216839,
+          "solve_wall_s": 0.15036328602582216,
           "terminal_residual": 7.030977859272384e-10,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -833,9 +853,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.826364937238395
+            0.05191847775131464
           ],
-          "first_trip_wall_s": 3.826364937238395,
+          "first_trip_wall_s": 0.05191847775131464,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -845,8 +865,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0033305354103399087,
           "centroid_error_against_efit_target_m": 0.010849614472691936,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 6,
@@ -960,7 +980,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.4265272188931704,
+          "solve_wall_s": 0.1485701184719801,
           "terminal_residual": 6.324904646654691e-10,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -969,9 +989,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.0386738004162908
+            0.054251695051789284
           ],
-          "first_trip_wall_s": 3.0386738004162908,
+          "first_trip_wall_s": 0.054251695051789284,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -981,8 +1001,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0032682483691976625,
           "centroid_error_against_efit_target_m": 0.017399686421055976,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 7,
@@ -1096,7 +1116,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.4515595361590385,
+          "solve_wall_s": 0.15082361921668053,
           "terminal_residual": 4.2630176247302085e-09,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -1105,9 +1125,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.983662492595613
+            0.052794476971030235
           ],
-          "first_trip_wall_s": 2.983662492595613,
+          "first_trip_wall_s": 0.052794476971030235,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1117,8 +1137,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0031983735767229632,
           "centroid_error_against_efit_target_m": 0.013328826540984289,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 8,
@@ -1232,7 +1252,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.534698479808867,
+          "solve_wall_s": 0.15107503812760115,
           "terminal_residual": 4.116289264608688e-09,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -1241,9 +1261,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.1444468647241592
+            0.05316339712589979
           ],
-          "first_trip_wall_s": 3.1444468647241592,
+          "first_trip_wall_s": 0.05316339712589979,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1253,8 +1273,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0030857225608844647,
           "centroid_error_against_efit_target_m": 0.016189324324129117,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 9,
@@ -1368,7 +1388,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.357103195041418,
+          "solve_wall_s": 0.15401340182870626,
           "terminal_residual": 3.2859649221225257e-09,
           "active_set_trips": 1,
           "newton_step_count": 2,
@@ -1377,9 +1397,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.9734295587986708
+            0.05576812103390694
           ],
-          "first_trip_wall_s": 2.9734295587986708,
+          "first_trip_wall_s": 0.05576812103390694,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1389,8 +1409,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0029024830032339933,
           "centroid_error_against_efit_target_m": 0.02207030971160022,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 10,
@@ -1504,7 +1524,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.45583647955209,
+          "solve_wall_s": 0.15410177689045668,
           "terminal_residual": 1.106150168319134e-10,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -1513,9 +1533,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.08786219637841
+            0.057368794456124306
           ],
-          "first_trip_wall_s": 3.08786219637841,
+          "first_trip_wall_s": 0.057368794456124306,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1525,8 +1545,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0028032251030855647,
           "centroid_error_against_efit_target_m": 0.004537464552307797,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 11,
@@ -1640,7 +1660,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.5517622837796807,
+          "solve_wall_s": 0.15663175098598003,
           "terminal_residual": 6.040603932252134e-11,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -1649,9 +1669,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.1678993068635464
+            0.05753246042877436
           ],
-          "first_trip_wall_s": 3.1678993068635464,
+          "first_trip_wall_s": 0.05753246042877436,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1661,8 +1681,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0028196428822584744,
           "centroid_error_against_efit_target_m": -0.004740389172383427,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 12,
@@ -1776,7 +1796,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.4616103572770953,
+          "solve_wall_s": 0.15426412504166365,
           "terminal_residual": 9.182788817271305e-11,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -1785,9 +1805,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.0950384754687548
+            0.05732476245611906
           ],
-          "first_trip_wall_s": 3.0950384754687548,
+          "first_trip_wall_s": 0.05732476245611906,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1797,8 +1817,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002616266963474543,
           "centroid_error_against_efit_target_m": -0.008975063228450805,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 13,
@@ -1912,7 +1932,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.3375343764200807,
+          "solve_wall_s": 0.1553539764136076,
           "terminal_residual": 6.758396685839395e-11,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -1921,9 +1941,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.9539579916745424
+            0.05759872682392597
           ],
-          "first_trip_wall_s": 2.9539579916745424,
+          "first_trip_wall_s": 0.05759872682392597,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -1933,8 +1953,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0024159184158439742,
           "centroid_error_against_efit_target_m": -0.01270664729779912,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 14,
@@ -2048,7 +2068,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.406111814081669,
+          "solve_wall_s": 0.15405733697116375,
           "terminal_residual": 1.667791302093495e-10,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -2057,9 +2077,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.9680022727698088
+            0.05671921372413635
           ],
-          "first_trip_wall_s": 2.9680022727698088,
+          "first_trip_wall_s": 0.05671921372413635,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -2069,8 +2089,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0024410458289101157,
           "centroid_error_against_efit_target_m": -0.013520500623436215,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 15,
@@ -2184,7 +2204,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 3.480327478609979,
+          "solve_wall_s": 0.1550315711647272,
           "terminal_residual": 8.46837237753226e-10,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -2193,9 +2213,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            2.9815641632303596
+            0.05746103264391422
           ],
-          "first_trip_wall_s": 2.9815641632303596,
+          "first_trip_wall_s": 0.05746103264391422,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -2205,8 +2225,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002364188010592498,
           "centroid_error_against_efit_target_m": -0.013203814203639069,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 16,
@@ -2320,7 +2340,7 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.122789280489087,
+          "solve_wall_s": 0.15517790243029594,
           "terminal_residual": 1.6861097371140176e-10,
           "active_set_trips": 1,
           "newton_step_count": 3,
@@ -2329,9 +2349,9 @@
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.746146559715271
+            0.0564460838213563
           ],
-          "first_trip_wall_s": 3.746146559715271,
+          "first_trip_wall_s": 0.0564460838213563,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -2341,8 +2361,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002493878733836322,
           "centroid_error_against_efit_target_m": -0.018028930668257385,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 17,
@@ -2456,18 +2476,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.4357530092820525,
+          "solve_wall_s": 0.1554912431165576,
           "terminal_residual": 1.1767392782215093e-09,
           "active_set_trips": 1,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 678,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.044981082901359
+            0.058359481394290924
           ],
-          "first_trip_wall_s": 4.044981082901359,
+          "first_trip_wall_s": 0.058359481394290924,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -2477,8 +2497,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002099497223583773,
           "centroid_error_against_efit_target_m": -0.014029266292540149,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 18,
@@ -2592,18 +2612,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.3889340832829475,
+          "solve_wall_s": 0.1547624422237277,
           "terminal_residual": 8.814547855982671e-10,
           "active_set_trips": 1,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 678,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.994993627071381
+            0.057529994286596775
           ],
-          "first_trip_wall_s": 4.994993627071381,
+          "first_trip_wall_s": 0.057529994286596775,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -2613,8 +2633,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0020463968212952608,
           "centroid_error_against_efit_target_m": -0.01412428715780878,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 19,
@@ -2728,21 +2748,21 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.414863429963589,
+          "solve_wall_s": 0.2037719413638115,
           "terminal_residual": 7.909896298118843e-12,
           "active_set_trips": 2,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 678,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            3.999475129880011,
-            0.048337933607399464
+            0.057932907715439796,
+            0.04880926478654146
           ],
-          "first_trip_wall_s": 3.999475129880011,
-          "median_warm_trip_wall_s": 0.048337933607399464,
-          "warm_wall_s": 0.048337933607399464,
+          "first_trip_wall_s": 0.057932907715439796,
+          "median_warm_trip_wall_s": 0.04880926478654146,
+          "warm_wall_s": 0.04880926478654146,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -2750,8 +2770,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0024636225228662446,
           "centroid_error_against_efit_target_m": -0.015882783142244335,
-          "program_compiled": true,
-          "steady_wall_s": 0.09667586721479893
+          "program_compiled": false,
+          "steady_wall_s": 0.09761852957308292
         },
         {
           "row": 20,
@@ -2865,21 +2885,21 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.338136789388955,
+          "solve_wall_s": 0.2023299615830183,
           "terminal_residual": 1.1275857492013343e-10,
           "active_set_trips": 2,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 680,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.901203215122223,
-            0.046969166956841946
+            0.05721999239176512,
+            0.047190286219120026
           ],
-          "first_trip_wall_s": 4.901203215122223,
-          "median_warm_trip_wall_s": 0.046969166956841946,
-          "warm_wall_s": 0.046969166956841946,
+          "first_trip_wall_s": 0.05721999239176512,
+          "median_warm_trip_wall_s": 0.047190286219120026,
+          "warm_wall_s": 0.047190286219120026,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -2887,8 +2907,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0023298679450843747,
           "centroid_error_against_efit_target_m": -0.017374814168581765,
-          "program_compiled": true,
-          "steady_wall_s": 0.09393833391368389
+          "program_compiled": false,
+          "steady_wall_s": 0.09438057243824005
         },
         {
           "row": 21,
@@ -3002,22 +3022,22 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.461667510680854,
+          "solve_wall_s": 0.25188443437218666,
           "terminal_residual": 3.010591830684069e-11,
           "active_set_trips": 3,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 674,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            3.9814202412962914,
-            0.04773296508938074,
-            0.047240094281733036
+            0.05666624568402767,
+            0.048865935765206814,
+            0.048909587785601616
           ],
-          "first_trip_wall_s": 3.9814202412962914,
-          "median_warm_trip_wall_s": 0.04748652968555689,
-          "warm_wall_s": 0.09497305937111378,
+          "first_trip_wall_s": 0.05666624568402767,
+          "median_warm_trip_wall_s": 0.048887761775404215,
+          "warm_wall_s": 0.09777552355080843,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -3025,8 +3045,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002454685990747197,
           "centroid_error_against_efit_target_m": -0.01759273932599662,
-          "program_compiled": true,
-          "steady_wall_s": 0.14245958905667067
+          "program_compiled": false,
+          "steady_wall_s": 0.14666328532621264
         },
         {
           "row": 22,
@@ -3140,22 +3160,22 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.674652214162052,
+          "solve_wall_s": 0.25261183455586433,
           "terminal_residual": 9.366273464273033e-11,
           "active_set_trips": 3,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 674,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            5.024545046500862,
-            0.04672108218073845,
-            0.047992327250540257
+            0.05817089509218931,
+            0.048633730970323086,
+            0.04860925953835249
           ],
-          "first_trip_wall_s": 5.024545046500862,
-          "median_warm_trip_wall_s": 0.04735670471563935,
-          "warm_wall_s": 0.0947134094312787,
+          "first_trip_wall_s": 0.05817089509218931,
+          "median_warm_trip_wall_s": 0.04862149525433779,
+          "warm_wall_s": 0.09724299050867558,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -3163,8 +3183,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.002622636488325498,
           "centroid_error_against_efit_target_m": -0.013529910227901837,
-          "program_compiled": true,
-          "steady_wall_s": 0.14207011414691806
+          "program_compiled": false,
+          "steady_wall_s": 0.14586448576301336
         },
         {
           "row": 23,
@@ -3278,22 +3298,22 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.87574837077409,
+          "solve_wall_s": 0.24909557774662971,
           "terminal_residual": 1.143451030088464e-11,
           "active_set_trips": 3,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 672,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            3.946044026874006,
-            0.04742169752717018,
-            0.04738049488514662
+            0.05638420768082142,
+            0.04732203297317028,
+            0.04820032976567745
           ],
-          "first_trip_wall_s": 3.946044026874006,
-          "median_warm_trip_wall_s": 0.0474010962061584,
-          "warm_wall_s": 0.0948021924123168,
+          "first_trip_wall_s": 0.05638420768082142,
+          "median_warm_trip_wall_s": 0.047761181369423866,
+          "warm_wall_s": 0.09552236273884773,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -3301,8 +3321,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.0030408158629619316,
           "centroid_error_against_efit_target_m": -0.012876323583670779,
-          "program_compiled": true,
-          "steady_wall_s": 0.1422032886184752
+          "program_compiled": false,
+          "steady_wall_s": 0.1432835441082716
         },
         {
           "row": 24,
@@ -3416,21 +3436,21 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.867170101962984,
+          "solve_wall_s": 0.2017821976915002,
           "terminal_residual": 4.782888061843161e-11,
           "active_set_trips": 2,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 670,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.338265779428184,
-            0.04750691540539265
+            0.055450886487960815,
+            0.04871026147156954
           ],
-          "first_trip_wall_s": 4.338265779428184,
-          "median_warm_trip_wall_s": 0.04750691540539265,
-          "warm_wall_s": 0.04750691540539265,
+          "first_trip_wall_s": 0.055450886487960815,
+          "median_warm_trip_wall_s": 0.04871026147156954,
+          "warm_wall_s": 0.04871026147156954,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
@@ -3438,8 +3458,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.003807336748133151,
           "centroid_error_against_efit_target_m": -0.01427652473051354,
-          "program_compiled": true,
-          "steady_wall_s": 0.0950138308107853
+          "program_compiled": false,
+          "steady_wall_s": 0.09742052294313908
         },
         {
           "row": 25,
@@ -3553,30 +3573,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.501505886204541,
-          "terminal_residual": 1.2301999314620602e-09,
+          "solve_wall_s": 0.20711967814713717,
+          "terminal_residual": 1.2301999314620604e-09,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 674,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            3.89800126850605,
-            0.04744375590234995
+            0.060119206085801125,
+            0.049246675334870815
           ],
-          "first_trip_wall_s": 3.89800126850605,
-          "median_warm_trip_wall_s": 0.04744375590234995,
-          "warm_wall_s": 0.04744375590234995,
+          "first_trip_wall_s": 0.060119206085801125,
+          "median_warm_trip_wall_s": 0.049246675334870815,
+          "warm_wall_s": 0.049246675334870815,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.005872799468479593,
-          "centroid_error_against_efit_target_m": -0.022726927337489565,
-          "program_compiled": true,
-          "steady_wall_s": 0.0948875118046999
+          "achieved_centroid_m": -0.0058727994684795864,
+          "centroid_error_against_efit_target_m": -0.022726927337489558,
+          "program_compiled": false,
+          "steady_wall_s": 0.09849335066974163
         },
         {
           "row": 26,
@@ -3690,31 +3710,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.978210764937103,
+          "solve_wall_s": 0.2505319006741047,
           "terminal_residual": 6.285232210294701e-11,
           "active_set_trips": 3,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 667,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.400806039571762,
-            0.049328552559018135,
-            0.04757890943437815
+            0.0565651198849082,
+            0.048158432357013226,
+            0.048455752432346344
           ],
-          "first_trip_wall_s": 4.400806039571762,
-          "median_warm_trip_wall_s": 0.04845373099669814,
-          "warm_wall_s": 0.09690746199339628,
+          "first_trip_wall_s": 0.0565651198849082,
+          "median_warm_trip_wall_s": 0.048307092394679785,
+          "warm_wall_s": 0.09661418478935957,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.004269058219854101,
-          "centroid_error_against_efit_target_m": -0.013746819793943628,
-          "program_compiled": true,
-          "steady_wall_s": 0.14536119299009442
+          "achieved_centroid_m": -0.004269058219854104,
+          "centroid_error_against_efit_target_m": -0.01374681979394363,
+          "program_compiled": false,
+          "steady_wall_s": 0.14492127718403935
         },
         {
           "row": 27,
@@ -3828,18 +3848,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.233572908677161,
+          "solve_wall_s": 0.15925930254161358,
           "terminal_residual": 2.5641113547293487e-09,
           "active_set_trips": 1,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 660,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.845927636139095
+            0.0606877189129591
           ],
-          "first_trip_wall_s": 3.845927636139095,
+          "first_trip_wall_s": 0.0606877189129591,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -3847,10 +3867,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.004561174226011818,
-          "centroid_error_against_efit_target_m": -0.01181654122939307,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.0045611742260118155,
+          "centroid_error_against_efit_target_m": -0.011816541229393067,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 28,
@@ -3964,30 +3984,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.514543525874615,
+          "solve_wall_s": 0.20965260919183493,
           "terminal_residual": 8.212123762576775e-10,
           "active_set_trips": 2,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 660,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            5.095163122750819,
-            0.04904878977686167
+            0.06311305239796638,
+            0.04860659223049879
           ],
-          "first_trip_wall_s": 5.095163122750819,
-          "median_warm_trip_wall_s": 0.04904878977686167,
-          "warm_wall_s": 0.04904878977686167,
+          "first_trip_wall_s": 0.06311305239796638,
+          "median_warm_trip_wall_s": 0.04860659223049879,
+          "warm_wall_s": 0.04860659223049879,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.005333148097671092,
-          "centroid_error_against_efit_target_m": -0.01671886552689177,
-          "program_compiled": true,
-          "steady_wall_s": 0.09809757955372334
+          "achieved_centroid_m": -0.00533314809767109,
+          "centroid_error_against_efit_target_m": -0.016718865526891766,
+          "program_compiled": false,
+          "steady_wall_s": 0.09721318446099758
         },
         {
           "row": 29,
@@ -4101,18 +4121,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.538525991141796,
+          "solve_wall_s": 0.16472244914621115,
           "terminal_residual": 7.255084394455925e-10,
           "active_set_trips": 1,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 658,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.154195484705269
+            0.06450143456459045
           ],
-          "first_trip_wall_s": 4.154195484705269,
+          "first_trip_wall_s": 0.06450143456459045,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -4120,10 +4140,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.004862629397747409,
-          "centroid_error_against_efit_target_m": -0.01338805124068011,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.004862629397747411,
+          "centroid_error_against_efit_target_m": -0.013388051240680113,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 30,
@@ -4237,30 +4257,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.071704021655023,
-          "terminal_residual": 1.030300153591291e-10,
+          "solve_wall_s": 0.20363941881805658,
+          "terminal_residual": 1.0303014421526419e-10,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 658,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.54165268689394,
-            0.04798848368227482
+            0.057723614387214184,
+            0.04901444725692272
           ],
-          "first_trip_wall_s": 4.54165268689394,
-          "median_warm_trip_wall_s": 0.04798848368227482,
-          "warm_wall_s": 0.04798848368227482,
+          "first_trip_wall_s": 0.057723614387214184,
+          "median_warm_trip_wall_s": 0.04901444725692272,
+          "warm_wall_s": 0.04901444725692272,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.006073632587847035,
-          "centroid_error_against_efit_target_m": -0.012612975978460828,
-          "program_compiled": true,
-          "steady_wall_s": 0.09597696736454964
+          "achieved_centroid_m": -0.006073632587847036,
+          "centroid_error_against_efit_target_m": -0.01261297597846083,
+          "program_compiled": false,
+          "steady_wall_s": 0.09802889451384544
         },
         {
           "row": 31,
@@ -4374,30 +4394,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.79011532664299,
-          "terminal_residual": 4.624962435033031e-09,
+          "solve_wall_s": 0.20499406941235065,
+          "terminal_residual": 4.6249626833532554e-09,
           "active_set_trips": 2,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 657,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.358316580764949,
-            0.04867288377135992
+            0.05710884276777506,
+            0.0487339710816741
           ],
-          "first_trip_wall_s": 4.358316580764949,
-          "median_warm_trip_wall_s": 0.04867288377135992,
-          "warm_wall_s": 0.04867288377135992,
+          "first_trip_wall_s": 0.05710884276777506,
+          "median_warm_trip_wall_s": 0.0487339710816741,
+          "warm_wall_s": 0.0487339710816741,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.007244593714901299,
-          "centroid_error_against_efit_target_m": -0.015235552815326542,
-          "program_compiled": true,
-          "steady_wall_s": 0.09734576754271984
+          "achieved_centroid_m": -0.007244593714901302,
+          "centroid_error_against_efit_target_m": -0.015235552815326545,
+          "program_compiled": false,
+          "steady_wall_s": 0.0974679421633482
         },
         {
           "row": 32,
@@ -4511,30 +4531,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.979327084496617,
-          "terminal_residual": 3.0839547193822456e-09,
+          "solve_wall_s": 0.20636635087430477,
+          "terminal_residual": 3.0839543609748297e-09,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 656,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.454438769258559,
-            0.048590993508696556
+            0.060865563340485096,
+            0.04773326776921749
           ],
-          "first_trip_wall_s": 4.454438769258559,
-          "median_warm_trip_wall_s": 0.048590993508696556,
-          "warm_wall_s": 0.048590993508696556,
+          "first_trip_wall_s": 0.060865563340485096,
+          "median_warm_trip_wall_s": 0.04773326776921749,
+          "warm_wall_s": 0.04773326776921749,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.008805634698459843,
-          "centroid_error_against_efit_target_m": -0.01550941193718646,
-          "program_compiled": true,
-          "steady_wall_s": 0.09718198701739311
+          "achieved_centroid_m": -0.008805634698459849,
+          "centroid_error_against_efit_target_m": -0.015509411937186465,
+          "program_compiled": false,
+          "steady_wall_s": 0.09546653553843498
         },
         {
           "row": 33,
@@ -4648,18 +4668,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.627601079642773,
-          "terminal_residual": 3.1461317989886786e-09,
+          "solve_wall_s": 0.17054940480738878,
+          "terminal_residual": 3.146131798988679e-09,
           "active_set_trips": 1,
           "newton_step_count": 8,
           "termination": "converged",
-          "reduced_dimension": 671,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.239098371937871
+            0.07278875820338726
           ],
-          "first_trip_wall_s": 4.239098371937871,
+          "first_trip_wall_s": 0.07278875820338726,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -4667,10 +4687,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.009758779330685674,
-          "centroid_error_against_efit_target_m": -0.015883351227775157,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.009758779330685696,
+          "centroid_error_against_efit_target_m": -0.015883351227775178,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 34,
@@ -4784,30 +4804,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.141565710306168,
-          "terminal_residual": 8.457975388300376e-10,
+          "solve_wall_s": 0.21692676842212677,
+          "terminal_residual": 8.457975388300374e-10,
           "active_set_trips": 2,
           "newton_step_count": 6,
           "termination": "converged",
-          "reduced_dimension": 671,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.576696345582604,
-            0.048718067817389965
+            0.06937456596642733,
+            0.04895329102873802
           ],
-          "first_trip_wall_s": 4.576696345582604,
-          "median_warm_trip_wall_s": 0.048718067817389965,
-          "warm_wall_s": 0.048718067817389965,
+          "first_trip_wall_s": 0.06937456596642733,
+          "median_warm_trip_wall_s": 0.04895329102873802,
+          "warm_wall_s": 0.04895329102873802,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.012895361840946234,
-          "centroid_error_against_efit_target_m": -0.020520425722224272,
-          "program_compiled": true,
-          "steady_wall_s": 0.09743613563477993
+          "achieved_centroid_m": -0.01289536184094627,
+          "centroid_error_against_efit_target_m": -0.02052042572222431,
+          "program_compiled": false,
+          "steady_wall_s": 0.09790658205747604
         },
         {
           "row": 35,
@@ -4921,18 +4941,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.6146005960181355,
+          "solve_wall_s": 0.16222116444259882,
           "terminal_residual": 1.39626922082614e-09,
           "active_set_trips": 1,
           "newton_step_count": 6,
           "termination": "converged",
-          "reduced_dimension": 654,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.230251055210829
+            0.06520390510559082
           ],
-          "first_trip_wall_s": 4.230251055210829,
+          "first_trip_wall_s": 0.06520390510559082,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -4940,10 +4960,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.016121617169857154,
-          "centroid_error_against_efit_target_m": -0.021724494756937156,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.016121617169857126,
+          "centroid_error_against_efit_target_m": -0.021724494756937128,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 36,
@@ -5057,18 +5077,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.095064006745815,
-          "terminal_residual": 6.219489859571187e-09,
+          "solve_wall_s": 0.17234695050865412,
+          "terminal_residual": 6.219489963525895e-09,
           "active_set_trips": 1,
           "newton_step_count": 8,
           "termination": "converged",
-          "reduced_dimension": 654,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.556052029132843
+            0.07512839417904615
           ],
-          "first_trip_wall_s": 4.556052029132843,
+          "first_trip_wall_s": 0.07512839417904615,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -5076,10 +5096,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.019711457825266687,
-          "centroid_error_against_efit_target_m": -0.024662478527986375,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.019711457825266624,
+          "centroid_error_against_efit_target_m": -0.024662478527986312,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 37,
@@ -5193,30 +5213,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.391359901055694,
-          "terminal_residual": 2.5506907990037766e-09,
+          "solve_wall_s": 0.21784457564353943,
+          "terminal_residual": 2.5506906986736538e-09,
           "active_set_trips": 2,
           "newton_step_count": 9,
           "termination": "converged",
-          "reduced_dimension": 654,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            3.963162657804787,
-            0.05027655605226755
+            0.07450463064014912,
+            0.04588130209594965
           ],
-          "first_trip_wall_s": 3.963162657804787,
-          "median_warm_trip_wall_s": 0.05027655605226755,
-          "warm_wall_s": 0.05027655605226755,
+          "first_trip_wall_s": 0.07450463064014912,
+          "median_warm_trip_wall_s": 0.04588130209594965,
+          "warm_wall_s": 0.04588130209594965,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.031026226158688292,
-          "centroid_error_against_efit_target_m": -0.03784417190353058,
-          "program_compiled": true,
-          "steady_wall_s": 0.1005531121045351
+          "achieved_centroid_m": -0.031026226158688188,
+          "centroid_error_against_efit_target_m": -0.03784417190353048,
+          "program_compiled": false,
+          "steady_wall_s": 0.0917626041918993
         },
         {
           "row": 38,
@@ -5330,30 +5350,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.398236572742462,
-          "terminal_residual": 6.171581442167904e-09,
+          "solve_wall_s": 1.0445170383900404,
+          "terminal_residual": 6.171581345441218e-09,
           "active_set_trips": 2,
           "newton_step_count": 24,
           "termination": "converged",
-          "reduced_dimension": 653,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            4.917121334001422,
-            0.05041456688195467
+            0.8993035079911351,
+            0.04840818978846073
           ],
-          "first_trip_wall_s": 4.917121334001422,
-          "median_warm_trip_wall_s": 0.05041456688195467,
-          "warm_wall_s": 0.05041456688195467,
+          "first_trip_wall_s": 0.8993035079911351,
+          "median_warm_trip_wall_s": 0.04840818978846073,
+          "warm_wall_s": 0.04840818978846073,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.05836526242472827,
-          "centroid_error_against_efit_target_m": -0.06466296765410005,
+          "achieved_centroid_m": -0.058365262424728045,
+          "centroid_error_against_efit_target_m": -0.06466296765409983,
           "program_compiled": true,
-          "steady_wall_s": 0.10082913376390934
+          "steady_wall_s": 0.09681637957692146
         },
         {
           "row": 39,
@@ -5467,31 +5487,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.264223580248654,
-          "terminal_residual": 2.136483391195824e-09,
+          "solve_wall_s": 0.3868937352672219,
+          "terminal_residual": 2.1364834379295405e-09,
           "active_set_trips": 3,
           "newton_step_count": 26,
           "termination": "converged",
-          "reduced_dimension": 671,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.582094783894718,
-            0.17446445301175117,
-            0.048508367501199245
+            0.07390807196497917,
+            0.16432582587003708,
+            0.04838064778596163
           ],
-          "first_trip_wall_s": 4.582094783894718,
-          "median_warm_trip_wall_s": 0.11148641025647521,
-          "warm_wall_s": 0.22297282051295042,
+          "first_trip_wall_s": 0.07390807196497917,
+          "median_warm_trip_wall_s": 0.10635323682799935,
+          "warm_wall_s": 0.2127064736559987,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.10568005175940731,
-          "centroid_error_against_efit_target_m": -0.11105891180835703,
-          "program_compiled": true,
-          "steady_wall_s": 0.33445923076942563
+          "achieved_centroid_m": -0.10568005175940694,
+          "centroid_error_against_efit_target_m": -0.11105891180835666,
+          "program_compiled": false,
+          "steady_wall_s": 0.31905971048399806
         },
         {
           "row": 40,
@@ -5605,18 +5625,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.833573253825307,
-          "terminal_residual": 8.013129190966414e-09,
+          "solve_wall_s": 0.22701775189489126,
+          "terminal_residual": 8.013129372494136e-09,
           "active_set_trips": 1,
           "newton_step_count": 21,
           "termination": "converged",
-          "reduced_dimension": 675,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.420598344877362
+            0.13056520000100136
           ],
-          "first_trip_wall_s": 4.420598344877362,
+          "first_trip_wall_s": 0.13056520000100136,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -5624,10 +5644,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.13252073724251523,
-          "centroid_error_against_efit_target_m": -0.1378124674079968,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.1325207372425153,
+          "centroid_error_against_efit_target_m": -0.13781246740799688,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 41,
@@ -5741,30 +5761,30 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 6.5104028806090355,
-          "terminal_residual": 2.500766036818375e-09,
+          "solve_wall_s": 0.2605747012421489,
+          "terminal_residual": 2.5007660368183755e-09,
           "active_set_trips": 2,
           "newton_step_count": 14,
           "termination": "converged",
-          "reduced_dimension": 675,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            5.960177764296532,
-            0.04712440446019173
+            0.11354934051632881,
+            0.04854882787913084
           ],
-          "first_trip_wall_s": 5.960177764296532,
-          "median_warm_trip_wall_s": 0.04712440446019173,
-          "warm_wall_s": 0.04712440446019173,
+          "first_trip_wall_s": 0.11354934051632881,
+          "median_warm_trip_wall_s": 0.04854882787913084,
+          "warm_wall_s": 0.04854882787913084,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.15009028660647367,
-          "centroid_error_against_efit_target_m": -0.15502509112052415,
-          "program_compiled": true,
-          "steady_wall_s": 0.09424880892038345
+          "achieved_centroid_m": -0.15009028660647333,
+          "centroid_error_against_efit_target_m": -0.15502509112052382,
+          "program_compiled": false,
+          "steady_wall_s": 0.09709765575826168
         },
         {
           "row": 42,
@@ -5878,31 +5898,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.67247649282217,
-          "terminal_residual": 4.787507150327e-12,
+          "solve_wall_s": 0.3252453040331602,
+          "terminal_residual": 4.787420457817397e-12,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 658,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.191781526431441,
-            0.052908080630004406,
-            0.04766492359340191
+            0.12815105449408293,
+            0.05156301613897085,
+            0.04920078720897436
           ],
-          "first_trip_wall_s": 4.191781526431441,
-          "median_warm_trip_wall_s": 0.05028650211170316,
-          "warm_wall_s": 0.10057300422340631,
+          "first_trip_wall_s": 0.12815105449408293,
+          "median_warm_trip_wall_s": 0.05038190167397261,
+          "warm_wall_s": 0.10076380334794521,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.15610608011493515,
-          "centroid_error_against_efit_target_m": -0.16259979661563467,
-          "program_compiled": true,
-          "steady_wall_s": 0.15085950633510947
+          "achieved_centroid_m": -0.15610608011493465,
+          "centroid_error_against_efit_target_m": -0.16259979661563417,
+          "program_compiled": false,
+          "steady_wall_s": 0.15114570502191782
         },
         {
           "row": 43,
@@ -6016,31 +6036,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.234567308798432,
-          "terminal_residual": 1.77660587064812e-12,
+          "solve_wall_s": 0.36441469099372625,
+          "terminal_residual": 1.7762663215305042e-12,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 657,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.521966690197587,
-            0.051949767395853996,
-            0.04711331706494093
+            0.16633107978850603,
+            0.05170323047786951,
+            0.04834154713898897
           ],
-          "first_trip_wall_s": 4.521966690197587,
-          "median_warm_trip_wall_s": 0.04953154223039746,
-          "warm_wall_s": 0.09906308446079493,
+          "first_trip_wall_s": 0.16633107978850603,
+          "median_warm_trip_wall_s": 0.05002238880842924,
+          "warm_wall_s": 0.10004477761685848,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.17618359523520358,
-          "centroid_error_against_efit_target_m": -0.18222995559379943,
-          "program_compiled": true,
-          "steady_wall_s": 0.1485946266911924
+          "achieved_centroid_m": -0.17618359523520316,
+          "centroid_error_against_efit_target_m": -0.182229955593799,
+          "program_compiled": false,
+          "steady_wall_s": 0.15006716642528772
         },
         {
           "row": 44,
@@ -6154,31 +6174,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.7046508472412825,
-          "terminal_residual": 1.9576703310608304e-13,
+          "solve_wall_s": 0.37404329888522625,
+          "terminal_residual": 1.9568422133234947e-13,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 657,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.9972101571038365,
-            0.04959766659885645,
-            0.04598710872232914
+            0.17607512883841991,
+            0.052744693122804165,
+            0.048250358551740646
           ],
-          "first_trip_wall_s": 4.9972101571038365,
-          "median_warm_trip_wall_s": 0.047792387660592794,
-          "warm_wall_s": 0.09558477532118559,
+          "first_trip_wall_s": 0.17607512883841991,
+          "median_warm_trip_wall_s": 0.050497525837272406,
+          "warm_wall_s": 0.10099505167454481,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.20372636682233405,
-          "centroid_error_against_efit_target_m": -0.20953511233321023,
-          "program_compiled": true,
-          "steady_wall_s": 0.14337716298177838
+          "achieved_centroid_m": -0.20372636682233425,
+          "centroid_error_against_efit_target_m": -0.20953511233321043,
+          "program_compiled": false,
+          "steady_wall_s": 0.15149257751181722
         },
         {
           "row": 45,
@@ -6292,31 +6312,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.4678010903298855,
-          "terminal_residual": 4.200453577141045e-09,
+          "solve_wall_s": 0.34254860132932663,
+          "terminal_residual": 4.200453255675875e-09,
           "active_set_trips": 3,
           "newton_step_count": 28,
           "termination": "converged",
-          "reduced_dimension": 657,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.924822267144918,
-            0.05978474300354719,
-            0.04830466769635677
+            0.1346221910789609,
+            0.06094453204423189,
+            0.04791424237191677
           ],
-          "first_trip_wall_s": 4.924822267144918,
-          "median_warm_trip_wall_s": 0.05404470534995198,
-          "warm_wall_s": 0.10808941069990396,
+          "first_trip_wall_s": 0.1346221910789609,
+          "median_warm_trip_wall_s": 0.05442938720807433,
+          "warm_wall_s": 0.10885877441614866,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.2346231885136779,
-          "centroid_error_against_efit_target_m": -0.23259678565652328,
-          "program_compiled": true,
-          "steady_wall_s": 0.16213411604985595
+          "achieved_centroid_m": -0.23462318851367758,
+          "centroid_error_against_efit_target_m": -0.23259678565652298,
+          "program_compiled": false,
+          "steady_wall_s": 0.163288161624223
         },
         {
           "row": 46,
@@ -6430,31 +6450,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.6212065340951085,
-          "terminal_residual": 8.37794916660224e-12,
+          "solve_wall_s": 0.36803141236305237,
+          "terminal_residual": 8.377166546409188e-12,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 664,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            5.054676091298461,
-            0.05235526151955128,
-            0.04854475799947977
+            0.1727806655690074,
+            0.05042780376970768,
+            0.048590357415378094
           ],
-          "first_trip_wall_s": 5.054676091298461,
-          "median_warm_trip_wall_s": 0.050450009759515524,
-          "warm_wall_s": 0.10090001951903105,
+          "first_trip_wall_s": 0.1727806655690074,
+          "median_warm_trip_wall_s": 0.04950908059254289,
+          "warm_wall_s": 0.09901816118508577,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.2656845761313386,
-          "centroid_error_against_efit_target_m": -0.27774760721617414,
-          "program_compiled": true,
-          "steady_wall_s": 0.15135002927854657
+          "achieved_centroid_m": -0.2656845761313388,
+          "centroid_error_against_efit_target_m": -0.2777476072161743,
+          "program_compiled": false,
+          "steady_wall_s": 0.14852724177762866
         },
         {
           "row": 47,
@@ -6568,18 +6588,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.465303951874375,
-          "terminal_residual": 9.902461063714567e-05,
+          "solve_wall_s": 0.25010226387530565,
+          "terminal_residual": 9.902461063653083e-05,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            5.055761900730431
+            0.15329336933791637
           ],
-          "first_trip_wall_s": 5.055761900730431,
+          "first_trip_wall_s": 0.15329336933791637,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -6587,10 +6607,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.27849972410781826,
-          "centroid_error_against_efit_target_m": -0.27736871281827385,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.2784997241078182,
+          "centroid_error_against_efit_target_m": -0.2773687128182738,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 48,
@@ -6704,31 +6724,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.39752655941993,
-          "terminal_residual": 8.003267748268509e-14,
+          "solve_wall_s": 0.3227343875914812,
+          "terminal_residual": 7.988110044199817e-14,
           "active_set_trips": 3,
           "newton_step_count": 20,
           "termination": "converged",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.673216735012829,
-            0.04903424996882677,
-            0.05171449948102236
+            0.12703833542764187,
+            0.0480147497728467,
+            0.05131515767425299
           ],
-          "first_trip_wall_s": 4.673216735012829,
-          "median_warm_trip_wall_s": 0.050374374724924564,
-          "warm_wall_s": 0.10074874944984913,
+          "first_trip_wall_s": 0.12703833542764187,
+          "median_warm_trip_wall_s": 0.04966495372354984,
+          "warm_wall_s": 0.09932990744709969,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.2957241870059831,
-          "centroid_error_against_efit_target_m": -0.29331933377005287,
-          "program_compiled": true,
-          "steady_wall_s": 0.1511231241747737
+          "achieved_centroid_m": -0.295724187005983,
+          "centroid_error_against_efit_target_m": -0.2933193337700528,
+          "program_compiled": false,
+          "steady_wall_s": 0.14899486117064953
         },
         {
           "row": 49,
@@ -6842,31 +6862,31 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.150001321919262,
-          "terminal_residual": 1.1221075081801837e-12,
+          "solve_wall_s": 0.3732382506132126,
+          "terminal_residual": 1.1238159996860848e-12,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            4.662963362410665,
-            0.05114988703280687,
-            0.04805545136332512
+            0.17734553944319487,
+            0.051783486269414425,
+            0.047831663861870766
           ],
-          "first_trip_wall_s": 4.662963362410665,
-          "median_warm_trip_wall_s": 0.049602669198065996,
-          "warm_wall_s": 0.09920533839613199,
+          "first_trip_wall_s": 0.17734553944319487,
+          "median_warm_trip_wall_s": 0.049807575065642595,
+          "warm_wall_s": 0.09961515013128519,
           "conditioning_flag": false,
           "target_source": null,
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.3187515111058662,
-          "centroid_error_against_efit_target_m": -0.3566231065779636,
-          "program_compiled": true,
-          "steady_wall_s": 0.148808007594198
+          "achieved_centroid_m": -0.3187515111058663,
+          "centroid_error_against_efit_target_m": -0.3566231065779637,
+          "program_compiled": false,
+          "steady_wall_s": 0.14942272519692779
         },
         {
           "row": 50,
@@ -6980,18 +7000,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.96887884195894,
-          "terminal_residual": 5.28334776312984e-07,
+          "solve_wall_s": 0.2690236773341894,
+          "terminal_residual": 5.283347776367152e-07,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.588223376311362
+            0.17313401773571968
           ],
-          "first_trip_wall_s": 4.588223376311362,
+          "first_trip_wall_s": 0.17313401773571968,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -6999,10 +7019,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.3269736442448959,
-          "centroid_error_against_efit_target_m": -0.35206884999893756,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.32697364424489606,
+          "centroid_error_against_efit_target_m": -0.3520688499989377,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 51,
@@ -7116,18 +7136,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.305470701307058,
-          "terminal_residual": 4.3417518895923776e-09,
+          "solve_wall_s": 0.21199180837720633,
+          "terminal_residual": 4.341752035040814e-09,
           "active_set_trips": 1,
           "newton_step_count": 16,
           "termination": "converged",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.922518887557089
+            0.11373413912951946
           ],
-          "first_trip_wall_s": 4.922518887557089,
+          "first_trip_wall_s": 0.11373413912951946,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7137,8 +7157,8 @@
           "compensator_rule": null,
           "achieved_centroid_m": -0.33626637207177,
           "centroid_error_against_efit_target_m": -0.3520023484697612,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 52,
@@ -7252,18 +7272,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.884253324009478,
-          "terminal_residual": 2.3640360774332002e-07,
+          "solve_wall_s": 0.27312313858419657,
+          "terminal_residual": 2.3640360694951965e-07,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.489209559746087
+            0.17709079291671515
           ],
-          "first_trip_wall_s": 4.489209559746087,
+          "first_trip_wall_s": 0.17709079291671515,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7271,10 +7291,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.33779422524882496,
-          "centroid_error_against_efit_target_m": -0.3487103297890538,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.3377942252488249,
+          "centroid_error_against_efit_target_m": -0.34871032978905375,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 53,
@@ -7388,18 +7408,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.899438604712486,
-          "terminal_residual": 2.1694542611490098e-06,
+          "solve_wall_s": 0.2739068763330579,
+          "terminal_residual": 2.169454261221781e-06,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.45332654658705
+            0.17806300800293684
           ],
-          "first_trip_wall_s": 4.45332654658705,
+          "first_trip_wall_s": 0.17806300800293684,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7407,10 +7427,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.32432326227321384,
-          "centroid_error_against_efit_target_m": -0.3044552739699101,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.32432326227321356,
+          "centroid_error_against_efit_target_m": -0.30445527396990985,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 54,
@@ -7524,18 +7544,18 @@
           "converged": true,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.598857091739774,
-          "terminal_residual": 7.854672379101947e-10,
+          "solve_wall_s": 0.2430606409907341,
+          "terminal_residual": 7.854679625217967e-10,
           "active_set_trips": 1,
           "newton_step_count": 17,
           "termination": "converged",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            5.209418556652963
+            0.14644767250865698
           ],
-          "first_trip_wall_s": 5.209418556652963,
+          "first_trip_wall_s": 0.14644767250865698,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7543,10 +7563,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.33722407839359403,
-          "centroid_error_against_efit_target_m": -0.31888814925314546,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.33722407839359425,
+          "centroid_error_against_efit_target_m": -0.3188881492531457,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 55,
@@ -7660,18 +7680,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.506605236791074,
-          "terminal_residual": 0.0007709127151092869,
+          "solve_wall_s": 0.26991642359644175,
+          "terminal_residual": 0.0007709127151097226,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            5.120410783216357
+            0.17367247305810452
           ],
-          "first_trip_wall_s": 5.120410783216357,
+          "first_trip_wall_s": 0.17367247305810452,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7679,10 +7699,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.3376255270270656,
-          "centroid_error_against_efit_target_m": -0.3206908509312223,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.3376255270270655,
+          "centroid_error_against_efit_target_m": -0.3206908509312222,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 56,
@@ -7796,18 +7816,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 4.894565921276808,
-          "terminal_residual": 1.3997781586127515e-07,
+          "solve_wall_s": 0.26533231046050787,
+          "terminal_residual": 1.399778146995524e-07,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.496925967745483
+            0.1693280255421996
           ],
-          "first_trip_wall_s": 4.496925967745483,
+          "first_trip_wall_s": 0.1693280255421996,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7815,10 +7835,10 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.3394779599879415,
-          "centroid_error_against_efit_target_m": -0.32392575588566375,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.33947795998794017,
+          "centroid_error_against_efit_target_m": -0.3239257558856624,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         },
         {
           "row": 57,
@@ -7932,18 +7952,18 @@
           "converged": false,
           "solved": true,
           "route": "free",
-          "solve_wall_s": 5.11426542326808,
-          "terminal_residual": 0.018516116216830004,
+          "solve_wall_s": 0.1607144121080637,
+          "terminal_residual": 0.018516116216826296,
           "active_set_trips": 1,
           "newton_step_count": 1,
           "termination": "active_set_settled",
-          "reduced_dimension": 666,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.67948782723397
+            0.06392536591738462
           ],
-          "first_trip_wall_s": 4.67948782723397,
+          "first_trip_wall_s": 0.06392536591738462,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "conditioning_flag": false,
@@ -7951,29 +7971,45 @@
           "row_qualified": null,
           "compensating_current_a": 0.0,
           "compensator_rule": null,
-          "achieved_centroid_m": -0.3853149969443788,
-          "centroid_error_against_efit_target_m": -0.4197025966212263,
-          "program_compiled": true,
-          "steady_wall_s": 0.04863193864002824
+          "achieved_centroid_m": -0.38531499694435883,
+          "centroid_error_against_efit_target_m": -0.4197025966212063,
+          "program_compiled": false,
+          "steady_wall_s": 0.04884851328097284
         }
       ],
       "summary": {
         "slices_measured": 57,
-        "slices_solved": 56,
-        "slices_converged": 49,
+        "slices_solved": 57,
+        "slices_converged": 50,
         "slices_qualified": null,
-        "solved_fraction": 0.9824561403508771,
-        "converged_fraction": 0.875,
+        "solved_fraction": 1.0,
+        "converged_fraction": 0.8771929824561403,
         "qualified_fraction": null,
-        "total_wall_s": 268.41195313539356,
-        "median_as_built_wall_per_slice_s": 4.87574837077409,
-        "median_warm_wall_per_slice_s": 0.04863193864002824,
-        "median_warm_trip_wall_s_global": 0.04863193864002824,
-        "as_built_slices_per_second": 0.21236014020302518,
-        "warm_slices_per_second": 12.176346668606799,
-        "as_built_slices_per_gpu_hour": 764.4965047308907,
-        "warm_slices_per_gpu_hour": 43834.84800698447,
-        "compiles_inferred": 56
+        "total_wall_s": 24.394806153140962,
+        "median_as_built_wall_per_slice_s": 0.20711967814713717,
+        "median_warm_wall_per_slice_s": 0.04884851328097284,
+        "median_warm_trip_wall_s_global": 0.04884851328097284,
+        "as_built_slices_per_second": 2.3365629405774535,
+        "warm_slices_per_second": 12.03952911028219,
+        "as_built_slices_per_gpu_hour": 8411.626586078833,
+        "warm_slices_per_gpu_hour": 43342.30479701589,
+        "compiles_inferred": 3,
+        "program_cache_sizes": {
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "jacobian": 1,
+          "flux_scores": 0,
+          "ladder": 0,
+          "leakage": 0,
+          "direction": 1,
+          "step_scores": 1,
+          "grade": 1,
+          "tail": 1,
+          "boundary": 1,
+          "initial_gather": 1
+        },
+        "program_compile_count": 1
       }
     },
     "conditioned": {
@@ -8093,7 +8129,7 @@
           "reference_plasma_current_a": 132431.5,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 17.243308668024838,
+          "solve_wall_s": 18.089381041005254,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -8210,8 +8246,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 5.226158951409161,
-          "terminal_residual": 0.05078997765503352,
+          "solve_wall_s": 5.7276315446943045,
+          "terminal_residual": 0.05078997765503371,
           "active_set_trips": 1,
           "newton_step_count": 0,
           "termination": "active_set_settled",
@@ -8231,15 +8267,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.965306641533971
+            4.772985656745732
           ],
-          "first_trip_wall_s": 3.965306641533971,
+          "first_trip_wall_s": 4.772985656745732,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": -0.0034293328196765257,
           "achieved_against_target_m": -0.0021963623137236906,
           "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 3,
@@ -8353,7 +8389,7 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.68877146858722,
+          "solve_wall_s": 0.6581842890009284,
           "terminal_residual": 6.8042398057425835e-09,
           "active_set_trips": 1,
           "newton_step_count": 15,
@@ -8374,15 +8410,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.979509700089693
+            0.24557703640311956
           ],
-          "first_trip_wall_s": 3.979509700089693,
+          "first_trip_wall_s": 0.24557703640311956,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": -0.009529120916211428,
           "achieved_against_target_m": -3.421389879743053e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 4,
@@ -8496,8 +8532,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.5427307756617665,
-          "terminal_residual": 0.01436469668872311,
+          "solve_wall_s": 0.45870946906507015,
+          "terminal_residual": 0.01436469668872323,
           "active_set_trips": 1,
           "newton_step_count": 0,
           "termination": "active_set_settled",
@@ -8517,15 +8553,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.855053815059364
+            0.05446671321988106
           ],
-          "first_trip_wall_s": 3.855053815059364,
+          "first_trip_wall_s": 0.05446671321988106,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": -0.0032417581414716417,
           "achieved_against_target_m": 0.008046483341799481,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 5,
@@ -8639,8 +8675,8 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.852241590619087,
-          "terminal_residual": 3.022816407205369e-09,
+          "solve_wall_s": 0.5178478611633182,
+          "terminal_residual": 3.022816610479977e-09,
           "active_set_trips": 1,
           "newton_step_count": 15,
           "termination": "converged",
@@ -8649,7 +8685,7 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.014180149883031845,
-          "row_error_m": -1.5100454723443457e-09,
+          "row_error_m": -1.5100454931610274e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
           "normalised_unknown": -0.0009770467662026635,
@@ -8660,15 +8696,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.1092302072793245
+            0.11886893305927515
           ],
-          "first_trip_wall_s": 4.1092302072793245,
+          "first_trip_wall_s": 0.11886893305927515,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.014180151393077317,
-          "achieved_against_target_m": -1.5100454723443457e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.014180151393077338,
+          "achieved_against_target_m": -1.5100454931610274e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 6,
@@ -8782,8 +8818,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 5.287732366472483,
-          "terminal_residual": 0.029587847416386225,
+          "solve_wall_s": 0.4408331122249365,
+          "terminal_residual": 0.0295878474163861,
           "active_set_trips": 1,
           "newton_step_count": 0,
           "termination": "active_set_settled",
@@ -8792,26 +8828,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.02066793479025364,
-          "row_error_m": 0.017579486925562382,
+          "row_error_m": 0.01757948692556239,
           "row_qualified": false,
           "compensator_rule": "dominant_authority",
           "normalised_unknown": -0.0009770467662026635,
-          "compensating_current_a": -142.85726899591583,
-          "compensating_current_norm_a": 142.85726899591583,
+          "compensating_current_a": -142.85726899591506,
+          "compensating_current_norm_a": 142.85726899591506,
           "direction_authority_row_scales_per_ampere": [
-            6.8393213244934456e-06
+            6.839321324493482e-06
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.005472083576024
+            0.052733419463038445
           ],
-          "first_trip_wall_s": 4.005472083576024,
+          "first_trip_wall_s": 0.052733419463038445,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.0030884478646912555,
-          "achieved_against_target_m": 0.017579486925562382,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.003088447864691252,
+          "achieved_against_target_m": 0.01757948692556239,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 7,
@@ -8925,8 +8961,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.746069316752255,
-          "terminal_residual": 0.01288184957494085,
+          "solve_wall_s": 0.49509477242827415,
+          "terminal_residual": 0.012881849574940948,
           "active_set_trips": 1,
           "newton_step_count": 11,
           "termination": "active_set_settled",
@@ -8935,26 +8971,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.016527200117707253,
-          "row_error_m": 0.014157659061921379,
+          "row_error_m": 0.014157659061921376,
           "row_qualified": false,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 9.630497893879749e-05,
-          "compensating_current_a": 4497.727746290696,
-          "compensating_current_norm_a": 4497.727746290696,
+          "normalised_unknown": 9.630497893879761e-05,
+          "compensating_current_a": 4497.727746290701,
+          "compensating_current_norm_a": 4497.727746290701,
           "direction_authority_row_scales_per_ampere": [
             2.141191827767272e-08
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.020746077410877
+            0.10090493690222502
           ],
-          "first_trip_wall_s": 4.020746077410877,
+          "first_trip_wall_s": 0.10090493690222502,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.002369541055785874,
-          "achieved_against_target_m": 0.014157659061921379,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.002369541055785877,
+          "achieved_against_target_m": 0.014157659061921376,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 8,
@@ -9068,8 +9104,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.920365191064775,
-          "terminal_residual": 0.015894176713909514,
+          "solve_wall_s": 0.4520724890753627,
+          "terminal_residual": 0.015894176713909396,
           "active_set_trips": 1,
           "newton_step_count": 0,
           "termination": "active_set_settled",
@@ -9078,26 +9114,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.01927504688501358,
-          "row_error_m": 0.01607362171130142,
+          "row_error_m": 0.016073621711301417,
           "row_qualified": false,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 9.630497893879749e-05,
-          "compensating_current_a": 1504.9816173027366,
-          "compensating_current_norm_a": 1504.9816173027366,
+          "normalised_unknown": 9.630497893879761e-05,
+          "compensating_current_a": 1504.981617302739,
+          "compensating_current_norm_a": 1504.981617302739,
           "direction_authority_row_scales_per_ampere": [
-            6.39908008387488e-08
+            6.399080083874878e-08
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            3.764743795618415
+            0.053633011877536774
           ],
-          "first_trip_wall_s": 3.764743795618415,
+          "first_trip_wall_s": 0.053633011877536774,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.0032014251737121587,
-          "achieved_against_target_m": 0.01607362171130142,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.0032014251737121626,
+          "achieved_against_target_m": 0.016073621711301417,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 9,
@@ -9211,7 +9247,7 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.8009643368422985,
+          "solve_wall_s": 0.4577468344941735,
           "terminal_residual": 0.026061430320575837,
           "active_set_trips": 1,
           "newton_step_count": 1,
@@ -9224,23 +9260,23 @@
           "row_error_m": 0.021544025690577173,
           "row_qualified": false,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": -8.668891029191111e-05,
-          "compensating_current_a": -5473.964654963647,
-          "compensating_current_norm_a": 5473.964654963647,
+          "normalised_unknown": -8.668891029191102e-05,
+          "compensating_current_a": -5473.964654963645,
+          "compensating_current_norm_a": 5473.964654963645,
           "direction_authority_row_scales_per_ampere": [
-            1.5836585684436944e-08
+            1.583658568443693e-08
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.087400431744754
+            0.06413645390421152
           ],
-          "first_trip_wall_s": 4.087400431744754,
+          "first_trip_wall_s": 0.06413645390421152,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": -0.0034287670242570383,
           "achieved_against_target_m": 0.021544025690577173,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 10,
@@ -9354,8 +9390,8 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.871669724583626,
-          "terminal_residual": 8.154919197788916e-09,
+          "solve_wall_s": 0.5774696972221136,
+          "terminal_residual": 8.1549198316458e-09,
           "active_set_trips": 1,
           "newton_step_count": 22,
           "termination": "converged",
@@ -9364,26 +9400,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.007340689655393362,
-          "row_error_m": 1.0443432646445316e-09,
+          "row_error_m": 1.0443432837264899e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": -0.00038015592458418094,
-          "compensating_current_a": -9644.536543701442,
-          "compensating_current_norm_a": 9644.536543701442,
+          "normalised_unknown": -0.00038015592458418067,
+          "compensating_current_a": -9644.536543701435,
+          "compensating_current_norm_a": 9644.536543701435,
           "direction_authority_row_scales_per_ampere": [
             3.941671254617718e-08
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.155162690207362
+            0.18324858509004116
           ],
-          "first_trip_wall_s": 4.155162690207362,
+          "first_trip_wall_s": 0.18324858509004116,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.007340688611050097,
-          "achieved_against_target_m": 1.0443432646445316e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.007340688611050078,
+          "achieved_against_target_m": 1.0443432837264899e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 11,
@@ -9497,8 +9533,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 4.873856223188341,
-          "terminal_residual": 0.06114186540420621,
+          "solve_wall_s": 0.45833466202020645,
+          "terminal_residual": 0.06114186540420564,
           "active_set_trips": 1,
           "newton_step_count": 1,
           "termination": "active_set_settled",
@@ -9507,26 +9543,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.0019207462901249528,
-          "row_error_m": -0.005240490349177741,
+          "row_error_m": -0.005240490349177742,
           "row_qualified": false,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": -0.03012510764339489,
-          "compensating_current_a": -10602.376786400722,
-          "compensating_current_norm_a": 10602.376786400722,
+          "normalised_unknown": -0.03012510764339511,
+          "compensating_current_a": -10602.376786400848,
+          "compensating_current_norm_a": 10602.376786400848,
           "direction_authority_row_scales_per_ampere": [
-            2.8413541840953296e-06
+            2.8413541840953173e-06
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            4.1526719918474555
+            0.0637916224077344
           ],
-          "first_trip_wall_s": 4.1526719918474555,
+          "first_trip_wall_s": 0.0637916224077344,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": -0.0033197440590527877,
-          "achieved_against_target_m": -0.005240490349177741,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": -0.003319744059052789,
+          "achieved_against_target_m": -0.005240490349177742,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 12,
@@ -9639,7 +9675,7 @@
           "reference_plasma_current_a": 377895.8125,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 4.441864822991192,
+          "solve_wall_s": 0.4697440657764673,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -9756,8 +9792,8 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 14.82448217831552,
-          "terminal_residual": 0.0888364718620895,
+          "solve_wall_s": 0.4419090058654547,
+          "terminal_residual": 0.08883647186208939,
           "active_set_trips": 1,
           "newton_step_count": 0,
           "termination": "active_set_settled",
@@ -9777,15 +9813,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            14.082053708843887
+            0.0531985592097044
           ],
-          "first_trip_wall_s": 14.082053708843887,
+          "first_trip_wall_s": 0.0531985592097044,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": -0.0023803218128852595,
           "achieved_against_target_m": -0.012671050694840407,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 14,
@@ -9899,7 +9935,7 @@
           "converged": false,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 13.052744892425835,
+          "solve_wall_s": 0.5323478979989886,
           "terminal_residual": 3.356389135458616e-08,
           "active_set_trips": 1,
           "newton_step_count": 24,
@@ -9920,15 +9956,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            12.044180104508996
+            0.13914374262094498
           ],
-          "first_trip_wall_s": 12.044180104508996,
+          "first_trip_wall_s": 0.13914374262094498,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": 0.011079488107776344,
           "achieved_against_target_m": 3.331325024343024e-08,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 15,
@@ -10042,8 +10078,8 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 12.931516856886446,
-          "terminal_residual": 6.7403546934159625e-09,
+          "solve_wall_s": 0.48430720530450344,
+          "terminal_residual": 6.7403544815370566e-09,
           "active_set_trips": 1,
           "newton_step_count": 7,
           "termination": "converged",
@@ -10052,26 +10088,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01083962619304657,
-          "row_error_m": 1.8181256066646112e-09,
+          "row_error_m": 1.818125620542399e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.005257818547396766,
-          "compensating_current_a": 15718.952369795254,
-          "compensating_current_norm_a": 15718.952369795254,
+          "normalised_unknown": 0.005257818547396768,
+          "compensating_current_a": 15718.952369795259,
+          "compensating_current_norm_a": 15718.952369795259,
           "direction_authority_row_scales_per_ampere": [
             3.344891201210028e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            12.080212622880936
+            0.08532932307571173
           ],
-          "first_trip_wall_s": 12.080212622880936,
+          "first_trip_wall_s": 0.08532932307571173,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.010839628011172176,
-          "achieved_against_target_m": 1.8181256066646112e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.01083962801117219,
+          "achieved_against_target_m": 1.818125620542399e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 16,
@@ -10185,8 +10221,8 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 13.460309623740613,
-          "terminal_residual": 8.853256470086246e-09,
+          "solve_wall_s": 0.4755404470488429,
+          "terminal_residual": 8.85325647008625e-09,
           "active_set_trips": 1,
           "newton_step_count": 8,
           "termination": "converged",
@@ -10195,26 +10231,26 @@
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.015535051934421062,
-          "row_error_m": -8.613605849416839e-09,
+          "row_error_m": -8.613605858090456e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.005964067165532608,
-          "compensating_current_a": 12759.987004955114,
-          "compensating_current_norm_a": 12759.987004955114,
+          "normalised_unknown": 0.005964067165532609,
+          "compensating_current_a": 12759.987004955112,
+          "compensating_current_norm_a": 12759.987004955112,
           "direction_authority_row_scales_per_ampere": [
-            4.6740385889237736e-07
+            4.674038588923774e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            12.576370095834136
+            0.0766242016106844
           ],
-          "first_trip_wall_s": 12.576370095834136,
+          "first_trip_wall_s": 0.0766242016106844,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.015535043320815213,
-          "achieved_against_target_m": -8.613605849416839e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.015535043320815204,
+          "achieved_against_target_m": -8.613605858090456e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 17,
@@ -10328,17 +10364,17 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.415198071859777,
+          "solve_wall_s": 0.45092348381876945,
           "terminal_residual": 2.960626408025664e-09,
           "active_set_trips": 1,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 668,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.011929769068956375,
-          "row_error_m": 1.9819459216169344e-09,
+          "row_error_m": 1.981945923351658e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
           "normalised_unknown": 0.005821658732440122,
@@ -10349,15 +10385,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            17.639495762065053
+            0.06334963999688625
           ],
-          "first_trip_wall_s": 17.639495762065053,
+          "first_trip_wall_s": 0.06334963999688625,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.011929771050902297,
-          "achieved_against_target_m": 1.9819459216169344e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.011929771050902298,
+          "achieved_against_target_m": 1.981945923351658e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 18,
@@ -10471,17 +10507,17 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.45299155265093,
-          "terminal_residual": 3.3725195288359786e-09,
+          "solve_wall_s": 0.4706783341243863,
+          "terminal_residual": 3.372519688603975e-09,
           "active_set_trips": 1,
           "newton_step_count": 8,
           "termination": "converged",
-          "reduced_dimension": 668,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01207789033651352,
-          "row_error_m": 1.6203709173046033e-09,
+          "row_error_m": 1.6203709138351563e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
           "normalised_unknown": 0.004802976770235667,
@@ -10492,15 +10528,15 @@
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            15.711935347877443
+            0.07342937309294939
           ],
-          "first_trip_wall_s": 15.711935347877443,
+          "first_trip_wall_s": 0.07342937309294939,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.012077891956884437,
-          "achieved_against_target_m": 1.6203709173046033e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.012077891956884433,
+          "achieved_against_target_m": 1.6203709138351563e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 19,
@@ -10614,36 +10650,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.6250478932634,
-          "terminal_residual": 2.902784526602129e-10,
+          "solve_wall_s": 0.46214822866022587,
+          "terminal_residual": 2.902785039876013e-10,
           "active_set_trips": 1,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 668,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01341916061937809,
-          "row_error_m": 3.709768603421537e-11,
+          "row_error_m": 3.709767736059799e-11,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.004840022545287922,
-          "compensating_current_a": 11333.339357018776,
-          "compensating_current_norm_a": 11333.339357018776,
+          "normalised_unknown": 0.0048400225452879175,
+          "compensating_current_a": 11333.33935701877,
+          "compensating_current_norm_a": 11333.33935701877,
           "direction_authority_row_scales_per_ampere": [
-            4.270605858361136e-07
+            4.270605858361135e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            15.743189266882837
+            0.06099040526896715
           ],
-          "first_trip_wall_s": 15.743189266882837,
+          "first_trip_wall_s": 0.06099040526896715,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.013419160656475776,
-          "achieved_against_target_m": 3.709768603421537e-11,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.013419160656475767,
+          "achieved_against_target_m": 3.709767736059799e-11,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 20,
@@ -10757,38 +10793,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 17.030887878499925,
-          "terminal_residual": 8.235287998794428e-10,
+          "solve_wall_s": 0.5665684444829822,
+          "terminal_residual": 8.235288039875667e-10,
           "active_set_trips": 3,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 668,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01504494622349739,
-          "row_error_m": 3.477486864439383e-09,
+          "row_error_m": 3.4774868765824474e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0051258455674267666,
-          "compensating_current_a": 10914.694885058307,
-          "compensating_current_norm_a": 10914.694885058307,
+          "normalised_unknown": 0.005125845567426767,
+          "compensating_current_a": 10914.694885058309,
+          "compensating_current_norm_a": 10914.694885058309,
           "direction_authority_row_scales_per_ampere": [
             4.6962793018097125e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            15.867205414921045,
-            0.05153778288513422,
-            0.050140353851020336
+            0.06452873442322016,
+            0.049389876425266266,
+            0.04922251868993044
           ],
-          "first_trip_wall_s": 15.867205414921045,
-          "median_warm_trip_wall_s": 0.05083906836807728,
-          "warm_wall_s": 0.10167813673615456,
-          "achieved_centroid_m": 0.015044949700984255,
-          "achieved_against_target_m": 3.477486864439383e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.15251720510423183
+          "first_trip_wall_s": 0.06452873442322016,
+          "median_warm_trip_wall_s": 0.04930619755759835,
+          "warm_wall_s": 0.0986123951151967,
+          "achieved_centroid_m": 0.015044949700984267,
+          "achieved_against_target_m": 3.4774868765824474e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.14791859267279506
         },
         {
           "row": 21,
@@ -10902,37 +10938,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 20.254471024498343,
-          "terminal_residual": 2.921011268478623e-10,
+          "solve_wall_s": 0.503521116450429,
+          "terminal_residual": 2.921011201135655e-10,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 677,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.015138053335249424,
-          "row_error_m": -3.090565026120373e-10,
+          "row_error_m": -3.0905649914259037e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.005330131746391567,
-          "compensating_current_a": 10808.282807585818,
-          "compensating_current_norm_a": 10808.282807585818,
+          "normalised_unknown": 0.005330131746391568,
+          "compensating_current_a": 10808.28280758582,
+          "compensating_current_norm_a": 10808.28280758582,
           "direction_authority_row_scales_per_ampere": [
             4.931525054702123e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            18.82272101007402,
-            0.0486772321164608
+            0.06201022397726774,
+            0.04857321735471487
           ],
-          "first_trip_wall_s": 18.82272101007402,
-          "median_warm_trip_wall_s": 0.0486772321164608,
-          "warm_wall_s": 0.0486772321164608,
-          "achieved_centroid_m": 0.015138053026192921,
-          "achieved_against_target_m": -3.090565026120373e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.0973544642329216
+          "first_trip_wall_s": 0.06201022397726774,
+          "median_warm_trip_wall_s": 0.04857321735471487,
+          "warm_wall_s": 0.04857321735471487,
+          "achieved_centroid_m": 0.015138053026192925,
+          "achieved_against_target_m": -3.0905649914259037e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.09714643470942974
         },
         {
           "row": 22,
@@ -11046,38 +11082,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.650960284285247,
-          "terminal_residual": 1.0875615896281415e-09,
+          "solve_wall_s": 0.5758556509390473,
+          "terminal_residual": 1.0875615809337996e-09,
           "active_set_trips": 3,
           "newton_step_count": 8,
           "termination": "converged",
-          "reduced_dimension": 676,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01090727373957634,
-          "row_error_m": 4.339876643819074e-09,
+          "row_error_m": 4.339876626471839e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0043898253497066985,
-          "compensating_current_a": 8632.020074773582,
-          "compensating_current_norm_a": 8632.020074773582,
+          "normalised_unknown": 0.0043898253497067,
+          "compensating_current_a": 8632.020074773583,
+          "compensating_current_norm_a": 8632.020074773583,
           "direction_authority_row_scales_per_ampere": [
-            5.085513369617417e-07
+            5.085513369617418e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            17.107641112059355,
-            0.050197336822748184,
-            0.04980952572077513
+            0.07375114597380161,
+            0.04862426687031984,
+            0.049370632506906986
           ],
-          "first_trip_wall_s": 17.107641112059355,
-          "median_warm_trip_wall_s": 0.050003431271761656,
-          "warm_wall_s": 0.10000686254352331,
-          "achieved_centroid_m": 0.010907278079452984,
-          "achieved_against_target_m": 4.339876643819074e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.15001029381528497
+          "first_trip_wall_s": 0.07375114597380161,
+          "median_warm_trip_wall_s": 0.048997449688613415,
+          "warm_wall_s": 0.09799489937722683,
+          "achieved_centroid_m": 0.010907278079452966,
+          "achieved_against_target_m": 4.339876626471839e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.14699234906584024
         },
         {
           "row": 23,
@@ -11191,36 +11227,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.236358370631933,
-          "terminal_residual": 2.0733481516773013e-09,
+          "solve_wall_s": 0.47065767366439104,
+          "terminal_residual": 2.073347990045642e-09,
           "active_set_trips": 1,
           "newton_step_count": 8,
           "termination": "converged",
-          "reduced_dimension": 676,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.009835507720708847,
-          "row_error_m": 1.024001716753986e-09,
+          "row_error_m": 1.0240017150192626e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0034319239689121817,
-          "compensating_current_a": 6933.692214569065,
-          "compensating_current_norm_a": 6933.692214569065,
+          "normalised_unknown": 0.003431923968912181,
+          "compensating_current_a": 6933.692214569066,
+          "compensating_current_norm_a": 6933.692214569066,
           "direction_authority_row_scales_per_ampere": [
-            4.949634138217193e-07
+            4.949634138217191e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            15.549922892823815
+            0.07416364364326
           ],
-          "first_trip_wall_s": 15.549922892823815,
+          "first_trip_wall_s": 0.07416364364326,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.009835508744710564,
-          "achieved_against_target_m": 1.024001716753986e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.009835508744710562,
+          "achieved_against_target_m": 1.0240017150192626e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 24,
@@ -11334,37 +11370,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 17.153510231524706,
-          "terminal_residual": 2.942739368309761e-10,
+          "solve_wall_s": 0.5047445446252823,
+          "terminal_residual": 2.9427408283855964e-10,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 676,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01046918798238039,
-          "row_error_m": 3.960932346003254e-10,
+          "row_error_m": 3.9609325541700713e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0032206271516959325,
-          "compensating_current_a": 6697.24851189301,
-          "compensating_current_norm_a": 6697.24851189301,
+          "normalised_unknown": 0.0032206271516959334,
+          "compensating_current_a": 6697.248511893012,
+          "compensating_current_norm_a": 6697.248511893012,
           "direction_authority_row_scales_per_ampere": [
             4.808881059104684e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            16.103552260436118,
-            0.05053460318595171
+            0.06094689480960369,
+            0.04877722728997469
           ],
-          "first_trip_wall_s": 16.103552260436118,
-          "median_warm_trip_wall_s": 0.05053460318595171,
-          "warm_wall_s": 0.05053460318595171,
-          "achieved_centroid_m": 0.010469188378473625,
-          "achieved_against_target_m": 3.960932346003254e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.10106920637190342
+          "first_trip_wall_s": 0.06094689480960369,
+          "median_warm_trip_wall_s": 0.04877722728997469,
+          "warm_wall_s": 0.04877722728997469,
+          "achieved_centroid_m": 0.010469188378473646,
+          "achieved_against_target_m": 3.9609325541700713e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.09755445457994938
         },
         {
           "row": 25,
@@ -11478,12 +11514,12 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.64516836218536,
-          "terminal_residual": 2.503780791263389e-09,
+          "solve_wall_s": 0.5228942390531301,
+          "terminal_residual": 2.5037807912633883e-09,
           "active_set_trips": 2,
           "newton_step_count": 10,
           "termination": "converged",
-          "reduced_dimension": 674,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
@@ -11499,16 +11535,16 @@
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            17.299966565333307,
-            0.04940534755587578
+            0.07719435170292854,
+            0.048338696360588074
           ],
-          "first_trip_wall_s": 17.299966565333307,
-          "median_warm_trip_wall_s": 0.04940534755587578,
-          "warm_wall_s": 0.04940534755587578,
+          "first_trip_wall_s": 0.07719435170292854,
+          "median_warm_trip_wall_s": 0.048338696360588074,
+          "warm_wall_s": 0.048338696360588074,
           "achieved_centroid_m": 0.01685411940247678,
           "achieved_against_target_m": -8.466533193279835e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.09881069511175156
+          "program_compiled": false,
+          "steady_wall_s": 0.09667739272117615
         },
         {
           "row": 26,
@@ -11622,38 +11658,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.81982731912285,
-          "terminal_residual": 1.1350116300775314e-09,
+          "solve_wall_s": 0.5712206708267331,
+          "terminal_residual": 1.1350116300775317e-09,
           "active_set_trips": 3,
           "newton_step_count": 7,
           "termination": "converged",
-          "reduced_dimension": 673,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.009477761574089527,
-          "row_error_m": 4.491456021341045e-09,
+          "row_error_m": 4.491456002259087e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0035454316374555457,
-          "compensating_current_a": 5910.7352049288875,
-          "compensating_current_norm_a": 5910.7352049288875,
+          "normalised_unknown": 0.0035454316374555427,
+          "compensating_current_a": 5910.735204928881,
+          "compensating_current_norm_a": 5910.735204928881,
           "direction_authority_row_scales_per_ampere": [
-            5.998292115165395e-07
+            5.998292115165396e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            17.651132088154554,
-            0.0503525547683239,
-            0.048927124589681625
+            0.07258062064647675,
+            0.049255246296525,
+            0.04847796447575092
           ],
-          "first_trip_wall_s": 17.651132088154554,
-          "median_warm_trip_wall_s": 0.04963983967900276,
-          "warm_wall_s": 0.09927967935800552,
-          "achieved_centroid_m": 0.009477766065545548,
-          "achieved_against_target_m": 4.491456021341045e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.14891951903700829
+          "first_trip_wall_s": 0.07258062064647675,
+          "median_warm_trip_wall_s": 0.04886660538613796,
+          "warm_wall_s": 0.09773321077227592,
+          "achieved_centroid_m": 0.00947776606554553,
+          "achieved_against_target_m": 4.491456002259087e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.1465998161584139
         },
         {
           "row": 27,
@@ -11767,38 +11803,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.769534497521818,
-          "terminal_residual": 9.302573568409778e-10,
+          "solve_wall_s": 0.5681699253618717,
+          "terminal_residual": 9.302573568409777e-10,
           "active_set_trips": 3,
           "newton_step_count": 10,
           "termination": "converged",
-          "reduced_dimension": 671,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.007255367003381252,
-          "row_error_m": 3.548921764101598e-10,
+          "row_error_m": 3.548921738080746e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.002307979368312343,
-          "compensating_current_a": 3766.46340926858,
-          "compensating_current_norm_a": 3766.46340926858,
+          "normalised_unknown": 0.002307979368312341,
+          "compensating_current_a": 3766.463409268578,
+          "compensating_current_norm_a": 3766.463409268578,
           "direction_authority_row_scales_per_ampere": [
-            6.127709518252125e-07
+            6.127709518252124e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            17.07462728023529,
-            0.04981266148388386,
-            0.049364494159817696
+            0.0750599866732955,
+            0.048159848898649216,
+            0.048507846891880035
           ],
-          "first_trip_wall_s": 17.07462728023529,
-          "median_warm_trip_wall_s": 0.04958857782185078,
-          "warm_wall_s": 0.09917715564370155,
-          "achieved_centroid_m": 0.007255367358273429,
-          "achieved_against_target_m": 3.548921764101598e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.14876573346555233
+          "first_trip_wall_s": 0.0750599866732955,
+          "median_warm_trip_wall_s": 0.048333847895264626,
+          "warm_wall_s": 0.09666769579052925,
+          "achieved_centroid_m": 0.007255367358273426,
+          "achieved_against_target_m": 3.548921738080746e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.14500154368579388
         },
         {
           "row": 28,
@@ -11912,37 +11948,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.180649494752288,
-          "terminal_residual": 3.952684151132575e-09,
+          "solve_wall_s": 0.5189132252708077,
+          "terminal_residual": 3.9526842832167256e-09,
           "active_set_trips": 2,
           "newton_step_count": 6,
           "termination": "converged",
-          "reduced_dimension": 672,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.011385717429220676,
-          "row_error_m": 1.3383264340499634e-09,
+          "row_error_m": 1.3383264392541339e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0025308777976473804,
-          "compensating_current_a": 4176.3283600852765,
-          "compensating_current_norm_a": 4176.3283600852765,
+          "normalised_unknown": 0.0025308777976473787,
+          "compensating_current_a": 4176.328360085274,
+          "compensating_current_norm_a": 4176.328360085274,
           "direction_authority_row_scales_per_ampere": [
             6.060054620790647e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            17.919710978865623,
-            0.04919200483709574
+            0.06631767563521862,
+            0.04930071346461773
           ],
-          "first_trip_wall_s": 17.919710978865623,
-          "median_warm_trip_wall_s": 0.04919200483709574,
-          "warm_wall_s": 0.04919200483709574,
-          "achieved_centroid_m": 0.01138571876754711,
-          "achieved_against_target_m": 1.3383264340499634e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.09838400967419147
+          "first_trip_wall_s": 0.06631767563521862,
+          "median_warm_trip_wall_s": 0.04930071346461773,
+          "warm_wall_s": 0.04930071346461773,
+          "achieved_centroid_m": 0.011385718767547116,
+          "achieved_against_target_m": 1.3383264392541339e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.09860142692923546
         },
         {
           "row": 29,
@@ -12056,37 +12092,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.70064254105091,
-          "terminal_residual": 3.594117418329456e-09,
+          "solve_wall_s": 0.5078320940956473,
+          "terminal_residual": 3.5941175483936595e-09,
           "active_set_trips": 2,
           "newton_step_count": 7,
           "termination": "converged",
-          "reduced_dimension": 671,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.008525421842932701,
-          "row_error_m": 4.953321676437472e-10,
+          "row_error_m": 4.953321555006829e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.002326274807297364,
-          "compensating_current_a": 4067.8524611293774,
-          "compensating_current_norm_a": 4067.8524611293774,
+          "normalised_unknown": 0.0023262748072973623,
+          "compensating_current_a": 4067.852461129374,
+          "compensating_current_norm_a": 4067.852461129374,
           "direction_authority_row_scales_per_ampere": [
             5.718680383632963e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            15.893881702795625,
-            0.05069610010832548
+            0.0646465253084898,
+            0.04868883267045021
           ],
-          "first_trip_wall_s": 15.893881702795625,
-          "median_warm_trip_wall_s": 0.05069610010832548,
-          "warm_wall_s": 0.05069610010832548,
-          "achieved_centroid_m": 0.008525422338264869,
-          "achieved_against_target_m": 4.953321676437472e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.10139220021665096
+          "first_trip_wall_s": 0.0646465253084898,
+          "median_warm_trip_wall_s": 0.04868883267045021,
+          "warm_wall_s": 0.04868883267045021,
+          "achieved_centroid_m": 0.008525422338264857,
+          "achieved_against_target_m": 4.953321555006829e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.09737766534090042
         },
         {
           "row": 30,
@@ -12200,37 +12236,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.85764303524047,
-          "terminal_residual": 8.289320287219208e-10,
+          "solve_wall_s": 0.5172710353508592,
+          "terminal_residual": 8.289317847383413e-10,
           "active_set_trips": 2,
           "newton_step_count": 6,
           "termination": "converged",
-          "reduced_dimension": 670,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006539343390613794,
-          "row_error_m": 1.4084835745636903e-09,
+          "row_error_m": 1.4084835806352225e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0018324042103168335,
-          "compensating_current_a": 2888.3478061476308,
-          "compensating_current_norm_a": 2888.3478061476308,
+          "normalised_unknown": 0.0018324042103168364,
+          "compensating_current_a": 2888.3478061476344,
+          "compensating_current_norm_a": 2888.3478061476344,
           "direction_authority_row_scales_per_ampere": [
-            6.344125892375909e-07
+            6.34412589237591e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            18.49316606950015,
-            0.04942999221384525
+            0.06927624344825745,
+            0.049000101163983345
           ],
-          "first_trip_wall_s": 18.49316606950015,
-          "median_warm_trip_wall_s": 0.04942999221384525,
-          "warm_wall_s": 0.04942999221384525,
-          "achieved_centroid_m": 0.006539344799097369,
-          "achieved_against_target_m": 1.4084835745636903e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.0988599844276905
+          "first_trip_wall_s": 0.06927624344825745,
+          "median_warm_trip_wall_s": 0.049000101163983345,
+          "warm_wall_s": 0.049000101163983345,
+          "achieved_centroid_m": 0.006539344799097375,
+          "achieved_against_target_m": 1.4084835806352225e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.09800020232796669
         },
         {
           "row": 31,
@@ -12344,36 +12380,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.712668805383146,
-          "terminal_residual": 4.902072636462804e-09,
+          "solve_wall_s": 0.45546578615903854,
+          "terminal_residual": 4.902072770616838e-09,
           "active_set_trips": 1,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 669,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.007990959100425243,
-          "row_error_m": 3.9522582775952664e-10,
+          "row_error_m": 3.9522583990259097e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.001756398561531651,
-          "compensating_current_a": 2470.9786664265575,
-          "compensating_current_norm_a": 2470.9786664265575,
+          "normalised_unknown": 0.0017563985615316514,
+          "compensating_current_a": 2470.978666426558,
+          "compensating_current_norm_a": 2470.978666426558,
           "direction_authority_row_scales_per_ampere": [
             7.108108966686033e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            17.515241289511323
+            0.056925143115222454
           ],
-          "first_trip_wall_s": 17.515241289511323,
+          "first_trip_wall_s": 0.056925143115222454,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.007990959495651071,
-          "achieved_against_target_m": 3.9522582775952664e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.007990959495651083,
+          "achieved_against_target_m": 3.9522583990259097e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 32,
@@ -12487,37 +12523,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.73021751549095,
-          "terminal_residual": 2.1665240657876086e-09,
+          "solve_wall_s": 0.49705252423882484,
+          "terminal_residual": 2.166524186934136e-09,
           "active_set_trips": 2,
           "newton_step_count": 4,
           "termination": "converged",
-          "reduced_dimension": 669,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006703777238726616,
-          "row_error_m": 1.6372378366241724e-09,
+          "row_error_m": 1.6372378227463846e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0015823569021373475,
-          "compensating_current_a": 2230.6023882464397,
-          "compensating_current_norm_a": 2230.6023882464397,
+          "normalised_unknown": 0.0015823569021373432,
+          "compensating_current_a": 2230.602388246429,
+          "compensating_current_norm_a": 2230.602388246429,
           "direction_authority_row_scales_per_ampere": [
-            7.093854603918441e-07
+            7.093854603918454e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            15.944268234074116,
-            0.05046924576163292
+            0.06135729607194662,
+            0.04920232389122248
           ],
-          "first_trip_wall_s": 15.944268234074116,
-          "median_warm_trip_wall_s": 0.05046924576163292,
-          "warm_wall_s": 0.05046924576163292,
-          "achieved_centroid_m": 0.0067037788759644525,
-          "achieved_against_target_m": 1.6372378366241724e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.10093849152326584
+          "first_trip_wall_s": 0.06135729607194662,
+          "median_warm_trip_wall_s": 0.04920232389122248,
+          "warm_wall_s": 0.04920232389122248,
+          "achieved_centroid_m": 0.006703778875964439,
+          "achieved_against_target_m": 1.6372378227463846e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.09840464778244495
         },
         {
           "row": 33,
@@ -12631,37 +12667,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.50125388428569,
-          "terminal_residual": 1.9685310158826783e-09,
+          "solve_wall_s": 0.5201128181070089,
+          "terminal_residual": 1.9685310091364356e-09,
           "active_set_trips": 2,
           "newton_step_count": 9,
           "termination": "converged",
-          "reduced_dimension": 649,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006124571897089481,
-          "row_error_m": -1.7793719969683153e-10,
+          "row_error_m": -1.7793721097253412e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0013371047999740158,
-          "compensating_current_a": 1632.0983231529615,
-          "compensating_current_norm_a": 1632.0983231529615,
+          "normalised_unknown": 0.0013371047999740152,
+          "compensating_current_a": 1632.0983231529606,
+          "compensating_current_norm_a": 1632.0983231529606,
           "direction_authority_row_scales_per_ampere": [
             8.192550540649636e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            18.1155030913651,
-            0.050553249195218086
+            0.07577309384942055,
+            0.04787297360599041
           ],
-          "first_trip_wall_s": 18.1155030913651,
-          "median_warm_trip_wall_s": 0.050553249195218086,
-          "warm_wall_s": 0.050553249195218086,
-          "achieved_centroid_m": 0.006124571719152282,
-          "achieved_against_target_m": -1.7793719969683153e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.10110649839043617
+          "first_trip_wall_s": 0.07577309384942055,
+          "median_warm_trip_wall_s": 0.04787297360599041,
+          "warm_wall_s": 0.04787297360599041,
+          "achieved_centroid_m": 0.00612457171915227,
+          "achieved_against_target_m": -1.7793721097253412e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.09574594721198082
         },
         {
           "row": 34,
@@ -12775,36 +12811,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.37190122436732,
-          "terminal_residual": 4.701646876292349e-09,
+          "solve_wall_s": 0.4619307117536664,
+          "terminal_residual": 4.701646766902337e-09,
           "active_set_trips": 1,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 648,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.007625063881278038,
-          "row_error_m": -5.234913448906586e-10,
+          "row_error_m": -5.23491337084403e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.001357831716501335,
-          "compensating_current_a": 1680.6497322793207,
-          "compensating_current_norm_a": 1680.6497322793207,
+          "normalised_unknown": 0.0013578317165013347,
+          "compensating_current_a": 1680.6497322793205,
+          "compensating_current_norm_a": 1680.6497322793205,
           "direction_authority_row_scales_per_ampere": [
             8.079207049643977e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            18.343560888431966
+            0.06489784363657236
           ],
-          "first_trip_wall_s": 18.343560888431966,
+          "first_trip_wall_s": 0.06489784363657236,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.007625063357786693,
-          "achieved_against_target_m": -5.234913448906586e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.007625063357786701,
+          "achieved_against_target_m": -5.23491337084403e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 35,
@@ -12918,38 +12954,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.62518982589245,
+          "solve_wall_s": 0.5602584686130285,
           "terminal_residual": 4.996280935091322e-10,
           "active_set_trips": 3,
           "newton_step_count": 5,
           "termination": "converged",
-          "reduced_dimension": 648,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.005602877587080002,
-          "row_error_m": 2.3708904371005923e-10,
+          "row_error_m": 2.370890653941027e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0012882101411653924,
-          "compensating_current_a": 1491.4239054465586,
-          "compensating_current_norm_a": 1491.4239054465586,
+          "normalised_unknown": 0.0012882101411653948,
+          "compensating_current_a": 1491.4239054465604,
+          "compensating_current_norm_a": 1491.4239054465604,
           "direction_authority_row_scales_per_ampere": [
-            8.637451340701688e-07
+            8.637451340701693e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            15.766641679219902,
-            0.05022072698920965,
-            0.04963948670774698
+            0.06362275220453739,
+            0.04965278506278992,
+            0.0501320781186223
           ],
-          "first_trip_wall_s": 15.766641679219902,
-          "median_warm_trip_wall_s": 0.04993010684847832,
-          "warm_wall_s": 0.09986021369695663,
-          "achieved_centroid_m": 0.0056028778241690455,
-          "achieved_against_target_m": 2.3708904371005923e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.14979032054543495
+          "first_trip_wall_s": 0.06362275220453739,
+          "median_warm_trip_wall_s": 0.04989243159070611,
+          "warm_wall_s": 0.09978486318141222,
+          "achieved_centroid_m": 0.005602877824169067,
+          "achieved_against_target_m": 2.370890653941027e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.14967729477211833
         },
         {
           "row": 36,
@@ -13063,37 +13099,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.976487806998193,
-          "terminal_residual": 2.8875197231087205e-09,
+          "solve_wall_s": 0.5041650328785181,
+          "terminal_residual": 2.887519709614309e-09,
           "active_set_trips": 2,
           "newton_step_count": 3,
           "termination": "converged",
-          "reduced_dimension": 648,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.004951020702719688,
-          "row_error_m": 4.734646306958634e-09,
+          "row_error_m": 4.734646281805144e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0011744240872605914,
-          "compensating_current_a": 1425.7496252045607,
-          "compensating_current_norm_a": 1425.7496252045607,
+          "normalised_unknown": 0.0011744240872605882,
+          "compensating_current_a": 1425.7496252045592,
+          "compensating_current_norm_a": 1425.7496252045592,
           "direction_authority_row_scales_per_ampere": [
-            8.237239319576112e-07
+            8.2372393195761e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            16.028561829589307,
-            0.050653000362217426
+            0.056781346909701824,
+            0.049594057723879814
           ],
-          "first_trip_wall_s": 16.028561829589307,
-          "median_warm_trip_wall_s": 0.050653000362217426,
-          "warm_wall_s": 0.050653000362217426,
-          "achieved_centroid_m": 0.004951025437365995,
-          "achieved_against_target_m": 4.734646306958634e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.10130600072443485
+          "first_trip_wall_s": 0.056781346909701824,
+          "median_warm_trip_wall_s": 0.049594057723879814,
+          "warm_wall_s": 0.049594057723879814,
+          "achieved_centroid_m": 0.00495102543736597,
+          "achieved_against_target_m": 4.734646281805144e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.09918811544775963
         },
         {
           "row": 37,
@@ -13207,38 +13243,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.268036106601357,
-          "terminal_residual": 2.5887976727523543e-09,
+          "solve_wall_s": 0.589813937433064,
+          "terminal_residual": 2.5887974715600383e-09,
           "active_set_trips": 3,
           "newton_step_count": 14,
           "termination": "converged",
-          "reduced_dimension": 647,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006817945744842291,
-          "row_error_m": 1.825705718550008e-09,
+          "row_error_m": 1.8257057515097541e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0011735838340580825,
-          "compensating_current_a": 1386.5400309487572,
-          "compensating_current_norm_a": 1386.5400309487572,
+          "normalised_unknown": 0.001173583834058085,
+          "compensating_current_a": 1386.5400309487613,
+          "compensating_current_norm_a": 1386.5400309487613,
           "direction_authority_row_scales_per_ampere": [
-            8.464117932859416e-07
+            8.464117932859408e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            17.858120596036315,
-            0.050241509452462196,
-            0.04770981799811125
+            0.09708842542022467,
+            0.048979222774505615,
+            0.04879248887300491
           ],
-          "first_trip_wall_s": 17.858120596036315,
-          "median_warm_trip_wall_s": 0.04897566372528672,
-          "warm_wall_s": 0.09795132745057344,
-          "achieved_centroid_m": 0.006817947570548009,
-          "achieved_against_target_m": 1.825705718550008e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.14692699117586017
+          "first_trip_wall_s": 0.09708842542022467,
+          "median_warm_trip_wall_s": 0.048885855823755264,
+          "warm_wall_s": 0.09777171164751053,
+          "achieved_centroid_m": 0.006817947570548042,
+          "achieved_against_target_m": 1.8257057515097541e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.1466575674712658
         },
         {
           "row": 38,
@@ -13352,38 +13388,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 20.42909234855324,
-          "terminal_residual": 2.2764167418333354e-10,
+          "solve_wall_s": 0.6082142097875476,
+          "terminal_residual": 2.2764157918033433e-10,
           "active_set_trips": 3,
           "newton_step_count": 17,
           "termination": "converged",
-          "reduced_dimension": 643,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006297705229371786,
-          "row_error_m": 1.186837581337863e-10,
+          "row_error_m": 1.1868370522472027e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0014343752840836337,
-          "compensating_current_a": 1709.1918274990248,
-          "compensating_current_norm_a": 1709.1918274990248,
+          "normalised_unknown": 0.001434375284083629,
+          "compensating_current_a": 1709.1918274990144,
+          "compensating_current_norm_a": 1709.1918274990144,
           "direction_authority_row_scales_per_ampere": [
-            8.392125804758168e-07
+            8.39212580475819e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            19.260321249254048,
-            0.0512267779558897,
-            0.050141142681241035
+            0.11606153566390276,
+            0.04887481685727835,
+            0.048523315228521824
           ],
-          "first_trip_wall_s": 19.260321249254048,
-          "median_warm_trip_wall_s": 0.05068396031856537,
-          "warm_wall_s": 0.10136792063713074,
-          "achieved_centroid_m": 0.006297705348055544,
-          "achieved_against_target_m": 1.186837581337863e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.1520518809556961
+          "first_trip_wall_s": 0.11606153566390276,
+          "median_warm_trip_wall_s": 0.048699066042900085,
+          "warm_wall_s": 0.09739813208580017,
+          "achieved_centroid_m": 0.006297705348055491,
+          "achieved_against_target_m": 1.1868370522472027e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.14609719812870026
         },
         {
           "row": 39,
@@ -13497,38 +13533,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.772693764418364,
-          "terminal_residual": 4.1516587816008845e-09,
+          "solve_wall_s": 0.5767087787389755,
+          "terminal_residual": 4.1516588766874424e-09,
           "active_set_trips": 3,
           "newton_step_count": 11,
           "termination": "converged",
-          "reduced_dimension": 641,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.0053788600489497185,
-          "row_error_m": 2.6190639752440847e-09,
+          "row_error_m": 2.6190639535600413e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0012272244720264193,
-          "compensating_current_a": 1297.9932945194605,
-          "compensating_current_norm_a": 1297.9932945194605,
+          "normalised_unknown": 0.0012272244720264252,
+          "compensating_current_a": 1297.9932945194648,
+          "compensating_current_norm_a": 1297.9932945194648,
           "direction_authority_row_scales_per_ampere": [
-            9.454782834458007e-07
+            9.454782834458022e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            17.54445901233703,
-            0.04990666452795267,
-            0.05011285841464996
+            0.08486234489828348,
+            0.04891966935247183,
+            0.048832766711711884
           ],
-          "first_trip_wall_s": 17.54445901233703,
-          "median_warm_trip_wall_s": 0.05000976147130132,
-          "warm_wall_s": 0.10001952294260263,
-          "achieved_centroid_m": 0.005378862668013694,
-          "achieved_against_target_m": 2.6190639752440847e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.15002928441390395
+          "first_trip_wall_s": 0.08486234489828348,
+          "median_warm_trip_wall_s": 0.048876218032091856,
+          "warm_wall_s": 0.09775243606418371,
+          "achieved_centroid_m": 0.005378862668013672,
+          "achieved_against_target_m": 2.6190639535600413e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.14662865409627557
         },
         {
           "row": 40,
@@ -13642,37 +13678,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 16.565934107638896,
-          "terminal_residual": 3.26829946176615e-14,
+          "solve_wall_s": 0.5785081833600998,
+          "terminal_residual": 3.2777845762903466e-14,
           "active_set_trips": 2,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 641,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.005291730165481567,
-          "row_error_m": -4.957839694341715e-15,
+          "row_error_m": -4.954370247389761e-15,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.001083456100340003,
-          "compensating_current_a": 1142.4428483332565,
-          "compensating_current_norm_a": 1142.4428483332565,
+          "normalised_unknown": 0.0010834561003400024,
+          "compensating_current_a": 1142.4428483332556,
+          "compensating_current_norm_a": 1142.4428483332556,
           "direction_authority_row_scales_per_ampere": [
-            9.483678784638452e-07
+            9.483678784638456e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            15.735277035273612,
-            0.05341987404972315
+            0.12803250178694725,
+            0.052505054511129856
           ],
-          "first_trip_wall_s": 15.735277035273612,
-          "median_warm_trip_wall_s": 0.05341987404972315,
-          "warm_wall_s": 0.05341987404972315,
-          "achieved_centroid_m": 0.0052917301654766095,
-          "achieved_against_target_m": -4.957839694341715e-15,
-          "program_compiled": true,
-          "steady_wall_s": 0.1068397480994463
+          "first_trip_wall_s": 0.12803250178694725,
+          "median_warm_trip_wall_s": 0.052505054511129856,
+          "warm_wall_s": 0.052505054511129856,
+          "achieved_centroid_m": 0.005291730165476613,
+          "achieved_against_target_m": -4.954370247389761e-15,
+          "program_compiled": false,
+          "steady_wall_s": 0.10501010902225971
         },
         {
           "row": 41,
@@ -13786,36 +13822,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 22.39192853681743,
+          "solve_wall_s": 0.4771161023527384,
           "terminal_residual": 4.0074373743676725e-09,
           "active_set_trips": 1,
           "newton_step_count": 11,
           "termination": "converged",
-          "reduced_dimension": 662,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.004934804514050484,
-          "row_error_m": -3.7275243568862804e-10,
+          "row_error_m": -3.7275242961709587e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0008972988630546176,
-          "compensating_current_a": 943.4480541309653,
-          "compensating_current_norm_a": 943.4480541309653,
+          "normalised_unknown": 0.0008972988630546188,
+          "compensating_current_a": 943.4480541309672,
+          "compensating_current_norm_a": 943.4480541309672,
           "direction_authority_row_scales_per_ampere": [
-            9.51084544745967e-07
+            9.510845447459664e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            20.703896392136812
+            0.08317037858068943
           ],
-          "first_trip_wall_s": 20.703896392136812,
+          "first_trip_wall_s": 0.08317037858068943,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.004934804141298048,
-          "achieved_against_target_m": -3.7275243568862804e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.004934804141298054,
+          "achieved_against_target_m": -3.7275242961709587e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 42,
@@ -13929,12 +13965,12 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 17.093053804710507,
-          "terminal_residual": 9.862491013731683e-09,
+          "solve_wall_s": 0.5111756576225162,
+          "terminal_residual": 9.862490917495927e-09,
           "active_set_trips": 1,
           "newton_step_count": 16,
           "termination": "converged",
-          "reduced_dimension": 662,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
@@ -13942,23 +13978,23 @@
           "row_error_m": -9.736069823615412e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0007514831626645362,
-          "compensating_current_a": 747.1739409709204,
-          "compensating_current_norm_a": 747.1739409709204,
+          "normalised_unknown": 0.0007514831626645365,
+          "compensating_current_a": 747.1739409709205,
+          "compensating_current_norm_a": 747.1739409709205,
           "direction_authority_row_scales_per_ampere": [
-            1.0057673607942164e-06
+            1.0057673607942166e-06
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            16.343553291633725
+            0.10541561525315046
           ],
-          "first_trip_wall_s": 16.343553291633725,
+          "first_trip_wall_s": 0.10541561525315046,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
           "achieved_centroid_m": 0.006493715527092538,
           "achieved_against_target_m": -9.736069823615412e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 43,
@@ -14072,37 +14108,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 17.564122758805752,
-          "terminal_residual": 1.0856487751292906e-11,
+          "solve_wall_s": 0.6164266243577003,
+          "terminal_residual": 1.0855774151495321e-11,
           "active_set_trips": 2,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 662,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.006046360358595848,
-          "row_error_m": 2.8351453129626947e-14,
+          "row_error_m": 2.833844270355712e-14,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0007847072747406491,
-          "compensating_current_a": 765.8644447142766,
-          "compensating_current_norm_a": 765.8644447142766,
+          "normalised_unknown": 0.0007847072747406511,
+          "compensating_current_a": 765.8644447142785,
+          "compensating_current_norm_a": 765.8644447142785,
           "direction_authority_row_scales_per_ampere": [
             1.0246033487471823e-06
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            16.4983217054978,
-            0.053207360208034515
+            0.1686986731365323,
+            0.05297032743692398
           ],
-          "first_trip_wall_s": 16.4983217054978,
-          "median_warm_trip_wall_s": 0.053207360208034515,
-          "warm_wall_s": 0.053207360208034515,
-          "achieved_centroid_m": 0.0060463603586241995,
-          "achieved_against_target_m": 2.8351453129626947e-14,
-          "program_compiled": true,
-          "steady_wall_s": 0.10641472041606903
+          "first_trip_wall_s": 0.1686986731365323,
+          "median_warm_trip_wall_s": 0.05297032743692398,
+          "warm_wall_s": 0.05297032743692398,
+          "achieved_centroid_m": 0.0060463603586241865,
+          "achieved_against_target_m": 2.833844270355712e-14,
+          "program_compiled": false,
+          "steady_wall_s": 0.10594065487384796
         },
         {
           "row": 44,
@@ -14216,37 +14252,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 18.88592534698546,
-          "terminal_residual": 2.8734565065365246e-09,
+          "solve_wall_s": 0.5291184736415744,
+          "terminal_residual": 2.8734565065365254e-09,
           "active_set_trips": 2,
           "newton_step_count": 11,
           "termination": "converged",
-          "reduced_dimension": 661,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.005808745510876179,
-          "row_error_m": -2.7627324906964734e-10,
+          "row_error_m": -2.7627322044671e-10,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0006592708795253637,
-          "compensating_current_a": 696.2613935276065,
-          "compensating_current_norm_a": 696.2613935276065,
+          "normalised_unknown": 0.0006592708795253547,
+          "compensating_current_a": 696.2613935275997,
+          "compensating_current_norm_a": 696.2613935275997,
           "direction_authority_row_scales_per_ampere": [
-            9.468726625573328e-07
+            9.468726625573292e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            17.550903440453112,
-            0.050089163705706596
+            0.08091958984732628,
+            0.04812161438167095
           ],
-          "first_trip_wall_s": 17.550903440453112,
-          "median_warm_trip_wall_s": 0.050089163705706596,
-          "warm_wall_s": 0.050089163705706596,
-          "achieved_centroid_m": 0.00580874523460293,
-          "achieved_against_target_m": -2.7627324906964734e-10,
-          "program_compiled": true,
-          "steady_wall_s": 0.10017832741141319
+          "first_trip_wall_s": 0.08091958984732628,
+          "median_warm_trip_wall_s": 0.04812161438167095,
+          "warm_wall_s": 0.04812161438167095,
+          "achieved_centroid_m": 0.005808745234602958,
+          "achieved_against_target_m": -2.7627322044671e-10,
+          "program_compiled": false,
+          "steady_wall_s": 0.0962432287633419
         },
         {
           "row": 45,
@@ -14360,37 +14396,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 20.719156745821238,
-          "terminal_residual": 3.1731939831923367e-09,
+          "solve_wall_s": 0.6302177552133799,
+          "terminal_residual": 3.173193928743298e-09,
           "active_set_trips": 2,
           "newton_step_count": 27,
           "termination": "converged",
-          "reduced_dimension": 632,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.0020264028571546078,
-          "row_error_m": -2.8977801061480513e-12,
+          "row_error_m": -2.8977775040628373e-12,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0006604763468509388,
-          "compensating_current_a": 756.517793562134,
-          "compensating_current_norm_a": 756.517793562134,
+          "normalised_unknown": 0.0006604763468509413,
+          "compensating_current_a": 756.5177935621393,
+          "compensating_current_norm_a": 756.5177935621393,
           "direction_authority_row_scales_per_ampere": [
-            8.730480002869792e-07
+            8.730480002869762e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            19.494264230132103,
-            0.057930611073970795
+            0.16840260941535234,
+            0.05831986293196678
           ],
-          "first_trip_wall_s": 19.494264230132103,
-          "median_warm_trip_wall_s": 0.057930611073970795,
-          "warm_wall_s": 0.057930611073970795,
-          "achieved_centroid_m": -0.002026402860052388,
-          "achieved_against_target_m": -2.8977801061480513e-12,
-          "program_compiled": true,
-          "steady_wall_s": 0.11586122214794159
+          "first_trip_wall_s": 0.16840260941535234,
+          "median_warm_trip_wall_s": 0.05831986293196678,
+          "warm_wall_s": 0.05831986293196678,
+          "achieved_centroid_m": -0.0020264028600523853,
+          "achieved_against_target_m": -2.8977775040628373e-12,
+          "program_compiled": false,
+          "steady_wall_s": 0.11663972586393356
         },
         {
           "row": 46,
@@ -14504,36 +14540,36 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 19.769425574690104,
-          "terminal_residual": 5.659022994315066e-09,
+          "solve_wall_s": 0.5789242023602128,
+          "terminal_residual": 5.659022885323518e-09,
           "active_set_trips": 1,
           "newton_step_count": 24,
           "termination": "converged",
-          "reduced_dimension": 626,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01206303108483553,
-          "row_error_m": -1.8907134764073463e-09,
+          "row_error_m": -1.8907134451823238e-09,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0007512207015896527,
-          "compensating_current_a": 1126.1962410318802,
-          "compensating_current_norm_a": 1126.1962410318802,
+          "normalised_unknown": 0.0007512207015896675,
+          "compensating_current_a": 1126.1962410319065,
+          "compensating_current_norm_a": 1126.1962410319065,
           "direction_authority_row_scales_per_ampere": [
-            6.670424515902707e-07
+            6.670424515902682e-07
           ],
           "trip_count": 1,
           "trip_wall_per_trip_s": [
-            18.72766046412289
+            0.18265308625996113
           ],
-          "first_trip_wall_s": 18.72766046412289,
+          "first_trip_wall_s": 0.18265308625996113,
           "median_warm_trip_wall_s": null,
           "warm_wall_s": null,
-          "achieved_centroid_m": 0.012063029194122053,
-          "achieved_against_target_m": -1.8907134764073463e-09,
-          "program_compiled": true,
-          "steady_wall_s": 0.05027920473366976
+          "achieved_centroid_m": 0.012063029194122084,
+          "achieved_against_target_m": -1.8907134451823238e-09,
+          "program_compiled": false,
+          "steady_wall_s": 0.04899877542629838
         },
         {
           "row": 47,
@@ -14647,38 +14683,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 17.60489756707102,
-          "terminal_residual": 5.47640949482355e-11,
+          "solve_wall_s": 0.676174777559936,
+          "terminal_residual": 5.476278349777062e-11,
           "active_set_trips": 3,
           "newton_step_count": 25,
           "termination": "converged",
-          "reduced_dimension": 626,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": -0.0011310112895444036,
-          "row_error_m": -4.309920476064377e-15,
+          "row_error_m": -4.326400349086157e-15,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.00041238204858840845,
-          "compensating_current_a": 563.0245617768829,
-          "compensating_current_norm_a": 563.0245617768829,
+          "normalised_unknown": 0.0004123820485884455,
+          "compensating_current_a": 563.0245617768538,
+          "compensating_current_norm_a": 563.0245617768538,
           "direction_authority_row_scales_per_ampere": [
-            7.324406013246513e-07
+            7.324406013247549e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            16.613041835837066,
-            0.05086271557956934,
-            0.04762689117342234
+            0.17240471299737692,
+            0.05256532318890095,
+            0.04880945011973381
           ],
-          "first_trip_wall_s": 16.613041835837066,
-          "median_warm_trip_wall_s": 0.04924480337649584,
-          "warm_wall_s": 0.09848960675299168,
-          "achieved_centroid_m": -0.0011310112895487135,
-          "achieved_against_target_m": -4.309920476064377e-15,
-          "program_compiled": true,
-          "steady_wall_s": 0.14773441012948751
+          "first_trip_wall_s": 0.17240471299737692,
+          "median_warm_trip_wall_s": 0.05068738665431738,
+          "warm_wall_s": 0.10137477330863476,
+          "achieved_centroid_m": -0.00113101128954873,
+          "achieved_against_target_m": -4.326400349086157e-15,
+          "program_compiled": false,
+          "steady_wall_s": 0.15206215996295214
         },
         {
           "row": 48,
@@ -14791,7 +14827,7 @@
           "reference_plasma_current_a": 926709.875,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 19.796486898325384,
+          "solve_wall_s": 0.6162970801815391,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -14907,7 +14943,7 @@
           "reference_plasma_current_a": 925220.0,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 19.82571587059647,
+          "solve_wall_s": 0.5584993157535791,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15024,37 +15060,37 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 20.509918235242367,
-          "terminal_residual": 4.3592580650020696e-11,
+          "solve_wall_s": 0.6021338831633329,
+          "terminal_residual": 4.359252589242002e-11,
           "active_set_trips": 2,
           "newton_step_count": 26,
           "termination": "converged",
-          "reduced_dimension": 629,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.025095205754041672,
-          "row_error_m": -2.165025103639806e-12,
+          "row_error_m": -2.1650597981093256e-12,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0009410290710218944,
-          "compensating_current_a": 1143.9331906955965,
-          "compensating_current_norm_a": 1143.9331906955965,
+          "normalised_unknown": 0.0009410290710218925,
+          "compensating_current_a": 1143.9331906955942,
+          "compensating_current_norm_a": 1143.9331906955942,
           "direction_authority_row_scales_per_ampere": [
             8.226259004249004e-07
           ],
           "trip_count": 2,
           "trip_wall_per_trip_s": [
-            19.401452546939254,
-            0.05493645370006561
+            0.14422962255775928,
+            0.05699468031525612
           ],
-          "first_trip_wall_s": 19.401452546939254,
-          "median_warm_trip_wall_s": 0.05493645370006561,
-          "warm_wall_s": 0.05493645370006561,
-          "achieved_centroid_m": 0.025095205751876647,
-          "achieved_against_target_m": -2.165025103639806e-12,
-          "program_compiled": true,
-          "steady_wall_s": 0.10987290740013123
+          "first_trip_wall_s": 0.14422962255775928,
+          "median_warm_trip_wall_s": 0.05699468031525612,
+          "warm_wall_s": 0.05699468031525612,
+          "achieved_centroid_m": 0.025095205751876612,
+          "achieved_against_target_m": -2.1650597981093256e-12,
+          "program_compiled": false,
+          "steady_wall_s": 0.11398936063051224
         },
         {
           "row": 51,
@@ -15168,38 +15204,38 @@
           "converged": true,
           "solved": true,
           "route": "conditioned",
-          "solve_wall_s": 21.304940071888268,
-          "terminal_residual": 9.707136895276266e-15,
+          "solve_wall_s": 0.7091254042461514,
+          "terminal_residual": 1.0368987138136009e-14,
           "active_set_trips": 3,
           "newton_step_count": 30,
           "termination": "converged",
-          "reduced_dimension": 628,
+          "reduced_dimension": 684,
           "off_support_leakage": 0.0,
           "conditioning_flag": true,
           "target_source": "efm/current_centrd_z",
           "target_centre_height_m": 0.01573597639799118,
-          "row_error_m": -2.255140518769849e-16,
+          "row_error_m": -2.2898349882893854e-16,
           "row_qualified": true,
           "compensator_rule": "dominant_authority",
-          "normalised_unknown": 0.0008102440803904319,
-          "compensating_current_a": 1286.9328071120292,
-          "compensating_current_norm_a": 1286.9328071120292,
+          "normalised_unknown": 0.0008102440803904405,
+          "compensating_current_a": 1286.9328071120422,
+          "compensating_current_norm_a": 1286.9328071120422,
           "direction_authority_row_scales_per_ampere": [
-            6.295931504059474e-07
+            6.295931504059477e-07
           ],
           "trip_count": 3,
           "trip_wall_per_trip_s": [
-            20.072380242869258,
-            0.06255680415779352,
-            0.05390896089375019
+            0.19306359719485044,
+            0.06720513850450516,
+            0.051869033835828304
           ],
-          "first_trip_wall_s": 20.072380242869258,
-          "median_warm_trip_wall_s": 0.058232882525771856,
-          "warm_wall_s": 0.11646576505154371,
-          "achieved_centroid_m": 0.015735976397990955,
-          "achieved_against_target_m": -2.255140518769849e-16,
-          "program_compiled": true,
-          "steady_wall_s": 0.17469864757731557
+          "first_trip_wall_s": 0.19306359719485044,
+          "median_warm_trip_wall_s": 0.05953708617016673,
+          "warm_wall_s": 0.11907417234033346,
+          "achieved_centroid_m": 0.01573597639799095,
+          "achieved_against_target_m": -2.2898349882893854e-16,
+          "program_compiled": false,
+          "steady_wall_s": 0.1786112585105002
         },
         {
           "row": 52,
@@ -15312,7 +15348,7 @@
           "reference_plasma_current_a": 931990.625,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 19.70313075557351,
+          "solve_wall_s": 0.5783574897795916,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15428,7 +15464,7 @@
           "reference_plasma_current_a": 933727.75,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 17.79215062223375,
+          "solve_wall_s": 0.5583602245897055,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15544,7 +15580,7 @@
           "reference_plasma_current_a": 927081.4375,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 19.377035330981016,
+          "solve_wall_s": 0.5231073284521699,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15660,7 +15696,7 @@
           "reference_plasma_current_a": 922946.0,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 17.231502127833664,
+          "solve_wall_s": 0.5794991087168455,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15776,7 +15812,7 @@
           "reference_plasma_current_a": 919656.625,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 17.657658793963492,
+          "solve_wall_s": 0.8118437891826034,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15892,7 +15928,7 @@
           "reference_plasma_current_a": 929509.6875,
           "converged": false,
           "solved": false,
-          "solve_wall_s": 17.32695569191128,
+          "solve_wall_s": 0.5654131947085261,
           "failure": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
           "program_compiled": false,
           "steady_wall_s": 0.0
@@ -15906,15 +15942,31 @@
         "solved_fraction": 0.8245614035087719,
         "converged_fraction": 0.8085106382978723,
         "qualified_fraction": 1.0,
-        "total_wall_s": 886.0651576677337,
-        "median_as_built_wall_per_slice_s": 17.32695569191128,
-        "median_warm_wall_per_slice_s": 0.05027920473366976,
-        "median_warm_trip_wall_s_global": 0.05027920473366976,
-        "as_built_slices_per_second": 0.0643293549088796,
-        "warm_slices_per_second": 13.847540378813225,
-        "as_built_slices_per_gpu_hour": 231.58567767196658,
-        "warm_slices_per_gpu_hour": 49851.145363727606,
-        "compiles_inferred": 47
+        "total_wall_s": 53.422573924064636,
+        "median_as_built_wall_per_slice_s": 0.5231073284521699,
+        "median_warm_wall_per_slice_s": 0.04899877542629838,
+        "median_warm_trip_wall_s_global": 0.04899877542629838,
+        "as_built_slices_per_second": 1.0669646895153415,
+        "warm_slices_per_second": 14.0749858706539,
+        "as_built_slices_per_gpu_hour": 3841.0728822552296,
+        "warm_slices_per_gpu_hour": 50669.94913435404,
+        "compiles_inferred": 1,
+        "program_cache_sizes": {
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "jacobian": 1,
+          "flux_scores": 0,
+          "ladder": 0,
+          "leakage": 0,
+          "direction": 1,
+          "step_scores": 1,
+          "grade": 1,
+          "tail": 1,
+          "boundary": 1,
+          "initial_gather": 1
+        },
+        "program_compile_count": 1
       }
     }
   },
@@ -15922,64 +15974,62 @@
     "probe": "jax.vmap of the fused trip-boundary kernel over a batch of states on one program",
     "batches": {
       "8": {
-        "serial_calls_wall_s": 1.38503098487854,
-        "vmap_wall_s": 2.0589278023689985,
-        "serial_per_slice_s": 0.1731288731098175,
-        "vmap_per_slice_s": 0.2573659752961248,
-        "vmap_over_serial": 1.4865572141330512
+        "serial_calls_wall_s": 1.6157077634707093,
+        "vmap_wall_s": 1.1455670644839604,
+        "serial_per_slice_s": 0.20196347043383867,
+        "vmap_per_slice_s": 0.14319588306049505,
+        "vmap_over_serial": 0.7090187287478042
       },
       "16": {
-        "serial_calls_wall_s": 0.6813234984874725,
-        "vmap_wall_s": 1.066836876173814,
-        "serial_per_slice_s": 0.04258271865546703,
-        "vmap_per_slice_s": 0.06667730476086338,
-        "vmap_over_serial": 1.5658301504970475
+        "serial_calls_wall_s": 0.7002733219414949,
+        "vmap_wall_s": 1.2420882719258468,
+        "serial_per_slice_s": 0.043767082621343434,
+        "vmap_per_slice_s": 0.07763051699536543,
+        "vmap_over_serial": 1.7737192507665147
       }
     },
-    "route_refusal_reason": "a full batched entry over distinct-current slices does not exist in the route: the external currents, the reduced coordinates and the constraint target enter the compiled kernels as trace constants, so distinct slices compile distinct programs, and the Newton ladder is a host loop whose backtracking selection is data-dependent; only the fused trip-boundary kernel admits a vmap, and only over states of one program"
+    "route_refusal_reason": "a full batched entry over distinct-current slices does not exist in the route: the reduced program now accepts external fields, prescribed currents and row leaves as traced arguments, but the Newton ladder is a host loop whose backtracking selection is data-dependent; only the fused trip-boundary kernel admits a vmap, and only over states of one program"
   },
   "extrapolation": {
     "free_as_built": {
       "census_slices": 1341435,
-      "hours_on_one_h200": 1754.6646605954027,
-      "hours_on_eight_h200": 219.33308257442533
+      "hours_on_one_h200": 159.47391224190372,
+      "hours_on_eight_h200": 19.934239030237965
     },
     "free_warm": {
       "census_slices": 1341435,
-      "hours_on_one_h200": 30.602022386076506,
-      "hours_on_eight_h200": 3.825252798259563
+      "hours_on_one_h200": 30.94978465686849,
+      "hours_on_eight_h200": 3.8687230821085614
     },
     "conditioned_as_built": {
       "census_slices": 1341435,
-      "hours_on_one_h200": 5792.391884873374,
-      "hours_on_eight_h200": 724.0489856091717
+      "hours_on_one_h200": 349.2344563929222,
+      "hours_on_eight_h200": 43.654307049115275
     },
     "conditioned_warm": {
       "census_slices": 1341435,
-      "hours_on_one_h200": 26.908810022568648,
-      "hours_on_eight_h200": 3.363601252821081
+      "hours_on_one_h200": 26.473975658493643,
+      "hours_on_eight_h200": 3.3092469573117054
     }
   },
   "online_verdict": {
     "decode_requirement": "8 decoded frames per second per process needs a label no slower than that many per process",
-    "free_warm_slices_per_second": 12.176346668606799,
-    "conditioned_warm_slices_per_second": 13.847540378813225,
-    "warm_label_latency_ms_free": 82.12643966340181,
-    "warm_label_latency_ms_conditioned": 72.21499072355137,
+    "free_warm_slices_per_second": 12.03952911028219,
+    "conditioned_warm_slices_per_second": 14.0749858706539,
     "answer": "the warm steady-state rate feeds training online only if decode demand stays below the label rate; the as-built rate with per-slice program compiles cannot, so the corpus is produced once ahead of training and written to file per shot"
   },
   "verdict": {
     "slices_measured": 57,
     "free": {
-      "converged_fraction": 0.875,
+      "converged_fraction": 0.8771929824561403,
       "qualified_fraction": null,
-      "as_built_slices_per_gpu_hour": 764.4965047308907,
-      "slices_converged": 49
+      "as_built_slices_per_gpu_hour": 8411.626586078833,
+      "slices_converged": 50
     },
     "conditioned": {
       "converged_fraction": 0.8085106382978723,
       "qualified_fraction": 1.0,
-      "as_built_slices_per_gpu_hour": 231.58567767196658,
+      "as_built_slices_per_gpu_hour": 3841.0728822552296,
       "slices_converged": 38
     }
   }

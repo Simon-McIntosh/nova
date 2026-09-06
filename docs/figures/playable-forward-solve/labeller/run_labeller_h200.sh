@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Submission harness for the forward-labeller throughput receipt.
-# source revision 14c353c4442d64121fbb4e9df5e495f91c75673c
+# source revision 45ac7533ec047419bb45886000c8091871bb89cd
 set -euo pipefail
 ROOT="$(git -C "$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")" rev-parse --show-toplevel)"
 OUT="${1:?missing log path}"

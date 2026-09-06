@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T16:58:55",
+  "updated": "2026-09-06T17:07:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2601,6 +2601,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-13"
+      },
+      {
+        "id": "pfs-batch-l",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "pfs-contract-rev",
@@ -111333,6 +111342,268 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T131105071033-pfs-shape-inverse-review",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-shape-inverse-review",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 10414,
+                "cached_input_tokens": 197875,
+                "input_tokens": 208291,
+                "output_tokens": 2647,
+                "reasoning_output_tokens": 858,
+                "total_tokens": 210938,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse-review.md with PASS or FAIL per item over the worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-inverse-step-shape-control-sol-2 (read-only): (1) nova/equilibrium/shape_inverse.py builds the coil currents as a regularised least squares over the free coils against bounding-box targets and reuses nova/equilibrium/inverse.py's InverseDesign and MoorePenrose machinery rather than re-deriving it, with the reuse or the deviation quoted file:line; (2) the rank-aware pseudo-inverse drops exactly-zero singular values only and the threshold is stated; (3) on MAST only the active circuits are driven and the per-round cap on the per-circuit current change (about ten percent of the seed) is a damping of the Picard step, not a hidden clamp on the answer; (4) the forward solve on the prescribed currents runs the reduced route warm-started from the previous state; (5) for every receipt JSON under docs/figures/playable-forward-solve/shape-inverse/ compute previous, commanded and achieved for each controlled turning point yourself and state whether the commit messages and docs claims match the numbers; (6) test tolerances in the touched tests against the plan's stated tolerance; (7) naming hygiene, no plan labels, no author attribution in source; (8) any uncommitted change in the worktree (git status) named. Every defect quoted with file:line. Read the diffs and the files only. Run everything from the worktree through the shared environment: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; never create a second environment. NEVER call Read on an image file (this lane is text-only and the process dies); verify a PNG through PIL. Commit each coherent step at once with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 1.0,
+          "goal": "Write an independent verdict report on the twelve inverse-step commits 5b1cf97c to ddc23bad in the shape-inverse worktree",
+          "id": "pfs-shape-inverse-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T131105071033-pfs-shape-inverse-review/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pfs-inverse-rev",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T13:11:17Z",
+        "completed_at": "2026-09-06T15:03:09.912Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6585,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6712,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "844b5befff3acc36b1023c5621c3379f6492eae0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only review of the worktree diffs, receipts and tests against eight named items; coordinator cross-checked items 1, 5 and 6 against the CPU consistency table and the receipt JSONs",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-inverse-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T131105071033-pfs-shape-inverse-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "4bd627b7-5f46-4749-9526-1d332aa45976",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "review role: the deliverable is the verdict report at the fenced path; no source change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-shape-inverse-review",
+          "session_id": "4bd627b7-5f46-4749-9526-1d332aa45976",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T15:03:09.912Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-frame-contract-internal-geometry-luna",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1539,
+                "cached_input_tokens": 773061,
+                "input_tokens": 774602,
+                "output_tokens": 5399,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 780001,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "Start from the carried work at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/contract-carried/uncommitted.diff (387 lines on nova/equilibrium/flux_surface_geometry.py from the local-lane attempt: traced coordinates and metrics on the ray tracer): git apply it, read it critically, keep what is sound, commit it as your first step. LOOPS for the decoder: SteeringFrame in nova/equilibrium/steering_frames.py gains flux_surface_psi_norm (11,) = linspace(0, 1, 11), flux_surface_psi (11,) in Wb under COCOS 17, flux_surface_r and flux_surface_z (11, 64) with row 0 the magnetic axis repeated on every ray (no contour exists at the O-point), rows 1 to 10 traced at psi_norm 0.1 to 1.0 on 64 polar rays about the axis (trace on 128 and store every second if convenient), row 10 the LCFS, the angle grid recorded. TORAX PROFILES on TORAX own mesh: faces at rho_norm = linspace(0, 1, 26) for n_rho = 25, rho_norm = sqrt(Phi / (pi B0)) / rho_b with rho_b at the LCFS; place the record on those faces with the rho_tor_norm option of FluxSurfaceGeometry.from_flux_map, record n_rho as an attribute and rho_face_norm (26,) as a variable, publish every TORAX StandardGeometryIntermediates field as a (26,) face array: Phi, psi, Ip_profile, R_in, R_out, F, int_dl_over_Bp, surface averages of 1/R, 1/R^2, |grad psi|, |grad psi|^2, |grad psi|^2/R^2, B^2, 1/B^2, delta_upper, delta_lower, elongation, vpr, plus volume, area, q, the g0 to g3 averages the reader carries, psi_norm on the faces; scalars R_major, a_minor, B_0, magnetic axis z, a diverted flag; the axis face from the reader axis fit, the LCFS face computed where finite and extrapolated from the outermost resolved surfaces for the averages that diverge at an X-point, named in the report and in a dataset attribute. DIVERTOR LEGS: divertor_leg_r and divertor_leg_z (4, 32) plus divertor_leg_finite (4,) bool: in a diverted configuration the separatrix branches leaving each X-point outside the LCFS, clipped at their first crossing of the first-wall polygon (the strike point), resampled by arclength, ordered primary-inboard, primary-outboard, secondary-inboard, secondary-outboard; masked (NaN, flag false) when absent, never imputed; cut with nova.biot.contour.Contour on the raster and clipped with the polygon helper in nova/equilibrium/wall_mask.py, the wall passed into assemble_frame. RASTER: keep the existing raster fields, add an include_raster keyword to session_dataset and write_session (default True) and two dataset attributes, training_inputs (the surface block, legs, landmarks, lcfs, currents, TORAX profiles) and diagnostic_only (psi, psi_norm, domain_label, separatrix, separatrix_vertex_count). Producer is nova own ray tracer in FluxSurfaceGeometry extended to publish its traced coordinates and the metrics it lacks as line integrals over loops it already traces; never a new contourer. Contracts in tests/test_steering_frames.py and tests/test_flux_surface_geometry.py: bitwise session round trip with the new variables on dims (n_surface, n_theta, nt) and (n_face, nt); traced surfaces within one raster cell of nova.biot.contour.Contour cut at the same psi on the Solovev fixture; metrics agreeing with traced_flux_surface_geometry in nova/equilibrium/flux_surface_extraction.py where both define a quantity at a stated tolerance or with the disagreement measured; frames_from_session reconstructs every field; existing tests green. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_steering_frames.py tests/test_flux_surface_geometry.py -m \"not slow\", PYTHONPATH the worktree) with the log captured whole. Commit at every coherent step (ruff path-scoped, conventional subject plus body, never git add -A). Manifest at the path the dispatch names before any wait, its outcome opening with the phrase: continuation of r-20260906T085225254813 on another lane, not rework. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-internal-geometry.md with the variable table (name, dims, units, producer) imas-ambix will read.",
+          "estimated_hours": 5.0,
+          "goal": "Extend the labeller contract (SteeringFrame and its netCDF session store) with the plasma internal geometry per followup f-pfs-021 and the four locked layout decisions, continuing run r-20260906T085225254813 on another lane",
+          "id": "pfs-frame-contract-internal-geometry-luna",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "nova/equilibrium/flux_surface_geometry.py",
+            "tests/test_steering_frames.py",
+            "tests/test_flux_surface_geometry.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-internal-geometry.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-luna-x3",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T10:44:50Z",
+        "completed_at": "2026-09-06T13:22:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9456,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "69cfe613db21cfea9a2fac91cc241df8f757ba74",
+        "commits": [
+          "a5cb87382124be3f5e513fe8d8d1047123edccf3",
+          "d88ed2af95eb597ff6ce2fbdc5de778a367b3f77",
+          "0f0800d9b0f11ba351fc4b5c3a6c73fadcca6b58",
+          "2225a7662aff02654fa48a548c6637427bea401c",
+          "86f936a7a3a776f59f41258a1be0d831627d8519",
+          "3616a49a04be2d5a9028a46dd091f21bdc477de5",
+          "c4b3894d84480c9a7805f436752fc0b4fd5b90aa"
+        ],
+        "changed_lines": {
+          "added": 1179,
+          "removed": 18,
+          "files": 4
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch 1263334 all_debug JAX_PLATFORMS=cpu: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field (1 passed in 2383 s); sbatch 1263313 fast gate tests/test_steering_frames.py tests/test_flux_surface_geometry.py 13 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/frame-contract-fixture-1263334.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07652-2a88-7911-9908-534582e47c41",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 337536,
+            "cached_input_tokens_cumulative": 337536,
+            "input_tokens": 343560,
+            "input_tokens_cumulative": 343560,
+            "output_tokens": 3473,
+            "output_tokens_cumulative": 3473,
+            "reasoning_output_tokens": 968,
+            "reasoning_output_tokens_cumulative": 968
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 4441,
+          "peak_input_tokens": 681096
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-internal-geometry-luna",
+          "session_id": "01a07652-2a88-7911-9908-534582e47c41",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T13:22:26Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -111561,6 +111832,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1876
+    "_version": 1879
   }
 }

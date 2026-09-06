@@ -549,6 +549,23 @@
     that alone runs 38 minutes; all 27 tests green with no abort.</p>
   </section>
 
+  <section id="frame-contract">
+    <h2>The frame contract carries the plasma's internal geometry (a5cb8738 to c4b3894d; main bbccae1d)</h2>
+    <p><strong>Nodes:</strong> <code>pfs-frame-contract-internal-geometry-luna</code> (run <code>r-20260906T104435282392</code>, codex luna at high effort,
+    seven commits over <code>nova/equilibrium/steering_frames.py</code> and <code>nova/equilibrium/flux_surface_geometry.py</code> with their tests) and
+    <code>pfs-contract-fast-gate</code> (local lane, the scoped fast gate on a compute node). Report
+    <code>~/.config/reckon/crew/reports/nova/playable/frame-contract-internal-geometry.md</code>.</p>
+    <p><strong>What the frame now carries.</strong> Eleven nested flux surfaces on <code>psi_norm = linspace(0, 1, 11)</code>, the O-point as row 0
+    (a point repeated along the 64 rays) and the last closed surface as row 10, R and Z loops in a fixed (11, 64) shape with the surface psi in webers;
+    the TORAX metric profiles (Phi, psi, I_p, R_in, R_out, F, the flux-surface averages, the geometric terms and g0 to g3) on TORAX's own face grid,
+    <code>rho_face_norm = linspace(0, 1, 26)</code> for n_rho = 25, so the transport side reads them without interpolation; divertor legs in a fixed (4, 32)
+    shape clipped to the wall with finite flags and fully masked when the equilibrium is limited; and the raster flux marked diagnostic-only through the
+    <code>training_inputs</code> and <code>diagnostic_only</code> attributes so the machine-independent training set excludes it. Surfaces come from the
+    <code>FluxSurfaceGeometry</code> ray tracer; no contourer was added.</p>
+    <p><strong>Gates.</strong> Scoped fast gate 13 passed (job 1263313, 399 s); the decoder-field fixture 1 passed in 2383 s on <code>all_debug</code> (job 1263334)
+    after the row-0 axis assertion was corrected (the first run compared a constant vector with a scalar). Merged on those two gates while the independent
+    local-lane review was still running; that review is folded into this anchor when it lands. The raster psi unit label (f-pfs-024) is unchanged.</p>
+  </section>
 </main>
 </body>
 </html>

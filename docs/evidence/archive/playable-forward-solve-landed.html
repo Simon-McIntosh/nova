@@ -211,6 +211,44 @@
     one H200 the corpus is 9 to 18 GPU-hours, one to two hours across eight; labels are written once to file ahead of training.</p>
   </section>
 
+  <section id="keyframe-loop">
+    <h2>The keyboard-steered session and the shared poloidal renderers (58a8c8a5, 2a7cda11, d2ffa5da)</h2>
+    <p><strong>Node:</strong> <code>pfs-keyframe-loop</code> (§4a), local DeepSeek lane, run <code>r-20260905T174220491082</code> against base
+    <code>73bf3acf</code>, dispatched 19:43, complete 04:27 after two resumes (its process ended while waiting on a 37 GB compile, then the
+    local model server refused a resume with a full queue). Eleven files: <code>apps/playable/</code> (session, shape, production, solovev,
+    machines, main; 971 lines), <code>apps/pulsedesign/poloidal_view.py</code> (121 lines), the pulse-design main importing it, a repaired
+    <code>apps/pulsedesign/config.py</code>, and <code>tests/test_playable_session.py</code> (453 lines).</p>
+    <p><strong>What landed.</strong> <code>PlayableSession</code> holds the current equilibrium, the commanded <code>PlasmaShape</code>, the key map
+    and a <code>KeyframeSolver</code> protocol (previous equilibrium and commanded shape in, next equilibrium with wall and trips out), so the
+    production constrained solve can be swapped for the constrained reduced route without the app changing; <code>step</code> applies one key's
+    signed step to one parameter, re-solves warm and records a receipt row; <code>frame_push</code> reduces the session to the columns the
+    renderers bind (raster flux, separatrix, control points, X-points, compensating current per circuit, receipt). <code>ProductionSolver</code>
+    solves on the Newton–Krylov route with the current-centroid row on the commanded bulk and the compensating direction derived once per
+    machine. The Solov'ev machine is the default, its external conductors carried as a prescribed current field so compensation is real
+    circuit current; the MAST frozen-six carrier is selected by the <code>machine</code> session argument (assembly of the MAST profile from the
+    carrier is left to the launcher). Bokeh has no key events, so a window-level keydown listener installed on document ready writes the key
+    into a channel source and a server-side change callback steps the session and pushes the frame. The pulse-design config had broken on
+    main (its base class was removed upstream) and is repaired in scope.</p>
+    <table>
+      <caption>Gate on a compute node (all_debug, 8 CPUs, 96 GiB), JAX_PLATFORMS=cpu</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">key map covers every named control, each key its exact commanded control-point change, reverse keys, unknown key refused</th><td>passed</td></tr>
+        <tr><th scope="row">pushed columns match every renderer binding in <code>poloidal_view</code></th><td>passed</td></tr>
+        <tr><th scope="row">pulse-design imports its renderers from the shared module; machine argument selects the carrier; Solov'ev machine reports 16 circuits and a 15 by 15 raster</th><td>passed</td></tr>
+        <tr><th scope="row"><code>bokeh serve apps/playable</code> serves the document on the Solov'ev default</th><td>running at 127.0.0.1:45959/playable, GET 200, roots present</td></tr>
+        <tr><th scope="row">fast subset plus the served-document test</th><td>18 passed, 1 deselected, 125.7 s</td></tr>
+        <tr><th scope="row">slow production keyframe on the Solov'ev machine</th><td>not finished: the constrained Newton–Krylov compile measured 40.2 GB peak and exceeded the 50-minute job (sacct MaxRSS 40213108K); marked slow and recorded</td></tr>
+      </tbody>
+    </table>
+    <p><strong>What the read found.</strong> The renderers draw the style the pulse-design app had (grey level set, black wall, red X markers, a
+    Viridis flux image at 0.6 alpha, a blue separatrix), not the style the lead locked; that lands as its own node on this module. The
+    channel sources start with no columns, so the served document logs Bokeh BAD_COLUMN_NAME warnings for every glyph until the first key
+    press; the style node initialises the columns. And the app's solver still runs the Newton–Krylov route: switching the protocol's
+    production implementation to the constrained reduced route with its program handle is what turns the 40 GB compile into a solve the
+    CPU lane finishes in minutes and a keyframe of tens of milliseconds on the H200.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T03:02:28",
+  "updated": "2026-09-06T04:30:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2573,6 +2573,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-view-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "plan-wording",
@@ -106559,6 +106568,209 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T174220491082-pfs-keyframe-loop",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-keyframe-loop",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3322,
+                "cached_input_tokens": 379486,
+                "input_tokens": 382840,
+                "output_tokens": 1765,
+                "reasoning_output_tokens": 96,
+                "total_tokens": 384605,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "tests/test_playable_session.py passes on the CPU lane under JAX_PLATFORMS=cpu in one gate log: with a stub solver each of the ten keys (bulk R and Z, elongation, upper and lower triangularity, X-point R and Z, inner and outer gap, each a signed step of a stated size) produces exactly the commanded control-point change it names, every ColumnDataSource column the session pushes (raster flux, separatrix, control points, compensating currents per circuit, keyframe wall and trips) has the shape its renderer in apps/pulsedesign/poloidal_view.py binds, the receipt row per action carries wall and trips, one keyframe through the production protocol (ForwardProfile.solve with constraint_pairs on the Newton-Krylov route carrying the current-centroid row) on the small Solov'ev fixture from tests/test_reduced_newton.py completes, a captured startup log shows bokeh serve apps/playable serving its document on that Solov'ev machine as the default with the MAST frozen-six carrier selectable by a session argument, and apps/pulsedesign still runs importing its renderers from the shared module",
+          "estimated_hours": null,
+          "goal": "The playable Bokeh app: a session holder over the forward solve with a ten-key control map on the bounding-box parameters, a warm-started re-solve per key press behind a solve protocol, the pulse-design poloidal view pushed per keyframe",
+          "id": "pfs-keyframe-loop",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T174220491082-pfs-keyframe-loop/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "apps/playable",
+            "apps/pulsedesign",
+            "tests/test_playable_session.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-loop-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-05T17:43:53Z",
+        "completed_at": "2026-09-06T02:28:45.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 31484,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 31492,
+        "stalled": true,
+        "time_budget": "90m",
+        "base_sha": "73bf3acf84745eb0ebf2d40d8240b8c10accd0eb",
+        "commits": [
+          "d2ffa5daf2b507ed04da9d47b0582752a8a7861d"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 7,
+          "files": 1
+        },
+        "tests_added": 19,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_playable_session.py -v -k 'not production_keyframe' (compute node, all_debug)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T174220491082-pfs-keyframe-loop/gate_fast_and_serve.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T174220491082-pfs-keyframe-loop/manifest.md",
+        "scope_changed": false,
+        "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 100.0,
+          "rate_limit_type": "rate-limit",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": "exhausted",
+          "surpassed_threshold": true,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": true,
+          "detail": "the run died after 10 rate-limit retries (api_retry 429); the lane is exhausted",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 127513,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 129913,
+              "external_wait": null,
+              "log_age_seconds": 129011,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 129067,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 185.669,
+          "generated_tokens": 0,
+          "generation_seconds": 0.0,
+          "machine_seconds": 185.669,
+          "wall_tokens_per_second": 0.0
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-keyframe-loop",
+          "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T02:28:45.745Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -106703,6 +106915,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1781
+    "_version": 1783
   }
 }

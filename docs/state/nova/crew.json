@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T16:51:37",
+  "updated": "2026-09-06T16:58:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4080,6 +4080,24 @@
       },
       {
         "id": "wt-triage-k2",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-k3",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-k4",
         "harness": "codex",
         "role": "investigate",
         "session_id": null,
@@ -111543,6 +111561,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1874
+    "_version": 1876
   }
 }

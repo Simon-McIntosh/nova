@@ -622,7 +622,25 @@ class BatchedLabeller:
             )
 
         mapped = jax.vmap(one)
-        self._compiled = jax.jit(mapped)
+        device_mesh = jax.sharding.Mesh(
+            np.asarray(jax.devices(), dtype=object), ("batch",)
+        )
+        batch_sharding = jax.sharding.NamedSharding(
+            device_mesh, jax.sharding.PartitionSpec("batch")
+        )
+        self._compiled = jax.jit(
+            mapped,
+            in_shardings=(
+                batch_sharding,
+                batch_sharding,
+                batch_sharding if target is not None else None,
+                batch_sharding if requested is not None else None,
+                batch_sharding,
+                batch_sharding,
+                batch_sharding,
+            ),
+        )
+        self._batch_sharding = batch_sharding
         return self._compiled
 
     def solve(
@@ -706,6 +724,17 @@ class BatchedLabeller:
                     value if zeros_prescribed is not None else None,
                 )
             )(values)
+        batch_sharding = getattr(self, "_batch_sharding", None)
+        if batch_sharding is not None:
+            initial = jax.device_put(initial, batch_sharding)
+            external = jax.device_put(external, batch_sharding)
+            if target is not None:
+                target = jax.device_put(target, batch_sharding)
+            if requested is not None:
+                requested = jax.device_put(requested, batch_sharding)
+            reference = jax.device_put(reference, batch_sharding)
+            active_value = jax.device_put(active_value, batch_sharding)
+            condition_target = jax.device_put(condition_target, batch_sharding)
         output = compiled(
             initial,
             external,

@@ -11,14 +11,16 @@ every later solve so a keyframe chain re-enters one program.  The session also
 carries the camera :class:`~apps.playable.camera.FrameDecoder` loaded once per
 session; ``decode_frame`` runs after the poloidal push so a slow decode delays
 only the picture, and records the decode wall and decoder identity beside each
-frame in ``decoded_frames``.  ``frame_push`` reduces the session to the
-``ColumnDataSource`` channels the shared poloidal renderers bound, so a
-keyframe is pushed by writing those columns verbatim.
+frame in ``decoded_frames``.  One ``SteeringFrame`` is assembled after each
+solve and shared by rendering, decoding and optional recording. ``frame_push``
+only reduces that frame to the ``ColumnDataSource`` channels the shared
+poloidal renderers bind.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from time import perf_counter
 from typing import TYPE_CHECKING, NamedTuple, Protocol, runtime_checkable
 
 import numpy as np
@@ -28,6 +30,7 @@ from apps.playable.shape import PlasmaShape, keymap
 
 if TYPE_CHECKING:
     from nova.equilibrium.forward import ForwardEquilibrium
+    from nova.equilibrium.solve_request import ForwardSolveReceipt
     from nova.equilibrium.steering_frames import SteeringFrame
 
 
@@ -40,6 +43,7 @@ class KeyframeReceipt(NamedTuple):
     wall: float  # seconds inside the solve callable
     trips: int  # active-set trips spent by the solve
     reused: bool  # whether the solve re-entered a carried compiled program
+    frame_assembly_wall: float = 0.0  # seconds spent assembling SteeringFrame
 
 
 class SolveResult(NamedTuple):
@@ -75,6 +79,15 @@ class KeyframeSolver(Protocol):
     ) -> SolveResult: ...
 
 
+@runtime_checkable
+class FrameBuilder(Protocol):
+    """Wrap an equilibrium in the typed receipt ``assemble_frame`` consumes."""
+
+    def __call__(
+        self, equilibrium: ForwardEquilibrium | object, *, wall_seconds: float
+    ) -> ForwardSolveReceipt: ...
+
+
 @dataclass
 class PlayableSession:
     """Hold the current equilibrium, commanded shape and key map.
@@ -105,6 +118,19 @@ class PlayableSession:
     decoded_frames: list[DecodedFrame] = field(default_factory=list)
     #: Whether the record and playback strip is currently recording.
     recording: bool = False
+    #: Adapter for solve routes that return an equilibrium rather than a
+    #: ``ForwardSolveReceipt``.  The session still calls ``assemble_frame``;
+    #: this adapter only supplies its typed receipt input.
+    frame_builder: FrameBuilder | None = None
+    #: The most recently assembled frame.  Rendering and decoding share this
+    #: exact object so neither can re-derive a second view of the solve.
+    frame: SteeringFrame | None = None
+    #: Frames admitted while recording is enabled, ready for ``write_session``.
+    recorded_frames: list[SteeringFrame] = field(default_factory=list)
+    #: Per-keyframe assembly timings and the input branch used, retained as
+    #: measurable session evidence.
+    frame_assembly_walls: list[float] = field(default_factory=list)
+    frame_assembly_routes: list[str] = field(default_factory=list)
 
     @property
     def frame_index(self) -> int:
@@ -112,8 +138,10 @@ class PlayableSession:
         return len(self.receipts)
 
     def current_frame(self) -> SteeringFrame:
-        """Return the current equilibrium as the typed steering frame."""
-        return steering_frame(self)
+        """Return the frame assembled for the current solved keyframe."""
+        if self.frame is None:
+            raise RuntimeError("the session has no solved steering frame")
+        return self.frame
 
     def decode_frame(self) -> DecodedFrame | None:
         """Decode the current frame through the session decoder and record it.
@@ -157,239 +185,244 @@ class PlayableSession:
         result = self.solver(
             self.equilibrium, commanded, action=action, program=self.program
         )
-        self.equilibrium = result.equilibrium
-        self.program = result.program
-        self.shape = commanded
+        from nova.equilibrium.solve_request import ForwardSolveReceipt
+        from nova.equilibrium.steering_frames import SteeringAction, assemble_frame
+
+        if isinstance(result.equilibrium, ForwardSolveReceipt):
+            solve_receipt = result.equilibrium
+            equilibrium = solve_receipt.terminal_state
+            assembly_route = "receipt"
+        else:
+            equilibrium = result.equilibrium
+            if self.frame_builder is None:
+                solve_receipt = equilibrium_frame_receipt(
+                    equilibrium,
+                    wall_seconds=float(result.wall),
+                    route=getattr(self.solver, "route", None),
+                )
+            else:
+                solve_receipt = self.frame_builder(
+                    equilibrium, wall_seconds=float(result.wall)
+                )
+            if not isinstance(solve_receipt, ForwardSolveReceipt):
+                raise TypeError("a frame builder must return a ForwardSolveReceipt")
+            assembly_route = "frame-builder"
+
         parameter, delta = (None, 0.0) if action is None else action
+        steering_action = SteeringAction(
+            name=parameter or "prime",
+            delta=float(delta),
+            commanded_control_points=np.asarray(
+                commanded.control_points(), dtype=np.float64
+            ).T,
+        )
+        assembly_started = perf_counter()
+        frame = assemble_frame(
+            solve_receipt,
+            action=steering_action,
+            **frame_assembly_inputs(self, solve_receipt),
+        )
+        assembly_wall = perf_counter() - assembly_started
         receipt = KeyframeReceipt(
             key=key if key is not None else "prime",
             parameter=parameter,
             delta=delta,
-            wall=result.wall,
-            trips=result.trips,
+            wall=float(frame.wall_seconds),
+            trips=int(frame.trip_count),
             reused=result.reused,
+            frame_assembly_wall=assembly_wall,
         )
+        self.equilibrium = equilibrium
+        self.program = result.program
+        self.shape = commanded
+        self.frame = frame
         self.receipts.append(receipt)
+        self.frame_assembly_walls.append(assembly_wall)
+        self.frame_assembly_routes.append(assembly_route)
+        if self.recording:
+            self.recorded_frames.append(frame)
         return receipt
+
+    def write_recording(
+        self,
+        *,
+        filename: str,
+        dirname: str,
+        include_raster: bool = True,
+    ):
+        """Persist the frames admitted while recording was enabled."""
+        from nova.equilibrium.steering_frames import write_session
+
+        if not self.recorded_frames:
+            raise ValueError("the session has no recorded steering frames")
+        return write_session(
+            self.recorded_frames,
+            filename=filename,
+            dirname=dirname,
+            include_raster=include_raster,
+        )
 
 
 def frame_push(
-    session: PlayableSession, *, equilibrium: object | None = None
-) -> dict[str, dict[str, np.ndarray]]:
+    session: PlayableSession, *, frame: SteeringFrame | None = None
+) -> dict[str, dict[str, np.ndarray | list]]:
     """Return the keyframe channels reduced to the renderers' bound columns.
 
-    The channel sources mirror :mod:`apps.pulsedesign.poloidal_view`: the
-    raster flux image, the separatrix polyline, the commanded control points,
-    the topology X-points, the compensating currents per circuit and the
-    latest keyframe receipt row.  Every column is shaped exactly as its
-    renderer binds it.
-
-    The view binds the lattice columns only - the raster image, the two
-    polyline projections of the separatrix and the scalar marks - so the push
-    itself is a device-to-host projection that costs milliseconds regardless
-    of how the raster was produced.  ``equilibrium`` defaults to the
-    session's current one; a caller feeding the solve result's on-device
-    raster (the light-receipt path) passes it here and the same columns come
-    out.
+    Every dynamic field except the clipped plasma-cell polygons is reduced
+    from the one :class:`SteeringFrame` shared with the decoder and recorder.
+    The caller adds the plasma polygons from the operator's solved clipped
+    geometry, because those polygons are deliberately not part of the
+    machine-independent frame contract.
     """
-    equilibrium = session.equilibrium if equilibrium is None else equilibrium
-    raster = equilibrium.raster_flux
-    labelled = equilibrium.labelled_flux
+    frame = session.current_frame() if frame is None else frame
+    points = np.asarray(frame.action.commanded_control_points, dtype=float).T
+    x_points = np.column_stack((frame.x_point_r, frame.x_point_z))
+    primary = x_points[:1]
+    primary = primary[np.isfinite(primary).all(axis=1)]
+    secondary = x_points[1:]
+    secondary = secondary[np.isfinite(secondary).all(axis=1)]
+    strikes = np.column_stack((frame.strike_points_r, frame.strike_points_z))
+    strikes = strikes[np.isfinite(strikes).all(axis=1)]
+    secondary = np.concatenate((secondary, strikes), axis=0)
+    axis = np.asarray([[frame.magnetic_axis_r, frame.magnetic_axis_z]], dtype=float)
+    axis = axis[np.isfinite(axis).all(axis=1)]
 
-    radius = np.asarray(raster.radius, dtype=float)
-    height = np.asarray(raster.height, dtype=float)
-    n_radius, n_height = radius.size, height.size
-    psi = np.asarray(raster.psi, dtype=float).reshape(n_radius, n_height).T
-    # Bokeh draws an image with row zero at the top; the raster rows increase
-    # with height, so a flipped array displays the machine upright.
-    psi = psi[::-1, :]
-
-    points = session.shape.control_points()
-
-    x_points = np.stack(
-        (
-            np.asarray(labelled.primary_x_point, dtype=float),
-            np.asarray(labelled.secondary_x_point, dtype=float),
-        )
-    )
-    x_points = x_points[np.isfinite(x_points).all(axis=1)]
-
-    receipt = session.receipts[-1]
+    separatrix_count = int(np.asarray(frame.separatrix_vertex_count))
+    separatrix = np.asarray(frame.separatrix, dtype=float)[:separatrix_count]
+    surfaces = np.stack((frame.flux_surface_r, frame.flux_surface_z), axis=-1)
+    contour_lines = []
+    for loop in np.asarray(surfaces[1:], dtype=float):
+        if not np.isfinite(loop).all():
+            continue
+        if loop.size and not np.allclose(loop[0], loop[-1]):
+            loop = np.vstack((loop, loop[:1]))
+        contour_lines.append(loop)
+    compensation = np.asarray(frame.compensating_current, dtype=float).reshape(-1)
     return {
-        "flux": {"psi": psi},
         "separatrix": {
-            "x": np.asarray(raster.separatrix[:, 0], dtype=float),
-            "z": np.asarray(raster.separatrix[:, 1], dtype=float),
+            "x": separatrix[:, 0],
+            "z": separatrix[:, 1],
         },
         "points": {"x": points[0], "z": points[1]},
-        "x_points": {"x": x_points[:, 0], "z": x_points[:, 1]},
-        "compensation": compensating_currents(equilibrium),
+        "levelset": {
+            "x": [loop[:, 0].tolist() for loop in contour_lines],
+            "z": [loop[:, 1].tolist() for loop in contour_lines],
+        },
+        "o_points": {"x": axis[:, 0], "z": axis[:, 1]},
+        "x_points": {"x": primary[:, 0], "z": primary[:, 1]},
+        "x_points_secondary": {
+            "x": secondary[:, 0],
+            "z": secondary[:, 1],
+        },
+        "compensation": {
+            "circuit": np.arange(compensation.size, dtype=float),
+            "current": compensation,
+        },
         "receipt": {
-            "action": [f"{receipt.key}: {receipt.parameter} {receipt.delta:+.4g}"],
-            "wall": [float(receipt.wall)],
-            "trips": [int(receipt.trips)],
+            "action": [f"{frame.action.name} {frame.action.delta:+.4g}"],
+            "wall": [float(frame.wall_seconds)],
+            "trips": [int(frame.trip_count)],
         },
     }
 
 
-def steering_frame(session: PlayableSession) -> SteeringFrame:
-    """Return the current equilibrium as a typed steering frame for the decode.
-
-    The frame is assembled, never computed: the raster channels come from the
-    current raster flux image, the labelled points from the consumer map, the
-    per-row compensation from the solve's constraint records, and the action,
-    keyframe wall and trip count from the latest receipt row.  Absent topology
-    slots stay absent (NaN coordinates, False finite-mask flags) per the frame
-    schema's no-imputation rule, and a carrier that publishes more fills the
-    corresponding fields.  The finished session record of the frame-schema
-    followup replaces this seam's policy and version fields when it lands.
-    """
-    from nova.equilibrium.solve_request import ForwardSolvePolicy
-    from nova.equilibrium.steering_frames import (
-        SteeringAction,
-        SteeringFrame,
-        policy_digest,
+def equilibrium_frame_receipt(
+    equilibrium: ForwardEquilibrium | object,
+    *,
+    wall_seconds: float,
+    route: str | None = None,
+) -> ForwardSolveReceipt:
+    """Wrap an equilibrium returned by an untyped route in a solve receipt."""
+    from nova.equilibrium.solve_request import (
+        ForwardSolvePolicy,
+        ForwardSolveReceipt,
+        ResolvedForwardSolveDefaults,
     )
 
-    equilibrium = session.equilibrium
-    raster = getattr(equilibrium, "raster_flux", None)
-    labelled = getattr(equilibrium, "labelled_flux", None)
-
-    def channel(name: str, default):
-        return np.asarray(getattr(raster, name, default), dtype=np.float64)
-
-    radius = channel("radius", np.linspace(0.6, 1.42, 12))
-    height = channel("height", np.linspace(-0.42, 0.42, 10))
-    n_radius, n_height = radius.size, height.size
-    psi = channel("psi", np.zeros(n_radius * n_height)).reshape(n_radius, n_height)
-    psi_norm = channel("psi_norm", np.linspace(0.0, 1.0, n_radius * n_height)).reshape(
-        n_radius, n_height
-    )
-    domain = channel("domain_label", np.zeros(n_radius * n_height))
-    shape = np.asarray([n_radius, n_height], dtype=np.int32)
-
-    def slot(value, size: int) -> np.ndarray:
-        if value is None:
-            return np.full(size, np.nan)
-        array = np.asarray(value, dtype=np.float64)
-        if array.size == 0:
-            return np.full(size, np.nan)
-        if array.size < size:
-            array = np.append(array, np.full(size - array.size, np.nan))
-        return array[:size]
-
-    axis = slot(getattr(labelled, "o_point", None), 2)
-    primary = slot(getattr(labelled, "primary_x_point", None), 2)
-    secondary = slot(getattr(labelled, "secondary_x_point", None), 2)
-    raw_strike = getattr(labelled, "strike_points", None)
-    strike = np.full((2, 2), np.nan)
-    if raw_strike is not None and np.asarray(raw_strike).size >= 4:
-        strike = np.asarray(raw_strike, dtype=np.float64).reshape(2, 2)[:2]
-    lcfs = np.asarray(
-        getattr(labelled, "lcfs", np.full((1, 2), np.nan)), dtype=np.float64
-    ).reshape(-1, 2)
-    boundary_count = int(
-        getattr(
-            labelled,
-            "lcfs_vertex_count",
-            np.count_nonzero(np.isfinite(lcfs).all(axis=1)),
-        )
-    )
-
-    def present(point) -> bool:
-        """Return whether one coordinate pair is fully present."""
-        return bool(np.isfinite(np.asarray(point, dtype=float)).all())
-
-    finite_mask = np.asarray(
-        [
-            present(axis),
-            present(primary),
-            present(secondary),
-            present(strike[0]),
-            present(strike[1]),
-            int(boundary_count) > 0,
-        ],
-        dtype=bool,
-    )
-
-    rows = [
-        np.ravel(np.asarray(record.physical_unknown, dtype=np.float64))
-        for record in getattr(equilibrium, "constraints", ())
-        if getattr(record, "physical_unknown", None) is not None
-    ]
-    compensation = np.concatenate(rows) if rows else np.empty((0,), dtype=np.float64)
-
-    receipt = session.receipts[-1] if session.receipts else None
-    action = SteeringAction(
-        name=(None if receipt is None else receipt.parameter) or "prime",
-        delta=0.0 if receipt is None else float(receipt.delta),
-        commanded_control_points=np.asarray(
-            session.shape.control_points(), dtype=np.float64
-        ).T,
-    )
-
-    import nova
-
-    return SteeringFrame(
-        radius=radius,
-        height=height,
-        shape=shape,
-        psi=psi,
-        psi_norm=psi_norm,
-        domain_label=domain.astype(np.int8),
-        separatrix=np.asarray(
-            getattr(raster, "separatrix", np.full((30, 2), np.nan)),
-            dtype=np.float64,
-        ).reshape(-1, 2),
-        separatrix_vertex_count=np.int32(getattr(raster, "separatrix_vertex_count", 0)),
-        magnetic_axis_r=axis[0],
-        magnetic_axis_z=axis[1],
-        x_point_r=np.stack((primary[0], secondary[0])),
-        x_point_z=np.stack((primary[1], secondary[1])),
-        strike_points_r=strike[:, 0],
-        strike_points_z=strike[:, 1],
-        lcfs_r=lcfs[:, 0],
-        lcfs_z=lcfs[:, 1],
-        n_boundary_coords=np.int32(boundary_count),
-        finite_mask=finite_mask,
-        coil_current=np.empty((0,), dtype=np.float64),
-        compensating_current=compensation,
-        action=action,
-        wall_seconds=0.0 if receipt is None else float(receipt.wall),
-        trip_count=0 if receipt is None else int(receipt.trips),
-        carrier_identity=session.machine,
-        nova_version=nova.__version__,
-        policy_digest=policy_digest(ForwardSolvePolicy()),
+    history = equilibrium.fixed_point
+    residual_history = getattr(history, "active_set_residuals", None)
+    if residual_history is None:
+        residual_history = history.trace
+    mask_history = getattr(history, "active_set_mask_differences", None)
+    if mask_history is None:
+        mask_history = history.shadow_mask_changes
+    normalisation = getattr(equilibrium, "normalisation", None)
+    amplitude = getattr(normalisation, "amplitude", None)
+    policy = ForwardSolvePolicy()
+    if route is not None:
+        policy = replace(policy, route=route)
+    return ForwardSolveReceipt(
+        terminal_state=equilibrium,
+        qualified=bool(getattr(getattr(equilibrium, "finite", None), "passed", True)),
+        termination_reason=history.termination_reason,
+        residual_history=residual_history,
+        mask_history=mask_history,
+        globalisation_decisions=(
+            history.inner_iteration_decisions,
+            history.inner_iteration_applied_factors,
+        ),
+        amplitude_history=(
+            np.empty((0,), dtype=float)
+            if amplitude is None
+            else np.atleast_1d(np.asarray(amplitude))
+        ),
+        topology_read=getattr(equilibrium, "topology", None),
+        polish_receipt=None,
+        compilation_cache_hit=False,
+        wall_seconds=float(wall_seconds),
+        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy),
     )
 
 
-def compensating_currents(equilibrium: object) -> dict[str, np.ndarray]:
-    """Return the per-circuit compensating current the constraint rows drove.
+def frame_assembly_inputs(
+    session: PlayableSession, receipt: ForwardSolveReceipt
+) -> dict[str, object]:
+    """Return contextual inputs needed to assemble the session's solved frame."""
+    equilibrium = receipt.terminal_state
+    solver = session.solver
+    machine = getattr(solver, "machine", None)
+    profile = getattr(machine, "profile", None)
+    applied_current = getattr(solver, "prescribed_current", None)
+    if applied_current is None:
+        applied_current = getattr(equilibrium, "coil_current", np.empty((0,)))
 
-    Every registered row contributes its recorded physical unknown spread
-    over its derived circuit direction, so the returned channel is one scalar
-    per prescribed circuit (zero where a frame carried no constraint rows).
-    """
-    records = list(getattr(equilibrium, "constraints", ()) or ())
-    directions = [
-        np.asarray(getattr(record, "compensator_direction", None)) for record in records
-    ]
-    physical = [
-        np.asarray(getattr(record, "physical_unknown", None)) for record in records
-    ]
-    circuit_count = 0
-    for direction in directions:
-        if direction is not None and direction.size:
-            circuit_count = max(circuit_count, direction.shape[0])
-    current = np.zeros(circuit_count)
-    for direction, row_value in zip(directions, physical, strict=False):
-        if (
-            direction is None
-            or row_value is None
-            or not direction.size
-            or not row_value.size
-        ):
-            continue
-        if direction.ndim == 2 and direction.shape[0] == circuit_count:
-            current += direction @ row_value
-    return {"circuit": np.arange(circuit_count, dtype=float), "current": current}
+    psi_norm = np.linspace(0.0, 1.0, 65)
+    internal_geometry = getattr(equilibrium, "internal_geometry", None)
+    if profile is None:
+        p_prime = np.zeros_like(psi_norm)
+        ff_prime = np.zeros_like(psi_norm)
+    else:
+        p_prime = np.asarray(profile.source.core.p_prime(psi_norm), dtype=float)
+        ff_prime = np.asarray(profile.source.core.ff_prime(psi_norm), dtype=float)
+        if internal_geometry is None:
+            from nova.equilibrium.flux_surface_geometry import (
+                FluxSurfaceGeometry,
+                source_field_function,
+            )
+
+            topology = equilibrium.topology
+            axis = np.asarray(topology.axis, dtype=float)
+            internal_geometry = FluxSurfaceGeometry.internal_geometry(
+                profile.lattice,
+                np.asarray(equilibrium.flux),
+                source_field_function(profile.source, float(topology.flux_span)),
+                axis=(float(axis[0]), float(axis[1])),
+                boundary_flux=float(topology.boundary_flux),
+                n_surface=11,
+                n_theta=64,
+                n_rho=25,
+                diverted=bool(getattr(topology, "diverted", False)),
+            )
+
+    return {
+        "carrier_identity": session.machine,
+        "applied_current": np.asarray(applied_current, dtype=float),
+        "p_prime_psi_norm": psi_norm,
+        "p_prime": p_prime,
+        "ff_prime_psi_norm": psi_norm,
+        "ff_prime": ff_prime,
+        "p_prime_source": str(getattr(equilibrium, "p_prime_source", "efm")),
+        "reference_centroid_z": getattr(equilibrium, "reference_centroid_z", None),
+        "internal_geometry": internal_geometry,
+        "wall": session.wall,
+    }

@@ -463,6 +463,33 @@
     compensating direction has no banked real-data gate. All three are recorded as followups on the constraint plan.</p>
   </section>
 
+  <section id="view-nova-contourer">
+    <h2>The view cuts its contours with nova's contourer: the marching squares is gone, and it was fourteen times slower (0395ebad)</h2>
+    <p><strong>Node:</strong> <code>pfs-view-nova-contourer-sol</code>, the first node of the codex-lane evaluation (gpt-5.6-sol at effort high), run
+    <code>r-20260906T094246446330</code> against base <code>1feb7422</code>, 17 minutes from dispatch to manifest in one turn of 64 commands and 15 patches
+    with no retries; its clive predecessor <code>r-20260906T085454448925</code> was lane-killed before any edit. <code>apps/pulsedesign/poloidal_view.py</code>
+    (+43/-118), <code>tests/test_poloidal_view.py</code> (+278). Gate: 16 tests on a compute node (job 1263262, 52 s); a separate measurement job
+    (1263263) for the agreement and timing figures. One first-attempt failure was repaired and its log preserved.</p>
+    <p><strong>What changed</strong> (decision <code>display-contourer</code>). The tracer and chaining functions written for the styled view are deleted.
+    <code>poloidal_channels</code> cuts its interior levels with <code>nova.biot.contour.Contour</code>, the contourpy generator behind the pulse-design app's
+    levelset, on the raster's physical flux at the physical level values, keeping closed loops only and appending the solved separatrix as the outermost
+    line; and it accepts precomputed surfaces of shape (n_surface, n_theta, 2) drawn at a stride, so a frame carrying the contract's nested surfaces is
+    drawn directly with no contouring at all. A test pins that no local tracer remains and that the raster path instantiates Contour; a second regenerates
+    the removed tracer's output from its own source, kept as a reference in the test file, and bounds the separation.</p>
+    <table>
+      <caption>Solov'ev fixture, CPU, 200 repetitions</caption>
+      <thead><tr><th scope="col">Path</th><th scope="col">Contour step per keyframe</th><th scope="col">Against the removed tracer</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">removed marching squares</th><td>3.885 ms</td><td></td></tr>
+        <tr><th scope="row">nova Contour on the raster</th><td>0.282 ms</td><td>13.8 times faster; 6 loops against 6, maximum separation 0.0336 m of a 0.060 m cell</td></tr>
+        <tr><th scope="row">precomputed surfaces drawn verbatim</th><td>0.119 ms</td><td>32.8 times faster</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> The lead's rule was to use the contourer nova already has and change it only if performance dictates; the measurement says
+    the reinvented tracer was the slow one. The picture does not move: every loop sits within six tenths of a cell of where it was. When the contract
+    node lands its nested surfaces, the view draws those and contours nothing.</p>
+  </section>
+
 </main>
 </body>
 </html>

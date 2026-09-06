@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T11:50:10",
+  "updated": "2026-09-06T12:02:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2642,9 +2642,11 @@
         "id": "pfs-sol-x",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07619-7f8b-7691-aade-e994845922bc"
+        },
         "created": "2026-09-06"
       },
       {
@@ -109196,6 +109198,130 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T094246446330-pfs-view-nova-contourer-sol",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-view-nova-contourer-sol",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 16244,
+                "cached_input_tokens": 604439,
+                "input_tokens": 620685,
+                "output_tokens": 3231,
+                "reasoning_output_tokens": 695,
+                "total_tokens": 623916,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "In apps/pulsedesign/poloidal_view.py the functions _trace_level, _chain and _key are deleted. poloidal_channels gains an optional surfaces argument, an array (n_surface, n_theta, 2) of R, Z loops, plus a stride (default 1, every loop drawn); when surfaces are given the levelset channel is those loops closed and no contouring runs; when absent the levelset channel is cut with nova.biot.contour.Contour from nova/biot/contour.py (the contourpy generator behind the pulse-design app LevelSet.contour) built on the raster x2d, z2d, psi grids at the psi values of the levels, closed loops only. Contracts in tests/test_poloidal_view.py: the existing tests stay green; a test asserts that no function named _trace_level, _chain or _key exists in the module and that the contour path instantiates Contour; a test that the Contour lines on the Solovev fixture agree with the previous marching-squares output within one raster cell size (regenerate the old lines from the parent commit in the test setup, or compare to the committed styled-frame channel data); a test that given surfaces are drawn verbatim. Measure the wall of the contour step per keyframe on the fixture for both paths and put the numbers in the report, since the lead allows a change of contourer only if performance dictates. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_poloidal_view.py, PYTHONPATH the worktree) with the log captured whole. Do NOT touch docs/figures/playable-forward-solve/view (held by the camera node) and do not re-render the PNG; verify through channel data. Write the manifest at the path the dispatch names before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/view-nova-contourer.md.",
+          "estimated_hours": 2.0,
+          "goal": "Replace the marching-squares tracer in the poloidal view with nova own contourer and let the view draw precomputed flux surfaces, as followup f-pfs-022 on the plan specifies",
+          "id": "pfs-view-nova-contourer-sol",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094246446330-pfs-view-nova-contourer-sol/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "apps/pulsedesign/poloidal_view.py",
+            "tests/test_poloidal_view.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/view-nova-contourer.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-sol-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T09:42:57Z",
+        "completed_at": "2026-09-06T10:01:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1086,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1086,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1feb74228146d80d5901911b479047cd27b74bf8",
+        "commits": [
+          "0395ebadf3e724c10f7bd3ab8370d649daff12f9"
+        ],
+        "changed_lines": {
+          "added": 321,
+          "removed": 118,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_poloidal_view.py on all_debug (sbatch 1263262, 96G): 16 passed in 52 s; measurement job 1263263: 6 Contour loops against 6 reference loops, maximum separation 0.0336 m of a 0.060 m cell",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094246446330-pfs-view-nova-contourer-sol/poloidal-view-pytest.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094246446330-pfs-view-nova-contourer-sol/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-view-nova-contourer-sol",
+          "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T10:01:03Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -109368,6 +109494,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1820
+    "_version": 1822
   }
 }

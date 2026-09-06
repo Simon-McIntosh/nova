@@ -4,14 +4,17 @@ The frame is the playable Solov'ev machine — the same 15-by-15 free-boundary
 problem ``tests/test_reduced_newton.py`` pins — solved on the CPU lane.  The
 gate pins the styled figure contract: no axis, grid, frame or bounding box;
 the first wall as one dark grey polyline; each coil outline with no fill
-columns; the plasma as light purple cell polygons at one alpha with every
+columns drawn from the machine's own conductor geometry (sixteen fitted
+conductor outlines centred on the fixture conductors, never a decorative
+ring); the plasma as light purple cell polygons at one alpha with every
 separatrix-cut cell drawn as its solved clipped polygon, so no cell polygon
 crosses the separatrix by more than the lattice pitch and each clipped vertex
 lies within that pitch of the separatrix; dark grey unfilled psi contours at a
 fixed level count with the separatrix outermost and no filled flux image; the
 O-point and primary X-point as distinct markers with the secondary X-point and
-strike points lighter; every served channel source initialised with its bound
-columns; and a styled PNG of the frame committed under
+strike points lighter, every topology marker inside the closed first wall;
+every served channel source initialised with its bound columns; and a styled
+PNG of the frame committed under
 ``docs/figures/playable-forward-solve/view/``.
 """
 
@@ -46,7 +49,6 @@ with skip_import("bokeh"):
         channel_sources,
         compensation_figure,
         contour_levels,
-        external_coil_rings,
         keyframe_receipt,
         poloidal_channels,
         poloidal_figure,
@@ -56,23 +58,26 @@ with skip_import("bokeh"):
 @pytest.fixture(scope="module")
 def solved_frame():
     """Solve the playable Solov'ev machine on the CPU lane as the styled frame."""
-    from apps.playable.solovev import build_machine
+    from apps.playable.machines import build_machine
 
-    machine = build_machine()
+    machine = build_machine("solovev")
     equilibrium = machine.profile.solve(machine.seed, route="host")
     return machine, equilibrium
 
 
 @pytest.fixture(scope="module")
 def channels(solved_frame):
-    """Return the styled channels assembled from the solved frame."""
+    """Return the styled channels assembled from the solved frame.
+
+    The coil outlines are the fixture machine's own conductor geometry,
+    carried beside its wall.
+    """
     machine, equilibrium = solved_frame
-    coils = external_coil_rings(machine.wall, machine.circuit_count)
     return poloidal_channels(
         equilibrium,
         machine.profile,
         wall=machine.wall,
-        coils=coils,
+        coils=machine.coils,
         n_contours=N_CONTOURS,
     )
 
@@ -162,6 +167,63 @@ def test_coil_source_outlines_only_with_no_fill_columns(channels):
     assert "fill_color" not in _bound_fields(glyph)
     assert "fill_alpha" not in _bound_fields(glyph)
     assert glyph.fill_alpha == 0
+
+
+def test_decorative_coil_ring_helper_is_removed():
+    """The view no longer places decorative rings on a circle around the wall."""
+    import apps.pulsedesign.poloidal_view as poloidal_view
+
+    assert not hasattr(poloidal_view, "external_coil_rings")
+
+
+def test_coil_channel_carries_the_sixteen_fitted_conductor_outlines(
+    solved_frame, channels
+):
+    """The coil channel is the fixture machine's conductor geometry.
+
+    The Solov'ev machine exposes one outline per fitted conductor, each a
+    small ring centred on its conductor to the stated tolerance, and the same
+    outlines ride on the fixture machine beside its wall.
+    """
+    from apps.playable.solovev import conductor_centres, coil_outlines
+
+    machine, _equilibrium = solved_frame
+    centres = conductor_centres()
+    expected = coil_outlines()
+    assert centres.shape == (16, 2)
+    rows = channels["coil"]
+    assert len(rows["x"]) == len(rows["z"]) == len(centres) == 16
+
+    for row, (x_row, z_row) in enumerate(zip(rows["x"], rows["z"], strict=True)):
+        assert len(x_row) == 1 and len(z_row) == 1
+        ring = np.c_[x_row[0], z_row[0]]
+        # the drawn outline is exactly one fitted conductor's ring
+        np.testing.assert_allclose(ring, expected[row], atol=1.0e-9)
+        # ... and the ring is centred on the fitted conductor
+        np.testing.assert_allclose(ring.mean(axis=0), centres[row], atol=1.0e-9)
+
+    # the fixture machine carries the same outlines beside its wall
+    assert len(machine.coils) == 16
+    for outline, expected_ring in zip(machine.coils, expected, strict=True):
+        np.testing.assert_allclose(outline, expected_ring, atol=1.0e-9)
+
+
+def test_no_topology_marker_lies_outside_the_first_wall(channels):
+    """O-point, X-point and strike markers are drawn only inside the wall."""
+    from nova.equilibrium.wall_mask import inside_polygon
+
+    wall = np.c_[channels["wall"]["x"], channels["wall"]["z"]]
+    for name in ("o_points", "x_points", "x_points_secondary"):
+        xs = np.asarray(channels[name]["x"], dtype=float)
+        zs = np.asarray(channels[name]["z"], dtype=float)
+        assert xs.size == zs.size
+        for x, z in zip(xs, zs, strict=True):
+            inside = inside_polygon(
+                np.asarray([x]), np.asarray([z]), wall[:, 0], wall[:, 1]
+            )
+            assert inside[0], (
+                f"{name} marker ({x:.4f}, {z:.4f}) lies outside the first wall"
+            )
 
 
 def test_plasma_source_is_light_purple_at_one_alpha_per_plasma_cell(
@@ -371,10 +433,11 @@ def test_contour_source_is_dark_grey_unfilled_levels_with_separatrix_outermost(
 def test_o_point_and_primary_x_point_carry_distinct_markers_with_secondary_lighter(
     channels,
 ):
-    # markers read from the frame's labelled points
+    # the axis marker is drawn on the limited fixture; the off-vessel X-point
+    # and strike markers are filtered out, so each channel's rows stay paired
     assert len(channels["o_points"]["x"]) == 1
-    assert len(channels["x_points"]["x"]) == 1
-    assert len(channels["x_points_secondary"]["x"]) >= 1
+    for name in ("o_points", "x_points", "x_points_secondary"):
+        assert len(channels[name]["x"]) == len(channels[name]["z"])
 
     sources = channel_sources()
     for name in ("o_points", "x_points", "x_points_secondary"):

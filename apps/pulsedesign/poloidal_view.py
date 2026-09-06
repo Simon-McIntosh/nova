@@ -25,7 +25,8 @@ the plasma as light purple cells at one alpha with the separatrix-cut cells
 drawn as their solved clipped polygons; dark grey unfilled psi contours with
 the separatrix as the outermost line; and distinct markers on the magnetic
 axis and primary X-point with the secondary X-point and strike points drawn
-lighter.  ``poloidal_channels`` assembles the styled channels from one solved
+lighter, every topology marker drawn only inside the closed first-wall
+polygon.  ``poloidal_channels`` assembles the styled channels from one solved
 :class:`~nova.equilibrium.forward.ForwardEquilibrium` and its forward
 profile: the plasma cells come from the operator's own moment geometry and
 the cut cells from :meth:`~nova.equilibrium.separatrix_clip.AtomicCellMesh.clip`
@@ -48,6 +49,8 @@ from bokeh.models import (
 )
 from bokeh.plotting import figure
 import numpy as np
+
+from nova.equilibrium.wall_mask import inside_polygon
 
 # ---------------------------------------------------------------------------
 # locked style: weights follow pulse-design's plasma rendering and imas-ink's
@@ -413,32 +416,6 @@ def close_outline(outline: np.ndarray) -> np.ndarray:
     return outline
 
 
-def conductor_outlines(
-    centres: np.ndarray, ring_radius: float, *, vertices: int = 25
-) -> list[np.ndarray]:
-    """Return one outline ring per conductor centre."""
-    centres = np.asarray(centres, dtype=float).reshape(-1, 2)
-    angle = 2.0 * np.pi * np.arange(vertices) / vertices
-    ring = ring_radius * np.c_[np.cos(angle), np.sin(angle)]
-    return [centre + ring for centre in centres]
-
-
-def external_coil_rings(wall: np.ndarray, count: int, *, margin: float = 0.08):
-    """Return outline rings for ``count`` external circuits around the wall.
-
-    A carrier that drives external circuits stores their currents but, in the
-    playable machines that carry no coil geometry, not their cross-sections;
-    the view places one small outline ring per circuit on a circle enclosing
-    the first wall so the machine reads as surrounded by its coil set.
-    """
-    wall = np.asarray(wall, dtype=float)
-    centre = wall.mean(axis=0)
-    radius = np.linalg.norm(wall - centre, axis=1).max() + margin
-    angle = 2.0 * np.pi * np.arange(count) / count
-    centres = centre + radius * np.c_[np.cos(angle), np.sin(angle)]
-    return conductor_outlines(centres, ring_radius=0.25 * margin)
-
-
 def poloidal_channels(
     equilibrium,
     profile,
@@ -510,19 +487,38 @@ def poloidal_channels(
     strikes = np.reshape(labelled.strike_points, (-1, 2)).astype(float)
     finite_strikes = strikes[np.isfinite(strikes).all(axis=1)]
 
+    wall = close_outline(wall)
+
+    def inside_wall(point: np.ndarray) -> bool:
+        """Return whether one finite point lies inside the closed first wall.
+
+        Topology markers are drawn only inside the vessel so a limited fixture
+        never shows an off-vessel cross.
+        """
+        if not np.isfinite(point).all():
+            return False
+        return bool(
+            inside_polygon(
+                np.asarray([float(point[0])]),
+                np.asarray([float(point[1])]),
+                wall[:, 0],
+                wall[:, 1],
+            )[0]
+        )
+
     def finite_point(point: np.ndarray) -> tuple[list, list]:
-        """Return (xs, zs) for one point, or empty lists when not finite."""
-        if np.isfinite(point).all():
+        """Return (xs, zs) for one point, or empty lists when outside the wall."""
+        if inside_wall(point):
             return [float(point[0])], [float(point[1])]
         return [], []
 
     o_xs, o_zs = finite_point(o_point)
     primary_xs, primary_zs = finite_point(primary)
     secondary_xs, secondary_zs = finite_point(secondary)
-    secondary_xs += finite_strikes[:, 0].tolist()
-    secondary_zs += finite_strikes[:, 1].tolist()
+    in_wall_strikes = [row for row in finite_strikes if inside_wall(row)]
+    secondary_xs += [float(row[0]) for row in in_wall_strikes]
+    secondary_zs += [float(row[1]) for row in in_wall_strikes]
 
-    wall = close_outline(wall)
     coil_xs: list[list[list[float]]] = []
     coil_zs: list[list[list[float]]] = []
     for outline in coils:

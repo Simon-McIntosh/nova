@@ -44,6 +44,38 @@ SEED_SPAN = 0.35
 DRIVE = 1.4
 BOUNDARY_FIELD_FUNCTION = 5.0
 CONDUCTORS = 16
+CONDUCTOR_RADIUS = 0.62
+
+#: Radius of each fitted conductor's outline ring in the poloidal view [m].
+CONDUCTOR_OUTLINE_RADIUS = 0.05
+
+
+def conductor_centres() -> np.ndarray:
+    """Return the fitted external-conductor ring centres [m].
+
+    The sixteen conductors sit on a circle of radius ``CONDUCTOR_RADIUS``
+    about the axis; the free-boundary seed is held by currents on this ring.
+    """
+    angle = 2 * np.pi * np.arange(CONDUCTORS) / CONDUCTORS
+    return np.c_[
+        AXIS_RADIUS + CONDUCTOR_RADIUS * np.cos(angle),
+        CONDUCTOR_RADIUS * np.sin(angle),
+    ]
+
+
+def coil_outlines(
+    *, ring_radius: float = CONDUCTOR_OUTLINE_RADIUS, vertices: int = 25
+) -> tuple[np.ndarray, ...]:
+    """Return one small outline ring per fitted conductor centre.
+
+    The rings are the Solov'ev machine's conductor outlines: each is a small
+    polygon centred on one conductor, so the poloidal view's coil channel
+    draws the coil set the seed is held by rather than a decorative ring.
+    """
+    centres = conductor_centres()
+    angle = 2 * np.pi * np.arange(vertices) / vertices
+    ring = ring_radius * np.c_[np.cos(angle), np.sin(angle)]
+    return tuple(centre + ring for centre in centres)
 
 
 def _terms() -> tuple[float, float, float]:
@@ -114,8 +146,7 @@ class _Fit:
         seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1])
         wall_seed = _solovev(self.wall[:, 0], self.wall[:, 1])
         self.inside = seed_flux >= wall_flux
-        angle = 2 * np.pi * np.arange(CONDUCTORS) / CONDUCTORS
-        conductor = np.c_[1.0 + 0.62 * np.cos(angle), 0.62 * np.sin(angle)]
+        conductor = conductor_centres()
         self.coupling = {
             "plasma_to_grid": _green_block(coordinate, coordinate),
             "plasma_to_wall": _green_block(self.wall, coordinate),

@@ -13,14 +13,18 @@ from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Div
 
-from apps.playable.machines import MachineUnavailable, build_session, machine_argument
+from apps.playable.machines import (
+    MachineUnavailable,
+    build_session,
+    machine_argument,
+    machine_coil_outlines,
+)
 from apps.playable.session import frame_push
 from apps.playable.shape import key_help
 from apps.pulsedesign.poloidal_view import (
     channel_sources,
     close_outline,
     compensation_figure,
-    external_coil_rings,
     keyframe_receipt,
     poloidal_channels,
     poloidal_figure,
@@ -83,10 +87,15 @@ def build_document(doc, *, machine: str = "solovev"):
         wall = session.wall
         closed = close_outline(wall)
         sources["wall"].data = {"x": closed[:, 0], "z": closed[:, 1]}
-        circuits = getattr(machine_carrier, "circuit_count", 0)
-        coil_rings = external_coil_rings(wall, circuits) if circuits else ()
+        # The coil channel is the machine's own conductor outlines beside the
+        # wall, not a decorative ring; an unreachable outline source yields an
+        # empty channel rather than an error document.
+        try:
+            coil_outlines = machine_coil_outlines(machine, machine_carrier)
+        except MachineUnavailable:
+            coil_outlines = ()
     else:
-        coil_rings = ()
+        coil_outlines = ()
 
     poloidal = poloidal_figure(sources)
     compensation = compensation_figure(sources)
@@ -104,7 +113,7 @@ def build_document(doc, *, machine: str = "solovev"):
                 session.equilibrium,
                 machine_carrier.profile,
                 wall=session.wall,
-                coils=coil_rings,
+                coils=coil_outlines,
             )
             for name, data in channels.items():
                 sources[name].data = data

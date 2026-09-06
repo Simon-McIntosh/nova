@@ -70,14 +70,17 @@ plan = json.loads(Path(sys.argv[1]).read_text())
 rate = float(sys.argv[2])
 hours = plan["estimated_slices"] / rate / 3600.0
 per_shard = hours / plan["shard_count"]
+cards = plan["tranche_shards"]
 print(f"corpus_shots={plan['"'"'corpus_shots'"'"']}")
 print(f"scheduled_shots={plan['"'"'scheduled_shots'"'"']}")
 print(f"labellable_shots={plan['"'"'labellable_shots'"'"']}")
 print(f"known_shots_without_efm={plan['"'"'known_shots_without_efm'"'"']}")
 print(f"estimated_slices={plan['"'"'estimated_slices'"'"']}")
 print(f"shards={plan['"'"'shard_count'"'"']}")
+print(f"cards_per_tranche={cards}")
 print(f"measured_slices_per_second_per_card={rate:.9g}")
 print(f"estimated_gpu_hours={hours:.6f}")
+print(f"estimated_elapsed_hours_at_card_count={hours / cards:.6f}")
 print(f"estimated_hours_per_shard={per_shard:.6f}")
 for tranche in plan["tranches"]:
     gpu_hours = tranche["estimated_cumulative_slices"] / rate / 3600.0
@@ -86,8 +89,13 @@ for tranche in plan["tranches"]:
             "tranche={tranche} shards={first_shard}-{last_shard} "
             "cumulative_shots={cumulative_shots} "
             "cumulative_camera_frames={cumulative_camera_frames} "
-            "cumulative_gpu_hours={gpu_hours:.6f}"
-        ).format(gpu_hours=gpu_hours, **tranche)
+            "cumulative_gpu_hours={gpu_hours:.6f} "
+            "cumulative_elapsed_hours={elapsed_hours:.6f}"
+        ).format(
+            gpu_hours=gpu_hours,
+            elapsed_hours=gpu_hours / cards,
+            **tranche,
+        )
     )
 ' "${PLAN}" "${SLICES_PER_SECOND}"
 

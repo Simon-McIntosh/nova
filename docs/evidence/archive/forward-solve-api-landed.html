@@ -186,6 +186,22 @@
     receipts.</p>
   </section>
 
+  <section id="traced-identity">
+    <h2>The traced external vector is the baked field to the bit (0989e723 to 472665eb; main dbc062f1)</h2>
+    <p><strong>Node:</strong> <code>fsa-traced-vector-identity</code> (run <code>r-20260906T130303852320</code>, codex terra at high effort, declared waits in
+    the comma form woken by the sweep). Driver <code>benchmarks/traced_vector_identity_receipt.py</code>; receipts
+    <code>docs/figures/forward-solve-api/traced-identity/traced-vector-identity.json</code> (accepted) and
+    <code>traced-vector-identity-confounded-arms.json</code> (excluded, kept as the explanation of a spurious reading); report
+    <code>~/.config/reckon/crew/reports/nova/forward-solve-api/traced-identity.md</code>; H200 job 1263361, 1 min 54 s.</p>
+    <p><strong>Result.</strong> With the target current (933,034.875 A) and the requested class (diverted) bound identically in both arms and
+    <code>external_value</code> the only variable, the reduced-route flux vector is bitwise equal between the baked external field and the traced
+    argument on 22086/43 (1126 of 1126 elements at trips 1 to 4 and at convergence) and on the Solov'ev fixture (686 of 686), maximum relative
+    difference 0 against a 1e-12 round-off bound; the traced path may be declared default. The first MAST capture read 1.2e-2 relative because
+    its closed arm bound neither the target current nor the class while the traced arm bound both; the worker judged its own receipt
+    confounded and refused to promote it, which is why the accepted receipt exists.</p>
+    <p><strong>Trial reading.</strong> Four H200 jobs for one verdict: two died on guessed imports that a CPU prepare-only pass now catches,
+    one on the confound; 8 turns, 20.4M charged input (97.6 percent cached), 80k output.</p>
+  </section>
 </main>
 </body>
 </html>

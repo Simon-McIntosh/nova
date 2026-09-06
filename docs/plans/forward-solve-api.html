@@ -23,8 +23,8 @@
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="31">
+<meta name="plan-modified" content="2026-09-06">
+<meta name="plan-version" content="32">
 <meta name="plan-impl" content="0.45">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -137,6 +137,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260904T105000000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T10:50:00+02:00">
     <div class="r-comment-body">RECEIPT TEST CONTRACT LANDED (fsa-receipt-test-contract-2, codex, worker commit 40ae9a38 merged at 4186124c; the first attempt r-20260904T073821798688 parked at the two-fix rule on the class read and was redispatched with the answer because codex refuses resumes on the budget hold). tests/test_solve_receipt_topology.py now calls an arm converged only when the terminal residual passes 1e-8 AND the non-raising _fixed_design_read admits the axis AND the receipt saddle is finite within 25 mm of the read AND the public operator.read returns a determinate diverted class, on the repaired-census 22086/43 mixed arm (residual 1.7364758673167596e-14, axis (0.9016, 0.0246) m) in place of the 21985/51 fixture whose old pass was an inadmissible three-cell root; the domain assertion accepts any subset of the four labels because this physical arm has no private-flux cells (an earlier 901 s run exposed it). 11 passed with the referees in 603 s (logs/cpu-gate-final.log). The test comments that the corroboration bank's connectivity read records the saddle at (0.5853, 1.2334) m against the receipt's (0.5648, 1.2580) m for the same converged state, the two-support difference the polish-support integration is expected to remove. impl 0.45.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260906T130303852320-fsa-traced-vector-identity" data-who="fsa-identity-t" data-when="2026-09-06T14:17:12Z">
+    <div class="r-comment-body"><p>traced external-vector identity measured on the H200 (job 1263361, 1m54s): with identical target current and requested class in both arms, the traced external_value path and the baked field give bitwise-equal flux vectors on 22086/43 (1126/1126 per trip and converged) and on the Solovev fixture (686/686), max relative 0, verdict ROUND_OFF, traced path may be declared default; an earlier confounded capture (arms bound different dynamic arguments, spurious 1.2e-2) is kept by name and excluded; codex terra high effort: three H200 jobs lost to two guessed imports and the confound before the fourth passed, the worker itself refusing to promote the confounded receipt; declared waits in the comma form woken by the sweep</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T123306247283-fsa-solve-budget-drift-inventory" data-who="fsa-budget-audit" data-when="2026-09-04T12:50:46Z">
     <div class="r-comment-body"><p>737 pinned solver-control sites (4 in nova/, 300 in benchmarks/, 14 in docs/figures producers, 419 in tests): 12 distinct Newton budgets and 14 distinct GMRES budgets in active paths, three conflicting would-be authorities (ForwardProfile newton_steps 4, the kernel's GMRES 8 with warmup 8, PerturbedSeedPolicy 10 and 30), the MAST bank produced at Newton 12, GMRES 12, warmup 0; single-source recommendation for a ForwardSolveRequest/Policy and a fail-closed default-wiring test</p></div>

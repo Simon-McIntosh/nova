@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T09:16:30",
+  "updated": "2026-09-06T09:52:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -108290,6 +108290,132 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T071717697721-cank-steering-authority-record",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-steering-authority-record",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2912,
+                "cached_input_tokens": 479022,
+                "input_tokens": 481936,
+                "output_tokens": 2864,
+                "reasoning_output_tokens": 231,
+                "total_tokens": 484800,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "Your worktree starts at a283f243 which already holds the driver and its fix. Copy every file from /home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/steering-authority-carried/ except driver-uncommitted.diff into docs/figures/constraint-augmented-newton-krylov/shape-control/ (nine steering-*.json arm receipts, steering-authority.json, steering-authority.png, the updated converged.json), apply driver-uncommitted.diff to benchmarks/constraint_shape_receipt.py with git apply, run the path-scoped ruff check plus format on the driver, force-add the PNG, commit with a conventional subject plus body. Then read the receipts (JSON only) and write the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/steering-authority.md: for each of the eight arms (newton_krylov with the active-set stop lifted at a twenty-trip budget, and the constrained reduced route, each at upper plus 5, 10, 20 mm and elongation plus 5 percent) the previous, commanded, achieved upper and lower turning points, trips, termination, terminal residual, rows_qualified, topology_valid, compensating current norm and the three leading circuits; then the two questions in numbers: does the achieved motion scale with the command (5, 10, 20 mm), and does lifting the active-set stop change the outcome against the original receipt (which reached 45.7 A and a 4 mm rigid shift at 20 mm). State which mechanism the numbers support, the compensator-conditioning floor or the early termination, or that neither route reaches the command for a stated reason. Run the fast protocol tests of tests/test_shape_constraints.py (-m \"not slow\") in the FOREGROUND on a compute node under one bounded sbatch (all_debug, --time under one hour, --mem=96G, JAX_PLATFORMS=cpu, the root environment interpreter, PYTHONPATH the worktree) with the log captured whole. NEVER call Read on an image file: the model serving you is text-only and a Read of a PNG returns a 400 that ends your process; the previous worker on this node died exactly there. Write the manifest at the path the dispatch names before any wait.",
+          "estimated_hours": 1.5,
+          "goal": "Commit the finished steering-authority measurement the previous worker left uncommitted, write its report, so followup f-cank-009 on the plan closes as the record of why the compensating-row formulation stopped short of its command",
+          "id": "cank-steering-authority-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071717697721-cank-steering-authority-record/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/constraint_shape_receipt.py",
+            "docs/figures/constraint-augmented-newton-krylov/shape-control",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/steering-authority.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cank-steer-x2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T07:17:25Z",
+        "completed_at": "2026-09-06T07:50:41.084Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1962,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1996,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a283f243a65067bdb1b5e3bc28074cabd4748814",
+        "commits": [
+          "5dd6b790a6de5dd9e7112345c5db936013ea86c2"
+        ],
+        "changed_lines": {
+          "added": 15676,
+          "removed": 7,
+          "files": 12
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shape_constraints.py -m \"not slow\" -v on all_debug (sbatch 1263217, 96G, JAX_PLATFORMS=cpu) plus the H200 measurement of the predecessor run (jobs 1263166 and the reduced-route job) whose arm receipts this commit persists byte-equal",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071717697721-cank-steering-authority-record/cank-cpu-lane.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T071717697721-cank-steering-authority-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "be4a9151-a673-4464-8fef-b98bb31642fb",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-steering-authority-record",
+          "session_id": "be4a9151-a673-4464-8fef-b98bb31642fb",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T07:50:41.084Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -108462,6 +108588,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1805
+    "_version": 1806
   }
 }

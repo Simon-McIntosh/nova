@@ -199,6 +199,47 @@
     reaches its target.</p>
   </section>
 
+  <section id="steering-authority">
+    <h2>Why the bounding-box rows stop short: the compensator floor, on both routes (989d561c, a283f243, 5dd6b790)</h2>
+    <p><strong>Nodes:</strong> <code>cank-steering-authority-receipt</code> (local lane, run <code>r-20260906T030830441678</code>, the measurement on the
+    reserved H200 across two jobs, the process lost to a Read of its own figure on a text-only model) and <code>cank-steering-authority-record</code>
+    (run <code>r-20260906T071717697721</code>, a fresh member that committed the carried receipts byte-equal to the driver's own re-assembly and
+    wrote the report). Driver <code>benchmarks/constraint_shape_receipt.py</code>, receipts and figure under
+    <code>docs/figures/constraint-augmented-newton-krylov/shape-control/steering-*.json</code>; the solve-row test gate tightened to the measured
+    floor. Report <code>~/.config/reckon/crew/reports/nova/cank/steering-authority.md</code>.</p>
+    <p><strong>What was measured.</strong> The converged 22086/43 equilibrium under the ten bounding-box rows read from its own turning points,
+    re-solved under four commands (upper point plus 5, 10, 20 mm; elongation plus 5 percent) on two routes: Newton-Krylov with the settlement and
+    stagnation stops lifted at a twenty-trip budget, and the constrained reduced route. Compensator direction by the singular-distribution rule over
+    the thirteen drivable circuits; row tolerance 1e-6 of scale; the drivable spectrum spans 2.36e-6 to 7.94e-11 row scales per ampere, a factor
+    of thirty thousand.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png" alt="Steering-authority figure: achieved against commanded upper-point motion for the Newton-Krylov arms saturating near four millimetres, and the reduced-route arms with no boundary drawn" style="max-width:100%">
+      <figcaption>Achieved against commanded motion across the command scan. The Newton-Krylov arms saturate near 4 mm; the reduced arms leave no readable boundary.</figcaption>
+    </figure>
+    <table>
+      <caption>Eight arms on 22086/43 (upper point previously at Z = 0.9907 m, lower at -0.9431 m)</caption>
+      <thead><tr><th scope="col">Route</th><th scope="col">Command</th><th scope="col">Achieved upper move</th><th scope="col">Trips, exit</th><th scope="col">Terminal residual</th><th scope="col">Rows closed</th><th scope="col">Topology</th><th scope="col">Compensation</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Newton-Krylov, stops lifted</th><td>upper +5 mm</td><td>+3.3 mm</td><td>3, cycle detected</td><td>5.8e-3</td><td>no</td><td>valid</td><td>15.1 A</td></tr>
+        <tr><th scope="row">Newton-Krylov, stops lifted</th><td>upper +10 mm</td><td>+4.1 mm</td><td>3, cycle detected</td><td>5.1e-3</td><td>no</td><td>valid</td><td>61.7 A</td></tr>
+        <tr><th scope="row">Newton-Krylov, stops lifted</th><td>upper +20 mm</td><td>+3.9 mm (lower also +3.9 mm: a rigid lift)</td><td>2, cycle detected</td><td>1.42e-3</td><td>no</td><td>valid</td><td>45.7 A, bit-identical to the original receipt</td></tr>
+        <tr><th scope="row">Newton-Krylov, stops lifted</th><td>elongation +5 percent</td><td>-2.2 mm (lower -4.8 mm)</td><td>20, budget exhausted</td><td>2.85e-3, the trip-4 value</td><td>no</td><td>valid</td><td>104.9 A, the trip-4 value</td></tr>
+        <tr><th scope="row">constrained reduced</th><td>upper +5, +10, +20 mm</td><td>undefined</td><td>2, converged</td><td>4e-11 to 1.6e-10</td><td>yes</td><td>no qualified axis</td><td>3.93 to 3.98 MA</td></tr>
+        <tr><th scope="row">constrained reduced</th><td>elongation +5 percent</td><td>undefined</td><td>4, converged</td><td>2.4e-11</td><td>yes</td><td>no qualified axis</td><td>5.07 MA</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> Neither hypothesis of the followup survives in the form it was posed, and the numbers settle which was closer.
+    Achieved motion does not scale with the command: 3.3, 4.1 and 3.9 mm for 5, 10 and 20 mm, with a compensating current that is not even
+    monotonic. Lifting the stops changed nothing: the 20 mm arm is bit-identical to the original receipt because the cycle detector, the one stop
+    not exposed as a toggle, fires at the same state, and the elongation arm given sixteen extra trips ends at the residual and current it had at
+    trip four. The reduced route shows the other face of the same floor: it closes the rows to machine precision by spending megaamperes down the
+    7.9e-11 direction and destroys the equilibrium doing it. One compensating direction per row over a spectrum spanning thirty thousand cannot
+    both close ten competing rows and keep a plasma. That is the record behind the lead's decision of the same morning to steer shape through
+    the pulse-design inverse step instead (decision <code>shape-control-formulation</code> on <code>playable-forward-solve</code>); the constraint
+    rows remain the tool for diagnostic placement, where one row has one physical actuator. The reduced route's willingness to accept a
+    megaampere compensator is a defect in its own right and is recorded as the next followup.</p>
+  </section>
+
 </main>
 </body>
 </html>

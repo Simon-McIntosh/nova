@@ -14,7 +14,11 @@ A frame is assembled, never computed: the raster channels come from the
 rectangular current image (``ForwardRasterFlux``), the labelled points from
 the consumer map (``ForwardLabelledFlux``), the request identity and keyframe
 wall from the solve receipt (``ForwardSolveReceipt``), and the driving currents
-and recorded action from the steering context that produced the frame.
+and recorded action from the steering context that produced the frame.  The
+achieved current centroid is the all-domain first moment used by
+``benchmarks/forward_labeller_throughput.py::_centroid``: each R or Z coordinate
+is weighted by the terminal state's carried plasma-cell current and divided by
+the total carried current.
 
 The point fields use the imas-ambix corpus key vocabulary — ``magnetic_axis_r``,
 ``magnetic_axis_z``, ``x_point_r``, ``x_point_z``, ``lcfs_r``, ``lcfs_z``,
@@ -77,6 +81,13 @@ per radian and ``psi_norm`` dimensionless.
 | Phi                      | (n_face, nt)    | float64 | Wb                 |
 | psi_face                 | (n_face, nt)    | float64 | Wb                 |
 | psi_norm_face            | (n_face, nt)    | float64 | dimensionless      |
+| p_prime_face             | (n_face, nt)    | float64 | Pa/Wb              |
+| ff_prime_face            | (n_face, nt)    | float64 | T*m/Wb             |
+| p_prime_source           | dataset attr    | str     | efm or torax       |
+| current_centroid_r       | (nt,)           | float64 | m                  |
+| current_centroid_z       | (nt,)           | float64 | m                  |
+| reference_centroid_z     | (nt,)           | float64 | m                  |
+| branch_guard_ok          | (nt,)           | bool    | within 0.05 m      |
 | divertor_leg_r/z         | (4, 32, nt)     | float64 | m                  |
 | divertor_leg_finite      | (4, nt)         | bool    | leg present        |
 | coil_current             | (n_circuits,nt) | float64 | A                  |
@@ -143,6 +154,8 @@ N_THETA = 64
 N_RHO = 25
 N_DIVERTOR_LEGS = 4
 N_DIVERTOR_LEG_POINTS = 32
+CENTROID_BRANCH_GUARD_METRES = 0.05
+P_PRIME_SOURCES = frozenset(("efm", "torax"))
 
 TORAX_PROFILE_FIELDS: tuple[str, ...] = (
     "rho_face_norm",
@@ -226,6 +239,12 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("Phi", ("n_face", "nt"), "float64", "Wb"),
     ("psi_face", ("n_face", "nt"), "float64", "Wb"),
     ("psi_norm_face", ("n_face", "nt"), "float64", "dimensionless"),
+    ("p_prime_face", ("n_face", "nt"), "float64", "Pa/Wb"),
+    ("ff_prime_face", ("n_face", "nt"), "float64", "T*m/Wb"),
+    ("current_centroid_r", ("nt",), "float64", "m"),
+    ("current_centroid_z", ("nt",), "float64", "m"),
+    ("reference_centroid_z", ("nt",), "float64", "m"),
+    ("branch_guard_ok", ("nt",), "bool", "within 0.05 m"),
     ("divertor_leg_r", ("4", "32", "nt"), "float64", "m"),
     ("divertor_leg_z", ("4", "32", "nt"), "float64", "m"),
     ("divertor_leg_finite", ("4", "nt"), "bool", "leg present"),
@@ -279,6 +298,7 @@ class SteeringFrame(NamedTuple):
     carrier_identity: str
     nova_version: str
     policy_digest: str
+    p_prime_source: str
     flux_surface_psi_norm: object
     flux_surface_psi: object
     flux_surface_r: object
@@ -312,6 +332,12 @@ class SteeringFrame(NamedTuple):
     g2: object
     g3: object
     psi_norm_face: object
+    p_prime_face: object
+    ff_prime_face: object
+    current_centroid_r: float
+    current_centroid_z: float
+    reference_centroid_z: float
+    branch_guard_ok: bool
     R_major: float
     a_minor: float
     B_0: float
@@ -385,10 +411,69 @@ def _compensating_current(eq) -> np.ndarray:
     return np.concatenate(rows)
 
 
+def _current_centroid(equilibrium, raster) -> tuple[float, float]:
+    """Return the all-domain R-Z first moment of carried plasma current.
+
+    This is the terminal-state form of the labeller driver's ``_centroid``:
+    ``sum(cell_current * coordinate) / sum(cell_current)`` over every authored
+    plasma cell.  Reading the carried current avoids re-evaluating the source
+    or topology after the solve has already published its terminal state.
+    """
+    current = np.asarray(equilibrium.cell_current, dtype=np.float64).reshape(-1)
+    radius, height = np.meshgrid(
+        np.asarray(raster.radius, dtype=np.float64),
+        np.asarray(raster.height, dtype=np.float64),
+        indexing="ij",
+    )
+    coordinate = np.column_stack((radius.reshape(-1), height.reshape(-1)))
+    if coordinate.shape[0] != current.size:
+        raise ValueError("cell current and raster coordinates must align")
+    total = float(np.sum(current))
+    denominator = total if abs(total) > 0.0 else 1.0
+    centroid = np.sum(current[:, None] * coordinate, axis=0) / denominator
+    return float(centroid[0]), float(centroid[1])
+
+
+def _interpolate_flux_function(
+    psi_norm,
+    values,
+    psi_norm_face,
+    *,
+    name: str,
+) -> np.ndarray:
+    """Linearly interpolate one supplied flux function onto the face grid."""
+    coordinate = np.asarray(psi_norm, dtype=np.float64)
+    function = np.asarray(values, dtype=np.float64)
+    face = np.asarray(psi_norm_face, dtype=np.float64)
+    if coordinate.ndim != 1 or function.ndim != 1:
+        raise ValueError(f"{name} and its psi_norm grid must be one dimensional")
+    if coordinate.shape != function.shape:
+        raise ValueError(f"{name} must have one value per psi_norm point")
+    if coordinate.size < 2 or not np.all(np.isfinite(coordinate)):
+        raise ValueError(f"{name} psi_norm grid must contain finite points")
+    if not np.all(np.diff(coordinate) > 0.0):
+        raise ValueError(f"{name} psi_norm grid must be strictly increasing")
+    if not np.all(np.isfinite(function)):
+        raise ValueError(f"{name} must contain finite values")
+    if face.ndim != 1 or not np.all(np.isfinite(face)):
+        raise ValueError("psi_norm_face must be a finite one-dimensional grid")
+    return np.asarray(np.interp(face, coordinate, function), dtype=np.float64)
+
+
+def _branch_guard(achieved: float, reference: float) -> bool:
+    """Return whether finite achieved and reference heights agree within 5 cm."""
+    return bool(
+        np.isfinite(achieved)
+        and np.isfinite(reference)
+        and abs(achieved - reference) <= CENTROID_BRANCH_GUARD_METRES
+    )
+
+
 def _empty_geometry_channels() -> dict[str, object]:
     """Return masked fixed-shape geometry for a receipt without a producer."""
     surface_psi_norm = np.linspace(0.0, 1.0, N_SURFACE)
     angle = np.linspace(0.0, 2.0 * np.pi, N_THETA, endpoint=False)
+    faces = np.linspace(0.0, 1.0, N_RHO + 1)
     return {
         "flux_surface_psi_norm": surface_psi_norm,
         "flux_surface_psi": np.full(N_SURFACE, np.nan),
@@ -396,11 +481,13 @@ def _empty_geometry_channels() -> dict[str, object]:
         "flux_surface_z": np.full((N_SURFACE, N_THETA), np.nan),
         "flux_surface_angle": angle,
         **{
-            name: np.full(N_RHO + 1, np.nan)
+            name: (
+                faces.copy() if name == "psi_norm_face" else np.full(N_RHO + 1, np.nan)
+            )
             for name in TORAX_PROFILE_FIELDS
             if name != "rho_face_norm"
         },
-        "rho_face_norm": np.linspace(0.0, 1.0, N_RHO + 1),
+        "rho_face_norm": faces,
         "R_major": np.nan,
         "a_minor": np.nan,
         "B_0": np.nan,
@@ -584,6 +671,12 @@ def assemble_frame(
     action: SteeringAction,
     carrier_identity: str,
     applied_current,
+    p_prime_psi_norm,
+    p_prime,
+    ff_prime_psi_norm,
+    ff_prime,
+    p_prime_source: str,
+    reference_centroid_z=None,
     compensating_current=None,
     internal_geometry: PlasmaInternalGeometry | None = None,
     wall=None,
@@ -600,6 +693,10 @@ def assemble_frame(
     ``applied_current`` names the coil currents the run drove this frame;
     ``compensating_current`` names the per-row physical compensation and, when
     omitted, is read from the terminal constraint records of the receipt.
+    ``p_prime`` and ``ff_prime`` are sampled by linear interpolation from their
+    own supplied ``psi_norm`` grids onto the frame's existing 26
+    ``psi_norm_face`` coordinates.  ``reference_centroid_z`` is an optional
+    EFIT branch reference: absence is stored as NaN with a false guard.
     """
     if not isinstance(receipt, ForwardSolveReceipt):
         raise TypeError("a steering frame is assembled from a ForwardSolveReceipt")
@@ -654,6 +751,25 @@ def assemble_frame(
         geometry["divertor_leg_z"] = leg_z
         geometry["divertor_leg_finite"] = leg_finite
 
+    if p_prime_source not in P_PRIME_SOURCES:
+        raise ValueError("p_prime_source must be 'efm' or 'torax'")
+    p_prime_face = _interpolate_flux_function(
+        p_prime_psi_norm,
+        p_prime,
+        geometry["psi_norm_face"],
+        name="p_prime",
+    )
+    ff_prime_face = _interpolate_flux_function(
+        ff_prime_psi_norm,
+        ff_prime,
+        geometry["psi_norm_face"],
+        name="ff_prime",
+    )
+    centroid_r, centroid_z = _current_centroid(equilibrium, raster)
+    reference_z = (
+        np.nan if reference_centroid_z is None else float(reference_centroid_z)
+    )
+
     return SteeringFrame(
         radius=_as_numpy(raster.radius),
         height=_as_numpy(raster.height),
@@ -681,6 +797,13 @@ def assemble_frame(
         carrier_identity=carrier_identity,
         nova_version=resolved.nova_version,
         policy_digest=policy_digest(resolved.policy),
+        p_prime_source=p_prime_source,
+        p_prime_face=p_prime_face,
+        ff_prime_face=ff_prime_face,
+        current_centroid_r=centroid_r,
+        current_centroid_z=centroid_z,
+        reference_centroid_z=reference_z,
+        branch_guard_ok=_branch_guard(centroid_z, reference_z),
         **geometry,
     )
 
@@ -769,6 +892,12 @@ def session_dataset(
         raise ValueError("time must carry one entry per frame")
     if not all(frame.action.name for frame in frames):
         raise ValueError("every frame needs a named action")
+    p_prime_sources = {frame.p_prime_source for frame in frames}
+    if not p_prime_sources <= P_PRIME_SOURCES:
+        raise ValueError("p_prime_source must be 'efm' or 'torax'")
+    if len(p_prime_sources) != 1:
+        raise ValueError("a steering session must have one p_prime_source")
+    p_prime_source = next(iter(p_prime_sources))
 
     variables: dict[str, object] = {
         "radius": ("radius", _as_numpy(first.radius)),
@@ -858,6 +987,30 @@ def session_dataset(
         "policy_digest": (
             "time",
             np.asarray([frame.policy_digest for frame in frames], dtype=str),
+        ),
+        "p_prime_face": (
+            ("n_face", "time"),
+            _frame_stack(frames, "p_prime_face"),
+        ),
+        "ff_prime_face": (
+            ("n_face", "time"),
+            _frame_stack(frames, "ff_prime_face"),
+        ),
+        "current_centroid_r": (
+            "time",
+            _frame_stack(frames, "current_centroid_r"),
+        ),
+        "current_centroid_z": (
+            "time",
+            _frame_stack(frames, "current_centroid_z"),
+        ),
+        "reference_centroid_z": (
+            "time",
+            _frame_stack(frames, "reference_centroid_z"),
+        ),
+        "branch_guard_ok": (
+            "time",
+            _frame_stack(frames, "branch_guard_ok").astype(bool),
         ),
     }
     variables.update(
@@ -949,6 +1102,8 @@ def session_dataset(
             "lcfs_z",
             "coil_current",
             "compensating_current",
+            "p_prime_face",
+            "ff_prime_face",
             *TORAX_PROFILE_FIELDS,
         )
     )
@@ -959,6 +1114,10 @@ def session_dataset(
             "domain_label",
             "separatrix",
             "separatrix_vertex_count",
+            "current_centroid_r",
+            "current_centroid_z",
+            "reference_centroid_z",
+            "branch_guard_ok",
         )
     )
     return xr.Dataset(
@@ -968,6 +1127,7 @@ def session_dataset(
             COCOS_ATTR: COCOS,
             "training_inputs": training_inputs,
             "diagnostic_only": diagnostic_only,
+            "p_prime_source": p_prime_source,
         },
     )
 
@@ -1049,6 +1209,13 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
                 carrier_identity=str(frame["carrier_identity"].values),
                 nova_version=str(frame["nova_version"].values),
                 policy_digest=str(frame["policy_digest"].values),
+                p_prime_source=str(dataset.attrs["p_prime_source"]),
+                p_prime_face=np.asarray(frame["p_prime_face"].values),
+                ff_prime_face=np.asarray(frame["ff_prime_face"].values),
+                current_centroid_r=float(frame["current_centroid_r"].values),
+                current_centroid_z=float(frame["current_centroid_z"].values),
+                reference_centroid_z=float(frame["reference_centroid_z"].values),
+                branch_guard_ok=bool(frame["branch_guard_ok"].values),
                 flux_surface_psi_norm=np.asarray(
                     dataset["flux_surface_psi_norm"].values
                 ),

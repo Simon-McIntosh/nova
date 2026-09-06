@@ -1,0 +1,1432 @@
+{
+  "artifact": "playable app keyframes on the constrained reduced route, H200",
+  "identity": "22086/43",
+  "source_commit": "405a6dc3d0dcd487f9f034466ba3543edc9bbc43",
+  "runtime": {
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1263416",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "evidence_inputs": {
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005475438199937344,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-keyframe-overhead/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.023428 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "persistent_compilation_cache": {
+      "selection": "explicit_per_recipe",
+      "root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114801183079-pfs-keyframe-overhead/h200-paired-cache",
+      "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114801183079-pfs-keyframe-overhead/h200-paired-cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "version_key": "runtime-0745ecebea4cb264e054",
+      "runtime_identity": {
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_enable_x64": true,
+          "jax_default_matmul_precision": null,
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "process_index": 0,
+            "id": 0
+          }
+        ]
+      },
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "minimum_compile_seconds": 1.0,
+      "maximum_bytes": 8589934592
+    },
+    "key_chain": [
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-"
+    ]
+  },
+  "presses": [
+    {
+      "index": 0,
+      "press": null,
+      "key": "prime",
+      "wall": 44.25031592044979,
+      "trips": 3,
+      "reused": false,
+      "solve_wall": 18.389981808140874,
+      "receipt_wall": 25.860316180624068,
+      "channel_wall": 0.007455380633473396
+    },
+    {
+      "index": 1,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.7263027308508754,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.38185503240674734,
+      "receipt_wall": 0.3444312084466219,
+      "channel_wall": 0.004537548869848251,
+      "stages": {
+        "convert": 0.10245324205607176,
+        "shadow": 2.289190888404846e-06,
+        "external": 3.564171493053436e-05,
+        "bind": 0.0005460111424326897,
+        "gather": 7.622875273227692e-06,
+        "trip0:start": 0.16802452597767115,
+        "trip0:boundary": 3.3194199204444885e-05,
+        "trips": 0.10997775848954916,
+        "records": 5.082134157419205e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008804211392998695
+        ],
+        "newton_wall": [
+          0.021465535275638103
+        ],
+        "boundary_wall": [
+          0.14561593439429998
+        ],
+        "trip_wall": [
+          0.16802634205669165
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 302.517,
+        "integral_state": 222.677,
+        "raster": 25.714,
+        "separatrix": 21.409,
+        "labelled": 47.418,
+        "lcfs": 28.919,
+        "strike": 6.721,
+        "secondary": 9.197
+      }
+    },
+    {
+      "index": 2,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5826313244178891,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2820817297324538,
+      "receipt_wall": 0.30054057855159044,
+      "channel_wall": 0.003627980127930641,
+      "stages": {
+        "convert": 0.0978563241660595,
+        "shadow": 2.4763867259025574e-06,
+        "external": 2.6615336537361145e-05,
+        "bind": 0.0003902409225702286,
+        "gather": 4.602596163749695e-06,
+        "trip0:start": 0.062416900880634785,
+        "trip0:boundary": 4.316028207540512e-05,
+        "trips": 0.12079085316509008,
+        "records": 4.1935592889785767e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0009013321250677109
+        ],
+        "newton_wall": [
+          0.014213886111974716
+        ],
+        "boundary_wall": [
+          0.047258758917450905
+        ],
+        "trip_wall": [
+          0.06241893209517002
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 298.923,
+        "integral_state": 232.405,
+        "raster": 25.532,
+        "separatrix": 20.246,
+        "labelled": 47.772,
+        "lcfs": 29.313,
+        "strike": 6.013,
+        "secondary": 9.038
+      }
+    },
+    {
+      "index": 3,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5713552059605718,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2834251094609499,
+      "receipt_wall": 0.2879218887537718,
+      "channel_wall": 0.0024234894663095474,
+      "stages": {
+        "convert": 0.09625742118805647,
+        "shadow": 2.277083694934845e-06,
+        "external": 2.559274435043335e-05,
+        "bind": 0.00040318258106708527,
+        "gather": 4.773028194904327e-06,
+        "trip0:start": 0.064791364595294,
+        "trip0:boundary": 3.527570515871048e-05,
+        "trips": 0.12146453280001879,
+        "records": 4.216749221086502e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006758561357855797
+        ],
+        "newton_wall": [
+          0.016942426562309265
+        ],
+        "boundary_wall": [
+          0.04711241368204355
+        ],
+        "trip_wall": [
+          0.06479333993047476
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 286.352,
+        "integral_state": 231.886,
+        "raster": 23.923,
+        "separatrix": 19.02,
+        "labelled": 47.449,
+        "lcfs": 28.837,
+        "strike": 6.154,
+        "secondary": 8.017
+      }
+    },
+    {
+      "index": 4,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5540658356621861,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27379779517650604,
+      "receipt_wall": 0.28025936614722013,
+      "channel_wall": 0.002877254970371723,
+      "stages": {
+        "convert": 0.09705926571041346,
+        "shadow": 2.182088792324066e-06,
+        "external": 2.264324575662613e-05,
+        "bind": 0.0005197040736675262,
+        "gather": 4.373490810394287e-06,
+        "trip0:start": 0.05980118364095688,
+        "trip0:boundary": 3.489293158054352e-05,
+        "trips": 0.11591808311641216,
+        "records": 4.631560295820236e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006608758121728897
+        ],
+        "newton_wall": [
+          0.012895377352833748
+        ],
+        "boundary_wall": [
+          0.046198341995477676
+        ],
+        "trip_wall": [
+          0.0598032595589757
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 278.829,
+        "integral_state": 224.861,
+        "raster": 21.585,
+        "separatrix": 18.25,
+        "labelled": 47.008,
+        "lcfs": 29.249,
+        "strike": 7.246,
+        "secondary": 8.035
+      }
+    },
+    {
+      "index": 5,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5628800829872489,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2824565628543496,
+      "receipt_wall": 0.2804159391671419,
+      "channel_wall": 0.002626977860927582,
+      "stages": {
+        "convert": 0.09844544250518084,
+        "shadow": 2.0582228899002075e-06,
+        "external": 2.2858381271362305e-05,
+        "bind": 0.00033981166779994965,
+        "gather": 4.197470843791962e-06,
+        "trip0:start": 0.06980297807604074,
+        "trip0:boundary": 3.40975821018219e-05,
+        "trips": 0.11347200069576502,
+        "records": 4.430953413248062e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0007702978327870369
+        ],
+        "newton_wall": [
+          0.02131169382482767
+        ],
+        "boundary_wall": [
+          0.047657452523708344
+        ],
+        "trip_wall": [
+          0.06980488076806068
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 279.223,
+        "integral_state": 225.133,
+        "raster": 21.891,
+        "separatrix": 18.225,
+        "labelled": 45.493,
+        "lcfs": 28.566,
+        "strike": 6.3,
+        "secondary": 7.87
+      }
+    },
+    {
+      "index": 6,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5676621552556753,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2799725355580449,
+      "receipt_wall": 0.28768292535096407,
+      "channel_wall": 0.0029230909422039986,
+      "stages": {
+        "convert": 0.09783470537513494,
+        "shadow": 2.323649823665619e-06,
+        "external": 2.5492161512374878e-05,
+        "bind": 0.0008705602958798409,
+        "gather": 4.959292709827423e-06,
+        "trip0:start": 0.06327354907989502,
+        "trip0:boundary": 3.658980131149292e-05,
+        "trips": 0.11743437685072422,
+        "records": 4.427321255207062e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0011546909809112549
+        ],
+        "newton_wall": [
+          0.01464945636689663
+        ],
+        "boundary_wall": [
+          0.04741968493908644
+        ],
+        "trip_wall": [
+          0.06327560264617205
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 285.996,
+        "integral_state": 228.108,
+        "raster": 22.598,
+        "separatrix": 18.359,
+        "labelled": 45.784,
+        "lcfs": 29.569,
+        "strike": 5.939,
+        "secondary": 7.677
+      }
+    },
+    {
+      "index": 7,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5522360568866134,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2786662895232439,
+      "receipt_wall": 0.27356220316141844,
+      "channel_wall": 0.0021374793723225594,
+      "stages": {
+        "convert": 0.09657866600900888,
+        "shadow": 2.29664146900177e-06,
+        "external": 2.2581778466701508e-05,
+        "bind": 0.0003818143159151077,
+        "gather": 4.827976226806641e-06,
+        "trip0:start": 0.06356518715620041,
+        "trip0:boundary": 3.623776137828827e-05,
+        "trips": 0.11757403425872326,
+        "records": 4.315376281738281e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006207674741744995
+        ],
+        "newton_wall": [
+          0.015172607265412807
+        ],
+        "boundary_wall": [
+          0.04771423526108265
+        ],
+        "trip_wall": [
+          0.06356710102409124
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 272.345,
+        "integral_state": 228.602,
+        "raster": 23.499,
+        "separatrix": 18.901,
+        "labelled": 46.027,
+        "lcfs": 28.816,
+        "strike": 6.687,
+        "secondary": 7.546
+      }
+    },
+    {
+      "index": 8,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5687381979078054,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2781852651387453,
+      "receipt_wall": 0.2905459823086858,
+      "channel_wall": 0.0017252527177333832,
+      "stages": {
+        "convert": 0.09737160988152027,
+        "shadow": 2.495013177394867e-06,
+        "external": 2.328958362340927e-05,
+        "bind": 0.0003559151664376259,
+        "gather": 4.820525646209717e-06,
+        "trip0:start": 0.0622883178293705,
+        "trip0:boundary": 3.395881503820419e-05,
+        "trips": 0.11776942480355501,
+        "records": 6.031058728694916e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008176211267709732
+        ],
+        "newton_wall": [
+          0.013389398343861103
+        ],
+        "boundary_wall": [
+          0.048033103346824646
+        ],
+        "trip_wall": [
+          0.06229038164019585
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 288.918,
+        "integral_state": 228.717,
+        "raster": 22.762,
+        "separatrix": 18.472,
+        "labelled": 43.362,
+        "lcfs": 29.27,
+        "strike": 4.111,
+        "secondary": 6.963
+      }
+    },
+    {
+      "index": 9,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5651136925444007,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27804197184741497,
+      "receipt_wall": 0.2870638547465205,
+      "channel_wall": 0.00210645142942667,
+      "stages": {
+        "convert": 0.09654526878148317,
+        "shadow": 2.187676727771759e-06,
+        "external": 2.5955960154533386e-05,
+        "bind": 0.0004095453768968582,
+        "gather": 4.460103809833527e-06,
+        "trip0:start": 0.0645895516499877,
+        "trip0:boundary": 3.69073823094368e-05,
+        "trips": 0.11611506156623363,
+        "records": 4.3478794395923615e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.000636599026620388
+        ],
+        "newton_wall": [
+          0.01725464779883623
+        ],
+        "boundary_wall": [
+          0.0466386778280139
+        ],
+        "trip_wall": [
+          0.06459148321300745
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 285.628,
+        "integral_state": 225.781,
+        "raster": 24.312,
+        "separatrix": 18.368,
+        "labelled": 51.562,
+        "lcfs": 28.774,
+        "strike": 8.084,
+        "secondary": 9.7
+      }
+    },
+    {
+      "index": 10,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5404001530259848,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.28001497965306044,
+      "receipt_wall": 0.2603770587593317,
+      "channel_wall": 0.002010539174079895,
+      "stages": {
+        "convert": 0.09658362250775099,
+        "shadow": 2.0563602447509766e-06,
+        "external": 2.1875835955142975e-05,
+        "bind": 0.0005225734785199165,
+        "gather": 4.264526069164276e-06,
+        "trip0:start": 0.06337372772395611,
+        "trip0:boundary": 3.308150917291641e-05,
+        "trips": 0.11896167509257793,
+        "records": 4.223082214593887e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006307186558842659
+        ],
+        "newton_wall": [
+          0.015000722371041775
+        ],
+        "boundary_wall": [
+          0.047698560170829296
+        ],
+        "trip_wall": [
+          0.06337564717978239
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 258.218,
+        "integral_state": 226.8,
+        "raster": 19.907,
+        "separatrix": 16.995,
+        "labelled": 44.794,
+        "lcfs": 29.428,
+        "strike": 5.157,
+        "secondary": 8.035
+      }
+    },
+    {
+      "index": 11,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5705405212938786,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2906291503459215,
+      "receipt_wall": 0.2799031939357519,
+      "channel_wall": 0.002156580798327923,
+      "stages": {
+        "convert": 0.09797192551195621,
+        "shadow": 1.8933787941932678e-06,
+        "external": 2.2759661078453064e-05,
+        "bind": 0.0005415566265583038,
+        "gather": 5.149282515048981e-06,
+        "trip0:start": 0.07139228377491236,
+        "trip0:boundary": 3.579072654247284e-05,
+        "trips": 0.12011431436985731,
+        "records": 3.854092210531235e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006898520514369011
+        ],
+        "newton_wall": [
+          0.022914898581802845
+        ],
+        "boundary_wall": [
+          0.04771593026816845
+        ],
+        "trip_wall": [
+          0.07139453198760748
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 278.447,
+        "integral_state": 231.164,
+        "raster": 23.25,
+        "separatrix": 18.255,
+        "labelled": 46.455,
+        "lcfs": 28.445,
+        "strike": 6.696,
+        "secondary": 7.705
+      }
+    },
+    {
+      "index": 12,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5610416978597641,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27945985458791256,
+      "receipt_wall": 0.28157461900264025,
+      "channel_wall": 0.001959371380507946,
+      "stages": {
+        "convert": 0.09745825827121735,
+        "shadow": 2.5155022740364075e-06,
+        "external": 2.670940011739731e-05,
+        "bind": 0.00035637058317661285,
+        "gather": 4.210509359836578e-06,
+        "trip0:start": 0.061555163003504276,
+        "trip0:boundary": 3.307219594717026e-05,
+        "trips": 0.11956379748880863,
+        "records": 3.600027412176132e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006143301725387573
+        ],
+        "newton_wall": [
+          0.013103816658258438
+        ],
+        "boundary_wall": [
+          0.04778884444385767
+        ],
+        "trip_wall": [
+          0.061557136476039886
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 280.161,
+        "integral_state": 228.371,
+        "raster": 22.041,
+        "separatrix": 18.315,
+        "labelled": 45.065,
+        "lcfs": 29.438,
+        "strike": 5.163,
+        "secondary": 7.813
+      }
+    },
+    {
+      "index": 13,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5702785225585103,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.28791666217148304,
+      "receipt_wall": 0.2823545802384615,
+      "channel_wall": 0.0023588910698890686,
+      "stages": {
+        "convert": 0.0960229616612196,
+        "shadow": 2.094544470310211e-06,
+        "external": 2.4088658392429352e-05,
+        "bind": 0.00035470351576805115,
+        "gather": 4.169531166553497e-06,
+        "trip0:start": 0.06950441468507051,
+        "trip0:boundary": 3.4782104194164276e-05,
+        "trips": 0.12164193298667669,
+        "records": 4.1981227695941925e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0007588276639580727
+        ],
+        "newton_wall": [
+          0.02050802856683731
+        ],
+        "boundary_wall": [
+          0.04817279241979122
+        ],
+        "trip_wall": [
+          0.06950629223138094
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 280.865,
+        "integral_state": 230.599,
+        "raster": 23.944,
+        "separatrix": 18.898,
+        "labelled": 47.015,
+        "lcfs": 28.629,
+        "strike": 6.648,
+        "secondary": 7.46
+      }
+    },
+    {
+      "index": 14,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5439547374844551,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2813318446278572,
+      "receipt_wall": 0.2626155521720648,
+      "channel_wall": 0.0019145403057336807,
+      "stages": {
+        "convert": 0.09528609737753868,
+        "shadow": 2.321787178516388e-06,
+        "external": 2.3643486201763153e-05,
+        "bind": 0.00048097502440214157,
+        "gather": 5.403533577919006e-06,
+        "trip0:start": 0.06562087778002024,
+        "trip0:boundary": 3.358721733093262e-05,
+        "trips": 0.11943614203482866,
+        "records": 4.657171666622162e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008623730391263962
+        ],
+        "newton_wall": [
+          0.016933158971369267
+        ],
+        "boundary_wall": [
+          0.04777654726058245
+        ],
+        "trip_wall": [
+          0.06562286801636219
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 261.19,
+        "integral_state": 226.371,
+        "raster": 21.564,
+        "separatrix": 17.962,
+        "labelled": 43.696,
+        "lcfs": 28.935,
+        "strike": 4.716,
+        "secondary": 7.865
+      }
+    },
+    {
+      "index": 15,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5603398280218244,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2852434078231454,
+      "receipt_wall": 0.2750885859131813,
+      "channel_wall": 0.002746233716607094,
+      "stages": {
+        "convert": 0.0966994408518076,
+        "shadow": 2.3934990167617798e-06,
+        "external": 2.2839754819869995e-05,
+        "bind": 0.0005099587142467499,
+        "gather": 5.595386028289795e-06,
+        "trip0:start": 0.06881698500365019,
+        "trip0:boundary": 4.096515476703644e-05,
+        "trips": 0.11870445683598518,
+        "records": 4.0413811802864075e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.000708441250026226
+        ],
+        "newton_wall": [
+          0.02013083267956972
+        ],
+        "boundary_wall": [
+          0.04791650176048279
+        ],
+        "trip_wall": [
+          0.06881875917315483
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 273.676,
+        "integral_state": 224.793,
+        "raster": 22.645,
+        "separatrix": 18.676,
+        "labelled": 47.051,
+        "lcfs": 28.692,
+        "strike": 7.034,
+        "secondary": 8.147
+      }
+    },
+    {
+      "index": 16,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5321941450238228,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2810158971697092,
+      "receipt_wall": 0.25117009319365025,
+      "channel_wall": 0.002445496618747711,
+      "stages": {
+        "convert": 0.0973816066980362,
+        "shadow": 2.064742147922516e-06,
+        "external": 2.2790394723415375e-05,
+        "bind": 0.00053438451141119,
+        "gather": 3.791414201259613e-06,
+        "trip0:start": 0.06453031208366156,
+        "trip0:boundary": 3.484170883893967e-05,
+        "trips": 0.11819711420685053,
+        "records": 3.935862332582474e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008213082328438759
+        ],
+        "newton_wall": [
+          0.015699831768870354
+        ],
+        "boundary_wall": [
+          0.04796166345477104
+        ],
+        "trip_wall": [
+          0.06453229580074549
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 250.266,
+        "integral_state": 220.458,
+        "raster": 22.934,
+        "separatrix": 19.162,
+        "labelled": 48.288,
+        "lcfs": 29.795,
+        "strike": 7.174,
+        "secondary": 8.215
+      }
+    },
+    {
+      "index": 17,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5731966570019722,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2878118911758065,
+      "receipt_wall": 0.2853769678622484,
+      "channel_wall": 0.0037088654935359955,
+      "stages": {
+        "convert": 0.09715075977146626,
+        "shadow": 2.3087486624717712e-06,
+        "external": 2.2920779883861542e-05,
+        "bind": 0.0005524745211005211,
+        "gather": 4.47593629360199e-06,
+        "trip0:start": 0.07099103834480047,
+        "trip0:boundary": 3.528594970703125e-05,
+        "trips": 0.11856277193874121,
+        "records": 3.87243926525116e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0006149085238575935
+        ],
+        "newton_wall": [
+          0.022163971327245235
+        ],
+        "boundary_wall": [
+          0.04814603738486767
+        ],
+        "trip_wall": [
+          0.07099303882569075
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 283.785,
+        "integral_state": 228.301,
+        "raster": 23.981,
+        "separatrix": 19.036,
+        "labelled": 45.409,
+        "lcfs": 28.698,
+        "strike": 5.834,
+        "secondary": 7.855
+      }
+    },
+    {
+      "index": 18,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.55343322083354,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.28130763210356236,
+      "receipt_wall": 0.2721183905377984,
+      "channel_wall": 0.0032871412113308907,
+      "stages": {
+        "convert": 0.09789791610091925,
+        "shadow": 2.253800630569458e-06,
+        "external": 2.274196594953537e-05,
+        "bind": 0.0005832258611917496,
+        "gather": 5.3746625781059265e-06,
+        "trip0:start": 0.06192777864634991,
+        "trip0:boundary": 3.5023316740989685e-05,
+        "trips": 0.12039365991950035,
+        "records": 3.961287438869476e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008790455758571625
+        ],
+        "newton_wall": [
+          0.01344323717057705
+        ],
+        "boundary_wall": [
+          0.04756132327020168
+        ],
+        "trip_wall": [
+          0.0619298480451107
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 270.836,
+        "integral_state": 224.941,
+        "raster": 22.231,
+        "separatrix": 18.007,
+        "labelled": 47.978,
+        "lcfs": 29.4,
+        "strike": 7.089,
+        "secondary": 8.431
+      }
+    },
+    {
+      "index": 19,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5519291032105684,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2770145880058408,
+      "receipt_wall": 0.2749068280681968,
+      "channel_wall": 0.0031017130240797997,
+      "stages": {
+        "convert": 0.09723975043743849,
+        "shadow": 2.0330771803855896e-06,
+        "external": 2.1643005311489105e-05,
+        "bind": 0.000463106669485569,
+        "gather": 3.866851329803467e-06,
+        "trip0:start": 0.06742632295936346,
+        "trip0:boundary": 3.493018448352814e-05,
+        "trips": 0.11132811475545168,
+        "records": 4.659872502088547e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.000666717067360878
+        ],
+        "newton_wall": [
+          0.019349001348018646
+        ],
+        "boundary_wall": [
+          0.04735201224684715
+        ],
+        "trip_wall": [
+          0.06742822285741568
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 273.489,
+        "integral_state": 219.749,
+        "raster": 23.797,
+        "separatrix": 18.932,
+        "labelled": 47.701,
+        "lcfs": 28.569,
+        "strike": 6.895,
+        "secondary": 8.097
+      }
+    },
+    {
+      "index": 20,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5468498300760984,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27590098325163126,
+      "receipt_wall": 0.27094155736267567,
+      "channel_wall": 0.002260187640786171,
+      "stages": {
+        "convert": 0.09723127540200949,
+        "shadow": 2.4419277906417847e-06,
+        "external": 2.250541001558304e-05,
+        "bind": 0.00048554129898548126,
+        "gather": 4.2673200368881226e-06,
+        "trip0:start": 0.06300680618733168,
+        "trip0:boundary": 3.6580488085746765e-05,
+        "trips": 0.11477087903767824,
+        "records": 4.1507184505462646e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0007760254666209221
+        ],
+        "newton_wall": [
+          0.014405813068151474
+        ],
+        "boundary_wall": [
+          0.04776781424880028
+        ],
+        "trip_wall": [
+          0.06300882715731859
+        ],
+        "newton_steps": [
+          4
+        ],
+        "map_evaluations": [
+          5
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 269.749,
+        "integral_state": 224.298,
+        "raster": 22.924,
+        "separatrix": 18.355,
+        "labelled": 46.584,
+        "lcfs": 29.087,
+        "strike": 6.071,
+        "secondary": 7.907
+      }
+    }
+  ],
+  "first_moved": {
+    "press": {
+      "index": 1,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.7263027308508754,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.38185503240674734,
+      "receipt_wall": 0.3444312084466219,
+      "channel_wall": 0.004537548869848251,
+      "stages": {
+        "convert": 0.10245324205607176,
+        "shadow": 2.289190888404846e-06,
+        "external": 3.564171493053436e-05,
+        "bind": 0.0005460111424326897,
+        "gather": 7.622875273227692e-06,
+        "trip0:start": 0.16802452597767115,
+        "trip0:boundary": 3.3194199204444885e-05,
+        "trips": 0.10997775848954916,
+        "records": 5.082134157419205e-05
+      },
+      "trip_census": {
+        "trips": 1,
+        "jacobian_builds": [
+          1
+        ],
+        "jacobian_wall": [
+          0.0008804211392998695
+        ],
+        "newton_wall": [
+          0.021465535275638103
+        ],
+        "boundary_wall": [
+          0.14561593439429998
+        ],
+        "trip_wall": [
+          0.16802634205669165
+        ],
+        "newton_steps": [
+          6
+        ],
+        "map_evaluations": [
+          7
+        ]
+      },
+      "receipt_stages": {
+        "receipt_total": 302.517,
+        "integral_state": 222.677,
+        "raster": 25.714,
+        "separatrix": 21.409,
+        "labelled": 47.418,
+        "lcfs": 28.919,
+        "strike": 6.721,
+        "secondary": 9.197
+      }
+    },
+    "compile_events": 8,
+    "fresh_compiles": 0,
+    "fresh_compile_seconds": 0,
+    "cache_served_compiles": 2,
+    "cache_served_compile_seconds": 0.031164169000000002,
+    "cache_artifacts_loaded": 0,
+    "dispatch_and_host_seconds": 0.6951385618508754
+  },
+  "prime": {
+    "wall": 44.25031592044979,
+    "trips": 3,
+    "reused": false,
+    "solve_wall": 18.389981808140874,
+    "receipt_wall": 25.860316180624068,
+    "channel_wall": 0.007455380633473396,
+    "stages": {
+      "convert": 0.7435125783085823,
+      "shadow": 0.173913792707026,
+      "external": 0.2998992232605815,
+      "bind": 0.25876060128211975,
+      "gather": 7.745809853076935e-06,
+      "trip0:start": 16.08837813604623,
+      "trip0:boundary": 1.8719583749771118e-05,
+      "trip1:start": 0.05524957552552223,
+      "trip1:boundary": 1.797545701265335e-05,
+      "trip2:start": 0.05052785202860832,
+      "trip2:boundary": 4.16487455368042e-05,
+      "trips": 0.7195135084912181,
+      "records": 6.303470581769943e-05
+    },
+    "trip_census": {
+      "trips": 3,
+      "jacobian_builds": [
+        1,
+        1,
+        1
+      ],
+      "jacobian_wall": [
+        1.5930885542184114,
+        0.0016511529684066772,
+        0.0012471489608287811
+      ],
+      "newton_wall": [
+        0.8020480619743466,
+        0.005748135969042778,
+        0.0
+      ],
+      "boundary_wall": [
+        13.693157508037984,
+        0.04780032578855753,
+        0.047719525173306465
+      ],
+      "trip_wall": [
+        16.08838208205998,
+        0.05525231175124645,
+        0.050529022701084614
+      ],
+      "newton_steps": [
+        7,
+        1,
+        0
+      ],
+      "map_evaluations": [
+        8,
+        2,
+        1
+      ]
+    },
+    "receipt_stages": {
+      "receipt_total": 25805.706,
+      "integral_state": 1388.546,
+      "raster": 6016.351,
+      "separatrix": 5493.049,
+      "labelled": 15682.368,
+      "lcfs": 14287.853,
+      "strike": 920.399,
+      "secondary": 468.709
+    },
+    "seed_centroid_m": [
+      0.7781594025789569,
+      0.002607436439218966
+    ]
+  },
+  "compile_events_total": 541,
+  "verdict": {
+    "presses_measured": 20,
+    "median_warm_keyframe_s": 0.5610416978597641,
+    "mean_warm_keyframe_s": 0.55941268252699,
+    "first_moved_keyframe_s": 0.7263027308508754,
+    "prime_wall_s": 44.25031592044979,
+    "all_reused_after_prime": true,
+    "median_warm_vs_100ms": 5.610416978597641,
+    "first_moved_vs_1s": 0.7263027308508754
+  }
+}

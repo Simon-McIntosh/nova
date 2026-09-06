@@ -29,6 +29,10 @@ alone, so a second browser window on another screen shows the picture while
 the first carries the controls, both reading the one server-side session.
 """
 
+from datetime import UTC, datetime
+from pathlib import Path
+
+import numpy as np
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import Button, ColumnDataSource, CustomJS, Div, Slider
@@ -197,10 +201,10 @@ def build_document(
     legend = Div(text=command_legend_text(session.shape), name="legend")
     help_text = Div(text=key_help())
 
-    # The record and playback strip over the recorded receipts: the record
+    # The record and playback strip over the recorded frames: the record
     # toggle, the live frame counter, the playback slider positioning over the
-    # session's keyframes, and the export button (the netCDF session write of
-    # the recorded run arrives with the frame-schema followup).
+    # session's keyframes, and the export button that persists the recorded
+    # SteeringFrame sequence through the session store.
     record = Button(label="record ●", button_type="primary", width=110)
     counter = Div(text=f"session frame {session.frame_index:04d} / 0000")
     playback_slider = Slider(
@@ -217,11 +221,15 @@ def build_document(
         counter.text = f"session frame {int(new):04d} / {session.frame_index:04d}"
 
     def export_session():
-        # The recorded run's netCDF session write is the frame-schema
-        # followup's; the export button lands alongside it.
+        if not session.recorded_frames:
+            status.text = "<b>nothing recorded</b> — enable recording and steer"
+            return
+        directory = Path.home() / ".local/share/nova/playable/sessions"
+        filename = datetime.now(UTC).strftime("session-%Y%m%dT%H%M%SZ")
+        session.write_recording(filename=filename, dirname=str(directory))
         status.text = (
-            "export writes the recorded session with the frame-schema "
-            "followup (§5); the receipts are held in the session until then"
+            f"<b>exported</b> {len(session.recorded_frames)} frames to "
+            f"{directory / filename}"
         )
 
     record.on_click(toggle_record)
@@ -234,22 +242,29 @@ def build_document(
 
     def on_key(key):
         receipt_row = session.step(key)
-        # Push the poloidal channels first: a moved key resets the picture the
-        # physics owns before the camera decode starts.  The session also
-        # publishes the filled flux image the styled view does not bind, so a
-        # channel with no bound source is skipped rather than raised on.
-        for name, data in frame_push(session).items():
-            if name in sources:
-                sources[name].data = data
+        pushed = frame_push(session)
+
+        # The clipped plasma polygons remain an operator-geometry channel:
+        # they are not part of the machine-independent SteeringFrame.  All
+        # contours and landmarks emitted by poloidal_channels are ignored in
+        # favour of the frame reduction above.
         if machine_carrier is not None:
+            frame = session.current_frame()
+            surfaces = np.stack((frame.flux_surface_r, frame.flux_surface_z), axis=-1)
             channels = poloidal_channels(
                 session.equilibrium,
                 machine_carrier.profile,
                 wall=session.wall,
                 coils=coil_outlines,
+                surfaces=surfaces[1:],
             )
-            for name, data in channels.items():
-                sources[name].data = data
+            for name in ("wall", "coil", "plasma"):
+                pushed[name] = channels[name]
+        # Push the poloidal channels first: a moved key resets the picture the
+        # physics owns before the camera decode starts.  Every frame-reduced
+        # channel is required to have a bound renderer source.
+        for name, data in pushed.items():
+            sources[name].data = data
 
         # The decode runs after the poloidal push, so a slow decode delays
         # only the picture.  When the solve refuses, the camera keeps the last

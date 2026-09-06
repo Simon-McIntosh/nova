@@ -4,8 +4,10 @@ Drives the session holder with a stub solver on CPU and pins the contract the
 interactive keyframe loop is built on: every named key produces exactly the
 commanded control-point change it names; every pushed ColumnDataSource column
 has the shape its renderer in ``apps/pulsedesign/poloidal_view.py`` binds; the
-receipt row per action carries wall and trips; and one keyframe through the
-production inverse-forward protocol completes on the small Solov'ev fixture.
+same assembled SteeringFrame reaches rendering, decoding and recording; the
+recorded frames round-trip through the session store; the receipt row per
+action carries wall and trips; and one keyframe through the production
+inverse-forward protocol completes on the small Solov'ev fixture.
 """
 
 from __future__ import annotations
@@ -22,8 +24,14 @@ import numpy as np
 import pytest
 
 from nova.utilities.importmanager import skip_import
+from nova.equilibrium.steering_frames import frames_from_session, read_session
 
-from apps.playable.session import PlayableSession, SolveResult, frame_push
+from apps.playable.session import (
+    PlayableSession,
+    SolveResult,
+    equilibrium_frame_receipt,
+    frame_push,
+)
 from apps.playable.shape import PARAMETER_FIELD, STEPS, PlasmaShape, keymap, point_delta
 
 #: The named controls and the signed step sizes the gate enumerates.
@@ -48,19 +56,66 @@ class StubEquilibrium(SimpleNamespace):
     def __init__(self, radius=None, height=None, circuits: int = 0):
         radius = np.linspace(0.6, 1.42, 12) if radius is None else radius
         height = np.linspace(-0.42, 0.42, 10) if height is None else height
+        radial_count, vertical_count = radius.size, height.size
+        count = radial_count * vertical_count
+        separatrix = np.full((30, 2), np.nan)
+        separatrix[:5] = np.array(
+            [
+                [0.8, -0.2],
+                [1.2, -0.2],
+                [1.2, 0.2],
+                [0.8, 0.2],
+                [0.8, -0.2],
+            ]
+        )
+        lcfs = np.full((12, 2), np.nan)
+        lcfs[:5] = separatrix[:5]
+        history = SimpleNamespace(
+            residual=np.asarray(0.0),
+            trace=np.asarray([0.0]),
+            converged=np.asarray(True),
+            termination_reason=np.asarray(0, dtype=np.int32),
+            active_set_iterations=np.asarray(StubSolver.trips, dtype=np.int32),
+            active_set_residuals=np.asarray([0.0]),
+            active_set_mask_differences=np.asarray([0], dtype=np.int32),
+            shadow_mask_changes=np.asarray([0], dtype=np.int32),
+            inner_iteration_decisions=np.asarray([], dtype=np.int32),
+            inner_iteration_applied_factors=np.asarray([], dtype=float),
+        )
         super().__init__(
             raster_flux=SimpleNamespace(
                 radius=np.asarray(radius),
                 height=np.asarray(height),
-                psi=np.zeros(radius.size * height.size),
-                separatrix=np.full((30, 2), np.nan),
+                shape=np.asarray([radial_count, vertical_count], dtype=np.int32),
+                psi=np.arange(count, dtype=float),
+                psi_norm=np.linspace(0.0, 1.0, count),
+                domain_label=np.zeros(count, dtype=np.int8),
+                separatrix=separatrix,
+                separatrix_vertex_count=np.int32(5),
             ),
             labelled_flux=SimpleNamespace(
-                primary_x_point=np.full(2, np.nan),
+                o_point=np.asarray([1.0, 0.0]),
+                primary_x_point=np.asarray([1.0, -0.2]),
                 secondary_x_point=np.full(2, np.nan),
+                strike_points=np.full((2, 2), np.nan),
+                lcfs=lcfs,
+                lcfs_vertex_count=np.int32(5),
             ),
             constraints=(),
             circuits=circuits,
+            coil_current=np.zeros(circuits, dtype=float),
+            cell_current=np.ones(count, dtype=float),
+            fixed_point=history,
+            finite=SimpleNamespace(passed=True, flux=True),
+            normalisation=SimpleNamespace(amplitude=np.asarray(1.0)),
+            topology=SimpleNamespace(
+                axis=np.asarray([1.0, 0.0]),
+                axis_flux=np.asarray(0.0),
+                boundary_flux=np.asarray(1.0),
+                flux_span=np.asarray(1.0),
+                diverted=False,
+            ),
+            flux=np.zeros(count, dtype=float),
         )
 
 
@@ -157,6 +212,7 @@ def test_unknown_key_raises():
 def test_receipt_row_carries_wall_and_trips():
     session = _stub_session()
     session.step("elongation+")
+    assert session.recorded_frames == []
     receipt = session.receipts[-1]
     assert receipt.wall == StubSolver.wall
     assert receipt.trips == StubSolver.trips
@@ -165,6 +221,125 @@ def test_receipt_row_carries_wall_and_trips():
     assert len(row["action"]) == 1
     assert row["wall"][0] == StubSolver.wall
     assert row["trips"][0] == StubSolver.trips
+
+
+def _assert_push_equal(expected, actual):
+    """Require every renderer column to survive a frame-store round trip."""
+    assert actual.keys() == expected.keys()
+    for channel, columns in expected.items():
+        assert actual[channel].keys() == columns.keys()
+        for name, values in columns.items():
+            left = np.asarray(values)
+            right = np.asarray(actual[channel][name])
+            assert right.shape == left.shape, f"{channel}.{name} shape changed"
+            if left.dtype.kind in "fc":
+                assert np.array_equal(left, right, equal_nan=True), (
+                    f"{channel}.{name} changed"
+                )
+            else:
+                assert np.array_equal(left, right), f"{channel}.{name} changed"
+
+
+def test_ten_recorded_keyframes_round_trip_the_pushed_channels(tmp_path):
+    """Ten keyframes record the exact frame reduced into renderer channels."""
+    session = _stub_session(recording=True)
+    driven_keys = list(session.keys)[:10]
+    expected_pushes = []
+    for key in driven_keys:
+        receipt = session.step(key)
+        assert receipt.frame_assembly_wall >= 0.0
+        expected_pushes.append(frame_push(session))
+
+    assert len(session.recorded_frames) == 10
+    assert session.frame_assembly_routes == ["frame-builder"] * 10
+    assert len(session.frame_assembly_walls) == 10
+    print(
+        "frame_assembly_wall_seconds_cpu="
+        + ",".join(f"{wall:.9f}" for wall in session.frame_assembly_walls)
+    )
+
+    session.write_recording(filename="playable", dirname=str(tmp_path))
+    dataset = read_session(filename="playable", dirname=str(tmp_path))
+    restored_frames = frames_from_session(dataset)
+    assert len(restored_frames) == len(expected_pushes)
+    for expected, restored in zip(expected_pushes, restored_frames, strict=True):
+        _assert_push_equal(expected, frame_push(session, frame=restored))
+
+
+def test_typed_solve_receipt_uses_the_direct_frame_branch():
+    """A solver returning a typed receipt bypasses the equilibrium adapter."""
+
+    class ReceiptSolver(StubSolver):
+        def __call__(self, previous, commanded, *, action=None, program=None):
+            result = super().__call__(
+                previous, commanded, action=action, program=program
+            )
+            receipt = equilibrium_frame_receipt(
+                result.equilibrium, wall_seconds=result.wall
+            )
+            return SolveResult(receipt, result.wall, result.trips)
+
+    def refused_builder(equilibrium, *, wall_seconds):
+        del equilibrium, wall_seconds
+        raise AssertionError("the direct receipt path must not call the builder")
+
+    session = PlayableSession(
+        solver=ReceiptSolver(),
+        frame_builder=refused_builder,
+    )
+    session.step("bulk_z+")
+    assert session.frame_assembly_routes == ["receipt"]
+    assert session.current_frame() is session.frame
+
+
+def test_decoder_receives_the_same_frame_the_session_pushes():
+    """Rendering and decoding share one assembled SteeringFrame object."""
+    from apps.playable.camera import DecodedFrame
+
+    class RecordingDecoder:
+        decoder_identity = "test:recording-decoder"
+        received = None
+
+        def decode(self, frame):
+            self.received = frame
+            return DecodedFrame(
+                image=np.zeros((2, 2, 3), dtype=np.uint8),
+                decode_wall=0.001,
+                decoder_identity=self.decoder_identity,
+            )
+
+    decoder = RecordingDecoder()
+    session = _stub_session(decoder=decoder)
+    session.step("outer_gap+")
+    session.decode_frame()
+    assert decoder.received is session.current_frame()
+
+
+def test_document_pushes_ten_assembled_frames_to_bound_sources():
+    """The playable callback reduces each assembled frame into live sources."""
+    with skip_import("bokeh.document"):
+        from bokeh.document import Document
+
+        from apps.playable.main import build_document
+
+        session = _stub_session(recording=True)
+        handle = build_document(Document(), session=session)
+        driven_keys = list(session.keys)[:10]
+        for key in driven_keys:
+            handle["on_key"](key)
+
+        assert session.frame_index == 10
+        assert len(session.recorded_frames) == 10
+        expected = frame_push(session)
+        assert expected.keys() <= handle["sources"].keys()
+        for channel, columns in expected.items():
+            actual = handle["sources"][channel].data
+            assert actual.keys() == columns.keys()
+            for name, values in columns.items():
+                left = np.asarray(values)
+                right = np.asarray(actual[name])
+                assert right.shape == left.shape, f"{channel}.{name} shape changed"
+        assert len(handle["sources"]["camera"].data["image"]) == 1
 
 
 # --------------------------------------------------------------------------
@@ -176,7 +351,6 @@ with skip_import("bokeh"):
     from bokeh.models import ColumnDataSource
 
     from apps.pulsedesign.poloidal_view import (
-        add_flux_image,
         add_separatrix,
         compensation_figure,
         keyframe_receipt,
@@ -209,10 +383,12 @@ def test_pushed_columns_match_renderer_bindings():
         for name in (
             "levelset",
             "wall",
+            "coil",
             "x_points",
+            "x_points_secondary",
+            "o_points",
             "plasma",
             "points",
-            "flux",
             "separatrix",
             "compensation",
             "receipt",
@@ -220,7 +396,6 @@ def test_pushed_columns_match_renderer_bindings():
     }
     poloidal = poloidal_figure(sources)
     add_separatrix(poloidal, sources)
-    add_flux_image(poloidal, sources, radius=(0.6, 1.42), height=(-0.42, 0.42))
     compensation = compensation_figure(sources)
     receipt = keyframe_receipt(sources)
 
@@ -229,23 +404,28 @@ def test_pushed_columns_match_renderer_bindings():
         for column, kind in _bound_fields(renderer.glyph):
             bound.setdefault(column, set()).add(kind)
 
-    # raster flux image: the image glyph binds the 2-D channel
-    assert "psi" in bound, "the flux image glyph must bind the psi column"
-    psi = frame["flux"]["psi"]
-    assert psi.ndim == 2
-    radius = np.asarray(session.equilibrium.raster_flux.radius)
-    height = np.asarray(session.equilibrium.raster_flux.height)
-    assert psi.shape == (height.size, radius.size)
-    sources["flux"].data = {"psi": [psi]}
-
-    # separatrix, control points and X-points: 1-D same-length x and z per line
-    for channel in ("separatrix", "points", "x_points"):
+    # separatrix, control points and topology markers: 1-D paired coordinates
+    for channel in (
+        "separatrix",
+        "points",
+        "o_points",
+        "x_points",
+        "x_points_secondary",
+    ):
         for column in ("x", "z"):
             assert column in bound, f"{channel} renderer must bind {column}"
             values = frame[channel][column]
             assert values.ndim == 1
         assert frame[channel]["x"].size == frame[channel]["z"].size
         sources[channel].data = frame[channel]
+
+    # nested surfaces are fixed-shape frame fields reduced to paired lines.
+    assert len(frame["levelset"]["x"]) == len(frame["levelset"]["z"])
+    for radial, vertical in zip(
+        frame["levelset"]["x"], frame["levelset"]["z"], strict=True
+    ):
+        assert len(radial) == len(vertical)
+    sources["levelset"].data = frame["levelset"]
 
     # compensating currents per circuit: 1-D same-length circuit and current
     assert "circuit" in bound and "current" in bound

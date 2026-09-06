@@ -13,6 +13,7 @@ from bokeh.models import (
 from bokeh.plotting import figure
 
 from apps.pulsedesign import ids_attrs, Simulator
+from apps.pulsedesign.poloidal_view import poloidal_figure
 from nova.graphics.bokeh import IdsInput
 
 simulator = Simulator(strike=True, **ids_attrs)
@@ -27,24 +28,7 @@ save = IdsInput(
 
 ids = Tabs(tabs=[equilibrium.tab, pf_active.tab, wall.tab, save.tab], name="ids")
 
-poloidal = figure(name="poloidal", match_aspect=True, height=650)
-poloidal.axis.visible = False
-
-flux = poloidal.multi_line(
-    "x", "z", source=source["levelset"], color="gray", alpha=0.5, level="overlay"
-)
-wall = poloidal.multi_line(
-    "x", "z", source=source["wall"], color="gray", width=2, alpha=2
-)
-nulls = poloidal.scatter(
-    "x", "z", source=source["x_points"], marker="x", size=8, line_color="red"
-)
-plasma = poloidal.multi_polygons(
-    "x", "z", fill_alpha="ionize", line_alpha=0, source=source["plasma"]
-)
-points = poloidal.scatter(
-    "x", "z", source=source["points"], marker="circle_cross", size=8
-)
+poloidal = poloidal_figure(source)
 pprime = figure(height=150)
 pprime.line("psi_norm", "dpressure_dpsi", source=source["profiles"])
 

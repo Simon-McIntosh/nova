@@ -571,6 +571,25 @@
     centroid beside a caller-supplied reference centroid with <code>branch_guard_ok</code> true within 50 mm, the reference and the flag under
     <code>diagnostic_only</code> so no EFIT reading enters the training set. Fast tests 10 passed; the decoder-field fixture 1 passed on a compute node.</p>
   </section>
+  <section id="keyframe-stage-table">
+    <h2>Where the keyframe's half second goes (31a79073 to 53fd6fd3; main merge)</h2>
+    <p><strong>Node:</strong> <code>pfs-keyframe-overhead</code> (local lane 3.5 h, then codex luna after the lane move; exact-base paired H200 job 1263460).
+    Median warm keyframe 549 ms after against 560 ms base, fence 150 ms not reached. Stage table: compiled trip 63 ms; row and shadow preparation
+    before the trip 97 ms; post-trip constraint record and prescribed-current folding 118 ms; complete receipt rebuild in the session 271 ms;
+    channel reduction 2.8 ms. Landed: the carried program reuses its external flux on warm keyframes (the external stage now reads 0 ms) and the
+    view push reads lattice columns from any receipt. Receipts and figures under <code>docs/figures/playable-forward-solve/keyframes/</code>.
+    The two remaining owners are one compiled program around the trip and a light render receipt in the session (f-pfs-018).</p>
+  </section>
+  <section id="shape-inverse">
+    <h2>The seed-anchored shape inverse reproduces the seed and shifts rather than shapes (cfd79b37; main b8f06271)</h2>
+    <p><strong>Node:</strong> <code>pfs-inverse-step-shape-control-sol-2</code> (codex sol, 31 commits over two lanes). <code>nova/equilibrium/shape_inverse.py</code>:
+    isoflux and Br/Bz rows at the bounding-box points, plasma and fixed circuits on the right-hand side, sqrt(50) on field rows, Tikhonov on the change
+    from the original seed (penalising total current, as the pulse-design reference does, picked a different minimum-norm coil set and drifted the
+    boundary 0.1 Wb), three placement rounds, one forward solve. Consistency table on 22086/43: every row closes at the seed to the extraction floor;
+    the null command returns the seed within 1.06 kA. Forward arm at gamma 1e-12 on the H200: a 20 mm top raise moved the boundary almost rigidly
+    (top +32 mm, bottom +44 mm, error 46.6 mm, 3 trips, 25 s); the elongation arm lost the axis. Receipts under
+    <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the row set continues as f-pfs-026.</p>
+  </section>
 </main>
 </body>
 </html>

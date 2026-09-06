@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T23:21:12",
+  "updated": "2026-09-06T23:34:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -115093,6 +115093,300 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T194420415769-pfs-shape-row-set",
+        "plan": "playable-forward-solve",
+        "section": "\u00a72",
+        "node": "pfs-shape-row-set",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5775,
+                "cached_input_tokens": 314280,
+                "input_tokens": 320087,
+                "output_tokens": 2637,
+                "reasoning_output_tokens": 1796,
+                "total_tokens": 322724,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "benchmarks/playable_shape_inverse_receipt.py on the CPU reports, for the null command, the 20 mm upper-point raise and the 5 percent elongation, per target point the previous, commanded and achieved values after one forward solve plus the per-circuit current change, written under docs/figures/playable-forward-solve/shape-inverse/ with tests/test_shape_inverse.py green; the report states whether the CPU linear prediction closes the exercised rows above 80 percent with every circuit change under 20 kA, which is the condition for a later one-hour H200 arm",
+          "estimated_hours": 2.5,
+          "goal": "A shape-steering row set for the seed-anchored inverse step in nova/equilibrium/shape_inverse.py: bounding-box targets built from the full boundary polygon, rows weighted by their consistency floor, X-point rows treated as the commanded location, measured first on the CPU",
+          "id": "pfs-shape-row-set",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194420415769-pfs-shape-row-set/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/shape_inverse.py",
+            "benchmarks/playable_shape_inverse_receipt.py",
+            "tests/test_shape_inverse.py",
+            "docs/figures/playable-forward-solve/shape-inverse/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-row-set.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-shape-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T19:44:32Z",
+        "completed_at": "2026-09-06T21:29:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6305,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6305,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "00d983ad6db8b4d904cd5bc1e722b137296f557f",
+        "commits": [
+          "6ca8feedbf2bda1650771860bf6ad42c1805be02",
+          "427c9b23b51fe1a467483d98795c3255d60e9223",
+          "2c3502c4e7272b3a55883922e096db9c9fb21885",
+          "c72368fb07ca4cd81a15b9c682e2f757b5e75ef3"
+        ],
+        "changed_lines": {
+          "added": 14025,
+          "removed": 682,
+          "files": 6
+        },
+        "tests_added": 2,
+        "gate": "failed",
+        "gate_check": {
+          "command": "coordinator comparison of docs/figures/playable-forward-solve/shape-inverse/null-resolve.json at 00d983ad against c72368fb: the null command must reproduce the seed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194420415769-pfs-shape-row-set/cpu-receipt-debug.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194420415769-pfs-shape-row-set/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07840-447f-7d43-9a85-d55f5f91e979",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1798528,
+            "cached_input_tokens_cumulative": 1798528,
+            "input_tokens": 1845445,
+            "input_tokens_cumulative": 1845445,
+            "output_tokens": 19771,
+            "output_tokens_cumulative": 19771,
+            "reasoning_output_tokens": 6267,
+            "reasoning_output_tokens_cumulative": 6267
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26038,
+          "peak_input_tokens": 3643973
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-shape-row-set",
+          "session_id": "01a07840-447f-7d43-9a85-d55f5f91e979",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T21:29:37Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T210501559130-pfs-pin-tail-crosstab",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-pin-tail-crosstab",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 476,
+                "cached_input_tokens": 553528,
+                "input_tokens": 554008,
+                "output_tokens": 30,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 554038,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_labeller_receipt.py passes with exit 0 including new assertions on the synthetic two-shot root (class counts sum to the slices with both errors finite, the joined flags match the manifest), and receipt.py over /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29 is run on a CPU debug partition (srun --partition=all_debug --time=00:30:00 --cpus-per-task=4 --mem=16G, TMPDIR=/tmp, the environment python called directly) writing docs/figures/playable-forward-solve/labeller-receipt/receipt.json with the new table, quoted in the report with the filter recommendation; no writer file is touched",
+          "estimated_hours": 0.75,
+          "goal": "One more table in scripts/labeller_batch/receipt.py cross-tabulating the pin displacement class (below -50 mm, -50 to 0, 0 to +50, above +50 mm) against converged and conditioned_branch_guard_ok counts, overall and by time-in-shot decile, from the manifest slice records joined to the npz by row, with the recommended consumer filter stated in the report",
+          "id": "pfs-pin-tail-crosstab",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210501559130-pfs-pin-tail-crosstab/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "scripts/labeller_batch/receipt.py",
+            "tests/test_labeller_receipt.py",
+            "docs/figures/playable-forward-solve/labeller-receipt/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/pin-tail-crosstab.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-receipt-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T21:05:11Z",
+        "completed_at": "2026-09-06T21:32:24.965Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1614,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1633,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b780497fdbac6b85fdfea7343ac8a047a8988241",
+        "commits": [
+          "b7cb904869c0b2a8501c7193b28f222f0a9e165b"
+        ],
+        "changed_lines": {
+          "added": 9774,
+          "removed": 5031,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_labeller_receipt.py -v (11 passed) plus receipt.py over the live root on all_debug via srun",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210501559130-pfs-pin-tail-crosstab/test_labeller_receipt.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210501559130-pfs-pin-tail-crosstab/manifest.md",
+        "scope_changed": false,
+        "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 12480112,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 46185,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1629.989,
+          "generated_tokens": 46185,
+          "generation_seconds": 1568.307,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 29.4,
+          "machine_seconds": 61.682,
+          "peak_input_tokens": 299043,
+          "tokens_per_second": 29.45,
+          "wall_tokens_per_second": 28.33
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-pin-tail-crosstab",
+          "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T21:32:24.965Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -115405,6 +115699,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1951
+    "_version": 1953
   }
 }

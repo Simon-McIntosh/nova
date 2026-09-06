@@ -473,13 +473,12 @@ def test_saddle_aware_hex_labels_are_fixed_shape_jit_and_vmap_safe():
     assert "pure_callback" not in inspect.getsource(fsc)
 
 
-def test_label_propagation_uses_fixed_cap_and_flood_stays_doubling():
-    """The label schedule is fixed at the diameter cap; the flood stays fast.
+def test_label_propagation_uses_fixed_schedule_and_flood_stays_doubling():
+    """The label schedule uses the caller cap; the flood stays fast.
 
-    The label propagation's fixed loop runs a capped ``nr + nz`` schedule on
-    every element (constant per-element work under vmap), while the flood
-    remains its data-dependent doubling while loop whose handful of active
-    trips already amortise across a batch and stop at the fixed point.
+    Label propagation uses the caller's fixed iteration count for every
+    element under vmap, while the flood remains its data-dependent doubling
+    loop and stops when the component reaches its fixed point.
     """
     flood_source = inspect.getsource(fsc.flood_fill_core_with_steps)
     assert "while_loop" in flood_source
@@ -487,7 +486,8 @@ def test_label_propagation_uses_fixed_cap_and_flood_stays_doubling():
     labels_source = inspect.getsource(fsc._iterate_component_labels)
     assert "lax.fori_loop" in labels_source
     assert "while_loop" not in labels_source
-    assert "vertical_count + radial_count" in labels_source
+    assert "n_iter" in labels_source
+    assert "active = jnp.any(labels != previous)" in labels_source
 
 
 def test_flood_matches_linear_reference_on_corridor():
@@ -527,13 +527,12 @@ def test_flood_matches_linear_reference_on_corridor():
     assert int(steps) <= math.ceil(math.log2(sum(confined.shape)))
 
 
-def test_label_propagation_cap_bounds_the_fixed_schedule():
-    """The label propagation fixed cap is the grid diameter, saturated.
+def test_label_propagation_caller_caps_preserve_the_fixed_point():
+    """Caller caps beyond convergence preserve the exact fixed point.
 
-    ``nr + nz`` steps suffice for any component on the structured lattice, so
-    the kernel's own cap keeps the compiled schedule static at the diameter
-    whatever the caller passes, and the label result is identical across the
-    two schedules (the mask preserves settled labels).
+    The masked fixed schedule retains settled labels while executing the
+    caller's full static iteration count, so two sufficient caps produce the
+    same exact labels and active-pass count.
     """
     confined = np.zeros((19, 27), dtype=bool)
     confined[2:15, 2:9] = True

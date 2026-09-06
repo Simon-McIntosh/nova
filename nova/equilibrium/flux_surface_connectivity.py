@@ -151,19 +151,9 @@ def _fill_label_segments(
 def _iterate_component_labels(
     confined: jnp.ndarray, n_iter: int, propagate
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
-    """Propagate canonical minimum labels with fixed-cap masked execution.
-
-    The loop cap is the grid-diameter bound ``nr + nz`` saturated by the
-    caller's ``n_iter``: every component on the structured lattice converges
-    within that many propagation steps (the caller's cell-count cap is looser),
-    so a batched pass runs the same short fixed schedule on every element and
-    the mask keeps settled labels exact.  The returned step count counts only
-    the active (changing) iterations, which is unchanged by the tighter cap.
-    """
+    """Propagate canonical minimum labels with fixed-cap masked execution."""
     initial = jnp.arange(confined.size, dtype=jnp.int32).reshape(confined.shape) + 1
     initial = jnp.where(confined, initial, 0)
-    vertical_count, radial_count = confined.shape
-    sufficient = min(n_iter, vertical_count + radial_count)
 
     def body(_iteration, state):
         labels, previous, step = state
@@ -177,7 +167,7 @@ def _iterate_component_labels(
 
     labels, _previous, step = jax.lax.fori_loop(
         0,
-        sufficient,
+        n_iter,
         body,
         (initial, jnp.zeros_like(initial), jnp.asarray(0, dtype=jnp.int32)),
     )

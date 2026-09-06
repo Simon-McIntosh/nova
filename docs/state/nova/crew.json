@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T22:55:48",
+  "updated": "2026-09-06T23:03:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2634,18 +2634,22 @@
         "id": "pfs-appframe-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07841-370c-7b62-8c86-888e3e4ce9eb"
+        },
         "created": "2026-09-06"
       },
       {
         "id": "pfs-appgate-c",
         "harness": "clive",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "c912a83d-9b8e-489b-9ca3-6d16e05114ea",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "c912a83d-9b8e-489b-9ca3-6d16e05114ea"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2836,6 +2840,15 @@
         "sessions": {
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07652-2a88-7911-9908-534582e47c41"
         },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-rasterless-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-06"
       },
       {
@@ -114515,6 +114528,291 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T194521067672-pfs-app-frame-push",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-app-frame-push",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3185,
+                "cached_input_tokens": 320055,
+                "input_tokens": 323272,
+                "output_tokens": 2464,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 325736,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_playable_session.py drives ten keys with every pushed column shaped as its glyph binds, a recorded session read back through frames_from_session reproduces the pushed channels, and the test log records the frame assembly wall per keyframe on the CPU, all with JAX_PLATFORMS=cpu, plus the report naming the receipt-path versus frame-builder branch taken per solve route",
+          "estimated_hours": 2.0,
+          "goal": "The playable app pushes a SteeringFrame per keyframe: PlayableSession in apps/playable/session.py assembles the frame after every solve through assemble_frame, records it in the session store when recording is on, with frame_push reduced to the renderer channels drawn from the frame fields",
+          "id": "pfs-app-frame-push",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194521067672-pfs-app-frame-push/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "apps/playable/session.py",
+            "apps/playable/main.py",
+            "tests/test_playable_session.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/app-frame-push.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-appframe-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T19:45:34Z",
+        "completed_at": "2026-09-06T20:09:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1414,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1414,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "00d983ad6db8b4d904cd5bc1e722b137296f557f",
+        "commits": [
+          "61e07bd07b512f255a441d07ba64da030a219810"
+        ],
+        "changed_lines": {
+          "added": 476,
+          "removed": 248,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider -m \"not slow\" -s tests/test_playable_session.py (21 passed) plus the separate slow-gate node: -m slow, 2 passed, 1 pre-existing failure (production keyframe 60 s CPU wall fence, identical assertion at base, no hunk of this commit touches it)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194521067672-pfs-app-frame-push/after-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T194521067672-pfs-app-frame-push/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16548224,
+            "cached_input_tokens_cumulative": 16548224,
+            "input_tokens": 16868235,
+            "input_tokens_cumulative": 16868235,
+            "output_tokens": 47957,
+            "output_tokens_cumulative": 47957,
+            "reasoning_output_tokens": 17300,
+            "reasoning_output_tokens_cumulative": 17300
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 65257,
+          "peak_input_tokens": 33416459
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-app-frame-push",
+          "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T20:09:08Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T201046490728-pfs-app-frame-slow-gate",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-app-frame-slow-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3649,
+                "cached_input_tokens": 412733,
+                "input_tokens": 416414,
+                "output_tokens": 1041,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 417455,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "From the assigned worktree root, JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider -m slow -s -vv tests/test_playable_session.py run in the FOREGROUND, redirected to slow-gate.log inside the run directory that holds the manifest, ends with exit 0 and a pytest summary counting 3 passed, 0 failed; the manifest quotes the summary line, the exit status, the wall time, and every frame_assembly_wall_seconds_cpu= line or, if none is printed by the slow tests, says so explicitly; no source or test file is edited",
+          "estimated_hours": 0.5,
+          "goal": "The three slow production tests in tests/test_playable_session.py executed against commit 61e07bd0 on the CPU, with the real frame-builder branch assembly wall per keyframe recorded from their output",
+          "id": "pfs-app-frame-slow-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T201046490728-pfs-app-frame-slow-gate/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/app-frame-slow-gate.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pfs-appgate-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T20:11:04Z",
+        "completed_at": "2026-09-06T20:58:04.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2801,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2820,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "61e07bd07b512f255a441d07ba64da030a219810",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider -m slow -s -vv tests/test_playable_session.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T201046490728-pfs-app-frame-slow-gate/slow-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T201046490728-pfs-app-frame-slow-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "c912a83d-9b8e-489b-9ca3-6d16e05114ea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3211665,
+            "input_tokens_cumulative": 3211665,
+            "output_tokens": 26616,
+            "output_tokens_cumulative": 26616,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2817.187,
+          "generated_tokens": 26616,
+          "generation_seconds": 694.862,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 11.9,
+          "machine_seconds": 2122.325,
+          "peak_input_tokens": 121355,
+          "tokens_per_second": 38.3,
+          "wall_tokens_per_second": 9.45
+        },
+        "follow_on_paths": [
+          "60.0"
+        ],
+        "predecessor_run": "r-20260906T194521067672-pfs-app-frame-push",
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only test node; the log and report are the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-app-frame-slow-gate",
+          "session_id": "c912a83d-9b8e-489b-9ca3-6d16e05114ea",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T20:58:04.645Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -114827,6 +115125,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1943
+    "_version": 1948
   }
 }

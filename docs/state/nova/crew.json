@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T13:44:21",
+  "updated": "2026-09-06T14:57:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -527,6 +527,15 @@
         "created": "2026-08-26"
       },
       {
+        "id": "cank-bound-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "cank-compensator-x",
         "harness": "claude",
         "role": "implement",
@@ -1010,11 +1019,20 @@
         "created": "2026-09-04"
       },
       {
+        "id": "dvf-residual-s",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "dvf-residual-x",
-        "harness": "codex",
-        "role": "implement",
-        "session_id": "01a06aab-2baa-7402-82f9-25f2e0667304",
-        "session_model": "gpt-5.6-sol",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06aab-2baa-7402-82f9-25f2e0667304"
         },
@@ -1213,6 +1231,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "fsa-identity-t",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "fsa-raster-receipt",
         "harness": "codex",
         "role": "implement",
@@ -1225,7 +1252,7 @@
       },
       {
         "id": "fsa-raster-x",
-        "harness": "codex",
+        "harness": "clive",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -1757,6 +1784,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "mcs-quantum-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "moment-blocks",
         "harness": "codex",
         "role": "implement",
@@ -1839,6 +1875,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "msc-hooks-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "msc-host-profile-x",
@@ -2224,6 +2269,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-nullfit-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "nia-oracle-expect-x",
         "harness": "codex",
         "role": "implement",
@@ -2370,6 +2424,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-surface-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "nia-test-health",
         "harness": "codex",
         "role": "implement",
@@ -2424,6 +2487,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nova-sweep-x",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "observable-discriminator",
@@ -2500,6 +2572,15 @@
         "created": "2026-08-13"
       },
       {
+        "id": "pfs-contract-rev",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-contract-x",
         "harness": "clive",
         "role": "implement",
@@ -2522,6 +2603,24 @@
         "created": "2026-09-05"
       },
       {
+        "id": "pfs-gate-x",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-inverse-rev",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-inverse-x",
         "harness": "clive",
         "role": "implement",
@@ -2530,6 +2629,15 @@
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "4ac46918-f3c3-4d54-ac53-99d4dbf00fde"
         },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-keyframe-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-06"
       },
       {
@@ -2678,6 +2786,17 @@
       {
         "id": "pfs-sol-x3",
         "harness": "codex",
+        "role": "implement",
+        "session_id": "01a07651-0e99-74d3-ab83-0ff183df55c3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07651-0e99-74d3-ab83-0ff183df55c3"
+        },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-topo-x",
+        "harness": "clive",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -109898,6 +110017,465 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T121053535934-pfs-contract-fast-gate",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-contract-fast-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2524,
+                "cached_input_tokens": 907559,
+                "input_tokens": 910115,
+                "output_tokens": 1651,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 911766,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "On a compute node under one bounded sbatch (all_debug partition, --time=00:30:00, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_steering_frames.py tests/test_flux_surface_geometry.py -m \"not slow\" -v, PYTHONPATH the worktree) run in the FOREGROUND with the log captured whole to the run directory, the report states the tally of passed and failed with every failing test named and its assertion quoted, and the log path. Also read the log of SLURM job 1263308 (the slow fixture test tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field run by the previous worker) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/ once that job has left the queue (poll squeue -h -j 1263308 with sleeps of a few minutes in the foreground; it has about fifteen minutes to run) and state its result in the report. Change no source or test file; this is a measurement of the delivered tip. Write the manifest before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/contract-fast-gate.md.",
+          "estimated_hours": 0.5,
+          "goal": "Run the fast gate of the contract extension at its delivered tip on a compute node and report the tally, because the codex worker that wrote the tests died on its lane limit before running them",
+          "id": "pfs-contract-fast-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T121053535934-pfs-contract-fast-gate/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/contract-fast-gate.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pfs-gate-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T12:11:10Z",
+        "completed_at": "2026-09-06T12:45:44.445Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2066,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2074,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "3616a49a04be2d5a9028a46dd091f21bdc477de5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch 1263328 all_debug --mem=96G: python -m pytest -p no:cacheprovider tests/test_steering_frames.py tests/test_flux_surface_geometry.py (JAX_PLATFORMS=cpu, root venv python)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T121053535934-pfs-contract-fast-gate/frame-contract-fast-gate-1263328.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T121053535934-pfs-contract-fast-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "6f8b5cd8-7561-4bf9-95cf-00e4e3fb5e66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4399158,
+            "input_tokens_cumulative": 4399158,
+            "output_tokens": 30610,
+            "output_tokens_cumulative": 30610,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"Awaiting foreground H200 one-row smoke job 1263318 before submitting the two-row measurement.\"",
+              "elapsed_seconds": 1057,
+              "external_wait": null,
+              "log_age_seconds": 192,
+              "log_fresh": true,
+              "manifest_commits": [
+                "98b1c93e061eecda8e891989a023fc0b7339163d\"]; changed_paths: [\"benchmarks/constraint_centroid_receipt.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/converged-state-compensator.md"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805234456-cank-converged-state-compensator-sol/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805234456-cank-converged-state-compensator-sol/manifest.md; resolve the blocker before resuming the run",
+              "node": "cank-converged-state-compensator-sol",
+              "phase": "working",
+              "plan": "constraint-augmented-newton-krylov",
+              "process_alive": false,
+              "project": "nova",
+              "resume_remedy": {
+                "command": "reckon crew resume --run r-20260906T102805234456-cank-converged-state-compensator-sol --advice continue",
+                "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+                "source": "pointer"
+              },
+              "run_id": "r-20260906T102805234456-cank-converged-state-compensator-sol",
+              "session": "s19-playable",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260906T102805234456-cank-converged-state-compensator-sol",
+                "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 1096,
+              "terminal_at": "2026-09-06T11:52:48Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-converged-state-compensator-sol"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: foreground H200 job h200-active-rank-aware.log has not yet completed; this manifest was written immediately before starting that bounded wait",
+              "elapsed_seconds": 991,
+              "external_wait": null,
+              "log_age_seconds": 192,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5b1cf97cbfff3d6187aa3ceae2ea5b257102d36f",
+                "9743c691edf21c1553439c407db3edd925e5f525",
+                "13e432711867c8dd3338060e80ac0cf47f45982b",
+                "1d6753f7f03c65c714ad057c479e10ac5b7983bb",
+                "9d46e9fd4766c21bc9bec0b69cc40eb65b0265b1",
+                "9c55637da90a913245f4d9cfdd7f85fff329ce1e",
+                "e270de7357e7694444a7ba227fcd23e8f762bddf",
+                "230ce90e9b7194b7f46b51a0860ba30924174051\"]; changed_paths: [\"nova/equilibrium/shape_inverse.py",
+                "tests/test_shape_inverse.py",
+                "apps/playable/production.py",
+                "apps/playable/shape.py",
+                "tests/test_playable_session.py",
+                "benchmarks/playable_shape_inverse_receipt.py",
+                "docs/figures/playable-forward-solve/shape-inverse/null-resolve.json",
+                "docs/figures/playable-forward-solve/shape-inverse/upper-point-plus-20mm.json",
+                "docs/figures/playable-forward-solve/shape-inverse/elongation-plus-5pct.json",
+                "docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json",
+                "docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.png",
+                "docs/figures/playable-forward-solve/shape-inverse/all-prescribed-negative-control.json",
+                "docs/figures/playable-forward-solve/shape-inverse/all-prescribed-negative-control.png",
+                "docs/figures/playable-forward-solve/shape-inverse/all-prescribed-upper-point-plus-20mm.json",
+                "docs/figures/playable-forward-solve/shape-inverse/all-prescribed-elongation-plus-5pct.json"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104326588527-pfs-inverse-step-shape-control-sol-2/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104326588527-pfs-inverse-step-shape-control-sol-2/manifest.md; resolve the blocker before resuming the run",
+              "node": "pfs-inverse-step-shape-control-sol-2",
+              "phase": "working",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "resume_remedy": {
+                "command": "reckon crew resume --run r-20260906T104326588527-pfs-inverse-step-shape-control-sol-2 --advice continue",
+                "session_id": "01a07651-0e99-74d3-ab83-0ff183df55c3",
+                "source": "pointer"
+              },
+              "run_id": "r-20260906T104326588527-pfs-inverse-step-shape-control-sol-2",
+              "session": "s19-playable",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260906T104326588527-pfs-inverse-step-shape-control-sol-2",
+                "session_id": "01a07651-0e99-74d3-ab83-0ff183df55c3",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 698,
+              "terminal_at": "2026-09-06T11:59:26Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-inverse-step-shape-control-sol-2"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2208,
+              "external_wait": null,
+              "log_age_seconds": 190,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a5cb8738",
+                "d88ed2af",
+                "0f0800d9",
+                "2225a766"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna --gate <verdict> --commit a5cb8738 --commit d88ed2af --commit 0f0800d9 --commit 2225a766",
+              "node": "pfs-frame-contract-internal-geometry-luna",
+              "phase": "working",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna",
+              "session": "s19-playable",
+              "terminal_age_seconds": 2356,
+              "terminal_at": "2026-09-06T11:31:48Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-internal-geometry-luna"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2071.261,
+          "generated_tokens": 30610,
+          "generation_seconds": 1560.379,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 16.0,
+          "machine_seconds": 510.882,
+          "peak_input_tokens": 162665,
+          "tokens_per_second": 19.62,
+          "wall_tokens_per_second": 14.78
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "measurement role: the node ran the fast contract gate on a compute node and delivered its report; no source or test change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-contract-fast-gate",
+          "session_id": "6f8b5cd8-7561-4bf9-95cf-00e4e3fb5e66",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T12:45:44.445Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260906T094100005581-cank-constraint-hygiene-luna",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-constraint-hygiene-luna",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7924,
+                "cached_input_tokens": 596515,
+                "input_tokens": 604441,
+                "output_tokens": 4961,
+                "reasoning_output_tokens": 1077,
+                "total_tokens": 609402,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "Three changes with contracts. (1) In nova/equilibrium/forward.py, _solve_augmented_constraints refuses a constrained Krylov request when neither prescribed_current nor an operator-side prescribed_current_field exists, raising ValueError with the reason stated, mirroring the refusal solve_constrained_reduced_newton already makes; a test in tests/test_forward_constraints.py (new file) drives the refusal on the Solovev fixture and shows the same request with a prescribed field still solves. (2) In nova/equilibrium/constraint.py, ConstraintBinding coerces initial_unknown (and target, scale, tolerance where they are array leaves) with jnp.asarray at construction so a plain Python list no longer raises TracerArrayConversionError inside ConstraintPair.__post_init__ under a traced solve; a test in tests/test_constraint_interface.py (extend if it exists, else new) constructs a binding from lists and traces through jax.jit a function that reads its leaves. (3) A banked real-data fixture for the derived compensating direction: persist the 22086/43 active-circuit response block (13 drivable circuits by the centroid row, read from the persisted receipt JSON under docs/figures/constraint-augmented-newton-krylov/centroid/ or recomputed from the carrier on the login node) as a small .npz under tests/data/ plus a CPU test that select_compensating_directions on it reproduces the recorded rule, leading circuits and singular spectrum to 1e-9 relative; if the receipt does not carry the matrix, state so in the report and bank the Solovev matrix instead with the gap named. Path-scoped ruff check and format on every file you touch; conventional commit subject plus body per coherent change; never git add -A. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider on the touched test files plus tests/test_reduced_newton_constraints.py in groups of at most four tests per process because XLA CPU aborts a process after eight to fifteen accumulated compilations, PYTHONPATH the worktree) with the log captured whole. Write the manifest at the path the dispatch names before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/constraint-hygiene.md.",
+          "estimated_hours": 2.0,
+          "goal": "Close the three constraint hygiene items the review repairs left, as followup f-cank-011 on the plan specifies",
+          "id": "cank-constraint-hygiene-luna",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094100005581-cank-constraint-hygiene-luna/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/constraint.py",
+            "tests/test_forward_constraints.py",
+            "tests/test_constraint_interface.py",
+            "tests/data",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/constraint-hygiene.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-luna-x",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T09:41:10Z",
+        "completed_at": "2026-09-06T12:52:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11483,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "d532d28d3bc9ae77beeea7468478cbb1016066ce",
+        "commits": [
+          "da8880dc6ca34d449bed505e9e2761b4eb3ab6f7",
+          "ed0c56581e674f584405d3dcb56073105271f12f",
+          "7a074ef3ee0f3ef5706a823faa8e7432f84cb667"
+        ],
+        "changed_lines": {
+          "added": 187,
+          "removed": 3,
+          "files": 5
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch 1263317 all_debug --mem=96G JAX_PLATFORMS=cpu: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider over six groups of tests/test_constraint_interface.py tests/test_forward_constraints.py tests/test_reduced_newton_constraints.py (and the forward gate files); 19 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094100005581-cank-constraint-hygiene-luna/log-gate-final.txt",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T094100005581-cank-constraint-hygiene-luna/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07617-dd2d-75a3-99ec-1f9363dc1871",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4031744,
+            "cached_input_tokens_cumulative": 4031744,
+            "input_tokens": 4322691,
+            "input_tokens_cumulative": 4322691,
+            "output_tokens": 21813,
+            "output_tokens_cumulative": 21813,
+            "reasoning_output_tokens": 4371,
+            "reasoning_output_tokens_cumulative": 4371
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26184,
+          "peak_input_tokens": 8354435
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-constraint-hygiene-luna",
+          "session_id": "01a07617-dd2d-75a3-99ec-1f9363dc1871",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T12:52:33Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -110102,16 +110680,16 @@
         "backend": "codex",
         "purpose": "resume",
         "opened_at": "2026-09-06T11:18:07Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-06T11:50:14Z",
+        "held_seconds": 1927,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T07:38:00+02:00",
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "resume",
         "resumption_fired": false
       }
     ],
-    "_version": 1837
+    "_version": 1856
   }
 }

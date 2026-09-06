@@ -174,6 +174,15 @@ and appends both the pytest wall time and exit status to the named log. Preserve
 GPU failures from CPU-specific identity assertions as device-qualified evidence;
 do not weaken those CPU contracts to make the H200 lane green.
 
+The H200 node is shared and its reservation is a **core** budget (30 cores, no
+cards): every submission states an explicit `--mem` (never `--mem=0`, which
+SLURM reads as the whole 1.5 TB and leaves the job pending on `Resources`
+while blocking the queue behind it) and sizes `--cpus-per-task` against the
+cores the serving jobs already hold (`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`).
+A single-card measurement job is 8 cores, `--gres=gpu:1`, `--mem=128G`. The
+node's live budget and the serving footprint are kept in imas-ambix
+`imas_ambix/agent/AGENTS.md`.
+
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment
 # per Repository above); --no-sync because peers share that environment:

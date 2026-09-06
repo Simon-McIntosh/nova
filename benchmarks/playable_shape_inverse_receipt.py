@@ -35,6 +35,7 @@ from nova.equilibrium.shape_inverse import (
     shape_values,
     solve_shape_inverse,
 )
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
     configure_dtypes,
@@ -385,20 +386,42 @@ def _seed_consistency_diagnostic(
 
     command = _upper_point_target(previous_target)
     gamma_factors = (1.0e-12, 1.0e-11, 1.0e-10, 1.0e-9)
-    default_inverse = solve_shape_inverse(
-        profile,
-        command,
-        prime.flux,
-        prescribed_current=seed,
-        free_circuits=free,
-        gamma=gamma_factors[0],
-    )
     sweep = []
     for gamma_factor in gamma_factors:
-        inverse = (
-            default_inverse
-            if gamma_factor == 1.0e-12
-            else solve_shape_inverse(
+        initial_inverse = solve_shape_inverse(
+            profile,
+            command,
+            prime.flux,
+            prescribed_current=seed,
+            free_circuits=free,
+            gamma=gamma_factor,
+            picard_rounds=0,
+        )
+        initial_closure = (
+            initial_inverse.linear_prediction - initial_inverse.right_hand_side
+        )
+        initial_weighted_closure = initial_closure.copy()
+        initial_weighted_closure[4:] *= np.sqrt(initial_inverse.field_weight)
+        entry: dict[str, Any] = {
+            "gamma_factor_per_ampere": gamma_factor,
+            "starting_state_solve": {
+                "tikhonov_gamma": initial_inverse.gamma,
+                "total_current_by_circuit": _current_comparison(
+                    initial_inverse, seed, circuit_names
+                ),
+                "current_change_l2_a": float(np.linalg.norm(initial_inverse.delta)),
+                "maximum_absolute_current_change_a": float(
+                    np.max(np.abs(initial_inverse.delta))
+                ),
+                "linear_row_closure": _linear_closure(initial_inverse),
+                "linear_row_closure_l2_mixed": float(np.linalg.norm(initial_closure)),
+                "weighted_linear_row_closure_l2_mixed": float(
+                    np.linalg.norm(initial_weighted_closure)
+                ),
+            },
+        }
+        try:
+            inverse = solve_shape_inverse(
                 profile,
                 command,
                 prime.flux,
@@ -406,29 +429,42 @@ def _seed_consistency_diagnostic(
                 free_circuits=free,
                 gamma=gamma_factor,
             )
-        )
-        closure = inverse.linear_prediction - inverse.right_hand_side
-        weighted_closure = closure.copy()
-        weighted_closure[4:] *= np.sqrt(inverse.field_weight)
-        sweep.append(
-            {
-                "gamma_factor_per_ampere": gamma_factor,
-                "tikhonov_gamma": inverse.gamma,
-                "total_current_by_circuit": _current_comparison(
-                    inverse, seed, circuit_names
-                ),
-                "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
-                "maximum_absolute_current_change_a": float(
-                    np.max(np.abs(inverse.delta))
-                ),
-                "linear_row_closure": _linear_closure(inverse),
-                "linear_row_closure_l2_mixed": float(np.linalg.norm(closure)),
-                "weighted_linear_row_closure_l2_mixed": float(
-                    np.linalg.norm(weighted_closure)
-                ),
-                "boundary_flux_by_round_wb": (inverse.picard_boundary_flux.tolist()),
-            }
-        )
+        except NoQualifiedAxisError as error:
+            entry.update(
+                {
+                    "status": "axis_lost_during_picard",
+                    "error": str(error),
+                    "placement_result": None,
+                }
+            )
+        else:
+            closure = inverse.linear_prediction - inverse.right_hand_side
+            weighted_closure = closure.copy()
+            weighted_closure[4:] *= np.sqrt(inverse.field_weight)
+            entry.update(
+                {
+                    "status": "complete",
+                    "placement_result": {
+                        "tikhonov_gamma": inverse.gamma,
+                        "total_current_by_circuit": _current_comparison(
+                            inverse, seed, circuit_names
+                        ),
+                        "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+                        "maximum_absolute_current_change_a": float(
+                            np.max(np.abs(inverse.delta))
+                        ),
+                        "linear_row_closure": _linear_closure(inverse),
+                        "linear_row_closure_l2_mixed": float(np.linalg.norm(closure)),
+                        "weighted_linear_row_closure_l2_mixed": float(
+                            np.linalg.norm(weighted_closure)
+                        ),
+                        "boundary_flux_by_round_wb": (
+                            inverse.picard_boundary_flux.tolist()
+                        ),
+                    },
+                }
+            )
+        sweep.append(entry)
         payload["check_3_upper_point_plus_20mm"] = {
             "status": "running",
             "commanded_turning_points_m": _points(command).tolist(),

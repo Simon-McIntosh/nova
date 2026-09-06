@@ -173,7 +173,9 @@ class PlayableSession:
         return receipt
 
 
-def frame_push(session: PlayableSession) -> dict[str, dict[str, np.ndarray]]:
+def frame_push(
+    session: PlayableSession, *, equilibrium: object | None = None
+) -> dict[str, dict[str, np.ndarray]]:
     """Return the keyframe channels reduced to the renderers' bound columns.
 
     The channel sources mirror :mod:`apps.pulsedesign.poloidal_view`: the
@@ -181,8 +183,16 @@ def frame_push(session: PlayableSession) -> dict[str, dict[str, np.ndarray]]:
     the topology X-points, the compensating currents per circuit and the
     latest keyframe receipt row.  Every column is shaped exactly as its
     renderer binds it.
+
+    The view binds the lattice columns only - the raster image, the two
+    polyline projections of the separatrix and the scalar marks - so the push
+    itself is a device-to-host projection that costs milliseconds regardless
+    of how the raster was produced.  ``equilibrium`` defaults to the
+    session's current one; a caller feeding the solve result's on-device
+    raster (the light-receipt path) passes it here and the same columns come
+    out.
     """
-    equilibrium = session.equilibrium
+    equilibrium = session.equilibrium if equilibrium is None else equilibrium
     raster = equilibrium.raster_flux
     labelled = equilibrium.labelled_flux
 

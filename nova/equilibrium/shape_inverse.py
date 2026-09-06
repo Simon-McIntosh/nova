@@ -17,9 +17,9 @@ row is evaluated by the same lattice interpolation the constraint rows use
 (``sample_lattice_flux`` and the field reads of ``FieldComponentConstraint``),
 and its response to every drivable circuit current is the observation
 Jacobian contracted with the operator's response carrier. The unknowns are
-the total free-circuit currents. The fixed-conductor and plasma contribution
-is moved to the right-hand side, exactly as the pulse-design inverse moves its
-plasma column. Field rows are weighted by ``sqrt(field_weight)`` and the
+free-circuit current changes about the equilibrium's original seed currents.
+The fixed-conductor, plasma and seed-current contributions are moved to the
+right-hand side. Field rows are weighted by ``sqrt(field_weight)`` and the
 Tikhonov ``gamma`` is scaled by the plasma current.
 
 Three Picard placement rounds alternate the current solve with one forward-map
@@ -558,14 +558,15 @@ def solve_shape_inverse(
     current_step_fraction: float | None = None,
     current_step_reference=None,
 ) -> ShapeInverseResult:
-    """Solve total free-circuit currents with three plasma-placement rounds.
+    """Solve seed-anchored free-circuit changes with plasma-placement rounds.
 
-    At each round, the absolute coil coupling is solved against the current
-    boundary-flux and zero-field targets after the fixed-conductor and plasma
-    contribution has been subtracted. The solved values replace the total
-    free currents; they are not increments. Between solves one forward-map
-    evaluation re-evaluates the plasma profile inside the boundary produced
-    by those currents. No nonlinear equilibrium solve is run here.
+    At each round, the coil coupling is solved for a current change about the
+    original seed after the fixed-conductor, plasma and seed-current images
+    have been subtracted from the target. Every round remains anchored to that
+    same seed rather than accumulating changes from the prior round. Between
+    solves one forward-map evaluation re-evaluates the plasma profile inside
+    the boundary produced by those currents. No nonlinear equilibrium solve
+    is run here.
     """
     if picard_rounds < 0:
         raise ValueError("picard_rounds must be non-negative")
@@ -621,11 +622,13 @@ def solve_shape_inverse(
             requested_class=requested_class,
             target_current=target_current,
         )
-        # Removing the present free-circuit image leaves the plasma plus every
-        # fixed conductor. Solving for total free currents against that base is
-        # the active-circuit analogue of moving the plasma column to the RHS.
+        # Removing the current free-circuit image leaves the plasma plus every
+        # fixed conductor. The original seed image is then held on that side of
+        # the equation so regularisation selects the smallest steering change,
+        # not the smallest absolute machine-current state.
         base = full_observed - response[:, free] @ current[free]
-        right_hand_side = target_rows - base
+        seed_observed = base + response[:, free] @ initial_current[free]
+        right_hand_side = target_rows - seed_observed
         flux_rows = int(jnp.shape(target.flux_points)[0])
         weight = np.ones(target_rows.size)
         weight[flux_rows:] = np.sqrt(field_weight)
@@ -633,15 +636,14 @@ def solve_shape_inverse(
         weighted_rhs = right_hand_side * weight
         ip = plasma_current(profile, state, target_current=target_current)
         regularisation = gamma * abs(ip)
-        solved_total = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
-        uncapped_round_delta = solved_total - current[free]
+        solved_delta = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
         applied_round_delta, limited = _cap_current_delta(
-            uncapped_round_delta,
+            solved_delta,
             step_reference[free],
             current_step_fraction,
         )
         current_step_limited = current_step_limited or limited
-        current[free] = current[free] + applied_round_delta
+        current[free] = initial_current[free] + applied_round_delta
         picard_current_history.append(current.copy())
         if iteration < picard_rounds:
             state = profile.flux_map(
@@ -654,10 +656,10 @@ def solve_shape_inverse(
     numerical_rank = int(np.linalg.matrix_rank(weighted))
     right_vectors_h = np.linalg.svd(weighted, full_matrices=True)[2]
     uncapped_current = current.copy()
-    uncapped_current[free] = solved_total
+    uncapped_current[free] = initial_current[free] + solved_delta
     delta_free = current[free] - initial_current[free]
     uncapped_delta = uncapped_current[free] - initial_current[free]
-    linear_prediction = response[:, free] @ current[free]
+    linear_prediction = response[:, free] @ delta_free
     row_kinds = ("flux",) * flux_rows + ("field",) * (target_rows.size - flux_rows)
     return ShapeInverseResult(
         currents=current,
@@ -665,7 +667,7 @@ def solve_shape_inverse(
         uncapped_delta=uncapped_delta,
         free_circuits=free,
         response=response,
-        observed=base,
+        observed=seed_observed,
         target=target_rows,
         right_hand_side=right_hand_side,
         linear_prediction=linear_prediction,
@@ -681,10 +683,10 @@ def solve_shape_inverse(
         current_step_fraction=current_step_fraction,
         current_step_limited=current_step_limited,
         least_squares_residual=float(
-            np.linalg.norm(weighted @ current[free] - weighted_rhs)
+            np.linalg.norm(weighted @ delta_free - weighted_rhs)
         ),
         uncapped_least_squares_residual=float(
-            np.linalg.norm(weighted @ solved_total - weighted_rhs)
+            np.linalg.norm(weighted @ solved_delta - weighted_rhs)
         ),
     )
 

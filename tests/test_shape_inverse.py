@@ -92,8 +92,8 @@ def test_response_matrix_matches_central_differences(machine, seed_target):
         )
 
 
-def test_unmoved_inverse_solves_total_currents(machine, seed_target):
-    """The inverse solves total currents against the absolute shape rows."""
+def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
+    """The inverse regularises current changes about the immutable seed."""
     current = np.asarray(machine.profile.operator.prescribed_current_field.current)
     solved = solve_shape_inverse(
         machine.profile,
@@ -121,8 +121,9 @@ def test_unmoved_inverse_solves_total_currents(machine, seed_target):
     )
     matrix = solved.response[:, solved.free_circuits] * weight[:, None]
     vector = solved.right_hand_side * weight
-    total = solved.currents[solved.free_circuits]
-    normal_residual = matrix.T @ (matrix @ total - vector) + solved.gamma**2 * total
+    normal_residual = (
+        matrix.T @ (matrix @ solved.delta - vector) + solved.gamma**2 * solved.delta
+    )
     assert np.linalg.norm(normal_residual) < 1.0e-10
     assert solved.right_null_space.shape == (
         solved.free_circuits.size - solved.numerical_rank,
@@ -186,10 +187,12 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
         *,
         prescribed_current,
         free_circuits,
+        gamma,
         current_step_fraction,
         current_step_reference,
     ):
         assert free_circuits is None
+        assert gamma == production.GAMMA
         assert current_step_fraction is None
         np.testing.assert_allclose(current_step_reference, [2.0, -3.0])
         return SimpleNamespace(currents=np.asarray(prescribed_current) + 1.0)

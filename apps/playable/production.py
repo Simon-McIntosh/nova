@@ -1,8 +1,9 @@
 """Production keyframe solver over one forward profile.
 
-Shape control is an inverse-forward step. The inverse solves total free-coil
-currents against the bounding-box flux and field rows, including three
-plasma-placement Picard updates that do not run a nonlinear equilibrium solve.
+Shape control is an inverse-forward step. The inverse solves free-coil current
+changes about the equilibrium seed against bounding-box flux and field rows,
+including three plasma-placement Picard updates that do not run a nonlinear
+equilibrium solve.
 The forward solve then runs once on those prescribed currents, warm-started
 from the previous frame. Constraint pairs are deliberately absent from this
 path: they remain the diagnostic placement mechanism, not the shape actuator.
@@ -27,6 +28,7 @@ from nova.equilibrium.reduced_newton import (
     solve_constrained_reduced_newton,
 )
 from nova.equilibrium.shape_inverse import (
+    GAMMA,
     ShapeInverseResult,
     achieved_target,
     solve_shape_inverse,
@@ -72,7 +74,7 @@ class InverseRoundReceipt:
 
 @dataclass
 class ProductionSolver:
-    """Run one pulse-design inverse followed by one warm forward solve."""
+    """Run one seed-anchored inverse followed by one warm forward solve."""
 
     machine: ForwardMachine
     route: str = "reduced_newton"
@@ -81,6 +83,7 @@ class ProductionSolver:
     active_set_steps: int = 2
     turning_point_tolerance: float = TURNING_POINT_TOLERANCE
     current_step_fraction: float | None = CURRENT_STEP_FRACTION
+    inverse_gamma: float = GAMMA
     prescribed_current: np.ndarray = field(init=False, repr=False)
     reference_current: np.ndarray = field(init=False, repr=False)
     last_target: object | None = field(init=False, default=None, repr=False)
@@ -205,6 +208,7 @@ class ProductionSolver:
             flux,
             prescribed_current=self.prescribed_current,
             free_circuits=self.machine.drivable_circuits,
+            gamma=self.inverse_gamma,
             current_step_fraction=self.current_step_fraction,
             current_step_reference=self.reference_current,
         )

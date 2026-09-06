@@ -189,6 +189,7 @@ def _current_comparison(
                 "solved_total_current_a": float(total),
                 "current_change_a": float(delta),
                 "absolute_change_a": absolute_change,
+                "absolute_change_ka": absolute_change / 1000.0,
                 "change_fraction_of_seed": (
                     absolute_change / abs(seed_current) if seed_current != 0.0 else None
                 ),
@@ -197,10 +198,14 @@ def _current_comparison(
     return rows
 
 
-def _linear_closure(inverse) -> list[dict[str, Any]]:
+def _linear_closure(
+    inverse, row_floors: np.ndarray | None = None
+) -> list[dict[str, Any]]:
     """Report every final linear row against the assembled right-hand side."""
     names = _row_names_from_kinds(inverse.row_kinds)
     closure = inverse.linear_prediction - inverse.right_hand_side
+    if row_floors is None:
+        row_floors = np.zeros_like(closure)
     return [
         {
             "row": name,
@@ -208,13 +213,21 @@ def _linear_closure(inverse) -> list[dict[str, Any]]:
             "linear_prediction": float(prediction),
             "right_hand_side": float(target),
             "residual": float(residual),
+            "consistency_floor": float(floor),
+            "closure_fraction": float(
+                max(0.0, 1.0 - abs(residual) / max(abs(target), floor, 1.0e-15))
+            ),
+            "closes_at_least_eighty_percent": bool(
+                abs(residual) <= max(0.2 * abs(target), floor)
+            ),
         }
-        for name, kind, prediction, target, residual in zip(
+        for name, kind, prediction, target, residual, floor in zip(
             names,
             inverse.row_kinds,
             inverse.linear_prediction,
             inverse.right_hand_side,
             closure,
+            row_floors,
             strict=True,
         )
     ]
@@ -339,7 +352,7 @@ def _seed_consistency_diagnostic(
             "passes": bool(np.all(relative_residual <= relative_tolerance)),
         },
         "check_2_null_inverse": {"status": "not_run"},
-        "check_3_upper_point_plus_20mm": {"status": "not_run"},
+        "check_3_command_gamma_sweep": {"status": "not_run"},
     }
     _write(path, payload)
 
@@ -384,94 +397,110 @@ def _seed_consistency_diagnostic(
     }
     _write(path, payload)
 
-    command = _upper_point_target(previous_target)
     gamma_factors = (1.0e-12, 1.0e-11, 1.0e-10, 1.0e-9)
-    sweep = []
-    for gamma_factor in gamma_factors:
-        initial_inverse = solve_shape_inverse(
-            profile,
-            command,
-            prime.flux,
-            prescribed_current=seed,
-            free_circuits=free,
-            gamma=gamma_factor,
-            picard_rounds=0,
-        )
-        initial_closure = (
-            initial_inverse.linear_prediction - initial_inverse.right_hand_side
-        )
-        initial_weighted_closure = initial_closure.copy()
-        initial_weighted_closure[4:] *= np.sqrt(initial_inverse.field_weight)
-        entry: dict[str, Any] = {
-            "gamma_factor_per_ampere": gamma_factor,
-            "starting_state_solve": {
-                "tikhonov_gamma": initial_inverse.gamma,
-                "total_current_by_circuit": _current_comparison(
-                    initial_inverse, seed, circuit_names
-                ),
-                "current_change_l2_a": float(np.linalg.norm(initial_inverse.delta)),
-                "maximum_absolute_current_change_a": float(
-                    np.max(np.abs(initial_inverse.delta))
-                ),
-                "linear_row_closure": _linear_closure(initial_inverse),
-                "linear_row_closure_l2_mixed": float(np.linalg.norm(initial_closure)),
-                "weighted_linear_row_closure_l2_mixed": float(
-                    np.linalg.norm(initial_weighted_closure)
-                ),
-            },
-        }
-        try:
-            inverse = solve_shape_inverse(
-                profile,
-                command,
-                prime.flux,
-                prescribed_current=seed,
-                free_circuits=free,
-                gamma=gamma_factor,
-            )
-        except NoQualifiedAxisError as error:
-            entry.update(
-                {
-                    "status": "axis_lost_during_picard",
-                    "error": str(error),
-                    "placement_result": None,
-                }
-            )
-        else:
-            closure = inverse.linear_prediction - inverse.right_hand_side
-            weighted_closure = closure.copy()
-            weighted_closure[4:] *= np.sqrt(inverse.field_weight)
-            entry.update(
-                {
-                    "status": "complete",
-                    "placement_result": {
-                        "tikhonov_gamma": inverse.gamma,
-                        "total_current_by_circuit": _current_comparison(
-                            inverse, seed, circuit_names
-                        ),
-                        "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
-                        "maximum_absolute_current_change_a": float(
-                            np.max(np.abs(inverse.delta))
-                        ),
-                        "linear_row_closure": _linear_closure(inverse),
-                        "linear_row_closure_l2_mixed": float(np.linalg.norm(closure)),
-                        "weighted_linear_row_closure_l2_mixed": float(
-                            np.linalg.norm(weighted_closure)
-                        ),
-                        "boundary_flux_by_round_wb": (
-                            inverse.picard_boundary_flux.tolist()
-                        ),
-                    },
-                }
-            )
-        sweep.append(entry)
-        payload["check_3_upper_point_plus_20mm"] = {
-            "status": "running",
-            "commanded_turning_points_m": _points(command).tolist(),
-            "gamma_sweep": sweep,
-        }
-        _write(path, payload)
-    payload["check_3_upper_point_plus_20mm"]["status"] = "complete"
+    maximum_change_a = 20_000.0
+    minimum_row_closure = 0.8
+    command_results = []
+    commands = (
+        ("upper-point-plus-20mm", _upper_point_target(previous_target)),
+        ("elongation-plus-5pct", _elongation_target(previous_target)),
+    )
+    for command_name, command in commands:
+        sweep = []
+        selected_gamma = None
+        for gamma_factor in gamma_factors:
+            entry: dict[str, Any] = {"gamma_factor_per_ampere": gamma_factor}
+            try:
+                inverse = solve_shape_inverse(
+                    profile,
+                    command,
+                    prime.flux,
+                    prescribed_current=seed,
+                    free_circuits=free,
+                    gamma=gamma_factor,
+                )
+            except NoQualifiedAxisError as error:
+                entry.update(
+                    {
+                        "status": "axis_lost_during_picard",
+                        "error": str(error),
+                        "placement_result": None,
+                        "admitted": False,
+                    }
+                )
+            else:
+                closure = inverse.linear_prediction - inverse.right_hand_side
+                weighted_closure = closure.copy()
+                weighted_closure[4:] *= np.sqrt(inverse.field_weight)
+                row_closure = _linear_closure(inverse, tolerances)
+                max_change = float(np.max(np.abs(inverse.delta)))
+                all_rows_close = all(
+                    row["closes_at_least_eighty_percent"] for row in row_closure
+                )
+                admitted = max_change <= maximum_change_a and all_rows_close
+                if admitted and selected_gamma is None:
+                    selected_gamma = gamma_factor
+                entry.update(
+                    {
+                        "status": "complete",
+                        "admitted": admitted,
+                        "placement_result": {
+                            "tikhonov_gamma": inverse.gamma,
+                            "total_current_by_circuit": _current_comparison(
+                                inverse, seed, circuit_names
+                            ),
+                            "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+                            "maximum_absolute_current_change_a": max_change,
+                            "maximum_absolute_current_change_ka": max_change / 1000.0,
+                            "linear_row_closure": row_closure,
+                            "every_row_closes_at_least_eighty_percent": (
+                                all_rows_close
+                            ),
+                            "linear_row_closure_l2_mixed": float(
+                                np.linalg.norm(closure)
+                            ),
+                            "weighted_linear_row_closure_l2_mixed": float(
+                                np.linalg.norm(weighted_closure)
+                            ),
+                            "boundary_flux_by_round_wb": (
+                                inverse.picard_boundary_flux.tolist()
+                            ),
+                        },
+                    }
+                )
+            sweep.append(entry)
+            partial = {
+                "command": command_name,
+                "commanded_turning_points_m": _points(command).tolist(),
+                "selected_gamma_factor_per_ampere": selected_gamma,
+                "gamma_sweep": sweep,
+            }
+            payload["check_3_command_gamma_sweep"] = {
+                "status": "running",
+                "commands": command_results + [partial],
+            }
+            _write(path, payload)
+        command_results.append(partial)
+    admission_policy = {
+        "maximum_absolute_current_change_a": maximum_change_a,
+        "minimum_linear_row_closure_fraction": minimum_row_closure,
+        "row_residual_allowance": (
+            "twenty percent of the delta-row target or the seed consistency "
+            "floor, whichever is larger"
+        ),
+        "selection": "smallest admitted gamma per command",
+    }
+    all_commands_admitted = all(
+        command["selected_gamma_factor_per_ampere"] is not None
+        for command in command_results
+    )
+    payload["check_3_command_gamma_sweep"] = {
+        "status": "complete",
+        "admission_policy": admission_policy,
+        "commands": command_results,
+        "all_commands_admitted": all_commands_admitted,
+    }
+    payload["policy"]["h200_forward_arms_admitted"] = all_commands_admitted
     payload["outcome"] = "cpu_consistency_table_complete"
     _write(path, payload)
     return payload
@@ -484,7 +513,7 @@ def _command_diagnostic(
     target,
     circuit_names: dict[int, str],
 ) -> dict[str, Any]:
-    """Return one pulse-design current command without solving it forward."""
+    """Return one seed-anchored current command without solving it forward."""
     seed = np.asarray(machine.profile.operator.prescribed_current_field.current)
     inverse = solve_shape_inverse(
         machine.profile,
@@ -503,7 +532,7 @@ def _command_diagnostic(
         ).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "formulation": {
-            "unknown": "total active-circuit currents",
+            "unknown": "active-circuit current change about the fixed seed",
             "field_weight": inverse.field_weight,
             "tikhonov_gamma": inverse.gamma,
             "placement_picard_rounds": int(inverse.picard_currents.shape[0] - 1),
@@ -549,9 +578,10 @@ def _arm_receipt(
     target,
     null_points: np.ndarray,
     circuit_names: dict[int, str],
+    gamma_factor: float,
 ) -> tuple[dict[str, Any], object]:
     """Run one arm through ``ProductionSolver`` and return its receipt."""
-    solver = ProductionSolver(machine)
+    solver = ProductionSolver(machine, inverse_gamma=gamma_factor)
     prior = achieved_target(machine.profile, previous.flux)
     equilibrium, _program = solver.solve_target(previous, target)
     achieved = achieved_target(machine.profile, equilibrium.flux)
@@ -590,11 +620,7 @@ def _arm_receipt(
             "linear_row_prediction": item.inverse.linear_prediction.tolist(),
             "uncapped_linear_row_prediction": (
                 item.inverse.response[:, item.inverse.free_circuits]
-                @ (
-                    item.inverse.currents[item.inverse.free_circuits]
-                    - item.inverse.delta
-                    + item.inverse.uncapped_delta
-                )
+                @ item.inverse.uncapped_delta
             ).tolist(),
             "linear_row_right_hand_side": item.inverse.right_hand_side.tolist(),
             "least_squares_residual": item.inverse.least_squares_residual,
@@ -637,6 +663,7 @@ def _arm_receipt(
         "round_count": len(rounds),
         "current_step_policy": {
             "reference": "fixed carrier seed current per circuit",
+            "gamma_factor_per_ampere": gamma_factor,
             "maximum_fraction_per_round": solver.current_step_fraction,
             "placement_picard_rounds": 3,
             "nonlinear_forward_solves": 1,
@@ -788,9 +815,25 @@ def measure(
         return payload
     null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
+    consistency_path = directory / CONSISTENCY_DIAGNOSTIC
+    consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
+    gamma_by_command = {
+        item["command"]: item["selected_gamma_factor_per_ampere"]
+        for item in consistency["check_3_command_gamma_sweep"]["commands"]
+    }
+    if any(value is None for value in gamma_by_command.values()):
+        raise ValueError("every H200 command must have an admitted CPU gamma")
     definitions = (
-        ("upper-point-plus-20mm", _upper_point_target(previous_target)),
-        ("elongation-plus-5pct", _elongation_target(previous_target)),
+        (
+            "upper-point-plus-20mm",
+            _upper_point_target(previous_target),
+            float(gamma_by_command["upper-point-plus-20mm"]),
+        ),
+        (
+            "elongation-plus-5pct",
+            _elongation_target(previous_target),
+            float(gamma_by_command["elongation-plus-5pct"]),
+        ),
     )
     runtime = {
         "source_commit": _source_revision(),
@@ -805,6 +848,7 @@ def measure(
         },
         "carrier": carrier_evidence,
         "policy": policy,
+        "inverse_gamma_factor_by_command": gamma_by_command,
         "active_circuits": [
             {
                 "index": index,
@@ -821,9 +865,15 @@ def measure(
     arms = []
     null_arm["runtime"] = runtime
     _write(directory / "null-resolve.json", null_arm)
-    for name, target in definitions:
+    for name, target, gamma_factor in definitions:
         arm, _achieved = _arm_receipt(
-            name, machine, prime, target, null_points, circuit_names
+            name,
+            machine,
+            prime,
+            target,
+            null_points,
+            circuit_names,
+            gamma_factor,
         )
         arm["runtime"] = runtime
         arms.append(arm)

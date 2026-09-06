@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T17:07:19",
+  "updated": "2026-09-06T17:26:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2778,6 +2778,15 @@
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"read-only\"}": "e57567a6-cc7b-4be9-81a3-35f3e9d5e543"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-ride-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "pfs-scout-x",
@@ -111604,6 +111613,146 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T130943167652-pfs-frame-contract-review",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-frame-contract-review",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 10414,
+                "cached_input_tokens": 197875,
+                "input_tokens": 208291,
+                "output_tokens": 2647,
+                "reasoning_output_tokens": 858,
+                "total_tokens": 210938,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-review.md with PASS or FAIL per item over the worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-internal-geometry-luna (read-only): (1) the surface block is shaped (11,64) per component with row 0 the O-point repeated along the ray and row 10 the LCFS, psi_norm exactly linspace(0,1,11), psi in webers, both stored; (2) the TORAX profiles sit on 26 faces with rho_norm = sqrt(Phi/(pi B0))/rho_b matching TORAX Grid1D faces linspace(0,1,n_rho+1) and each metric (vpr, volume, area, F, int_dl_over_Bp, inv_R, inv_R2, grad_psi terms, B2, inv_B2, delta_upper and lower, elongation, q, g0 to g3) is computed from the traced surfaces with the formula stated and no interpolation onto another grid; (3) divertor legs are (4,32) clipped to wall or target with finite flags and fully masked when the equilibrium is limited; (4) the raster is excluded from training inputs through the training_inputs and diagnostic_only attributes and no vacuum-field contours enter; (5) no contourer is reinvented: surfaces come from the FluxSurfaceGeometry ray tracer or nova.biot.contour.Contour; (6) naming hygiene, no plan labels or node ids in code or comments; (7) the fixture test's row-0 axis assertion and what commit c4b3894d changed to satisfy it; (8) the netCDF session store round-trips every new field. Every defect quoted with file:line. Read the diffs and the files only. Run everything from the worktree through the shared environment: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; never create a second environment. NEVER call Read on an image file (this lane is text-only and the process dies); verify a PNG through PIL. Commit each coherent step at once with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 1.0,
+          "goal": "Write an independent verdict report on the seven contract commits a5cb8738 to c4b3894d in the frame-contract worktree",
+          "id": "pfs-frame-contract-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130943167652-pfs-frame-contract-review/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "pfs-contract-rev",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T13:10:02Z",
+        "completed_at": "2026-09-06T15:22:31.402Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7921,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7949,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "844b5befff3acc36b1023c5621c3379f6492eae0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only review of the worktree diffs, tests and receipts against eight named items; coordinator cross-checked items 1, 2 and 4 against the diff before the merge",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-review.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130943167652-pfs-frame-contract-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "5bbd6557-f1a0-45f6-b873-ca9b40904e3e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8026550,
+            "input_tokens_cumulative": 8026550,
+            "output_tokens": 54172,
+            "output_tokens_cumulative": 54172,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 7945.083,
+          "generated_tokens": 54172,
+          "generation_seconds": 6919.652,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 19.4,
+          "machine_seconds": 1025.431,
+          "peak_input_tokens": 197540,
+          "tokens_per_second": 7.83,
+          "wall_tokens_per_second": 6.82
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "review role: the deliverable is the verdict report at the fenced path; no source change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-review",
+          "session_id": "5bbd6557-f1a0-45f6-b873-ca9b40904e3e",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T15:22:31.402Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -111832,6 +111981,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1879
+    "_version": 1881
   }
 }

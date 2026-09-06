@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T18:15:31",
+  "updated": "2026-09-06T18:21:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2677,9 +2677,11 @@
         "id": "pfs-keyframe-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07753-edb6-7571-b92c-bb5031261edc",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07753-edb6-7571-b92c-bb5031261edc"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2785,9 +2787,11 @@
         "id": "pfs-ride-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07755-4489-78e2-9857-3fe2a82a16fc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07755-4489-78e2-9857-3fe2a82a16fc"
+        },
         "created": "2026-09-06"
       },
       {
@@ -112661,6 +112665,145 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T152737969237-pfs-frame-flux-functions-and-centroid",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-frame-flux-functions-and-centroid",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 6766,
+                "cached_input_tokens": 452681,
+                "input_tokens": 459449,
+                "output_tokens": 2675,
+                "reasoning_output_tokens": 128,
+                "total_tokens": 462124,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "nova/equilibrium/steering_frames.py: SteeringFrame (class at line 245) gains p_prime_face and ff_prime_face, each (n_face,) float64 evaluated at psi_norm_face (the existing 26-face grid, so no interpolation downstream) with units Pa/Wb and T*m/Wb in the variable table and a p_prime_source attribute (efm or torax) on the dataset; current_centroid_r and current_centroid_z as the achieved vertical and radial current centroid of the solved plasma (the first moment of the plasma current distribution the receipt's terminal state carries; compute it the way benchmarks/forward_labeller_throughput.py _centroid at line 124 does and quote that in the docstring), and reference_centroid_z with branch_guard_ok, the reference being a caller-supplied EFIT centroid for the slice (NaN and False when absent) with both listed under the diagnostic_only attribute and never under training_inputs; assemble_frame (line 581) takes p_prime and ff_prime arrays with their own psi_norm grid plus reference_centroid_z as keyword arguments and evaluates the flux functions at psi_norm_face by linear interpolation from the supplied grid (the efm grid is 65 points on psi_norm 0 to 1), with the guard true when the achieved and reference centroids agree within 0.05 m; session_dataset, write_session, read_session and frames_from_session round-trip every new field; tests/test_steering_frames.py gains fast tests (a frame with a linear p_prime on a 65-point grid reads back the exact face values; centroid agrees with the driver's _centroid to 1e-12 on the Solovev fixture; the guard flips at 0.05 m; round-trip of the new fields) and the existing test_fixture_frame_carries_every_decoder_field is extended with the new names; gate: the fast tests pass on the CPU (JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_steering_frames.py -p no:cacheprovider -m 'not slow', log in the run directory), and the slow fixture test alone runs on all_debug (sbatch --partition=all_debug --cpus-per-task=8 --mem=96G --time=00:59:00, JAX_PLATFORMS=cpu inside the wrapped command, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field, about 40 min) with a declared wait: manifest status waiting, wait_probe as a JSON argv list of squeue -h -j the job id -o %T, wait_terminal as the comma-separated bare list COMPLETED,FAILED,CANCELLED,TIMEOUT,exit:0, unquoted ISO wait_started_at, resume_brief, then end your turn. Read the contract review at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-contract-review.md item 2 for how the face grid is defined before touching it. Grep every name before importing it. No plan labels or node ids in code or comments; commit each coherent step with a conventional subject and a body.",
+          "estimated_hours": 1.5,
+          "goal": "Carry the per-slice flux functions and the plasma current centroid with its branch-guard flag in the SteeringFrame so they ride along in every labelled session",
+          "id": "pfs-frame-flux-functions-and-centroid",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T152737969237-pfs-frame-flux-functions-and-centroid/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-ride-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T15:27:51Z",
+        "completed_at": "2026-09-06T16:20:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3149,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3149,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f40b0d501396fbfa9929dbd6db359d25f37b732c",
+        "commits": [
+          "707e1372ceded4a8b59e632f1a626977dd60b351"
+        ],
+        "changed_lines": {
+          "added": 303,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_steering_frames.py -m \"not slow\" (10 passed); all_debug job 1263419 pytest tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field (1 passed in 238 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T152737969237-pfs-frame-flux-functions-and-centroid/slow-fixture-1263419.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T152737969237-pfs-frame-flux-functions-and-centroid/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07755-4489-78e2-9857-3fe2a82a16fc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2329984,
+            "cached_input_tokens_cumulative": 2329984,
+            "input_tokens": 2520053,
+            "input_tokens_cumulative": 2520053,
+            "output_tokens": 7834,
+            "output_tokens_cumulative": 7834,
+            "reasoning_output_tokens": 1891,
+            "reasoning_output_tokens_cumulative": 1891
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 9725,
+          "peak_input_tokens": 4850037
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-flux-functions-and-centroid",
+          "session_id": "01a07755-4489-78e2-9857-3fe2a82a16fc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T16:20:20Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_steering_frames.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -112901,8 +113044,36 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
         "closed_by_purpose": "resume",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906161712",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T16:17:12Z",
+        "closed_at": "2026-09-06T16:18:24Z",
+        "held_seconds": 72,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906161911",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T16:19:11Z",
+        "closed_at": "2026-09-06T16:20:39Z",
+        "held_seconds": 88,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1897
+    "_version": 1904
   }
 }

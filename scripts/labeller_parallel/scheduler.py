@@ -8,6 +8,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wai
 from dataclasses import dataclass, field, replace
 import multiprocessing
 from pathlib import Path
+import subprocess
 import time
 from typing import Any, Callable, Protocol, Sequence
 
@@ -49,11 +50,36 @@ from scripts.labeller_batch.shard import (
     _write_json,
     _write_session_file,
     policy_digest,
-    source_revision,
 )
 
 STATE_SIZE = 1_126
 CURRENT_SIZE = 101
+ROOT = Path(__file__).resolve().parents[2]
+
+
+@dataclass(frozen=True)
+class SourceIdentity:
+    """Immutable source identity captured once by the driver process."""
+
+    nova_revision: str
+    nova_equilibrium_tree: str
+    labeller_batch_tree: str
+
+    @classmethod
+    def capture(cls) -> SourceIdentity:
+        def revision(specification: str) -> str:
+            return subprocess.run(
+                ["git", "-C", str(ROOT), "rev-parse", specification],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+
+        return cls(
+            nova_revision=revision("HEAD"),
+            nova_equilibrium_tree=revision("HEAD:nova/equilibrium"),
+            labeller_batch_tree=revision("HEAD:scripts/labeller_batch"),
+        )
 
 
 @dataclass(frozen=True)
@@ -361,6 +387,7 @@ class SequentialCompiledEngine:
             "centroid_error_m": final_centroid_error,
             "target_source": "efm/current_centrd_z",
             "branch_guard_ok": False,
+            "requested_class": requested_value,
         }
         if selected_exception is not None:
             record["exception"] = selected_exception
@@ -558,6 +585,7 @@ def load_shot(shot: int, *, max_slices: int | None) -> ShotInput:
                     "conditioning_target_source": None,
                     "free_branch_guard_ok": None,
                     "conditioned_branch_guard_ok": None,
+                    "requested_class": int(_requested_class(group, row)),
                 }
             )
             continue
@@ -617,6 +645,7 @@ def _shot_manifest(
     condition_on_guard_failure: bool,
     setup_wall_seconds: float,
     shot_wall_seconds: float,
+    source_identity: SourceIdentity,
 ) -> dict[str, Any]:
     ordered = sorted(assembled, key=lambda item: item.row)
     template = next((item.frame for item in ordered if item.frame is not None), None)
@@ -664,7 +693,15 @@ def _shot_manifest(
         "status": "complete",
         "session": str(session.resolve()),
         "companion": str(companion.resolve()),
-        "nova_revision": source_revision(),
+        "nova_revision": source_identity.nova_revision,
+        "nova_equilibrium_tree": source_identity.nova_equilibrium_tree,
+        "labeller_batch_tree": source_identity.labeller_batch_tree,
+        "declared_additions": [
+            "manifest.nova_equilibrium_tree",
+            "manifest.labeller_batch_tree",
+            "manifest.declared_additions",
+            "manifest.slices.requested_class",
+        ],
         "carrier_identity": response_carrier.DEFAULT_CARRIER.stem,
         "carrier": prepared.carrier_evidence,
         "policy_digest": policy_digest(policy),
@@ -772,6 +809,7 @@ class CorpusScheduler:
         output_root: Path,
         *,
         prepared: PreparedLabeller,
+        source_identity: SourceIdentity,
     ) -> dict[str, Any]:
         output_root.mkdir(parents=True, exist_ok=True)
         pending = deque(
@@ -825,6 +863,7 @@ class CorpusScheduler:
                     setup_wall_seconds=setup_unassigned,
                     shot_wall_seconds=time.perf_counter()
                     - shot_started.pop(slot.work.shot),
+                    source_identity=source_identity,
                 )
                 setup_unassigned = 0.0
                 written_shots += 1

@@ -7,6 +7,7 @@ from .scheduler import (
     SequentialCompiledEngine,
     ShotInput,
     SliceInput,
+    SourceIdentity,
     load_shot,
 )
 
@@ -17,5 +18,6 @@ __all__ = [
     "SequentialCompiledEngine",
     "ShotInput",
     "SliceInput",
+    "SourceIdentity",
     "load_shot",
 ]

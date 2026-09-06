@@ -32,7 +32,21 @@ UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" \
 
 The smoke selects the first sixteen shots from the ranked decoder corpus and
 invokes `scripts/labeller_batch/shard.py` as an independent sequential
-reference. It compares every non-timing per-slice field, every companion NPZ
-array and every non-timing session variable exactly. Wall-clock channels are
-listed separately because independent executions cannot have identical timing.
-Only a zero difference count permits the three-device H200 launch.
+reference. The identity arm uses four admitted slices per shot. Its receipt
+reports difference counts by manifest key, companion NPZ array and session
+variable. Independent wall-clock values are checked for the same typed shape;
+all scientific values are compared exactly. The parallel manifest declares its
+additional per-slice requested topology class and its process-start source-tree
+identities.
+
+The one-card identity allocation is launched with:
+
+```bash
+scripts/labeller_parallel/run.sh --submit \
+  --output-root docs/figures/playable-forward-solve/labeller-parallel \
+  --batch-per-device 1
+```
+
+The launcher uses one H200, four host CPUs, 128 GiB and a one-hour bound. It
+runs the independent reference first, then the one-device compiled scheduler,
+then the comparison. The three-device throughput arm is a separate follow-on.

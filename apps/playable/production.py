@@ -1,49 +1,46 @@
 """Production keyframe solver over one forward profile.
 
-The production solve runs the constrained reduced route:
-``solve_constrained_reduced_newton`` poses the current-centroid row on the
-commanded bulk position beside the plasma-cell amplitudes, reads the
-compensating circuit direction off the machine's response matrix once per
-session (it is a property of the carrier, not of the frame), and returns a
-:class:`~nova.equilibrium.reduced_newton.ReducedProgram` handle that the
-session carries and hands back on every later solve.  With the row target
-arriving as a traced argument, a keyframe chain re-enters one compiled
-program from the second press on, so a steered solve runs at the warm-trip
-figure rather than at a per-target compile.  The constrained Newton-Krylov
-implementation stays reachable as the reference, selected by
-``route="newton_krylov"``.
+Shape control is an inverse-forward step. The inverse solves every free coil
+current against the bounding-box flux and field rows; the forward solve then
+runs on those prescribed currents, warm-started from the previous frame. A
+second inverse-forward round is allowed when the first response leaves a
+turning point more than the stated tolerance from its command. Constraint
+pairs are deliberately absent from this path: they remain the diagnostic
+placement mechanism, not the shape actuator.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field
 from time import perf_counter
 
 import numpy as np
 import jax.numpy as jnp
 
-from nova.equilibrium.constraint import (
-    CircuitCurrentUnknown,
-    ConstraintBinding,
-    ConstraintPair,
-    CurrentCentroidConstraint,
-    derive_circuit_compensators,
-)
 from nova.equilibrium.fixed_point import (
     FIXED_POINT_RESIDUAL_TOLERANCE,
     FixedPointResult,
 )
-from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
 from nova.equilibrium.reduced_newton import (
     ACTIVE_SET_STEPS,
     NEWTON_STEPS,
-    TRACED_ROWS,
     solve_constrained_reduced_newton,
+)
+from nova.equilibrium.shape_inverse import (
+    ShapeInverseResult,
+    achieved_target,
+    solve_shape_inverse,
+    turning_point_error,
 )
 
 from apps.playable.session import SolveResult
-from apps.playable.shape import PlasmaShape
+from apps.playable.shape import PlasmaShape, move_bounding_box
+
+#: A second inverse-forward round is taken above this point error [m].
+TURNING_POINT_TOLERANCE = 2.0e-3
+#: One initial response and at most one correction keep a keyframe bounded.
+MAX_INVERSE_ROUNDS = 2
 
 
 @dataclass(frozen=True)
@@ -62,101 +59,43 @@ class ForwardMachine:
         return 0 if field is None else int(field.current.size)
 
 
-def centroid_row(
-    profile: ForwardProfile,
-    commanded: PlasmaShape,
-    *,
-    tolerance: float = 1.0e-4,
-    scale: float = 0.05,
-) -> ConstraintPair:
-    """Return the current-centroid row posed on the commanded bulk position."""
-    return ConstraintPair(
-        functional=CurrentCentroidConstraint(
-            components=("centroid_r", "centroid_z"),
-            support=MomentIntegralSupport.ALL_DOMAIN,
-        ),
-        unknown=CircuitCurrentUnknown(
-            direction=np.zeros(
-                (profile.operator.prescribed_current_field.circuit_count, 2)
-            ),
-            ampere_scale=np.asarray([1.0, 1.0]),
-        ),
-        binding=ConstraintBinding(
-            target=np.asarray([commanded.axis_r, commanded.axis_z]),
-            tolerance=np.full(2, tolerance),
-            scale=np.full(2, scale),
-            initial_unknown=np.asarray([0.0, 0.0]),
-            payload=None,
-            policy="imposed",
-        ),
-    )
+@dataclass(frozen=True)
+class InverseRoundReceipt:
+    """One inverse current solve followed by one forward response."""
 
-
-def derive_direction(
-    profile: ForwardProfile,
-    row: ConstraintPair,
-    flux: np.ndarray,
-    *,
-    circuits=None,
-) -> tuple[ConstraintPair, ...]:
-    """Return the row with the best-conditioned circuit direction applied."""
-    derived, _selection = derive_circuit_compensators(
-        profile, (row,), np.asarray(flux), circuits=circuits
-    )
-    return derived
+    inverse: ShapeInverseResult
+    turning_point_error: float
+    trips: int
+    wall: float
 
 
 @dataclass
 class ProductionSolver:
-    """Keyframe solver over one forward profile.
-
-    The default route is the constrained reduced solve, whose compiled-program
-    handle lets a session re-enter one program per keyframe chain;
-    ``route="newton_krylov"`` keeps the constrained Newton-Krylov
-    implementation reachable as the reference.  Both routes share the frozen
-    compensating circuit direction read off the carrier's response matrix at
-    construction.
-    """
+    """Run bounded inverse-forward shape-control rounds on one machine."""
 
     machine: ForwardMachine
     route: str = "reduced_newton"
     newton_steps: int = 4
     gmres_iterations: int = 4
     active_set_steps: int = 2
+    turning_point_tolerance: float = TURNING_POINT_TOLERANCE
+    prescribed_current: np.ndarray = field(init=False, repr=False)
+    last_target: object | None = field(init=False, default=None, repr=False)
+    last_rounds: tuple[InverseRoundReceipt, ...] = field(
+        init=False, default=(), repr=False
+    )
 
     def __post_init__(self) -> None:
-        """Freeze the compensating circuit direction read off the carrier."""
+        """Validate the route and start from the carrier's own currents."""
         if self.route not in ("reduced_newton", "newton_krylov"):
             raise ValueError(
                 f"unknown production route {self.route!r}; choose from "
                 "('reduced_newton', 'newton_krylov')"
             )
-        commanded = PlasmaShape()
-        row = centroid_row(self.machine.profile, commanded)
-        circuits = (
-            None
-            if self.machine.circuit_count == 0
-            else tuple(range(self.machine.circuit_count))
-        )
-        # The direction is a property of the response matrix evaluated at the
-        # seed; the unknown's magnitude is re-solved every keyframe.
-        self.frozen_pairs = derive_direction(
-            self.machine.profile, row, self.machine.seed, circuits=circuits
-        )
-
-    def _pairs(self, commanded: PlasmaShape) -> tuple[ConstraintPair, ...]:
-        """Return the frozen-row pairs re-bound to the commanded position."""
-        return tuple(
-            ConstraintPair(
-                functional=pair.functional,
-                unknown=pair.unknown,
-                binding=replace(
-                    pair.binding,
-                    target=np.asarray([commanded.axis_r, commanded.axis_z]),
-                ),
-            )
-            for pair in self.frozen_pairs
-        )
+        field_current = self.machine.profile.operator.prescribed_current_field
+        if field_current is None:
+            raise ValueError("shape control needs a prescribed current field")
+        self.prescribed_current = np.asarray(field_current.current, dtype=float).copy()
 
     def _flux(self, previous: ForwardEquilibrium | None) -> np.ndarray:
         """Return the warm-start flux, or the machine seed for the prime."""
@@ -166,21 +105,19 @@ class ProductionSolver:
         self,
         profile: ForwardProfile,
         flux: np.ndarray,
-        commanded: PlasmaShape,
-        program=None,
+        prescribed_current: np.ndarray,
     ):
-        """Run the constrained reduced solve with the traced row targets."""
+        """Run the reduced route with prescribed currents and no shape rows."""
         return solve_constrained_reduced_newton(
             profile,
             jnp.asarray(flux),
-            constraint_pairs=self._pairs(commanded),
+            constraint_pairs=(),
             current=None,
-            prescribed_current=None,
+            prescribed_current=jnp.asarray(prescribed_current),
             tolerance=FIXED_POINT_RESIDUAL_TOLERANCE,
             newton_steps=NEWTON_STEPS,
             active_set_steps=ACTIVE_SET_STEPS,
-            row_arguments=TRACED_ROWS,
-            program=program,
+            program=None,
         )
 
     @staticmethod
@@ -220,6 +157,71 @@ class ProductionSolver:
             constraints=result.constraints,
         )
 
+    def _forward(
+        self, profile: ForwardProfile, flux: np.ndarray, prescribed_current: np.ndarray
+    ) -> tuple[ForwardEquilibrium, int, object | None]:
+        """Run one unconstrained forward response on prescribed currents."""
+        if self.route == "reduced_newton":
+            result = self._reduced(profile, flux, prescribed_current)
+            return (
+                self._reduced_receipt(profile, result),
+                int(result.active_set_iterations),
+                result.program,
+            )
+        equilibrium = profile.solve(
+            flux,
+            route="newton_krylov",
+            constraint_pairs=(),
+            prescribed_current=prescribed_current,
+            warmup=0,
+            newton_steps=self.newton_steps,
+            gmres_iterations=self.gmres_iterations,
+            active_set_steps=self.active_set_steps,
+            stop_on_active_set_settlement=False,
+        )
+        return (
+            equilibrium,
+            int(equilibrium.fixed_point.active_set_iterations),
+            None,
+        )
+
+    def solve_target(
+        self, previous: ForwardEquilibrium, target: object
+    ) -> tuple[ForwardEquilibrium, object | None]:
+        """Drive one fixed bounding-box target for at most two rounds."""
+        profile = self.machine.profile
+        flux = np.asarray(previous.flux)
+        rounds = []
+        equilibrium = previous
+        program_out = None
+        for _ in range(MAX_INVERSE_ROUNDS):
+            round_started = perf_counter()
+            inverse = solve_shape_inverse(
+                profile,
+                target,
+                flux,
+                prescribed_current=self.prescribed_current,
+            )
+            self.prescribed_current = inverse.currents
+            equilibrium, round_trips, program_out = self._forward(
+                profile, flux, self.prescribed_current
+            )
+            error = turning_point_error(profile, target, equilibrium.flux)
+            rounds.append(
+                InverseRoundReceipt(
+                    inverse=inverse,
+                    turning_point_error=error,
+                    trips=round_trips,
+                    wall=perf_counter() - round_started,
+                )
+            )
+            if error <= self.turning_point_tolerance:
+                break
+            flux = np.asarray(equilibrium.flux)
+        self.last_target = target
+        self.last_rounds = tuple(rounds)
+        return equilibrium, program_out
+
     def __call__(
         self,
         previous: ForwardEquilibrium | None,
@@ -228,29 +230,41 @@ class ProductionSolver:
         action: tuple[str, float] | None = None,
         program: object | None = None,
     ) -> SolveResult:
-        """Warm-start from the previous equilibrium and solve the commanded set."""
-        del action
+        """Warm-start and run the inverse-forward shape-control step.
+
+        A prime uses the carrier currents unchanged. A shape action is applied
+        to the achieved turning points of the previous frame, then one or two
+        inverse-forward rounds drive that fixed target. Each forward solve is
+        unconstrained and therefore publishes no compensating-row records.
+        """
+        del program
         profile = self.machine.profile
         flux = self._flux(previous)
         started = perf_counter()
-        if self.route == "reduced_newton":
-            result = self._reduced(profile, flux, commanded, program)
-            equilibrium = self._reduced_receipt(profile, result)
-            trips = int(result.active_set_iterations)
-            program_out = result.program
-            reused = program is not None
-        else:
-            equilibrium = profile.solve(
-                flux,
-                route="newton_krylov",
-                constraint_pairs=self._pairs(commanded),
-                warmup=0,
-                newton_steps=self.newton_steps,
-                gmres_iterations=self.gmres_iterations,
-                active_set_steps=self.active_set_steps,
-                stop_on_active_set_settlement=False,
+        if previous is None or action is None:
+            equilibrium, trips, program_out = self._forward(
+                profile, flux, self.prescribed_current
             )
-            trips = int(equilibrium.fixed_point.active_set_iterations)
-            program_out, reused = None, False
-        wall = perf_counter() - started
-        return SolveResult(equilibrium, wall, trips, program=program_out, reused=reused)
+            self.last_target = achieved_target(profile, equilibrium.flux)
+            self.last_rounds = ()
+            return SolveResult(
+                equilibrium,
+                perf_counter() - started,
+                trips,
+                program=program_out,
+                reused=False,
+            )
+
+        parameter, delta = action
+        prior_shape = commanded.apply(parameter, -delta)
+        target = move_bounding_box(
+            achieved_target(profile, flux), prior_shape, parameter, delta
+        )
+        equilibrium, program_out = self.solve_target(previous, target)
+        return SolveResult(
+            equilibrium,
+            perf_counter() - started,
+            sum(item.trips for item in self.last_rounds),
+            program=program_out,
+            reused=False,
+        )

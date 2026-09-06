@@ -1,0 +1,16 @@
+{
+  "receipt": "bank-row frozen-partition prepare-only pass",
+  "backend": {
+    "jax_backend": "cpu",
+    "device_kinds": [
+      "cpu"
+    ],
+    "device_count": 1,
+    "slurm_job_id": null
+  },
+  "source_revision": "4b0121d9c02d0ba3b866f1dfab79c09e4e80ddb0",
+  "row_selection": [
+    21985
+  ],
+  "hooks_attached_on_every_row": true
+}

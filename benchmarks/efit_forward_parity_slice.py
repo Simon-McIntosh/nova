@@ -24,6 +24,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import time
 from typing import Any
 
 import jax
@@ -85,6 +86,9 @@ DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 CURRENT_CONSTRAINED_OUTPUT = Path(
     "docs/figures/current-constrained-forward-solve/mast-constrained"
 )
+FROZEN_PARTITION_OUTPUT = Path(
+    "docs/figures/millisecond-converged-solve/frozen-partition"
+)
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
@@ -137,6 +141,7 @@ ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
 DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
 EXTENDED_PROMOTION_BUDGETS = (50, 100)
 POWER_ITERATIONS = 40
+FROZEN_PARTITION_SHOTS = (21985, 21986, 21989, 22086)
 
 
 @dataclass
@@ -175,6 +180,11 @@ class DeclaredAnchorOperator(ForwardFluxOperator):
         current = jnp.where(self.declared_support, density * self.area, 0.0)
         zero = jnp.zeros_like(current)
         return CellCurrentMoments(current, zero, zero)
+
+    def _current_moments_on_partition(self, psi, partition) -> CellCurrentMoments:
+        """Preserve the declared source coordinate during frozen revaluation."""
+        del partition
+        return self.cell_current_moments(psi)
 
 
 def _absolute(value: float) -> float:
@@ -3427,20 +3437,82 @@ def _passive_inclusive_solve(
     *,
     newton_budget: int = NEWTON_STEPS,
     target_current: float | None = None,
+    freeze_partition: bool | None = None,
 ) -> tuple[dict[str, Any], np.ndarray, Any]:
     """Run the reference-seeded diverted branch and retain its full outcome."""
-    branch = profile.solve_branch(
-        jnp.asarray(case["state"]),
-        TopologyClass.DIVERTED,
-        route="newton_krylov",
-        target_current=target_current,
-        tolerance=FIXED_POINT_CRITERION,
-        newton_steps=newton_budget,
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
-    )
+    counters = {"map_evaluations": 0, "topology_reads": 0, "trip_times": []}
+    operator = profile.operator
+    original_factory = operator.flux_map_with_shadow
+    original_read = operator._fixed_design_read
+    original_trip_reporter = fixed_point._print_active_set_trip
+    started = time.perf_counter()
+
+    def count_read(*args, **kwargs):
+        jax.debug.callback(
+            lambda: counters.__setitem__(
+                "topology_reads", counters["topology_reads"] + 1
+            ),
+            ordered=True,
+        )
+        return original_read(*args, **kwargs)
+
+    def instrumented_factory(*args, **kwargs):
+        mapped = original_factory(*args, **kwargs)
+        if freeze_partition is False:
+            for name in (
+                "_read_frozen_partition",
+                "_map_frozen_partition",
+                "_frozen_partition_shadow",
+            ):
+                if hasattr(mapped, name):
+                    delattr(mapped, name)
+
+        def counted_map(state, shadow):
+            jax.debug.callback(
+                lambda: counters.__setitem__(
+                    "map_evaluations", counters["map_evaluations"] + 1
+                ),
+                ordered=True,
+            )
+            return mapped(state, shadow)
+
+        for name in (
+            "_read_frozen_partition",
+            "_map_frozen_partition",
+            "_frozen_partition_shadow",
+        ):
+            if hasattr(mapped, name):
+                setattr(counted_map, name, getattr(mapped, name))
+        return counted_map
+
+    def record_trip(active, trip_index, *_values):
+        if bool(active):
+            counters["trip_times"].append(time.perf_counter())
+        del trip_index
+
+    if freeze_partition is not None:
+        operator._fixed_design_read = count_read
+        operator.flux_map_with_shadow = instrumented_factory
+        fixed_point._print_active_set_trip = record_trip
+    try:
+        branch = profile.solve_branch(
+            jnp.asarray(case["state"]),
+            TopologyClass.DIVERTED,
+            route="newton_krylov",
+            target_current=target_current,
+            tolerance=FIXED_POINT_CRITERION,
+            newton_steps=newton_budget,
+            gmres_iterations=GMRES_ITERATIONS,
+            warmup=WARMUP_SWEEPS,
+            relaxation=RELAXATION,
+            step_cap=STEP_CAP,
+            stream_active_set=freeze_partition is not None,
+        )
+    finally:
+        operator.flux_map_with_shadow = original_factory
+        operator._fixed_design_read = original_read
+        fixed_point._print_active_set_trip = original_trip_reporter
+    solve_wall = time.perf_counter() - started
     equilibrium = branch.equilibrium
     trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
     requested = int(branch.requested_class)
@@ -3524,6 +3596,26 @@ def _passive_inclusive_solve(
             else "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
         ),
     }
+    if freeze_partition is not None:
+        trip_times = np.asarray(counters["trip_times"], dtype=np.float64)
+        boundaries = np.r_[started, trip_times, started + solve_wall]
+        trip_walls = np.diff(boundaries).tolist()
+        record["frozen_partition_measurement"] = {
+            "hooks_attached": bool(freeze_partition),
+            "topology_reads": counters["topology_reads"],
+            "map_evaluations": counters["map_evaluations"],
+            "trips": len(trip_walls),
+            "trip_wall_seconds": trip_walls,
+            "mean_trip_wall_seconds": (
+                float(np.mean(trip_walls)) if trip_walls else None
+            ),
+            "whole_solve_wall_seconds": solve_wall,
+            "terminal_residual": float(branch.residual),
+            "termination_reason": int(
+                branch.equilibrium.fixed_point.termination_reason
+            ),
+            "converged": converged,
+        }
     return record, trace, branch
 
 
@@ -4209,6 +4301,160 @@ def run_current_constrained(
     return receipt
 
 
+def run_frozen_partition_comparison(
+    store: Path,
+    bank: Path,
+    output: Path = FROZEN_PARTITION_OUTPUT,
+    shots: tuple[int, ...] = FROZEN_PARTITION_SHOTS,
+    *,
+    prepare_only: bool = False,
+) -> dict[str, Any]:
+    """Measure paired public-route solves with and without frozen partitions."""
+    configure_dtypes()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    selected = _selected_frozen_slices(bank, shots)
+    response_cache, carrier_evidence = _load_persisted_response_cache()
+    paired_rows = []
+    for selected_row, qualification in selected:
+        mast_case, context = _mast_case_from_selection(
+            store, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            mast_case, context, response_cache
+        )
+        if prepare_only:
+            mapped = profile.operator.flux_map_with_shadow()
+            if not all(
+                callable(getattr(mapped, name, None))
+                for name in (
+                    "_read_frozen_partition",
+                    "_map_frozen_partition",
+                    "_frozen_partition_shadow",
+                )
+            ):
+                raise RuntimeError("the bank-row operator did not attach frozen hooks")
+            continue
+        baseline, _baseline_trace, _baseline_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=False,
+        )
+        frozen, _frozen_trace, _frozen_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=True,
+        )
+        baseline_measurement = baseline["frozen_partition_measurement"]
+        frozen_measurement = frozen["frozen_partition_measurement"]
+        if (
+            baseline_measurement["converged"] != frozen_measurement["converged"]
+            or abs(
+                baseline_measurement["terminal_residual"]
+                - frozen_measurement["terminal_residual"]
+            )
+            > 1.0e-10
+        ):
+            raise RuntimeError("frozen partition changed the terminal solve result")
+        reference = mast_case["reference"]
+        paired_rows.append(
+            {
+                "shot": reference["shot"],
+                "slice_index": reference["slice_index"],
+                "baseline_without_hooks": baseline_measurement,
+                "frozen_partition_hooks": frozen_measurement,
+                "saving_seconds": (
+                    baseline_measurement["whole_solve_wall_seconds"]
+                    - frozen_measurement["whole_solve_wall_seconds"]
+                ),
+                "saving_fraction": (
+                    1.0
+                    - frozen_measurement["whole_solve_wall_seconds"]
+                    / baseline_measurement["whole_solve_wall_seconds"]
+                ),
+                "prescribed_current_policy": policy,
+            }
+        )
+    if prepare_only:
+        output.mkdir(parents=True, exist_ok=True)
+        receipt = {
+            "receipt": "bank-row frozen-partition prepare-only pass",
+            "backend": _execution_environment(),
+            "source_revision": _source_revision(),
+            "row_selection": list(shots),
+            "hooks_attached_on_every_row": True,
+        }
+        (output / "prepare-only.json").write_text(
+            json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        )
+        return receipt
+    figure, axes = plt.subplots(1, 2, figsize=(10.0, 4.4), constrained_layout=True)
+    labels = [f"{row['shot']} / {row['slice_index']}" for row in paired_rows]
+    baseline_walls = [
+        row["baseline_without_hooks"]["whole_solve_wall_seconds"] for row in paired_rows
+    ]
+    frozen_walls = [
+        row["frozen_partition_hooks"]["whole_solve_wall_seconds"] for row in paired_rows
+    ]
+    axes[0].bar(
+        np.arange(len(labels)) - 0.2, baseline_walls, 0.4, label="without hooks"
+    )
+    axes[0].bar(
+        np.arange(len(labels)) + 0.2, frozen_walls, 0.4, label="frozen partition"
+    )
+    axes[0].set_ylabel("Whole-solve wall [s]")
+    axes[0].set_xticks(np.arange(len(labels)), labels, rotation=35, ha="right")
+    axes[0].legend(fontsize=8)
+    axes[0].grid(axis="y", alpha=0.25)
+    axes[1].bar(
+        np.arange(len(labels)),
+        [row["saving_seconds"] for row in paired_rows],
+        color="C2",
+    )
+    axes[1].set_ylabel("Saving [s]")
+    axes[1].set_xticks(np.arange(len(labels)), labels, rotation=35, ha="right")
+    axes[1].grid(axis="y", alpha=0.25)
+    figure_path = output / "frozen-partition-savings.png"
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+    receipt = {
+        "receipt": "paired public-route frozen-partition revaluation",
+        "backend": _execution_environment(),
+        "source_revision": _source_revision(),
+        "compilation_cache": compilation_cache.receipt(),
+        "execution_contract": {
+            "entry_point": "ForwardProfile.solve_branch",
+            "route": "newton_krylov",
+            "paired_arms_in_one_job": True,
+            "row_selection": list(shots),
+            "terminal_residual_change_limit": 1.0e-10,
+        },
+        "response_carrier": carrier_evidence,
+        "per_row": paired_rows,
+        "aggregate": {
+            "row_count": len(paired_rows),
+            "total_saving_seconds": float(
+                sum(row["saving_seconds"] for row in paired_rows)
+            ),
+            "mean_saving_fraction": float(
+                np.mean([row["saving_fraction"] for row in paired_rows])
+            ),
+            "terminal_semantics_preserved": True,
+        },
+        "figure": str(figure_path),
+        "figure_src": _figure_src(figure_path),
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "frozen-partition-savings.json").write_text(
+        json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+    )
+    return receipt
+
+
 def run(
     store: Path,
     bank: Path,
@@ -4449,6 +4695,16 @@ def main(argv: list[str] | None = None) -> None:
         help="diagnostically replay the reference-seeded absolute-source route",
     )
     parser.add_argument(
+        "--frozen-partition-comparison",
+        action="store_true",
+        help="pair the four bank rows with and without frozen revaluation",
+    )
+    parser.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="build the selected comparison rows without running solves",
+    )
+    parser.add_argument(
         "--shot",
         action="append",
         type=int,
@@ -4456,6 +4712,27 @@ def main(argv: list[str] | None = None) -> None:
     )
     arguments = parser.parse_args(argv)
     shots = tuple(arguments.shot) if arguments.shot else None
+    if arguments.frozen_partition_comparison:
+        receipt = run_frozen_partition_comparison(
+            arguments.store,
+            arguments.bank,
+            arguments.output or FROZEN_PARTITION_OUTPUT,
+            shots or FROZEN_PARTITION_SHOTS,
+            prepare_only=arguments.prepare_only,
+        )
+        if arguments.prepare_only:
+            print(
+                "FROZEN_PARTITION_PREPARE "
+                f"rows={len(receipt['row_selection'])} "
+                f"hooks={receipt['hooks_attached_on_every_row']}"
+            )
+            return
+        print(
+            "FROZEN_PARTITION_COMPARISON "
+            f"rows={receipt['aggregate']['row_count']} "
+            f"saving_s={receipt['aggregate']['total_saving_seconds']:.6g}"
+        )
+        return
     if arguments.absolute_source_replay:
         output = arguments.output or DEFAULT_OUTPUT
         try:

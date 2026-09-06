@@ -1365,6 +1365,8 @@ class ForwardFluxOperator:
             topology.axis_flux, topology.boundary_flux, grid_flux
         )
         masks = DomainMasks(label=frozen.label, psi_norm=psi_norm)
+        if not self.use_linear_moments:
+            return masks, topology, None, None
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
         return masks, topology, sample_psi_norm, frozen.profile_support
@@ -1372,7 +1374,7 @@ class ForwardFluxOperator:
     def _internal_on_partition(self, psi, frozen, target_current=None):
         """Return the plasma image while retaining one trip's partition."""
         partition = self._partition_for_state(psi, frozen)
-        moments = self._partitioned_current_moments(partition)
+        moments = self._current_moments_on_partition(psi, partition)
         if target_current is not None:
             amplitude = self.current_normalisation_amplitude(
                 target_current, jnp.sum(moments.cell_current)
@@ -1380,8 +1382,15 @@ class ForwardFluxOperator:
             moments = self.scaled_current_moments(moments, amplitude)
         return self.current_moment_image(moments)
 
+    def _current_moments_on_partition(self, psi, partition) -> CellCurrentMoments:
+        """Return current moments from a topology partition and trial state."""
+        del psi
+        return self._partitioned_current_moments(partition)
+
     def _partitioned_current_moments(self, partition) -> CellCurrentMoments:
         masks, _topology, sample_psi_norm, profile_support = partition
+        if not self.use_linear_moments:
+            return self._point_current_moments(masks)
         moments = self.source.current_moments(
             masks,
             self.support_current_moments,
@@ -1389,6 +1398,19 @@ class ForwardFluxOperator:
             sample_flux=sample_psi_norm,
         )
         return self.coupling_current_moments(moments)
+
+    def _point_current_moments(self, masks) -> CellCurrentMoments:
+        """Return point-current moments from an already-read domain mask."""
+        point_current = self.source.cell_current(self.radius, self.area, masks)
+        density = point_current / self.area
+        if self.cell_average_stencil is None:
+            current = point_current
+        else:
+            gathered = density[self.cell_average_stencil]
+            average = jnp.einsum("ni,i->n", gathered, self.cell_average_weight)
+            current = jnp.where(masks.profile_participation, average * self.area, 0.0)
+        zero = jnp.zeros_like(current)
+        return CellCurrentMoments(current, zero, zero)
 
     def _clipped_integral_measure(self, partition) -> ClippedIntegralMeasure:
         """Build the observation measure from one already-traced partition."""
@@ -1453,18 +1475,7 @@ class ForwardFluxOperator:
             masks, _topology, _connected, _admitted = self._fixed_design_read(
                 physical, requested_class
             )
-            point_current = self.source.cell_current(self.radius, self.area, masks)
-            density = point_current / self.area
-            if self.cell_average_stencil is None:
-                current = point_current
-            else:
-                gathered = density[self.cell_average_stencil]
-                average = jnp.einsum("ni,i->n", gathered, self.cell_average_weight)
-                current = jnp.where(
-                    masks.profile_participation, average * self.area, 0.0
-                )
-            zero = jnp.zeros_like(current)
-            return CellCurrentMoments(current, zero, zero)
+            return self._point_current_moments(masks)
         return self._partitioned_current_moments(
             self._support_partition(psi, requested_class)
         )
@@ -1606,8 +1617,8 @@ class ForwardFluxOperator:
         self, psi, requested_class=None, previous_shadow=None
     ):
         """Read all discrete topology state once for an active-set boundary."""
-        if self.moment_geometry is None or not self.use_linear_moments:
-            raise ValueError("frozen topology requires clipped support moments")
+        if self.use_linear_moments and self.moment_geometry is None:
+            raise ValueError("linear moments require moment geometry")
         physical = jnp.asarray(psi)[: self.physical_node_number]
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
@@ -1618,10 +1629,15 @@ class ForwardFluxOperator:
         direct_sample_shadow = jnp.zeros(
             self.node_number - self.physical_node_number, dtype=bool
         )
+        profile_support = (
+            self._profile_support(masks, physical.dtype)
+            if self.use_linear_moments
+            else None
+        )
         return _FrozenTopologyPartition(
             label=masks.label,
             topology=topology,
-            profile_support=self._profile_support(masks, physical.dtype),
+            profile_support=profile_support,
             residual_shadow=jnp.concatenate(
                 (flood_shadow, wall_shadow, direct_sample_shadow)
             ),
@@ -1731,7 +1747,7 @@ class ForwardFluxOperator:
                 psi, image, requested_class, shadow=shadow
             )
 
-        if self.moment_geometry is not None and self.use_linear_moments:
+        if not self.use_linear_moments or self.moment_geometry is not None:
 
             def read_partition(psi, previous_shadow=None):
                 return self._frozen_topology_partition(

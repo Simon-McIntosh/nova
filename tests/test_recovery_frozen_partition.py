@@ -12,9 +12,15 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
+    from nova.biot.null import Null1D, Null2D
+    from nova.biot.target import FluxTarget
+    from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium import fixed_point
     from nova.equilibrium.fixed_point import newton_krylov
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.jax.config import configure_dtypes
+    from nova.geometry.hexstencil import hex_stencil
 
 
 def _eager_partition_selection(
@@ -90,6 +96,46 @@ def _recovery_and_rebuild_solve(selector):
         fixed_point._acceptance_map_on_selected_partition = original
         jax.clear_caches()
     return result, counts
+
+
+def _bank_row_shaped_operator() -> ForwardFluxOperator:
+    """Build the smallest structured point-current carrier used by a bank row."""
+    lattice = FluxLattice(np.linspace(1.05, 2.35, 7), np.linspace(-0.72, 0.72, 7))
+    angle = np.linspace(0.0, 2.0 * np.pi, 32, endpoint=False)
+    wall = np.c_[1.7 + 0.64 * np.cos(angle), 0.68 * np.sin(angle)]
+
+    def zero_profile(psi_norm):
+        return jnp.zeros_like(psi_norm)
+
+    return ForwardFluxOperator(
+        grid=FluxTarget(
+            source_target=jnp.zeros((lattice.node_count, 1)),
+            plasma_target=jnp.zeros((lattice.node_count, 1)),
+            null=Null2D.from_coordinates(
+                lattice.coordinate, hex_stencil(lattice.shape), maxsize=5
+            ),
+        ),
+        wall=FluxTarget(
+            source_target=jnp.zeros((len(wall), 1)),
+            plasma_target=jnp.zeros((len(wall), 1)),
+            null=Null1D(jnp.asarray(wall, dtype=jnp.float64)),
+        ),
+        source=ForwardSource(
+            core=DomainProfile(p_prime=zero_profile, ff_prime=zero_profile)
+        ),
+        external_current=jnp.zeros(1),
+        area=jnp.asarray(lattice.cell_area),
+        use_linear_moments=False,
+    )
+
+
+def test_point_current_bank_row_attaches_frozen_partition_hooks():
+    configure_dtypes()
+    mapped = _bank_row_shaped_operator().flux_map_with_shadow()
+
+    assert callable(getattr(mapped, "_read_frozen_partition"))
+    assert callable(getattr(mapped, "_map_frozen_partition"))
+    assert callable(getattr(mapped, "_frozen_partition_shadow"))
 
 
 def test_recovery_and_rebuild_reuse_the_frozen_partition_bit_identically():

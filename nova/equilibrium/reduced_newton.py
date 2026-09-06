@@ -45,6 +45,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import partial
 import time
 from typing import Any, NamedTuple
 
@@ -72,6 +73,7 @@ from nova.equilibrium.fixed_point import (
 
 __all__ = [
     "ConstrainedReducedNewtonResult",
+    "ReducedProgram",
     "ReducedCoordinates",
     "ReducedNewtonResult",
     "ReducedScores",
@@ -106,6 +108,15 @@ EAGER_LADDER_SCORING = "eager"
 TRIP_BOUNDARY = "fused"
 #: Close a trip through the separate calls the first prototype dispatched.
 DISPATCHED_TRIP_BOUNDARY = "dispatched"
+#: Hand the constraint tuple and the flux scale to every kernel as traced
+#: arguments.  A commanded target then moves without changing the program's
+#: identity, so a keyframe that re-solves the same rows at a new target
+#: re-enters the program it already compiled.
+TRACED_ROWS = "traced"
+#: Bake the constraint tuple and the flux scale into the program when it is
+#: built.  Same numbers, one program per commanded target; it stays reachable
+#: because the semantics the traced route must agree with is what it computes.
+CAPTURED_ROWS = "captured"
 
 
 class ReducedCoordinates(NamedTuple):
@@ -301,21 +312,33 @@ def _reduced_kernels(
             return reduced, None
         return reduced[: coordinates.size], reduced[coordinates.size :]
 
-    def _image(moments, unknowns):
+    def _bound(rows):
+        """Return the constraint data this call evaluates its rows against.
+
+        ``None`` selects the tuple the program was built around, which is what
+        a solve that bakes its targets in passes.  A keyframe loop hands the
+        edited tuple in instead and the kernel traces it, so a commanded
+        target moves without changing the program's identity.
+        """
+        if augmentation is None:
+            return None
+        return augmentation.arguments if rows is None else rows
+
+    def _image(moments, unknowns, bound):
         """Return the flux image of one moment set and its compensation."""
         image = external + operator.current_moment_image(moments)
         if augmentation is None:
             return image
-        return image + augmentation.flux_delta(unknowns)
+        return image + augmentation.flux_delta(unknowns, bound.pairs)
 
-    def _augment(residual, state, unknowns, shadow):
+    def _augment(residual, state, unknowns, shadow, bound):
         """Return the residual with the authored rows appended to it."""
         if augmentation is None:
             return residual, None
-        rows = augmentation.rows(state, unknowns, shadow)
+        rows = augmentation.rows(state, unknowns, shadow, bound.pairs)
         return jnp.concatenate((residual, rows)), rows
 
-    def _scores(state, mapped, unknowns, rows):
+    def _scores(state, mapped, unknowns, rows, bound):
         """Return the merit and relative residual the selection reads.
 
         Unaugmented these are the production flux-space scores.  With rows
@@ -329,7 +352,7 @@ def _reduced_kernels(
                 _smooth_relative_sup_merit(mapped, state),
                 _relative_residual(mapped, state),
             )
-        scale = augmentation.flux_scale
+        scale = bound.flux_scale
         scored = jnp.concatenate((state / scale, unknowns))
         imaged = jnp.concatenate((mapped / scale, unknowns - rows))
         return (
@@ -337,59 +360,64 @@ def _reduced_kernels(
             _relative_residual(imaged, scored),
         )
 
-    def reconstruct(reduced, shadow, base_state):
+    def reconstruct(reduced, shadow, base_state, rows=None):
         """Return the flux one reduced state reconstructs behind the shadow."""
         amplitudes, unknowns = _split(reduced)
-        image = _image(_scatter(coordinates, amplitudes), unknowns)
+        image = _image(_scatter(coordinates, amplitudes), unknowns, _bound(rows))
         return jnp.where(shadow, base_state, image)
 
-    def reduced_map(reduced, shadow, base_state):
+    def reduced_map(reduced, shadow, base_state, rows=None):
         """Return one write-then-read cycle of the reduced amplitudes."""
         moments = _current_moments(
             operator,
-            reconstruct(reduced, shadow, base_state),
+            reconstruct(reduced, shadow, base_state, rows),
             requested_class,
             target_current,
         )
         return _gather(coordinates, moments)
 
-    def reduced_residual(reduced, shadow, base_state):
+    def reduced_residual(reduced, shadow, base_state, rows=None):
         """Return the reduced fixed-point residual ``u - R(u)`` and its rows."""
         amplitudes, unknowns = _split(reduced)
         if augmentation is None:
-            return amplitudes - reduced_map(reduced, shadow, base_state)
-        state = reconstruct(reduced, shadow, base_state)
+            return amplitudes - reduced_map(reduced, shadow, base_state, rows)
+        bound = _bound(rows)
+        state = reconstruct(reduced, shadow, base_state, rows)
         moments = _current_moments(operator, state, requested_class, target_current)
         residual, _rows = _augment(
-            amplitudes - _gather(coordinates, moments), state, unknowns, shadow
+            amplitudes - _gather(coordinates, moments), state, unknowns, shadow, bound
         )
         return residual
 
-    def flux_scores(reduced, shadow, base_state):
+    def flux_scores(reduced, shadow, base_state, rows=None):
         """Return the production merit and relative residual in flux space."""
         amplitudes, unknowns = _split(reduced)
-        state = reconstruct(reduced, shadow, base_state)
+        bound = _bound(rows)
+        state = reconstruct(reduced, shadow, base_state, rows)
         moments = _current_moments(operator, state, requested_class, target_current)
-        image = _image(moments, unknowns)
+        image = _image(moments, unknowns, bound)
         mapped = jnp.where(shadow, state, image)
-        rows = (
-            None if augmentation is None else augmentation.rows(state, unknowns, shadow)
+        scored = (
+            None
+            if augmentation is None
+            else augmentation.rows(state, unknowns, shadow, bound.pairs)
         )
-        return _scores(state, mapped, unknowns, rows)
+        return _scores(state, mapped, unknowns, scored, bound)
 
-    def ladder(reduced, step, shadow, base_state):
+    def ladder(reduced, step, shadow, base_state, rows=None):
         """Score the production backtracking grades of one Newton step."""
         factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=reduced.dtype)
         candidates = reduced[None, :] + factors[:, None] * step[None, :]
         return jax.lax.map(
-            lambda candidate: flux_scores(candidate, shadow, base_state), candidates
+            lambda candidate: flux_scores(candidate, shadow, base_state, rows),
+            candidates,
         )
 
-    def leakage(reduced, shadow, base_state):
+    def leakage(reduced, shadow, base_state, rows=None):
         """Return the current the reduced map drives outside its support."""
         moments = _current_moments(
             operator,
-            reconstruct(reduced, shadow, base_state),
+            reconstruct(reduced, shadow, base_state, rows),
             requested_class,
             target_current,
         )
@@ -398,7 +426,7 @@ def _reduced_kernels(
         excluded = jnp.max(jnp.abs(jnp.where(retained > 0.0, 0.0, current)))
         return excluded / jnp.maximum(jnp.max(jnp.abs(current)), 1.0e-30)
 
-    def step_scores(reduced, shadow, base_state):
+    def step_scores(reduced, shadow, base_state, rows=None):
         """Return the reduced residual, its sup norm and the flux scores.
 
         The residual, its sup norm and the two flux scores are four readings
@@ -408,14 +436,15 @@ def _reduced_kernels(
         merit it was going to synchronise on anyway.
         """
         amplitudes, unknowns = _split(reduced)
-        state = reconstruct(reduced, shadow, base_state)
+        bound = _bound(rows)
+        state = reconstruct(reduced, shadow, base_state, rows)
         moments = _current_moments(operator, state, requested_class, target_current)
-        image = _image(moments, unknowns)
+        image = _image(moments, unknowns, bound)
         mapped = jnp.where(shadow, state, image)
-        residual, rows = _augment(
-            amplitudes - _gather(coordinates, moments), state, unknowns, shadow
+        residual, scored = _augment(
+            amplitudes - _gather(coordinates, moments), state, unknowns, shadow, bound
         )
-        merit, flux_residual = _scores(state, mapped, unknowns, rows)
+        merit, flux_residual = _scores(state, mapped, unknowns, scored, bound)
         return ReducedScores(
             residual,
             jnp.max(jnp.abs(residual)),
@@ -423,7 +452,7 @@ def _reduced_kernels(
             flux_residual,
         )
 
-    def grade_scores(reduced, step, factor, shadow, base_state):
+    def grade_scores(reduced, step, factor, shadow, base_state, rows=None):
         """Score one backtracking grade and return the state it scored.
 
         The candidate amplitudes leave the program beside their scores, so a
@@ -433,9 +462,9 @@ def _reduced_kernels(
         one compiled program.
         """
         candidate = reduced + factor * step
-        return candidate, step_scores(candidate, shadow, base_state)
+        return candidate, step_scores(candidate, shadow, base_state, rows)
 
-    def tail_grades(reduced, step, shadow, base_state):
+    def tail_grades(reduced, step, shadow, base_state, rows=None):
         """Score every backtracking grade after the first in one dispatch.
 
         A refused first grade leaves the remaining grades with no ordering to
@@ -449,10 +478,11 @@ def _reduced_kernels(
         factors = jnp.asarray(_BACKTRACKING_FACTORS[1:], dtype=reduced.dtype)
         candidates = reduced[None, :] + factors[:, None] * step[None, :]
         return candidates, jax.lax.map(
-            lambda candidate: step_scores(candidate, shadow, base_state), candidates
+            lambda candidate: step_scores(candidate, shadow, base_state, rows),
+            candidates,
         )
 
-    def trip_boundary(reduced, shadow, base_state):
+    def trip_boundary(reduced, shadow, base_state, rows=None):
         """Close one trip inside a single program.
 
         Reconstructing the flux, promoting the residual shadow against the
@@ -464,7 +494,8 @@ def _reduced_kernels(
         """
         amplitudes, unknowns = _split(reduced)
         del amplitudes
-        state = reconstruct(reduced, shadow, base_state)
+        bound = _bound(rows)
+        state = reconstruct(reduced, shadow, base_state, rows)
         moments = _current_moments(operator, state, requested_class, target_current)
         promoted = jnp.ravel(
             jnp.asarray(
@@ -474,22 +505,22 @@ def _reduced_kernels(
                 dtype=bool,
             )
         )
-        image = _image(moments, unknowns)
+        image = _image(moments, unknowns, bound)
         mapped = jnp.where(promoted, state, image)
         current = moments.cell_current
         retained = jnp.zeros_like(current).at[coordinates.cells].set(1.0)
         excluded = jnp.max(jnp.abs(jnp.where(retained > 0.0, 0.0, current)))
         gathered = _gather(coordinates, moments)
-        rows = (
+        scored = (
             None
             if augmentation is None
-            else augmentation.rows(state, unknowns, promoted)
+            else augmentation.rows(state, unknowns, promoted, bound.pairs)
         )
         return (
             state,
             promoted,
             jnp.sum(promoted != shadow),
-            _scores(state, mapped, unknowns, rows)[1],
+            _scores(state, mapped, unknowns, scored, bound)[1],
             gathered if augmentation is None else jnp.concatenate((gathered, unknowns)),
             excluded / jnp.maximum(jnp.max(jnp.abs(current)), 1.0e-30),
         )
@@ -993,6 +1024,60 @@ def solve_reduced_newton(
     )
 
 
+class _RowArguments(NamedTuple):
+    """The constraint data one solve varies without rebuilding its program.
+
+    :class:`~nova.equilibrium.constraint.ConstraintPair` flattens to exactly
+    the numerical leaves a keyframe edits - the row target, its tolerance and
+    scale, the initial unknown, and the compensating direction with its
+    ampere scale - and keeps the functional type and the solve policy in its
+    tree structure.  Handing the tuple itself to a kernel as a traced
+    argument therefore moves a commanded target without changing the
+    program's identity, while a change of row kind or policy still builds the
+    different program it is.  ``flux_scale`` travels beside it because it is
+    read off the state the solve starts from and so moves with the keyframe.
+    """
+
+    pairs: tuple[ConstraintPair, ...]
+    flux_scale: jax.Array
+
+
+class ReducedProgram(NamedTuple):
+    """One built reduced solve a later keyframe can re-enter.
+
+    The coordinates and the external flux travel with the kernels because
+    reuse is only meaningful while the layout holds: the amplitudes a later
+    solve carries are indices into the same cells, and the flux those
+    amplitudes reconstruct sits behind the same conductor state.  A caller
+    that changes either builds a new program rather than re-entering this one.
+    """
+
+    coordinates: ReducedCoordinates
+    external: jax.Array
+    kernels: dict[str, Callable[..., Any]]
+    row_count: int
+
+
+def _bind_rows(
+    kernels: dict[str, Callable[..., Any]], arguments: _RowArguments | None
+) -> dict[str, Callable[..., Any]]:
+    """Return the kernels with one solve's varying row data already bound.
+
+    Binding here rather than threading the argument through the trip loop
+    keeps the loop reading the same kernel signatures it read before, so the
+    only thing the traced route changes is where a kernel finds its targets.
+    ``direction`` and ``initial_gather`` never see a row, so they are handed
+    back unbound.
+    """
+    if arguments is None:
+        return kernels
+    unbound = ("direction", "initial_gather")
+    return {
+        name: kernel if name in unbound else partial(kernel, rows=arguments)
+        for name, kernel in kernels.items()
+    }
+
+
 @dataclass(frozen=True)
 class _RowAugmentation:
     """The constraint block a reduced state and its residual are extended by.
@@ -1013,10 +1098,15 @@ class _RowAugmentation:
     requested_class: Any
     target_current: Any
 
-    def flux_delta(self, unknowns) -> jax.Array:
+    @property
+    def arguments(self) -> "_RowArguments":
+        """Return the row data a program bakes in when none is handed to it."""
+        return _RowArguments(self.pairs, self.flux_scale)
+
+    def flux_delta(self, unknowns, pairs) -> jax.Array:
         """Return the flux every compensating unknown drives at this state."""
         delta = 0.0
-        for pair, row_slice in zip(self.pairs, self.row_slices, strict=True):
+        for pair, row_slice in zip(pairs, self.row_slices, strict=True):
             delta = delta + pair.unknown.flux_delta(
                 self.profile,
                 None,
@@ -1026,7 +1116,7 @@ class _RowAugmentation:
             )
         return delta
 
-    def rows(self, flux, unknowns, shadow) -> jax.Array:
+    def rows(self, flux, unknowns, shadow, pairs) -> jax.Array:
         """Return every authored constraint residual row at one state."""
         context = ConstraintContext(
             flux, self.requested_class, self.target_current, shadow
@@ -1043,7 +1133,7 @@ class _RowAugmentation:
                         jnp.asarray(pair.binding.scale),
                     )
                 )
-                for pair, row_slice in zip(self.pairs, self.row_slices, strict=True)
+                for pair, row_slice in zip(pairs, self.row_slices, strict=True)
             )
         )
 
@@ -1082,6 +1172,7 @@ class ConstrainedReducedNewtonResult(ReducedNewtonResult):
     constraints: tuple[ConstraintRecord, ...] = ()
     prescribed_current: jax.Array | None = None
     row_count: int = 0
+    program: "ReducedProgram | None" = None
 
 
 def _row_augmentation(
@@ -1130,6 +1221,8 @@ def solve_constrained_reduced_newton(
     support_floor: float = _ACTIVE_SUPPORT_FLOOR,
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
+    row_arguments: str = TRACED_ROWS,
+    program: ReducedProgram | None = None,
     stream: bool = False,
 ) -> ConstrainedReducedNewtonResult:
     """Drive the reduced fixed point with constraint rows on the same state.
@@ -1146,6 +1239,20 @@ def solve_constrained_reduced_newton(
     An empty constraint tuple is the unconstrained solve.  Every kernel then
     evaluates the expression :func:`solve_reduced_newton` evaluates, so the two
     entries return the same numbers rather than nearly the same ones.
+
+    ``row_arguments`` decides where a kernel finds its targets: traced, they
+    arrive as an argument and a commanded target moves inside the program the
+    caller already has; captured, they are baked in when the program is built
+    and every new target is a new program.  The two compute the same numbers
+    and the captured route stays reachable because that agreement is what
+    makes the traced one safe to steer with.
+
+    ``program`` is a built solve returned by an earlier call.  Handing it back
+    is what turns a sequence of keyframes into one compiled program: the
+    coordinates and the external flux come from it rather than being derived
+    again, so the reduced state stays in the cells the program was built
+    around.  The result carries its program either way, so a loop is a chain
+    of calls each passing the last one's.
     """
     operator = profile.operator
     state = jnp.asarray(initial)
@@ -1168,25 +1275,46 @@ def solve_constrained_reduced_newton(
             "the dispatched boundary rebuilds the reduced state from the flux "
             "alone and would discard the compensating unknowns"
         )
-    external = operator.external(current, prescribed_current)
+    if row_arguments not in (TRACED_ROWS, CAPTURED_ROWS):
+        raise ValueError(f"unknown row arguments {row_arguments!r}")
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
-    coordinates = reduced_coordinates(
-        operator,
-        state,
-        requested_class=requested_class,
-        target_current=target_current,
-        policy=support_policy,
-        floor=support_floor,
-    )
-    kernels = _reduced_kernels(
-        operator,
-        coordinates,
-        external,
-        requested_class,
-        target_current,
-        augmentation=augmentation,
+    if program is None:
+        external = operator.external(current, prescribed_current)
+        coordinates = reduced_coordinates(
+            operator,
+            state,
+            requested_class=requested_class,
+            target_current=target_current,
+            policy=support_policy,
+            floor=support_floor,
+        )
+        program = ReducedProgram(
+            coordinates=coordinates,
+            external=external,
+            kernels=_reduced_kernels(
+                operator,
+                coordinates,
+                external,
+                requested_class,
+                target_current,
+                augmentation=augmentation,
+            ),
+            row_count=0 if augmentation is None else augmentation.row_count,
+        )
+    elif program.row_count != (0 if augmentation is None else augmentation.row_count):
+        raise ValueError(
+            "a reused program carries a fixed number of constraint rows; "
+            f"it was built for {program.row_count} and this solve poses "
+            f"{0 if augmentation is None else augmentation.row_count}"
+        )
+    coordinates = program.coordinates
+    kernels = _bind_rows(
+        program.kernels,
+        None
+        if augmentation is None or row_arguments == CAPTURED_ROWS
+        else augmentation.arguments,
     )
 
     def regather(state):
@@ -1286,4 +1414,5 @@ def solve_constrained_reduced_newton(
         constraints=records,
         prescribed_current=circuit_current,
         row_count=0 if augmentation is None else augmentation.row_count,
+        program=program,
     )

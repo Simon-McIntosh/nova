@@ -370,6 +370,139 @@ def test_the_public_route_carries_the_rows_into_a_receipt(steered):
         )
 
 
+#: Agreement required between a scored scalar read out of a program that
+#: traces its constraint targets and one that folds them in as constants.
+#: The two evaluate the same expressions, and XLA is free to reassociate the
+#: reductions behind the merit and the relative residual differently in each;
+#: measured on this machine that moves the terminal residual by 6.7e-09 of
+#: itself.  This figure brackets that reassociation two decades wide rather
+#: than predicting it, and no decision reads the numbers it covers.
+SCORE_REASSOCIATION = 1.0e-6
+#: Kernels a constrained solve drives on this machine.  Each must compile
+#: once across a sequence of moved targets that re-enters one program.
+STEERED_KERNELS = ("initial_gather", "jacobian", "direction", "grade", "boundary")
+
+
+def _cache_sizes(program):
+    """Return how many programs each kernel of one built solve has compiled."""
+    return {
+        name: kernel._cache_size()
+        for name, kernel in program.kernels.items()
+        if hasattr(kernel, "_cache_size")
+    }
+
+
+def test_consecutive_moved_targets_share_one_compiled_program(steered):
+    """Moving a commanded target re-enters the program the caller already has.
+
+    The constraint tuple flattens to its own numerical leaves, so handing it
+    to every kernel as a traced argument keeps the target out of the
+    program's identity.  Three commanded targets in a row, each re-solved
+    from the state and the compensation the last one left behind and each
+    handed back the program the last one built, therefore compile every
+    kernel exactly once rather than once per target.
+    """
+    profile, _seed, free = steered
+    achieved = _centroid(profile, free.state)
+    state, program, unknown = free.state, None, None
+    reached = []
+    for index in range(3):
+        commanded = achieved + (index + 1) * CENTROID_MOVE
+        pair, _selection = _centroid_pair(profile, state, commanded)
+        if unknown is not None:
+            pair = dataclasses.replace(
+                pair,
+                binding=dataclasses.replace(pair.binding, initial_unknown=unknown),
+            )
+        result = reduced_newton.solve_constrained_reduced_newton(
+            profile,
+            state,
+            constraint_pairs=(pair,),
+            program=program,
+            tolerance=SOLVE_TOLERANCE,
+            newton_steps=NEWTON_STEPS,
+        )
+        assert result.converged
+        reached.append(_centroid(profile, result.state) - commanded)
+        state, program, unknown = (
+            result.state,
+            result.program,
+            result.compensating_unknown,
+        )
+    assert np.max(np.abs(reached)) <= CENTROID_AGREEMENT
+    sizes = _cache_sizes(program)
+    assert set(STEERED_KERNELS) <= set(sizes)
+    assert max(sizes.values()) == 1, sizes
+    assert all(sizes[name] == 1 for name in STEERED_KERNELS), sizes
+
+
+def test_a_traced_target_decides_what_a_captured_one_decides(steered):
+    """Where a kernel finds its target changes no decision and no answer.
+
+    Baking the tuple into the program is the reference the traced route has
+    to reproduce: the same commanded target solved both ways must walk the
+    same trips, accept the same grades and land on the same flux, bit for
+    bit, or the saving is being taken out of the answer.
+
+    Every scored scalar is bracketed rather than pinned, and every decision is
+    pinned rather than bracketed.  A target that arrives as a program
+    parameter and a target folded in as a constant leave XLA free to
+    reassociate the reductions that produce the merit and the two residuals,
+    and measured on this machine that moves the residual a trip reports by
+    about 7e-09 of itself.  The solve stops on that number against a
+    tolerance fifteen decades above the motion, so the trips it takes, the
+    grades it accepts and the flux it lands on are unmoved, which is what the
+    exact comparisons below require.
+    """
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    common = dict(
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    captured = reduced_newton.solve_constrained_reduced_newton(
+        profile, free.state, row_arguments=reduced_newton.CAPTURED_ROWS, **common
+    )
+    traced = reduced_newton.solve_constrained_reduced_newton(
+        profile, free.state, row_arguments=reduced_newton.TRACED_ROWS, **common
+    )
+    assert np.array_equal(np.asarray(captured.state), np.asarray(traced.state))
+    assert np.array_equal(
+        np.asarray(captured.compensating_unknown),
+        np.asarray(traced.compensating_unknown),
+    )
+    for name in (
+        "active_set_iterations",
+        "converged",
+        "termination_reason",
+        "active_set_mask_differences",
+        "newton_steps_per_trip",
+        "jacobian_builds_per_trip",
+        "rejected_steps_per_trip",
+        "map_evaluations_per_trip",
+    ):
+        assert getattr(captured, name) == getattr(traced, name), name
+    for name in ("terminal_residual", "off_support_leakage"):
+        left, right = getattr(captured, name), getattr(traced, name)
+        assert abs(left - right) <= SCORE_REASSOCIATION * max(abs(left), 1.0), name
+    assert len(captured.active_set_residuals) == len(traced.active_set_residuals)
+    for left, right in zip(
+        captured.active_set_residuals, traced.active_set_residuals, strict=True
+    ):
+        assert abs(left - right) <= SCORE_REASSOCIATION * max(abs(left), 1.0)
+    assert len(captured.steps) == len(traced.steps)
+    for one, other in zip(captured.steps, traced.steps, strict=True):
+        for name in ("trip", "step", "accepted_factor", "grades_tried"):
+            assert getattr(one, name) == getattr(other, name), name
+        for name in ("map_evaluations", "jacobian_refreshed"):
+            assert getattr(one, name) == getattr(other, name), name
+        for name in ("reduced_residual", "flux_residual", "merit"):
+            left, right = getattr(one, name), getattr(other, name)
+            assert abs(left - right) <= SCORE_REASSOCIATION * abs(left), name
+
+
 def test_the_reduced_route_refuses_a_state_reading_compensator(steered):
     """Only a compensator whose flux image is explicit is admitted.
 

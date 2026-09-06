@@ -670,6 +670,50 @@ def plasma_current(profile: ForwardProfile, flux, *, target_current=None) -> flo
     return abs(float(np.asarray(observation.plasma_current)))
 
 
+def _same_points(left, right) -> bool:
+    """Return whether two commanded point sets are equal to roundoff."""
+    left_points = np.asarray(left, dtype=float)
+    right_points = np.asarray(right, dtype=float)
+    if left_points.shape != right_points.shape:
+        return False
+    scale = max(
+        1.0,
+        float(np.max(np.abs(left_points))),
+        float(np.max(np.abs(right_points))),
+    )
+    return bool(
+        np.max(np.abs(left_points - right_points)) <= 64.0 * np.finfo(float).eps * scale
+    )
+
+
+def _is_unmoved_command(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux,
+    previous_flux_points: np.ndarray,
+    *,
+    requested_class=None,
+) -> bool:
+    """Return whether every commanded location is the seed extraction."""
+    previous_turning_points = np.asarray(previous_flux_points, dtype=float)[:4]
+    if not _same_points(target.flux_points[:4], previous_turning_points):
+        return False
+    if not _same_points(target.radial_field_points, previous_turning_points[[0, 2]]):
+        return False
+    if not _same_points(target.vertical_field_points, previous_turning_points[[1, 3]]):
+        return False
+    _masks, topology = profile.operator.read(
+        jnp.asarray(flux), requested_class=requested_class
+    )
+    seed_x_point = np.asarray(topology.x_point, dtype=float)
+    has_seed_x_point = bool(np.asarray(topology.diverted)) and np.all(
+        np.isfinite(seed_x_point)
+    )
+    if target.x_point is None:
+        return not has_seed_x_point
+    return has_seed_x_point and _same_points(target.x_point, seed_x_point)
+
+
 def solve_shape_inverse(
     profile: ForwardProfile,
     target: BoundingBoxTarget,
@@ -727,6 +771,13 @@ def solve_shape_inverse(
             f"{field.circuit_count}"
         )
     row_target, previous_flux_points = shape_steering_target(profile, target, state)
+    unmoved_command = _is_unmoved_command(
+        profile,
+        row_target,
+        state,
+        previous_flux_points,
+        requested_class=requested_class,
+    )
     target_rows = shape_row_target(
         profile, row_target, state, requested_class=requested_class
     )
@@ -737,6 +788,13 @@ def solve_shape_inverse(
         requested_class=requested_class,
         target_current=target_current,
     )
+    if unmoved_command:
+        # Ray-cast boundary points and the topology saddle are extraction
+        # coordinates. On a coarse diverted lattice their interpolated rows
+        # need not equal the scalar boundary level or exact zero field. A null
+        # command targets those same extracted values, making its delta system
+        # identically zero without weakening moved-point targets.
+        target_rows = initial_observed.copy()
     initial_response = shape_response_matrix(
         profile,
         row_target,

@@ -19,7 +19,6 @@ from nova.equilibrium.shape_inverse import (
     observed_values,
     response_matrix,
     shape_response_matrix,
-    shape_row_target,
     shape_steering_target,
     shape_values,
     solve_shape_inverse,
@@ -134,8 +133,9 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
     row_target, _previous = shape_steering_target(
         machine.profile, seed_target, machine.seed
     )
-    expected_target = shape_row_target(machine.profile, row_target, machine.seed)
+    expected_target = shape_values(machine.profile, row_target, machine.seed)
     np.testing.assert_allclose(solved.target, expected_target, rtol=0.0, atol=0.0)
+    np.testing.assert_allclose(solved.right_hand_side, 0.0, rtol=0.0, atol=0.0)
     assert solved.picard_boundary_flux[0] == pytest.approx(expected_target[0])
     matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
     vector = solved.right_hand_side * solved.row_weight

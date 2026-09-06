@@ -12,6 +12,8 @@ import pytest
 
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
+    RANK_RELATIVE_TOLERANCE,
+    _numerical_rank,
     achieved_target,
     bounding_box_pairs,
     observed_values,
@@ -79,6 +81,20 @@ def test_unmoved_inverse_preserves_the_seed_currents(machine, seed_target):
     np.testing.assert_allclose(solved.currents, current, rtol=0.0, atol=5.0e-4)
     assert np.linalg.norm(solved.delta) < 2.0e-3
     assert solved.row_kinds == ("flux",) * 4 + ("field",) * 4
+    assert solved.numerical_rank == solved.singular_values.size
+    assert solved.right_null_space.shape == (
+        solved.free_circuits.size - solved.numerical_rank,
+        solved.free_circuits.size,
+    )
+
+
+def test_numerical_rank_drops_only_exact_zero_modes():
+    """Weak nonzero authority remains available to Tikhonov damping."""
+    threshold = RANK_RELATIVE_TOLERANCE
+    values = np.asarray([1.0, 10.0**-4.5, threshold, np.nextafter(threshold, 0.0), 0.0])
+    rank, absolute_threshold = _numerical_rank(values)
+    assert rank == 3
+    assert absolute_threshold == threshold
 
 
 @pytest.mark.parametrize("parameter", ("bulk_r", "bulk_z"))

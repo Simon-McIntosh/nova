@@ -69,6 +69,8 @@ FIELD_WEIGHT = 50.0
 #: Dimensionless Tikhonov fraction of the largest weighted response singular
 #: value. The scale follows the operator authority on the current fixture.
 GAMMA = 1.0e-6
+#: Relative threshold that removes only numerically zero response directions.
+RANK_RELATIVE_TOLERANCE = 1.0e-12
 
 IsofluxReference = Literal["boundary", "reference_point"]
 
@@ -87,7 +89,23 @@ class ShapeInverseResult:
     plasma_current: float
     gamma: float
     field_weight: float
+    singular_values: np.ndarray
+    numerical_rank: int
+    rank_threshold: float
+    right_null_space: np.ndarray
     least_squares_residual: float
+
+
+def _numerical_rank(singular_values: np.ndarray) -> tuple[int, float]:
+    """Return the exact-zero numerical rank and its absolute threshold."""
+    values = np.asarray(singular_values, dtype=float)
+    if values.ndim != 1 or values.size == 0:
+        raise ValueError("the shape response block has no singular values")
+    largest = float(values[0])
+    if not np.isfinite(largest) or largest <= 0.0:
+        raise ValueError("the shape response block has no finite circuit authority")
+    threshold = RANK_RELATIVE_TOLERANCE * largest
+    return int(np.count_nonzero(values >= threshold)), threshold
 
 
 def reference_point(profile: ForwardProfile, flux) -> np.ndarray:
@@ -464,12 +482,15 @@ def solve_shape_inverse(
     rhs = (np.zeros(observed.shape[0]) - observed) * weight
 
     ip = plasma_current(profile, state, target_current=target_current)
-    singular_values = np.linalg.svd(weighted, compute_uv=False)
-    largest_singular_value = float(singular_values[0])
-    if not np.isfinite(largest_singular_value) or largest_singular_value <= 0.0:
+    _left_vectors, singular_values, right_vectors_h = np.linalg.svd(
+        weighted, full_matrices=True
+    )
+    numerical_rank, rank_threshold = _numerical_rank(singular_values)
+    if numerical_rank == 0:
         raise ValueError("the shape response block has no finite circuit authority")
+    largest_singular_value = float(singular_values[0])
     regularisation = gamma * largest_singular_value
-    delta_free = MoorePenrose(weighted, gamma=regularisation) / rhs
+    delta_free = MoorePenrose(weighted, gamma=regularisation, rank=numerical_rank) / rhs
 
     if prescribed_current is None:
         current = np.zeros(response.shape[1])
@@ -500,6 +521,10 @@ def solve_shape_inverse(
         plasma_current=float(ip),
         gamma=float(regularisation),
         field_weight=field_weight,
+        singular_values=singular_values,
+        numerical_rank=numerical_rank,
+        rank_threshold=rank_threshold,
+        right_null_space=right_vectors_h[numerical_rank:],
         least_squares_residual=float(np.linalg.norm(weighted @ delta_free - rhs)),
     )
 
@@ -524,6 +549,7 @@ def turning_point_error(
 __all__ = [
     "FIELD_WEIGHT",
     "GAMMA",
+    "RANK_RELATIVE_TOLERANCE",
     "ShapeInverseResult",
     "achieved_target",
     "boundary_polygon",

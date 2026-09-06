@@ -185,9 +185,15 @@ def _stage_durations(marks: list[tuple[str, float]]) -> dict[str, float]:
 
 
 def measure(
-    *, output: Path, figure: Path, cache_root: Path | None = None
+    *,
+    output: Path,
+    figure: Path,
+    cache_root: Path | None = None,
+    route: str = "host",
 ) -> dict[str, Any]:
     """Drive the playable session over the MAST 22086/43 machine on the H200."""
+    if route not in ("host", "compiled"):
+        raise ValueError("route must be 'host' or 'compiled'")
     import sys
 
     compile_log = output.parent / "h200-keyframes-compiles.log"
@@ -215,6 +221,7 @@ def measure(
 
     receipt: dict[str, Any] = {
         "artifact": "playable app keyframes on the constrained reduced route, H200",
+        "route": route,
         "identity": identity,
         "source_commit": _source_revision(),
         "runtime": {
@@ -297,6 +304,7 @@ def measure(
                 deltas[name] = round(1000.0 * (total - receipt_totals[name]), 3)
                 receipt_totals[name] = total
             return deltas
+
         _reduced = solver._reduced
         _receipt = solver._reduced_receipt
 
@@ -326,7 +334,19 @@ def measure(
         def timed_reduce(profile_, flux, commanded, program=None):
             reduced_newton.clear_stage_marks()
             started = time.perf_counter()
-            result = _reduced(profile_, flux, commanded, program)
+            if route == "compiled":
+                result = reduced_newton.solve_constrained_reduced_newton_compiled(
+                    profile_,
+                    jnp.asarray(flux),
+                    constraint_pairs=(),
+                    prescribed_current=jnp.asarray(commanded),
+                    tolerance=reduced_newton.FIXED_POINT_RESIDUAL_TOLERANCE,
+                    newton_steps=reduced_newton.NEWTON_STEPS,
+                    active_set_steps=reduced_newton.ACTIVE_SET_STEPS,
+                    program=None,
+                )
+            else:
+                result = _reduced(profile_, flux, commanded, program)
             # Drain the solve's tail device work (constraint records, the
             # prescribed-current fold) into this stage so it does not land on
             # the next press's first array conversion.
@@ -473,9 +493,7 @@ def measure(
         "fresh_compile_seconds": sum(event["seconds"] for event in fresh),
         "cache_served_compiles": len(cached),
         "cache_served_compile_seconds": sum(event["seconds"] for event in cached),
-        "cache_artifacts_loaded": _loaded_since(
-            moved_cache_before, moved_cache_after
-        ),
+        "cache_artifacts_loaded": _loaded_since(moved_cache_before, moved_cache_after),
         "dispatch_and_host_seconds": receipt["presses"][1]["wall"]
         - sum(event["seconds"] for event in fresh)
         - sum(event["seconds"] for event in cached),
@@ -525,13 +543,20 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument("--route", choices=("host", "compiled"), default="host")
+    parser.add_argument("--prepare-only", action="store_true")
     arguments = parser.parse_args()
+    if arguments.prepare_only:
+        configure_dtypes()
+        print(f"PREPARED route={arguments.route} platform={jax.default_backend()}")
+        return
     status = 0
     try:
         measure(
             output=arguments.output,
             figure=arguments.figure,
             cache_root=arguments.cache_root,
+            route=arguments.route,
         )
     except Exception as error:  # keep the exit-status line honest
         import traceback

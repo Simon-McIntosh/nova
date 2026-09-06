@@ -94,7 +94,9 @@ __all__ = [
     "ReducedTrip",
     "reduced_coordinates",
     "solve_constrained_reduced_newton",
+    "solve_constrained_reduced_newton_compiled",
     "solve_reduced_newton",
+    "solve_reduced_newton_compiled",
 ]
 
 
@@ -134,6 +136,7 @@ def _stage_mark(name: str) -> None:
     """Record one named solve-stage boundary when stage timing is enabled."""
     if _STAGE_TIMING_ENABLED:
         _STAGE_MARKS.append((name, time.perf_counter()))
+
 
 #: Score the first backtracking grade alone and, when it is refused, score
 #: every remaining grade in one dispatch.  The production ladder takes the
@@ -1187,6 +1190,233 @@ def _drive_trips(
     }
 
 
+def _compiled_slice_solver(
+    kernels: dict[str, Callable[..., Any]],
+    *,
+    tolerance: float,
+    newton_steps: int,
+    active_set_steps: int,
+    initial_unknown: jax.Array | None = None,
+) -> Callable[..., Any]:
+    """Build one fixed-shape program for a complete reduced solve.
+
+    The host route deliberately exposes one trip at a time so its decisions
+    can be inspected.  This route keeps the same dense Newton and grade
+    expressions, but carries the trip state through fixed ``fori_loop``
+    bodies.  Once a trip settles or converges, its carry is masked and simply
+    passes through the remaining budget.  The arrays returned by the program
+    are the complete receipt history, so the caller performs one
+    ``device_get`` for the slice rather than one read per trip.
+    """
+    factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=jnp.float64)
+
+    def choose(reduced, jacobian, shadow, base_state, merit):
+        direction = kernels["direction"](
+            jacobian,
+            kernels["step_scores"](reduced, shadow, base_state).residual,
+        )
+        candidates = reduced[None, :] + factors[:, None] * direction[None, :]
+        scored = jax.lax.map(
+            lambda candidate: kernels["step_scores"](candidate, shadow, base_state),
+            candidates,
+        )
+        valid = jnp.isfinite(scored.merit) & (scored.merit < merit)
+        accepted = jnp.argmax(valid.astype(jnp.int32))
+        found = jnp.any(valid)
+        return found, accepted, candidates[accepted]
+
+    def trip_body(reduced, shadow, base_state):
+        jacobian = kernels["jacobian"](reduced, shadow, base_state)
+
+        def step_body(_index, carry):
+            reduced, jacobian, active, step_count, builds, rejected = carry
+
+            def run_step(carry):
+                reduced, jacobian, _active, step_count, builds, rejected = carry
+                scores = kernels["step_scores"](reduced, shadow, base_state)
+                finished = jnp.isfinite(scores.flux_residual) & (
+                    scores.flux_residual <= tolerance
+                )
+
+                def no_step(_):
+                    return reduced, jacobian, False, step_count, builds, rejected
+
+                def try_step(_):
+                    first = choose(
+                        reduced,
+                        jacobian,
+                        shadow,
+                        base_state,
+                        scores.merit,
+                    )
+
+                    def refresh(_):
+                        refreshed = kernels["jacobian"](reduced, shadow, base_state)
+                        selected = choose(
+                            reduced,
+                            refreshed,
+                            shadow,
+                            base_state,
+                            scores.merit,
+                        )
+                        return selected, refreshed, 1
+
+                    selected, selected_jacobian, refreshes = jax.lax.cond(
+                        ~first[0], refresh, lambda _: (first, jacobian, 0), None
+                    )
+                    found, accepted, candidate = selected
+                    return (
+                        jnp.where(found, candidate, reduced),
+                        selected_jacobian,
+                        found,
+                        step_count + found.astype(jnp.int32),
+                        builds + refreshes,
+                        rejected + (~found).astype(jnp.int32),
+                    )
+
+                return jax.lax.cond(finished, no_step, try_step, None)
+
+            return jax.lax.cond(active, run_step, lambda value: value, carry)
+
+        return jax.lax.fori_loop(
+            0,
+            newton_steps,
+            step_body,
+            (
+                reduced,
+                jacobian,
+                jnp.asarray(True),
+                jnp.asarray(0, dtype=jnp.int32),
+                jnp.asarray(1, dtype=jnp.int32),
+                jnp.asarray(0, dtype=jnp.int32),
+            ),
+        )
+
+    def solve(
+        initial,
+        shadow,
+        external_value=None,
+        target_value=None,
+        requested_value=None,
+    ):
+        del external_value, target_value, requested_value
+        reduced = kernels["initial_gather"](initial)
+        if initial_unknown is not None:
+            reduced = jnp.concatenate((reduced, initial_unknown))
+        state = initial
+        active = jnp.asarray(True)
+        converged = jnp.asarray(False)
+        reason = jnp.asarray(
+            int(FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED),
+            dtype=jnp.int32,
+        )
+        terminal_residual = jnp.asarray(jnp.inf, dtype=initial.dtype)
+        iterations = jnp.asarray(0, dtype=jnp.int32)
+        converged_trip = jnp.asarray(-1, dtype=jnp.int32)
+        leakage = jnp.asarray(0.0, dtype=initial.dtype)
+        residuals = jnp.full((active_set_steps,), jnp.nan, dtype=initial.dtype)
+        differences = jnp.full((active_set_steps,), -1, dtype=jnp.int32)
+        trip_steps = jnp.zeros((active_set_steps,), dtype=jnp.int32)
+        trip_builds = jnp.zeros((active_set_steps,), dtype=jnp.int32)
+        trip_rejected = jnp.zeros((active_set_steps,), dtype=jnp.int32)
+        trip_maps = jnp.zeros((active_set_steps,), dtype=jnp.int32)
+
+        def outer_body(index, carry):
+            (
+                state,
+                reduced,
+                shadow,
+                active,
+                converged,
+                reason,
+                terminal_residual,
+                iterations,
+                converged_trip,
+                leakage,
+                residuals,
+                differences,
+                trip_steps,
+                trip_builds,
+                trip_rejected,
+                trip_maps,
+            ) = carry
+
+            def run_trip(_):
+                (
+                    solved_reduced,
+                    jacobian_active,
+                    step_count,
+                    trip_active,
+                    builds,
+                    rejected,
+                ) = trip_body(reduced, shadow, state)
+                del jacobian_active, trip_active
+                closed = kernels["boundary"](solved_reduced, shadow, state)
+                next_state, promoted, difference, observed, next_reduced, excluded = (
+                    closed
+                )
+                converged_now = (
+                    jnp.isfinite(observed) & (observed <= tolerance) & (difference == 0)
+                )
+                settled = difference == 0
+                still_active = ~converged_now & ~settled
+                next_reason = jnp.where(
+                    converged_now,
+                    int(FixedPointTerminationReason.CONVERGED),
+                    jnp.where(
+                        settled,
+                        int(FixedPointTerminationReason.ACTIVE_SET_SETTLED),
+                        reason,
+                    ),
+                )
+                return (
+                    next_state,
+                    next_reduced,
+                    promoted,
+                    still_active,
+                    converged | converged_now,
+                    next_reason,
+                    observed,
+                    iterations + 1,
+                    jnp.where(converged_now, index, converged_trip),
+                    jnp.maximum(leakage, excluded),
+                    residuals.at[index].set(observed),
+                    differences.at[index].set(difference),
+                    trip_steps.at[index].set(step_count),
+                    trip_builds.at[index].set(builds),
+                    trip_rejected.at[index].set(rejected),
+                    trip_maps.at[index].set(step_count),
+                )
+
+            return jax.lax.cond(active, run_trip, lambda value: value, carry)
+
+        return jax.lax.fori_loop(
+            0,
+            active_set_steps,
+            outer_body,
+            (
+                state,
+                reduced,
+                shadow,
+                active,
+                converged,
+                reason,
+                terminal_residual,
+                iterations,
+                converged_trip,
+                leakage,
+                residuals,
+                differences,
+                trip_steps,
+                trip_builds,
+                trip_rejected,
+                trip_maps,
+            ),
+        )
+
+    return jax.jit(solve)
+
+
 def _validate_solve_policy(ladder_scoring: str, trip_boundary: str) -> bool:
     """Return whether the trip boundary is fused, refusing unknown policies."""
     if ladder_scoring not in _GRADERS:
@@ -1411,6 +1641,7 @@ class ReducedProgram(NamedTuple):
     #: currents (both ``None``), which is what makes reusing it on a later
     #: solve exact.  A program built under explicit currents always recomputes.
     default_external: bool = True
+    slice_solver: Callable[..., Any] | None = None
 
 
 def _bind_rows(
@@ -1860,5 +2091,306 @@ def solve_constrained_reduced_newton(
         constraints=records,
         prescribed_current=circuit_current,
         row_count=0 if augmentation is None else augmentation.row_count,
+        program=program,
+    )
+
+
+def _compiled_output_fields(output):
+    """Convert one compiled call's fixed-shape receipt arrays to host fields."""
+    host = jax.device_get(output)
+    iterations = int(host[7])
+    return {
+        "state": jnp.asarray(host[0]),
+        "reduced": jnp.asarray(host[1]),
+        "terminal_residual": float(host[6]),
+        "active_set_iterations": iterations,
+        "converged": bool(host[4]),
+        "termination_reason": int(host[5]),
+        "active_set_residuals": [float(value) for value in host[10][:iterations]],
+        "active_set_mask_differences": [int(value) for value in host[11][:iterations]],
+        "newton_steps_per_trip": [int(value) for value in host[12][:iterations]],
+        "jacobian_builds_per_trip": [int(value) for value in host[13][:iterations]],
+        "rejected_steps_per_trip": [int(value) for value in host[14][:iterations]],
+        "map_evaluations_per_trip": [int(value) for value in host[15][:iterations]],
+        "off_support_leakage": float(host[9]),
+        "converged_trip": int(host[8]),
+    }
+
+
+def _compiled_program(
+    operator,
+    state,
+    *,
+    requested_class,
+    target_current,
+    external,
+    program,
+    augmentation=None,
+):
+    """Return the static program and the kernels for one compiled call."""
+    row_count = 0 if augmentation is None else augmentation.row_count
+    row_signature = (
+        ()
+        if augmentation is None
+        else tuple(
+            (
+                type(pair.functional).__qualname__,
+                type(pair.unknown).__qualname__,
+            )
+            for pair in augmentation.pairs
+        )
+    )
+    target_shape = None if target_current is None else tuple(target_current.shape)
+    requested_shape = (
+        None if requested_class is None else tuple(np.shape(requested_class))
+    )
+    if program is None:
+        coordinates = reduced_coordinates(
+            operator,
+            state,
+            requested_class=requested_class,
+            target_current=target_current,
+            policy=SUPPORT_POLICY,
+            floor=_ACTIVE_SUPPORT_FLOOR,
+        )
+        program = ReducedProgram(
+            coordinates=coordinates,
+            external=external,
+            kernels=_reduced_kernels(
+                operator,
+                coordinates,
+                external,
+                requested_class,
+                target_current,
+                augmentation=augmentation,
+            ),
+            row_count=row_count,
+            operator_identity=id(operator),
+            external_shape=tuple(external.shape),
+            target_current_shape=target_shape,
+            requested_class_shape=requested_shape,
+            row_signature=row_signature,
+            default_external=False,
+        )
+    elif (
+        program.operator_identity != id(operator)
+        or program.external_shape != tuple(external.shape)
+        or program.target_current_shape != target_shape
+        or program.requested_class_shape != requested_shape
+        or program.row_count != row_count
+        or program.row_signature != row_signature
+    ):
+        raise ValueError(
+            "the reduced program does not match this operator's static shapes"
+        )
+    return program, program.kernels
+
+
+def _compiled_result(
+    operator,
+    initial,
+    *,
+    requested_class,
+    target_current,
+    external,
+    program,
+    augmentation,
+    row_arguments,
+    tolerance,
+    newton_steps,
+    active_set_steps,
+):
+    """Run a complete slice and synchronise its fixed-shape receipt once."""
+    program, raw_kernels = _compiled_program(
+        operator,
+        initial,
+        requested_class=requested_class,
+        target_current=target_current,
+        external=external,
+        program=program,
+        augmentation=augmentation,
+    )
+    kernels = _bind_dynamic_arguments(
+        raw_kernels, external, target_current, requested_class
+    )
+    if augmentation is not None and row_arguments == TRACED_ROWS:
+        kernels = _bind_rows(kernels, augmentation.arguments)
+    initial_unknown = None
+    if augmentation is not None:
+        initial_unknown = jnp.concatenate(
+            tuple(
+                jnp.ravel(jnp.asarray(pair.binding.initial_unknown))
+                for pair in augmentation.pairs
+            )
+        )
+    solver = _compiled_slice_solver(
+        kernels,
+        tolerance=tolerance,
+        newton_steps=newton_steps,
+        active_set_steps=active_set_steps,
+        initial_unknown=initial_unknown,
+    )
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(initial, requested_class), dtype=bool)
+    )
+    output = solver(initial, shadow)
+    fields = _compiled_output_fields(output)
+    return fields, program._replace(slice_solver=solver)
+
+
+def solve_reduced_newton_compiled(
+    operator,
+    initial,
+    *,
+    requested_class=None,
+    target_current=None,
+    current=None,
+    prescribed_current=None,
+    tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
+    newton_steps: int = NEWTON_STEPS,
+    active_set_steps: int = ACTIVE_SET_STEPS,
+    program: "ReducedProgram | None" = None,
+    stream: bool = False,
+) -> ReducedNewtonResult:
+    """Solve one slice in one compiled call with a fixed trip budget."""
+    del stream
+    state = jnp.asarray(initial)
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    external = operator.external(current, prescribed_current)
+    fields, program = _compiled_result(
+        operator,
+        state,
+        requested_class=requested_class,
+        target_current=target_value,
+        external=external,
+        program=program,
+        augmentation=None,
+        row_arguments=TRACED_ROWS,
+        tolerance=tolerance,
+        newton_steps=newton_steps,
+        active_set_steps=active_set_steps,
+    )
+    return ReducedNewtonResult(
+        state=fields["state"],
+        terminal_residual=fields["terminal_residual"],
+        active_set_iterations=fields["active_set_iterations"],
+        converged=fields["converged"],
+        termination_reason=fields["termination_reason"],
+        active_set_residuals=fields["active_set_residuals"],
+        active_set_mask_differences=fields["active_set_mask_differences"],
+        newton_steps_per_trip=fields["newton_steps_per_trip"],
+        jacobian_builds_per_trip=fields["jacobian_builds_per_trip"],
+        rejected_steps_per_trip=fields["rejected_steps_per_trip"],
+        map_evaluations_per_trip=fields["map_evaluations_per_trip"],
+        reduced_dimension=program.coordinates.size,
+        support_cells=int(program.coordinates.cells.size),
+        off_support_leakage=fields["off_support_leakage"],
+        program=program,
+    )
+
+
+def solve_constrained_reduced_newton_compiled(
+    profile,
+    initial,
+    *,
+    constraint_pairs: tuple[ConstraintPair, ...] = (),
+    requested_class=None,
+    target_current=None,
+    current=None,
+    prescribed_current=None,
+    tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
+    newton_steps: int = NEWTON_STEPS,
+    active_set_steps: int = ACTIVE_SET_STEPS,
+    row_arguments: str = TRACED_ROWS,
+    program: ReducedProgram | None = None,
+    stream: bool = False,
+) -> ConstrainedReducedNewtonResult:
+    """Solve one constrained slice in one compiled call."""
+    del stream
+    if not constraint_pairs:
+        result = solve_reduced_newton_compiled(
+            profile.operator,
+            initial,
+            requested_class=requested_class,
+            target_current=target_current,
+            current=current,
+            prescribed_current=prescribed_current,
+            tolerance=tolerance,
+            newton_steps=newton_steps,
+            active_set_steps=active_set_steps,
+            program=program,
+        )
+        return ConstrainedReducedNewtonResult(**result.__dict__)
+    if prescribed_current is None and profile.operator.prescribed_current_field is None:
+        raise ValueError(
+            "a constrained reduced solve needs a prescribed current field to "
+            "fold its rows' compensating currents into; pass prescribed_current "
+            "or set the operator's prescribed field"
+        )
+    if row_arguments not in (TRACED_ROWS, CAPTURED_ROWS):
+        raise ValueError(f"unknown row arguments {row_arguments!r}")
+    state = jnp.asarray(initial)
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    pairs = tuple(constraint_pairs)
+    augmentation = _row_augmentation(
+        profile,
+        pairs,
+        state,
+        requested_class=requested_class,
+        target_current=target_value,
+    )
+    external = profile.operator.external(current, prescribed_current)
+    fields, program = _compiled_result(
+        profile.operator,
+        state,
+        requested_class=requested_class,
+        target_current=target_value,
+        external=external,
+        program=program,
+        augmentation=augmentation,
+        row_arguments=row_arguments,
+        tolerance=tolerance,
+        newton_steps=newton_steps,
+        active_set_steps=active_set_steps,
+    )
+    unknowns = fields["reduced"][program.coordinates.size :]
+    records = constraint_records(
+        profile,
+        _RowRecordView(augmentation.row_slices, fields["state"], unknowns),
+        fields["state"],
+        pairs,
+        jnp.full(augmentation.row_count, jnp.nan),
+        requested_class=requested_class,
+        target_current=target_value,
+    )
+    records = tuple(record._replace(soft_mode_projection=None) for record in records)
+    circuit_current = (
+        jnp.asarray(prescribed_current)
+        if prescribed_current is not None
+        else jnp.asarray(profile.operator.prescribed_current_field.current)
+    )
+    for pair, record in zip(pairs, records, strict=True):
+        circuit_current = circuit_current + (
+            jnp.asarray(pair.unknown.direction) @ record.physical_unknown
+        )
+    return ConstrainedReducedNewtonResult(
+        state=fields["state"],
+        terminal_residual=fields["terminal_residual"],
+        active_set_iterations=fields["active_set_iterations"],
+        converged=fields["converged"],
+        termination_reason=fields["termination_reason"],
+        active_set_residuals=fields["active_set_residuals"],
+        active_set_mask_differences=fields["active_set_mask_differences"],
+        newton_steps_per_trip=fields["newton_steps_per_trip"],
+        jacobian_builds_per_trip=fields["jacobian_builds_per_trip"],
+        rejected_steps_per_trip=fields["rejected_steps_per_trip"],
+        map_evaluations_per_trip=fields["map_evaluations_per_trip"],
+        reduced_dimension=program.coordinates.size,
+        support_cells=int(program.coordinates.cells.size),
+        off_support_leakage=fields["off_support_leakage"],
+        compensating_unknown=unknowns,
+        constraints=records,
+        prescribed_current=circuit_current,
+        row_count=augmentation.row_count,
         program=program,
     )

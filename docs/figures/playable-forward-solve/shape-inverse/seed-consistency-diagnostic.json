@@ -1,5 +1,5 @@
 {
-  "source_commit": "c068e6a770c79de4bef17b07c27cd474eabf5bec",
+  "source_commit": "186127cd2a853c280e33c94f699d3839bebed5a7",
   "machine": "mast-22086/43",
   "policy": {
     "active_circuit_count": 13,
@@ -36,7 +36,10 @@
         "residual": -1.8457457784393227e-15,
         "active_circuit_contribution": -1.1338692597385494,
         "fixed_circuit_and_plasma_contribution": 1.01597297921914,
-        "absolute_tolerance": 1e-08,
+        "characteristic_row_scale": 1.1338692597385494,
+        "relative_residual": 1.627829454398402e-15,
+        "absolute_tolerance": 0.011338692597385494,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -47,8 +50,11 @@
         "residual": 8.605601159004939e-05,
         "active_circuit_contribution": -0.2850112147528713,
         "fixed_circuit_and_plasma_contribution": 0.16720099024505392,
-        "absolute_tolerance": 1e-08,
-        "passes": false
+        "characteristic_row_scale": 0.2850112147528713,
+        "relative_residual": 0.000301939036555692,
+        "absolute_tolerance": 0.002850112147528713,
+        "relative_tolerance": 0.01,
+        "passes": true
       },
       {
         "row": "psi_inner",
@@ -58,7 +64,10 @@
         "residual": -1.3877787807814457e-17,
         "active_circuit_contribution": -0.2501609555354816,
         "fixed_circuit_and_plasma_contribution": 0.1322646750160742,
-        "absolute_tolerance": 1e-08,
+        "characteristic_row_scale": 0.2501609555354816,
+        "relative_residual": 5.547543491792467e-17,
+        "absolute_tolerance": 0.002501609555354816,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -69,7 +78,10 @@
         "residual": -5.169475958410885e-14,
         "active_circuit_contribution": -0.367236262548121,
         "fixed_circuit_and_plasma_contribution": 0.24933998202866187,
-        "absolute_tolerance": 1e-08,
+        "characteristic_row_scale": 0.367236262548121,
+        "relative_residual": 1.40767034348453e-13,
+        "absolute_tolerance": 0.00367236262548121,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -80,7 +92,10 @@
         "residual": -7.28583859910259e-16,
         "active_circuit_contribution": 0.0018418041764432906,
         "fixed_circuit_and_plasma_contribution": -0.0018418041764440192,
-        "absolute_tolerance": 1e-07,
+        "characteristic_row_scale": 0.0018418041764440192,
+        "relative_residual": 3.9558160917896257e-13,
+        "absolute_tolerance": 1.8418041764440192e-05,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -91,7 +106,10 @@
         "residual": -1.0308052154905933e-16,
         "active_circuit_contribution": -9.355496798439203e-05,
         "fixed_circuit_and_plasma_contribution": 9.355496798428895e-05,
-        "absolute_tolerance": 1e-07,
+        "characteristic_row_scale": 9.355496798439203e-05,
+        "relative_residual": 1.1018177203187807e-12,
+        "absolute_tolerance": 9.355496798439203e-07,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -102,8 +120,11 @@
         "residual": -6.202484052447721e-05,
         "active_circuit_contribution": -0.1256992417828172,
         "fixed_circuit_and_plasma_contribution": 0.1256372169422927,
-        "absolute_tolerance": 1e-07,
-        "passes": false
+        "characteristic_row_scale": 0.1256992417828172,
+        "relative_residual": 0.0004934384618774675,
+        "absolute_tolerance": 0.001256992417828172,
+        "relative_tolerance": 0.01,
+        "passes": true
       },
       {
         "row": "bz_lower",
@@ -113,7 +134,10 @@
         "residual": -8.473777235451507e-14,
         "active_circuit_contribution": -0.1452263332549989,
         "fixed_circuit_and_plasma_contribution": 0.14522633325491416,
-        "absolute_tolerance": 1e-07,
+        "characteristic_row_scale": 0.1452263332549989,
+        "relative_residual": 5.834876530672048e-13,
+        "absolute_tolerance": 0.001452263332549989,
+        "relative_tolerance": 0.01,
         "passes": true
       },
       {
@@ -124,8 +148,11 @@
         "residual": 0.0007387959932327326,
         "active_circuit_contribution": -0.07850514317784373,
         "fixed_circuit_and_plasma_contribution": 0.07924393917107646,
-        "absolute_tolerance": 1e-07,
-        "passes": false
+        "characteristic_row_scale": 0.07924393917107646,
+        "relative_residual": 0.009323059920554638,
+        "absolute_tolerance": 0.0007924393917107646,
+        "relative_tolerance": 0.01,
+        "passes": true
       },
       {
         "row": "bz_x_point",
@@ -135,19 +162,1888 @@
         "residual": -7.698764293403992e-05,
         "active_circuit_contribution": -0.12643177808606518,
         "fixed_circuit_and_plasma_contribution": 0.12635479044313114,
-        "absolute_tolerance": 1e-07,
-        "passes": false
+        "characteristic_row_scale": 0.12643177808606518,
+        "relative_residual": 0.0006089263640793897,
+        "absolute_tolerance": 0.0012643177808606518,
+        "relative_tolerance": 0.01,
+        "passes": true
       }
     ],
     "maximum_absolute_flux_residual_wb": 8.605601159004939e-05,
     "maximum_absolute_field_residual_t": 0.0007387959932327326,
-    "passes": false
+    "maximum_relative_residual": 0.009323059920554638,
+    "consistency_floor": {
+      "relative_to": "largest of the target, active-circuit image and fixed-circuit-plus-plasma image",
+      "maximum_relative_residual": 0.009323059920554638,
+      "admission_tolerance": 0.01,
+      "interpretation": "Boundary-extraction precision, not an inverse-system assembly error."
+    },
+    "passes": true
   },
   "check_2_null_inverse": {
-    "status": "not_run"
+    "status": "complete",
+    "total_current_by_circuit": [
+      {
+        "circuit": 0,
+        "family": "sol",
+        "seed_current_a": -25381.810546875,
+        "solved_total_current_a": -26079.559505818717,
+        "current_change_a": -697.7489589437173,
+        "absolute_change_a": 697.7489589437173,
+        "change_fraction_of_seed": 0.027490117683099006
+      },
+      {
+        "circuit": 1,
+        "family": "p2_inner_upper",
+        "seed_current_a": 50267.71875,
+        "solved_total_current_a": 5959.616275540268,
+        "current_change_a": -44308.10247445973,
+        "absolute_change_a": 44308.10247445973,
+        "change_fraction_of_seed": 0.8814424759321255
+      },
+      {
+        "circuit": 2,
+        "family": "p2_outer_upper",
+        "seed_current_a": 33341.1796875,
+        "solved_total_current_a": 7776.1681872775835,
+        "current_change_a": -25565.011500222416,
+        "absolute_change_a": 25565.011500222416,
+        "change_fraction_of_seed": 0.7667698545713737
+      },
+      {
+        "circuit": 3,
+        "family": "p2_inner_lower",
+        "seed_current_a": 50319.8671875,
+        "solved_total_current_a": -394.33902753482334,
+        "current_change_a": -50714.20621503482,
+        "absolute_change_a": 50714.20621503482,
+        "change_fraction_of_seed": 1.007836646827096
+      },
+      {
+        "circuit": 4,
+        "family": "p2_outer_lower",
+        "seed_current_a": 33416.35546875,
+        "solved_total_current_a": -449.83753575729315,
+        "current_change_a": -33866.193004507295,
+        "absolute_change_a": 33866.193004507295,
+        "change_fraction_of_seed": 1.0134615977549668
+      },
+      {
+        "circuit": 5,
+        "family": "p3_upper",
+        "seed_current_a": 29.57099151611328,
+        "solved_total_current_a": -24580.252453587003,
+        "current_change_a": -24609.823445103117,
+        "absolute_change_a": 24609.823445103117,
+        "change_fraction_of_seed": 832.228551812109
+      },
+      {
+        "circuit": 6,
+        "family": "p3_lower",
+        "seed_current_a": 46.641414642333984,
+        "solved_total_current_a": -22545.366212156165,
+        "current_change_a": -22592.0076267985,
+        "absolute_change_a": 22592.0076267985,
+        "change_fraction_of_seed": 484.37655247044995
+      },
+      {
+        "circuit": 7,
+        "family": "p4_upper",
+        "seed_current_a": -185433.671875,
+        "solved_total_current_a": -53258.85013071917,
+        "current_change_a": 132174.82174428084,
+        "absolute_change_a": 132174.82174428084,
+        "change_fraction_of_seed": 0.7127875989716651
+      },
+      {
+        "circuit": 8,
+        "family": "p4_lower",
+        "seed_current_a": -185195.171875,
+        "solved_total_current_a": -55010.297010335635,
+        "current_change_a": 130184.87486466437,
+        "absolute_change_a": 130184.87486466437,
+        "change_fraction_of_seed": 0.7029604149320611
+      },
+      {
+        "circuit": 9,
+        "family": "p5_upper",
+        "seed_current_a": -138156.90625,
+        "solved_total_current_a": -139209.1714554635,
+        "current_change_a": -1052.265205463511,
+        "absolute_change_a": 1052.265205463511,
+        "change_fraction_of_seed": 0.007616450266766964
+      },
+      {
+        "circuit": 10,
+        "family": "p5_lower",
+        "seed_current_a": -138175.46875,
+        "solved_total_current_a": -145238.0750658667,
+        "current_change_a": -7062.606315866695,
+        "absolute_change_a": 7062.606315866695,
+        "change_fraction_of_seed": 0.05111331540799781
+      },
+      {
+        "circuit": 11,
+        "family": "p6_upper",
+        "seed_current_a": -554.8970947265625,
+        "solved_total_current_a": -70128.47854976795,
+        "current_change_a": -69573.58145504139,
+        "absolute_change_a": 69573.58145504139,
+        "change_fraction_of_seed": 125.38105193959481
+      },
+      {
+        "circuit": 12,
+        "family": "p6_lower",
+        "seed_current_a": 926.8552856445312,
+        "solved_total_current_a": -70603.27827040764,
+        "current_change_a": -71530.13355605217,
+        "absolute_change_a": 71530.13355605217,
+        "change_fraction_of_seed": 77.17508295408858
+      }
+    ],
+    "total_current_by_round_a": [
+      [
+        -27588.62703573267,
+        18096.113420355232,
+        23223.48212518501,
+        -1601.6823200376384,
+        -2087.8828835451495,
+        -43367.450776282225,
+        -35664.030464802294,
+        -56813.616856803856,
+        -56495.23364235702,
+        -126814.30766409366,
+        -128342.81246180252,
+        -73592.03798724644,
+        -69790.7392660852,
+        1257.3311767578125,
+        1867.960205078125,
+        1066.3206787109375,
+        641.0380249023438,
+        775.0189208984375,
+        1718.53466796875,
+        703.6361694335938,
+        2026.234130859375,
+        -0.27942585945129395,
+        0.09518745541572571,
+        3778.736083984375,
+        5194.57080078125,
+        6156.0703125,
+        6275.279296875,
+        6268.58154296875,
+        6180.56689453125,
+        5247.57958984375,
+        3813.4140625,
+        245.28907775878906,
+        1049.990966796875,
+        1636.4842529296875,
+        1886.26171875,
+        1923.7152099609375,
+        2791.22412109375,
+        250.09170532226562,
+        1065.805419921875,
+        1654.10498046875,
+        1895.2508544921875,
+        1925.63818359375,
+        2803.581787109375,
+        -6.427796840667725,
+        2.501694679260254,
+        52.160404205322266,
+        47.23615646362305,
+        -44.56344985961914,
+        -21.70099449157715,
+        8.450414657592773,
+        51.18608856201172,
+        46.006004333496094,
+        49.822540283203125,
+        -151.190673828125,
+        -266.54766845703125,
+        5921.36962890625,
+        -8354.6416015625,
+        -4728.77001953125,
+        -2990.78515625,
+        1579.34130859375,
+        4501.08203125,
+        2863.458984375,
+        7563.9697265625,
+        209.08929443359375,
+        74.75963592529297,
+        810.333984375,
+        1031.466064453125,
+        -19.61410903930664,
+        -264.4586486816406,
+        -1655.669677734375,
+        3526.185791015625,
+        -954.8402709960938,
+        404.6587219238281,
+        -653.9049072265625,
+        2120.304931640625,
+        142.03111267089844,
+        20.160320281982422,
+        42.47112274169922,
+        -309.69842529296875,
+        1161.21826171875,
+        269.29022216796875,
+        1356.5936279296875,
+        779.3143310546875,
+        1016.7299194335938,
+        843.5001831054688,
+        284.28558349609375,
+        1049.042236328125,
+        740.0038452148438,
+        127.16990661621094,
+        36.94565200805664,
+        -14.850179672241211,
+        22.833417892456055,
+        335.2781677246094,
+        279.9428405761719,
+        313.85992431640625,
+        -387.17828369140625,
+        -355.4259948730469,
+        -279.23095703125,
+        312.7547607421875,
+        280.88702392578125,
+        295.2450256347656
+      ],
+      [
+        -26610.012503539507,
+        3808.763522890329,
+        4721.019351906623,
+        -2006.8444579134728,
+        -2567.233443603991,
+        -35909.92105743297,
+        -33420.6175489275,
+        -56970.209402783,
+        -56408.08282299536,
+        -130521.68529993898,
+        -130958.40252473291,
+        -71700.56904635958,
+        -69923.59365935792,
+        1257.3311767578125,
+        1867.960205078125,
+        1066.3206787109375,
+        641.0380249023438,
+        775.0189208984375,
+        1718.53466796875,
+        703.6361694335938,
+        2026.234130859375,
+        -0.27942585945129395,
+        0.09518745541572571,
+        3778.736083984375,
+        5194.57080078125,
+        6156.0703125,
+        6275.279296875,
+        6268.58154296875,
+        6180.56689453125,
+        5247.57958984375,
+        3813.4140625,
+        245.28907775878906,
+        1049.990966796875,
+        1636.4842529296875,
+        1886.26171875,
+        1923.7152099609375,
+        2791.22412109375,
+        250.09170532226562,
+        1065.805419921875,
+        1654.10498046875,
+        1895.2508544921875,
+        1925.63818359375,
+        2803.581787109375,
+        -6.427796840667725,
+        2.501694679260254,
+        52.160404205322266,
+        47.23615646362305,
+        -44.56344985961914,
+        -21.70099449157715,
+        8.450414657592773,
+        51.18608856201172,
+        46.006004333496094,
+        49.822540283203125,
+        -151.190673828125,
+        -266.54766845703125,
+        5921.36962890625,
+        -8354.6416015625,
+        -4728.77001953125,
+        -2990.78515625,
+        1579.34130859375,
+        4501.08203125,
+        2863.458984375,
+        7563.9697265625,
+        209.08929443359375,
+        74.75963592529297,
+        810.333984375,
+        1031.466064453125,
+        -19.61410903930664,
+        -264.4586486816406,
+        -1655.669677734375,
+        3526.185791015625,
+        -954.8402709960938,
+        404.6587219238281,
+        -653.9049072265625,
+        2120.304931640625,
+        142.03111267089844,
+        20.160320281982422,
+        42.47112274169922,
+        -309.69842529296875,
+        1161.21826171875,
+        269.29022216796875,
+        1356.5936279296875,
+        779.3143310546875,
+        1016.7299194335938,
+        843.5001831054688,
+        284.28558349609375,
+        1049.042236328125,
+        740.0038452148438,
+        127.16990661621094,
+        36.94565200805664,
+        -14.850179672241211,
+        22.833417892456055,
+        335.2781677246094,
+        279.9428405761719,
+        313.85992431640625,
+        -387.17828369140625,
+        -355.4259948730469,
+        -279.23095703125,
+        312.7547607421875,
+        280.88702392578125,
+        295.2450256347656
+      ],
+      [
+        -26320.7266999022,
+        9345.98580512977,
+        12104.769399758967,
+        -701.7935187545052,
+        -872.7346003523439,
+        -29893.26747816282,
+        -26206.279843045788,
+        -54072.05409301557,
+        -55145.39482252783,
+        -134994.7872097695,
+        -139757.41732716747,
+        -70902.34209327096,
+        -69977.48626306423,
+        1257.3311767578125,
+        1867.960205078125,
+        1066.3206787109375,
+        641.0380249023438,
+        775.0189208984375,
+        1718.53466796875,
+        703.6361694335938,
+        2026.234130859375,
+        -0.27942585945129395,
+        0.09518745541572571,
+        3778.736083984375,
+        5194.57080078125,
+        6156.0703125,
+        6275.279296875,
+        6268.58154296875,
+        6180.56689453125,
+        5247.57958984375,
+        3813.4140625,
+        245.28907775878906,
+        1049.990966796875,
+        1636.4842529296875,
+        1886.26171875,
+        1923.7152099609375,
+        2791.22412109375,
+        250.09170532226562,
+        1065.805419921875,
+        1654.10498046875,
+        1895.2508544921875,
+        1925.63818359375,
+        2803.581787109375,
+        -6.427796840667725,
+        2.501694679260254,
+        52.160404205322266,
+        47.23615646362305,
+        -44.56344985961914,
+        -21.70099449157715,
+        8.450414657592773,
+        51.18608856201172,
+        46.006004333496094,
+        49.822540283203125,
+        -151.190673828125,
+        -266.54766845703125,
+        5921.36962890625,
+        -8354.6416015625,
+        -4728.77001953125,
+        -2990.78515625,
+        1579.34130859375,
+        4501.08203125,
+        2863.458984375,
+        7563.9697265625,
+        209.08929443359375,
+        74.75963592529297,
+        810.333984375,
+        1031.466064453125,
+        -19.61410903930664,
+        -264.4586486816406,
+        -1655.669677734375,
+        3526.185791015625,
+        -954.8402709960938,
+        404.6587219238281,
+        -653.9049072265625,
+        2120.304931640625,
+        142.03111267089844,
+        20.160320281982422,
+        42.47112274169922,
+        -309.69842529296875,
+        1161.21826171875,
+        269.29022216796875,
+        1356.5936279296875,
+        779.3143310546875,
+        1016.7299194335938,
+        843.5001831054688,
+        284.28558349609375,
+        1049.042236328125,
+        740.0038452148438,
+        127.16990661621094,
+        36.94565200805664,
+        -14.850179672241211,
+        22.833417892456055,
+        335.2781677246094,
+        279.9428405761719,
+        313.85992431640625,
+        -387.17828369140625,
+        -355.4259948730469,
+        -279.23095703125,
+        312.7547607421875,
+        280.88702392578125,
+        295.2450256347656
+      ],
+      [
+        -26079.559505818717,
+        5959.616275540268,
+        7776.1681872775835,
+        -394.33902753482334,
+        -449.83753575729315,
+        -24580.252453587003,
+        -22545.366212156165,
+        -53258.85013071917,
+        -55010.297010335635,
+        -139209.1714554635,
+        -145238.0750658667,
+        -70128.47854976795,
+        -70603.27827040764,
+        1257.3311767578125,
+        1867.960205078125,
+        1066.3206787109375,
+        641.0380249023438,
+        775.0189208984375,
+        1718.53466796875,
+        703.6361694335938,
+        2026.234130859375,
+        -0.27942585945129395,
+        0.09518745541572571,
+        3778.736083984375,
+        5194.57080078125,
+        6156.0703125,
+        6275.279296875,
+        6268.58154296875,
+        6180.56689453125,
+        5247.57958984375,
+        3813.4140625,
+        245.28907775878906,
+        1049.990966796875,
+        1636.4842529296875,
+        1886.26171875,
+        1923.7152099609375,
+        2791.22412109375,
+        250.09170532226562,
+        1065.805419921875,
+        1654.10498046875,
+        1895.2508544921875,
+        1925.63818359375,
+        2803.581787109375,
+        -6.427796840667725,
+        2.501694679260254,
+        52.160404205322266,
+        47.23615646362305,
+        -44.56344985961914,
+        -21.70099449157715,
+        8.450414657592773,
+        51.18608856201172,
+        46.006004333496094,
+        49.822540283203125,
+        -151.190673828125,
+        -266.54766845703125,
+        5921.36962890625,
+        -8354.6416015625,
+        -4728.77001953125,
+        -2990.78515625,
+        1579.34130859375,
+        4501.08203125,
+        2863.458984375,
+        7563.9697265625,
+        209.08929443359375,
+        74.75963592529297,
+        810.333984375,
+        1031.466064453125,
+        -19.61410903930664,
+        -264.4586486816406,
+        -1655.669677734375,
+        3526.185791015625,
+        -954.8402709960938,
+        404.6587219238281,
+        -653.9049072265625,
+        2120.304931640625,
+        142.03111267089844,
+        20.160320281982422,
+        42.47112274169922,
+        -309.69842529296875,
+        1161.21826171875,
+        269.29022216796875,
+        1356.5936279296875,
+        779.3143310546875,
+        1016.7299194335938,
+        843.5001831054688,
+        284.28558349609375,
+        1049.042236328125,
+        740.0038452148438,
+        127.16990661621094,
+        36.94565200805664,
+        -14.850179672241211,
+        22.833417892456055,
+        335.2781677246094,
+        279.9428405761719,
+        313.85992431640625,
+        -387.17828369140625,
+        -355.4259948730469,
+        -279.23095703125,
+        312.7547607421875,
+        280.88702392578125,
+        295.2450256347656
+      ]
+    ],
+    "boundary_flux_target_wb": -0.11789628051940741,
+    "boundary_flux_by_round_wb": [
+      -0.11789628051940741,
+      -0.01665544579425391,
+      -0.03932260429285182,
+      -0.03498633042074399
+    ],
+    "maximum_boundary_flux_excursion_wb": 0.1012408347251535,
+    "current_change_l2_a": 227768.46276531732,
+    "maximum_absolute_current_change_a": 132174.82174428084,
+    "maximum_change_fraction_of_nonzero_seed": 832.228551812109,
+    "current_within_five_percent": false,
+    "boundary_stable_within_1e-6_wb": false,
+    "passes": false,
+    "linear_row_closure": [
+      {
+        "row": "psi_outer",
+        "unit": "Wb",
+        "linear_prediction": -1.1086757041910316,
+        "right_hand_side": -1.1648403172649968,
+        "residual": 0.05616461307396525
+      },
+      {
+        "row": "psi_upper",
+        "unit": "Wb",
+        "linear_prediction": -0.2940154082128273,
+        "right_hand_side": -0.27301282663812143,
+        "residual": -0.02100258157470586
+      },
+      {
+        "row": "psi_inner",
+        "unit": "Wb",
+        "linear_prediction": -0.25516373410335486,
+        "right_hand_side": -0.2442519707151093,
+        "residual": -0.010911763388245566
+      },
+      {
+        "row": "psi_lower",
+        "unit": "Wb",
+        "linear_prediction": -0.37458598466969,
+        "right_hand_side": -0.3534499405729085,
+        "residual": -0.021136044096781492
+      },
+      {
+        "row": "br_outer",
+        "unit": "T",
+        "linear_prediction": -0.0004951646647446076,
+        "right_hand_side": -0.0007519111247030997,
+        "residual": 0.00025674645995849205
+      },
+      {
+        "row": "br_inner",
+        "unit": "T",
+        "linear_prediction": -0.000351389985437503,
+        "right_hand_side": -0.000699991275939043,
+        "residual": 0.00034860129050153996
+      },
+      {
+        "row": "bz_upper",
+        "unit": "T",
+        "linear_prediction": -0.11879790312091172,
+        "right_hand_side": -0.1187491894662992,
+        "residual": -4.871365461252275e-05
+      },
+      {
+        "row": "bz_lower",
+        "unit": "T",
+        "linear_prediction": -0.14168957572841473,
+        "right_hand_side": -0.14160064190683824,
+        "residual": -8.893382157648677e-05
+      },
+      {
+        "row": "br_x_point",
+        "unit": "T",
+        "linear_prediction": -0.0681983549367643,
+        "right_hand_side": -0.06843952160720675,
+        "residual": 0.00024116667044245255
+      },
+      {
+        "row": "bz_x_point",
+        "unit": "T",
+        "linear_prediction": -0.1194598152646977,
+        "right_hand_side": -0.1194123701071466,
+        "residual": -4.744515755110423e-05
+      }
+    ]
   },
   "check_3_upper_point_plus_20mm": {
-    "status": "not_run"
+    "status": "complete",
+    "commanded_turning_points_m": [
+      [
+        1.403322210873598,
+        0.011597952807894519
+      ],
+      [
+        0.5917068928217991,
+        1.2577478983979749
+      ],
+      [
+        0.26784458442879255,
+        0.022758461087626334
+      ],
+      [
+        0.6479403295878958,
+        -1.0166726794942371
+      ]
+    ],
+    "gamma_sweep": [
+      {
+        "gamma_factor_per_ampere": 1e-12,
+        "starting_state_solve": {
+          "tikhonov_gamma": 9.401835207012807e-07,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -27661.59379051642,
+              "current_change_a": -2279.783243641421,
+              "absolute_change_a": 2279.783243641421,
+              "change_fraction_of_seed": 0.0898195674193978
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": 18089.31512152801,
+              "current_change_a": -32178.40362847199,
+              "absolute_change_a": 32178.40362847199,
+              "change_fraction_of_seed": 0.6401405201717453
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": 23549.622327829078,
+              "current_change_a": -9791.557359670922,
+              "absolute_change_a": 9791.557359670922,
+              "change_fraction_of_seed": 0.2936775918382364
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -1556.0628970677499,
+              "current_change_a": -51875.93008456775,
+              "absolute_change_a": 51875.93008456775,
+              "change_fraction_of_seed": 1.0309234301288914
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -2033.4779201430647,
+              "current_change_a": -35449.833388893065,
+              "absolute_change_a": 35449.833388893065,
+              "change_fraction_of_seed": 1.060852773787516
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -41986.08644190375,
+              "current_change_a": -42015.65743341987,
+              "absolute_change_a": 42015.65743341987,
+              "change_fraction_of_seed": 1420.840333017764
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -35842.97399652881,
+              "current_change_a": -35889.615411171144,
+              "absolute_change_a": 35889.615411171144,
+              "change_fraction_of_seed": 769.4795641681933
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -55856.71793947082,
+              "current_change_a": 129576.95393552918,
+              "absolute_change_a": 129576.95393552918,
+              "change_fraction_of_seed": 0.698777911397216
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -56520.91883403175,
+              "current_change_a": 128674.25304096825,
+              "absolute_change_a": 128674.25304096825,
+              "change_fraction_of_seed": 0.6948034969713934
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -127622.4015029477,
+              "current_change_a": 10534.504747052299,
+              "absolute_change_a": 10534.504747052299,
+              "change_fraction_of_seed": 0.07625029419803107
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -128212.83348626066,
+              "current_change_a": 9962.635263739343,
+              "absolute_change_a": 9962.635263739343,
+              "change_fraction_of_seed": 0.07210133140032747
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -73246.24830842408,
+              "current_change_a": -72691.35121369752,
+              "absolute_change_a": 72691.35121369752,
+              "change_fraction_of_seed": 130.99969688887586
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -69771.68429201654,
+              "current_change_a": -70698.53957766107,
+              "absolute_change_a": 70698.53957766107,
+              "change_fraction_of_seed": 76.27786200571495
+            }
+          ],
+          "current_change_l2_a": 227985.7468326006,
+          "maximum_absolute_current_change_a": 129576.95393552918,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -1.0817928513713795,
+              "right_hand_side": -1.1338692597385476,
+              "residual": 0.05207640836716809
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -0.2977256539698297,
+              "right_hand_side": -0.2794233751514936,
+              "residual": -0.01830227881833607
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -0.2677870827044012,
+              "right_hand_side": -0.2501609555354816,
+              "residual": -0.017626127168919592
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -0.3891613599050876,
+              "right_hand_side": -0.3672362625480693,
+              "residual": -0.02192509735701831
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": 0.002016003625414641,
+              "right_hand_side": 0.0018418041764440192,
+              "residual": 0.00017419944897062163
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": -4.983690308641743e-05,
+              "right_hand_side": -9.355496798428895e-05,
+              "residual": 4.371806489787152e-05
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -0.122744752873316,
+              "right_hand_side": -0.12139467101989654,
+              "residual": -0.001350081853419463
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -0.144865088950471,
+              "right_hand_side": -0.14522633325491416,
+              "residual": 0.0003612443044431479
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -0.07765253136930939,
+              "right_hand_side": -0.07924393917107646,
+              "residual": 0.0015914078017670724
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -0.12481910351033283,
+              "right_hand_side": -0.12635479044313114,
+              "residual": 0.0015356869327983053
+            }
+          ],
+          "linear_row_closure_l2_mixed": 0.062009615059122586,
+          "weighted_linear_row_closure_l2_mixed": 0.06466943163191335
+        },
+        "status": "complete",
+        "placement_result": {
+          "tikhonov_gamma": 8.786803712016e-07,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -26148.67050162914,
+              "current_change_a": -766.8599547541417,
+              "absolute_change_a": 766.8599547541417,
+              "change_fraction_of_seed": 0.030212972921608905
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": 6687.955850482902,
+              "current_change_a": -43579.762899517096,
+              "absolute_change_a": 43579.762899517096,
+              "change_fraction_of_seed": 0.866953265101514
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": 9098.17687620684,
+              "current_change_a": -24243.00281129316,
+              "absolute_change_a": 24243.00281129316,
+              "change_fraction_of_seed": 0.7271189273600343
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -227.22635457751062,
+              "current_change_a": -50547.09354207751,
+              "absolute_change_a": 50547.09354207751,
+              "change_fraction_of_seed": 1.0045156389966379
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -243.3602115984852,
+              "current_change_a": -33659.71568034848,
+              "absolute_change_a": 33659.71568034848,
+              "change_fraction_of_seed": 1.0072826676693114
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -24227.39063745261,
+              "current_change_a": -24256.961628968722,
+              "absolute_change_a": 24256.961628968722,
+              "change_fraction_of_seed": 820.2958502676877
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -22390.957963918412,
+              "current_change_a": -22437.599378560746,
+              "absolute_change_a": 22437.599378560746,
+              "change_fraction_of_seed": 481.066012911952
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -52688.16328607728,
+              "current_change_a": 132745.50858892273,
+              "absolute_change_a": 132745.50858892273,
+              "change_fraction_of_seed": 0.7158651783501644
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -54805.016945443946,
+              "current_change_a": 130390.15492955605,
+              "absolute_change_a": 130390.15492955605,
+              "change_fraction_of_seed": 0.7040688675057072
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -140122.5727279119,
+              "current_change_a": -1965.666477911902,
+              "absolute_change_a": 1965.666477911902,
+              "change_fraction_of_seed": 0.014227782969857158
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -145168.99362790037,
+              "current_change_a": -6993.524877900374,
+              "absolute_change_a": 6993.524877900374,
+              "change_fraction_of_seed": 0.050613360976207104
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -70417.72705170867,
+              "current_change_a": -69862.82995698211,
+              "absolute_change_a": 69862.82995698211,
+              "change_fraction_of_seed": 125.90231706188429
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -70326.07227214909,
+              "current_change_a": -71252.92755779362,
+              "absolute_change_a": 71252.92755779362,
+              "change_fraction_of_seed": 76.87600066740153
+            }
+          ],
+          "current_change_l2_a": 227817.62147738299,
+          "maximum_absolute_current_change_a": 132745.50858892273,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -1.109635571751672,
+              "right_hand_side": -1.1658736633889184,
+              "residual": 0.05623809163724647
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -0.28836687911944237,
+              "right_hand_side": -0.2690066735721087,
+              "residual": -0.019360205547333642
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -0.25573011355892,
+              "right_hand_side": -0.24398299021181763,
+              "residual": -0.011747123347102373
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -0.37461987054710083,
+              "right_hand_side": -0.35259165773892515,
+              "residual": -0.022028212808175685
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": -0.00017279968921582456,
+              "right_hand_side": -0.0004175993499828339,
+              "residual": 0.00024479966076700933
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": -0.0003387955392101867,
+              "right_hand_side": -0.0003673726394917561,
+              "residual": 2.8577100281569352e-05
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -0.11717704213358779,
+              "right_hand_side": -0.11578742991633889,
+              "residual": -0.0013896122172488978
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -0.14130677472435782,
+              "right_hand_side": -0.1412499341330645,
+              "residual": -5.684059129332231e-05
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -0.06879029524624387,
+              "right_hand_side": -0.06904534167238363,
+              "residual": 0.00025504642613975725
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -0.11897935655567243,
+              "right_hand_side": -0.12017364336216883,
+              "residual": 0.0011942868064964002
+            }
+          ],
+          "linear_row_closure_l2_mixed": 0.06453110833106795,
+          "weighted_linear_row_closure_l2_mixed": 0.0658414450301439,
+          "boundary_flux_by_round_wb": [
+            -0.11789628051940741,
+            -0.016656572933847737,
+            -0.03882528087713808,
+            -0.034482745908877226
+          ]
+        }
+      },
+      {
+        "gamma_factor_per_ampere": 1e-11,
+        "starting_state_solve": {
+          "tikhonov_gamma": 9.401835207012807e-06,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -21425.705757258653,
+              "current_change_a": 3956.1047896163473,
+              "absolute_change_a": 3956.1047896163473,
+              "change_fraction_of_seed": 0.15586377426898815
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": -2906.6051372124857,
+              "current_change_a": -53174.323887212486,
+              "absolute_change_a": 53174.323887212486,
+              "change_fraction_of_seed": 1.05782249939903
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": -4521.416147591277,
+              "current_change_a": -37862.59583509128,
+              "absolute_change_a": 37862.59583509128,
+              "change_fraction_of_seed": 1.1356105629725637
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -3645.2348847342873,
+              "current_change_a": -53965.10207223429,
+              "absolute_change_a": 53965.10207223429,
+              "change_fraction_of_seed": 1.072441266014307
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -4798.942337339351,
+              "current_change_a": -38215.29780608935,
+              "absolute_change_a": 38215.29780608935,
+              "change_fraction_of_seed": 1.1436105843986242
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -47888.86260427204,
+              "current_change_a": -47918.433595788156,
+              "absolute_change_a": 47918.433595788156,
+              "change_fraction_of_seed": 1620.4540713380316
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -39321.519852417805,
+              "current_change_a": -39368.16126706014,
+              "absolute_change_a": 39368.16126706014,
+              "change_fraction_of_seed": 844.0601891891955
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -37161.00931479939,
+              "current_change_a": 148272.6625602006,
+              "absolute_change_a": 148272.6625602006,
+              "change_fraction_of_seed": 0.7995994527905943
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -31230.171705338085,
+              "current_change_a": 153965.00016966191,
+              "absolute_change_a": 153965.00016966191,
+              "change_fraction_of_seed": 0.8313661668976051
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -38725.91777371985,
+              "current_change_a": 99430.98847628015,
+              "absolute_change_a": 99430.98847628015,
+              "change_fraction_of_seed": 0.7196961134636015
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -37127.29046202787,
+              "current_change_a": 101048.17828797213,
+              "absolute_change_a": 101048.17828797213,
+              "change_fraction_of_seed": 0.7313033145615591
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -38334.35431903712,
+              "current_change_a": -37779.45722431056,
+              "absolute_change_a": 37779.45722431056,
+              "change_fraction_of_seed": 68.08371783407372
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -34176.37260482036,
+              "current_change_a": -35103.22789046489,
+              "absolute_change_a": 35103.22789046489,
+              "change_fraction_of_seed": 37.873472195882506
+            }
+          ],
+          "current_change_l2_a": 284503.40739322355,
+          "maximum_absolute_current_change_a": 153965.00016966191,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -0.5234702704780932,
+              "right_hand_side": -1.1338692597385476,
+              "residual": 0.6103989892604543
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -0.21373459507595705,
+              "right_hand_side": -0.2794233751514936,
+              "residual": 0.06568878007553658
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -0.19644431413142796,
+              "right_hand_side": -0.2501609555354816,
+              "residual": 0.05371664140405366
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -0.25212748688943076,
+              "right_hand_side": -0.3672362625480693,
+              "residual": 0.11510877565863853
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": 0.0034033588288878806,
+              "right_hand_side": 0.0018418041764440192,
+              "residual": 0.0015615546524438615
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": 0.0006476830055985887,
+              "right_hand_side": -9.355496798428895e-05,
+              "residual": 0.0007412379735828776
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -0.07400917048361053,
+              "right_hand_side": -0.12139467101989654,
+              "residual": 0.04738550053628601
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -0.07437790252990839,
+              "right_hand_side": -0.14522633325491416,
+              "residual": 0.07084843072500577
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -0.0446647363502666,
+              "right_hand_side": -0.07924393917107646,
+              "residual": 0.03457920282080986
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -0.07492214858156931,
+              "right_hand_side": -0.12635479044313114,
+              "residual": 0.05143264186156182
+            }
+          ],
+          "linear_row_closure_l2_mixed": 0.63572506739618,
+          "weighted_linear_row_closure_l2_mixed": 0.9739009342542474
+        },
+        "status": "complete",
+        "placement_result": {
+          "tikhonov_gamma": 1.8389454096240405e-06,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -18682.874354121832,
+              "current_change_a": 6698.936192753168,
+              "absolute_change_a": 6698.936192753168,
+              "change_fraction_of_seed": 0.26392664858882336
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": -7644.516533962287,
+              "current_change_a": -57912.23528396229,
+              "absolute_change_a": 57912.23528396229,
+              "change_fraction_of_seed": 1.152076058433869
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": -10398.979007961876,
+              "current_change_a": -43740.158695461876,
+              "absolute_change_a": 43740.158695461876,
+              "change_fraction_of_seed": 1.3118959528555787
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -5613.864928790298,
+              "current_change_a": -55933.732116290295,
+              "absolute_change_a": 55933.732116290295,
+              "change_fraction_of_seed": 1.111563587953683
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -7349.595784931526,
+              "current_change_a": -40765.951253681524,
+              "absolute_change_a": 40765.951253681524,
+              "change_fraction_of_seed": 1.219940076702998
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -30218.577531211628,
+              "current_change_a": -30248.14852272774,
+              "absolute_change_a": 30248.14852272774,
+              "change_fraction_of_seed": 1022.8993676537858
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -51265.571610164814,
+              "current_change_a": -51312.21302480715,
+              "absolute_change_a": 51312.21302480715,
+              "change_fraction_of_seed": 1100.142725478865
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -24436.64590874626,
+              "current_change_a": 160997.02596625374,
+              "absolute_change_a": 160997.02596625374,
+              "change_fraction_of_seed": 0.8682189396259224
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -34922.258954643665,
+              "current_change_a": 150272.91292035632,
+              "absolute_change_a": 150272.91292035632,
+              "change_fraction_of_seed": 0.8114299708730262
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -24460.76938459286,
+              "current_change_a": 113696.13686540714,
+              "absolute_change_a": 113696.13686540714,
+              "change_fraction_of_seed": 0.8229493548420215
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -28078.503377178375,
+              "current_change_a": 110096.96537282162,
+              "absolute_change_a": 110096.96537282162,
+              "change_fraction_of_seed": 0.7967909670856218
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -23578.077839131332,
+              "current_change_a": -23023.18074440477,
+              "absolute_change_a": 23023.18074440477,
+              "change_fraction_of_seed": 41.49090158013882
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -36811.24461763192,
+              "current_change_a": -37738.09990327645,
+              "absolute_change_a": 37738.09990327645,
+              "change_fraction_of_seed": 40.71628061875219
+            }
+          ],
+          "current_change_l2_a": 298587.7060009385,
+          "maximum_absolute_current_change_a": 160997.02596625374,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -0.42708338854927896,
+              "right_hand_side": -0.4312664797573272,
+              "residual": 0.0041830912080482174
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -0.1724204600129416,
+              "right_hand_side": -0.18534028216145004,
+              "residual": 0.012919822148508453
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -0.17035582281528863,
+              "right_hand_side": -0.1705211883151289,
+              "residual": 0.00016536549984028093
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -0.2381483688921788,
+              "right_hand_side": -0.2749231754367546,
+              "residual": 0.036774806544575794
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": -0.006151511135151319,
+              "right_hand_side": -0.005465125911610275,
+              "residual": -0.0006863852235410445
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": -0.0015642974725348904,
+              "right_hand_side": -0.007931434624796639,
+              "residual": 0.0063671371522617485
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -0.048625692953145304,
+              "right_hand_side": -0.0491782375325385,
+              "residual": 0.0005525445793931952
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -0.08097983452569624,
+              "right_hand_side": -0.08423496588972053,
+              "residual": 0.0032551313640242913
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -0.03407630875913104,
+              "right_hand_side": -0.03319768645723416,
+              "residual": -0.000878622301896885
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -0.04903130665627148,
+              "right_hand_side": -0.0511486630386986,
+              "residual": 0.0021173563824271185
+            }
+          ],
+          "linear_row_closure_l2_mixed": 0.03992495109130537,
+          "weighted_linear_row_closure_l2_mixed": 0.06629652972461804,
+          "boundary_flux_by_round_wb": [
+            -0.11789628051940741,
+            0.19330673195294795,
+            -0.0158362307235463,
+            -0.16110020716749532
+          ]
+        }
+      },
+      {
+        "gamma_factor_per_ampere": 1e-10,
+        "starting_state_solve": {
+          "tikhonov_gamma": 9.401835207012808e-05,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -560.2706999151087,
+              "current_change_a": 24821.53984695989,
+              "absolute_change_a": 24821.53984695989,
+              "change_fraction_of_seed": 0.9779262909995958
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": -79.6884571720002,
+              "current_change_a": -50347.407207172,
+              "absolute_change_a": 50347.407207172,
+              "change_fraction_of_seed": 1.001585280954728
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": -122.01161702675745,
+              "current_change_a": -33463.19130452676,
+              "absolute_change_a": 33463.19130452676,
+              "change_fraction_of_seed": 1.0036594871018467
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -76.51353971025674,
+              "current_change_a": -50396.38072721026,
+              "absolute_change_a": 50396.38072721026,
+              "change_fraction_of_seed": 1.0015205433556722
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -100.62941199268244,
+              "current_change_a": -33516.98488074268,
+              "absolute_change_a": 33516.98488074268,
+              "change_fraction_of_seed": 1.0030113820188078
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -1153.7797615741285,
+              "current_change_a": -1183.3507530902418,
+              "absolute_change_a": 1183.3507530902418,
+              "change_fraction_of_seed": 40.017283574865324
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -810.0937391818053,
+              "current_change_a": -856.7351538241393,
+              "absolute_change_a": 856.7351538241393,
+              "change_fraction_of_seed": 18.368549933443173
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -871.2423896274413,
+              "current_change_a": 184562.42948537256,
+              "absolute_change_a": 184562.42948537256,
+              "change_fraction_of_seed": 0.9953015955472492
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -642.5605794691655,
+              "current_change_a": 184552.61129553083,
+              "absolute_change_a": 184552.61129553083,
+              "change_fraction_of_seed": 0.9965303599820471
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -849.3242240917752,
+              "current_change_a": 137307.58202590822,
+              "absolute_change_a": 137307.58202590822,
+              "change_fraction_of_seed": 0.9938524663938632
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -755.3733842621732,
+              "current_change_a": 137420.09536573783,
+              "absolute_change_a": 137420.09536573783,
+              "change_fraction_of_seed": 0.9945332308904349
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -887.4382017663272,
+              "current_change_a": -332.5411070397647,
+              "absolute_change_a": 332.5411070397647,
+              "change_fraction_of_seed": 0.5992842820768984
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -701.2423084500533,
+              "current_change_a": -1628.0975940945846,
+              "absolute_change_a": 1628.0975940945846,
+              "change_fraction_of_seed": 1.7565823050384963
+            }
+          ],
+          "current_change_l2_a": 337341.7345900223,
+          "maximum_absolute_current_change_a": 184562.42948537256,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -0.011962298674300435,
+              "right_hand_side": -1.1338692597385476,
+              "residual": 1.1219069610642471
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -0.005307428281838999,
+              "right_hand_side": -0.2794233751514936,
+              "residual": 0.2741159468696546
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -0.005062107414780254,
+              "right_hand_side": -0.2501609555354816,
+              "residual": 0.24509884812070137
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -0.006015930698777377,
+              "right_hand_side": -0.3672362625480693,
+              "residual": 0.3612203318492919
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": 0.00013649741746721696,
+              "right_hand_side": 0.0018418041764440192,
+              "residual": -0.0017053067589768022
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": 2.714912744366871e-05,
+              "right_hand_side": -9.355496798428895e-05,
+              "residual": 0.00012070409542795765
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -0.001668955261163588,
+              "right_hand_side": -0.12139467101989654,
+              "residual": 0.11972571575873295
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -0.001472236983362603,
+              "right_hand_side": -0.14522633325491416,
+              "residual": 0.14375409627155156
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -0.001118124964945757,
+              "right_hand_side": -0.07924393917107646,
+              "residual": 0.0781258142061307
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -0.001687386748360985,
+              "right_hand_side": -0.12635479044313114,
+              "residual": 0.12466740369477015
+            }
+          ],
+          "linear_row_closure_l2_mixed": 1.257384734018529,
+          "weighted_linear_row_closure_l2_mixed": 2.087287490271277
+        },
+        "status": "axis_lost_during_picard",
+        "error": "no qualified magnetic-axis candidate has a resolved component",
+        "placement_result": null
+      },
+      {
+        "gamma_factor_per_ampere": 1e-09,
+        "starting_state_solve": {
+          "tikhonov_gamma": 0.0009401835207012807,
+          "total_current_by_circuit": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "seed_current_a": -25381.810546875,
+              "solved_total_current_a": -5.712729295970348,
+              "current_change_a": 25376.09781757903,
+              "absolute_change_a": 25376.09781757903,
+              "change_fraction_of_seed": 0.9997749282193474
+            },
+            {
+              "circuit": 1,
+              "family": "p2_inner_upper",
+              "seed_current_a": 50267.71875,
+              "solved_total_current_a": -0.8073602577787824,
+              "current_change_a": -50268.52611025778,
+              "absolute_change_a": 50268.52611025778,
+              "change_fraction_of_seed": 1.000016061207428
+            },
+            {
+              "circuit": 2,
+              "family": "p2_outer_upper",
+              "seed_current_a": 33341.1796875,
+              "solved_total_current_a": -1.236244393097877,
+              "current_change_a": -33342.4159318931,
+              "absolute_change_a": 33342.4159318931,
+              "change_fraction_of_seed": 1.0000370786038373
+            },
+            {
+              "circuit": 3,
+              "family": "p2_inner_lower",
+              "seed_current_a": 50319.8671875,
+              "solved_total_current_a": -0.773577579871926,
+              "current_change_a": -50320.64076507987,
+              "absolute_change_a": 50320.64076507987,
+              "change_fraction_of_seed": 1.0000153732039274
+            },
+            {
+              "circuit": 4,
+              "family": "p2_outer_lower",
+              "seed_current_a": 33416.35546875,
+              "solved_total_current_a": -1.0173700601008022,
+              "current_change_a": -33417.3728388101,
+              "absolute_change_a": 33417.3728388101,
+              "change_fraction_of_seed": 1.0000304452728561
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "seed_current_a": 29.57099151611328,
+              "solved_total_current_a": -11.69278532824967,
+              "current_change_a": -41.26377684436295,
+              "absolute_change_a": 41.26377684436295,
+              "change_fraction_of_seed": 1.3954140435865416
+            },
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "seed_current_a": 46.641414642333984,
+              "solved_total_current_a": -8.187356630428795,
+              "current_change_a": -54.82877127276278,
+              "absolute_change_a": 54.82877127276278,
+              "change_fraction_of_seed": 1.1755383427628192
+            },
+            {
+              "circuit": 7,
+              "family": "p4_upper",
+              "seed_current_a": -185433.671875,
+              "solved_total_current_a": -8.826804235141026,
+              "current_change_a": 185424.84507076486,
+              "absolute_change_a": 185424.84507076486,
+              "change_fraction_of_seed": 0.9999523991293173
+            },
+            {
+              "circuit": 8,
+              "family": "p4_lower",
+              "seed_current_a": -185195.171875,
+              "solved_total_current_a": -6.495435579417972,
+              "current_change_a": 185188.67643942058,
+              "absolute_change_a": 185188.67643942058,
+              "change_fraction_of_seed": 0.9999649265393171
+            },
+            {
+              "circuit": 9,
+              "family": "p5_upper",
+              "seed_current_a": -138156.90625,
+              "solved_total_current_a": -8.599328039592365,
+              "current_change_a": 138148.3069219604,
+              "absolute_change_a": 138148.3069219604,
+              "change_fraction_of_seed": 0.9999377567993305
+            },
+            {
+              "circuit": 10,
+              "family": "p5_lower",
+              "seed_current_a": -138175.46875,
+              "solved_total_current_a": -7.637175821553683,
+              "current_change_a": 138167.83157417845,
+              "absolute_change_a": 138167.83157417845,
+              "change_fraction_of_seed": 0.9999447284247295
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "seed_current_a": -554.8970947265625,
+              "solved_total_current_a": -8.990121228302542,
+              "current_change_a": 545.90697349826,
+              "absolute_change_a": 545.90697349826,
+              "change_fraction_of_seed": 0.9837985793875302
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "seed_current_a": 926.8552856445312,
+              "solved_total_current_a": -7.088633466541978,
+              "current_change_a": -933.9439191110732,
+              "absolute_change_a": 933.9439191110732,
+              "change_fraction_of_seed": 1.007648047733377
+            }
+          ],
+          "current_change_l2_a": 338799.60723878373,
+          "maximum_absolute_current_change_a": 185424.84507076486,
+          "linear_row_closure": [
+            {
+              "row": "psi_outer",
+              "unit": "Wb",
+              "linear_prediction": -0.00012132425249430661,
+              "right_hand_side": -1.1338692597385476,
+              "residual": 1.1337479354860533
+            },
+            {
+              "row": "psi_upper",
+              "unit": "Wb",
+              "linear_prediction": -5.397025726779495e-05,
+              "right_hand_side": -0.2794233751514936,
+              "residual": 0.27936940489422585
+            },
+            {
+              "row": "psi_inner",
+              "unit": "Wb",
+              "linear_prediction": -5.158618399171672e-05,
+              "right_hand_side": -0.2501609555354816,
+              "residual": 0.2501093693514899
+            },
+            {
+              "row": "psi_lower",
+              "unit": "Wb",
+              "linear_prediction": -6.11452465357287e-05,
+              "right_hand_side": -0.3672362625480693,
+              "residual": 0.36717511730153357
+            },
+            {
+              "row": "br_outer",
+              "unit": "T",
+              "linear_prediction": 1.3924702942064806e-06,
+              "right_hand_side": 0.0018418041764440192,
+              "residual": -0.0018404117061498128
+            },
+            {
+              "row": "br_inner",
+              "unit": "T",
+              "linear_prediction": 2.7687166982571883e-07,
+              "right_hand_side": -9.355496798428895e-05,
+              "residual": 9.383183965411467e-05
+            },
+            {
+              "row": "bz_upper",
+              "unit": "T",
+              "linear_prediction": -1.687970750414297e-05,
+              "right_hand_side": -0.12139467101989654,
+              "residual": 0.1213777913123924
+            },
+            {
+              "row": "bz_lower",
+              "unit": "T",
+              "linear_prediction": -1.4852283472130771e-05,
+              "right_hand_side": -0.14522633325491416,
+              "residual": 0.14521148097144201
+            },
+            {
+              "row": "br_x_point",
+              "unit": "T",
+              "linear_prediction": -1.1381836309092274e-05,
+              "right_hand_side": -0.07924393917107646,
+              "residual": 0.07923255733476736
+            },
+            {
+              "row": "bz_x_point",
+              "unit": "T",
+              "linear_prediction": -1.706497207791774e-05,
+              "right_hand_side": -0.12635479044313114,
+              "residual": 0.1263377254710532
+            }
+          ],
+          "linear_row_closure_l2_mixed": 1.2723463625841431,
+          "weighted_linear_row_closure_l2_mixed": 2.1127876792133606
+        },
+        "status": "axis_lost_during_picard",
+        "error": "no qualified magnetic-axis candidate has a resolved component",
+        "placement_result": null
+      }
+    ]
   },
-  "outcome": "seed_row_consistency_failed"
+  "outcome": "cpu_consistency_table_complete"
 }

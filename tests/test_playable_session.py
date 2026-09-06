@@ -5,9 +5,7 @@ interactive keyframe loop is built on: every named key produces exactly the
 commanded control-point change it names; every pushed ColumnDataSource column
 has the shape its renderer in ``apps/pulsedesign/poloidal_view.py`` binds; the
 receipt row per action carries wall and trips; and one keyframe through the
-production protocol — ``ForwardProfile.solve`` with ``constraint_pairs`` on
-the Newton-Krylov route carrying the current-centroid row — completes on the
-small Solov'ev fixture from ``tests/test_reduced_newton.py``.
+production inverse-forward protocol completes on the small Solov'ev fixture.
 """
 
 from __future__ import annotations
@@ -334,8 +332,7 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
     assert solver.route == "reduced_newton"
     session = PlayableSession(solver=solver, shape=PlasmaShape(), machine="solovev")
 
-    # the prime converges on the Solov'ev machine from the seed and builds the
-    # compiled program the session carries
+    # The prime converges on the Solov'ev machine from the seed.
     prime = session.prime()
     assert prime.wall > 0.0 and isinstance(prime.trips, int) and prime.trips >= 0
     assert prime.reused is False
@@ -351,35 +348,30 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
     )
     assert np.all(np.isfinite(centroid))
 
-    # one moved keyframe re-enters the session's program and converges.  The
-    # first moved target on the CPU lane pays the reduced route's one-time
-    # dispatch cost (measured ~27-35 s; the warm steady state sits around
-    # 1.1-1.5 s, dominated by the fused-trip dispatch in reduced_newton.py),
-    # so the assertion here is a generous correctness bound and the receipt
-    # row is what records the program reuse.
+    # One moved keyframe solves all circuit currents, then runs the reduced
+    # forward route without shape constraint pairs. A changed prescribed
+    # current builds its own reduced program until that input is traced.
     keyframe = session.step("bulk_r+")
     assert keyframe.wall > 0.0
     assert keyframe.wall < 60.0
     assert keyframe.trips >= 0
-    assert keyframe.reused is True
+    assert keyframe.reused is False
     assert session.program is not None
     assert session.receipts[-1].parameter == "bulk_r"
-    assert bool(session.equilibrium.fixed_point.converged)
     assert session.equilibrium.finite.flux
-    # a second moved key shows the dispatch cost de-cay, still bounded and
-    # still re-entering the same program (no recompile from the second press)
-    settled = session.step("bulk_r-")
-    assert settled.reused is True
-    assert settled.wall < 30.0
-    assert bool(session.equilibrium.fixed_point.converged)
+    assert 1 <= len(solver.last_rounds) <= 2
+    assert len(session.equilibrium.constraints) == 0
 
-    # the current-centroid row was carried: a constraint record qualified
-    assert len(session.equilibrium.constraints) == 1
-    record = session.equilibrium.constraints[0]
-    assert np.isfinite(np.asarray(record.observed)).all()
-    # compensation pushed per circuit has the circuit count the carrier owns
+    # The reverse key executes the same bounded inverse-forward path.
+    settled = session.step("bulk_r-")
+    assert settled.reused is False
+    assert settled.wall < 120.0
+    assert session.equilibrium.finite.flux
+    assert len(session.equilibrium.constraints) == 0
+
+    # No constraint-row compensation is published on the control path.
     pushed = frame_push(session)
-    assert pushed["compensation"]["circuit"].size == machine.circuit_count
+    assert pushed["compensation"]["circuit"].size == 0
 
 
 @pytest.mark.slow
@@ -390,9 +382,10 @@ def test_newton_krylov_route_stays_reachable_as_the_reference(machine):
     configure_dtypes()
     reference = ProductionSolver(machine, route="newton_krylov")
     assert reference.route == "newton_krylov"
-    # the reference shares the frozen compensating direction with the
-    # reduced-route solver it was kept for
-    assert len(reference.frozen_pairs) == 1
+    np.testing.assert_allclose(
+        reference.prescribed_current,
+        machine.profile.operator.prescribed_current_field.current,
+    )
 
 
 # --------------------------------------------------------------------------
@@ -460,7 +453,14 @@ def test_bokeh_serve_serves_the_playable_document_on_the_default_machine(tmp_pat
             )
             try:
                 names = {root.name for root in session.document.roots}
-                assert "poloidal" in names
+                assert "panels" in names
+                panels = next(
+                    root for root in session.document.roots if root.name == "panels"
+                )
+                panel_names = {
+                    child.name for child in panels.children if child.name is not None
+                }
+                assert {"poloidal", "camera_panel"} <= panel_names
                 # the compensation chart and the keyframe receipt table live
                 # inside the named receipts column, bound to the same sources
                 nested = set()

@@ -14,8 +14,12 @@ exactly the control-point change it names.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from nova.equilibrium.constraint import BoundingBoxTarget
 
 #: One key per enumerated control; each key applies a stated signed step.
 #: The reverse direction of every control is also bound, so an operator can
@@ -148,6 +152,40 @@ def point_delta(
         for name, point in zip(stepped.control_point_names, stepped.control_points().T)
     }
     return {name: after[name] - before[name] for name in before if name in after}
+
+
+def move_bounding_box(
+    target: BoundingBoxTarget,
+    shape: PlasmaShape,
+    parameter: str,
+    delta: float,
+) -> BoundingBoxTarget:
+    """Move an achieved bounding box by one shape-control action.
+
+    The inverse step starts from the plasma's measured turning points rather
+    than from the nominal dimensions in :class:`PlasmaShape`. Applying the
+    nominal point displacement to those measured points retains the key map's
+    exact meaning without first fitting the achieved boundary to a parametric
+    shape. In particular, bulk radius and height translate all four turning
+    points rigidly; the independently commanded X-point moves only for its own
+    controls.
+    """
+    displacement = point_delta(shape, parameter, delta)
+    points = np.asarray(target.flux_points, dtype=float).copy()
+    names = ("outer", "upper", "inner", "lower")
+    for index, name in enumerate(names):
+        points[index] += displacement[name]
+
+    x_point = target.x_point
+    if x_point is not None:
+        x_point = np.asarray(x_point, dtype=float) + displacement["x_point"]
+    return replace(
+        target,
+        flux_points=points,
+        radial_field_points=points[[0, 2]],
+        vertical_field_points=points[[1, 3]],
+        x_point=x_point,
+    )
 
 
 def key_help() -> str:

@@ -498,7 +498,7 @@ def _measure_full_trip(
             1.0e3 * float(np.median(samples)) / WIDTH / TRIP_LIMIT
         ),
         "active_set_iterations": int(
-            np.asarray(fixed.active_set_iterations).reshape(())
+            np.asarray(fixed.active_set_iterations).ravel()[0]
         ),
         "termination": str(np.asarray(fixed.termination_reason)),
     }
@@ -845,7 +845,7 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
     figure.suptitle(
         "Per-trip quantum at width one with the stale width-1024 baselines "
         "re-measured at HEAD\n"
-        f"revision {payload['source']['measurement_revision'][:10]}",
+        f"revision {payload['measurement_revision'][:10]}",
         fontsize=15,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -870,7 +870,7 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
             "# Per-trip quantum at batch width one — which stage owns the trip",
             "",
             f"measured on `{payload['assignment']['device']}` at revision "
-            f"`{payload['source']['measurement_revision'][:10]}` in job "
+            f"`{payload['measurement_revision'][:10]}` in job "
             f"`{payload['assignment']['job_id']}`.",
             "",
             "This job ran the baseline re-measurement only; no width-one member "
@@ -906,7 +906,7 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
         "# Per-trip quantum at batch width one — which stage owns the trip",
         "",
         f"measured on `{payload['assignment']['device']}` at revision "
-        f"`{payload['source']['measurement_revision'][:10]}` in job "
+        f"`{payload['measurement_revision'][:10]}` in job "
         f"`{payload['assignment']['job_id']}`.",
         "",
         "## Baselines re-measured at HEAD (width 1024, Solovev workload)",

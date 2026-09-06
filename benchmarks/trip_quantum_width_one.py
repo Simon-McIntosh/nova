@@ -533,10 +533,22 @@ def _map_and_substages(repeats: int) -> dict[str, Any]:
     }
 
 
-def _full_trip_with_apportionment(
-    workload, seed, probes: dict[str, Any], repeats: int
-) -> dict[str, Any]:
-    """The slow full-sixteen-trip width-1024 solve and its sub-stage shares."""
+def _full_trip_measure(
+    workload,
+    seed,
+    probes: dict[str, Any],
+    *,
+    persist: Callable[[dict[str, Any]], None],
+) -> None:
+    """Measure the full sixteen-trip width-1024 solve, persisting incrementally.
+
+    Each arm is a single sample because one synchronous solve takes over seven
+    minutes at width 1024; the control arm and its sub-stage apportionment are
+    persisted as soon as they land so a scheduler wall on the settled arm still
+    banks the re-measured per-trip quantum.  The compiled executable is about
+    3.8 GiB and cannot enter the persistent cache, so the compile repeats every
+    run and is timed explicitly.
+    """
     solve, initial, current = _full_trip_solver(workload, seed)
     print("STAGE FULL_TRIP_COMPILE_START", flush=True)
     started = time.perf_counter()
@@ -546,8 +558,7 @@ def _full_trip_with_apportionment(
         f"STAGE FULL_TRIP_COMPILE_DONE seconds={full_trip_compile_seconds:.6f}",
         flush=True,
     )
-    control = _measure_full_trip(compiled, initial, current, False, repeats)
-    settled = _measure_full_trip(compiled, initial, current, True, repeats)
+    control = _measure_full_trip(compiled, initial, current, False, 1)
     control_quantum = control["quantum_ms_per_member_per_trip"]
     positive = {
         name: max(probe["steady"]["median_ms_per_member"], 0.0)
@@ -576,24 +587,39 @@ def _full_trip_with_apportionment(
         - relinearization,
         0.0,
     )
-    return {
-        "per_trip_quantum": {
-            "state": "complete",
-            "control_ms_per_member_per_trip": control_quantum,
-            "control_active_set_iterations": control["active_set_iterations"],
-            "settled_ms_per_member": settled["steady"]["median_ms_per_member"],
-            "settled_active_set_iterations": settled["active_set_iterations"],
-            "full_trip_compile_seconds": full_trip_compile_seconds,
-            "banked_ms": 24.99596260986329,
-            "banked_source": str(SOLVER_QUANTUM_RECEIPT.relative_to(ROOT)),
-        },
-        "substage_apportionment": substages,
-        "mask_reconciliation_ms_per_member_per_trip": by_name[
-            "mask_reconciliation_gather_scatter_comparison"
-        ]["attributed_ms_per_member_per_trip"],
-        "relinearization_ms_per_member_per_trip": relinearization,
-        "first_gmres_action_sync_ms_per_member_per_trip": first_action_sync,
-    }
+    persist(
+        {
+            "per_trip_quantum": {
+                "state": "control_only",
+                "control_ms_per_member_per_trip": control_quantum,
+                "control_active_set_iterations": control["active_set_iterations"],
+                "full_trip_compile_seconds": full_trip_compile_seconds,
+                "banked_ms": 24.99596260986329,
+                "banked_source": str(SOLVER_QUANTUM_RECEIPT.relative_to(ROOT)),
+            },
+            "substage_apportionment": substages,
+            "mask_reconciliation_ms_per_member_per_trip": by_name[
+                "mask_reconciliation_gather_scatter_comparison"
+            ]["attributed_ms_per_member_per_trip"],
+            "relinearization_ms_per_member_per_trip": relinearization,
+            "first_gmres_action_sync_ms_per_member_per_trip": first_action_sync,
+        }
+    )
+    print(
+        f"STAGE FULL_TRIP_CONTROL_DONE quantum_ms={control_quantum:.6f}",
+        flush=True,
+    )
+    settled = _measure_full_trip(compiled, initial, current, True, 1)
+    persist(
+        {
+            "per_trip_quantum": {
+                "state": "complete",
+                "settled_ms_per_member": settled["steady"]["median_ms_per_member"],
+                "settled_active_set_iterations": settled["active_set_iterations"],
+            }
+        }
+    )
+    print("STAGE FULL_TRIP_SETTLED_DONE", flush=True)
 
 
 def _measure_member_width_one(
@@ -1077,11 +1103,25 @@ def run(
         f"map_ms={fast['map']['median_ms_per_member_width_1024']:.6f}",
         flush=True,
     )
+
+    def persist_full(update: dict[str, Any]) -> None:
+        for key, value in update.items():
+            if key == "per_trip_quantum":
+                replacement = receipt["baselines"]["per_trip_quantum"]
+                replacement.update(value)
+                receipt["baselines"]["per_trip_quantum"] = replacement
+            else:
+                receipt["baselines"][key] = value
+        receipt["baseline_summary"] = _baseline_summary(receipt)
+        _write_json(output, receipt)
+
     try:
-        full = _full_trip_with_apportionment(
-            fast["workload"], fast["seed"], fast["direct_width_1024_probes"], repeats
+        _full_trip_measure(
+            fast["workload"],
+            fast["seed"],
+            fast["direct_width_1024_probes"],
+            persist=persist_full,
         )
-        receipt["baselines"].update(full)
     except Exception as error:  # noqa: BLE001 - the fast baselines are already
         # persisted; record the failed full-trip and finalize with what exists
         receipt["baselines"]["per_trip_quantum"] = {
@@ -1092,8 +1132,8 @@ def run(
             f"STAGE FULL_TRIP_FAILED error={type(error).__name__}: {error}",
             flush=True,
         )
-    receipt["baseline_summary"] = _baseline_summary(receipt)
-    _write_json(output, receipt)
+        receipt["baseline_summary"] = _baseline_summary(receipt)
+        _write_json(output, receipt)
 
     receipt["execution"] = {
         "elapsed_seconds": time.perf_counter() - total_started,

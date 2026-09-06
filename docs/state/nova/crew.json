@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T14:57:55",
+  "updated": "2026-09-06T15:17:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -999,6 +999,15 @@
         "session_model": "gpt-5.6-sol"
       },
       {
+        "id": "dvf-axis-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "dvf-cocos-scout",
         "harness": "codex",
         "role": "investigate",
@@ -1234,9 +1243,11 @@
         "id": "fsa-identity-t",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a076d0-e9ba-7b42-bd44-f0d2264c9d55",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a076d0-e9ba-7b42-bd44-f0d2264c9d55"
+        },
         "created": "2026-09-06"
       },
       {
@@ -110476,6 +110487,144 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T130412174303-dvf-residual-decomposition-scout",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a72",
+        "node": "dvf-residual-decomposition-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2088,
+                "cached_input_tokens": 195787,
+                "input_tokens": 197907,
+                "output_tokens": 4138,
+                "reasoning_output_tokens": 855,
+                "total_tokens": 202045,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/residual-decomposition-scout.md that (1) lists the landed instruments the decomposition reuses with file:line for each entry point (the tare, the patch and the circuit instruments named in docs/plans/diiid-vertical-force-balance.html section 2 and its evidence record), (2) lists the banked residual evidence files under docs/figures/ for the five gate frames with their frame identities and the residual value each carries, (3) states for each of the five frames the decomposition the section calls for as a table of terms (external-field force imbalance, the tare, the patch, the circuit currents) with the source of each term named and whether it is already computed or must be computed, (4) names every source the residual would attribute to and confirms each enters the machine description with its recorded current, with no fitted coefficient, pin or imposed condition, and (5) ends with the exact write paths and the done-when the implement node must carry, so that node is dispatchable without further reading. Read-only: no source change, no job submission. Run everything from the worktree through the shared environment: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; never create a second environment. Commit each coherent step at once with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 1.0,
+          "goal": "Scout the per-frame residual decomposition on the five DIII-D gate frames over the landed tare, patch and circuit instruments",
+          "id": "dvf-residual-decomposition-scout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130412174303-dvf-residual-decomposition-scout/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/residual-decomposition-scout.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "dvf-residual-s",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-06T13:04:24Z",
+        "completed_at": "2026-09-06T13:07:37.684Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 187,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 193,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "844b5befff3acc36b1023c5621c3379f6492eae0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only report review by the coordinator: commits f152d4f5 and 5681764d verified ancestors of main, receipt and five figures present under docs/figures/diiid-vertical-force-balance/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/residual-decomposition-scout.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130412174303-dvf-residual-decomposition-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "969046bb-8622-4059-8d52-c0170b075ea4",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 55.00000000000001,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T16:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 101728,
+            "cache_creation_input_tokens_cumulative": 101728,
+            "cache_read_input_tokens": 1881290,
+            "cache_read_input_tokens_cumulative": 1881290,
+            "inference_geo": "not_available",
+            "input_tokens": 40,
+            "input_tokens_cumulative": 40,
+            "output_tokens": 13835,
+            "output_tokens_cumulative": 13835,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.9216000000000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.9216000000000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 190.435,
+          "generated_tokens": 13835,
+          "generation_seconds": 173.38,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 12.1,
+          "machine_seconds": 17.055,
+          "peak_input_tokens": 120959,
+          "tokens_per_second": 79.8,
+          "wall_tokens_per_second": 72.65
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only investigate node: the deliverable is the report at the fenced write path; no source or test change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/dvf-residual-decomposition-scout",
+          "session_id": "969046bb-8622-4059-8d52-c0170b075ea4",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T13:07:37.684Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -110690,6 +110839,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1856
+    "_version": 1859
   }
 }

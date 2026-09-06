@@ -66,6 +66,19 @@ per radian and ``psi_norm`` dimensionless.
 | lcfs_z                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | n_boundary_coords        | (nt,)           | int32   | vertices           |
 | finite_mask              | (6, nt)         | bool    | component present  |
+| flux_surface_psi_norm    | (n_surface,)    | float64 | dimensionless      |
+| flux_surface_psi         | (n_surface, nt) | float64 | Wb                 |
+| flux_surface_r           | (n_surface,     | float64 | m                  |
+|                          |  n_theta, nt)   |         |                    |
+| flux_surface_z           | (n_surface,     | float64 | m                  |
+|                          |  n_theta, nt)   |         |                    |
+| flux_surface_angle       | (n_theta,)      | float64 | rad                |
+| rho_face_norm            | (n_face,)       | float64 | dimensionless      |
+| Phi                      | (n_face, nt)    | float64 | Wb                 |
+| psi_face                 | (n_face, nt)    | float64 | Wb                 |
+| psi_norm_face            | (n_face, nt)    | float64 | dimensionless      |
+| divertor_leg_r/z         | (4, 32, nt)     | float64 | m                  |
+| divertor_leg_finite      | (4, nt)         | bool    | leg present        |
 | coil_current             | (n_circuits,nt) | float64 | A                  |
 | compensating_current     | (n_rows, nt)    | float64 | A                  |
 | action_delta             | (nt,)           | float64 | parameter units    |
@@ -194,6 +207,28 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("lcfs_z", ("n_b", "nt"), "float64", "m"),
     ("n_boundary_coords", ("nt",), "int32", "vertices"),
     ("finite_mask", ("6", "nt"), "bool", "component present"),
+    ("flux_surface_psi_norm", ("n_surface",), "float64", "dimensionless"),
+    ("flux_surface_psi", ("n_surface", "nt"), "float64", "Wb"),
+    (
+        "flux_surface_r",
+        ("n_surface", "n_theta", "nt"),
+        "float64",
+        "m",
+    ),
+    (
+        "flux_surface_z",
+        ("n_surface", "n_theta", "nt"),
+        "float64",
+        "m",
+    ),
+    ("flux_surface_angle", ("n_theta",), "float64", "rad"),
+    ("rho_face_norm", ("n_face",), "float64", "dimensionless"),
+    ("Phi", ("n_face", "nt"), "float64", "Wb"),
+    ("psi_face", ("n_face", "nt"), "float64", "Wb"),
+    ("psi_norm_face", ("n_face", "nt"), "float64", "dimensionless"),
+    ("divertor_leg_r", ("4", "32", "nt"), "float64", "m"),
+    ("divertor_leg_z", ("4", "32", "nt"), "float64", "m"),
+    ("divertor_leg_finite", ("4", "nt"), "bool", "leg present"),
     ("coil_current", ("n_circuits", "nt"), "float64", "A"),
     ("compensating_current", ("n_rows", "nt"), "float64", "A"),
     ("action_delta", ("nt",), "float64", "parameter units"),

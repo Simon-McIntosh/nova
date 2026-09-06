@@ -15,14 +15,15 @@ from typing import Any
 import jax
 import jax.numpy as jnp
 import numpy as np
+from scipy.constants import mu_0
 
-from benchmarks import coil_edit_latency as coil_edit
 from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
-from benchmarks import solovev_certificate as certificate
 from benchmarks.label_seed_residual_field import _persisted_response_cache
+from nova.biot.greens import hybrid_greens
 from nova.equilibrium import ForwardProfile, reduced_newton
-from nova.equilibrium.stencil_mesh import StencilMesh
+from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
@@ -30,8 +31,6 @@ from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
-from scripts.analytic_oracle_fixtures import measure as oracle_fixture
-from scripts.oracle_rebaseline import measure as recovery
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,9 +39,17 @@ DEFAULT_OUTPUT = OUTPUT_ROOT / "traced-vector-identity.json"
 SHOT = 22086
 SLICE_INDEX = 43
 SOLOVEV_CASE = "weak-rotation-reactor-static"
-SOLOVEV_CELLS = -110
 TRIP_LIMIT = 4
 RELATIVE_BOUND = 1.0e-12
+P_PRIME = -3.0e5
+FF_PRIME = -0.25
+AXIS_RADIUS = 1.0
+SEED_SPAN = 0.35
+DRIVE = 1.4
+BOUNDARY_FIELD_FUNCTION = 5.0
+CONDUCTORS = 16
+SOLOVEV_TOLERANCE = 1.0e-8
+SOLOVEV_NEWTON_STEPS = 12
 
 
 def _sha256(path: Path) -> str:
@@ -144,69 +151,158 @@ def _mast_fixture() -> tuple[str, Any, jax.Array, Any, float, dict[str, Any]]:
     )
 
 
-def _solovev_fixture() -> tuple[str, Any, jax.Array, Any, float, dict[str, Any]]:
-    """Construct the reduced Solov'ev carrier used by the certificate route."""
-    carrier_case, source_case, exact = certificate._case(SOLOVEV_CASE)
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        SOLOVEV_CELLS,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+def _solovev_terms() -> tuple[float, float, float]:
+    """Return the analytic quartic, offset, and vertical coefficients."""
+    alpha = np.pi**2 * mu_0 * P_PRIME / 2.0
+    return alpha, -2.0 * alpha * AXIS_RADIUS**2, 2.0 * np.pi**2 * FF_PRIME
+
+
+def _solovev(radius: np.ndarray, height: np.ndarray) -> np.ndarray:
+    """Return the analytic seed flux in webers."""
+    alpha, offset, beta = _solovev_terms()
+    return alpha * radius**4 + offset * radius**2 + beta * height**2
+
+
+def _solovev_wall(points: int = 61) -> tuple[np.ndarray, float]:
+    """Return a material boundary on one analytic seed flux surface."""
+    alpha, offset, beta = _solovev_terms()
+    wall_flux = _solovev(AXIS_RADIUS, 0.0) - SEED_SPAN
+    inner, outer = np.sqrt(np.sort(np.roots([alpha, offset, -wall_flux])))
+    centre, half = 0.5 * (inner + outer), 0.5 * (outer - inner)
+    angle = 2.0 * np.pi * np.arange(points) / points
+    radius = centre + half * np.cos(angle)
+    argument = np.clip((wall_flux - _solovev(radius, 0.0)) / beta, 0.0, None)
+    wall = np.c_[radius, np.sign(np.sin(angle)) * np.sqrt(argument)]
+    return wall, float(wall_flux)
+
+
+def _green_block(
+    target: np.ndarray, source: np.ndarray, section: float = 0.05
+) -> np.ndarray:
+    """Return total-flux coupling for one source and target set."""
+    return np.stack(
+        [
+            hybrid_greens(target[:, 0], target[:, 1], a, z, section, section)[0]
+            for a, z in source
+        ],
+        axis=1,
     )
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
+
+
+def _flat_profile(amplitude: float):
+    """Return a constant absolute source gradient."""
+
+    def gradient(psi_norm):
+        return jnp.full_like(jnp.asarray(psi_norm, dtype=jnp.float64), amplitude)
+
+    return gradient
+
+
+def _edge_vanishing_profile(amplitude: float):
+    """Return an absolute source gradient that vanishes at the boundary."""
+
+    def gradient(psi_norm):
+        return amplitude * (1.0 - jnp.clip(jnp.asarray(psi_norm), 0.0, 1.0))
+
+    return gradient
+
+
+def _solovev_fixture() -> tuple[str, Any, jax.Array, Any, float | None, dict[str, Any]]:
+    """Build the shared test-owned free-boundary Solov'ev fixture."""
+    lattice = FluxLattice(np.linspace(0.6, 1.42, 25), np.linspace(-0.42, 0.42, 25))
+    coordinate = lattice.coordinate
+    wall, wall_flux = _solovev_wall()
+    seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1])
+    wall_seed = _solovev(wall[:, 0], wall[:, 1])
+    inside = seed_flux >= wall_flux
+
+    angle = 2.0 * np.pi * np.arange(CONDUCTORS) / CONDUCTORS
+    conductor = np.c_[1.0 + 0.62 * np.cos(angle), 0.62 * np.sin(angle)]
+    coupling = {
+        "plasma_to_grid": _green_block(coordinate, coordinate),
+        "plasma_to_wall": _green_block(wall, coordinate),
+        "source_to_grid": _green_block(coordinate, conductor),
+        "source_to_wall": _green_block(wall, conductor),
+    }
+
+    def build(core: DomainProfile, current: np.ndarray) -> ForwardProfile:
+        return ForwardProfile.from_lattice(
+            lattice,
+            ForwardSource(
+                core=core,
+                boundary_field_function=BOUNDARY_FIELD_FUNCTION,
+            ),
+            external_current=current,
+            wall_coordinate=wall,
+            polarity=1,
+            inside_material=inside,
+            **coupling,
+        )
+
+    seed = jnp.asarray(np.r_[seed_flux, wall_seed])
+    flat = build(
+        DomainProfile(
+            p_prime=_flat_profile(P_PRIME),
+            ff_prime=_flat_profile(FF_PRIME),
+        ),
+        np.zeros(CONDUCTORS),
     )
-    oracle_state = certificate._exact_state(SOLOVEV_CASE, exact, coordinates)
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
-    )
-    coefficients = empty_operator.coupling_current_moments(exact_physical)
-    internal = oracle_fixture._internal_flux_image(empty_operator, coefficients)
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - internal
-    )
-    profile = ForwardProfile(
-        operator,
-        StencilMesh(machine.node, machine.stencil, machine.area),
-        newton_steps=recovery.NEWTON_STEPS,
-    )
-    target_current, centroid, current_receipt = certificate._closed_form_current_target(
-        SOLOVEV_CASE, source_case, operator, exact_physical
-    )
-    seed, branch, seed_receipt = certificate._production_seed(
-        profile, SOLOVEV_CASE, target_current, centroid, current_receipt
+    cell_current = np.asarray(flat.operator.cell_current(seed))
+    target = np.r_[
+        seed_flux - coupling["plasma_to_grid"] @ cell_current,
+        wall_seed - coupling["plasma_to_wall"] @ cell_current,
+    ]
+    weight = np.r_[inside.astype(float), np.ones(len(wall))]
+    matrix = np.r_[coupling["source_to_grid"], coupling["source_to_wall"]]
+    current = np.linalg.lstsq(matrix * weight[:, None], target * weight, rcond=None)[0]
+    profile = build(
+        DomainProfile(
+            p_prime=_edge_vanishing_profile(2.0 * DRIVE * P_PRIME),
+            ff_prime=_edge_vanishing_profile(2.0 * DRIVE * FF_PRIME),
+        ),
+        current,
     )
     return (
-        "Solovev weak-rotation reactor static",
-        operator,
-        jnp.asarray(seed),
-        TopologyClass(branch),
-        target_current,
+        "Solovev free-boundary fixture",
+        profile.operator,
+        seed,
+        None,
+        None,
         {
             "case": SOLOVEV_CASE,
-            "requested_cells": SOLOVEV_CELLS,
-            "realised_cells": len(machine.node),
-            "seed": seed_receipt,
-            "newton_steps": recovery.NEWTON_STEPS,
-            "tolerance": recovery.FIXED_POINT_RESIDUAL_TOLERANCE,
+            "construction": (
+                "tests/test_steering_frames.py and "
+                "tests/test_equilibrium_forward_solve.py free-boundary fixture"
+            ),
+            "grid_shape": [25, 25],
+            "wall_points": len(wall),
+            "conductor_count": CONDUCTORS,
+            "newton_steps": SOLOVEV_NEWTON_STEPS,
+            "tolerance": SOLOVEV_TOLERANCE,
         },
     )
 
 
-def _program(operator: Any, initial: jax.Array, requested: Any, target: float):
+def _program(
+    operator: Any,
+    initial: jax.Array,
+    requested: Any,
+    target: float | None,
+):
     """Build one kernel set whose field can remain closed or become traced."""
     external = operator.external()
+    target_value = None if target is None else jnp.asarray(target)
     coordinates = reduced_newton.reduced_coordinates(
         operator,
         initial,
         requested_class=requested,
-        target_current=jnp.asarray(target),
+        target_current=target_value,
     )
     return (
         external,
         coordinates,
         reduced_newton._reduced_kernels(
-            operator, coordinates, external, requested, jnp.asarray(target)
+            operator, coordinates, external, requested, target_value
         ),
     )
 
@@ -215,7 +311,7 @@ def _drive(
     operator: Any,
     initial: jax.Array,
     requested: Any,
-    target: float,
+    target: float | None,
     *,
     active_set_steps: int,
     traced: bool,
@@ -225,9 +321,10 @@ def _drive(
 ) -> dict[str, Any]:
     """Run one prefix of the reduced active-set loop in either field mode."""
     external, coordinates, kernels = program
+    target_value = None if target is None else jnp.asarray(target)
     dynamic = (
         reduced_newton._bind_dynamic_arguments(
-            kernels, external, jnp.asarray(target), requested
+            kernels, external, target_value, requested
         )
         if traced
         else kernels
@@ -247,9 +344,7 @@ def _drive(
         scoring=reduced_newton.LADDER_SCORING,
         regather=lambda state: reduced_newton._gather(
             coordinates,
-            reduced_newton._current_moments(
-                operator, state, requested, jnp.asarray(target)
-            ),
+            reduced_newton._current_moments(operator, state, requested, target_value),
         ),
         dispatched_boundary=lambda *_arguments: (_ for _ in ()).throw(
             RuntimeError("the identity receipt requires the fused reduced boundary")
@@ -265,7 +360,7 @@ def _case_receipt(
     operator: Any,
     initial: jax.Array,
     requested: Any,
-    target: float,
+    target: float | None,
     metadata: dict[str, Any],
 ) -> dict[str, Any]:
     """Compare the first four prefixes and the full reduced solve."""
@@ -343,11 +438,57 @@ def _case_receipt(
     }
 
 
+def prepare_only() -> dict[str, Any]:
+    """Build both fixtures on the selected backend without entering a solve."""
+    configure_dtypes()
+    fixtures = [_mast_fixture(), _solovev_fixture()]
+    rows = []
+    for name, operator, initial, requested, target, metadata in fixtures:
+        external = operator.external()
+        jax.block_until_ready(external)
+        rows.append(
+            {
+                "name": name,
+                "initial_shape": list(np.shape(initial)),
+                "external_shape": list(np.shape(external)),
+                "requested_class": (
+                    None if requested is None else int(np.asarray(requested))
+                ),
+                "target_current": target,
+                "metadata": metadata,
+            }
+        )
+    payload = {
+        "status": "prepared",
+        "platform": jax.default_backend(),
+        "fixture_count": len(rows),
+        "fixtures": rows,
+    }
+    print(json.dumps(_strict(payload), indent=2, sort_keys=True), flush=True)
+    print("PREPARE_ONLY_EXIT=0", flush=True)
+    return payload
+
+
+def _require_measurement_host() -> None:
+    """Require the declared one-H200 scheduler allocation."""
+    device = jax.devices()[0]
+    if device.platform != "gpu" or "H200" not in device.device_kind:
+        raise RuntimeError(f"one H200 is required, got {device}")
+    if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
+        raise RuntimeError("the betelgeuse partition is required")
+    if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
+        raise RuntimeError("the gpu_0003_grpA reservation is required")
+    if os.environ.get("SLURM_CPUS_PER_TASK") != "8":
+        raise RuntimeError("the measurement requires eight requested CPUs")
+    if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
+        raise RuntimeError("JAX_PLATFORMS=cuda,cpu must be set in the job body")
+
+
 def run(output: Path) -> dict[str, Any]:
     """Run the H200 identity measurement and write its strict JSON receipt."""
     started = time.perf_counter()
     configure_dtypes()
-    coil_edit._require_measurement_host()
+    _require_measurement_host()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
@@ -439,8 +580,8 @@ def _sbatch(arguments: argparse.Namespace) -> str:
 #SBATCH --reservation=gpu_0003_grpA
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=128G
 #SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
 #SBATCH --output={log_directory}/traced-vector-identity-%j.log
@@ -461,7 +602,8 @@ exit $result
 def main() -> None:
     """Run or submit the identity receipt."""
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument("--prepare-only", action="store_true")
+    subparsers = parser.add_subparsers(dest="command")
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     submit_parser = subparsers.add_parser("submit")
@@ -474,9 +616,16 @@ def main() -> None:
         ),
     )
     arguments = parser.parse_args()
+    if arguments.prepare_only:
+        if arguments.command is not None:
+            parser.error("--prepare-only does not accept a subcommand")
+        prepare_only()
+        return
     if arguments.command == "run":
         run(arguments.output)
         return
+    if arguments.command is None:
+        parser.error("choose --prepare-only, run, or submit")
     completed = subprocess.run(
         ["sbatch", "--parsable"],
         input=_sbatch(arguments),

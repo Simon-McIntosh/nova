@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-impl" content="0.3">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json">
@@ -268,6 +268,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260905T162101540255-cank-bounding-box-shape-rows" data-who="cank-dsv4-shape-x" data-when="2026-09-06T02:53:16.270Z">
     <div class="r-comment-body"><p>Transferred the pulse-design bounding-box row set (four isoflux, two radial-field, two vertical-field, one two-gradient X-point null; ten rows) to the forward solve as FieldComponentConstraint and BoundingBoxTarget with from_control_points and from_boundary builders; H200 receipt on 22086/43 shows a 2 cm upper-point raise and a 5 percent elongation raise both steer in the commanded direction with tens of amperes of compensation while rows_qualified reads False at a worst 0.14 to 0.28 percent of scale, attributed to compensator conditioning; 7/7 slow contracts green on the H200 lane in 1h56m and 12/12 protocol tests green on CPU</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260906T030830441678-cank-steering-authority-receipt" data-who="cank-steer-x" data-when="2026-09-06T06:27:30.015Z">
+    <div class="r-comment-body"><p>Measurement complete on the H200 but the run died before the record: two commits (989d561c the driver, a283f243 degenerate-arm handling and a tighter row gate) plus nine uncommitted arm receipts (newton_krylov with the active-set stop lifted at upper 5, 10, 20 mm and elongation; the constrained reduced route at the same four commands) and the summary steering-authority.json and PNG; the worker then called Read on its PNG and the text-only lane answered 400, ending the process; a resume would replay that read. Artifacts and the driver diff carried to reports/nova/cank/steering-authority-carried for a successor node on a fresh member that commits them and writes the report</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

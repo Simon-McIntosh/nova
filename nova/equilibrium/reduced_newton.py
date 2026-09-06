@@ -1234,7 +1234,18 @@ def solve_reduced_newton(
     target_current_value = (
         None if target_current is None else jnp.asarray(target_current)
     )
-    external = operator.external(current, prescribed_current)
+    # A carried program keeps the external flux it was built with.  When the
+    # caller's conductor currents are the default ones (both ``None``) and the
+    # program was itself built on the defaults, that external is exactly what
+    # this call would recompute, so reusing it skips one per-keyframe device
+    # evaluation.  A program built under explicit currents is never reused
+    # this way.
+    default_external = current is None and prescribed_current is None
+    if program is not None and default_external and program.default_external:
+        external = program.external
+    else:
+        external = operator.external(current, prescribed_current)
+    _stage_mark("external")
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
@@ -1268,6 +1279,7 @@ def solve_reduced_newton(
             requested_class_shape=(
                 None if requested_class is None else tuple(np.shape(requested_class))
             ),
+            default_external=default_external,
         )
     else:
         expected_target_shape = (
@@ -1395,6 +1407,10 @@ class ReducedProgram(NamedTuple):
     target_current_shape: tuple[int, ...] | None = None
     requested_class_shape: tuple[int, ...] | None = None
     row_signature: tuple[tuple[str, str], ...] = ()
+    #: Whether the carried external was computed from the default conductor
+    #: currents (both ``None``), which is what makes reusing it on a later
+    #: solve exact.  A program built under explicit currents always recomputes.
+    default_external: bool = True
 
 
 def _bind_rows(
@@ -1663,7 +1679,12 @@ def solve_constrained_reduced_newton(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
     _stage_mark("shadow")
-    external = operator.external(current, prescribed_current)
+    default_external = current is None and prescribed_current is None
+    if program is not None and default_external and program.default_external:
+        external = program.external
+    else:
+        external = operator.external(current, prescribed_current)
+    _stage_mark("external")
     row_signature = tuple(
         (
             type(pair.functional).__qualname__,
@@ -1703,6 +1724,7 @@ def solve_constrained_reduced_newton(
                 None if requested_class is None else tuple(np.shape(requested_class))
             ),
             row_signature=row_signature,
+            default_external=default_external,
         )
     elif (
         program.operator_identity != id(operator)

@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="27">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-impl" content="0.6">
@@ -94,6 +94,11 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
     <div class="r-fu-body">Unblocked (null-identification-authority section 2 landed). Two parts on the same driver, sequenced after f-dvf-004 because both edit benchmarks/diiid_forward_gs_match.py: root-cause frame 144's limited reading on the corrected topology read and name its mechanism against section 2's verdict; then split the gate into residual convergence and branch persistence as two fields per frame, and normalise the MAST and DIII-D error columns on one stated denominator or label each with its own. Done-when: the gate rerun on the eleven frames reports both fields per frame with the normalisation stated per row and frame 144 carries a named mechanism.</div>
     <pre class="r-fu-prompt">/reckon-ship diiid-vertical-force-balance §3</pre>
     </article>
+<article class="r-fu" data-id="f-dvf-006" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="smc" data-written-at="2026-09-06" data-recommends-skill="/reckon-ship diiid-vertical-force-balance §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">COCOS scout finding: the labels cannot fix the source COCOS alone; the prototype forward solves wait on the q95 answer</h4>
+    <div class="r-fu-body">The scout half of f-dvf-003 (run r-20260904T053746703323, report ~/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md, five_frame_cocos_measurement.json in its run directory) is closed as a measured negative: sign tuples 5 of 5, flux exponent proved by the Grad-Shafranov current integral, unique source COCOS 0 of 5, persisted pf_active carries no current samples, the imas-ambix loader hard-codes 5 to 17. The prototype forward solves on prescribed p-prime and FF-prime in COCOS 17 cannot start until the lead answers q-dvf-cocos-q95; when answered, dispatch the prototype node with the data-proved flux-map and current factors from the report and q95 treated as the answer says, and only then decide where the translation lives.</div>
+    <pre class="r-fu-prompt">/reckon-ship diiid-vertical-force-balance §5</pre>
+    </article>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -161,6 +166,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 <div class="r-comment" data-section="s5" data-id="c-20260904T081000000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-04T08:10:00+02:00">
     <div class="r-comment-body">CONFIRMED FOR THE LEAD 2026-09-04: the affine flux-function extraction exists and is the prescribed-profile source. nova/equilibrium/map_extraction.py extract_flux_functions applies the conservation operator to the label map and, on each of 19 normalised-flux shells (0.05 to 0.95 by default), projects R j_phi onto the two-column design [R^2, 1]; the coefficients are p' and ff'/mu0 in the map's per-radian convention, divided by minus two pi (the intercept times mu0) to publish Nova's negated-total-flux p' and ff', with a scaled condition number, per-shell reliability and uncertainty in a fixed-shape receipt. It is a deterministic read of the map, not a fit against observations. benchmarks/efit_affine_extraction.py is the standalone driver (converts per-radian flux to total flux, fixed normalised-flux bins, profiles consumable by a forward-input adapter); benchmarks/diiid_forward_gs_match.py builds its prescribed-source solve from extract_flux_functions(label) (lines 833 and 1025 to 1056) and diiid_label_resolve_gate.py reads the same profiles (lines 435 to 605); tests/test_map_extraction.py pins the prescribed-profile round trip. The COCOS scout used this route for its 19-surface census on all five frames (p' negative on 18 to 19 of 19 surfaces, projection floors 1.5 to 2.1 percent). Consequence for section 5: item (b) prescribes the affinely extracted profiles in COCOS 17 (the minus two pi map factor feeds the extraction's own conversion, so the extraction must be run on the canonical map exactly once); question q-dvf-001 is resolved, and the stored-EFIT comparison is optional per frame. Section 5 prose corrected accordingly.</div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260904T053746703323-dvf-diiid-cocos-resolution" data-who="dvf-cocos-scout" data-when="2026-09-04T05:52:58Z">
+    <div class="r-comment-body"><p>DIII-D COCOS scout (report ~/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md): sign tuples measured on 5 of 5 gate frames and the flux exponent settled by the Grad-Shafranov current integral (stored psi is Wb/radian), but a unique source COCOS is derived on 0 of 5 because the five gate Parquets store no p-prime or FF-prime arrays (the requested ratio and sign comparison is impossible) and efit_q95 is positive for both toroidal-field polarities, which gives COCOS 1 on the two positive-B0 frames and COCOS 5 on the three negative-B0 frames unless q95 is an unsigned magnitude; the persisted pf_active carries no current samples; the imas-ambix loader hard-codes 5 to 17. The worker stopped correctly at NEEDS-HELP with three options; taken as a measured negative for the scout half of the COCOS followup, with q95 signedness and the missing profile store opened as the lead question. Codex, 2026-09-04, blocked since 05:52Z that day, reconciled at handoff.</p></div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
@@ -170,6 +178,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
     </div>
 <div class="r-q" data-id="q-dvf-002" data-section="s5" data-status="open" data-opened-by="reckon-ship-s19-relaunch" data-opened-at="2026-09-04" data-resolved-at="" data-resolved-by="">
     <p class="r-q-body">Is efit_q95 signed in the DIII-D challenge corpus? It is positive on all five gate frames across both toroidal-field polarities, so the ambix loader's blanket COCOS 5 negation produces an invalid signed tuple on the two positive-B0 frames (179, 144). If unsigned, the ambix loader and type surface should expose it as a magnitude; if signed, the two positive-B0 frames need reclassifying and every q-dependent validation regenerating. This is imas-ambix work.</p>
+    </div>
+<div class="r-q" data-id="q-dvf-cocos-q95" data-section="" data-status="open" data-opened-by="" data-opened-at="" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"></p>
     </div>
 </section>
 </main>

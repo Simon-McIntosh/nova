@@ -473,6 +473,145 @@ def test_saddle_aware_hex_labels_are_fixed_shape_jit_and_vmap_safe():
     assert "pure_callback" not in inspect.getsource(fsc)
 
 
+def test_label_propagation_uses_fixed_cap_and_flood_stays_doubling():
+    """The label schedule is fixed at the diameter cap; the flood stays fast.
+
+    The label propagation's fixed loop runs a capped ``nr + nz`` schedule on
+    every element (constant per-element work under vmap), while the flood
+    remains its data-dependent doubling while loop whose handful of active
+    trips already amortise across a batch and stop at the fixed point.
+    """
+    flood_source = inspect.getsource(fsc.flood_fill_core_with_steps)
+    assert "while_loop" in flood_source
+    assert "lax.fori_loop" not in flood_source
+    labels_source = inspect.getsource(fsc._iterate_component_labels)
+    assert "lax.fori_loop" in labels_source
+    assert "while_loop" not in labels_source
+    assert "vertical_count + radial_count" in labels_source
+
+
+def test_flood_matches_linear_reference_on_corridor():
+    """The doubling flood reaches the exact one-cell-per-pass fixed point.
+
+    The one-cell dilation reference is the unambiguous definition of the
+    seed-connected component, so bit equality there pins the doubling fill to
+    the correct classification, disconnected pocket excluded.
+    """
+    confined = np.zeros((49, 73), dtype=bool)
+    confined[8:41, 6:31] = True
+    confined[22:27, 31:58] = True
+    confined[13:36, 58:67] = True
+    confined[3:9, 48:55] = True  # disconnected pocket above the corridor
+    seed = np.zeros_like(confined)
+    seed[24, 12] = True
+
+    def linear_flood(confined, seed):
+        core = seed & confined
+        for _ in range(sum(confined.shape)):
+            up = np.zeros_like(core)
+            down = np.zeros_like(core)
+            left = np.zeros_like(core)
+            right = np.zeros_like(core)
+            up[1:, :] = core[:-1, :]
+            down[:-1, :] = core[1:, :]
+            left[:, 1:] = core[:, :-1]
+            right[:, :-1] = core[:, 1:]
+            core = (core | up | down | left | right) & confined
+        return core
+
+    reference = linear_flood(confined, seed)
+    doubled, steps = fsc.flood_fill_core_with_steps(
+        jnp.asarray(confined), jnp.asarray(seed), confined.size
+    )
+    assert np.array_equal(np.asarray(doubled).astype(bool), reference)
+    assert int(steps) <= math.ceil(math.log2(sum(confined.shape)))
+
+
+def test_label_propagation_cap_bounds_the_fixed_schedule():
+    """The label propagation fixed cap is the grid diameter, saturated.
+
+    ``nr + nz`` steps suffice for any component on the structured lattice, so
+    the kernel's own cap keeps the compiled schedule static at the diameter
+    whatever the caller passes, and the label result is identical across the
+    two schedules (the mask preserves settled labels).
+    """
+    confined = np.zeros((19, 27), dtype=bool)
+    confined[2:15, 2:9] = True
+    confined[7:12, 9:17] = True
+    confined[1:5, 20:25] = True
+    confined[14:18, 18:22] = True
+
+    tight, tight_steps = fsc.label_hex_connected_components_with_steps(
+        jnp.asarray(confined),
+        jnp.asarray(hex_stencil(confined.shape)),
+        sum(confined.shape),
+    )
+    loose, loose_steps = fsc.label_hex_connected_components_with_steps(
+        jnp.asarray(confined),
+        jnp.asarray(hex_stencil(confined.shape)),
+        64 * sum(confined.shape),
+    )
+    np.testing.assert_array_equal(np.asarray(loose), np.asarray(tight))
+    assert int(loose_steps) == int(tight_steps) <= sum(confined.shape)
+    assert int(tight_steps) < sum(confined.shape)
+
+
+def test_connectivity_kernels_vmap_batch_equals_per_slice_bit_identical():
+    """vmap over a batch equals per-slice calls exactly, per element.
+
+    The fixed schedules make the per-element result independent of the batch,
+    so every kernel's vmapped output is bit-identical to the serial stack.
+    """
+    fixtures = []
+    psi, rg, zg, inside = _solovev_psi()
+    psi_n = psi / -1.0
+    ellipse = (psi_n < 1.0) & inside
+    ellipse[5:10, 3:6] = True  # a disconnected pocket
+    fixtures.append((ellipse, (np.abs(zg).argmin(), np.abs(rg - 0.9).argmin())))
+    small = _solovev_psi(a=0.35)
+    psi_n = small[0] / -1.0
+    ellipse_small = (psi_n < 1.0) & inside
+    fixtures.append(
+        (ellipse_small, (np.abs(zg - 0.0).argmin(), np.abs(rg - 0.9).argmin()))
+    )
+
+    confineds = [jnp.asarray(confined) for confined, _seed in fixtures]
+    seeds = []
+    for confined, seed_index in fixtures:
+        seed = jnp.zeros_like(confined)
+        seed = seed.at[seed_index].set(True)
+        seeds.append(jnp.asarray(seed))
+
+    batch_c = jnp.stack(confineds)
+    batch_s = jnp.stack(seeds)
+    n_iters = confineds[0].size
+    rings = jnp.asarray(hex_stencil(confineds[0].shape))
+
+    flood_vmap = jax.jit(jax.vmap(lambda c, s: fsc.flood_fill_core(c, s, n_iters)))(
+        batch_c, batch_s
+    )
+    flood_serial = jnp.stack(
+        [fsc.flood_fill_core(c, s, n_iters) for c, s in zip(confineds, seeds)]
+    )
+    np.testing.assert_array_equal(np.asarray(flood_vmap), np.asarray(flood_serial))
+
+    labels_vmap = jax.jit(
+        jax.vmap(lambda c: fsc.label_connected_components(c, n_iters))
+    )(batch_c)
+    labels_serial = jnp.stack(
+        [fsc.label_connected_components(c, n_iters) for c in confineds]
+    )
+    np.testing.assert_array_equal(np.asarray(labels_vmap), np.asarray(labels_serial))
+
+    hex_vmap = jax.jit(
+        jax.vmap(lambda c: fsc.label_hex_connected_components(c, rings, n_iters))
+    )(batch_c)
+    hex_serial = jnp.stack(
+        [fsc.label_hex_connected_components(c, rings, n_iters) for c in confineds]
+    )
+    np.testing.assert_array_equal(np.asarray(hex_vmap), np.asarray(hex_serial))
+
+
 def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():
     """Doubling and one-cell dilation reach exactly the same fixed point."""
 

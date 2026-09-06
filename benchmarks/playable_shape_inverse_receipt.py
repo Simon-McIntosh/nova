@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+from time import perf_counter
 from typing import Any
 
 import jax
@@ -93,6 +94,7 @@ def _arm_receipt(
     machine: ForwardMachine,
     previous,
     target,
+    null_points: np.ndarray,
 ) -> tuple[dict[str, Any], object]:
     """Run one arm through ``ProductionSolver`` and return its receipt."""
     solver = ProductionSolver(machine)
@@ -104,6 +106,14 @@ def _arm_receipt(
             "index": index,
             "coil_current_a": item.inverse.currents.tolist(),
             "coil_delta_a": item.inverse.delta.tolist(),
+            "current_change_l2_a": float(np.linalg.norm(item.inverse.delta)),
+            "linear_row_prediction": (
+                item.inverse.response[:, item.inverse.free_circuits]
+                @ item.inverse.delta
+            ).tolist(),
+            "linear_row_command": (
+                item.inverse.target - item.inverse.observed
+            ).tolist(),
             "least_squares_residual": item.inverse.least_squares_residual,
             "turning_point_error_m": item.turning_point_error,
             "trips": item.trips,
@@ -116,6 +126,8 @@ def _arm_receipt(
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
+        "null_turning_points_m": null_points.tolist(),
+        "relative_turning_point_motion_m": (_points(achieved) - null_points).tolist(),
         "coil_current_by_circuit_a": {
             f"circuit_{index:02d}": float(current)
             for index, current in enumerate(solver.prescribed_current)
@@ -128,6 +140,32 @@ def _arm_receipt(
         "final_turning_point_error_m": rounds[-1]["turning_point_error_m"],
     }
     return payload, achieved
+
+
+def _null_receipt(machine: ForwardMachine, previous) -> tuple[dict[str, Any], object]:
+    """Re-solve unchanged currents and return the physical motion baseline."""
+    solver = ProductionSolver(machine)
+    started = perf_counter()
+    equilibrium, trips, _program = solver._forward(
+        machine.profile, previous.flux, solver.prescribed_current
+    )
+    wall = perf_counter() - started
+    prior = achieved_target(machine.profile, previous.flux)
+    achieved = achieved_target(machine.profile, equilibrium.flux)
+    payload = {
+        "arm": "null-resolve",
+        "previous_turning_points_m": _points(prior).tolist(),
+        "achieved_turning_points_m": _points(achieved).tolist(),
+        "turning_point_drift_m": (_points(achieved) - _points(prior)).tolist(),
+        "coil_current_by_circuit_a": {
+            f"circuit_{index:02d}": float(current)
+            for index, current in enumerate(solver.prescribed_current)
+        },
+        "trips": int(trips),
+        "wall_s": float(wall),
+        "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
+    }
+    return payload, equilibrium
 
 
 def _draw(arms: list[dict[str, Any]], path: Path) -> None:
@@ -206,6 +244,8 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)
+    null_arm, null_equilibrium = _null_receipt(machine, prime)
+    null_points = _points(achieved_target(profile, null_equilibrium.flux))
     definitions = (
         ("upper-point-plus-20mm", _upper_point_target(previous_target)),
         ("elongation-plus-5pct", _elongation_target(previous_target)),
@@ -230,8 +270,10 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         },
     }
     arms = []
+    null_arm["runtime"] = runtime
+    _write(directory / "null-resolve.json", null_arm)
     for name, target in definitions:
-        arm, _achieved = _arm_receipt(name, machine, prime, target)
+        arm, _achieved = _arm_receipt(name, machine, prime, target, null_points)
         arm["runtime"] = runtime
         arms.append(arm)
         _write(directory / f"{name}.json", arm)
@@ -242,7 +284,7 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
             f"wall_s={arm['total_wall_s']:.6g}",
             flush=True,
         )
-    receipt = {"runtime": runtime, "arms": arms}
+    receipt = {"runtime": runtime, "null_arm": null_arm, "arms": arms}
     _write(directory / "shape-inverse-receipt.json", receipt)
     _draw(arms, directory / "shape-inverse-receipt.png")
     return receipt

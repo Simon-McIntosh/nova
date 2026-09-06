@@ -108,6 +108,9 @@ class ProductionSolver:
         prescribed_current: np.ndarray,
     ):
         """Run the reduced route with prescribed currents and no shape rows."""
+        # A reduced program closes over the external flux associated with the
+        # currents it was compiled with. Reusing it after prescribed currents
+        # change would silently solve with the earlier current field.
         return solve_constrained_reduced_newton(
             profile,
             jnp.asarray(flux),

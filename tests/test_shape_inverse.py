@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 from types import SimpleNamespace
 
 import jax.numpy as jnp
@@ -167,8 +168,16 @@ def test_limited_fixture_motion_has_commanded_sign_and_monotonic_gain(
     prime_result = prime_solver._reduced(profile, machine.seed, current)
     prime = ProductionSolver._reduced_receipt(profile, prime_result)
     prime_target = achieved_target(profile, prime.flux)
-    initial_upper = float(np.asarray(prime_target.flux_points)[1, 1])
+
+    # Every comparison gets the same warm re-solve drift. The unchanged-current
+    # arm is therefore the physical zero for the commanded arms, rather than
+    # the already-converged prime flux.
+    null_result = ProductionSolver(machine)._reduced(profile, prime.flux, current)
+    null_equilibrium = ProductionSolver._reduced_receipt(profile, null_result)
+    null_target = achieved_target(profile, null_equilibrium.flux)
+    null_upper = float(np.asarray(null_target.flux_points)[1, 1])
     achieved_motion = []
+    evidence = []
     for command in (0.005, 0.010, 0.020):
         points = np.asarray(prime_target.flux_points).copy()
         points[1, 1] += command
@@ -181,13 +190,32 @@ def test_limited_fixture_motion_has_commanded_sign_and_monotonic_gain(
         inverse = solve_shape_inverse(
             profile, target, prime.flux, prescribed_current=current
         )
+        linear_prediction = inverse.response[:, inverse.free_circuits] @ inverse.delta
+        linear_command = inverse.target - inverse.observed
         reduced = ProductionSolver(machine)._reduced(
             profile, prime.flux, inverse.currents
         )
         equilibrium = ProductionSolver._reduced_receipt(profile, reduced)
         achieved = achieved_target(profile, equilibrium.flux)
-        achieved_motion.append(
-            float(np.asarray(achieved.flux_points)[1, 1]) - initial_upper
+        motion = float(np.asarray(achieved.flux_points)[1, 1]) - null_upper
+        achieved_motion.append(motion)
+        evidence.append(
+            {
+                "command_m": command,
+                "relative_motion_m": motion,
+                "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+                "linear_row_prediction": linear_prediction.tolist(),
+                "linear_row_command": linear_command.tolist(),
+            }
+        )
+    print("limited-directional-evidence " + json.dumps(evidence, sort_keys=True))
+    for item in evidence:
+        assert item["current_change_l2_a"] > 1.0e-3
+        np.testing.assert_allclose(
+            item["linear_row_prediction"],
+            item["linear_row_command"],
+            rtol=2.0e-6,
+            atol=2.0e-10,
         )
     assert np.all(np.asarray(achieved_motion) > 0.0)
     assert np.all(np.diff(achieved_motion) > 0.0)

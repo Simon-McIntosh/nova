@@ -453,7 +453,14 @@ def test_bokeh_serve_serves_the_playable_document_on_the_default_machine(tmp_pat
             )
             try:
                 names = {root.name for root in session.document.roots}
-                assert "poloidal" in names
+                assert "panels" in names
+                panels = next(
+                    root for root in session.document.roots if root.name == "panels"
+                )
+                panel_names = {
+                    child.name for child in panels.children if child.name is not None
+                }
+                assert {"poloidal", "camera_panel"} <= panel_names
                 # the compensation chart and the keyframe receipt table live
                 # inside the named receipts column, bound to the same sources
                 nested = set()

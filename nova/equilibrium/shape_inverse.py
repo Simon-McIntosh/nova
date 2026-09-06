@@ -20,9 +20,11 @@ Jacobian contracted with the operator's response carrier.  With the observed
 values taken at the current plasma iterate, the linear system the
 pseudo-inverse solves is ``response @ delta = target - observed`` — the plasma's
 own contribution enters subtracted, exactly as the inverse design moves it to
-the right-hand side.  Field rows are weighted by ``sqrt(field_weight)`` and
-the Tikhonov ``gamma`` scales with the plasma current, so the two solve paths
-agree dimensionally as the current waveform ramps.
+the right-hand side. Field rows are weighted by ``sqrt(field_weight)`` and the
+Tikhonov ``gamma`` is a dimensionless fraction of the weighted response
+block's largest singular value. That keeps damping proportional to the
+fixture's actual current-to-row authority rather than to an unrelated plasma
+current scale.
 
 An unmoved command — the achieved boundary's own turning points read back
 through :meth:`BoundingBoxTarget.from_boundary` — reproduces the carrier's own
@@ -64,9 +66,9 @@ if TYPE_CHECKING:
 #: Field-row weight whose square root scales the field and flux rows onto
 #: comparable residuals, the same factor the inverse design carries.
 FIELD_WEIGHT = 50.0
-#: Tikhonov factor at unit plasma current [per ampere]; the inverse step
-#: regularises with ``GAMMA * |Ip|`` exactly as the inverse design does.
-GAMMA = 1.0e-12
+#: Dimensionless Tikhonov fraction of the largest weighted response singular
+#: value. The scale follows the operator authority on the current fixture.
+GAMMA = 1.0e-6
 
 IsofluxReference = Literal["boundary", "reference_point"]
 
@@ -422,8 +424,9 @@ def solve_shape_inverse(
     response matrix must supply.  Free circuits default to every prescribed
     circuit; a caller that must not drive passive structure passes the
     drivable indices explicitly.  Field rows are weighted by
-    ``sqrt(field_weight)`` and the Tikhonov factor is ``gamma * |Ip|``, the
-    exact scaling the pulse-design inverse step carries.
+    ``sqrt(field_weight)`` and the Tikhonov factor is ``gamma`` times the
+    largest singular value of the weighted response block. The returned
+    ``gamma`` is that dimensional factor as passed to the pseudo-inverse.
     """
     state = jnp.asarray(flux)
     span = _flux_span(profile, state)
@@ -461,7 +464,11 @@ def solve_shape_inverse(
     rhs = (np.zeros(observed.shape[0]) - observed) * weight
 
     ip = plasma_current(profile, state, target_current=target_current)
-    regularisation = gamma * ip
+    singular_values = np.linalg.svd(weighted, compute_uv=False)
+    largest_singular_value = float(singular_values[0])
+    if not np.isfinite(largest_singular_value) or largest_singular_value <= 0.0:
+        raise ValueError("the shape response block has no finite circuit authority")
+    regularisation = gamma * largest_singular_value
     delta_free = MoorePenrose(weighted, gamma=regularisation) / rhs
 
     if prescribed_current is None:

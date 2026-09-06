@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T12:02:16",
+  "updated": "2026-09-06T12:27:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -109322,6 +109322,135 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T083403755108-pfs-two-panel-camera-page",
+        "plan": "playable-forward-solve",
+        "section": "\u00a77",
+        "node": "pfs-two-panel-camera-page",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2814,
+                "cached_input_tokens": 545847,
+                "input_tokens": 548693,
+                "output_tokens": 3634,
+                "reasoning_output_tokens": 1416,
+                "total_tokens": 552327,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A new module apps/playable/camera.py holds the FrameDecoder protocol (decode(frame: SteeringFrame) -> DecodedFrame carrying an RGB uint8 array of shape (height, width, 3), the decode wall, a decoder identity), the grey placeholder decoder that paints the frame index, the --decoder dotted-path loader resolved once per session. apps/playable/main.py lays out the row of the styled poloidal figure plus the camera figure (one image_rgba glyph on a single-cell source at the camera own aspect, no axes), the two readout strips (a key legend with the commanded values plus the compensating current per circuit as thin bars; keyframe wall plus trips per action as a sparkline with the record plus playback strip over the steering session store), the status line (frame index, decode wall, keyframe wall, HELD when the solve refuses with the last good frame shown), a view=camera request argument that renders the camera panel plus the status line alone; the decode runs after the poloidal push so a slow decode delays only the picture, with the decode wall plus decoder identity recorded beside each frame in apps/playable/session.py. Tests go in a NEW file tests/test_playable_camera.py because tests/test_playable_session.py is held by a concurrent node: ten keys through a stub solver plus the placeholder decoder with every pushed column shaped as its glyph binds, the camera source updated once per keyframe with the status line carrying the decode wall, the camera-only view serving without the poloidal figure. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_playable_camera.py tests/test_poloidal_view.py, PYTHONPATH the worktree) with the log captured whole. A rendered PNG of the two-panel page on the Solovev fixture committed (force-added) under docs/figures/playable-forward-solve/view/ through the same matplotlib channel-data path the styled frame used, verified through PIL only: NEVER call Read on an image file, the model serving you is text-only and a Read of a PNG returns a 400 that ends your process. Write the manifest at the path the dispatch names before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/two-panel-page.md.",
+          "estimated_hours": 5.0,
+          "goal": "Build the two-panel page with the camera window, the FrameDecoder protocol, the grey placeholder decoder plus the readout strips on the styled playable app, as followup f-pfs-009 on the plan specifies",
+          "id": "pfs-two-panel-camera-page",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T083403755108-pfs-two-panel-camera-page/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "apps/playable/camera.py",
+            "apps/playable/main.py",
+            "apps/playable/session.py",
+            "tests/test_playable_camera.py",
+            "docs/figures/playable-forward-solve/view",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/two-panel-page.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-view-x2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T08:34:15Z",
+        "completed_at": "2026-09-06T10:26:07.713Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6701,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6712,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4487a6bf8c60a41ec92d2e5c22e26395a1b59878",
+        "commits": [
+          "1c67811579e6fa9c301a55cced8c59aeb921c010"
+        ],
+        "changed_lines": {
+          "added": 1300,
+          "removed": 27,
+          "files": 6
+        },
+        "tests_added": 13,
+        "gate": "passed",
+        "gate_check": {
+          "command": "foreground sbatch on all_debug (--time=00:55:00, --mem=96G, JAX_PLATFORMS=cpu, root env interpreter, -p no:cacheprovider) pytest tests/test_playable_camera.py tests/test_poloidal_view.py: 26 passed in 52.88 s, GATE_EXIT=0; the same 26 passed on the login lane in 36 s (camera-gate-local.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T083403755108-pfs-two-panel-camera-page/camera-gate-local.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T083403755108-pfs-two-panel-camera-page/manifest.md",
+        "scope_changed": false,
+        "session_id": "57812116-7292-4797-82d0-df3afbb8ef48",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-two-panel-camera-page",
+          "session_id": "57812116-7292-4797-82d0-df3afbb8ef48",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T10:26:07.713Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -109494,6 +109623,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1822
+    "_version": 1823
   }
 }

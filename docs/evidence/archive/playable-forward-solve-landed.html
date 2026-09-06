@@ -490,6 +490,36 @@
     node lands its nested surfaces, the view draws those and contours nothing.</p>
   </section>
 
+  <section id="two-panel-page">
+    <h2>The two-panel page: the poloidal view beside the camera window, behind a decoder protocol the app owns (1c678115)</h2>
+    <p><strong>Node:</strong> <code>pfs-two-panel-camera-page</code>, local DeepSeek lane, run <code>r-20260906T083403755108</code> against base
+    <code>4487a6bf</code>, 3.8 hours; <code>apps/playable/camera.py</code> (new, 288 lines), <code>apps/playable/main.py</code> (+223/-27),
+    <code>apps/playable/session.py</code> (+174), <code>tests/test_playable_camera.py</code> (13 tests), a committed render script and the two-panel
+    record figure. Gate: 26 tests (the camera file and the view file) on an all_debug compute node in 53 s, the same 26 on the login lane in 36 s.
+    The worker wrote its manifest before committing and left its commits line as a placeholder; the commit followed twenty minutes later while its
+    pre-commit naming checks ran, so the coordinator merged the rev-parsed tip rather than the manifest line.</p>
+    <p><strong>What the page does</strong> (decisions <code>camera-window-layout</code>, <code>decoder-input-is-physics-state</code>). A row of the styled
+    poloidal figure and a camera figure carrying one image glyph on a single-cell source at the camera's aspect with no axes. <code>FrameDecoder</code> is a
+    runtime protocol, <code>decode(frame) -> DecodedFrame</code> with an RGB uint8 image, the decode wall and a decoder identity; imas-ambix implements
+    it against the steering frame and the app loads it by dotted path once per session, so nova imports nothing from imas-ambix. With no decoder the
+    grey placeholder paints the frame index. Per keyframe the solve runs, the poloidal channels are pushed, and only then the decode, so a slow decode
+    delays the picture and never the physics; when the solve refuses the camera keeps the last good frame and the status line says HELD. The status
+    line carries frame index, decode wall, keyframe wall and trips; the readout strips carry the key legend with the commanded values, the
+    compensating-current bars, and the wall-and-trips sparkline with a record toggle, counter, playback slider and an export button that defers to the
+    session store. A <code>view=camera</code> request argument serves the camera panel and status line alone for a second window on another screen.</p>
+    <figure>
+      <img src="/nova/figures/playable-forward-solve/view/two-panel-page.png" alt="Two-panel page on the Solov'ev fixture: the styled poloidal view with sixteen coil rings on the left, a grey placeholder camera frame reading frame 0005 on the right, and beneath them the compensating-current bars per circuit and the keyframe wall and trips sparkline" style="max-width:100%">
+      <figcaption>The record figure on the Solov'ev fixture after five keyframes through the stub solver and the placeholder decoder, rendered from the channel data.</figcaption>
+    </figure>
+    <p><strong>Two things the record keeps.</strong> The session's frame for the decoder is assembled by a local seam that reads the equilibrium's
+    rasters and the receipt row, with an empty coil-current vector and a default policy digest; it is the placeholder for the contract path (decision
+    <code>prototype-data-through-contract</code>, followup f-pfs-023), which replaces it with <code>assemble_frame</code> and the surface block once the
+    contract node lands. And the served-document test in <code>tests/test_playable_session.py</code> asserts the poloidal figure at the top level of the
+    document, which the two-panel row now nests under a panels root; the worker asked the node holding that file through the peer channel, got no
+    answer within its wait, and delivered without touching a file it did not own. That one assertion reads red at the merged head until the next node on
+    that file updates it, and the plan records it as a known failure with its owner.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -2,10 +2,10 @@
 # The compute-node payload of the playable serving job.
 #
 # Runs at the checkout root under the shared environment's interpreter.  It
-# warms the resident MAST operator and carrier once, writes the allocation
-# record, then serves the Bokeh app bound on the node's routable interfaces
-# with the websocket origins the browser presents allowed.  All output is the
-# job's stdout, so the serving log (the sbatch --output target) is the receipt.
+# serves the Bokeh app immediately, writes the allocation record, and loads
+# the resident MAST operator and carrier once while warming the keyframes that
+# ride the persistent compilation cache.  All output is the job's stdout, so
+# the serving log (the sbatch --output target) is the receipt.
 #
 # The payload never uses uv; every python invocation is the interpreter that
 # run.sh resolved.
@@ -42,18 +42,6 @@ printf 'JAX_PLATFORMS=%s\n' "${JAX_PLATFORMS}"
 printf 'JAX_COMPILATION_CACHE_DIR=%s\n' "${cache_root}"
 printf 'TMPDIR=%s\n' "${TMPDIR}"
 
-# The resident MAST 22086/43 operator and carrier, loaded once at start, then
-# the warm keyframes that ride the persistent compilation cache.  The warm-up
-# is a bounded side effect of startup: the process-level timeout guarantees it
-# can never stop the serve that follows.
-set +e
-timeout 1500 "${python}" "${root}/scripts/playable_server/warmup.py"
-warmup_status=$?
-set -e
-# The warm-up is best-effort: a crash or budget expiry must never stop the
-# serve, so the status is recorded and the job continues regardless.
-printf 'WARMUP_EXIT_STATUS=%s\n' "${warmup_status}"
-
 # Allocation record: job id, node, port, start time, nova revision.  This is
 # the record nova's own status command reads (the tunnel's fallback stays in
 # imas-codex and is only exercised on failure).
@@ -79,7 +67,9 @@ for origin in "${origins[@]}"; do
   server_args+=(--allow-websocket-origin "${origin}")
 done
 
-set +e
+# The Bokeh server starts first and serves immediately; the resident MAST
+# operator and carrier load, and the warm keyframes run, concurrently beneath
+# it.  The warm-up is a bounded side effect of startup, never a gate on it.
 "${python}" -m bokeh serve "${root}/apps/playable" \
   --address 0.0.0.0 \
   --port "${port}" \
@@ -87,8 +77,16 @@ set +e
   "${server_args[@]}" &
 server_pid=$!
 trap 'kill "${server_pid}" 2>/dev/null' TERM INT
+
+set +e
+timeout 5400 "${python}" "${root}/scripts/playable_server/warmup.py"
+warmup_status=$?
+set -e
+# A crash or budget expiry in the warm-up never stops the serve; the status is
+# recorded and the job keeps serving until it is cancelled.
+printf 'WARMUP_EXIT_STATUS=%s\n' "${warmup_status}"
+
 wait "${server_pid}"
 server_status=$?
-set -e
 printf 'BOKEH_EXIT_STATUS=%s\n' "${server_status}"
 exit "${server_status}"

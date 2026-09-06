@@ -52,14 +52,16 @@ def _warm_keyframes(profile, seed) -> None:
         flush=True,
     )
 
-    # Prime from the seed, then one command per keyframe.  Each keyframe warms
-    # from the previous equilibrium; the second keyframe reuses the compiled
-    # operator kernels, so the persistent cache reports its hits there.
-    chain: list[tuple[str | None, float | None]] = [
-        (None, None),
-        ("bulk_r", 0.02),
-        ("bulk_z", 0.01),
-        ("inner_gap", 0.005),
+    # Prime from the seed, then one keyframe per step.  On this route a moved
+    # constraint target descends from a fresh trace, so the second keyframe
+    # re-solves the prime command warm and the persistent cache reports its
+    # hits there; a moved command follows to prove the loop still steps.  The
+    # reduced route's traced-target fix removes that recompile, which is the
+    # swap the playable session sequence lands behind this protocol.
+    chain: list[tuple[str, str | None, float | None]] = [
+        ("prime", None, None),
+        ("reprime", None, None),
+        ("bulk_r", "bulk_r", 0.02),
     ]
 
     # A novel solve path must never block the serve: the whole keyframe chain
@@ -70,7 +72,7 @@ def _warm_keyframes(profile, seed) -> None:
     # timeout around this module is the process-level backstop.
     import time as _time
 
-    budget = float(os.environ.get("PLAYABLE_KEYFRAME_BUDGET_SECONDS", "900"))
+    budget = float(os.environ.get("PLAYABLE_KEYFRAME_BUDGET_SECONDS", "3600"))
     deadline = _time.perf_counter() + budget
 
     def _armed_timeout(_signum, _frame):
@@ -84,7 +86,7 @@ def _warm_keyframes(profile, seed) -> None:
 
     previous = None
     commanded = PlasmaShape()
-    for index, (parameter, delta) in enumerate(chain, start=1):
+    for index, (label, parameter, delta) in enumerate(chain, start=1):
         action = (parameter, delta) if parameter is not None else None
         next_shape = (
             commanded
@@ -96,12 +98,7 @@ def _warm_keyframes(profile, seed) -> None:
             result = solver(previous, next_shape, action=action)
             print(
                 "PLAYABLE_KEYFRAME %d parameter=%s wall=%.3fs trips=%d status=ok"
-                % (
-                    index,
-                    "prime" if parameter is None else parameter,
-                    result.wall,
-                    result.trips,
-                ),
+                % (index, label, result.wall, result.trips),
                 flush=True,
             )
             previous = result.equilibrium
@@ -109,12 +106,7 @@ def _warm_keyframes(profile, seed) -> None:
         except BaseException as error:  # keep serving even if a keyframe is novel
             print(
                 "PLAYABLE_KEYFRAME %d parameter=%s status=skipped error=%s: %s"
-                % (
-                    index,
-                    "prime" if parameter is None else parameter,
-                    type(error).__name__,
-                    error,
-                ),
+                % (index, label, type(error).__name__, error),
                 flush=True,
             )
     signal.alarm(0)

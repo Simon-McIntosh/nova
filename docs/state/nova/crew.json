@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T12:42:45",
+  "updated": "2026-09-06T12:56:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2578,9 +2578,11 @@
         "id": "pfs-luna-x2",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07623-b97b-7d40-8ca4-b2a4285aede3",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07623-b97b-7d40-8ca4-b2a4285aede3"
+        },
         "created": "2026-09-06"
       },
       {
@@ -109925,13 +109927,13 @@
         "backend": "codex",
         "purpose": "resume",
         "opened_at": "2026-09-06T10:36:26Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-06T10:43:33Z",
+        "held_seconds": 427,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T07:38:00+02:00",
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       },
       {
@@ -109939,16 +109941,16 @@
         "backend": "codex-luna",
         "purpose": "dispatch",
         "opened_at": "2026-09-06T10:39:19Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-06T10:44:45Z",
+        "held_seconds": 326,
         "utilisation_pct": 97.0,
         "resets_at": "2026-09-11T04:24:27Z",
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 97% with burn multiple 3.0x is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 1830
+    "_version": 1833
   }
 }

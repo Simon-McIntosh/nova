@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T17:26:56",
+  "updated": "2026-09-06T17:36:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2606,9 +2606,11 @@
         "id": "pfs-batch-l",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07746-b607-7752-ada9-b0bfccdd0d8c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07746-b607-7752-ada9-b0bfccdd0d8c"
+        },
         "created": "2026-09-06"
       },
       {
@@ -4135,6 +4137,42 @@
       {
         "id": "wt-triage-s2",
         "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-x1",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-x2",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-x3",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "wt-triage-x4",
+        "harness": "codex",
         "role": "investigate",
         "session_id": null,
         "session_model": null,
@@ -111981,6 +112019,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1881
+    "_version": 1886
   }
 }

@@ -4,35 +4,30 @@ The document holds one :class:`~apps.playable.session.PlayableSession` over
 the carrier the ``machine`` session argument selects (the Solov'ev machine by
 default, the MAST frozen-six carrier when ``machine=mast``).  Key presses on
 the focused poloidal view step one control parameter, warm re-solve, and push
-the raster flux, separatrix, control points, compensating currents and the
-keyframe receipt row to the shared poloidal channels.
+the styled poloidal channels — the clipped plasma cells, unfilled contours,
+wall and coil outlines, and the topology markers — plus the compensating
+currents and the keyframe receipt row, to the shared poloidal channels.
 """
 
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Div
 
-from apps.playable.machines import MachineUnavailable, build_session, machine_argument
+from apps.playable.machines import (
+    MachineUnavailable,
+    build_session,
+    machine_argument,
+    machine_coil_outlines,
+)
 from apps.playable.session import frame_push
 from apps.playable.shape import key_help
 from apps.pulsedesign.poloidal_view import (
-    add_flux_image,
-    add_separatrix,
+    channel_sources,
+    close_outline,
     compensation_figure,
     keyframe_receipt,
+    poloidal_channels,
     poloidal_figure,
-)
-
-SOURCE_NAMES = (
-    "levelset",
-    "wall",
-    "flux",
-    "separatrix",
-    "x_points",
-    "plasma",
-    "points",
-    "compensation",
-    "receipt",
 )
 
 #: Install a window-level keydown listener once the document is ready; every
@@ -48,8 +43,12 @@ document.addEventListener('keydown', handler);
 
 
 def make_sources():
-    """Return one empty :class:`~bokeh.models.ColumnDataSource` per channel."""
-    return {name: ColumnDataSource(data={}) for name in SOURCE_NAMES}
+    """Return the shared channel sources with their bound columns initialised.
+
+    Pre-binding every column a renderer binds keeps the served document free
+    of BAD_COLUMN_NAME warnings before the first keyframe.
+    """
+    return channel_sources()
 
 
 def wire_keyboard(doc, session, sources, status, on_key):
@@ -82,15 +81,23 @@ def build_document(doc, *, machine: str = "solovev"):
         return
 
     sources = make_sources()
+    machine_carrier = getattr(getattr(session, "solver", None), "machine", None)
+
     if session.wall is not None:
         wall = session.wall
-        sources["wall"].data = {"x": wall[:, 0], "z": wall[:, 1]}
+        closed = close_outline(wall)
+        sources["wall"].data = {"x": closed[:, 0], "z": closed[:, 1]}
+        # The coil channel is the machine's own conductor outlines beside the
+        # wall, not a decorative ring; an unreachable outline source yields an
+        # empty channel rather than an error document.
+        try:
+            coil_outlines = machine_coil_outlines(machine, machine_carrier)
+        except MachineUnavailable:
+            coil_outlines = ()
+    else:
+        coil_outlines = ()
 
     poloidal = poloidal_figure(sources)
-    add_separatrix(poloidal, sources)
-    if session.raster_bounds is not None:
-        radius, height = session.raster_bounds
-        add_flux_image(poloidal, sources, radius, height)
     compensation = compensation_figure(sources)
     receipt = keyframe_receipt(sources)
 
@@ -101,6 +108,15 @@ def build_document(doc, *, machine: str = "solovev"):
         receipt_row = session.step(key)
         for name, data in frame_push(session).items():
             sources[name].data = data
+        if machine_carrier is not None:
+            channels = poloidal_channels(
+                session.equilibrium,
+                machine_carrier.profile,
+                wall=session.wall,
+                coils=coil_outlines,
+            )
+            for name, data in channels.items():
+                sources[name].data = data
         moved = (
             f" {receipt_row.parameter} {receipt_row.delta:+.4g}"
             if receipt_row.parameter is not None

@@ -3993,16 +3993,28 @@ def _selected_frozen_slices(
     return filtered
 
 
-def _load_persisted_response_cache() -> tuple[dict[str, Any], dict[str, Any]]:
+def _resolve_checkout_path(checkout_root: Path, path: Path) -> Path:
+    """Resolve one authored input or output path against the checkout root."""
+    return path if path.is_absolute() else checkout_root / path
+
+
+def _load_persisted_response_cache(
+    checkout_root: Path | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load the frozen response through its existing fail-closed carrier check."""
     from benchmarks import mast_response_carrier_warm as response_carrier
     from benchmarks.label_seed_residual_field import (
         _persisted_response_cache as load_response_cache,
     )
 
+    root = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
     return load_response_cache(
         response_carrier.DEFAULT_CARRIER,
-        response_carrier.DEFAULT_RECEIPT,
+        _resolve_checkout_path(root, response_carrier.DEFAULT_RECEIPT),
     )
 
 
@@ -4017,9 +4029,13 @@ def _execution_environment() -> dict[str, Any]:
     }
 
 
-def _source_revision() -> str:
+def _source_revision(checkout_root: Path | None = None) -> str:
     """Return the repository revision that supplied this benchmark process."""
-    repository = Path(__file__).resolve().parents[1]
+    repository = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
     completed = subprocess.run(
         ["git", "-C", str(repository), "rev-parse", "HEAD"],
         check=True,
@@ -4308,14 +4324,23 @@ def run_frozen_partition_comparison(
     shots: tuple[int, ...] = FROZEN_PARTITION_SHOTS,
     *,
     prepare_only: bool = False,
+    checkout_root: Path | None = None,
+    cache_root: Path | None = None,
 ) -> dict[str, Any]:
     """Measure paired public-route solves with and without frozen partitions."""
     configure_dtypes()
+    root = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
     compilation_cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
     )
     selected = _selected_frozen_slices(bank, shots)
-    response_cache, carrier_evidence = _load_persisted_response_cache()
+    response_cache, carrier_evidence = _load_persisted_response_cache(root)
     paired_rows = []
     for selected_row, qualification in selected:
         mast_case, context = _mast_case_from_selection(
@@ -4383,7 +4408,7 @@ def run_frozen_partition_comparison(
         receipt = {
             "receipt": "bank-row frozen-partition prepare-only pass",
             "backend": _execution_environment(),
-            "source_revision": _source_revision(),
+            "source_revision": _source_revision(root),
             "row_selection": list(shots),
             "hooks_attached_on_every_row": True,
         }
@@ -4424,7 +4449,7 @@ def run_frozen_partition_comparison(
     receipt = {
         "receipt": "paired public-route frozen-partition revaluation",
         "backend": _execution_environment(),
-        "source_revision": _source_revision(),
+        "source_revision": _source_revision(root),
         "compilation_cache": compilation_cache.receipt(),
         "execution_contract": {
             "entry_point": "ForwardProfile.solve_branch",
@@ -4686,6 +4711,16 @@ def run(
 def main(argv: list[str] | None = None) -> None:
     """Parse paths, score the frozen references and print the verdict."""
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--checkout-root",
+        type=Path,
+        help="resolve every relative input and output path from this checkout",
+    )
+    parser.add_argument(
+        "--cache-root",
+        type=Path,
+        help="use this parent for the persistent JAX compilation cache",
+    )
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path)
@@ -4711,14 +4746,29 @@ def main(argv: list[str] | None = None) -> None:
         help="run only the named shot from the frozen reference cohort",
     )
     arguments = parser.parse_args(argv)
+    checkout_root = (
+        Path.cwd().resolve()
+        if arguments.checkout_root is None
+        else arguments.checkout_root.resolve()
+    )
+    store = _resolve_checkout_path(checkout_root, arguments.store)
+    bank = _resolve_checkout_path(checkout_root, arguments.bank)
+    requested_output = (
+        None
+        if arguments.output is None
+        else _resolve_checkout_path(checkout_root, arguments.output)
+    )
     shots = tuple(arguments.shot) if arguments.shot else None
     if arguments.frozen_partition_comparison:
         receipt = run_frozen_partition_comparison(
-            arguments.store,
-            arguments.bank,
-            arguments.output or FROZEN_PARTITION_OUTPUT,
+            store,
+            bank,
+            requested_output
+            or _resolve_checkout_path(checkout_root, FROZEN_PARTITION_OUTPUT),
             shots or FROZEN_PARTITION_SHOTS,
             prepare_only=arguments.prepare_only,
+            checkout_root=checkout_root,
+            cache_root=arguments.cache_root,
         )
         if arguments.prepare_only:
             print(
@@ -4734,12 +4784,14 @@ def main(argv: list[str] | None = None) -> None:
         )
         return
     if arguments.absolute_source_replay:
-        output = arguments.output or DEFAULT_OUTPUT
+        output = requested_output or _resolve_checkout_path(
+            checkout_root, DEFAULT_OUTPUT
+        )
         try:
-            receipt = run(arguments.store, arguments.bank, output, shots)
+            receipt = run(store, bank, output, shots)
         except Exception as error:
             _write_absolute_source_failure_receipt(
-                arguments.bank,
+                bank,
                 output,
                 shots,
                 error,
@@ -4754,10 +4806,10 @@ def main(argv: list[str] | None = None) -> None:
             f"verdict={aggregate['verdict']}"
         )
         return
-    output = arguments.output or CURRENT_CONSTRAINED_OUTPUT
-    receipt = run_current_constrained(
-        arguments.store, arguments.bank, output, shots=shots
+    output = requested_output or _resolve_checkout_path(
+        checkout_root, CURRENT_CONSTRAINED_OUTPUT
     )
+    receipt = run_current_constrained(store, bank, output, shots=shots)
     aggregate = receipt["aggregate"]
     print(
         "CURRENT_CONSTRAINED_FROZEN_SIX "

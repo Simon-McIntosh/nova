@@ -7,14 +7,14 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
 #SBATCH --gres=gpu:1
-#SBATCH --time=01:00:00
+#SBATCH --time=00:45:00
+#SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/slurm-%j.out
 #SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/slurm-%j.err
 
 set -euo pipefail
 
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-checkout_root="${NOVA_CHECKOUT_ROOT:-$(cd "$here/../../../../.." && pwd)}"
+checkout_root=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks
 output_root="$checkout_root/docs/figures/millisecond-converged-solve/frozen-partition"
 python_bin="${NOVA_PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}"
 cache_root="${NOVA_JAX_CACHE_ROOT:-/work/projects/imas_gpu/sophelio/jax-cache/frozen-partition}"
@@ -29,27 +29,10 @@ export PYTHONPATH="$checkout_root"
 printf 'MEASUREMENT_START job=%s host=%s revision=%s\n' \
   "$SLURM_JOB_ID" "$(hostname)" "$(git -C "$checkout_root" rev-parse HEAD)"
 
-"$python_bin" - "$checkout_root" "$output_root" "$cache_root" <<'PY'
-from pathlib import Path
-import sys
-
-from benchmarks import efit_forward_parity_slice as driver
-
-checkout_root = Path(sys.argv[1])
-output_root = Path(sys.argv[2])
-cache_root = Path(sys.argv[3])
-driver.default_persistent_compilation_cache_root = lambda: cache_root
-receipt = driver.run_frozen_partition_comparison(
-    checkout_root / driver.SHOT_STORE,
-    checkout_root / driver.DECOMPOSITION_BANK,
-    output_root,
-)
-print(
-    "FROZEN_PARTITION_COMPARISON "
-    f"rows={receipt['aggregate']['row_count']} "
-    f"saving_s={receipt['aggregate']['total_saving_seconds']:.6g}",
-    flush=True,
-)
-PY
+"$python_bin" "$checkout_root/benchmarks/efit_forward_parity_slice.py" \
+  --checkout-root "$checkout_root" \
+  --cache-root "$cache_root" \
+  --output "$output_root" \
+  --frozen-partition-comparison
 
 printf 'MEASUREMENT_COMPLETE job=%s\n' "$SLURM_JOB_ID"

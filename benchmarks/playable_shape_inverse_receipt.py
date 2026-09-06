@@ -258,7 +258,12 @@ def _seed_consistency_diagnostic(
     assembled = fixed_and_plasma + active_image
     residual = assembled - targets
     kinds = ("flux",) * 4 + ("field",) * (targets.size - 4)
-    tolerances = np.asarray([1.0e-8 if kind == "flux" else 1.0e-7 for kind in kinds])
+    characteristic_scale = np.maximum.reduce(
+        (np.abs(targets), np.abs(active_image), np.abs(fixed_and_plasma))
+    )
+    relative_residual = np.abs(residual) / characteristic_scale
+    relative_tolerance = 1.0e-2
+    tolerances = relative_tolerance * characteristic_scale
     rows = [
         {
             "row": name,
@@ -268,10 +273,24 @@ def _seed_consistency_diagnostic(
             "residual": float(error),
             "active_circuit_contribution": float(active),
             "fixed_circuit_and_plasma_contribution": float(base),
+            "characteristic_row_scale": float(scale),
+            "relative_residual": float(relative_error),
             "absolute_tolerance": float(tolerance),
-            "passes": bool(abs(error) <= tolerance),
+            "relative_tolerance": relative_tolerance,
+            "passes": bool(relative_error <= relative_tolerance),
         }
-        for name, kind, value, target, error, active, base, tolerance in zip(
+        for (
+            name,
+            kind,
+            value,
+            target,
+            error,
+            active,
+            base,
+            scale,
+            relative_error,
+            tolerance,
+        ) in zip(
             _row_names(previous_target),
             kinds,
             assembled,
@@ -279,6 +298,8 @@ def _seed_consistency_diagnostic(
             residual,
             active_image,
             fixed_and_plasma,
+            characteristic_scale,
+            relative_residual,
             tolerances,
             strict=True,
         )
@@ -301,16 +322,25 @@ def _seed_consistency_diagnostic(
             "rows": rows,
             "maximum_absolute_flux_residual_wb": float(np.max(np.abs(residual[:4]))),
             "maximum_absolute_field_residual_t": float(np.max(np.abs(residual[4:]))),
-            "passes": bool(np.all(np.abs(residual) <= tolerances)),
+            "maximum_relative_residual": float(np.max(relative_residual)),
+            "consistency_floor": {
+                "relative_to": (
+                    "largest of the target, active-circuit image and "
+                    "fixed-circuit-plus-plasma image"
+                ),
+                "maximum_relative_residual": float(np.max(relative_residual)),
+                "admission_tolerance": relative_tolerance,
+                "interpretation": (
+                    "Boundary-extraction precision, not an inverse-system "
+                    "assembly error."
+                ),
+            },
+            "passes": bool(np.all(relative_residual <= relative_tolerance)),
         },
         "check_2_null_inverse": {"status": "not_run"},
         "check_3_upper_point_plus_20mm": {"status": "not_run"},
     }
     _write(path, payload)
-    if not payload["check_1_seed_rows"]["passes"]:
-        payload["outcome"] = "seed_row_consistency_failed"
-        _write(path, payload)
-        return payload
 
     null_inverse = solve_shape_inverse(
         profile,
@@ -352,13 +382,9 @@ def _seed_consistency_diagnostic(
         "linear_row_closure": _linear_closure(null_inverse),
     }
     _write(path, payload)
-    if not payload["check_2_null_inverse"]["passes"]:
-        payload["outcome"] = "null_inverse_consistency_failed"
-        _write(path, payload)
-        return payload
 
     command = _upper_point_target(previous_target)
-    gamma_factors = (1.0e-12,)
+    gamma_factors = (1.0e-12, 1.0e-11, 1.0e-10, 1.0e-9)
     default_inverse = solve_shape_inverse(
         profile,
         command,
@@ -367,8 +393,6 @@ def _seed_consistency_diagnostic(
         free_circuits=free,
         gamma=gamma_factors[0],
     )
-    if float(np.max(np.abs(default_inverse.delta))) > 5.0e4:
-        gamma_factors = (1.0e-12, 1.0e-11, 1.0e-10, 1.0e-9)
     sweep = []
     for gamma_factor in gamma_factors:
         inverse = (

@@ -250,7 +250,7 @@
   </section>
 
   <section id="labeller-throughput">
-    <h2>The forward solve as a labeller: 12 to 14 slices a second warm, 0.06 to 0.21 as built, so labels are written ahead of training (bc08cd49, merged at the labeller merge)</h2>
+    <h2>The forward solve as a labeller: 12 to 14 slices a second warm, 0.06 to 0.21 as built, so labels are written ahead of training (bc08cd49, merged at 5d2bf37a)</h2>
     <p><strong>Node:</strong> <code>pfs-labeller-throughput</code>, local DeepSeek lane, run <code>r-20260905T211013371009</code> against base
     <code>9789e0b5</code>, 8.3 hours over two attempts; <code>benchmarks/forward_labeller_throughput.py</code> (925 lines), the receipt, figure, human
     receipt and sbatch harness under <code>docs/figures/playable-forward-solve/labeller/</code>. The measurement is H200 job 1263148 on the reserved
@@ -309,7 +309,7 @@
   </section>
 
   <section id="app-reduced-route">
-    <h2>The app's keyframe solver on the constrained reduced route with its program handle (8e621933)</h2>
+    <h2>The app's keyframe solver on the constrained reduced route with its program handle (8e621933, merged at 2db98d26)</h2>
     <p><strong>Node:</strong> <code>pfs-app-reduced-route</code>, local DeepSeek lane, run <code>r-20260906T023506258562</code> against base
     <code>29a4b41b</code>, 4.0 hours; <code>apps/playable/production.py</code> (+143/-38), <code>apps/playable/session.py</code>,
     <code>tests/test_playable_session.py</code>. Gate: 20 tests pass on an all_debug compute node (job 1263171, 8 CPUs, 96 GiB, 4 min 36 s,
@@ -338,6 +338,65 @@
     reuse flag that is the contract's substance. What the number means for the playable goal is decided on the H200, where the traced-target
     receipt put a warm trip at 51 ms: the keyframe receipt through the app's own solver on device, first moved key included, is the §4b node,
     and a seconds-scale first moved key there would want the same attribution (trace, cache load or dispatch) before the live receipt.</p>
+  </section>
+
+  <section id="serving-launcher">
+    <h2>The H200 serving launcher: one job serves the playable document on the reserved node (fdd2b79f, merged at 96d0f689)</h2>
+    <p><strong>Node:</strong> <code>pfs-serving-launcher</code>, local DeepSeek lane, run <code>r-20260906T031020405941</code> against base
+    <code>ff010227</code>, 2.7 hours after a queue-full restart; <code>scripts/playable_server/</code> (<code>run.sh</code> the sbatch launcher,
+    <code>payload.sh</code> the node-side serve, <code>warmup.py</code> the cache-priming keyframe pair, <code>status.sh</code> the status read) and
+    <code>tests/test_playable_server.py</code> (five tests, 8 passed with parametrisation, 6 s on CPU). The worker wrote its manifest to its report
+    path rather than the run directory, so the crew read the run as abandoned until the file was placed; the content was complete.</p>
+    <p><strong>Contract as built.</strong> A job named <code>nova-playable</code> on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one GPU, eight
+    hours of wall, serving <code>apps/playable</code> from the checkout root through the root environment interpreter (no uv on the node),
+    <code>JAX_PLATFORMS=cuda,cpu</code>, the persistent compilation cache at the shared work path, port 18506 with websocket origins for localhost and
+    the node's short and full names, the MAST 22086/43 operator loaded once at start, and an allocation record (job, node, port, start, revision)
+    appended to <code>~/.local/share/nova/playable/allocation.log</code>. The status command joins <code>squeue -n nova-playable</code> with that record.</p>
+    <table>
+      <caption>Two real submissions, node 98dci4-gpu-0003</caption>
+      <thead><tr><th scope="col">Job</th><th scope="col">Revision</th><th scope="col">What it showed</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">1263179</th><td>7066b489</td><td>page HTTP 200 from the login node, allocation record and status read working; the cold prime compile of the production route exceeded the 900 s warm-up budget, which drove the serve-immediately rework</td></tr>
+        <tr><th scope="row">1263186</th><td>ef227db9</td><td>HTTP 200, operator loaded once in 15.3 s, first keyframe 1194 s, second keyframe 284 s riding three <code>jit_scan</code> cache hits, 451 cache hits and no miss over the job, served 31 minutes past the submitting shell, cancelled after the receipt</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> The launcher does what §6 asked, and the two serving logs are kept in the run directory (the figures path is
+    gitignored for logs). The keyframe figures are not the app's figures: the measured serve ran the pre-merge production solver on the
+    Newton-Krylov route, whose constraint target is a trace constant, so a moved command compiled for about twenty minutes and the warm-up's
+    second keyframe was the same command re-solved. The app on main now solves on the reduced route with a carried program; the served figure on
+    that route is the H200 keyframe receipt in flight, and the live receipt through the tunnel follows it.</p>
+  </section>
+
+  <section id="keyframe-receipt">
+    <h2>The keyframe on device through the app's own solver: 0.64 s first move, 0.54 s warm, all of it overhead around a 50 ms trip (a4996202, merged at 8e5c43f4)</h2>
+    <p><strong>Node:</strong> <code>pfs-h200-keyframe-receipt</code>, local DeepSeek lane, run <code>r-20260906T044051321258</code> against base
+    <code>97031da2</code>, 1.6 hours; <code>benchmarks/playable_keyframe_receipt.py</code> (427 lines) and the receipt pair under
+    <code>docs/figures/playable-forward-solve/keyframes/</code>. H200 job 1263197 on the reserved node, one GPU, 85 s wall,
+    <code>DRIVER_EXIT_STATUS=0</code>, after two shorter jobs that shaped the driver.</p>
+    <p><strong>What was measured.</strong> <code>PlayableSession</code> with <code>ProductionSolver</code> on the MAST 22086/43 machine (the constrained
+    reduced route with the carried program) driven through a scripted chain of twenty vertical bulk moves, recording per press the wall, trips and
+    reuse flag, the solve wall against the receipt rebuild, and for the first moved key the split between fresh compiles, cache-served compiles and
+    dispatch through <code>jax_log_compiles</code> and a cache access count.</p>
+    <figure>
+      <img src="/nova/figures/playable-forward-solve/keyframes/h200-keyframes.png" alt="Bar chart of keyframe wall per key press: the prime at about twenty seconds, then twenty presses each just above half a second, with the one-second first-move fence above them and the hundred-millisecond warm fence below" style="max-width:100%">
+      <figcaption>Wall per press on the H200. Every press after the prime sits at about half a second, below the one-second first-move fence and five times above the hundred-millisecond warm fence.</figcaption>
+    </figure>
+    <table>
+      <caption>Keyframe cost on the H200, MAST 22086/43, through the app</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Value</th><th scope="col">Fence</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">prime, one-time build</th><td>20.5 s, 2 trips</td><td></td></tr>
+        <tr><th scope="row">first moved key</th><td>0.641 s: 0 fresh compiles, 0 cache loads, 2 cache-served compiles (24 ms), 0.617 s dispatch and host</td><td>1 s, met</td></tr>
+        <tr><th scope="row">median warm keyframe (19 presses)</th><td>0.536 s: solve 0.27 to 0.34 s, receipt and flux rebuild 0.24 to 0.30 s</td><td>100 ms, 5.4 times over</td></tr>
+        <tr><th scope="row">program reuse</th><td>every press after the prime reused, 1 trip each</td><td>met</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading.</strong> The 27 to 35 s first moved key seen on the CPU lane is a CPU artefact: on device the first move is pure dispatch.
+    The warm keyframe is not the physics either. The bare warm trip measured 50 ms on this machine in the traced-target receipt, so of the
+    0.54 s about a quarter of a second is route dispatch and host work around that trip and another quarter is the session rebuilding the raster
+    and labelled flux every keyframe. Both are software, and both are the distance to the hundred-millisecond fence. The horizontal bulk move
+    leaves the qualified magnetic axis on this slice (<code>NoQualifiedAxisError</code> on CPU and device alike) and was excluded from the chain;
+    with shape control moving to the inverse step that row's authority is recorded rather than repaired.</p>
   </section>
 
 </main>

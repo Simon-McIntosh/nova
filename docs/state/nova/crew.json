@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T06:39:02",
+  "updated": "2026-09-06T08:21:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2502,6 +2502,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "pfs-inverse-x",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-labeller-scout-x",
         "harness": "clive",
         "role": "investigate",
@@ -2593,9 +2602,11 @@
         "id": "pfs-view-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "9834d189-2764-441f-9941-acb6ef9bf40f",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "9834d189-2764-441f-9941-acb6ef9bf40f"
+        },
         "created": "2026-09-06"
       },
       {
@@ -107536,6 +107547,304 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T031020405941-pfs-serving-launcher",
+        "plan": "playable-forward-solve",
+        "section": "\u00a76",
+        "node": "pfs-serving-launcher",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5100,
+                "cached_input_tokens": 199153,
+                "input_tokens": 204285,
+                "output_tokens": 2593,
+                "reasoning_output_tokens": 99,
+                "total_tokens": 206878,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "scripts/playable_server/ holds the sbatch launcher plus the status command. One real submission of a job named nova-playable on betelgeuse under --reservation=gpu_0003_grpA with one GPU serves the playable document from the checkout root through /home/ITER/mcintos/Code/nova/.venv/bin/python -m bokeh (no uv on the node) with JAX_PLATFORMS=cuda,cpu, the persistent compilation cache configured, bound on the node interfaces at port 18506 with websocket origins localhost:18506 plus the node name allowed, the MAST 22086/43 operator plus carrier loaded once at start. Measured in the FOREGROUND of the turn: a request from the login node to the node port returns the Bokeh page, the serving log under docs/figures/playable-forward-solve/serving/ shows the operator loaded once with a compilation-cache hit on the second keyframe, the allocation record (job id, node, port, start time, nova revision) is written to ~/.local/share/nova/playable/allocation.log, the status command prints node, port, age from squeue -n nova-playable plus that record, the job survives the submitting shell, a dry run resolves every path from the checkout root, a CPU test in tests/test_playable_server.py pins the dry-run path resolution. The measured job is cancelled with scancel once the receipt is written so no GPU idles. Never a background task waited across turns.",
+          "estimated_hours": 3.0,
+          "goal": "Deliver the H200 serving launcher for apps/playable with its status read, as followup f-pfs-004 on the plan specifies",
+          "id": "pfs-serving-launcher",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T031020405941-pfs-serving-launcher/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "scripts/playable_server",
+            "tests/test_playable_server.py",
+            "docs/figures/playable-forward-solve/serving",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/serving-launcher.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-serve-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T03:10:33Z",
+        "completed_at": "2026-09-06T06:04:11.524Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 10227,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 10418,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "ff0102270dc05df681e89c4dd436e186d664bf73",
+        "commits": [
+          "fdd2b79f8b6750d42a580e85152350d7a4697498"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_playable_server.py -p no:cacheprovider at fdd2b79f (8 passed, CPU) plus two real submissions of nova-playable on betelgeuse/gpu_0003_grpA (jobs 1263179, 1263186): curl to the node port returned HTTP 200, the serving log shows the operator loaded once and 451 persistent-cache hits with 0 misses on the second keyframe, allocation record written, job cancelled after the receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T031020405941-pfs-serving-launcher/nova-playable-20260906T052224Z.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T031020405941-pfs-serving-launcher/manifest.md",
+        "scope_changed": false,
+        "session_id": "d2c3461a-c29b-4bbf-b54c-5c3a117ff099",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 22145394,
+            "input_tokens_cumulative": 22145394,
+            "output_tokens": 101093,
+            "output_tokens_cumulative": 101093,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 9184.943,
+          "generated_tokens": 101093,
+          "generation_seconds": 6900.342,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 22.8,
+          "machine_seconds": 2284.601,
+          "peak_input_tokens": 231872,
+          "tokens_per_second": 14.65,
+          "wall_tokens_per_second": 11.01
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T044051321258-pfs-h200-keyframe-receipt",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-h200-keyframe-receipt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1722,
+                "cached_input_tokens": 308491,
+                "input_tokens": 310245,
+                "output_tokens": 4082,
+                "reasoning_output_tokens": 1903,
+                "total_tokens": 314327,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A receipt docs/figures/playable-forward-solve/keyframes/h200-keyframes.json with a PNG of wall per press beside it, written by a new driver benchmarks/playable_keyframe_receipt.py that drives PlayableSession with ProductionSolver on the MAST 22086/43 machine through a scripted chain of twenty key presses, recording per press the wall, trips, reuse flag, the solve wall against the receipt-build wall, plus for the first moved key the split between trace, persistent-cache load, dispatch (jax_log_compiles plus a cache-hit count). The chain runs in the FOREGROUND of the turn under one bounded sbatch on betelgeuse with --reservation=gpu_0003_grpA --gres=gpu:1 --mem=128G --time=00:55:00, /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH the worktree, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache enabled, each press persisted as it lands, never a background task waited across turns; the driver log ends DRIVER_EXIT_STATUS=0. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/h200-keyframe-receipt.md states the median warm keyframe against the hundred-millisecond fence, the first moved key against the one-second fence, with any seconds-scale cost attributed to trace, cache load or dispatch rather than bounded.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the playable app keyframe cost on the H200 through its own production solver on the MAST 22086/43 machine, first moved key included, as followup f-pfs-017 on the plan specifies (measurement only, the forward.py seam excluded)",
+          "id": "pfs-h200-keyframe-receipt",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T044051321258-pfs-h200-keyframe-receipt/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/playable_keyframe_receipt.py",
+            "docs/figures/playable-forward-solve/keyframes",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/h200-keyframe-receipt.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-loop-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T04:41:02Z",
+        "completed_at": "2026-09-06T06:16:27.660Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5616,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5725,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "97031da266ded99872372cbd484a58aa567ecbd6",
+        "commits": [
+          "a4996202a469dbc253696a79a703b2bcaa3d7b8a"
+        ],
+        "changed_lines": {
+          "added": 828,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/playable_keyframe_receipt.py on the reserved H200 (sbatch 1263197, betelgeuse/gpu_0003_grpA, one GPU, 128G, JAX_PLATFORMS=cuda,cpu, persistent compilation cache), twenty scripted key presses through PlayableSession with ProductionSolver on MAST 22086/43, DRIVER_EXIT_STATUS=0 in 85 s",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T044051321258-pfs-h200-keyframe-receipt/h200_slurm-1263197.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T044051321258-pfs-h200-keyframe-receipt/manifest.md",
+        "scope_changed": false,
+        "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 29442143,
+            "input_tokens_cumulative": 29442143,
+            "output_tokens": 52781,
+            "output_tokens_cumulative": 52781,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 5721.984,
+          "generated_tokens": 52781,
+          "generation_seconds": 4773.47,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 57.3,
+          "machine_seconds": 948.514,
+          "peak_input_tokens": 582914,
+          "tokens_per_second": 11.06,
+          "wall_tokens_per_second": 9.22
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-h200-keyframe-receipt",
+          "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T06:16:27.660Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -107708,6 +108017,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1796
+    "_version": 1800
   }
 }

@@ -1537,9 +1537,7 @@ class ForwardProfile:
                 raise ValueError(
                     "augmented constraints require a route this ladder solves "
                     "with a compensating unknown vector; available: "
-                    + ", ".join(
-                        name for name in _CONSTRAINABLE if name in _ACCELERATED
-                    )
+                    + ", ".join(name for name in _CONSTRAINABLE if name in _ACCELERATED)
                 )
             return self._solve_augmented_constraints(
                 initial_flux,
@@ -1676,6 +1674,16 @@ class ForwardProfile:
         pairs = tuple(constraint_pairs)
         if not all(isinstance(pair, ConstraintPair) for pair in pairs):
             raise TypeError("constraint_pairs must contain ConstraintPair values")
+        if (
+            pairs
+            and prescribed_current is None
+            and self.operator.prescribed_current_field is None
+        ):
+            raise ValueError(
+                "a constrained Krylov solve needs a prescribed current field to "
+                "fold its rows' compensating currents into; pass prescribed_current "
+                "or set the operator's prescribed field"
+            )
         mapped = self.flux_map(
             current,
             requested_class,

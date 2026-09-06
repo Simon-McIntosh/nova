@@ -120,6 +120,8 @@ class ConstraintBinding:
         """Require a known solve policy; row-shape validation belongs to the pair."""
         if self.policy not in ("imposed", "eliminated"):
             raise ValueError("constraint policy must be 'imposed' or 'eliminated'")
+        for name in ("target", "tolerance", "scale", "initial_unknown"):
+            object.__setattr__(self, name, jnp.asarray(getattr(self, name)))
 
     def tree_flatten(self):
         """Keep policy static while all numerical binding values remain leaves."""

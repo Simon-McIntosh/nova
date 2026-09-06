@@ -322,12 +322,11 @@ def _drive(
     """Run one prefix of the reduced active-set loop in either field mode."""
     external, coordinates, kernels = program
     target_value = None if target is None else jnp.asarray(target)
-    dynamic = (
-        reduced_newton._bind_dynamic_arguments(
-            kernels, external, target_value, requested
-        )
-        if traced
-        else kernels
+    dynamic = reduced_newton._bind_dynamic_arguments(
+        kernels,
+        external if traced else None,
+        target_value,
+        requested,
     )
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(initial, requested), dtype=bool)

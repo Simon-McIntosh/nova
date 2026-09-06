@@ -89,8 +89,10 @@ import numpy as np
 import xarray as xr
 
 from nova.database.netcdf import netCDF
+from nova.biot.contour import Contour
 from nova.equilibrium.labels import N_XPOINT_SLOTS
 from nova.equilibrium.flux_surface_geometry import PlasmaInternalGeometry
+from nova.equilibrium.wall_mask import inside_polygon
 from nova.equilibrium.solve_request import (
     ForwardSolvePolicy,
     ForwardSolveReceipt,
@@ -446,6 +448,101 @@ def _geometry_channels(
     return channels
 
 
+def _resample_leg(points: np.ndarray, count: int) -> np.ndarray | None:
+    """Resample one finite wall-clipped branch by arclength."""
+    points = np.asarray(points, dtype=float)
+    if points.ndim != 2 or points.shape[0] < 2 or not np.all(np.isfinite(points)):
+        return None
+    distance = np.linalg.norm(np.diff(points, axis=0), axis=1)
+    coordinate = np.concatenate(([0.0], np.cumsum(distance)))
+    if coordinate[-1] <= 0.0:
+        return None
+    target = np.linspace(0.0, coordinate[-1], count)
+    return np.column_stack(
+        [np.interp(target, coordinate, points[:, axis]) for axis in range(2)]
+    )
+
+
+def _clip_leg(points: np.ndarray, wall: np.ndarray, x_point: np.ndarray):
+    """Keep the branch from an X-point through its first wall crossing."""
+    points = np.asarray(points, dtype=float)
+    if points.shape[0] < 2:
+        return None
+    if np.linalg.norm(points[-1] - x_point) < np.linalg.norm(points[0] - x_point):
+        points = points[::-1]
+    inside = inside_polygon(points[:, 0], points[:, 1], wall[:, 0], wall[:, 1])
+    if not bool(inside[0]):
+        return None
+    crossing = None
+    for index in range(1, points.shape[0]):
+        if bool(inside[index]):
+            continue
+        left, right = points[index - 1], points[index]
+        for _ in range(24):
+            middle = 0.5 * (left + right)
+            if bool(inside_polygon(middle[0], middle[1], wall[:, 0], wall[:, 1])):
+                left = middle
+            else:
+                right = middle
+        crossing = left
+        points = np.vstack((points[:index], crossing))
+        break
+    if crossing is None:
+        return None
+    return points
+
+
+def _trace_divertor_legs(
+    raster,
+    boundary_flux: float,
+    x_points: np.ndarray,
+    wall,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Trace separatrix branches and clip them at the supplied first wall."""
+    result_r = np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan)
+    result_z = np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan)
+    finite = np.zeros(N_DIVERTOR_LEGS, dtype=bool)
+    wall = np.asarray(wall, dtype=float)
+    if wall.ndim != 2 or wall.shape[1] != 2 or wall.shape[0] < 3:
+        return result_r, result_z, finite
+    shape = tuple(np.asarray(raster.shape, dtype=int))
+    values = np.asarray(raster.psi).reshape(shape).T
+    contours = Contour(
+        np.asarray(raster.radius),
+        np.asarray(raster.height),
+        values,
+        levels=np.asarray([boundary_flux]),
+    ).levelset(boundary_flux)
+    open_lines = [surface.points for surface in contours if not surface.closed]
+    for slot in range(N_XPOINT_SLOTS):
+        point = np.asarray(x_points[slot], dtype=float)
+        if not np.all(np.isfinite(point)):
+            continue
+        candidates = []
+        for line in open_lines:
+            nearest = np.min(np.linalg.norm(line - point, axis=1))
+            if nearest <= 3.0 * max(
+                np.diff(np.asarray(raster.radius)).min(),
+                np.diff(np.asarray(raster.height)).min(),
+            ):
+                clipped = _clip_leg(line, wall, point)
+                if clipped is not None:
+                    candidates.append(clipped)
+        radial_tests = (lambda value: value < point[0], lambda value: value >= point[0])
+        for side, radial_test in enumerate(radial_tests):
+            branches = [line for line in candidates if radial_test(line[-1, 0])]
+            if not branches:
+                continue
+            branch = max(branches, key=lambda line: line.shape[0])
+            sampled = _resample_leg(branch, N_DIVERTOR_LEG_POINTS)
+            if sampled is None:
+                continue
+            index = 2 * slot + side
+            result_r[index], result_z[index] = sampled.T
+            finite[index] = True
+    return result_r, result_z, finite
+
+
 def assemble_frame(
     receipt: ForwardSolveReceipt,
     *,
@@ -454,6 +551,7 @@ def assemble_frame(
     applied_current,
     compensating_current=None,
     internal_geometry: PlasmaInternalGeometry | None = None,
+    wall=None,
     divertor_leg_r=None,
     divertor_leg_z=None,
     divertor_leg_finite=None,
@@ -505,6 +603,21 @@ def assemble_frame(
         divertor_leg_finite=divertor_leg_finite,
     )
     geometry["magnetic_axis_z_scalar"] = float(axis[1])
+    if (
+        wall is not None
+        and internal_geometry is not None
+        and internal_geometry.diverted
+        and divertor_leg_finite is None
+    ):
+        leg_r, leg_z, leg_finite = _trace_divertor_legs(
+            raster,
+            float(np.asarray(equilibrium.topology.boundary_flux)),
+            np.stack((primary, secondary)),
+            wall,
+        )
+        geometry["divertor_leg_r"] = leg_r
+        geometry["divertor_leg_z"] = leg_z
+        geometry["divertor_leg_finite"] = leg_finite
 
     return SteeringFrame(
         radius=_as_numpy(raster.radius),

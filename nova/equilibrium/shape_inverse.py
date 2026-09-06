@@ -835,26 +835,30 @@ def solve_shape_inverse(
     for iteration in range(placement_rounds + 1):
         _masks, topology = profile.operator.read(state, requested_class=requested_class)
         picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
-        full_observed = shape_values(
-            profile,
-            row_target,
-            state,
-            requested_class=requested_class,
-            target_current=target_current,
-        )
-        response = shape_response_matrix(
-            profile,
-            row_target,
-            state,
-            requested_class=requested_class,
-            target_current=target_current,
-        )
-        # Removing the current free-circuit image leaves the plasma plus every
-        # fixed conductor. The original seed image is then held on that side of
-        # the equation so regularisation selects the smallest steering change,
-        # not the smallest absolute machine-current state.
-        base = full_observed - response[:, free] @ current[free]
-        seed_observed = base + response[:, free] @ initial_current[free]
+        if iteration == 0:
+            response = initial_response
+            seed_observed = initial_observed
+        else:
+            full_observed = shape_values(
+                profile,
+                row_target,
+                state,
+                requested_class=requested_class,
+                target_current=target_current,
+            )
+            response = shape_response_matrix(
+                profile,
+                row_target,
+                state,
+                requested_class=requested_class,
+                target_current=target_current,
+            )
+            # Removing the current free-circuit image leaves the plasma plus
+            # every fixed conductor. The original seed image is then held on
+            # that side of the equation so regularisation selects the smallest
+            # steering change, not the smallest absolute machine-current state.
+            base = full_observed - response[:, free] @ current[free]
+            seed_observed = base + response[:, free] @ initial_current[free]
         right_hand_side = target_rows - seed_observed
         weighted = response[:, free] * row_weight[:, None]
         weighted_rhs = right_hand_side * row_weight

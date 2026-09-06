@@ -446,6 +446,32 @@ def test_consecutive_moved_targets_share_one_compiled_program(steered):
     assert all(sizes[name] == 1 for name in STEERED_KERNELS), sizes
 
 
+def test_compiled_constrained_slice_preserves_the_host_flags(steered):
+    """The fixed-budget constrained call keeps the host route's decisions."""
+    profile, _seed, free = steered
+    target = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, target)
+    common = dict(
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=1,
+        active_set_steps=1,
+        prescribed_current=jnp.asarray(
+            profile.operator.prescribed_current_field.current
+        ),
+    )
+    host = reduced_newton.solve_constrained_reduced_newton(
+        profile, free.state, **common
+    )
+    compiled = reduced_newton.solve_constrained_reduced_newton_compiled(
+        profile, free.state, **common
+    )
+    assert compiled.converged == host.converged
+    assert compiled.termination_reason == host.termination_reason
+    assert compiled.active_set_iterations == host.active_set_iterations
+    assert compiled.active_set_mask_differences == host.active_set_mask_differences
+
+
 def test_prescribed_currents_reuse_one_constrained_program(steered):
     """A constrained program accepts a new prescribed current vector as data."""
     profile, _seed, free = steered

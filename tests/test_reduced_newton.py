@@ -670,3 +670,40 @@ def test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane(machine
     assert batched.active_set_residuals == pytest.approx(
         serial.active_set_residuals, rel=BOUNDARY_RESIDUAL_AGREEMENT
     )
+
+
+def test_compiled_slice_matches_the_fused_host_route(machine):
+    """A complete fixed-budget call preserves the host route decisions."""
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        active_set_steps=reduced_newton.ACTIVE_SET_STEPS,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    host = reduced_newton.solve_reduced_newton(profile.operator, seed, **common)
+    compiled = reduced_newton.solve_reduced_newton_compiled(
+        profile.operator,
+        seed,
+        **{key: value for key, value in common.items() if key != "trip_boundary"},
+    )
+    assert np.array_equal(np.asarray(compiled.state), np.asarray(host.state))
+    assert compiled.converged == host.converged
+    assert compiled.termination_reason == host.termination_reason
+    assert compiled.terminal_residual == host.terminal_residual
+    assert compiled.active_set_iterations == host.active_set_iterations
+    assert compiled.active_set_mask_differences == host.active_set_mask_differences
+
+
+def test_compiled_slice_keeps_a_nonconverged_result_masked(machine):
+    """A budget exhausted before convergence reports the same terminal flags."""
+    profile, seed = machine
+    common = dict(tolerance=1.0e-30, newton_steps=1, active_set_steps=1)
+    host = reduced_newton.solve_reduced_newton(profile.operator, seed, **common)
+    compiled = reduced_newton.solve_reduced_newton_compiled(
+        profile.operator, seed, **common
+    )
+    assert compiled.converged == host.converged
+    assert compiled.termination_reason == host.termination_reason
+    assert compiled.active_set_iterations == host.active_set_iterations
+    assert compiled.active_set_mask_differences == host.active_set_mask_differences

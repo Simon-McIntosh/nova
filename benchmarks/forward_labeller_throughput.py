@@ -539,8 +539,16 @@ def _arm_rate_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
+def measure(
+    *,
+    output: Path,
+    figure: Path,
+    cache_root: Path | None = None,
+    route: str = "host",
+):
     """Step the shot's slices through both arms and write the receipt."""
+    if route not in ("host", "compiled"):
+        raise ValueError("route must be 'host' or 'compiled'")
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
@@ -572,6 +580,7 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
     identity = f"{SHOT}/{KEYFRAME_SLICE}-keyframe"
     receipt: dict[str, Any] = {
         "artifact": "forward labeller throughput on one MAST shot",
+        "route": route,
         "identity": identity,
         "source_commit": _source_revision(),
         "runtime": {
@@ -599,9 +608,18 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             },
         },
         "measurement_contract": {
-            "route_free": "reduced_newton.solve_reduced_newton",
+            "route_free": (
+                "reduced_newton.solve_reduced_newton_compiled"
+                if route == "compiled"
+                else "reduced_newton.solve_reduced_newton"
+            ),
             "route_conditioned": (
-                "reduced_newton.solve_constrained_reduced_newton with the "
+                (
+                    "reduced_newton.solve_constrained_reduced_newton_compiled"
+                    if route == "compiled"
+                    else "reduced_newton.solve_constrained_reduced_newton"
+                )
+                + " with the "
                 "vertical current-centroid row targeted on efm/current_centrd_z"
             ),
             "decision": (
@@ -666,7 +684,12 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
         item: dict[str, Any] = {"row": row, **table[row]}
         item["converged"] = False
         try:
-            result = reduced_newton.solve_reduced_newton(
+            solve = (
+                reduced_newton.solve_reduced_newton_compiled
+                if route == "compiled"
+                else reduced_newton.solve_reduced_newton
+            )
+            result = solve(
                 operator,
                 state,
                 requested_class=requested,
@@ -758,7 +781,12 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
                 requested=requested,
                 names=names,
             )
-            result = reduced_newton.solve_constrained_reduced_newton(
+            solve = (
+                reduced_newton.solve_constrained_reduced_newton_compiled
+                if route == "compiled"
+                else reduced_newton.solve_constrained_reduced_newton
+            )
+            result = solve(
                 profile,
                 state,
                 constraint_pairs=(pair,),
@@ -942,11 +970,13 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument("--route", choices=("host", "compiled"), default="host")
     arguments = parser.parse_args()
     measure(
         output=arguments.output,
         figure=arguments.figure,
         cache_root=arguments.cache_root,
+        route=arguments.route,
     )
 
 

@@ -627,6 +627,7 @@ def _arm_receipt(
     """Persist inverse currents, run one forward solve, and return its receipt."""
     solver = ProductionSolver(machine, inverse_gamma=gamma_factor)
     profile = machine.profile
+    seed_current = np.asarray(solver.prescribed_current).copy()
     prior = achieved_target(profile, previous.flux)
     inverse_started = perf_counter()
     inverse = solve_shape_inverse(
@@ -703,6 +704,7 @@ def _arm_receipt(
         _write(arm_path, persisted)
         raise
     error = turning_point_error(profile, target, equilibrium.flux)
+    current_change = inverse.currents - seed_current
     round_receipt = {
         "index": 1,
         "coil_current_a": inverse.currents.tolist(),
@@ -718,6 +720,11 @@ def _arm_receipt(
             _circuit_label(int(circuit), circuit_names): float(delta)
             for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
         },
+        "current_change_by_circuit_a": {
+            _circuit_label(index, circuit_names): float(delta)
+            for index, delta in enumerate(current_change)
+        },
+        "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "uncapped_current_change_l2_a": float(np.linalg.norm(inverse.uncapped_delta)),
         "current_step_fraction": inverse.current_step_fraction,
@@ -727,6 +734,9 @@ def _arm_receipt(
             inverse.response[:, inverse.free_circuits] @ inverse.uncapped_delta
         ).tolist(),
         "linear_row_right_hand_side": inverse.right_hand_side.tolist(),
+        "row_consistency_floor": inverse.consistency_floor.tolist(),
+        "row_weight": inverse.row_weight.tolist(),
+        "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
         "least_squares_residual": inverse.least_squares_residual,
         "uncapped_least_squares_residual": inverse.uncapped_least_squares_residual,
         "response_singular_values": inverse.singular_values.tolist(),

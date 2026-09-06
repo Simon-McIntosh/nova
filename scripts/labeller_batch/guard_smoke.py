@@ -40,6 +40,17 @@ def _fraction(numerator: int, denominator: float) -> float | None:
     return numerator / denominator if denominator else None
 
 
+def _json_default(value: Any) -> int | float | bool:
+    """Convert NumPy scalar values to their JSON-native equivalents."""
+    if isinstance(value, np.bool_):
+        return bool(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        return float(value)
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+
+
 def _load_arm(root: Path, shot: int, *, flag_enabled: bool) -> dict[str, Any]:
     """Read one arm and assert its frame and companion contracts."""
     if not root.is_absolute():
@@ -226,11 +237,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise ValueError("free-only arm unexpectedly conditioned a slice")
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+        json.dumps(receipt, default=_json_default, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     _plot_receipt(receipt, arguments.figure)
-    print(json.dumps(receipt, sort_keys=True))
+    print(json.dumps(receipt, default=_json_default, sort_keys=True))
     return 0
 
 

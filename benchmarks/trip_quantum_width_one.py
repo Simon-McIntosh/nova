@@ -94,6 +94,12 @@ WIDTH = 1024
 TRIP_LIMIT = 16
 EIGHT_SAMPLES = 8
 FULL_TRIP_BASELINE_MS_PER_MEMBER = 415.60787488197093
+#: The stale width-1024 baseline values this driver re-measures at HEAD; they
+#: are quoted beside the re-measured numbers so a stopped job still states
+#: both.  The map floor and per-trip quantum were banked before the census
+#: null polish entered the jitted topology read.
+BANKED_MAP_MS = 0.7836647878320946
+BANKED_QUANTUM_MS = 24.99596260986329
 CACHE_MIN_COMPILE_SECONDS = 0.0
 
 
@@ -491,7 +497,9 @@ def _measure_full_trip(
         "quantum_ms_per_member_per_trip": (
             1.0e3 * float(np.median(samples)) / WIDTH / TRIP_LIMIT
         ),
-        "active_set_iterations": int(np.asarray(fixed.active_set_iterations)),
+        "active_set_iterations": int(
+            np.asarray(fixed.active_set_iterations).reshape(())
+        ),
         "termination": str(np.asarray(fixed.termination_reason)),
     }
 
@@ -525,7 +533,7 @@ def _map_and_substages(repeats: int) -> dict[str, Any]:
                 "median_ms_per_member"
             ],
             "compile_seconds": map_probe["compile_seconds"],
-            "banked_ms": 0.7836647878320946,
+            "banked_ms": BANKED_MAP_MS,
             "banked_source": str(MAP_PROFILE_RECEIPT.relative_to(ROOT)),
         },
         "direct_width_1024_probes": probes,
@@ -593,7 +601,7 @@ def _full_trip_measure(
                 "control_ms_per_member_per_trip": control_quantum,
                 "control_active_set_iterations": control["active_set_iterations"],
                 "full_trip_compile_seconds": full_trip_compile_seconds,
-                "banked_ms": 24.99596260986329,
+                "banked_ms": BANKED_QUANTUM_MS,
                 "banked_source": str(SOLVER_QUANTUM_RECEIPT.relative_to(ROOT)),
             },
             "substage_apportionment": substages,
@@ -740,9 +748,9 @@ def _measure_member_width_one(
 
 def _baseline_summary(payload: dict[str, Any]) -> dict[str, Any]:
     baselines = payload["baselines"]
-    old_map = baselines["map"]["banked_ms"]
+    old_map = baselines["map"].get("banked_ms", BANKED_MAP_MS)
     new_map = baselines["map"]["median_ms_per_member_width_1024"]
-    old_quantum = baselines["per_trip_quantum"]["banked_ms"]
+    old_quantum = baselines["per_trip_quantum"].get("banked_ms", BANKED_QUANTUM_MS)
     quantum = baselines["per_trip_quantum"]
     new_quantum = quantum.get("control_ms_per_member_per_trip")
     return {

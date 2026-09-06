@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="35">
 <meta name="plan-impl" content="0.35">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -216,10 +216,11 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
     <pre class="r-fu-prompt">/reckon-ship constraint-augmented-newton-krylov §4</pre>
     <p class="r-fu-outcome">Landed in main merge 844b5bef (worktree commits da8880dc, ed0c5658, 7a074ef3; node cank-constraint-hygiene-luna, codex luna, declared-wait arm of the trial). ConstraintBinding coerces target, tolerance, scale and initial_unknown to arrays at construction so a list-typed binding survives a jitted tree read; _solve_augmented_constraints refuses a constrained Krylov request with neither a prescribed current nor an operator prescribed field, stating the reason; the compensating-direction selection is gated on the banked Solovev response tests/data/solovev_constraint_response.npz (the worker could not export the 22086/43 active block from a CPU lane, so the real-data fixture is the open remainder). Gate: 19/19 across six compute-node groups on all_debug (job 1263317, JAX_PLATFORMS=cpu), including tests/test_constraint_interface.py and tests/test_forward_constraints.py (4 tests added).</p>
     </article>
-<article class="r-fu" data-id="f-cank-012" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-written-by="smc" data-written-at="2026-09-06" data-recommends-skill="/reckon-ship constraint-augmented-newton-krylov §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cank-012" data-status="resolved" data-capability-version="1.0" data-capability-class="routine" data-written-by="smc" data-written-at="2026-09-06" data-recommends-skill="/reckon-ship constraint-augmented-newton-krylov §4" data-resolved-at="2026-09-06T14:26:28+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Re-export the compensator selection names from nova.equilibrium</h4>
     <div class="r-fu-body">Small hygiene remainder of f-cank-005: CompensatorRule, CompensatorSelection, constraint_response_matrix and derive_circuit_compensators are reachable only through nova.equilibrium.constraint; export them from nova/equilibrium/__init__.py beside ConstraintPair so a consumer of the interface imports one namespace, with the export list test extended. Belongs with the next touch of nova/equilibrium/__init__.py; can ride with f-cank-010.</div>
     <pre class="r-fu-prompt">/reckon-ship constraint-augmented-newton-krylov §4</pre>
+    <p class="r-fu-outcome">The premise was stale: nova/equilibrium/__init__.py already exported CompensatorRule, CompensatorSelection, constraint_response_matrix and derive_circuit_compensators through its import block, lazy map and __all__ (lines 80-92, 221-231, 347-357). The node (cank-compensator-selection-exports, codex spark, 51 s dispatch to complete, one turn, 657k input) correctly changed only the test: tests/test_constraint_interface.py now pins that the four names imported from nova.equilibrium are the same objects as those in nova.equilibrium.constraint (3 passed on CPU). Merged to main as 89116f5d (commit f03eef64).</p>
     </article>
 </section>
 
@@ -301,6 +302,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260906T102805234456-cank-converged-state-compensator-sol" data-who="pfs-sol-x" data-when="2026-09-06T13:30:45Z">
     <div class="r-comment-body"><p>converged-state compensator stability measured on the H200 (job 1263331, 53 min, JAX_PLATFORMS=cuda,cpu): re-deriving the compensating direction from the converged flux and warm-starting a constrained re-solve rotates the direction by 12.6 degrees on 21986/46 (leading circuit set changes to P3 upper) and 4.1 degrees on 21989/55; the compensating current vector moves 755 A (22 percent of norm) and 162 A (7 percent) while both rows close to 3e-13 m under the dominant_authority rule; receipt and PNG under docs/figures/constraint-augmented-newton-krylov/centroid/; codex sol high effort, declared-wait arm (parked 12:31Z, job done ~13:24Z, woken by hand because the quoted wait_started_at and JSON terminal list defeated the sweep)</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260906T142030781624-cank-compensator-selection-exports" data-who="cank-export-k" data-when="2026-09-06T14:21:39Z">
+    <div class="r-comment-body"><p>compensator selection exports pinned by an identity test in tests/test_constraint_interface.py (3 passed on CPU); the four names were already exported from nova.equilibrium so the followup premise was stale and the node correctly changed only the test; first codex-spark row: 1 turn, 51 s from dispatch to complete, 657k input (566k cached), 9.9k output</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

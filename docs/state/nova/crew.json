@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T16:18:28",
+  "updated": "2026-09-06T16:26:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -554,6 +554,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":492288}": "489c3668-3290-4546-afd6-bb4997b242a6"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "cank-export-k",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "cank-interface-design-x",
@@ -110909,6 +110918,189 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T142030781624-cank-compensator-selection-exports",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-compensator-selection-exports",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1405,
+                "cached_input_tokens": 385825,
+                "input_tokens": 387262,
+                "output_tokens": 1580,
+                "reasoning_output_tokens": 170,
+                "total_tokens": 388842,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "nova/equilibrium/__init__.py exports CompensatorRule, CompensatorSelection, constraint_response_matrix and derive_circuit_compensators (all defined in nova/equilibrium/constraint.py at lines 31, 393, 436 and 565) through the same three places ConstraintPair already uses: the import block near line 78, the lazy name-to-module map near line 219 where the entry \"ConstraintPair\": \"constraint\" sits, and __all__ near line 330; tests/test_constraint_interface.py gains one test that imports the four names from nova.equilibrium and asserts each is the same object as the one in nova.equilibrium.constraint; the check is JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_constraint_interface.py -p no:cacheprovider, captured whole to a log in the run directory and passing with the new test collected; path-scoped ruff check and format on the two files; one commit with a conventional subject and a body, no plan labels or node ids in code or comments. Nothing else changes; if the lazy map does not exist in the form described, follow whatever pattern ConstraintPair actually uses and quote its file:line in the manifest.",
+          "estimated_hours": 0.5,
+          "goal": "Export the compensator selection names from nova.equilibrium beside ConstraintPair",
+          "id": "cank-compensator-selection-exports",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T142030781624-cank-compensator-selection-exports/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "nova/equilibrium/__init__.py",
+            "tests/test_constraint_interface.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cank-export-k",
+        "backend": "codex-spark",
+        "local": false,
+        "agent": {
+          "alias": "spark5.3",
+          "backend": "codex-spark",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.3-codex-spark",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T14:20:43Z",
+        "completed_at": "2026-09-06T14:21:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 56,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 56,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a267a3c568da871a63933ec16ba6bc0d9c614439",
+        "commits": [
+          "f03eef64f4e3955212442beb19f4e04c472a9a4b"
+        ],
+        "changed_lines": {
+          "added": 20,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_constraint_interface.py -p no:cacheprovider; 3 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T142030781624-cank-compensator-selection-exports/tests_test_constraint_interface_jax_cpu.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T142030781624-cank-compensator-selection-exports/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07717-cd84-70c2-9604-26658c790c98",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 566272,
+            "cached_input_tokens_cumulative": 566272,
+            "input_tokens": 656977,
+            "input_tokens_cumulative": 656977,
+            "output_tokens": 9880,
+            "output_tokens_cumulative": 9880,
+            "reasoning_output_tokens": 6985,
+            "reasoning_output_tokens_cumulative": 6985
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 79,
+              "external_wait": null,
+              "log_age_seconds": 3490,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a5cb87382124be3f5e513fe8d8d1047123edccf3",
+                "d88ed2af95eb597ff6ce2fbdc5de778a367b3f77",
+                "0f0800d9b0f11ba351fc4b5c3a6c73fadcca6b58",
+                "2225a7662aff02654fa48a548c6637427bea401c",
+                "86f936a7a3a776f59f41258a1be0d831627d8519",
+                "3616a49a04be2d5a9028a46dd091f21bdc477de5",
+                "c4b3894d84480c9a7805f436752fc0b4fd5b90aa"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna --gate <verdict> --commit a5cb87382124be3f5e513fe8d8d1047123edccf3 --commit d88ed2af95eb597ff6ce2fbdc5de778a367b3f77 --commit 0f0800d9b0f11ba351fc4b5c3a6c73fadcca6b58 --commit 2225a7662aff02654fa48a548c6637427bea401c --commit 86f936a7a3a776f59f41258a1be0d831627d8519 --commit 3616a49a04be2d5a9028a46dd091f21bdc477de5 --commit c4b3894d84480c9a7805f436752fc0b4fd5b90aa",
+              "node": "pfs-frame-contract-internal-geometry-luna",
+              "phase": "working",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260906T104435282392-pfs-frame-contract-internal-geometry-luna",
+              "session": "s19-playable",
+              "terminal_age_seconds": 3505,
+              "terminal_at": "2026-09-06T13:22:11Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-frame-contract-internal-geometry-luna"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 16865,
+          "peak_input_tokens": 1223249
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-compensator-selection-exports",
+          "session_id": "01a07717-cd84-70c2-9604-26658c790c98",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T14:21:39Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_constraint_interface.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -111137,6 +111329,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1864
+    "_version": 1866
   }
 }

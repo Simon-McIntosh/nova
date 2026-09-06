@@ -196,6 +196,55 @@ def _turning_point_residual(
     return jnp.stack((psi, gradient[1] if radial else gradient[0]))
 
 
+def _damped_point_root(profile: ForwardProfile, residual, start) -> np.ndarray:
+    """Refine a nearby two-row point root without leaving the flux lattice."""
+    point = np.asarray(start, dtype=float)
+    lower = np.asarray(
+        (profile.lattice.radius[0], profile.lattice.height[0]), dtype=float
+    )
+    upper = np.asarray(
+        (profile.lattice.radius[-1], profile.lattice.height[-1]), dtype=float
+    )
+    step_limit = 2.0 * max(
+        float(profile.lattice.radial_step),
+        float(profile.lattice.vertical_step),
+    )
+    residual_and_jacobian = jax.jit(
+        lambda position: (residual(position), jax.jacfwd(residual)(position))
+    )
+    for _ in range(64):
+        values, jacobian = residual_and_jacobian(jnp.asarray(point))
+        values = np.asarray(values, dtype=float)
+        jacobian = np.asarray(jacobian, dtype=float)
+        norm = float(np.linalg.norm(values))
+        if norm < 1.0e-12:
+            return point
+        step = np.linalg.lstsq(jacobian, -values, rcond=None)[0]
+        length = float(np.linalg.norm(step))
+        if length > step_limit:
+            step *= step_limit / length
+        accepted = False
+        fraction = 1.0
+        for _ in range(12):
+            candidate = np.clip(point + fraction * step, lower, upper)
+            candidate_norm = float(
+                np.linalg.norm(np.asarray(residual(jnp.asarray(candidate))))
+            )
+            if candidate_norm < norm:
+                point = candidate
+                accepted = True
+                break
+            fraction *= 0.5
+        if not accepted:
+            break
+    final = float(np.linalg.norm(np.asarray(residual(jnp.asarray(point)))))
+    if final >= 1.0e-10:
+        raise ValueError(
+            f"shape control point did not refine onto its flux rows: residual={final}"
+        )
+    return point
+
+
 def _refine_turning_point(
     profile: ForwardProfile, grid: jax.Array, level: float, start, *, radial: bool
 ) -> np.ndarray:
@@ -209,20 +258,21 @@ def _refine_turning_point(
     nails the point to interpolation precision, so an unmoved command starts
     with every field row at zero.
     """
-    point = jnp.asarray(start, dtype=jnp.float64)
-    for _ in range(20):
-        residual = _turning_point_residual(
+
+    def residual(point):
+        return _turning_point_residual(
             profile.lattice, grid, level, point, radial=radial
         )
-        if float(np.asarray(jnp.linalg.norm(residual))) < 1.0e-12:
-            break
-        jacobian = jax.jacfwd(
-            lambda position: _turning_point_residual(
-                profile.lattice, grid, level, position, radial=radial
-            )
-        )(point)
-        point = point + jnp.linalg.solve(jacobian, -residual)
-    return np.asarray(point)
+
+    return _damped_point_root(profile, residual, start)
+
+
+def _refine_stationary_point(
+    profile: ForwardProfile, grid: jax.Array, start
+) -> np.ndarray:
+    """Refine a topology seed to zero field on the control interpolation."""
+    residual = jax.grad(lambda point: sample_lattice_flux(profile.lattice, grid, point))
+    return _damped_point_root(profile, residual, start)
 
 
 def achieved_target(profile: ForwardProfile, flux) -> BoundingBoxTarget:
@@ -253,7 +303,7 @@ def achieved_target(profile: ForwardProfile, flux) -> BoundingBoxTarget:
     lower = _refine_turning_point(profile, grid, level, starts[3], radial=False)
     saddle = np.asarray(topology.x_point, dtype=float)
     x_point = (
-        saddle
+        _refine_stationary_point(profile, grid, saddle)
         if bool(np.asarray(topology.diverted)) and np.all(np.isfinite(saddle))
         else None
     )

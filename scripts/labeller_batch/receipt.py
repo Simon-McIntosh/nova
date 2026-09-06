@@ -268,6 +268,70 @@ def _shot_class_labels(
     return np.asarray([labels_by_row.get(int(row)) for row in rows], dtype=object)
 
 
+#: Ordered pin-displacement classes of the tail cross-tabulation.  The
+#: displacement is the conditioned minus free centroid error; the classes
+#: partition the real line at -50 and +50 mm (the branch-guard tolerance).
+_PIN_CLASSES = ("below_-50_mm", "-50_to_0_mm", "0_to_+50_mm", "above_+50_mm")
+
+
+def _pin_class(value_mm: float) -> str:
+    """Return the pin-displacement class of one slice."""
+    if value_mm < -50.0:
+        return "below_-50_mm"
+    if value_mm < 0.0:
+        return "-50_to_0_mm"
+    if value_mm <= 50.0:
+        return "0_to_+50_mm"
+    return "above_+50_mm"
+
+
+def _empty_pin_tally() -> dict[str, int]:
+    """Return a zeroed concentration row of the pin tail cross-tabulation."""
+    return {
+        "slices": 0,
+        "converged": 0,
+        "conditioned_branch_guard_ok": 0,
+        "converged_and_conditioned_guard_ok": 0,
+    }
+
+
+def _accumulate_pin_crosstab(
+    overall: dict[str, dict[str, int]],
+    by_decile: dict[str, dict[str, dict[str, int]]],
+    values: Sequence[float],
+    row_numbers: Sequence[int],
+    deciles: Sequence[int],
+    item: dict[str, Any],
+) -> None:
+    """Tally one shot's both-finite slices into the pin tail cross-tabulation.
+
+    The converged and conditioned_branch_guard_ok flags are the manifest
+    slice records, joined to the npz rows by their row number.
+    """
+    manifest_by_row = {
+        int(record["row"]): record
+        for record in item.get("slices", ())
+        if record.get("written") and record.get("row") is not None
+    }
+    for value, row_number, decile in zip(values, row_numbers, deciles, strict=True):
+        record = manifest_by_row.get(int(row_number))
+        if record is None:
+            continue
+        cls = _pin_class(float(value))
+        converged = bool(record.get("converged"))
+        guard_ok = bool(record.get("conditioned_branch_guard_ok"))
+        for bucket in (
+            overall[cls],
+            by_decile.setdefault(
+                str(int(decile)), {name: _empty_pin_tally() for name in _PIN_CLASSES}
+            )[cls],
+        ):
+            bucket["slices"] += 1
+            bucket["converged"] += int(converged)
+            bucket["conditioned_branch_guard_ok"] += int(guard_ok)
+            bucket["converged_and_conditioned_guard_ok"] += int(converged and guard_ok)
+
+
 def _conditioned_bins(
     labels: np.ndarray,
     conditioned: np.ndarray,
@@ -299,6 +363,8 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
     class_buckets: dict[str, list[bool]] = {}
     displacements: list[float] = []
     displacement_by_class: dict[str, list[float]] = {}
+    crosstab_overall = {name: _empty_pin_tally() for name in _PIN_CLASSES}
+    crosstab_by_decile: dict[str, dict[str, dict[str, int]]] = {}
     companion_shots = 0
     classed_shots = 0
     for item in complete:
@@ -308,7 +374,8 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
         companion_shots += 1
         time = np.asarray(rows["time"])
         conditioned = np.asarray(rows["conditioned"], dtype=bool)
-        decile_pool.append(_decile_labels(time))
+        shot_deciles = _decile_labels(time)
+        decile_pool.append(shot_deciles)
         bin_pool.append(_time_bin_labels(time))
         conditioned_pool.append(conditioned)
         row_numbers = np.asarray(rows["row"], dtype=np.int64)
@@ -333,6 +400,14 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
             ):
                 if label is not None:
                     displacement_by_class.setdefault(str(label), []).append(value)
+        _accumulate_pin_crosstab(
+            crosstab_overall,
+            crosstab_by_decile,
+            values.tolist(),
+            row_numbers[both].tolist(),
+            shot_deciles[both].tolist(),
+            item,
+        )
     deciles = np.concatenate(decile_pool) if decile_pool else np.asarray([], dtype=int)
     time_bins = np.concatenate(bin_pool) if bin_pool else np.asarray([], dtype=int)
     conditioned_all = (
@@ -396,6 +471,25 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
             "by_topology_class": {
                 label: _distribution(values)
                 for label, values in sorted(displacement_by_class.items())
+            },
+        },
+        "pin_displacement_crosstab": {
+            "definition": (
+                "pin displacement class (conditioned_centroid_error_m minus "
+                "free_centroid_error_m, mm) against converged and "
+                "conditioned_branch_guard_ok, over written slices with both "
+                "errors finite; the manifest fields are joined to the npz by row"
+            ),
+            "classes": list(_PIN_CLASSES),
+            "overall": crosstab_overall,
+            "by_decile": {
+                str(decile): {
+                    name: crosstab_by_decile.get(str(decile), {}).get(
+                        name, _empty_pin_tally()
+                    )
+                    for name in _PIN_CLASSES
+                }
+                for decile in range(10)
             },
         },
     }

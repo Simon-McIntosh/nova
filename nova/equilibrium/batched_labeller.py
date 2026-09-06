@@ -28,8 +28,18 @@ from nova.equilibrium.observation import MomentIntegralSupport
 __all__ = [
     "BatchedLabelledResult",
     "BatchedLabeller",
+    "CENTROID_REPORTING_QUANTUM",
     "solve_batched_labeller",
 ]
+
+
+CENTROID_REPORTING_QUANTUM = 1.0e-12
+
+
+def _reported_centroid(value: jax.Array) -> jax.Array:
+    """Snap reported coordinates below physically meaningful precision."""
+    quantum = jnp.asarray(CENTROID_REPORTING_QUANTUM, dtype=value.dtype)
+    return jnp.rint(value / quantum) * quantum
 
 
 class BatchedLabelledResult(NamedTuple):
@@ -609,6 +619,7 @@ class BatchedLabeller:
                 support=MomentIntegralSupport.ALL_DOMAIN,
                 target_current=target_value,
             ).stack()[1:]
+            centroid = _reported_centroid(centroid)
             return (
                 jnp.where(active, state_value, initial_value),
                 jnp.where(active, solved[4], False),

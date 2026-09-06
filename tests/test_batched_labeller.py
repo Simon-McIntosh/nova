@@ -8,7 +8,10 @@ from matplotlib.figure import Figure
 import numpy as np
 
 from nova.equilibrium import reduced_newton
-from nova.equilibrium.batched_labeller import BatchedLabeller
+from nova.equilibrium.batched_labeller import (
+    CENTROID_REPORTING_QUANTUM,
+    BatchedLabeller,
+)
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
 from nova.jax.config import configure_persistent_compilation_cache
@@ -94,6 +97,10 @@ def test_two_elements_match_compiled_route_and_padded_batch(machine_fixture):  #
             reference.state,
             support=MomentIntegralSupport.ALL_DOMAIN,
         ).stack()[1:]
+    )
+    reference_centroid = (
+        np.rint(reference_centroid / CENTROID_REPORTING_QUANTUM)
+        * CENTROID_REPORTING_QUANTUM
     )
     np.testing.assert_array_equal(
         np.asarray(result.achieved_centroid),

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T17:51:19",
+  "updated": "2026-09-06T17:58:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -111914,6 +111914,483 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T114623992008-pfs-topology-parallel-pass",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-topology-parallel-pass",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2377,
+                "cached_input_tokens": 858228,
+                "input_tokens": 860637,
+                "output_tokens": 4631,
+                "reasoning_output_tokens": 510,
+                "total_tokens": 865268,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "The throughput study measured that vmap of the fused trip over 8 and 16 states of one program ran 1.49 and 1.57 times SLOWER per element than a serial loop, attributing it to the topology close in the trip being a write-then-read pass whose per-element memory does not amortise. Measure first, then change, then prove. (1) A new probe driver benchmarks/topology_batch_probe.py that runs the connectivity kernels of nova/equilibrium/flux_surface_connectivity.py (the flood fill, the connected-component labelling, the hex and saddle-aware variants, and traced_flux_surface_bins) standalone on the MAST 22086/43 lattice flux at batch sizes 1, 8, 16, 64 under jax.vmap on the H200 (betelgeuse, --reservation=gpu_0003_grpA --gres=gpu:1 --mem=128G --time=00:40:00, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, PYTHONPATH the worktree, JAX_PLATFORMS=cuda,cpu, persistent compilation cache, foreground), recording per kernel the device wall per element, the HLO while-loop trip counts read from the compiled text, and the peak device memory, persisted under docs/figures/playable-forward-solve/topology-batch/ as JSON plus a PNG; the kernel whose per-element wall or memory grows with batch is the one to re-cast. (2) Re-cast that kernel in nova/equilibrium/flux_surface_connectivity.py as a fixed-iteration gather-form label propagation (or a segment composition that halves the iteration count) whose per-element work and memory are constant under vmap, with the classification bit-identical to the current kernel on the twelve MAST bank slices and on the Solovev fixture, pinned by tests in tests/test_flux_surface_connectivity.py and tests/test_jax_topology.py (run on a compute node under all_debug in groups of at most four tests per process). (3) Re-run the probe: the receipt states per-element wall at batch 1, 16, 64 before and after, and the batch at which the pass is at least eight times cheaper per element than the serial loop, or names the floor. Do NOT touch nova/equilibrium/reduced_newton.py (a concurrent node holds it); the integration of the re-cast pass into the fused trip is the next step and is stated in your report. Verify any PNG through PIL only; NEVER call Read on an image file, the model serving you is text-only and a Read of a PNG returns a 400 that ends your process. Never a background task waited across turns; write the manifest with what you have before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/topology-parallel-pass.md.",
+          "estimated_hours": 6.0,
+          "goal": "Make the topology read of a batch of slices a parallel pass whose cost amortises under vmap, the second step of followup f-pfs-018 on the plan toward the one-hour full-MAST labeller",
+          "id": "pfs-topology-parallel-pass",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114623992008-pfs-topology-parallel-pass/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "open",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_flux_surface_connectivity.py",
+            "tests/test_jax_topology.py",
+            "benchmarks/topology_batch_probe.py",
+            "docs/figures/playable-forward-solve/topology-batch",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/topology-parallel-pass.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "pfs-topo-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T11:46:35Z",
+        "completed_at": "2026-09-06T15:26:37.464Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13161,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13202,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "c358440959cf456461927bc31a27646150aecd6d",
+        "commits": [
+          "8baaba5a0736ced7a4448850fe685d688d27df3a",
+          "a577e67fc5ec5ea966476adf13b385223ac16a4b",
+          "ed95800c4f16d251357958b4016efb7053b698fc"
+        ],
+        "changed_lines": {
+          "added": 2401,
+          "removed": 0,
+          "files": 10
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug JAX_PLATFORMS=cpu: pytest tests/test_flux_surface_connectivity.py tests/test_jax_topology.py -p no:cacheprovider; 32 passed, 2 pre-existing failures in domain.axis_connected_component unchanged at base",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114623992008-pfs-topology-parallel-pass/cpu-canonical-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114623992008-pfs-topology-parallel-pass/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07754-2572-79b1-aa83-4be652b2a38f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4629760,
+            "cached_input_tokens_cumulative": 4629760,
+            "input_tokens": 4890345,
+            "input_tokens_cumulative": 4890345,
+            "output_tokens": 27314,
+            "output_tokens_cumulative": 27314,
+            "reasoning_output_tokens": 9533,
+            "reasoning_output_tokens_cumulative": 9533
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-06T15:26:37Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "time-critical labeller throughput step held on the slow local lane for 3.5 h with no manifest and uncommitted source; the lead directed time-critical work to codex",
+              "session": "fresh",
+              "to_backend": "codex",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260906T114623992008-pfs-topology-parallel-pass"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The required CPU smoke failed twice under different execution fixes: normal CPU JIT timed out at 20m20s and JAX_DISABLE_JIT=1 timed out at 20m14s before the first solve returned. The anti-thrashing stop rule forbids a third attempt; and without a passing CPU smoke the prescribed H200 receipt cannot be run.\"",
+              "elapsed_seconds": 2933,
+              "external_wait": null,
+              "log_age_seconds": 1759,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: [\"benchmarks/constraint_centroid_receipt.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cank/converged-state-compensator.md"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805234456-cank-converged-state-compensator-sol/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805234456-cank-converged-state-compensator-sol/manifest.md; resolve the blocker before resuming the run",
+              "node": "cank-converged-state-compensator-sol",
+              "phase": "working",
+              "plan": "constraint-augmented-newton-krylov",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260906T102805234456-cank-converged-state-compensator-sol",
+              "session": "s19-playable",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260906T102805234456-cank-converged-state-compensator-sol",
+                "session_id": "01a07619-7f8b-7691-aade-e994845922bc",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 1791,
+              "terminal_at": "2026-09-06T11:16:39Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-converged-state-compensator-sol"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36847,
+          "peak_input_tokens": 9520105
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-topology-parallel-pass",
+          "session_id": "01a07754-2572-79b1-aa83-4be652b2a38f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T15:26:37.464Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T154002962768-pfs-worktree-triage-4-codex",
+        "plan": "playable-forward-solve",
+        "section": "",
+        "node": "pfs-worktree-triage-4-codex",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2722,
+                "cached_input_tokens": 487250,
+                "input_tokens": 489974,
+                "output_tokens": 1722,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 491696,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-4.md with one row per tree listed in /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/assign-4.md carrying: the path; the run id and node the worktree basename maps to in /home/ITER/mcintos/Code/nova/docs/state/nova/crew.json with that ledger row's status and outcome line (or the words no ledger row); for every unmerged commit, read with git -C followed by the tree path then log --format='%h %ad %s' --date=short origin/main..HEAD, whether the same change already exists on origin/main in another form, decided by a subject and keyword search of git log origin/main since that commit's date and by git diff origin/main HEAD over the files that commit touched for the hunks it introduced, quoting the superseding main commit or stating unlanded; for every dirty file from git status --porcelain in that tree (excluding the .venv link) the diff size in lines and a one-line reading of what it changes and whether it is generated output, scratch or source work; a recommendation per tree from exactly three values, remove (every commit superseded or scratch and every dirty file generated or throwaway), carry-then-remove (naming the commits or files whose content is absent from main and worth landing, with the plan slug from the ledger row), or hold-for-lead (with the one question that decides it); and a totals line by recommendation with reclaimable size. Read-only: no git write command, no checkout, no stash, no file change in any worktree; every git command runs with -C and the tree path or -C /home/ITER/mcintos/Code/nova.",
+          "estimated_hours": 1.0,
+          "goal": "Triage the stale nova worktrees listed in /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/assign-4.md into remove, carry-then-remove or hold-for-lead",
+          "id": "pfs-worktree-triage-4-codex",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T154002962768-pfs-worktree-triage-4-codex/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-4.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "wt-triage-x4",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-06T15:40:14Z",
+        "completed_at": "2026-09-06T15:50:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 631,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 631,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "afd984cbea64aa554f4a69efd9d28ad9ff7c2773",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only report; coordinator verification of every remove row against origin/main (verify_triage.py)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-4.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T154002962768-pfs-worktree-triage-4-codex/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07760-9aa3-7e13-ba12-0cbc44933209",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2150912,
+            "cached_input_tokens_cumulative": 2150912,
+            "input_tokens": 2289887,
+            "input_tokens_cumulative": 2289887,
+            "output_tokens": 28971,
+            "output_tokens_cumulative": 28971,
+            "reasoning_output_tokens": 14794,
+            "reasoning_output_tokens_cumulative": 14794
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 43765,
+          "peak_input_tokens": 4440799
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only triage: the deliverable is the report at the fenced write path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-worktree-triage-4-codex",
+          "session_id": "01a07760-9aa3-7e13-ba12-0cbc44933209",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T15:50:45Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260906T153633777086-pfs-worktree-triage-1-codex",
+        "plan": "playable-forward-solve",
+        "section": "",
+        "node": "pfs-worktree-triage-1-codex",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2722,
+                "cached_input_tokens": 487250,
+                "input_tokens": 489974,
+                "output_tokens": 1722,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 491696,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-1.md with one row per tree listed in /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/assign-1.md carrying: the path; the run id and node the worktree basename maps to in /home/ITER/mcintos/Code/nova/docs/state/nova/crew.json with that ledger row's status and outcome line (or the words no ledger row); for every unmerged commit, read with git -C followed by the tree path then log --format='%h %ad %s' --date=short origin/main..HEAD, whether the same change already exists on origin/main in another form, decided by a subject and keyword search of git log origin/main since that commit's date and by git diff origin/main HEAD over the files that commit touched for the hunks it introduced, quoting the superseding main commit or stating unlanded; for every dirty file from git status --porcelain in that tree (excluding the .venv link) the diff size in lines and a one-line reading of what it changes and whether it is generated output, scratch or source work; a recommendation per tree from exactly three values, remove (every commit superseded or scratch and every dirty file generated or throwaway), carry-then-remove (naming the commits or files whose content is absent from main and worth landing, with the plan slug from the ledger row), or hold-for-lead (with the one question that decides it); and a totals line by recommendation with reclaimable size. Read-only: no git write command, no checkout, no stash, no file change in any worktree; every git command runs with -C and the tree path or -C /home/ITER/mcintos/Code/nova.",
+          "estimated_hours": 1.0,
+          "goal": "Triage the stale nova worktrees listed in /home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/assign-1.md into remove, carry-then-remove or hold-for-lead",
+          "id": "pfs-worktree-triage-1-codex",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T153633777086-pfs-worktree-triage-1-codex/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-1.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "wt-triage-x1",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-06T15:36:50Z",
+        "completed_at": "2026-09-06T15:54:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1073,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1073,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "afd984cbea64aa554f4a69efd9d28ad9ff7c2773",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only report; coordinator verification of every remove row against origin/main (verify_triage.py)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/integration/worktree-triage/triage-1.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T153633777086-pfs-worktree-triage-1-codex/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0775d-7f74-7230-9e7f-fef20abc7cd1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13883776,
+            "cached_input_tokens_cumulative": 13883776,
+            "input_tokens": 14141865,
+            "input_tokens_cumulative": 14141865,
+            "output_tokens": 42169,
+            "output_tokens_cumulative": 42169,
+            "reasoning_output_tokens": 14248,
+            "reasoning_output_tokens_cumulative": 14248
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 56417,
+          "peak_input_tokens": 28025641
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only triage: the deliverable is the report at the fenced write path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-worktree-triage-1-codex",
+          "session_id": "01a0775d-7f74-7230-9e7f-fef20abc7cd1",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T15:54:43Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -112156,6 +112633,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1890
+    "_version": 1893
   }
 }

@@ -34,6 +34,7 @@ from nova.equilibrium.shape_inverse import (
     shape_row_target,
     shape_values,
     solve_shape_inverse,
+    turning_point_error,
 )
 from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.imas.mast_solve_inputs import SHOT_STORE
@@ -50,6 +51,7 @@ TARGET = (22086, 43)
 DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
 NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
 CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
+FORWARD_GAMMA_FACTOR = 1.0e-12
 
 
 def _source_revision() -> str:
@@ -575,77 +577,135 @@ def _arm_receipt(
     null_points: np.ndarray,
     circuit_names: dict[int, str],
     gamma_factor: float,
+    row_floor_table: list[dict[str, Any]],
+    directory: Path,
+    runtime: dict[str, Any],
 ) -> tuple[dict[str, Any], object]:
-    """Run one arm through ``ProductionSolver`` and return its receipt."""
+    """Persist inverse currents, run one forward solve, and return its receipt."""
     solver = ProductionSolver(machine, inverse_gamma=gamma_factor)
-    prior = achieved_target(machine.profile, previous.flux)
-    equilibrium, _program = solver.solve_target(previous, target)
-    achieved = achieved_target(machine.profile, equilibrium.flux)
-    rounds = [
-        {
-            "index": index,
-            "coil_current_a": item.inverse.currents.tolist(),
-            "coil_delta_a": item.inverse.delta.tolist(),
-            "uncapped_coil_delta_a": item.inverse.uncapped_delta.tolist(),
-            "free_circuit_current_by_family_a": {
-                _circuit_label(int(circuit), circuit_names): float(
-                    item.inverse.currents[circuit]
-                )
-                for circuit in item.inverse.free_circuits
-            },
-            "current_change_by_family_a": {
-                _circuit_label(int(circuit), circuit_names): float(delta)
-                for circuit, delta in zip(
-                    item.inverse.free_circuits, item.inverse.delta, strict=True
-                )
-            },
-            "current_change_fraction_of_seed_by_family": {
-                _circuit_label(int(circuit), circuit_names): float(
-                    abs(delta) / abs(solver.reference_current[circuit])
-                )
-                for circuit, delta in zip(
-                    item.inverse.free_circuits, item.inverse.delta, strict=True
-                )
-            },
-            "current_change_l2_a": float(np.linalg.norm(item.inverse.delta)),
-            "uncapped_current_change_l2_a": float(
-                np.linalg.norm(item.inverse.uncapped_delta)
-            ),
-            "current_step_fraction": item.inverse.current_step_fraction,
-            "current_step_limited": item.inverse.current_step_limited,
-            "linear_row_prediction": item.inverse.linear_prediction.tolist(),
-            "uncapped_linear_row_prediction": (
-                item.inverse.response[:, item.inverse.free_circuits]
-                @ item.inverse.uncapped_delta
-            ).tolist(),
-            "linear_row_right_hand_side": item.inverse.right_hand_side.tolist(),
-            "least_squares_residual": item.inverse.least_squares_residual,
-            "uncapped_least_squares_residual": (
-                item.inverse.uncapped_least_squares_residual
-            ),
-            "response_singular_values": item.inverse.singular_values.tolist(),
-            "response_numerical_rank": item.inverse.numerical_rank,
-            "response_conditioning_span": float(
-                item.inverse.singular_values[0]
-                / item.inverse.singular_values[item.inverse.numerical_rank - 1]
-            ),
-            "null_modes": _null_modes(item.inverse, circuit_names),
-            "placement_picard_total_currents_a": (
-                item.inverse.picard_currents.tolist()
-            ),
-            "placement_picard_boundary_flux_wb": (
-                item.inverse.picard_boundary_flux.tolist()
-            ),
-            "commanded_turning_points_m": _points(target).tolist(),
-            "achieved_turning_points_m": item.achieved_turning_points.tolist(),
-            "turning_point_error_m": item.turning_point_error,
-            "trips": item.trips,
-            "wall_s": item.wall,
-        }
-        for index, item in enumerate(solver.last_rounds, start=1)
-    ]
+    profile = machine.profile
+    prior = achieved_target(profile, previous.flux)
+    inverse_started = perf_counter()
+    inverse = solve_shape_inverse(
+        profile,
+        target,
+        previous.flux,
+        prescribed_current=solver.prescribed_current,
+        free_circuits=machine.drivable_circuits,
+        gamma=gamma_factor,
+        current_step_fraction=solver.current_step_fraction,
+        current_step_reference=solver.reference_current,
+    )
+    inverse_wall = perf_counter() - inverse_started
+    solver.prescribed_current = inverse.currents
+    arm_path = directory / f"{name}.json"
+    persisted = {
+        "arm": name,
+        "status": "prescribed_currents_persisted",
+        "runtime": runtime,
+        "previous_turning_points_m": _points(prior).tolist(),
+        "commanded_turning_points_m": _points(target).tolist(),
+        "gamma_factor_per_ampere": gamma_factor,
+        "prescribed_current_by_circuit_a": {
+            _circuit_label(index, circuit_names): float(current)
+            for index, current in enumerate(inverse.currents)
+        },
+        "active_current_change_by_family_a": {
+            _circuit_label(int(circuit), circuit_names): float(delta)
+            for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
+        },
+        "maximum_absolute_active_current_change_a": float(
+            np.max(np.abs(inverse.delta))
+        ),
+        "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+        "commanded_change_against_consistency_floor": row_floor_table,
+        "inverse_wall_s": inverse_wall,
+    }
+    _write(arm_path, persisted)
+    forward_started = perf_counter()
+    try:
+        equilibrium, trips, _program = solver._forward(
+            profile, previous.flux, solver.prescribed_current
+        )
+    except Exception as error:
+        persisted.update(
+            {
+                "status": "forward_failed",
+                "forward_wall_s": perf_counter() - forward_started,
+                "forward_error": f"{type(error).__name__}: {error}",
+                "qualified_axis": (
+                    False if isinstance(error, NoQualifiedAxisError) else None
+                ),
+            }
+        )
+        _write(arm_path, persisted)
+        raise
+    forward_wall = perf_counter() - forward_started
+    try:
+        profile.operator.read(jnp.asarray(equilibrium.flux))
+        achieved = achieved_target(profile, equilibrium.flux)
+    except NoQualifiedAxisError as error:
+        persisted.update(
+            {
+                "status": "forward_unqualified_axis",
+                "forward_wall_s": forward_wall,
+                "forward_error": f"{type(error).__name__}: {error}",
+                "trips": int(trips),
+                "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
+                "qualified_axis": False,
+            }
+        )
+        _write(arm_path, persisted)
+        raise
+    error = turning_point_error(profile, target, equilibrium.flux)
+    round_receipt = {
+        "index": 1,
+        "coil_current_a": inverse.currents.tolist(),
+        "coil_delta_a": inverse.delta.tolist(),
+        "uncapped_coil_delta_a": inverse.uncapped_delta.tolist(),
+        "free_circuit_current_by_family_a": {
+            _circuit_label(int(circuit), circuit_names): float(
+                inverse.currents[circuit]
+            )
+            for circuit in inverse.free_circuits
+        },
+        "current_change_by_family_a": {
+            _circuit_label(int(circuit), circuit_names): float(delta)
+            for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
+        },
+        "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+        "uncapped_current_change_l2_a": float(np.linalg.norm(inverse.uncapped_delta)),
+        "current_step_fraction": inverse.current_step_fraction,
+        "current_step_limited": inverse.current_step_limited,
+        "linear_row_prediction": inverse.linear_prediction.tolist(),
+        "uncapped_linear_row_prediction": (
+            inverse.response[:, inverse.free_circuits] @ inverse.uncapped_delta
+        ).tolist(),
+        "linear_row_right_hand_side": inverse.right_hand_side.tolist(),
+        "least_squares_residual": inverse.least_squares_residual,
+        "uncapped_least_squares_residual": inverse.uncapped_least_squares_residual,
+        "response_singular_values": inverse.singular_values.tolist(),
+        "response_numerical_rank": inverse.numerical_rank,
+        "response_conditioning_span": float(
+            inverse.singular_values[0]
+            / inverse.singular_values[inverse.numerical_rank - 1]
+        ),
+        "null_modes": _null_modes(inverse, circuit_names),
+        "placement_picard_total_currents_a": inverse.picard_currents.tolist(),
+        "placement_picard_boundary_flux_wb": inverse.picard_boundary_flux.tolist(),
+        "commanded_change_against_consistency_floor": row_floor_table,
+        "commanded_turning_points_m": _points(target).tolist(),
+        "achieved_turning_points_m": _points(achieved).tolist(),
+        "turning_point_error_m": error,
+        "trips": int(trips),
+        "inverse_wall_s": inverse_wall,
+        "forward_wall_s": forward_wall,
+        "wall_s": inverse_wall + forward_wall,
+    }
     payload = {
         "arm": name,
+        "status": "complete",
+        "runtime": runtime,
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
@@ -655,8 +715,8 @@ def _arm_receipt(
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
-        "rounds": rounds,
-        "round_count": len(rounds),
+        "rounds": [round_receipt],
+        "round_count": 1,
         "current_step_policy": {
             "reference": "fixed carrier seed current per circuit",
             "gamma_factor_per_ampere": gamma_factor,
@@ -664,11 +724,13 @@ def _arm_receipt(
             "placement_picard_rounds": 3,
             "nonlinear_forward_solves": 1,
         },
-        "total_wall_s": float(sum(item["wall_s"] for item in rounds)),
-        "total_trips": int(sum(item["trips"] for item in rounds)),
+        "total_wall_s": round_receipt["wall_s"],
+        "total_trips": int(trips),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
-        "final_turning_point_error_m": rounds[-1]["turning_point_error_m"],
+        "qualified_axis": True,
+        "final_turning_point_error_m": error,
     }
+    _write(arm_path, payload)
     return payload, achieved
 
 
@@ -813,12 +875,38 @@ def measure(
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
     consistency_path = directory / CONSISTENCY_DIAGNOSTIC
     consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
-    gamma_by_command = {
-        item["command"]: item["selected_gamma_factor_per_ampere"]
+    command_evidence = {
+        item["command"]: next(
+            row
+            for row in item["gamma_sweep"]
+            if row["gamma_factor_per_ampere"] == FORWARD_GAMMA_FACTOR
+        )
         for item in consistency["check_3_command_gamma_sweep"]["commands"]
     }
-    if any(value is None for value in gamma_by_command.values()):
-        raise ValueError("every H200 command must have an admitted CPU gamma")
+    gamma_by_command = dict.fromkeys(command_evidence, FORWARD_GAMMA_FACTOR)
+    maximum_change_a = 20_000.0
+    for name, evidence in command_evidence.items():
+        measured = evidence["placement_result"]["maximum_absolute_current_change_a"]
+        if measured > maximum_change_a:
+            raise ValueError(
+                f"{name} requests {measured:.6g} A, above the hardware ceiling"
+            )
+    row_floor_by_command = {
+        name: [
+            {
+                **row,
+                "absolute_commanded_change": abs(row["right_hand_side"]),
+                "commanded_change_to_consistency_floor": (
+                    abs(row["right_hand_side"]) / max(row["consistency_floor"], 1.0e-15)
+                ),
+                "commanded_change_exceeds_consistency_floor": bool(
+                    abs(row["right_hand_side"]) > row["consistency_floor"]
+                ),
+            }
+            for row in evidence["placement_result"]["linear_row_closure"]
+        ]
+        for name, evidence in command_evidence.items()
+    }
     definitions = (
         (
             "upper-point-plus-20mm",
@@ -845,6 +933,12 @@ def measure(
         "carrier": carrier_evidence,
         "policy": policy,
         "inverse_gamma_factor_by_command": gamma_by_command,
+        "hardware_current_ceiling_a": maximum_change_a,
+        "gamma_selection": (
+            "fixed weak damping after interpreting row closure against each "
+            "row's measured consistency floor"
+        ),
+        "cpu_consistency_source_commit": consistency["source_commit"],
         "active_circuits": [
             {
                 "index": index,
@@ -870,10 +964,11 @@ def measure(
             null_points,
             circuit_names,
             gamma_factor,
+            row_floor_by_command[name],
+            directory,
+            runtime,
         )
-        arm["runtime"] = runtime
         arms.append(arm)
-        _write(directory / f"{name}.json", arm)
         print(
             f"ARM-DONE {name} error_mm="
             f"{1000 * arm['final_turning_point_error_m']:.6g} "

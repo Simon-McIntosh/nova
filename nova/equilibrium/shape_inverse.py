@@ -81,6 +81,7 @@ class ShapeInverseResult:
 
     currents: np.ndarray
     delta: np.ndarray
+    uncapped_delta: np.ndarray
     free_circuits: np.ndarray
     response: np.ndarray
     observed: np.ndarray
@@ -93,7 +94,10 @@ class ShapeInverseResult:
     numerical_rank: int
     rank_threshold: float
     right_null_space: np.ndarray
+    current_step_fraction: float | None
+    current_step_limited: bool
     least_squares_residual: float
+    uncapped_least_squares_residual: float
 
 
 def _numerical_rank(singular_values: np.ndarray) -> tuple[int, float]:
@@ -106,6 +110,25 @@ def _numerical_rank(singular_values: np.ndarray) -> tuple[int, float]:
         raise ValueError("the shape response block has no finite circuit authority")
     threshold = RANK_RELATIVE_TOLERANCE * largest
     return int(np.count_nonzero(values >= threshold)), threshold
+
+
+def _cap_current_delta(
+    delta: np.ndarray,
+    reference_current: np.ndarray,
+    fraction: float | None,
+) -> tuple[np.ndarray, bool]:
+    """Bound each circuit update by a fraction of its seed-current magnitude."""
+    update = np.asarray(delta, dtype=float)
+    reference = np.asarray(reference_current, dtype=float)
+    if update.shape != reference.shape:
+        raise ValueError("the current-step reference must match the free-circuit count")
+    if fraction is None:
+        return update.copy(), False
+    if not np.isfinite(fraction) or fraction <= 0.0:
+        raise ValueError("current_step_fraction must be finite and positive")
+    limit = fraction * np.abs(reference)
+    capped = np.clip(update, -limit, limit)
+    return capped, bool(np.any(capped != update))
 
 
 def reference_point(profile: ForwardProfile, flux) -> np.ndarray:
@@ -434,6 +457,8 @@ def solve_shape_inverse(
     reference: IsofluxReference = "reference_point",
     gamma: float = GAMMA,
     field_weight: float = FIELD_WEIGHT,
+    current_step_fraction: float | None = None,
+    current_step_reference=None,
 ) -> ShapeInverseResult:
     """Return the prescribed currents that drive the flux map to one target.
 
@@ -444,7 +469,10 @@ def solve_shape_inverse(
     drivable indices explicitly.  Field rows are weighted by
     ``sqrt(field_weight)`` and the Tikhonov factor is ``gamma`` times the
     largest singular value of the weighted response block. The returned
-    ``gamma`` is that dimensional factor as passed to the pseudo-inverse.
+    ``gamma`` is that dimensional factor as passed to the pseudo-inverse. A
+    current-step fraction clips each free-circuit update against the magnitude
+    of its fixed seed-current reference so Picard rounds cannot destroy the
+    equilibrium with a single under-damped command.
     """
     state = jnp.asarray(flux)
     span = _flux_span(profile, state)
@@ -490,7 +518,26 @@ def solve_shape_inverse(
         raise ValueError("the shape response block has no finite circuit authority")
     largest_singular_value = float(singular_values[0])
     regularisation = gamma * largest_singular_value
-    delta_free = MoorePenrose(weighted, gamma=regularisation, rank=numerical_rank) / rhs
+    uncapped_delta = (
+        MoorePenrose(weighted, gamma=regularisation, rank=numerical_rank) / rhs
+    )
+    if current_step_reference is None:
+        if prescribed_current is None:
+            step_reference = np.zeros(response.shape[1])
+        else:
+            step_reference = np.asarray(prescribed_current, dtype=float)
+    else:
+        step_reference = np.asarray(current_step_reference, dtype=float)
+    if step_reference.shape != (response.shape[1],):
+        raise ValueError(
+            "current_step_reference must match the response column count "
+            f"{response.shape[1]}"
+        )
+    delta_free, current_step_limited = _cap_current_delta(
+        uncapped_delta,
+        step_reference[free],
+        current_step_fraction,
+    )
 
     if prescribed_current is None:
         current = np.zeros(response.shape[1])
@@ -513,6 +560,7 @@ def solve_shape_inverse(
     return ShapeInverseResult(
         currents=current,
         delta=delta_free,
+        uncapped_delta=uncapped_delta,
         free_circuits=free,
         response=response,
         observed=observed,
@@ -525,7 +573,12 @@ def solve_shape_inverse(
         numerical_rank=numerical_rank,
         rank_threshold=rank_threshold,
         right_null_space=right_vectors_h[numerical_rank:],
+        current_step_fraction=current_step_fraction,
+        current_step_limited=current_step_limited,
         least_squares_residual=float(np.linalg.norm(weighted @ delta_free - rhs)),
+        uncapped_least_squares_residual=float(
+            np.linalg.norm(weighted @ uncapped_delta - rhs)
+        ),
     )
 
 

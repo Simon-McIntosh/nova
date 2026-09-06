@@ -202,6 +202,7 @@ def _arm_receipt(
             "index": index,
             "coil_current_a": item.inverse.currents.tolist(),
             "coil_delta_a": item.inverse.delta.tolist(),
+            "uncapped_coil_delta_a": item.inverse.uncapped_delta.tolist(),
             "free_circuit_current_by_family_a": {
                 _circuit_label(int(circuit), circuit_names): float(
                     item.inverse.currents[circuit]
@@ -214,15 +215,35 @@ def _arm_receipt(
                     item.inverse.free_circuits, item.inverse.delta, strict=True
                 )
             },
+            "current_change_fraction_of_seed_by_family": {
+                _circuit_label(int(circuit), circuit_names): float(
+                    abs(delta) / abs(solver.reference_current[circuit])
+                )
+                for circuit, delta in zip(
+                    item.inverse.free_circuits, item.inverse.delta, strict=True
+                )
+            },
             "current_change_l2_a": float(np.linalg.norm(item.inverse.delta)),
+            "uncapped_current_change_l2_a": float(
+                np.linalg.norm(item.inverse.uncapped_delta)
+            ),
+            "current_step_fraction": item.inverse.current_step_fraction,
+            "current_step_limited": item.inverse.current_step_limited,
             "linear_row_prediction": (
                 item.inverse.response[:, item.inverse.free_circuits]
                 @ item.inverse.delta
+            ).tolist(),
+            "uncapped_linear_row_prediction": (
+                item.inverse.response[:, item.inverse.free_circuits]
+                @ item.inverse.uncapped_delta
             ).tolist(),
             "linear_row_command": (
                 item.inverse.target - item.inverse.observed
             ).tolist(),
             "least_squares_residual": item.inverse.least_squares_residual,
+            "uncapped_least_squares_residual": (
+                item.inverse.uncapped_least_squares_residual
+            ),
             "response_singular_values": item.inverse.singular_values.tolist(),
             "response_numerical_rank": item.inverse.numerical_rank,
             "response_rank_threshold": item.inverse.rank_threshold,
@@ -231,6 +252,8 @@ def _arm_receipt(
                 / item.inverse.singular_values[item.inverse.numerical_rank - 1]
             ),
             "null_modes": _null_modes(item.inverse, circuit_names),
+            "commanded_turning_points_m": _points(target).tolist(),
+            "achieved_turning_points_m": item.achieved_turning_points.tolist(),
             "turning_point_error_m": item.turning_point_error,
             "trips": item.trips,
             "wall_s": item.wall,
@@ -250,6 +273,11 @@ def _arm_receipt(
         },
         "rounds": rounds,
         "round_count": len(rounds),
+        "current_step_policy": {
+            "reference": "fixed carrier seed current per circuit",
+            "maximum_fraction_per_round": solver.current_step_fraction,
+            "maximum_rounds": solver.max_inverse_rounds,
+        },
         "total_wall_s": float(sum(item["wall_s"] for item in rounds)),
         "total_trips": int(sum(item["trips"] for item in rounds)),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),

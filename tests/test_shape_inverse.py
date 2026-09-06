@@ -13,6 +13,7 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
     RANK_RELATIVE_TOLERANCE,
+    _cap_current_delta,
     _numerical_rank,
     achieved_target,
     bounding_box_pairs,
@@ -97,6 +98,17 @@ def test_numerical_rank_drops_only_exact_zero_modes():
     assert absolute_threshold == threshold
 
 
+def test_current_step_cap_is_relative_to_each_seed_circuit():
+    """Every update stays within its circuit's fixed seed-current box."""
+    applied, limited = _cap_current_delta(
+        np.asarray([20.0, -40.0, 1.0]),
+        np.asarray([100.0, 200.0, 0.0]),
+        0.1,
+    )
+    np.testing.assert_array_equal(applied, np.asarray([10.0, -20.0, 0.0]))
+    assert limited
+
+
 @pytest.mark.parametrize("parameter", ("bulk_r", "bulk_z"))
 def test_bulk_motion_translates_all_four_turning_points_rigidly(seed_target, parameter):
     """Bulk controls move the bounding box without deforming it."""
@@ -113,7 +125,7 @@ def test_bulk_motion_translates_all_four_turning_points_rigidly(seed_target, par
     np.testing.assert_allclose(np.asarray(moved.vertical_field_points), after[[1, 3]])
 
 
-def test_production_solver_uses_at_most_two_unconstrained_forward_rounds(
+def test_production_solver_stops_after_first_acceptable_forward_round(
     monkeypatch, seed_target
 ):
     """A large point error earns exactly one corrective inverse-forward round."""
@@ -137,8 +149,19 @@ def test_production_solver_uses_at_most_two_unconstrained_forward_rounds(
         production, "achieved_target", lambda _profile, _flux: seed_target
     )
 
-    def inverse(_profile, _target, _flux, *, prescribed_current, free_circuits):
+    def inverse(
+        _profile,
+        _target,
+        _flux,
+        *,
+        prescribed_current,
+        free_circuits,
+        current_step_fraction,
+        current_step_reference,
+    ):
         assert free_circuits is None
+        assert current_step_fraction == 0.1
+        np.testing.assert_allclose(current_step_reference, [2.0, -3.0])
         return SimpleNamespace(currents=np.asarray(prescribed_current) + 1.0)
 
     monkeypatch.setattr(production, "solve_shape_inverse", inverse)

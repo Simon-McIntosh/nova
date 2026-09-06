@@ -37,10 +37,12 @@ from nova.equilibrium.shape_inverse import (
 from apps.playable.session import SolveResult
 from apps.playable.shape import PlasmaShape, move_bounding_box
 
-#: A second inverse-forward round is taken above this point error [m].
+#: Another inverse-forward round is taken above this point error [m].
 TURNING_POINT_TOLERANCE = 2.0e-3
-#: One initial response and at most one correction keep a keyframe bounded.
-MAX_INVERSE_ROUNDS = 2
+#: Per-round circuit-current change as a fraction of the fixed seed magnitude.
+CURRENT_STEP_FRACTION = 0.1
+#: Bound Picard progress so the interactive solve remains a finite operation.
+MAX_INVERSE_ROUNDS = 12
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,7 @@ class InverseRoundReceipt:
     """One inverse current solve followed by one forward response."""
 
     inverse: ShapeInverseResult
+    achieved_turning_points: np.ndarray
     turning_point_error: float
     trips: int
     wall: float
@@ -80,7 +83,10 @@ class ProductionSolver:
     gmres_iterations: int = 4
     active_set_steps: int = 2
     turning_point_tolerance: float = TURNING_POINT_TOLERANCE
+    current_step_fraction: float = CURRENT_STEP_FRACTION
+    max_inverse_rounds: int = MAX_INVERSE_ROUNDS
     prescribed_current: np.ndarray = field(init=False, repr=False)
+    reference_current: np.ndarray = field(init=False, repr=False)
     last_target: object | None = field(init=False, default=None, repr=False)
     last_rounds: tuple[InverseRoundReceipt, ...] = field(
         init=False, default=(), repr=False
@@ -97,6 +103,7 @@ class ProductionSolver:
         if field_current is None:
             raise ValueError("shape control needs a prescribed current field")
         self.prescribed_current = np.asarray(field_current.current, dtype=float).copy()
+        self.reference_current = self.prescribed_current.copy()
 
     def _flux(self, previous: ForwardEquilibrium | None) -> np.ndarray:
         """Return the warm-start flux, or the machine seed for the prime."""
@@ -192,13 +199,13 @@ class ProductionSolver:
     def solve_target(
         self, previous: ForwardEquilibrium, target: object
     ) -> tuple[ForwardEquilibrium, object | None]:
-        """Drive one fixed bounding-box target for at most two rounds."""
+        """Drive one fixed bounding-box target through bounded Picard rounds."""
         profile = self.machine.profile
         flux = np.asarray(previous.flux)
         rounds = []
         equilibrium = previous
         program_out = None
-        for _ in range(MAX_INVERSE_ROUNDS):
+        for _ in range(self.max_inverse_rounds):
             round_started = perf_counter()
             inverse = solve_shape_inverse(
                 profile,
@@ -206,15 +213,19 @@ class ProductionSolver:
                 flux,
                 prescribed_current=self.prescribed_current,
                 free_circuits=self.machine.drivable_circuits,
+                current_step_fraction=self.current_step_fraction,
+                current_step_reference=self.reference_current,
             )
             self.prescribed_current = inverse.currents
             equilibrium, round_trips, program_out = self._forward(
                 profile, flux, self.prescribed_current
             )
             error = turning_point_error(profile, target, equilibrium.flux)
+            achieved = achieved_target(profile, equilibrium.flux)
             rounds.append(
                 InverseRoundReceipt(
                     inverse=inverse,
+                    achieved_turning_points=np.asarray(achieved.flux_points),
                     turning_point_error=error,
                     trips=round_trips,
                     wall=perf_counter() - round_started,
@@ -238,9 +249,10 @@ class ProductionSolver:
         """Warm-start and run the inverse-forward shape-control step.
 
         A prime uses the carrier currents unchanged. A shape action is applied
-        to the achieved turning points of the previous frame, then one or two
-        inverse-forward rounds drive that fixed target. Each forward solve is
-        unconstrained and therefore publishes no compensating-row records.
+        to the achieved turning points of the previous frame, then bounded
+        Picard inverse-forward rounds drive that fixed target. Each forward
+        solve is unconstrained and therefore publishes no compensating-row
+        records.
         """
         del program
         profile = self.machine.profile

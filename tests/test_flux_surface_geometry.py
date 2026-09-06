@@ -1,11 +1,17 @@
 """Flux-surface geometry assembly from accelerator-native connectivity bins."""
 
 from dataclasses import dataclass
+from functools import cache
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.contour import Contour
+from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.flux_surface_geometry import (
+    FluxSurfaceGeometry as HostFluxSurfaceGeometry,
+)
 from nova.transport import (
     CurrentDiffusion,
     EtaProfile,
@@ -63,6 +69,106 @@ def _assemble_circular_geometry(*, n_radial_cells: int = 24):
     )
     assert geometry is not None
     return geometry
+
+
+@cache
+def _internal_circular_geometry():
+    """Return host and device geometry from the same analytic circular map."""
+    psi, grid = _circular_equilibrium()
+
+    def field_function(psi_norm):
+        """Return the constant toroidal-field function of the circular map."""
+        return np.full_like(psi_norm, 2.0 * grid.r0)
+
+    internal = HostFluxSurfaceGeometry.internal_geometry(
+        FluxLattice(grid.rg, grid.zg),
+        psi.T,
+        field_function,
+        axis=(grid.r0, 0.0),
+        boundary_flux=-0.2,
+        reference_radius=grid.r0,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
+    device = traced_flux_surface_geometry(
+        jnp.asarray(psi),
+        jnp.asarray(grid.rg),
+        jnp.asarray(grid.zg),
+        jnp.asarray(grid.inside_limiter),
+        axis_psi=jnp.asarray(0.0),
+        boundary_psi=jnp.asarray(-0.2),
+        profile_coefficients=jnp.asarray([1.0, 0.0]),
+        coefficient_scale=jnp.asarray([8.0e5, 8.0e5]),
+        ip_amperes=jnp.asarray(5.0e5),
+        major_radius=jnp.asarray(grid.r0),
+        boundary_toroidal_field=jnp.asarray(2.0),
+        n_pressure=1,
+        n_diamagnetic=1,
+        n_radial_cells=25,
+        n_surface_bins=32,
+    )
+    return psi, grid, internal, device
+
+
+def test_internal_geometry_loops_are_nested_and_lcfs_matches_contour():
+    """Stored loops span axis to LCFS and agree with Nova's contour cut."""
+    psi, grid, internal, _device = _internal_circular_geometry()
+    expected_levels = np.linspace(0.0, 1.0, 11)
+    np.testing.assert_array_equal(internal.surface_psi_norm, expected_levels)
+    np.testing.assert_array_equal(
+        internal.surface_r[0], np.full(64, internal.record.magnetic_axis[0])
+    )
+    np.testing.assert_array_equal(
+        internal.surface_z[0], np.full(64, internal.record.magnetic_axis[1])
+    )
+
+    distance = np.sqrt(
+        (internal.surface_r - internal.record.magnetic_axis[0]) ** 2
+        + (internal.surface_z - internal.record.magnetic_axis[1]) ** 2
+    )
+    assert np.all(np.diff(np.mean(distance, axis=1)) > 0.0)
+
+    surfaces = Contour(
+        grid.rg,
+        grid.zg,
+        psi,
+        levels=np.asarray([-0.2]),
+    ).levelset(-0.2)
+    contour = max(
+        (surface.points for surface in surfaces if surface.closed),
+        key=lambda points: points.shape[0],
+    )
+    lcfs = np.column_stack((internal.surface_r[-1], internal.surface_z[-1]))
+    nearest = np.min(
+        np.linalg.norm(lcfs[:, None, :] - contour[None, :, :], axis=2), axis=1
+    )
+    cell_diagonal = np.hypot(np.diff(grid.rg).min(), np.diff(grid.zg).min())
+    assert float(np.max(nearest)) <= cell_diagonal
+
+
+def test_internal_geometry_faces_are_finite_monotone_and_match_device_volume():
+    """TORAX faces are finite and host volume agrees with the device path."""
+    _psi, _grid, internal, device = _internal_circular_geometry()
+    record = internal.record
+    np.testing.assert_array_equal(record.rho_tor_norm, np.linspace(0.0, 1.0, 26))
+    for name in record.profile_names():
+        values = np.asarray(getattr(record, name))
+        assert values.shape == (26,), name
+        assert np.all(np.isfinite(values)), name
+    for values in (record.volume, record.area, record.toroidal_flux):
+        assert np.all(np.diff(values) >= 0.0)
+
+    assert bool(device["valid"])
+    device_volume = np.asarray(device["volume_face"])
+    relative = np.abs(record.volume[1:] - device_volume[1:]) / np.maximum(
+        np.abs(device_volume[1:]), 1.0e-12
+    )
+    assert int(np.argmax(relative)) == 0
+    assert float(relative[0]) < 0.85
+    assert float(relative[4]) < 0.15
+    assert float(np.max(relative[5:])) < 0.01
+    assert float(relative[-1]) < 0.005
 
 
 def test_circular_geometry_has_analytic_volume_flux_and_profile_map():

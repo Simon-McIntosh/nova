@@ -773,11 +773,14 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
         commanded = np.asarray(arm["commanded_turning_points_m"])
         achieved = np.asarray(arm["achieved_turning_points_m"])
         shape_axis = axes[row, 0]
-        shape_axis.scatter(previous[:, 0], previous[:, 1], marker="o", label="previous")
-        shape_axis.scatter(
-            commanded[:, 0], commanded[:, 1], marker="x", label="commanded"
-        )
-        shape_axis.scatter(achieved[:, 0], achieved[:, 1], marker="+", label="achieved")
+        for points, marker, label in (
+            (previous, "o", "previous"),
+            (commanded, "x", "commanded"),
+            (achieved, "+", "achieved"),
+        ):
+            closed = np.vstack((points, points[0]))
+            shape_axis.plot(closed[:, 0], closed[:, 1], alpha=0.65)
+            shape_axis.scatter(points[:, 0], points[:, 1], marker=marker, label=label)
         for before, command, after in zip(previous, commanded, achieved, strict=True):
             shape_axis.plot(
                 [before[0], command[0]], [before[1], command[1]], color="0.75"
@@ -809,6 +812,43 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=160)
     plt.close(figure)
+
+
+def _finalize_measured_negative(directory: Path) -> dict[str, Any]:
+    """Aggregate persisted terminal arms without running another solve."""
+    upper_path = directory / "upper-point-plus-20mm.json"
+    elongation_path = directory / "elongation-plus-5pct.json"
+    null_path = directory / "null-resolve.json"
+    consistency_path = directory / CONSISTENCY_DIAGNOSTIC
+    negative_control_path = directory / NEGATIVE_CONTROL
+    upper = json.loads(upper_path.read_text(encoding="utf-8"))
+    elongation = json.loads(elongation_path.read_text(encoding="utf-8"))
+    null = json.loads(null_path.read_text(encoding="utf-8"))
+    consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
+    negative_control = json.loads(negative_control_path.read_text(encoding="utf-8"))
+    receipt = {
+        "outcome": "measured_negative_shape_motion",
+        "interpretation": (
+            "The seed-anchored inverse and consistency checks land. The upper "
+            "command converges to a largely rigid displacement, while the "
+            "elongation command loses its qualified magnetic axis."
+        ),
+        "runtime": upper["runtime"],
+        "null_arm": null,
+        "arms": [upper, elongation],
+        "consistency_receipt": consistency,
+        "all_prescribed_negative_control": {
+            "interpretation": (
+                "Driving passive and vessel circuits as actuators is unphysical; "
+                "the retained large errors are a negative control."
+            ),
+            "source_path": NEGATIVE_CONTROL,
+            "receipt": negative_control,
+        },
+    }
+    _write(directory / "shape-inverse-receipt.json", receipt)
+    _draw([upper], directory / "shape-inverse-receipt.png")
+    return receipt
 
 
 def measure(
@@ -1008,7 +1048,12 @@ def main() -> None:
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
     parser.add_argument("--diagnose-inverse", action="store_true")
     parser.add_argument("--diagnose-consistency", action="store_true")
+    parser.add_argument("--finalize-measured-negative", action="store_true")
     arguments = parser.parse_args()
+    if arguments.finalize_measured_negative:
+        receipt = _finalize_measured_negative(arguments.directory)
+        print("MEASURED-NEGATIVE " + json.dumps(receipt), flush=True)
+        return
     measure(
         arguments.directory,
         diagnose_inverse=arguments.diagnose_inverse,

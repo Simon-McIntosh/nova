@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T21:43:56",
+  "updated": "2026-09-06T21:51:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2670,9 +2670,11 @@
         "id": "pfs-corpus-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07838-4979-72e1-bcb1-f8bd2907cd75"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2869,9 +2871,11 @@
         "id": "pfs-scout-s",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a07839-160e-7b13-a3fb-be4aa343b686"
+        },
         "created": "2026-09-06"
       },
       {
@@ -113709,6 +113713,139 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T193631966321-pfs-batched-reuse-map",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-batched-reuse-map",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4026,
+                "cached_input_tokens": 260500,
+                "input_tokens": 264558,
+                "output_tokens": 4391,
+                "reasoning_output_tokens": 1452,
+                "total_tokens": 268949,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "The report /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/batched-reuse-map.md carries one table per capability (device batching of the compiled slice route, corpus scheduling, host frame assembly, receipt aggregation, session reading) with at least the rows nova/equilibrium/reduced_newton.py compiled solvers, nova/jax, tests/test_batched_throughput_receipts.py, nova/equilibrium/steering_frames.py, nova/equilibrium/flux_surface_geometry.py, scripts/labeller_batch, imas_ambix/worldmodel/equilibrium_labels.py, imas_ambix/latent/topology.py, each with a fitness verdict and a gap column, and a closing list of candidates that f-pfs-028, f-pfs-029 and f-pfs-031 must not duplicate",
+          "estimated_hours": 0.4,
+          "goal": "A reuse map for the batched labeller engine, the corpus scheduler, the receipt adjudication tables, an ambix-side session reader: every module, symbol, test, fixture already in nova, imas-ambix or the crew reports that batches, shards or vmaps a compiled solve, assembles, writes or reads steering frames, aggregates labeller receipts, or consumes the labeller session root, each row carrying a one-line fitness verdict with the gap it leaves",
+          "id": "pfs-batched-reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193631966321-pfs-batched-reuse-map/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/batched-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "pfs-scout-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-06T19:36:41Z",
+        "completed_at": "2026-09-06T19:48:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 710,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 710,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "d4dca9ac0c7016ddab1c76f61fbb6b79b54608d6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python3 structural reuse-map check: 5 capability tables, 60 rows with fitness verdicts and gaps, 8 mandated locations, 3 no-duplicate boundaries",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193631966321-pfs-batched-reuse-map/reuse-map-check.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193631966321-pfs-batched-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5604352,
+            "cached_input_tokens_cumulative": 5604352,
+            "input_tokens": 5873426,
+            "input_tokens_cumulative": 5873426,
+            "output_tokens": 25725,
+            "output_tokens_cumulative": 25725,
+            "reasoning_output_tokens": 5628,
+            "reasoning_output_tokens_cumulative": 5628
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 31353,
+          "peak_input_tokens": 11477778
+        },
+        "follow_on_paths": [
+          "receipt-adjudication/Ambix-reader"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only investigate node; the reuse map report is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-batched-reuse-map",
+          "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T19:48:31Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -114021,6 +114158,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1929
+    "_version": 1932
   }
 }

@@ -5,14 +5,16 @@ set -euo pipefail
 ROOT="$(git -C "$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")" rev-parse --show-toplevel)"
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 DRIVER="${ROOT}/scripts/labeller_batch/shard.py"
+export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 MODE=
 OUTPUT_ROOT=
 SHARDS=8
+TRANCHE_SHARDS=8
 SLICES_PER_SECOND=
 INCLUDE_RASTER=0
 
 usage() {
-  echo "usage: $0 (--dry-run|--submit) --output-root DIR --slices-per-second RATE [--shards N] [--include-raster]" >&2
+  echo "usage: $0 (--dry-run|--submit) --output-root DIR --slices-per-second RATE [--shards N] [--tranche-shards N] [--include-raster]" >&2
 }
 
 while (($#)); do
@@ -28,6 +30,10 @@ while (($#)); do
       ;;
     --shards)
       SHARDS="${2:?missing shard count}"
+      shift 2
+      ;;
+    --tranche-shards)
+      TRANCHE_SHARDS="${2:?missing tranche shard count}"
       shift 2
       ;;
     --slices-per-second)
@@ -54,7 +60,8 @@ mkdir -p -- "${OUTPUT_ROOT}/.shards" "${OUTPUT_ROOT}/logs"
 PLAN="${OUTPUT_ROOT}/.shards/plan.json"
 "${PYTHON}" "${DRIVER}" --enumerate-corpus \
   --write-shards "${OUTPUT_ROOT}/.shards" \
-  --shard-count "${SHARDS}" --plan-output "${PLAN}" >/dev/null
+  --shard-count "${SHARDS}" --tranche-shards "${TRANCHE_SHARDS}" \
+  --plan-output "${PLAN}" >/dev/null
 
 "${PYTHON}" -c '
 import json, sys
@@ -72,6 +79,16 @@ print(f"shards={plan['"'"'shard_count'"'"']}")
 print(f"measured_slices_per_second_per_card={rate:.9g}")
 print(f"estimated_gpu_hours={hours:.6f}")
 print(f"estimated_hours_per_shard={per_shard:.6f}")
+for tranche in plan["tranches"]:
+    gpu_hours = tranche["estimated_cumulative_slices"] / rate / 3600.0
+    print(
+        (
+            "tranche={tranche} shards={first_shard}-{last_shard} "
+            "cumulative_shots={cumulative_shots} "
+            "cumulative_camera_frames={cumulative_camera_frames} "
+            "cumulative_gpu_hours={gpu_hours:.6f}"
+        ).format(gpu_hours=gpu_hours, **tranche)
+    )
 ' "${PLAN}" "${SLICES_PER_SECOND}"
 
 if [[ "${MODE}" == "--dry-run" ]]; then
@@ -80,7 +97,10 @@ import json, sys
 from pathlib import Path
 plan = json.loads(Path(sys.argv[1]).read_text())
 for shard in plan["shards"]:
-    print("shard={index} shots={shot_count} first={first_shot} last={last_shot} list={path}".format(**shard))
+    print(
+        "shard={index} shots={shot_count} camera_frames={camera_frames} "
+        "first={first_shot} last={last_shot} list={path}".format(**shard)
+    )
 ' "${PLAN}"
   exit 0
 fi

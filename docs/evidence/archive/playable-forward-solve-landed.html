@@ -565,6 +565,11 @@
     <p><strong>Gates.</strong> Scoped fast gate 13 passed (job 1263313, 399 s); the decoder-field fixture 1 passed in 2383 s on <code>all_debug</code> (job 1263334)
     after the row-0 axis assertion was corrected (the first run compared a constant vector with a scalar). Merged on those two gates while the independent
     local-lane review was still running; that review is folded into this anchor when it lands. The raster psi unit label (f-pfs-024) is unchanged.</p>
+    <p><strong>Ride-alongs (707e1372; main 2c6f8352).</strong> Node <code>pfs-frame-flux-functions-and-centroid</code> (codex sol, 53 minutes): the
+    frame carries <code>p_prime_face</code> and <code>ff_prime_face</code> on the same 26-face grid, linearly interpolated from the supplied flux-function
+    grid (efm's 65 points tonight, TORAX's later, named by the <code>p_prime_source</code> attribute) as training inputs, and the solved plasma current
+    centroid beside a caller-supplied reference centroid with <code>branch_guard_ok</code> true within 50 mm, the reference and the flag under
+    <code>diagnostic_only</code> so no EFIT reading enters the training set. Fast tests 10 passed; the decoder-field fixture 1 passed on a compute node.</p>
   </section>
 </main>
 </body>

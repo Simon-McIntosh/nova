@@ -351,15 +351,17 @@ def test_ladder_scoring_evaluates_one_map_per_accepted_step(machine):
 def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
     """One compiled trip close returns what the separate calls returned.
 
-    The promoted shadow, the mask difference against the frozen shadow and the
-    live residual of the promoted map are the boundary's decisions, and they
-    are compared for exact equality against the calls the dispatched boundary
-    makes at the same reduced state and the same frozen shadow.  The next
-    trip's amplitudes and the off-support leakage are carried values rather
-    than decisions and are compared to a tolerance: one program computing the
-    whole boundary is free to reassociate arithmetic that separate programs
-    evaluate one expression at a time, and that reassociation moves the last
-    bits of a sum without moving anything the solve decides.
+    The promoted shadow and the mask difference against the frozen shadow are
+    the boundary's decisions and are compared for exact equality against the
+    calls the dispatched boundary makes at the same reduced state and the same
+    frozen shadow.  The live residual against the promoted map is bracketed
+    rather than pinned: the fused program rebuilds the mapped flux from its
+    own captured external and image while the reference recomputation drives
+    the production map, and one fused program is free to reassociate that
+    arithmetic so the two agree to a few units in the last place (measured
+    here at about 9e-16 of the residual) without any decision moving.  The
+    next trip's amplitudes and the off-support leakage are carried values
+    rather than decisions and are compared to a tolerance for the same reason.
     """
     profile, seed = machine
     operator = profile.operator
@@ -391,7 +393,10 @@ def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
         assert bool(jnp.array_equal(state, expected_state))
         assert bool(jnp.array_equal(promoted, expected_promoted))
         assert int(difference) == int(jnp.sum(expected_promoted != shadow))
-        assert float(residual) == float(_relative_residual(mapped, expected_state))
+        assert float(residual) == pytest.approx(
+            float(_relative_residual(mapped, expected_state)),
+            rel=TAIL_RESIDUAL_AGREEMENT,
+        )
         expected_gather = reduced_newton._gather(
             coordinates, operator.cell_current_moments(expected_state)
         )

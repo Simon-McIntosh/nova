@@ -1,0 +1,403 @@
+{
+  "receipt": "compensating direction stability under the constrained solve",
+  "source": {
+    "revision": "98b1c93e061eecda8e891989a023fc0b7339163d",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "configuration": {
+    "route": "ForwardProfile.solve_branch public defaults",
+    "constraint_policy": "imposed",
+    "support": "all_domain",
+    "derivations": [
+      "seed flux followed by a constrained solve",
+      "converged flux followed by a warm-started constrained re-solve"
+    ],
+    "drivable_circuits": "the machine active mapping",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    }
+  },
+  "inputs": {
+    "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005542316474020481,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/cank-converged-state-compensator-sol/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.027740 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "identity": "21986/46",
+      "seed_vertical_centroid_m": 0.09889428493417936,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 130455.06566432705,
+        "position_scale_m": 4.0
+      },
+      "seed_derivation": {
+        "selection": {
+          "rule": "dominant_authority",
+          "competing_rows": false,
+          "singular_values_row_scales_per_ampere": [
+            4.1237614346365337e-07
+          ],
+          "direction_authority_row_scales_per_ampere": [
+            7.446161444416652e-07
+          ],
+          "leading_circuits": [
+            {
+              "circuit": 0,
+              "family": "sol",
+              "weight": 1.0
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "weight": 0.8015030258894703
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "weight": 0.6412633240890712
+            }
+          ]
+        },
+        "solve": {
+          "qualified": true,
+          "topology_consistent": true,
+          "terminal_residual": 5.590500990365727e-15,
+          "active_set_trips": 3,
+          "termination": "converged",
+          "vertical_centroid_m": 0.09889428493417951,
+          "vertical_target_m": 0.09889428493417936,
+          "vertical_error_m": 1.5265566588595902e-16,
+          "compensating_current_a": -1869.9809661854317,
+          "scaled_constraint_residual": 3.8163916471489756e-17,
+          "soft_mode_projection": 1.8047773660842832e-17,
+          "compensator_rule": "dominant_authority",
+          "singular_values_row_scales_per_ampere": [
+            4.1237614346365337e-07
+          ],
+          "pair_projected_current_a": -1037.265504064536,
+          "circuit_current_delta_norm_a": 3376.5726734942,
+          "driven_circuits": [
+            {
+              "circuit": 0,
+              "current_a": -1869.9809661854317
+            },
+            {
+              "circuit": 5,
+              "current_a": -1498.7954027533387
+            },
+            {
+              "circuit": 11,
+              "current_a": -1199.150210359363
+            },
+            {
+              "circuit": 7,
+              "current_a": -1054.1822020837153
+            },
+            {
+              "circuit": 12,
+              "current_a": 875.380797769709
+            },
+            {
+              "circuit": 6,
+              "current_a": 865.3876703862948
+            }
+          ]
+        }
+      },
+      "converged_derivation": {
+        "selection": {
+          "rule": "dominant_authority",
+          "competing_rows": false,
+          "singular_values_row_scales_per_ampere": [
+            3.4120308775554115e-07
+          ],
+          "direction_authority_row_scales_per_ampere": [
+            7.10544452810284e-07
+          ],
+          "leading_circuits": [
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "weight": 1.0
+            },
+            {
+              "circuit": 11,
+              "family": "p6_upper",
+              "weight": 0.8049758691199251
+            },
+            {
+              "circuit": 0,
+              "family": "sol",
+              "weight": 0.7572721169449301
+            }
+          ]
+        },
+        "solve": {
+          "qualified": true,
+          "topology_consistent": true,
+          "terminal_residual": 2.2203040336551721e-16,
+          "active_set_trips": 4,
+          "termination": "converged",
+          "vertical_centroid_m": 0.09889428493417936,
+          "vertical_target_m": 0.09889428493417936,
+          "vertical_error_m": 0.0,
+          "compensating_current_a": -1502.3561227656132,
+          "scaled_constraint_residual": 0.0,
+          "soft_mode_projection": -0.00835643611545256,
+          "compensator_rule": "dominant_authority",
+          "singular_values_row_scales_per_ampere": [
+            3.4120308775554115e-07
+          ],
+          "pair_projected_current_a": -1091.8535771017948,
+          "circuit_current_delta_norm_a": 3128.608290735893,
+          "driven_circuits": [
+            {
+              "circuit": 5,
+              "current_a": -1502.3561227656132
+            },
+            {
+              "circuit": 11,
+              "current_a": -1209.3604256508904
+            },
+            {
+              "circuit": 0,
+              "current_a": -1137.6924014918932
+            },
+            {
+              "circuit": 7,
+              "current_a": -1052.5370915824176
+            },
+            {
+              "circuit": 12,
+              "current_a": 974.3467285526993
+            },
+            {
+              "circuit": 6,
+              "current_a": 956.6161291050599
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "direction_angle_degrees": 12.597821555786203,
+        "compensating_current_norm_change_a": -247.96438275830678,
+        "compensating_current_vector_change_norm_a": 755.0764729639304,
+        "compensating_current_vector_relative_change": 0.22362215950250816
+      }
+    },
+    {
+      "identity": "21989/55",
+      "seed_vertical_centroid_m": 0.012586049153551352,
+      "actuator": {
+        "definition": "P6 upper current minus P6 lower current",
+        "upper_stored_circuit": 12,
+        "lower_stored_circuit": 13,
+        "unit_direction_response_span_wb_per_a": 1.2598876914124452e-05,
+        "current_scale_a": 143188.14849106473,
+        "position_scale_m": 4.0
+      },
+      "seed_derivation": {
+        "selection": {
+          "rule": "dominant_authority",
+          "competing_rows": false,
+          "singular_values_row_scales_per_ampere": [
+            3.355167525247554e-07
+          ],
+          "direction_authority_row_scales_per_ampere": [
+            7.875018906927662e-07
+          ],
+          "leading_circuits": [
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "weight": -1.0
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "weight": 0.9688192240357058
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "weight": -0.8994889912461603
+            }
+          ]
+        },
+        "solve": {
+          "qualified": true,
+          "topology_consistent": true,
+          "terminal_residual": 5.023919130907674e-12,
+          "active_set_trips": 1,
+          "termination": "converged",
+          "vertical_centroid_m": 0.012586049153222513,
+          "vertical_target_m": 0.012586049153551352,
+          "vertical_error_m": -3.288393862765915e-13,
+          "compensating_current_a": 958.1879904731406,
+          "scaled_constraint_residual": -8.220984656914787e-14,
+          "soft_mode_projection": -0.005404056706499311,
+          "compensator_rule": "dominant_authority",
+          "singular_values_row_scales_per_ampere": [
+            3.355167525247554e-07
+          ],
+          "pair_projected_current_a": 842.4603279981773,
+          "circuit_current_delta_norm_a": 2248.993078463425,
+          "driven_circuits": [
+            {
+              "circuit": 6,
+              "current_a": -958.1879904731406
+            },
+            {
+              "circuit": 5,
+              "current_a": 928.3109454105204
+            },
+            {
+              "circuit": 12,
+              "current_a": -861.8795489748708
+            },
+            {
+              "circuit": 11,
+              "current_a": 823.0411070214838
+            },
+            {
+              "circuit": 8,
+              "current_a": -727.9628902791569
+            },
+            {
+              "circuit": 7,
+              "current_a": 696.3637903424941
+            }
+          ]
+        }
+      },
+      "converged_derivation": {
+        "selection": {
+          "rule": "dominant_authority",
+          "competing_rows": false,
+          "singular_values_row_scales_per_ampere": [
+            3.35889748631058e-07
+          ],
+          "direction_authority_row_scales_per_ampere": [
+            7.905076204343161e-07
+          ],
+          "leading_circuits": [
+            {
+              "circuit": 6,
+              "family": "p3_lower",
+              "weight": -1.0
+            },
+            {
+              "circuit": 5,
+              "family": "p3_upper",
+              "weight": 0.9864529419696887
+            },
+            {
+              "circuit": 12,
+              "family": "p6_lower",
+              "weight": -0.9012494238658412
+            }
+          ]
+        },
+        "solve": {
+          "qualified": true,
+          "topology_consistent": true,
+          "terminal_residual": 4.885713624428551e-12,
+          "active_set_trips": 1,
+          "termination": "converged",
+          "vertical_centroid_m": 0.012586049153249363,
+          "vertical_target_m": 0.012586049153551352,
+          "vertical_error_m": -3.0198933631542246e-13,
+          "compensating_current_a": 966.7258796264896,
+          "scaled_constraint_residual": -7.549733407885562e-14,
+          "soft_mode_projection": 0.016436799796158256,
+          "compensator_rule": "dominant_authority",
+          "singular_values_row_scales_per_ampere": [
+            3.35889748631058e-07
+          ],
+          "pair_projected_current_a": 859.1621984927671,
+          "circuit_current_delta_norm_a": 2275.163734023961,
+          "driven_circuits": [
+            {
+              "circuit": 6,
+              "current_a": -966.7258796264896
+            },
+            {
+              "circuit": 5,
+              "current_a": 953.6295880357858
+            },
+            {
+              "circuit": 12,
+              "current_a": -871.2611420495723
+            },
+            {
+              "circuit": 11,
+              "current_a": 847.0632549359618
+            },
+            {
+              "circuit": 8,
+              "current_a": -734.7347915064294
+            },
+            {
+              "circuit": 7,
+              "current_a": 716.6436273746301
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "direction_angle_degrees": 4.062086729527532,
+        "compensating_current_norm_change_a": 26.170655560536034,
+        "compensating_current_vector_change_norm_a": 162.45959918789035,
+        "compensating_current_vector_relative_change": 0.07223659367546267
+      }
+    }
+  ],
+  "verdict": {
+    "row_count": 2,
+    "direction_angle_max_degrees": 12.597821555786203,
+    "compensating_current_vector_change_norm_max_a": 755.0764729639304,
+    "vertical_error_max_abs_m": 3.288393862765915e-13,
+    "rules": [
+      "dominant_authority"
+    ]
+  }
+}

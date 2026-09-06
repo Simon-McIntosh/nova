@@ -158,17 +158,17 @@
     "circuit_100": 295.2450256347656
   },
   "trips": 1,
-  "wall_s": 4.693053717724979,
+  "wall_s": 4.542200856842101,
   "converged": true,
   "runtime": {
-    "source_commit": "230ce90e9b7194b7f46b51a0860ba30924174051",
+    "source_commit": "ddc23badea88b9dc08d20ff140725e313520fdcb",
     "python": "3.14.2",
     "jax": "0.11.0",
     "devices": [
       "cuda:0"
     ],
     "scheduler": {
-      "job_id": "1263319",
+      "job_id": "1263337",
       "node": "98dci4-gpu-0003",
       "partition": "betelgeuse",
       "reservation": "gpu_0003_grpA"
@@ -186,7 +186,7 @@
         ],
         "stored_circuit_count": 101,
         "frozen_reference_count": 6,
-        "warm_load_seconds": 0.005558154545724392,
+        "warm_load_seconds": 0.005530217662453651,
         "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
         "size_bytes": 645864
       },
@@ -200,7 +200,7 @@
           "--receipt",
           "docs/figures/plateau-input-attribution/mast-response-carrier.json"
         ],
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.029737 direct_builders=0 verdict=PASS",
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.026944 direct_builders=0 verdict=PASS",
         "direct_green_operator_builder_entries": 0,
         "passes": true
       }

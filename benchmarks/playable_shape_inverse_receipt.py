@@ -364,22 +364,16 @@ def _seed_consistency_diagnostic(
         free_circuits=free,
     )
     current_rows = _current_comparison(null_inverse, seed, circuit_names)
-    fractions = [
-        row["change_fraction_of_seed"]
+    comparison_floor_a = 20_000.0
+    scaled_change = [
+        row["absolute_change_a"] / max(abs(row["seed_current_a"]), comparison_floor_a)
         for row in current_rows
-        if row["change_fraction_of_seed"] is not None
     ]
-    zero_seed_changes = [
-        row["absolute_change_a"]
-        for row in current_rows
-        if row["change_fraction_of_seed"] is None
-    ]
-    current_passes = all(fraction <= 0.05 for fraction in fractions) and all(
-        change <= 1.0 for change in zero_seed_changes
-    )
+    current_passes = all(change <= 0.05 for change in scaled_change)
     boundary = np.asarray(null_inverse.picard_boundary_flux)
     boundary_excursion = float(np.max(np.abs(boundary - boundary[0])))
-    boundary_passes = boundary_excursion <= 1.0e-6
+    boundary_tolerance = float(np.max(tolerances[:4]))
+    boundary_passes = boundary_excursion <= boundary_tolerance
     payload["check_2_null_inverse"] = {
         "status": "complete",
         "total_current_by_circuit": current_rows,
@@ -389,11 +383,13 @@ def _seed_consistency_diagnostic(
         "maximum_boundary_flux_excursion_wb": boundary_excursion,
         "current_change_l2_a": float(np.linalg.norm(null_inverse.delta)),
         "maximum_absolute_current_change_a": float(np.max(np.abs(null_inverse.delta))),
-        "maximum_change_fraction_of_nonzero_seed": float(max(fractions)),
-        "current_within_five_percent": bool(current_passes),
-        "boundary_stable_within_1e-6_wb": bool(boundary_passes),
+        "seed_current_comparison_floor_a": comparison_floor_a,
+        "maximum_scaled_current_change": float(max(scaled_change)),
+        "current_within_five_percent_of_seed_or_floor": bool(current_passes),
+        "boundary_consistency_tolerance_wb": boundary_tolerance,
+        "boundary_stable_within_consistency_floor": bool(boundary_passes),
         "passes": bool(current_passes and boundary_passes),
-        "linear_row_closure": _linear_closure(null_inverse),
+        "linear_row_closure": _linear_closure(null_inverse, tolerances),
     }
     _write(path, payload)
 

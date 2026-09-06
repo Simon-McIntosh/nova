@@ -1,0 +1,153 @@
+{
+  "source_commit": "c068e6a770c79de4bef17b07c27cd474eabf5bec",
+  "machine": "mast-22086/43",
+  "policy": {
+    "active_circuit_count": 13,
+    "field_weight": 50.0,
+    "picard_rounds": 3,
+    "h200_forward_arms_admitted": false
+  },
+  "previous_turning_points_m": [
+    [
+      1.403322210873598,
+      0.011597952807894519
+    ],
+    [
+      0.5917068928217991,
+      1.2377478983979748
+    ],
+    [
+      0.26784458442879255,
+      0.022758461087626334
+    ],
+    [
+      0.6479403295878958,
+      -1.0166726794942371
+    ]
+  ],
+  "check_1_seed_rows": {
+    "description": "Absolute shape rows evaluated at the seed total currents and the previous equilibrium turning points.",
+    "rows": [
+      {
+        "row": "psi_outer",
+        "unit": "Wb",
+        "assembled_value": -0.11789628051940926,
+        "assembled_target": -0.11789628051940741,
+        "residual": -1.8457457784393227e-15,
+        "active_circuit_contribution": -1.1338692597385494,
+        "fixed_circuit_and_plasma_contribution": 1.01597297921914,
+        "absolute_tolerance": 1e-08,
+        "passes": true
+      },
+      {
+        "row": "psi_upper",
+        "unit": "Wb",
+        "assembled_value": -0.11781022450781736,
+        "assembled_target": -0.11789628051940741,
+        "residual": 8.605601159004939e-05,
+        "active_circuit_contribution": -0.2850112147528713,
+        "fixed_circuit_and_plasma_contribution": 0.16720099024505392,
+        "absolute_tolerance": 1e-08,
+        "passes": false
+      },
+      {
+        "row": "psi_inner",
+        "unit": "Wb",
+        "assembled_value": -0.11789628051940743,
+        "assembled_target": -0.11789628051940741,
+        "residual": -1.3877787807814457e-17,
+        "active_circuit_contribution": -0.2501609555354816,
+        "fixed_circuit_and_plasma_contribution": 0.1322646750160742,
+        "absolute_tolerance": 1e-08,
+        "passes": true
+      },
+      {
+        "row": "psi_lower",
+        "unit": "Wb",
+        "assembled_value": -0.1178962805194591,
+        "assembled_target": -0.11789628051940741,
+        "residual": -5.169475958410885e-14,
+        "active_circuit_contribution": -0.367236262548121,
+        "fixed_circuit_and_plasma_contribution": 0.24933998202866187,
+        "absolute_tolerance": 1e-08,
+        "passes": true
+      },
+      {
+        "row": "br_outer",
+        "unit": "T",
+        "assembled_value": -7.28583859910259e-16,
+        "assembled_target": 0.0,
+        "residual": -7.28583859910259e-16,
+        "active_circuit_contribution": 0.0018418041764432906,
+        "fixed_circuit_and_plasma_contribution": -0.0018418041764440192,
+        "absolute_tolerance": 1e-07,
+        "passes": true
+      },
+      {
+        "row": "br_inner",
+        "unit": "T",
+        "assembled_value": -1.0308052154905933e-16,
+        "assembled_target": 0.0,
+        "residual": -1.0308052154905933e-16,
+        "active_circuit_contribution": -9.355496798439203e-05,
+        "fixed_circuit_and_plasma_contribution": 9.355496798428895e-05,
+        "absolute_tolerance": 1e-07,
+        "passes": true
+      },
+      {
+        "row": "bz_upper",
+        "unit": "T",
+        "assembled_value": -6.202484052447721e-05,
+        "assembled_target": 0.0,
+        "residual": -6.202484052447721e-05,
+        "active_circuit_contribution": -0.1256992417828172,
+        "fixed_circuit_and_plasma_contribution": 0.1256372169422927,
+        "absolute_tolerance": 1e-07,
+        "passes": false
+      },
+      {
+        "row": "bz_lower",
+        "unit": "T",
+        "assembled_value": -8.473777235451507e-14,
+        "assembled_target": 0.0,
+        "residual": -8.473777235451507e-14,
+        "active_circuit_contribution": -0.1452263332549989,
+        "fixed_circuit_and_plasma_contribution": 0.14522633325491416,
+        "absolute_tolerance": 1e-07,
+        "passes": true
+      },
+      {
+        "row": "br_x_point",
+        "unit": "T",
+        "assembled_value": 0.0007387959932327326,
+        "assembled_target": 0.0,
+        "residual": 0.0007387959932327326,
+        "active_circuit_contribution": -0.07850514317784373,
+        "fixed_circuit_and_plasma_contribution": 0.07924393917107646,
+        "absolute_tolerance": 1e-07,
+        "passes": false
+      },
+      {
+        "row": "bz_x_point",
+        "unit": "T",
+        "assembled_value": -7.698764293403992e-05,
+        "assembled_target": 0.0,
+        "residual": -7.698764293403992e-05,
+        "active_circuit_contribution": -0.12643177808606518,
+        "fixed_circuit_and_plasma_contribution": 0.12635479044313114,
+        "absolute_tolerance": 1e-07,
+        "passes": false
+      }
+    ],
+    "maximum_absolute_flux_residual_wb": 8.605601159004939e-05,
+    "maximum_absolute_field_residual_t": 0.0007387959932327326,
+    "passes": false
+  },
+  "check_2_null_inverse": {
+    "status": "not_run"
+  },
+  "check_3_upper_point_plus_20mm": {
+    "status": "not_run"
+  },
+  "outcome": "seed_row_consistency_failed"
+}

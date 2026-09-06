@@ -1,6 +1,7 @@
 """Batched-evaluation contract for the jax plasma-topology stack."""
 
 import typing
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -15,6 +16,7 @@ with skip_import("jax"):
     from nova.biot.greens import hybrid_greens
     from nova.biot.null import Null1D, Null2D
     from nova.biot.target import FluxTarget
+    from nova.equilibrium import flux_surface_connectivity as fsc
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain, classify_domains
     from nova.equilibrium.forward_operator import ForwardFluxOperator
@@ -572,6 +574,154 @@ def test_topology_tree_roundtrip_preserves_null_kernels(topology):
     assert restored.wall.node_number == topo.wall.node_number
     np.testing.assert_array_equal(restored.grid.coordinate, topo.grid.coordinate)
     np.testing.assert_array_equal(restored.wall.coordinate, topo.wall.coordinate)
+
+
+#: A deterministic dozen of the labeller's driven 22086 rows, spanning the
+#: discharge from the limited early rows through the diverted body.
+MAST_BANK_ROWS = (1, 6, 12, 18, 24, 30, 36, 43, 45, 50, 54, 57)
+GRID_STRIDE = 2
+
+
+@pytest.mark.slow
+def test_mast_bank_slices_classification_is_batch_invariant():
+    """The twelve bank slices classify bit-identically serial and vmapped.
+
+    The topology read of a batch of slices is a parallel pass: every
+    connectivity kernel runs the same fixed iteration schedule whether one
+    slice or sixty-four are batched, so the vmapped classification must equal
+    the per-slice classification exactly.  The twelve rows cover the limited
+    and diverted phases of one MAST shot on the shared laboratory lattice.
+    """
+    from nova.equilibrium.connectivity_boundary import (
+        _raster_hex_partition_geometry,
+    )
+    from nova.equilibrium.wall_mask import inside_polygon
+    from nova.geometry.hexstencil import hex_stencil
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    shot_store = Path(SHOT_STORE)
+    if not (shot_store / "22086.zarr").exists():
+        pytest.skip("the MAST 22086 zarr store is not present on this host")
+    import zarr
+
+    group = zarr.open_group(str(shot_store / "22086.zarr"), mode="r")["efm"]
+    full_r = np.asarray(group["gridr"], dtype=np.float64)
+    full_z = np.asarray(group["gridz"], dtype=np.float64)
+    radius = full_r[::GRID_STRIDE]
+    height = full_z[::GRID_STRIDE]
+    nz, nr = len(height), len(radius)
+    n_iter = nz * nr
+    limiter = np.column_stack(
+        [
+            np.asarray(group["limiterr"], dtype=float),
+            np.asarray(group["limiterz"], dtype=float),
+        ]
+    )
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    inside_flat = np.asarray(
+        inside_polygon(rr.ravel(), zz.ravel(), limiter[:, 0], limiter[:, 1]),
+        dtype=bool,
+    )
+    inside = jnp.asarray(inside_flat).reshape(nr, nz).T
+    hex_rings = jnp.asarray(hex_stencil((nz, nr)), dtype=jnp.int32)
+    _, hex_shared_edges = _raster_hex_partition_geometry(
+        jnp.asarray(radius, dtype=jnp.float64),
+        jnp.asarray(height, dtype=jnp.float64),
+    )
+
+    def live_flux_map(row):
+        raw = np.asarray(group["psirz"][row], dtype=np.float64)
+        columns = np.flatnonzero(np.all(np.isfinite(raw), axis=0))
+        if columns.size != len(full_r):
+            raise AssertionError(f"{columns.size} live radial columns")
+        return raw[:, columns]
+
+    operands = []
+    for row in MAST_BANK_ROWS:
+        reference_full = live_flux_map(row).T
+        psi2d = jnp.asarray(
+            reference_full[::GRID_STRIDE, ::GRID_STRIDE].T, dtype=jnp.float64
+        )
+        axis_psi = jnp.asarray(float(np.asarray(group["psi_axis"][row])))
+        boundary_psi = jnp.asarray(float(np.asarray(group["psi_boundary"][row])))
+        span = jnp.where(
+            jnp.abs(boundary_psi - axis_psi) < 1e-12,
+            jnp.asarray(1e-12, dtype=jnp.float64),
+            boundary_psi - axis_psi,
+        )
+        psi_n = (psi2d - axis_psi) / span
+        confined = (psi_n < 1.0) & inside
+        pn_seed = jnp.where(confined, psi_n, jnp.inf)
+        seed_flat = jnp.argmin(pn_seed.reshape(-1))
+        seed = (
+            jnp.zeros((nz, nr), dtype=bool)
+            .reshape(-1)
+            .at[seed_flat]
+            .set(True)
+            .reshape(nz, nr)
+        )
+        link = fsc.hex_edge_admissibility(
+            psi2d,
+            jnp.asarray(radius, dtype=jnp.float64),
+            jnp.asarray(height, dtype=jnp.float64),
+            boundary_psi,
+            axis_psi,
+            hex_shared_edges,
+        )
+        operands.append((confined, seed, link))
+
+    confineds = jnp.stack([item[0] for item in operands])
+    seeds = jnp.stack([item[1] for item in operands])
+    links = jnp.stack([item[2] for item in operands])
+
+    def assert_batch_invariant(element, per_element_args, *batched):
+        """Assert the vmapped element equals the per-slice stack bit-exactly."""
+        per_slice = jnp.stack(
+            [
+                element(*(args[index] for args in per_element_args))
+                for index in range(len(operands))
+            ]
+        )
+        vmapped = jax.jit(jax.vmap(element))(*batched)
+        np.testing.assert_array_equal(np.asarray(vmapped), np.asarray(per_slice))
+
+    assert_batch_invariant(
+        lambda c, s: fsc.flood_fill_core(c, s, n_iter),
+        (confineds, seeds),
+        confineds,
+        seeds,
+    )
+    assert_batch_invariant(
+        lambda c: fsc.label_connected_components(c, n_iter),
+        (confineds,),
+        confineds,
+    )
+    assert_batch_invariant(
+        lambda c: fsc.label_hex_connected_components(c, hex_rings, n_iter),
+        (confineds,),
+        confineds,
+    )
+    assert_batch_invariant(
+        lambda c, link: fsc.label_saddle_aware_hex_connected_components(
+            c, hex_rings, link, n_iter
+        ),
+        (confineds, links),
+        confineds,
+        links,
+    )
+    # the classification is not trivial: the bank spans limited and diverted
+    # phases, so component counts vary across the dozen
+    component_counts = {
+        int(row): int(
+            np.count_nonzero(
+                np.unique(
+                    np.asarray(fsc.label_connected_components(c, n_iter))[np.asarray(c)]
+                )
+            )
+        )
+        for row, (c, _s, _l) in zip(MAST_BANK_ROWS, operands)
+    }
+    assert len(set(component_counts.values())) >= 2
 
 
 if __name__ == "__main__":

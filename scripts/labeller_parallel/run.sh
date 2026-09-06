@@ -51,7 +51,7 @@ fi
 CPUS=$((4 * DEVICES))
 MEMORY_GIB=$((128 * DEVICES))
 LOG="${OUTPUT_ROOT}/logs/labeller-parallel-%j.log"
-WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}' --devices '${DEVICES}'"
+WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}' --devices '${DEVICES}' --batch-per-device '${BATCH_PER_DEVICE}' --host-workers '$((CPUS - 1))' --condition-on-guard-failure --replace"
 COMMAND=(
   sbatch --parsable
   --job-name=nova-labeller-parallel
@@ -60,7 +60,7 @@ COMMAND=(
   --gres="gpu:${DEVICES}"
   --cpus-per-task="${CPUS}"
   --mem="${MEMORY_GIB}G"
-  --time=1-00:00:00
+  --time=01:00:00
   --output="${LOG}"
   --error="${LOG}"
   --chdir="${ROOT}"

@@ -1,17 +1,21 @@
 """Multi-device corpus scheduling for the forward labeller."""
 
 from .scheduler import (
-    ArrayBatchEngine,
     CorpusScheduler,
     EngineBatch,
     EngineResult,
+    SequentialCompiledEngine,
+    ShotInput,
     SliceInput,
+    load_shot,
 )
 
 __all__ = [
-    "ArrayBatchEngine",
     "CorpusScheduler",
     "EngineBatch",
     "EngineResult",
+    "SequentialCompiledEngine",
+    "ShotInput",
     "SliceInput",
+    "load_shot",
 ]

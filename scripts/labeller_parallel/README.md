@@ -6,24 +6,33 @@ slice's warm state. When the shot ends, the slot is refilled from the ranked
 decoder corpus. Device results cross to the host once per step and frame
 assembly is submitted to a process pool while the next device step runs.
 
-The current `ArrayBatchEngine` is an explicit array-contract stub. It validates
-the production contract (`state[batch,1126]`, decisions and centroid vectors,
-plus arbitrary labelled fields with a leading batch axis) and can be replaced
-by the batched engine without changing scheduling or persistence. Shot output
-uses the sequential writer's exact helpers and names: `<shot>.nc`,
-`<shot>.npz`, and `<shot>.manifest.json`. The session is built from
-`SteeringFrame` values by `_write_session_file`; conditioning diagnostics are
-written by the shard helper currently named `_write_companion`. The presence
-of the session and manifest makes that shot resumable and skipped on restart.
+`SequentialCompiledEngine` is the interim production engine behind the array
+contract. Each active slot runs the compiled reduced-Newton slice program on
+its assigned JAX device and owns separate free and centroid-conditioned
+programs. Its result arrays keep the replacement boundary fixed while carrying
+the sequential writer's guard, centroid, convergence and termination readings
+beside them.
+
+Host workers construct `FluxSurfaceGeometry` and call `assemble_frame` with the
+EFM flux functions, applied currents and branch reference. Shot output then
+uses the card-job writer helpers and names: `<shot>.nc`, `<shot>.npz`, and
+`<shot>.manifest.json`. A slot does not advance until its frame is assembled,
+so an assembly failure resets the warm state exactly as the sequential route
+does. The presence of the session and complete manifest makes a shot resumable.
 
 Run the bounded evidence smoke with:
 
 ```bash
 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" \
   uv run --no-sync python scripts/labeller_parallel/smoke.py \
-  --output docs/figures/playable-forward-solve/labeller-parallel/smoke
+  --output docs/figures/playable-forward-solve/labeller-parallel \
+  --devices 1 --batch-per-device 1 --host-workers 4 --max-slices 1 \
+  --run-reference --condition-on-guard-failure --replace
 ```
 
-The smoke selects the first sixteen shots from the real ranked decoder corpus,
-writes a sequential reference, runs one- and three-device scheduler arms, and
-requires every per-slice manifest record and session variable to be identical.
+The smoke selects the first sixteen shots from the ranked decoder corpus and
+invokes `scripts/labeller_batch/shard.py` as an independent sequential
+reference. It compares every non-timing per-slice field, every companion NPZ
+array and every non-timing session variable exactly. Wall-clock channels are
+listed separately because independent executions cannot have identical timing.
+Only a zero difference count permits the three-device H200 launch.

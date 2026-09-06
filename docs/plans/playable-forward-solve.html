@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-impl" content="0.7">
 <meta name="plan-commits" content="3afd3caf,81bec10b,672f3b43,d5e90aea,afdba34d,d4838cdb,f37907f9,58a8c8a5,2a7cda11,d2ffa5da,14c353c4,147051cc,bc08cd49,8e621933,2db98d26,7066b489,ef227db9,fdd2b79f,a4996202,43148bd2,d39ba24e,a01d4ca2">
 <meta name="plan-artifacts" content="docs/evidence/archive/playable-forward-solve-landed.html,nova/equilibrium/steering_frames.py,tests/test_steering_frames.py,nova/equilibrium/reduced_newton.py,tests/test_reduced_newton_constraints.py,benchmarks/reduced_newton_constrained_rows.py,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.json,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.png,apps/playable/main.py,apps/playable/session.py,apps/playable/shape.py,apps/playable/production.py,apps/playable/machines.py,apps/playable/solovev.py,apps/pulsedesign/poloidal_view.py,tests/test_playable_session.py,benchmarks/forward_labeller_throughput.py,docs/figures/playable-forward-solve/labeller/forward-labeller-throughput.json,docs/figures/playable-forward-solve/labeller/forward-labeller-throughput.png,docs/figures/playable-forward-solve/labeller/labeller-throughput.md,docs/figures/playable-forward-solve/labeller/run_labeller_h200.sh">
@@ -456,6 +456,9 @@
 <div class="r-comment" data-section="_top" data-id="c-20260906T104000-lead-contract-direction" data-who="reckon-ship-s19-playable" data-when="2026-09-06T10:40:00Z">
     <div class="r-comment-body"><p><strong>Lead direction 2026-09-06 10:35: the contract is the carrier, and it carries the inside of the plasma.</strong> Three decisions locked: <code>frame-contract-internal-geometry</code> (about thirty nested surfaces at recorded psi_norm with psi in Wb and fixed-shape R, Z contours, plus the TORAX geometry metrics on the same surfaces), <code>display-contourer</code> (no hand-rolled contourer in the view; nova's contourpy-based Contour or the frame's own surfaces), and <code>prototype-data-through-contract</code> (the app pushes a SteeringFrame per keyframe, the labeller writes session files). Where nova stands: the record and store exist (<code>steering_frames.py</code>) without a surface block; <code>FluxSurfaceGeometry</code> already traces a nested family on rays from the axis and publishes rho_tor, Phi, V, S, V', F, q and the g0 to g3 averages; the device path <code>traced_flux_surface_geometry</code> publishes the TORAX face columns (R_in, R_out, elongation, triangularities, the gradient and field averages, int dl/Bp, Ip profile); the view-style landing wrote its own marching squares. Opened as f-pfs-021 (contract, dispatched), f-pfs-022 (view, dispatched) and f-pfs-023 (app through the contract, after the camera node releases the session files); the corpus write f-pfs-013 produces the surface block on device.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260906T110000-surface-count" data-who="reckon-ship-s19-playable" data-when="2026-09-06T11:00:00Z">
+    <div class="r-comment-body"><p><strong>Lead refinement 2026-09-06 11:00: eleven loops, not thirty, and no raster in the training record.</strong> Decisions <code>contract-surface-layout</code> and <code>training-contract-excludes-raster</code>. The reasoning the coordinator gave: the loops are for the decoder and the profiles are for TORAX, and they want different grids. Eleven loops at psi_norm k/11 to the LCFS on 64 rays carry the nested shape in a third of the numbers of a raster and a third of thirty loops whose neighbours would be near-duplicates; the metric profiles are cheap one-dimensional arrays and keep the reader's thirty levels to the 0.995 edge, where the surface averages stay finite and TORAX's axis fit has the density it wants. The raster grid and its vacuum region are the machine, not the plasma, so they leave the training-facing record and become an optional diagnostic block; machine independence in training comes from feeding the decoder geometry that has the same shape on any machine. The running contract node is repointed with this layout; the corpus write and the app wiring inherit it.</p></div>
+</div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -531,6 +534,22 @@
       <button class="r-opt" data-value="ad-hoc-channels">each consumer reads what it needs off the equilibrium</button>
       </p>
     <p class="r-dec-rat">Lead direction 2026-09-06 10:35: the prototype passes the majority of its data using the sanctioned labeller contract, which is designed and largely implemented as the data persisted for imas-ambix. Today neither the app (frame_push reads the equilibrium directly) nor the labeller driver (per-slice JSON) goes through assemble_frame or write_session; both move onto the contract, so what a person sees in the view is what the decoder is trained on.</p>
+    </div>
+<div class="r-dec" data-key="contract-surface-layout" data-choice="eleven-loops-thirty-profile" data-by="Simon McIntosh" data-when="2026-09-06T09:12:15+00:00">
+    <p class="r-dec-q">How many nested surfaces does the contract carry as fixed-shape loops, on what levels, and do the TORAX metric profiles share that grid?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="eleven-loops-thirty-profile">eleven loops at psi_norm k/11 for k = 1..11 (the LCFS last, the axis a separate point) on 64 rays, and the TORAX metric profiles on their own denser label grid of 30 levels from the axis floor to the reader&#x27;s edge level</button>
+      <button class="r-opt" data-value="thirty-loops-shared">thirty loops and the metrics on the same thirty surfaces</button>
+      </p>
+    <p class="r-dec-rat">Lead question 2026-09-06 11:00 (thirty or eleven), answered eleven for the loops: the contract exists so the decoder is not handed a per-pixel flux map, and nested Grad-Shafranov surfaces vary smoothly in psi_norm, so eleven loops uniform to the LCFS carry the shape (11 by 64 by 2 is 1,408 numbers against 4,225 for a 65 by 65 raster) while thirty triple the tensor with near-duplicate neighbours. The TORAX metrics are one-dimensional profiles and cost nothing at thirty levels, and TORAX&#x27;s own grid (25 cells) and its axis fit want that density, so the profiles keep the reader&#x27;s denser grid, stopping at the 0.995 edge where the surface averages stay finite; the loops reach psi_norm 1.0 because coordinates on the separatrix are well defined even where 1/|grad psi| is not. The tracer integrates on 128 rays regardless; 64 is the storage.</p>
+    </div>
+<div class="r-dec" data-key="training-contract-excludes-raster" data-choice="excluded-diagnostic-only" data-by="Simon McIntosh" data-when="2026-09-06T09:12:15+00:00">
+    <p class="r-dec-q">Is the per-pixel raster (psi, psi_norm and the domain label on the machine grid) part of the decoder-facing contract?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="excluded-diagnostic-only">no: the training-facing record is the fixed-shape surfaces, the landmarks, the currents and the metric profiles; the raster is an optional diagnostic block off by default in the corpus write</button>
+      <button class="r-opt" data-value="included">the raster stays a training input beside the surfaces</button>
+      </p>
+    <p class="r-dec-rat">Lead direction 2026-09-06 11:00: the contract exists to avoid passing the per-pixel flux map; imas-ambix trains better off a fixed-shape plasma geometry; the vacuum-field contours are neither needed nor wanted as training input; and this contract is what makes the training machine-independent, since a machine grid and its vacuum region are the machine while nested surfaces, landmarks and profiles are the plasma. The raster block stays available as a diagnostic for playback and debugging, written only on request and flagged so, never a training input.</p>
     </div>
 </section>
 </main>

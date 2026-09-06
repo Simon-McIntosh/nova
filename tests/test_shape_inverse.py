@@ -54,6 +54,15 @@ def test_limited_target_drops_the_null_row(machine, seed_target):
     assert tuple(pair.row_count for pair in pairs) == (4, 4)
 
 
+def test_x_point_adds_both_field_components(machine, seed_target):
+    """One X-point coordinate contributes both Br and Bz rows."""
+    target = replace(seed_target, x_point=np.asarray([1.0, -0.2]))
+    values = shape_values(machine.profile, target, machine.seed)
+    response = shape_response_matrix(machine.profile, target, machine.seed)
+    assert values.shape == (10,)
+    assert response.shape == (10, machine.circuit_count)
+
+
 def test_response_matrix_matches_central_differences(machine, seed_target):
     """Carrier contractions reproduce direct current perturbations of each row."""
     profile = machine.profile

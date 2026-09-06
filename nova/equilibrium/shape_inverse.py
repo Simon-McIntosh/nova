@@ -455,7 +455,7 @@ def _shape_values(
     if target.x_point is not None and np.shape(target.x_point) == (2,):
         x_point = jnp.asarray(target.x_point, dtype=jnp.float64)
         x_field = FieldComponentConstraint(components=("radial", "vertical")).observed(
-            profile, context, x_point[None, :]
+            profile, context, jnp.repeat(x_point[None, :], 2, axis=0)
         )
         field = jnp.concatenate((field, x_field))
     return jnp.concatenate((psi, field))

@@ -1218,6 +1218,20 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
+def _terminal_boundary_geometry(
+    equilibrium: object, assembled_closed_boundary: np.ndarray
+) -> np.ndarray:
+    """Prefer the terminal receipt's traced raster separatrix for geometry."""
+
+    raster_flux = getattr(equilibrium, "raster_flux", None)
+    if raster_flux is not None:
+        vertex_count = int(np.asarray(raster_flux.separatrix_vertex_count))
+        traced = np.asarray(raster_flux.separatrix, dtype=float)[:vertex_count]
+        if len(traced) >= 3 and np.all(np.isfinite(traced)):
+            return traced
+    return np.asarray(assembled_closed_boundary, dtype=float)
+
+
 def gauge_metrics(
     labelled: np.ndarray, predicted: np.ndarray, interior: np.ndarray
 ) -> tuple[float, float, float, np.ndarray]:
@@ -1551,6 +1565,9 @@ def solve_frame(
         float(topology.boundary_flux),
         np.asarray(topology.axis, dtype=float),
     )
+    predicted_terminal_boundary = _terminal_boundary_geometry(
+        equilibrium, predicted_closed_boundary
+    )
     count = int(row["efit_lcfs_n"][frame])
     labelled_closed_boundary = np.c_[
         np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
@@ -1583,7 +1600,7 @@ def solve_frame(
             efit_axis_rz_m=labelled_axis,
             nova_x_point_rz_m=np.asarray(topology.x_point, dtype=float),
             efit_x_point_rz_m=labelled_x_point,
-            nova_boundary_rz_m=predicted_closed_boundary,
+            nova_boundary_rz_m=predicted_terminal_boundary,
             efit_boundary_rz_m=labelled_closed_boundary,
         )
     except ValueError:
@@ -1685,6 +1702,7 @@ def solve_frame(
         "difference": aligned - label,
         "labelled_closed_boundary": labelled_closed_boundary,
         "predicted_closed_boundary": predicted_closed_boundary,
+        "predicted_terminal_boundary": predicted_terminal_boundary,
         "predicted_open_branches": predicted_open_branches,
         "pseudo_wall": wall,
     }
@@ -1766,12 +1784,21 @@ def _solve_selected_frames(
     selected,
     baseline_expansion: float,
     on_frame_completed: Callable[[list[FrameResult]], None] | None = None,
+    *,
+    restored_results: list[FrameResult] | None = None,
 ) -> tuple[list[FrameResult], list[dict[str, Any]]]:
     """Solve declared frames while bounding each frame's compilation lifetime."""
 
-    results: list[FrameResult] = []
-    fields: list[dict[str, Any]] = []
-    for number, selected_frame in enumerate(selected, start=1):
+    results = list(restored_results or [])
+    if len(results) > len(selected):
+        raise ValueError("restored frame prefix is longer than the declared cohort")
+    fields: list[dict[str, Any]] = [
+        {"plot_unavailable_reason": "restored from frame checkpoint"}
+        for _result in results
+    ]
+    for number, selected_frame in enumerate(
+        selected[len(results) :], start=len(results) + 1
+    ):
         started = time.perf_counter()
         try:
             row = _read(
@@ -1878,6 +1905,100 @@ def _strict_json_value(value: Any) -> Any:
     if isinstance(value, list | tuple):
         return [_strict_json_value(item) for item in value]
     return value
+
+
+def _checkpoint_float(value: float | None) -> float:
+    """Restore a strict-JSON null to the non-finite value used during scoring."""
+
+    return float("nan") if value is None else float(value)
+
+
+def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
+    """Rebuild one typed result from an atomically published frame checkpoint."""
+
+    restored = dict(record)
+    metric_values = dict(restored.pop("metrics"))
+    for name in (
+        "interior_r_squared",
+        "interior_fractional_rms",
+        "additive_gauge_wb",
+        "magnetic_axis_displacement_mm",
+        "predicted_q95_nova",
+        "labelled_q95_nova",
+        "signed_relative_q95_error",
+    ):
+        metric_values[name] = _checkpoint_float(metric_values[name])
+    metric_values["boundary_comparison_failures"] = tuple(
+        metric_values["boundary_comparison_failures"]
+    )
+    restored["metrics"] = MatchMetrics(**metric_values)
+    displacement_values = restored.get("displacement_decomposition")
+    if displacement_values is not None:
+        displacement_values = dict(displacement_values)
+        for name in (
+            "magnetic_axis",
+            "x_point",
+            "terminal_boundary_centroid",
+        ):
+            landmark_values = dict(displacement_values[name])
+            landmark_values["efit_rz_m"] = tuple(landmark_values["efit_rz_m"])
+            landmark_values["nova_rz_m"] = tuple(landmark_values["nova_rz_m"])
+            displacement_values[name] = LandmarkDisplacement(**landmark_values)
+        restored["displacement_decomposition"] = DisplacementDecomposition(
+            **displacement_values
+        )
+    for name in (
+        "fixed_point_relative_residual",
+        "target_current_a",
+        "achieved_current_a",
+    ):
+        restored[name] = _checkpoint_float(restored[name])
+    restored["residual_history"] = tuple(
+        _checkpoint_float(value) for value in restored["residual_history"]
+    )
+    restored["active_set_residuals"] = tuple(restored["active_set_residuals"])
+    restored["active_set_mask_differences"] = tuple(
+        restored["active_set_mask_differences"]
+    )
+    restored["active_set_cycle_damping_activations"] = tuple(
+        restored["active_set_cycle_damping_activations"]
+    )
+    return FrameResult(**restored)
+
+
+def _restore_frame_checkpoint(
+    path: Path,
+    selected: list[SelectedFrame],
+    preregistration_hash: str,
+) -> list[FrameResult]:
+    """Restore only an identity-matched prefix of the declared frame cohort."""
+
+    if not path.exists():
+        return []
+    checkpoint = json.loads(path.read_text())
+    cohort = checkpoint.get("cohort_status", {})
+    records = checkpoint.get("frame_records", [])
+    if checkpoint.get("receipt_kind") != "partial_frame_checkpoint":
+        raise RuntimeError("frame checkpoint has the wrong receipt kind")
+    if checkpoint.get("preregistration_sha256") != preregistration_hash:
+        raise RuntimeError("frame checkpoint belongs to another preregistration")
+    if cohort.get("declared_frame_count") != len(selected):
+        raise RuntimeError("frame checkpoint has the wrong declared frame count")
+    if cohort.get("attempted_frame_count") != len(records):
+        raise RuntimeError("frame checkpoint count disagrees with its frame rows")
+    if len(records) > len(selected):
+        raise RuntimeError("frame checkpoint exceeds the declared cohort")
+    for expected, record in zip(selected, records, strict=False):
+        identity = (record.get("shot"), record.get("frame"))
+        if identity != (expected.path.name, expected.frame):
+            raise RuntimeError("frame checkpoint is not a declared-cohort prefix")
+    restored = [_frame_result_from_checkpoint(record) for record in records]
+    if restored:
+        print(
+            f"RESTORED_FRAME_PREFIX {len(restored)}/{len(selected)} from {path}",
+            flush=True,
+        )
+    return restored
 
 
 def _frame_checkpoint_receipt(
@@ -2421,23 +2542,29 @@ def displacement_figure(
             )
             axis.set_axis_off()
             continue
-        labelled_boundary = np.asarray(frame["labelled_closed_boundary"], dtype=float)
-        predicted_boundary = np.asarray(frame["predicted_closed_boundary"], dtype=float)
-        axis.plot(
-            labelled_boundary[:, 0],
-            labelled_boundary[:, 1],
-            color="0.25",
-            linewidth=1.0,
-            label="EFIT boundary" if panel == 0 else None,
+        labelled_boundary = frame.get("labelled_closed_boundary")
+        predicted_boundary = frame.get(
+            "predicted_terminal_boundary", frame.get("predicted_closed_boundary")
         )
-        axis.plot(
-            predicted_boundary[:, 0],
-            predicted_boundary[:, 1],
-            color="tab:red",
-            linestyle="--",
-            linewidth=1.0,
-            label="Nova boundary" if panel == 0 else None,
-        )
+        if labelled_boundary is not None:
+            labelled_boundary = np.asarray(labelled_boundary, dtype=float)
+            axis.plot(
+                labelled_boundary[:, 0],
+                labelled_boundary[:, 1],
+                color="0.25",
+                linewidth=1.0,
+                label="EFIT boundary" if panel == 0 else None,
+            )
+        if predicted_boundary is not None:
+            predicted_boundary = np.asarray(predicted_boundary, dtype=float)
+            axis.plot(
+                predicted_boundary[:, 0],
+                predicted_boundary[:, 1],
+                color="tab:red",
+                linestyle="--",
+                linewidth=1.0,
+                label="Nova boundary" if panel == 0 else None,
+            )
         for attribute, label, colour, marker in landmark_styles:
             landmark = getattr(displacement, attribute)
             efit = np.asarray(landmark.efit_rz_m, dtype=float)
@@ -4097,6 +4224,9 @@ def run(
     selected = select_frames(paths, frames, affected)
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
     partial_receipt_path = output / PARTIAL_RECEIPT_NAME
+    restored_results = _restore_frame_checkpoint(
+        partial_receipt_path, selected, preregistration_hash
+    )
     results, fields = _solve_selected_frames(
         selected,
         baseline_expansion,
@@ -4106,6 +4236,7 @@ def run(
             len(selected),
             preregistration_hash,
         ),
+        restored_results=restored_results,
     )
     first = selected[0]
     first_row = _read(
@@ -4194,7 +4325,8 @@ def run(
         }
     )
     _record_publication_artifacts(receipt, output)
-    frame_figure(results, fields, output / FRAME_FIGURE_NAME)
+    if not restored_results:
+        frame_figure(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, output / COHORT_FIGURE_NAME)
     displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
     displacement_figure(results, fields, displacement_path)

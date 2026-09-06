@@ -10,6 +10,7 @@ written through the group-backed netCDF store is bit-identical on read.
 
 from __future__ import annotations
 
+from pathlib import Path
 import time
 from types import SimpleNamespace
 
@@ -65,6 +66,21 @@ GMRES_ITERATIONS = 12
 
 #: Fixed per-run identity the recorded fixture frame is assembled under.
 CARRIER_IDENTITY = "solovev-fixture"
+
+RASTER_FIELDS = (
+    "radius",
+    "height",
+    "shape",
+    "psi",
+    "psi_norm",
+    "domain_label",
+    "separatrix",
+    "separatrix_vertex_count",
+)
+
+CORPUS_SESSION = Path(
+    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.nc"
+)
 
 
 def _terms():
@@ -422,6 +438,30 @@ def _assert_dataset_variables_bitwise(expected, actual) -> None:
             assert np.array_equal(a, b), f"{name} differs ({a.dtype})"
 
 
+def _assert_frame_fields_equal(
+    actual: SteeringFrame,
+    expected: SteeringFrame,
+    *,
+    excluded: tuple[str, ...] = (),
+) -> None:
+    """Require all selected fields of two typed frames to agree."""
+    for name in SteeringFrame._fields:
+        if name in excluded:
+            continue
+        if name == "action":
+            assert actual.action.name == expected.action.name
+            assert actual.action.delta == expected.action.delta
+            np.testing.assert_array_equal(
+                np.asarray(actual.action.commanded_control_points),
+                np.asarray(expected.action.commanded_control_points),
+            )
+            continue
+        np.testing.assert_array_equal(
+            np.asarray(getattr(actual, name)),
+            np.asarray(getattr(expected, name)),
+        )
+
+
 def test_synthetic_session_round_trips_bitwise(tmp_path) -> None:
     """Three synthetic frames survive the netCDF store bitwise on every field."""
     frames = _synthetic_session()
@@ -456,21 +496,73 @@ def test_session_frames_reconstruct_from_the_store(tmp_path) -> None:
     original = _synthetic_session()
     assert len(restored) == len(original)
     for got, want in zip(restored, original, strict=True):
-        for name in SteeringFrame._fields:
-            if name == "action":
-                assert got.action.name == want.action.name
-                assert got.action.delta == want.action.delta
-                np.testing.assert_array_equal(
-                    np.asarray(got.action.commanded_control_points),
-                    np.asarray(want.action.commanded_control_points),
-                )
-                continue
-            left = np.asarray(getattr(got, name))
-            right = np.asarray(getattr(want, name))
-            if left.dtype.kind in "fc":
-                np.testing.assert_array_equal(left, right)
-            else:
-                np.testing.assert_array_equal(left, right)
+        _assert_frame_fields_equal(got, want)
+
+
+def test_rasterless_solovev_session_reconstructs_every_frame(machine, tmp_path) -> None:
+    """A Solov'ev-grid session decodes with only its raster block absent."""
+    profile, seed, _conductor_current = machine
+    radial_count = profile.lattice.radius.size
+    vertical_count = profile.lattice.height.size
+    psi = np.asarray(seed[: radial_count * vertical_count]).reshape(
+        radial_count, vertical_count
+    )
+    frames = tuple(
+        frame._replace(
+            radius=np.asarray(profile.lattice.radius),
+            height=np.asarray(profile.lattice.height),
+            shape=np.asarray([radial_count, vertical_count], dtype=np.int32),
+            psi=psi * (index + 1),
+            psi_norm=np.linspace(0.0, 1.0, psi.size).reshape(psi.shape),
+            domain_label=np.zeros(psi.shape, dtype=np.int8),
+        )
+        for index, frame in enumerate(_synthetic_session())
+    )
+    expected = session_dataset(frames, include_raster=False)
+    write_session(
+        frames,
+        filename="rasterless-session",
+        dirname=str(tmp_path),
+        include_raster=False,
+    )
+    actual = read_session(filename="rasterless-session", dirname=str(tmp_path))
+    restored = frames_from_session(actual)
+
+    assert set(RASTER_FIELDS).isdisjoint(actual.variables)
+    _assert_dataset_variables_bitwise(expected, actual)
+    assert len(restored) == len(frames)
+    for got, want in zip(restored, frames, strict=True):
+        assert all(getattr(got, name) is None for name in RASTER_FIELDS)
+        _assert_frame_fields_equal(got, want, excluded=RASTER_FIELDS)
+
+
+def test_real_rasterless_corpus_session_decodes() -> None:
+    """One corpus session decodes all frames without diagnostic rasters."""
+    if not CORPUS_SESSION.is_file():
+        pytest.skip(f"corpus session is unreachable: {CORPUS_SESSION}")
+    try:
+        dataset = read_session(
+            filename=CORPUS_SESSION.stem,
+            dirname=str(CORPUS_SESSION.parent),
+        )
+    except OSError as error:
+        pytest.skip(f"corpus session is unreachable: {error}")
+
+    restored = frames_from_session(dataset)
+    assert len(restored) == dataset.sizes["time"] == 96
+    assert all(
+        getattr(frame, name) is None
+        for frame in (restored[0], restored[-1])
+        for name in RASTER_FIELDS
+    )
+    np.testing.assert_array_equal(
+        restored[0].flux_surface_r,
+        dataset["flux_surface_r"].isel(time=0).values,
+    )
+    np.testing.assert_array_equal(
+        restored[-1].coil_current,
+        dataset["coil_current"].isel(time=-1).values,
+    )
 
 
 def test_masked_components_stay_masked_never_imputed() -> None:

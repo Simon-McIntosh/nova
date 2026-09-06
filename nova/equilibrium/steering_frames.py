@@ -27,6 +27,12 @@ it reads from the equilibrium store.  Masking is never imputation: an
 absent component is NaN in the coordinate channels and False in
 ``finite_mask``; no fill value is substituted.
 
+The raster block is optional diagnostic data.  A session written without it
+decodes with ``None`` in all eight raster fields: ``radius``, ``height``,
+``shape``, ``psi``, ``psi_norm``, ``domain_label``, ``separatrix`` and
+``separatrix_vertex_count``.  The marker is all-or-nothing; a partially present
+raster block is an invalid session rather than an imputed raster.
+
 Coordinate convention
 ---------------------
 All coordinates are cylindrical ``(R, phi, Z)`` in COCOS 17 with ``Z`` upward
@@ -157,6 +163,17 @@ N_DIVERTOR_LEG_POINTS = 32
 CENTROID_BRANCH_GUARD_METRES = 0.05
 P_PRIME_SOURCES = frozenset(("efm", "torax"))
 
+_RASTER_FIELDS: tuple[str, ...] = (
+    "radius",
+    "height",
+    "shape",
+    "psi",
+    "psi_norm",
+    "domain_label",
+    "separatrix",
+    "separatrix_vertex_count",
+)
+
 TORAX_PROFILE_FIELDS: tuple[str, ...] = (
     "rho_face_norm",
     "rho_tor",
@@ -270,6 +287,8 @@ class SteeringFrame(NamedTuple):
     packed to ``(n_b, 2)``, ``coil_current`` one entry per driven circuit,
     ``compensating_current`` one entry per registered constraint row, and
     ``finite_mask`` one flag per component in :data:`FINITE_MASK_COMPONENTS`.
+    The eight raster fields are all ``None`` when an optional diagnostic raster
+    was not recorded.
     """
 
     radius: object
@@ -1158,10 +1177,28 @@ def read_session(
     dirname: str,
     group: str = SESSION_GROUP,
 ) -> xr.Dataset:
-    """Return the decoded dataset of one recorded steering session."""
+    """Return one recorded session, including sessions without a raster block."""
     store = netCDF(filename=filename, dirname=dirname, group=group)
     store.load()
     return store.data
+
+
+def _raster_values(frame: xr.Dataset, dataset: xr.Dataset) -> dict[str, object]:
+    """Return one frame's raster values or the all-``None`` absence marker."""
+    present = tuple(name in dataset.variables for name in _RASTER_FIELDS)
+    if not any(present):
+        return dict.fromkeys(_RASTER_FIELDS)
+    if not all(present):
+        missing = [
+            name
+            for name, field_present in zip(_RASTER_FIELDS, present)
+            if not field_present
+        ]
+        raise ValueError(
+            "a steering session raster block must be complete; "
+            f"missing {', '.join(missing)}"
+        )
+    return {name: np.asarray(frame[name].values) for name in _RASTER_FIELDS}
 
 
 def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
@@ -1174,19 +1211,18 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
     frames = []
     for index in range(count):
         frame = dataset.isel(time=index)
+        raster = _raster_values(frame, dataset)
         commanded = np.asarray(frame["commanded_control_points"].values)
         frames.append(
             SteeringFrame(
-                radius=np.asarray(frame["radius"].values),
-                height=np.asarray(frame["height"].values),
-                shape=np.asarray(frame["shape"].values),
-                psi=np.asarray(frame["psi"].values),
-                psi_norm=np.asarray(frame["psi_norm"].values),
-                domain_label=np.asarray(frame["domain_label"].values),
-                separatrix=np.asarray(frame["separatrix"].values),
-                separatrix_vertex_count=np.asarray(
-                    frame["separatrix_vertex_count"].values
-                ),
+                radius=raster["radius"],
+                height=raster["height"],
+                shape=raster["shape"],
+                psi=raster["psi"],
+                psi_norm=raster["psi_norm"],
+                domain_label=raster["domain_label"],
+                separatrix=raster["separatrix"],
+                separatrix_vertex_count=raster["separatrix_vertex_count"],
                 magnetic_axis_r=np.asarray(frame["magnetic_axis_r"].values),
                 magnetic_axis_z=np.asarray(frame["magnetic_axis_z"].values),
                 x_point_r=np.asarray(frame["x_point_r"].values),

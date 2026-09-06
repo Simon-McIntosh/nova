@@ -30,6 +30,7 @@ from scripts.labeller_parallel.scheduler import (  # noqa: E402
     assemble_stub_frame,
     write_shot,
 )
+from nova.equilibrium.steering_frames import SESSION_GROUP  # noqa: E402
 
 
 SHOT_COUNT = 16
@@ -134,18 +135,34 @@ def _assert_identical(reference: Path, candidate: Path, shots: Sequence[int]) ->
         candidate_rows = _manifest_rows(candidate / f"{shot}.manifest.json")
         if reference_rows != candidate_rows:
             raise AssertionError(f"per-slice manifest records differ for shot {shot}")
-        with xr.open_dataset(
-            reference / f"{shot}.nc", group="steering_frames"
-        ) as expected:
+        with xr.open_dataset(reference / f"{shot}.nc", group=SESSION_GROUP) as expected:
             with xr.open_dataset(
-                candidate / f"{shot}.nc", group="steering_frames"
+                candidate / f"{shot}.nc", group=SESSION_GROUP
             ) as actual:
                 xr.testing.assert_identical(expected, actual)
+        with np.load(reference / f"{shot}.npz") as expected_diagnostics:
+            with np.load(candidate / f"{shot}.npz") as actual_diagnostics:
+                if expected_diagnostics.files != actual_diagnostics.files:
+                    raise AssertionError(
+                        f"diagnostic field names differ for shot {shot}"
+                    )
+                for name in expected_diagnostics.files:
+                    expected_values = expected_diagnostics[name]
+                    actual_values = actual_diagnostics[name]
+                    identical = (
+                        np.array_equal(expected_values, actual_values, equal_nan=True)
+                        if expected_values.dtype.kind in "fc"
+                        else np.array_equal(expected_values, actual_values)
+                    )
+                    if not identical:
+                        raise AssertionError(
+                            f"diagnostic field {name!r} differs for shot {shot}"
+                        )
         compared += len(reference_rows)
     return compared
 
 
-def run_smoke(output: Path) -> dict[str, Any]:
+def run_smoke(output: Path, devices: Sequence[int] = (1, 3)) -> dict[str, Any]:
     """Execute one- and three-device scheduler arms and persist their receipt."""
     corpus = decoder_corpus(DEFAULT_MANIFEST, DEFAULT_COHORT_REPORT)
     ranked = [(item.shot, _synthetic_slices(item.shot)) for item in corpus[:SHOT_COUNT]]
@@ -155,13 +172,13 @@ def run_smoke(output: Path) -> dict[str, Any]:
     reference = output / "sequential"
     _sequential_reference(ranked, reference)
     arms = []
-    for devices in (1, 3):
-        arm_root = output / f"devices-{devices}"
+    for device_count in devices:
+        arm_root = output / f"devices-{device_count}"
         scheduler = CorpusScheduler(
-            engine=ArrayBatchEngine(device_count=devices),
-            device_count=devices,
+            engine=ArrayBatchEngine(device_count=device_count),
+            device_count=device_count,
             batch_per_device=2,
-            host_workers=max(1, 4 * devices - 1),
+            host_workers=max(1, 4 * device_count - 1),
         )
         receipt = scheduler.run(
             ranked,
@@ -194,11 +211,15 @@ def run_smoke(output: Path) -> dict[str, Any]:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--devices", type=int, nargs="+", default=(1, 3))
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    result = run_smoke(_parser().parse_args(argv).output.resolve())
+    arguments = _parser().parse_args(argv)
+    if any(device < 1 for device in arguments.devices):
+        raise ValueError("device count must be positive")
+    result = run_smoke(arguments.output.resolve(), arguments.devices)
     print(json.dumps(result, sort_keys=True))
     return 0 if result["passed"] else 1
 

@@ -51,7 +51,7 @@ fi
 CPUS=$((4 * DEVICES))
 MEMORY_GIB=$((128 * DEVICES))
 LOG="${OUTPUT_ROOT}/logs/labeller-parallel-%j.log"
-WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}'"
+WRAP="export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu PYTHONPATH='${ROOT}'; '${PYTHON}' '${DRIVER}' --output '${OUTPUT_ROOT}' --devices '${DEVICES}'"
 COMMAND=(
   sbatch --parsable
   --job-name=nova-labeller-parallel

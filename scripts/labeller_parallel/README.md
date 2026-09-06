@@ -10,9 +10,11 @@ The current `ArrayBatchEngine` is an explicit array-contract stub. It validates
 the production contract (`state[batch,1126]`, decisions and centroid vectors,
 plus arbitrary labelled fields with a leading batch axis) and can be replaced
 by the batched engine without changing scheduling or persistence. Shot output
-uses the sequential writer's names: `<shot>.nc`, `<shot>.manifest.json`, plus a
-digest `<shot>.receipt.json`; the presence of all three makes that shot
-resumable and skipped on restart.
+uses the sequential writer's exact helpers and names: `<shot>.nc`,
+`<shot>.npz`, and `<shot>.manifest.json`. The session is built from
+`SteeringFrame` values by `_write_session_file`; conditioning diagnostics are
+written by the shard helper currently named `_write_companion`. The presence
+of the session and manifest makes that shot resumable and skipped on restart.
 
 Run the bounded evidence smoke with:
 

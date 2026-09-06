@@ -13,7 +13,6 @@ from __future__ import annotations
 from collections import deque
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -21,7 +20,21 @@ import time
 from typing import Any, Callable, Protocol, Sequence
 
 import numpy as np
-import xarray as xr
+
+from nova.equilibrium.steering_frames import (
+    N_DIVERTOR_LEG_POINTS,
+    N_DIVERTOR_LEGS,
+    N_RHO,
+    N_SURFACE,
+    N_THETA,
+    TORAX_PROFILE_FIELDS,
+    SteeringAction,
+    SteeringFrame,
+)
+from scripts.labeller_batch.shard import (
+    _write_companion as _write_diagnostics,
+    _write_session_file,
+)
 
 
 STATE_SIZE = 1_126
@@ -196,7 +209,7 @@ class AssembledSlice:
     shot: int
     row: int
     time: float
-    frame: dict[str, np.ndarray]
+    frame: SteeringFrame
     record: dict[str, Any]
     assembly_wall_seconds: float
 
@@ -204,15 +217,78 @@ class AssembledSlice:
 def assemble_stub_frame(request: AssemblyRequest) -> AssembledSlice:
     """Assemble the deterministic smoke frame in a host worker process."""
     started = time.perf_counter()
-    # A small matrix operation makes the host-stage timer measurable without
-    # turning the smoke into a compute benchmark.
-    surface = np.outer(request.state[:8], np.linspace(0.0, 1.0, 16))
-    frame = {
-        "state": np.asarray(request.state, dtype=np.float64),
-        "surface": surface,
-        "centroid": np.asarray(request.centroid, dtype=np.float64),
-        **{name: np.asarray(value) for name, value in request.labelled_fields.items()},
+    radius = np.linspace(0.6, 1.5, 4, dtype=np.float64)
+    height = np.linspace(-0.4, 0.4, 3, dtype=np.float64)
+    psi = np.asarray(request.state[:12], dtype=np.float64).reshape(4, 3)
+    psi_span = float(np.ptp(psi))
+    psi_norm = np.zeros_like(psi) if psi_span == 0.0 else (psi - psi.min()) / psi_span
+    angle = np.linspace(0.0, 2.0 * np.pi, N_THETA, endpoint=False)
+    levels = np.linspace(0.0, 1.0, N_SURFACE)
+    surface_r = 0.9 + 0.3 * levels[:, None] * np.cos(angle)[None, :]
+    surface_z = request.centroid[1] + 0.35 * levels[:, None] * np.sin(angle)[None, :]
+    boundary = np.column_stack((surface_r[-1], surface_z[-1]))
+    faces = np.linspace(0.0, 1.0, N_RHO + 1)
+    profiles = {
+        name: 0.1 + faces
+        for name in TORAX_PROFILE_FIELDS
+        if name not in {"rho_face_norm", "psi_norm_face"}
     }
+    profiles["psi_norm_face"] = faces
+    frame = SteeringFrame(
+        radius=radius,
+        height=height,
+        shape=np.asarray([radius.size, height.size], dtype=np.int32),
+        psi=psi,
+        psi_norm=psi_norm,
+        domain_label=np.zeros_like(psi, dtype=np.int8),
+        separatrix=boundary,
+        separatrix_vertex_count=np.int32(boundary.shape[0]),
+        magnetic_axis_r=float(request.centroid[0]),
+        magnetic_axis_z=float(request.centroid[1]),
+        x_point_r=np.full(2, np.nan),
+        x_point_z=np.full(2, np.nan),
+        strike_points_r=np.full(2, np.nan),
+        strike_points_z=np.full(2, np.nan),
+        lcfs_r=boundary[:, 0],
+        lcfs_z=boundary[:, 1],
+        n_boundary_coords=np.int32(boundary.shape[0]),
+        finite_mask=np.asarray([True, False, False, False, False, True]),
+        coil_current=np.zeros(101, dtype=np.float64),
+        compensating_current=np.zeros(1, dtype=np.float64),
+        action=SteeringAction(
+            name="label",
+            delta=0.0,
+            commanded_control_points=np.empty((0, 2), dtype=np.float64),
+        ),
+        wall_seconds=0.0,
+        trip_count=request.trips,
+        carrier_identity="array-contract-stub",
+        nova_version="stub",
+        policy_digest="0" * 64,
+        p_prime_source="efm",
+        flux_surface_psi_norm=levels,
+        flux_surface_psi=levels,
+        flux_surface_r=surface_r,
+        flux_surface_z=surface_z,
+        flux_surface_angle=angle,
+        rho_face_norm=faces,
+        p_prime_face=np.zeros_like(faces),
+        ff_prime_face=np.zeros_like(faces),
+        current_centroid_r=float(request.centroid[0]),
+        current_centroid_z=float(request.centroid[1]),
+        reference_centroid_z=float(request.centroid[1]),
+        branch_guard_ok=True,
+        R_major=0.9,
+        a_minor=0.3,
+        B_0=1.0,
+        boundary_toroidal_flux=1.0,
+        magnetic_axis_z_scalar=float(request.centroid[1]),
+        diverted=False,
+        divertor_leg_r=np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        divertor_leg_z=np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        divertor_leg_finite=np.zeros(N_DIVERTOR_LEGS, dtype=bool),
+        **profiles,
+    )
     record = {
         "row": request.row,
         "time": request.time,
@@ -225,6 +301,13 @@ def assemble_stub_frame(request: AssemblyRequest) -> AssembledSlice:
         "termination": request.termination,
         "conditioned": request.conditioned,
         "conditioning_flag": request.conditioned,
+        "conditioning_target_source": (
+            "efm/current_centrd_z" if request.conditioned else None
+        ),
+        "free_branch_guard_ok": True,
+        "conditioned_branch_guard_ok": True if request.conditioned else None,
+        "free_centroid_error_m": 0.0,
+        "conditioned_centroid_error_m": 0.0 if request.conditioned else None,
         "achieved_current_centroid_r": float(request.centroid[0]),
         "achieved_current_centroid_z": float(request.centroid[1]),
     }
@@ -292,56 +375,30 @@ def write_shot(
     *,
     run_metadata: dict[str, Any],
 ) -> dict[str, Any]:
-    """Atomically write one session, manifest and receipt, resumable by shot."""
+    """Write one shot through the same session and diagnostic helpers as shards."""
     output_root.mkdir(parents=True, exist_ok=True)
     ordered = sorted(slices, key=lambda item: item.row)
     session_path = output_root / f"{shot}.nc"
+    diagnostics_path = output_root / f"{shot}.npz"
     manifest_path = output_root / f"{shot}.manifest.json"
-    receipt_path = output_root / f"{shot}.receipt.json"
-    if session_path.is_file() and manifest_path.is_file() and receipt_path.is_file():
+    if session_path.is_file() and manifest_path.is_file():
         return {"shot": shot, "status": "skipped", "resumed": True}
     if not ordered:
         raise ValueError(f"shot {shot} has no admitted slices")
-    state = np.stack([item.frame["state"] for item in ordered], axis=-1)
-    surface = np.stack([item.frame["surface"] for item in ordered], axis=-1)
-    centroid = np.stack([item.frame["centroid"] for item in ordered], axis=-1)
-    dataset = xr.Dataset(
-        data_vars={
-            "state": (("state_index", "time"), state),
-            "surface": (("surface_row", "surface_column", "time"), surface),
-            "centroid": (("coordinate", "time"), centroid),
-            "converged": (
-                ("time",),
-                np.asarray([item.record["converged"] for item in ordered], dtype=bool),
-            ),
-            "termination": (
-                ("time",),
-                np.asarray(
-                    [item.record["termination"] for item in ordered], dtype=np.int32
-                ),
-            ),
-            "trips": (
-                ("time",),
-                np.asarray([item.record["trips"] for item in ordered], dtype=np.int32),
-            ),
-        },
-        coords={
-            "time": np.asarray([item.time for item in ordered], dtype=np.float64),
-            "coordinate": np.asarray(["r", "z"]),
-        },
-        attrs={"schema": "nova-forward-labeller-session", **run_metadata},
+    _write_session_file(
+        [item.frame for item in ordered],
+        session_path.resolve(),
+        time_values=[item.time for item in ordered],
+        include_raster=False,
     )
-    temporary_session = session_path.with_name(f".{session_path.stem}.tmp.nc")
-    dataset.to_netcdf(temporary_session, mode="w", group="steering_frames")
-    dataset.close()
-    os.replace(temporary_session, session_path)
     rows = [item.record for item in ordered]
+    _write_diagnostics(rows, diagnostics_path)
     manifest = {
         "schema": "nova-forward-labeller-shot",
         "shot": shot,
         "status": "complete",
         "session": str(session_path.resolve()),
-        "receipt": str(receipt_path.resolve()),
+        "companion": str(diagnostics_path.resolve()),
         "slice_count": len(rows),
         "admitted_slice_count": len(rows),
         "written_slice_count": len(rows),
@@ -352,16 +409,6 @@ def write_shot(
         **run_metadata,
     }
     _write_json(manifest, manifest_path)
-    digest = hashlib.sha256(session_path.read_bytes()).hexdigest()
-    receipt = {
-        "schema": "nova-forward-labeller-shot-receipt",
-        "shot": shot,
-        "session_sha256": digest,
-        "frame_count": len(rows),
-        "assembly_wall_seconds": sum(item.assembly_wall_seconds for item in ordered),
-        **run_metadata,
-    }
-    _write_json(receipt, receipt_path)
     return manifest
 
 
@@ -460,7 +507,6 @@ class CorpusScheduler:
             if not (
                 (output_root / f"{shot}.nc").is_file()
                 and (output_root / f"{shot}.manifest.json").is_file()
-                and (output_root / f"{shot}.receipt.json").is_file()
             )
         )
         skipped = len(ranked_shots) - len(pending)

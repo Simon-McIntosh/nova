@@ -240,6 +240,22 @@
     megaampere compensator is a defect in its own right and is recorded as the next followup.</p>
   </section>
 
+  <section id="constraint-hygiene">
+    <h2>Constraint hygiene: typed binding leaves, a prescribed-field refusal, a banked direction fixture (da8880dc, ed0c5658, 7a074ef3; main 844b5bef)</h2>
+    <p><strong>Node:</strong> <code>cank-constraint-hygiene-luna</code> (run <code>r-20260906T094100005581</code>, codex luna at high effort, the
+    declared-wait arm of the backend trial). Files <code>nova/equilibrium/constraint.py</code>, <code>nova/equilibrium/forward.py</code>,
+    <code>tests/test_constraint_interface.py</code>, <code>tests/test_forward_constraints.py</code>, <code>tests/data/solovev_constraint_response.npz</code>.</p>
+    <p><strong>What landed.</strong> <code>ConstraintBinding</code> coerces <code>target</code>, <code>tolerance</code>, <code>scale</code> and
+    <code>initial_unknown</code> to arrays at construction, so a binding built from plain lists survives a jitted tree read instead of raising
+    inside the traced reduced route. <code>_solve_augmented_constraints</code> refuses a constrained Krylov request when neither the call nor the
+    operator carries a prescribed current field, naming what the rows' compensating currents would otherwise fold into nothing. The compensating
+    direction selection rule is gated on a banked Solov'ev response (2.4 kB fixture) on the CPU lane; the 22086/43 active block could not be
+    exported from a CPU lane, so the real-data fixture is the open remainder.</p>
+    <p><strong>Gate.</strong> 19 of 19 across six compute-node groups on <code>all_debug</code> (job 1263317, <code>JAX_PLATFORMS=cpu</code>, 96 GB), four
+    tests added; log <code>log-gate-final.txt</code> in the run directory. <strong>Trial reading.</strong> The worker parked on its gate at 12:30Z with a
+    declared wait and spent nothing until woken at 12:49Z (the sweep did not match the JSON terminal list, a reckon parser defect now specified); the
+    wait and wake turns cost 8.3M charged input against 46.3M for the polled gate of the traced-currents node.</p>
+  </section>
 </main>
 </body>
 </html>

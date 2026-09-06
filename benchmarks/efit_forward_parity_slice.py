@@ -4341,7 +4341,69 @@ def run_frozen_partition_comparison(
     )
     selected = _selected_frozen_slices(bank, shots)
     response_cache, carrier_evidence = _load_persisted_response_cache(root)
-    paired_rows = []
+    output.mkdir(parents=True, exist_ok=True)
+    receipt_path = output / "frozen-partition-savings.json"
+    receipt = {
+        "receipt": "paired public-route frozen-partition revaluation",
+        "status": "running",
+        "backend": _execution_environment(),
+        "source_revision": _source_revision(root),
+        "compilation_cache": compilation_cache.receipt(),
+        "execution_contract": {
+            "entry_point": "ForwardProfile.solve_branch",
+            "route": "newton_krylov",
+            "paired_arms_in_one_job": True,
+            "arm_order_per_row": ["without_hooks", "frozen_partition"],
+            "first_solve_of_each_arm_carries_compilation": True,
+            "row_selection": list(shots),
+            "terminal_residual_change_limit": 1.0e-10,
+        },
+        "response_carrier": carrier_evidence,
+        "progress": {
+            "completed_rows": 0,
+            "requested_rows": len(selected),
+        },
+        "per_row": [],
+    }
+
+    def write_checkpoint() -> None:
+        temporary_path = receipt_path.with_suffix(receipt_path.suffix + ".tmp")
+        temporary_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+        temporary_path.replace(receipt_path)
+
+    def run_arm(
+        passive_case: dict[str, Any],
+        context: dict[str, Any],
+        profile: ForwardProfile,
+        *,
+        freeze_partition: bool,
+    ) -> dict[str, Any]:
+        compile_bearing, _compile_trace, _compile_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=freeze_partition,
+        )
+        measured, _measured_trace, _measured_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=freeze_partition,
+        )
+        compile_bearing_measurement = compile_bearing["frozen_partition_measurement"]
+        measurement = measured["frozen_partition_measurement"]
+        first_solve_wall = compile_bearing_measurement["whole_solve_wall_seconds"]
+        solve_wall = measurement["whole_solve_wall_seconds"]
+        measurement["first_solve_with_compile_wall_seconds"] = first_solve_wall
+        measurement["solve_wall_seconds"] = solve_wall
+        measurement["compile_wall_seconds"] = max(first_solve_wall - solve_wall, 0.0)
+        measurement["compile_wall_definition"] = (
+            "first solve wall minus immediately repeated solve wall"
+        )
+        return measurement
+
+    if not prepare_only:
+        write_checkpoint()
     for selected_row, qualification in selected:
         mast_case, context = _mast_case_from_selection(
             store, selected_row, qualification
@@ -4361,31 +4423,28 @@ def run_frozen_partition_comparison(
             ):
                 raise RuntimeError("the bank-row operator did not attach frozen hooks")
             continue
-        baseline, _baseline_trace, _baseline_branch = _passive_inclusive_solve(
+        baseline_measurement = run_arm(
             passive_case,
             context,
             profile,
             freeze_partition=False,
         )
-        frozen, _frozen_trace, _frozen_branch = _passive_inclusive_solve(
+        frozen_measurement = run_arm(
             passive_case,
             context,
             profile,
             freeze_partition=True,
         )
-        baseline_measurement = baseline["frozen_partition_measurement"]
-        frozen_measurement = frozen["frozen_partition_measurement"]
-        if (
-            baseline_measurement["converged"] != frozen_measurement["converged"]
-            or abs(
-                baseline_measurement["terminal_residual"]
-                - frozen_measurement["terminal_residual"]
-            )
-            > 1.0e-10
-        ):
-            raise RuntimeError("frozen partition changed the terminal solve result")
+        residual_delta = abs(
+            baseline_measurement["terminal_residual"]
+            - frozen_measurement["terminal_residual"]
+        )
+        converged_flag_preserved = (
+            baseline_measurement["converged"] == frozen_measurement["converged"]
+        )
+        semantic_guard_passed = converged_flag_preserved and residual_delta <= 1.0e-10
         reference = mast_case["reference"]
-        paired_rows.append(
+        receipt["per_row"].append(
             {
                 "shot": reference["shot"],
                 "slice_index": reference["slice_index"],
@@ -4400,9 +4459,21 @@ def run_frozen_partition_comparison(
                     - frozen_measurement["whole_solve_wall_seconds"]
                     / baseline_measurement["whole_solve_wall_seconds"]
                 ),
+                "semantic_guard": {
+                    "converged_flag_preserved": converged_flag_preserved,
+                    "terminal_residual_delta": residual_delta,
+                    "terminal_residual_change_limit": 1.0e-10,
+                    "passed": semantic_guard_passed,
+                },
                 "prescribed_current_policy": policy,
             }
         )
+        receipt["progress"]["completed_rows"] = len(receipt["per_row"])
+        if not semantic_guard_passed:
+            receipt["status"] = "failed"
+        write_checkpoint()
+        if not semantic_guard_passed:
+            raise RuntimeError("frozen partition changed the terminal solve result")
     if prepare_only:
         output.mkdir(parents=True, exist_ok=True)
         receipt = {
@@ -4417,6 +4488,7 @@ def run_frozen_partition_comparison(
         )
         return receipt
     figure, axes = plt.subplots(1, 2, figsize=(10.0, 4.4), constrained_layout=True)
+    paired_rows = receipt["per_row"]
     labels = [f"{row['shot']} / {row['slice_index']}" for row in paired_rows]
     baseline_walls = [
         row["baseline_without_hooks"]["whole_solve_wall_seconds"] for row in paired_rows
@@ -4446,37 +4518,20 @@ def run_frozen_partition_comparison(
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=180)
     plt.close(figure)
-    receipt = {
-        "receipt": "paired public-route frozen-partition revaluation",
-        "backend": _execution_environment(),
-        "source_revision": _source_revision(root),
-        "compilation_cache": compilation_cache.receipt(),
-        "execution_contract": {
-            "entry_point": "ForwardProfile.solve_branch",
-            "route": "newton_krylov",
-            "paired_arms_in_one_job": True,
-            "row_selection": list(shots),
-            "terminal_residual_change_limit": 1.0e-10,
-        },
-        "response_carrier": carrier_evidence,
-        "per_row": paired_rows,
-        "aggregate": {
-            "row_count": len(paired_rows),
-            "total_saving_seconds": float(
-                sum(row["saving_seconds"] for row in paired_rows)
-            ),
-            "mean_saving_fraction": float(
-                np.mean([row["saving_fraction"] for row in paired_rows])
-            ),
-            "terminal_semantics_preserved": True,
-        },
-        "figure": str(figure_path),
-        "figure_src": _figure_src(figure_path),
+    receipt["status"] = "complete"
+    receipt["aggregate"] = {
+        "row_count": len(paired_rows),
+        "total_saving_seconds": float(
+            sum(row["saving_seconds"] for row in paired_rows)
+        ),
+        "mean_saving_fraction": float(
+            np.mean([row["saving_fraction"] for row in paired_rows])
+        ),
+        "terminal_semantics_preserved": True,
     }
-    output.mkdir(parents=True, exist_ok=True)
-    (output / "frozen-partition-savings.json").write_text(
-        json.dumps(receipt, indent=2, allow_nan=False) + "\n"
-    )
+    receipt["figure"] = str(figure_path)
+    receipt["figure_src"] = _figure_src(figure_path)
+    write_checkpoint()
     return receipt
 
 

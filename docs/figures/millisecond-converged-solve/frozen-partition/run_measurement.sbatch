@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
 #SBATCH --gres=gpu:1
-#SBATCH --time=00:45:00
+#SBATCH --time=02:00:00
 #SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/slurm-%j.out
 #SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/slurm-%j.err

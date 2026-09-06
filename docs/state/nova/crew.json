@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T22:46:50",
+  "updated": "2026-09-06T22:55:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2842,9 +2842,11 @@
         "id": "pfs-receipt-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "309b90dd-6599-4bf0-a879-5e0b09f436c3"
+        },
         "created": "2026-09-06"
       },
       {
@@ -114362,6 +114364,157 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T193953377401-pfs-receipt-adjudication-tables",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-receipt-adjudication-tables",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 799,
+                "cached_input_tokens": 287983,
+                "input_tokens": 288814,
+                "output_tokens": 1808,
+                "reasoning_output_tokens": 872,
+                "total_tokens": 290622,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_receipt.py passes with JAX_PLATFORMS=cpu on a two-shot synthetic root asserting the table shapes, that each table bin count sums to the written slice count, the pin summary values on known inputs, and the per-shot counts; and python3 scripts/labeller_batch/receipt.py over /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29 writes docs/figures/playable-forward-solve/labeller-receipt/receipt.json carrying both tables, quoted in the report",
+          "estimated_hours": 1.0,
+          "goal": "Two adjudication tables in scripts/labeller_batch/receipt.py over the per-shot diagnostics npz: the conditioned fraction by time-in-shot, by topology class, the pin displacement per slice as conditioned minus free centroid error, with per-shot free, conditioned slice counts in the receipt per-shot block",
+          "id": "pfs-receipt-adjudication-tables",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193953377401-pfs-receipt-adjudication-tables/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "scripts/labeller_batch/receipt.py",
+            "tests/test_labeller_receipt.py",
+            "docs/figures/playable-forward-solve/labeller-receipt/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/receipt-adjudication.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-receipt-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T19:40:06Z",
+        "completed_at": "2026-09-06T20:54:14.235Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4416,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4448,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "80a8512744748cbcec9903cbae37d9c75cd91860",
+        "commits": [
+          "5d8b711e686449be3cf9be9f61476c8745375a1c"
+        ],
+        "changed_lines": {
+          "added": 11567,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_labeller_receipt.py -v (9 passed: table shapes, bin sums equal written slice count for deciles, 50 ms bins and class, pin summary on hand-computed inputs, per-shot counts, three class-source outcomes) plus receipt.py over the live root",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193953377401-pfs-receipt-adjudication-tables/test_labeller_receipt.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193953377401-pfs-receipt-adjudication-tables/manifest.md",
+        "scope_changed": false,
+        "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 15646078,
+            "input_tokens_cumulative": 15646078,
+            "output_tokens": 97445,
+            "output_tokens_cumulative": 97445,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4444.362,
+          "generated_tokens": 97445,
+          "generation_seconds": 3680.305,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 22.8,
+          "machine_seconds": 764.057,
+          "peak_input_tokens": 231868,
+          "tokens_per_second": 26.48,
+          "wall_tokens_per_second": 21.93
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-receipt-adjudication-tables",
+          "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T20:54:14.235Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -114674,6 +114827,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1941
+    "_version": 1943
   }
 }

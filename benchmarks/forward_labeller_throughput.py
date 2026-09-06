@@ -458,6 +458,27 @@ def _compiled_flag(item: dict[str, Any]) -> bool:
     return bool(first > 0.25)
 
 
+def _warm_slice_wall(item: dict[str, Any], global_trip_wall: float | None) -> float:
+    """Return one slice's warm steady-state cost, every trip at the warm rate.
+
+    A slice that settled in one trip has no within-solve warm reference, so
+    its single trip is billed at the arm's median warm-trip wall instead of
+    the zero the raw tally would report; a multi-trip slice is the product of
+    its own trip count and its own median warm-trip wall.  This is the rate
+    the same loop costs once the programs are hot and the currents are traced
+    arguments rather than trace constants.
+    """
+    trips = int(item.get("trip_count") or 0)
+    if trips <= 0:
+        return 0.0
+    median = item.get("median_warm_trip_wall_s")
+    if median is not None:
+        return trips * float(median)
+    if global_trip_wall is not None:
+        return trips * global_trip_wall
+    return 0.0
+
+
 def _arm_rate_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     """Collapse one arm's slice records into rate statistics."""
     measured = [item for item in records if item is not None]
@@ -470,9 +491,15 @@ def _arm_rate_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         else None
     )
     total_wall = float(np.sum([item["solve_wall_s"] for item in measured]))
-    warm_wall = float(np.sum([item["steady_wall_s"] for item in measured]))
     as_built_walls = [item["solve_wall_s"] for item in measured]
-    warm_walls = [item["steady_wall_s"] for item in measured]
+    reference_trips = [
+        float(item["median_warm_trip_wall_s"])
+        for item in measured
+        if item.get("median_warm_trip_wall_s") is not None
+    ]
+    global_trip_wall = float(np.median(reference_trips)) if reference_trips else None
+    warm_walls = [_warm_slice_wall(item, global_trip_wall) for item in measured]
+    warm_wall = float(np.sum(warm_walls))
     per_second = len(measured) / total_wall if total_wall > 0 else 0.0
     warm_per_second = len(measured) / warm_wall if warm_wall > 0 else 0.0
     return {
@@ -492,6 +519,7 @@ def _arm_rate_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "median_warm_wall_per_slice_s": float(np.median(warm_walls))
         if warm_walls
         else None,
+        "median_warm_trip_wall_s_global": global_trip_wall,
         "as_built_slices_per_second": per_second,
         "warm_slices_per_second": warm_per_second,
         "as_built_slices_per_gpu_hour": per_second * 3600.0,
@@ -672,12 +700,13 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             item["solved"] = False
             item["solve_wall_s"] = time.perf_counter() - started
             item["failure"] = f"{type(error).__name__}: {error}"
-            # keep the last good state as the warm prior; do not teleport the
-            # chain back to a raw reference seed
+            # A converged state whose magnetic axis cannot be re-read would
+            # strand the whole chain at the next slice, so a failed slice is
+            # re-entered from its own reconstruction seed; the re-seed is the
+            # stated cost of the warm-start break.
+            state = jnp.asarray(seeds[row])
         item["program_compiled"] = _compiled_flag(item)
-        item["steady_wall_s"] = (
-            item.get("warm_wall_s") if item.get("warm_wall_s") is not None else 0.0
-        )
+        item["steady_wall_s"] = _warm_slice_wall(item, None)
         persist_arm("free", index, item)
         print(
             "LABELLER-DONE "
@@ -770,11 +799,11 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
             item["solved"] = False
             item["solve_wall_s"] = time.perf_counter() - started
             item["failure"] = f"{type(error).__name__}: {error}"
-            # keep the last good state and compensation as the warm prior
+            # re-enter the chain from the slice's own seed (see the free arm)
+            state = jnp.asarray(seeds[row])
+            unknown = None
         item["program_compiled"] = _compiled_flag(item)
-        item["steady_wall_s"] = (
-            item.get("warm_wall_s") if item.get("warm_wall_s") is not None else 0.0
-        )
+        item["steady_wall_s"] = _warm_slice_wall(item, None)
         persist_arm("conditioned", index, item)
         print(
             "LABELLER-DONE "
@@ -814,9 +843,12 @@ def measure(*, output: Path, figure: Path, cache_root: Path | None = None):
         _write_json(receipt, output)
 
     for arm in ("free", "conditioned"):
-        receipt["arms"][arm]["summary"] = _arm_rate_summary(
-            receipt["arms"][arm]["slices"]
-        )
+        slices = receipt["arms"][arm]["slices"]
+        summary = _arm_rate_summary(slices)
+        receipt["arms"][arm]["summary"] = summary
+        trip_wall = summary["median_warm_trip_wall_s_global"]
+        for item in (slice_ for slice_ in slices if slice_ is not None):
+            item["steady_wall_s"] = _warm_slice_wall(item, trip_wall)
 
     free = receipt["arms"]["free"]["summary"]
     cond = receipt["arms"]["conditioned"]["summary"]

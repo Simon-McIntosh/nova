@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T23:03:52",
+  "updated": "2026-09-06T23:18:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -114813,6 +114813,146 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T210401612293-pfs-decoder-reset-protocol",
+        "plan": "playable-forward-solve",
+        "section": "\u00a77",
+        "node": "pfs-decoder-reset-protocol",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3496,
+                "cached_input_tokens": 550032,
+                "input_tokens": 553560,
+                "output_tokens": 189,
+                "reasoning_output_tokens": 95,
+                "total_tokens": 553749,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_playable_camera.py tests/test_playable_session.py -m \"not slow\" passes with exit 0, including new tests asserting reset() is called once at session start and once per base shot or slice change against a recording stub, that a stub without reset() loads and decodes unchanged, and that the (256, 256, 3) uint8 DecodedFrame contract is unchanged; the manifest quotes the summary line",
+          "estimated_hours": 0.75,
+          "goal": "An optional reset() on the FrameDecoder protocol in apps/playable/camera.py that PlayableSession calls at session start plus whenever the base shot or slice changes (getattr with a no-op default), with the imas-ambix implementation dotted path imas_ambix.worldmodel.flux_conditioned_decoder:FluxConditionedDecoder plus its decoder_identity format pinned in the decoder loading path",
+          "id": "pfs-decoder-reset-protocol",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210401612293-pfs-decoder-reset-protocol/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "apps/playable/camera.py",
+            "apps/playable/session.py",
+            "tests/test_playable_camera.py",
+            "tests/test_playable_session.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/decoder-reset-protocol.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-appframe-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T21:04:20Z",
+        "completed_at": "2026-09-06T21:17:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 813,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 813,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b780497fdbac6b85fdfea7343ac8a047a8988241",
+        "commits": [
+          "d016f91607fbed4494e1f843e1afa9a58e1e4a50"
+        ],
+        "changed_lines": {
+          "added": 184,
+          "removed": 3,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_playable_camera.py tests/test_playable_session.py -m \"not slow\" on the all_debug partition (37 passed, 3 deselected; baseline at b780497f had 7 camera-fixture failures exposed by the merged frame-push lifecycle, repaired in scope)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210401612293-pfs-decoder-reset-protocol/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210401612293-pfs-decoder-reset-protocol/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 8118656,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8456308,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 24655,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 8871
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 33526,
+          "peak_input_tokens": 16574964
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-decoder-reset-protocol",
+          "session_id": "01a07841-370c-7b62-8c86-888e3e4ce9eb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T21:17:53Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -115125,6 +115265,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1948
+    "_version": 1949
   }
 }

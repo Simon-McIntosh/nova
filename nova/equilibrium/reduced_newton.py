@@ -58,6 +58,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import partial
+import os as _os
 import time
 from typing import Any, NamedTuple
 
@@ -101,6 +102,38 @@ ACTIVE_SET_STEPS = 16
 NEWTON_STEPS = 12
 SUPPORT_POLICY = "participation"
 _ACTIVE_SUPPORT_FLOOR = 0.0
+
+#: Optional per-solve stage recording for the keyframe driver.  When enabled,
+#: the host loop records named boundaries (``convert``, ``shadow``, ``bind``,
+#: ``gather``, ``trips``, ``records`` plus a ``tripN:*`` boundary per active-set
+#: trip) against ``perf_counter`` so a measurement can separate host-side work
+#: around the compiled program from the kernels themselves.  The recording
+#: changes no number the solve produces; it is off unless the driver turns it
+#: on.
+_STAGE_TIMING_ENABLED = _os.environ.get("NOVA_REDUCED_STAGE_TIMING") == "1"
+_STAGE_MARKS: list[tuple[str, float]] = []
+
+
+def set_stage_timing(enabled: bool = True) -> None:
+    """Enable or disable the named stage recording (measurement hook only)."""
+    global _STAGE_TIMING_ENABLED
+    _STAGE_TIMING_ENABLED = bool(enabled)
+
+
+def clear_stage_marks() -> None:
+    """Forget recorded stage boundaries before one solve's measurement."""
+    _STAGE_MARKS.clear()
+
+
+def reduced_stage_marks() -> list[tuple[str, float]]:
+    """Return the stage boundaries recorded since the last clear, in order."""
+    return list(_STAGE_MARKS)
+
+
+def _stage_mark(name: str) -> None:
+    """Record one named solve-stage boundary when stage timing is enabled."""
+    if _STAGE_TIMING_ENABLED:
+        _STAGE_MARKS.append((name, time.perf_counter()))
 
 #: Score the first backtracking grade alone and, when it is refused, score
 #: every remaining grade in one dispatch.  The production ladder takes the
@@ -1077,6 +1110,7 @@ def _drive_trips(
 
     for trip in range(active_set_steps):
         trip_started = time.perf_counter()
+        _stage_mark(f"trip{trip}:start")
         if not fused:
             reduced = regather(state)
         reduced, census = _plain_newton_trip(
@@ -1109,6 +1143,7 @@ def _drive_trips(
                 reduced, shadow, state
             )
             leakage = max(leakage, excluded)
+        _stage_mark(f"trip{trip}:boundary")
         per_trip_boundary_wall.append(time.perf_counter() - boundary_started)
         per_trip_wall.append(time.perf_counter() - trip_started)
         residuals.append(observed)
@@ -1199,7 +1234,18 @@ def solve_reduced_newton(
     target_current_value = (
         None if target_current is None else jnp.asarray(target_current)
     )
-    external = operator.external(current, prescribed_current)
+    # A carried program keeps the external flux it was built with.  When the
+    # caller's conductor currents are the default ones (both ``None``) and the
+    # program was itself built on the defaults, that external is exactly what
+    # this call would recompute, so reusing it skips one per-keyframe device
+    # evaluation.  A program built under explicit currents is never reused
+    # this way.
+    default_external = current is None and prescribed_current is None
+    if program is not None and default_external and program.default_external:
+        external = program.external
+    else:
+        external = operator.external(current, prescribed_current)
+    _stage_mark("external")
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
@@ -1233,6 +1279,7 @@ def solve_reduced_newton(
             requested_class_shape=(
                 None if requested_class is None else tuple(np.shape(requested_class))
             ),
+            default_external=default_external,
         )
     else:
         expected_target_shape = (
@@ -1360,6 +1407,10 @@ class ReducedProgram(NamedTuple):
     target_current_shape: tuple[int, ...] | None = None
     requested_class_shape: tuple[int, ...] | None = None
     row_signature: tuple[tuple[str, str], ...] = ()
+    #: Whether the carried external was computed from the default conductor
+    #: currents (both ``None``), which is what makes reusing it on a later
+    #: solve exact.  A program built under explicit currents always recomputes.
+    default_external: bool = True
 
 
 def _bind_rows(
@@ -1593,6 +1644,7 @@ def solve_constrained_reduced_newton(
     target_current_value = (
         None if target_current is None else jnp.asarray(target_current)
     )
+    _stage_mark("convert")
     if (
         pairs
         and prescribed_current is None
@@ -1626,7 +1678,13 @@ def solve_constrained_reduced_newton(
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
-    external = operator.external(current, prescribed_current)
+    _stage_mark("shadow")
+    default_external = current is None and prescribed_current is None
+    if program is not None and default_external and program.default_external:
+        external = program.external
+    else:
+        external = operator.external(current, prescribed_current)
+    _stage_mark("external")
     row_signature = tuple(
         (
             type(pair.functional).__qualname__,
@@ -1666,6 +1724,7 @@ def solve_constrained_reduced_newton(
                 None if requested_class is None else tuple(np.shape(requested_class))
             ),
             row_signature=row_signature,
+            default_external=default_external,
         )
     elif (
         program.operator_identity != id(operator)
@@ -1690,6 +1749,7 @@ def solve_constrained_reduced_newton(
         if augmentation is None or row_arguments == CAPTURED_ROWS
         else augmentation.arguments,
     )
+    _stage_mark("bind")
 
     def regather(state):
         """Return the amplitudes one flux state drives, outside a program."""
@@ -1731,6 +1791,7 @@ def solve_constrained_reduced_newton(
                 ),
             )
         )
+    _stage_mark("gather")
     driven = _drive_trips(
         kernels,
         state,
@@ -1745,6 +1806,7 @@ def solve_constrained_reduced_newton(
         dispatched_boundary=dispatched_boundary,
         stream=stream,
     )
+    _stage_mark("trips")
     unknowns = None if augmentation is None else driven["reduced"][coordinates.size :]
     records: tuple[ConstraintRecord, ...] = ()
     circuit_current = (
@@ -1773,6 +1835,7 @@ def solve_constrained_reduced_newton(
                 circuit_current = circuit_current + (
                     jnp.asarray(pair.unknown.direction) @ record.physical_unknown
                 )
+    _stage_mark("records")
     return ConstrainedReducedNewtonResult(
         state=driven["state"],
         terminal_residual=driven["terminal_residual"],

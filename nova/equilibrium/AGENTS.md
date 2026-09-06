@@ -4,6 +4,41 @@ This guidance applies when constructing equilibrium machines, running forward
 maps, or measuring their fixed points. Repository-wide development and git
 rules remain in the root `AGENTS.md`.
 
+## Run a forward solve through the request-receipt seam
+
+The only supported way to run a forward solve with production defaults and a
+receipt is a typed request through the public seam. A bare call to a private
+fixed-point kernel, or a solver-control keyword threaded past the seam, is a
+routing-around: it resolves outside the declared defaults, so its verdict is
+not comparable with any production receipt.
+
+- Build a `ForwardSolveRequest` and pass it to `ForwardProfile.solve`; the
+  return is a `ForwardSolveReceipt` carrying the terminal state, its
+  qualification and termination reason, the per-trip residual and mask
+  histories, the compilation-cache hit, wall seconds, and the resolved
+  defaults that actually ran. The request, receipt, policy, seed, and
+  resolved-defaults types — `ForwardSolveRequest`, `ForwardSolveReceipt`,
+  `ForwardSolvePolicy`, `ExplicitSolveSeed`, `ResolvedForwardSolveDefaults` —
+  live in `nova/equilibrium/solve_request.py` and are re-exported under
+  `nova.equilibrium`. Passing a request together with any solve keyword is
+  rejected, so the defaults cannot be half-overridden through the seam.
+- The declared-defaults table is `FORWARD_SOLVE_DEFAULTS` in the same module,
+  keyed by the installed Nova package version. Read it through
+  `declared_forward_solve_policy()` and build a request from those defaults
+  with `ForwardSolveRequest.from_defaults(...)`. A deliberate deviation (a
+  bank row pinned to a different budget, a stricter qualification floor) is
+  expressed through `policy_overrides` or `resolve_forward_solve_policy(...)`
+  and is recorded on the receipt under `resolved_defaults.deviations` — never
+  passed to the seam as a raw solver keyword.
+- Production routes and benchmarks construct one typed request per solve,
+  leave every default that is not a deliberate deviation at its declared
+  value, and write the resolved-defaults block into any JSON they emit. After
+  touching a route, run the default-wiring tests:
+  `tests/test_route_default_wiring.py` (each production route receipt resolves
+  every declared default and no production route calls a private solver
+  kernel) and `tests/test_default_wiring.py` (every production entry point
+  resolves the defaults on and its launcher leaves them to the public seam).
+
 ## Keep the two reference lanes separate
 
 ### Closed-form analytic oracle

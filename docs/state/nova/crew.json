@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T21:32:48",
+  "updated": "2026-09-06T21:43:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1249,6 +1249,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "fsa-docs-c",
+        "harness": "clive",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "fsa-identity-t",
@@ -2609,6 +2618,15 @@
         "created": "2026-08-13"
       },
       {
+        "id": "pfs-appframe-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-batch-l",
         "harness": "codex",
         "role": "implement",
@@ -2877,6 +2895,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "d2c3461a-c29b-4bbf-b54c-5c3a117ff099"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-shape-t",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "pfs-slice-l",
@@ -113994,6 +114021,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1926
+    "_version": 1929
   }
 }

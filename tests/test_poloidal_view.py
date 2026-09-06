@@ -122,6 +122,164 @@ def _hex_luminance(colour: str) -> float:
     return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
 
 
+def _reference_endpoint(point) -> tuple[float, float]:
+    """Return the endpoint identity used by the replaced raster tracer."""
+    return round(float(point[0]), 10), round(float(point[1]), 10)
+
+
+def _reference_join_segments(segments) -> list[np.ndarray]:
+    """Join raster-edge segments as the replaced renderer did."""
+    neighbours = {}
+    for index, (start, end) in enumerate(segments):
+        neighbours.setdefault(_reference_endpoint(start), []).append(index)
+        neighbours.setdefault(_reference_endpoint(end), []).append(index)
+    used = [False] * len(segments)
+    lines: list[np.ndarray] = []
+    for start in range(len(segments)):
+        if used[start]:
+            continue
+        used[start] = True
+        line = [list(segments[start][0]), list(segments[start][1])]
+        extended = True
+        while extended:
+            extended = False
+            for end_index in (0, -1):
+                endpoint = _reference_endpoint(line[end_index])
+                for other in neighbours.get(endpoint, ()):
+                    if used[other]:
+                        continue
+                    used[other] = True
+                    first, second = segments[other]
+                    following = (
+                        second if _reference_endpoint(first) == endpoint else first
+                    )
+                    if end_index == 0:
+                        line.insert(0, list(following))
+                    else:
+                        line.append(list(following))
+                    extended = True
+                    break
+        lines.append(np.asarray(line))
+    return lines
+
+
+def _reference_level_lines(psi2d, radius, height, level) -> list[np.ndarray]:
+    """Regenerate the replaced renderer's output for one raster level."""
+    psi2d = np.asarray(psi2d, dtype=float)
+    radius = np.asarray(radius, dtype=float)
+    height = np.asarray(height, dtype=float)
+    radial_step = radius[1] - radius[0]
+    vertical_step = height[1] - height[0]
+    segments = []
+    for radial_index in range(psi2d.shape[0] - 1):
+        for vertical_index in range(psi2d.shape[1] - 1):
+            values = (
+                psi2d[radial_index, vertical_index],
+                psi2d[radial_index, vertical_index + 1],
+                psi2d[radial_index + 1, vertical_index + 1],
+                psi2d[radial_index + 1, vertical_index],
+            )
+            above = [value > level for value in values]
+            if sum(above) in (0, 4):
+                continue
+            crossings = []
+            edges = ((0, 1), (1, 2), (2, 3), (3, 0))
+            for edge, (first, second) in enumerate(edges):
+                if above[first] == above[second]:
+                    continue
+                fraction = (level - values[first]) / (values[second] - values[first])
+                if edge == 0:
+                    point = (
+                        radius[radial_index],
+                        height[vertical_index] + fraction * vertical_step,
+                    )
+                elif edge == 1:
+                    point = (
+                        radius[radial_index] + fraction * radial_step,
+                        height[vertical_index + 1],
+                    )
+                elif edge == 2:
+                    point = (
+                        radius[radial_index + 1],
+                        height[vertical_index + 1] - fraction * vertical_step,
+                    )
+                else:
+                    point = (
+                        radius[radial_index + 1] - fraction * radial_step,
+                        height[vertical_index],
+                    )
+                crossings.append(point)
+            if len(crossings) == 2:
+                segments.append((crossings[0], crossings[1]))
+            elif len(crossings) == 4:
+                centre = 0.25 * sum(values)
+                if centre <= level:
+                    segments.extend(
+                        ((crossings[0], crossings[3]), (crossings[1], crossings[2]))
+                    )
+                else:
+                    segments.extend(
+                        ((crossings[0], crossings[1]), (crossings[2], crossings[3]))
+                    )
+            else:  # pragma: no cover - a square has two or four crossings
+                raise AssertionError(f"unexpected crossing count {len(crossings)}")
+    return _reference_join_segments(segments)
+
+
+def _polyline_separation(first: np.ndarray, second: np.ndarray) -> float:
+    """Return the symmetric nearest-vertex separation of two polylines."""
+    distances = np.linalg.norm(first[:, None, :] - second[None, :, :], axis=2)
+    return float(max(distances.min(axis=0).max(), distances.min(axis=1).max()))
+
+
+def _measure_contour_steps(equilibrium, repeats: int = 200) -> dict[str, float]:
+    """Measure legacy, Nova and precomputed contour-channel steps in seconds."""
+    from time import perf_counter
+
+    import apps.pulsedesign.poloidal_view as poloidal_view
+
+    raster = equilibrium.raster_flux
+    radius = np.asarray(raster.radius, dtype=float)
+    height = np.asarray(raster.height, dtype=float)
+    shape = (len(radius), len(height))
+    psi_norm = np.asarray(raster.psi_norm, dtype=float).reshape(shape)
+    psi2d = np.asarray(raster.psi, dtype=float).reshape(shape)
+    x2d, z2d = np.meshgrid(radius, height, indexing="ij")
+    normalised_levels = contour_levels(N_CONTOURS)
+    axis_flux = float(np.asarray(equilibrium.topology.axis_flux))
+    flux_span = float(np.asarray(equilibrium.topology.flux_span))
+    physical_levels = axis_flux + flux_span * normalised_levels
+
+    def legacy_step():
+        return [
+            line
+            for level in normalised_levels
+            for line in _reference_level_lines(psi_norm, radius, height, float(level))
+        ]
+
+    def nova_step():
+        return poloidal_view._closed_contour_lines(x2d, z2d, psi2d, physical_levels)
+
+    surface_rows = nova_step()
+
+    def precomputed_step():
+        return [poloidal_view.close_outline(line) for line in surface_rows]
+
+    timings = {}
+    for name, operation in (
+        ("legacy_marching_squares_seconds", legacy_step),
+        ("nova_contour_seconds", nova_step),
+        ("precomputed_surfaces_seconds", precomputed_step),
+    ):
+        operation()
+        started = perf_counter()
+        for _ in range(repeats):
+            operation()
+        timings[name] = (perf_counter() - started) / repeats
+    timings["repeats"] = float(repeats)
+    return timings
+
+
 # ---------------------------------------------------------------------------
 # the styled figure: no chrome, wall, coils, plasma, contours, markers
 # ---------------------------------------------------------------------------
@@ -373,6 +531,126 @@ def test_cut_cells_are_the_solve_clipped_polygons_with_vertices_within_pitch(
         "no cell polygon crosses the separatrix by more than the lattice pitch; "
         f"measured {penetration.max():.3e} m against pitch {pitch:.4f} m"
     )
+
+
+def test_raster_contours_instantiate_nova_contourer_and_local_tracer_is_absent(
+    solved_frame, monkeypatch
+):
+    """The raster fallback delegates every level cut to Nova's Contour."""
+    import apps.pulsedesign.poloidal_view as poloidal_view
+
+    actual_contour = poloidal_view.Contour
+    calls = []
+
+    def recording_contour(*args, **kwargs):
+        calls.append((args, kwargs))
+        return actual_contour(*args, **kwargs)
+
+    monkeypatch.setattr(poloidal_view, "Contour", recording_contour)
+    machine, equilibrium = solved_frame
+    result = poloidal_view.poloidal_channels(
+        equilibrium,
+        machine.profile,
+        wall=machine.wall,
+        coils=machine.coils,
+        n_contours=N_CONTOURS,
+    )
+
+    assert len(calls) == 1
+    x2d, z2d, psi2d = calls[0][0]
+    levels = calls[0][1]["levels"]
+    raster = equilibrium.raster_flux
+    shape = (len(raster.radius), len(raster.height))
+    assert x2d.shape == z2d.shape == psi2d.shape == shape
+    axis_flux = float(np.asarray(equilibrium.topology.axis_flux))
+    flux_span = float(np.asarray(equilibrium.topology.flux_span))
+    np.testing.assert_allclose(
+        levels, axis_flux + flux_span * contour_levels(N_CONTOURS)
+    )
+    for name in ("_trace_level", "_chain", "_key"):
+        assert not hasattr(poloidal_view, name)
+    for x_line, z_line in zip(
+        result["levelset"]["x"][:-1], result["levelset"]["z"][:-1], strict=True
+    ):
+        np.testing.assert_allclose((x_line[0], z_line[0]), (x_line[-1], z_line[-1]))
+
+
+def test_nova_contours_agree_with_replaced_raster_tracer_within_one_cell(
+    solved_frame, channels
+):
+    """The contourer change does not move a loop by one raster cell."""
+    machine, equilibrium = solved_frame
+    del machine
+    raster = equilibrium.raster_flux
+    radius = np.asarray(raster.radius, dtype=float)
+    height = np.asarray(raster.height, dtype=float)
+    psi_norm = np.asarray(raster.psi_norm, dtype=float).reshape(
+        len(radius), len(height)
+    )
+    pitch = max(float(np.diff(radius).max()), float(np.diff(height).max()))
+
+    reference = [
+        line
+        for level in contour_levels(N_CONTOURS)
+        for line in _reference_level_lines(psi_norm, radius, height, float(level))
+        if len(line) > 2 and np.allclose(line[0], line[-1], atol=1.0e-9)
+    ]
+    actual = [
+        np.c_[x_line, z_line]
+        for x_line, z_line in zip(
+            channels["levelset"]["x"][:-1],
+            channels["levelset"]["z"][:-1],
+            strict=True,
+        )
+    ]
+    assert reference and actual
+    for line in reference:
+        separation = min(_polyline_separation(line, candidate) for candidate in actual)
+        assert separation <= pitch
+    for line in actual:
+        assert (
+            min(_polyline_separation(line, candidate) for candidate in reference)
+            <= pitch
+        )
+
+
+def test_precomputed_surfaces_are_closed_and_drawn_without_contouring(
+    solved_frame, monkeypatch
+):
+    """Given surface coordinates pass to the channel verbatim, plus closure."""
+    import apps.pulsedesign.poloidal_view as poloidal_view
+
+    class UnexpectedContour:
+        def __init__(self, *_args, **_kwargs):
+            raise AssertionError("precomputed surfaces must bypass contouring")
+
+    monkeypatch.setattr(poloidal_view, "Contour", UnexpectedContour)
+    surfaces = np.asarray(
+        [
+            [[0.4, -0.1], [0.5, -0.2], [0.6, -0.1], [0.5, 0.0]],
+            [[0.3, -0.2], [0.5, -0.3], [0.7, -0.2], [0.5, 0.1]],
+            [[0.2, -0.3], [0.5, -0.4], [0.8, -0.3], [0.5, 0.2]],
+        ]
+    )
+    machine, equilibrium = solved_frame
+    result = poloidal_view.poloidal_channels(
+        equilibrium,
+        machine.profile,
+        wall=machine.wall,
+        coils=machine.coils,
+        surfaces=surfaces,
+        stride=2,
+    )
+    lines = [
+        np.c_[x_line, z_line]
+        for x_line, z_line in zip(
+            result["levelset"]["x"], result["levelset"]["z"], strict=True
+        )
+    ]
+    assert len(lines) == 2
+    for line, supplied in zip(lines, surfaces[::2], strict=True):
+        np.testing.assert_array_equal(line[:-1], supplied)
+        np.testing.assert_array_equal(line[-1], supplied[0])
 
 
 def test_contour_source_is_dark_grey_unfilled_levels_with_separatrix_outermost(

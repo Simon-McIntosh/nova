@@ -12,13 +12,15 @@ import pytest
 
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
-    RANK_RELATIVE_TOLERANCE,
+    GAMMA,
+    PICARD_ROUNDS,
     _cap_current_delta,
-    _numerical_rank,
     achieved_target,
     bounding_box_pairs,
     observed_values,
     response_matrix,
+    shape_response_matrix,
+    shape_values,
     solve_shape_inverse,
 )
 
@@ -69,9 +71,19 @@ def test_response_matrix_matches_central_differences(machine, seed_target):
             analytic[:, circuit], central, rtol=2.0e-8, atol=1.0e-12
         )
 
+    direct = shape_response_matrix(profile, seed_target, state)
+    for circuit in (0, profile.operator.prescribed_current_field.circuit_count // 2):
+        tangent = response[:, circuit] * current_step
+        plus = shape_values(profile, seed_target, state + tangent)
+        minus = shape_values(profile, seed_target, state - tangent)
+        central = (plus - minus) / (2.0 * current_step)
+        np.testing.assert_allclose(
+            direct[:, circuit], central, rtol=2.0e-8, atol=1.0e-12
+        )
 
-def test_unmoved_inverse_preserves_the_seed_currents(machine, seed_target):
-    """The seed's own turning points command no edit to its own currents."""
+
+def test_unmoved_inverse_solves_total_currents(machine, seed_target):
+    """The inverse solves total currents against the absolute shape rows."""
     current = np.asarray(machine.profile.operator.prescribed_current_field.current)
     solved = solve_shape_inverse(
         machine.profile,
@@ -79,23 +91,30 @@ def test_unmoved_inverse_preserves_the_seed_currents(machine, seed_target):
         machine.seed,
         prescribed_current=current,
     )
-    np.testing.assert_allclose(solved.currents, current, rtol=0.0, atol=5.0e-4)
-    assert np.linalg.norm(solved.delta) < 2.0e-3
+    np.testing.assert_allclose(
+        solved.delta,
+        solved.currents[solved.free_circuits] - current[solved.free_circuits],
+        rtol=0.0,
+        atol=1.0e-12,
+    )
     assert solved.row_kinds == ("flux",) * 4 + ("field",) * 4
-    assert solved.numerical_rank == solved.singular_values.size
+    assert solved.gamma == pytest.approx(GAMMA * solved.plasma_current)
+    assert solved.picard_currents.shape[0] == PICARD_ROUNDS + 1
+    weight = np.asarray(
+        [
+            1.0 if kind == "flux" else np.sqrt(solved.field_weight)
+            for kind in solved.row_kinds
+        ]
+    )
+    matrix = solved.response[:, solved.free_circuits] * weight[:, None]
+    vector = solved.right_hand_side * weight
+    total = solved.currents[solved.free_circuits]
+    normal_residual = matrix.T @ (matrix @ total - vector) + solved.gamma**2 * total
+    assert np.linalg.norm(normal_residual) < 1.0e-10
     assert solved.right_null_space.shape == (
         solved.free_circuits.size - solved.numerical_rank,
         solved.free_circuits.size,
     )
-
-
-def test_numerical_rank_drops_only_exact_zero_modes():
-    """Weak nonzero authority remains available to Tikhonov damping."""
-    threshold = RANK_RELATIVE_TOLERANCE
-    values = np.asarray([1.0, 10.0**-4.5, threshold, np.nextafter(threshold, 0.0), 0.0])
-    rank, absolute_threshold = _numerical_rank(values)
-    assert rank == 3
-    assert absolute_threshold == threshold
 
 
 def test_current_step_cap_is_relative_to_each_seed_circuit():
@@ -125,10 +144,8 @@ def test_bulk_motion_translates_all_four_turning_points_rigidly(seed_target, par
     np.testing.assert_allclose(np.asarray(moved.vertical_field_points), after[[1, 3]])
 
 
-def test_production_solver_stops_after_first_acceptable_forward_round(
-    monkeypatch, seed_target
-):
-    """A large point error earns exactly one corrective inverse-forward round."""
+def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_target):
+    """Placement Picard stays inside the inverse before one forward solve."""
     from apps.playable import production
 
     current_field = SimpleNamespace(current=np.asarray([2.0, -3.0]))
@@ -160,14 +177,13 @@ def test_production_solver_stops_after_first_acceptable_forward_round(
         current_step_reference,
     ):
         assert free_circuits is None
-        assert current_step_fraction == 0.1
+        assert current_step_fraction is None
         np.testing.assert_allclose(current_step_reference, [2.0, -3.0])
         return SimpleNamespace(currents=np.asarray(prescribed_current) + 1.0)
 
     monkeypatch.setattr(production, "solve_shape_inverse", inverse)
-    errors = iter((0.01, 0.001))
     monkeypatch.setattr(
-        production, "turning_point_error", lambda _profile, _target, _flux: next(errors)
+        production, "turning_point_error", lambda _profile, _target, _flux: 0.01
     )
 
     def forward(_profile, flux, prescribed_current):
@@ -188,11 +204,11 @@ def test_production_solver_stops_after_first_acceptable_forward_round(
         action=("bulk_z", 0.01),
         program=object(),
     )
-    assert len(forward_calls) == 2
-    np.testing.assert_allclose(forward_calls, [[3.0, -2.0], [4.0, -1.0]])
-    assert len(solver.last_rounds) == 2
-    assert solver.last_rounds[-1].turning_point_error == 0.001
-    assert result.trips == 4
+    assert len(forward_calls) == 1
+    np.testing.assert_allclose(forward_calls, [[3.0, -2.0]])
+    assert len(solver.last_rounds) == 1
+    assert solver.last_rounds[-1].turning_point_error == 0.01
+    assert result.trips == 2
     assert result.reused is False
 
 
@@ -230,8 +246,8 @@ def test_limited_fixture_motion_has_commanded_sign_and_monotonic_gain(
         inverse = solve_shape_inverse(
             profile, target, prime.flux, prescribed_current=current
         )
-        linear_prediction = inverse.response[:, inverse.free_circuits] @ inverse.delta
-        linear_command = inverse.target - inverse.observed
+        linear_prediction = inverse.linear_prediction
+        linear_command = inverse.right_hand_side
         reduced = ProductionSolver(machine)._reduced(
             profile, prime.flux, inverse.currents
         )

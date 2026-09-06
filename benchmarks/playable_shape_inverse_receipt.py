@@ -141,13 +141,14 @@ def _null_modes(inverse, names: dict[int, str]) -> list[dict[str, Any]]:
     return modes
 
 
-def _upper_command_diagnostic(
+def _command_diagnostic(
+    name: str,
     machine: ForwardMachine,
     previous,
     target,
     circuit_names: dict[int, str],
 ) -> dict[str, Any]:
-    """Return the uncapped active-current command without solving it forward."""
+    """Return one pulse-design current command without solving it forward."""
     seed = np.asarray(machine.profile.operator.prescribed_current_field.current)
     inverse = solve_shape_inverse(
         machine.profile,
@@ -157,8 +158,19 @@ def _upper_command_diagnostic(
         free_circuits=machine.drivable_circuits,
     )
     fractions = np.abs(inverse.delta) / np.abs(seed[inverse.free_circuits])
+    block = inverse.response[:, inverse.free_circuits]
+    flux_rows = sum(kind == "flux" for kind in inverse.row_kinds)
     return {
-        "command": "upper-point-plus-20mm",
+        "command": name,
+        "formulation": {
+            "unknown": "total active-circuit currents",
+            "field_weight": inverse.field_weight,
+            "tikhonov_gamma": inverse.gamma,
+            "placement_picard_rounds": int(inverse.picard_currents.shape[0] - 1),
+            "nonlinear_solve_inside_inverse": False,
+            "current_step_guard": inverse.current_step_fraction,
+        },
+        "previous_variant_current_change_l2_a": 1146131.0,
         "seed_current_by_family_a": {
             _circuit_label(int(circuit), circuit_names): float(seed[circuit])
             for circuit in inverse.free_circuits
@@ -173,13 +185,19 @@ def _upper_command_diagnostic(
         },
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "largest_change_fraction_of_seed": float(np.max(fractions)),
-        "linear_row_prediction": (
-            inverse.response[:, inverse.free_circuits] @ inverse.delta
+        "linear_row_prediction": inverse.linear_prediction.tolist(),
+        "linear_row_right_hand_side": inverse.right_hand_side.tolist(),
+        "picard_total_current_by_round_a": inverse.picard_currents.tolist(),
+        "picard_boundary_flux_by_round_wb": inverse.picard_boundary_flux.tolist(),
+        "weighted_response_singular_values_mixed": inverse.singular_values.tolist(),
+        "flux_response_singular_values_wb_per_a": np.linalg.svd(
+            block[:flux_rows], compute_uv=False
         ).tolist(),
-        "linear_row_command": (inverse.target - inverse.observed).tolist(),
-        "response_singular_values": inverse.singular_values.tolist(),
+        "field_response_singular_values_t_per_a": np.linalg.svd(
+            block[flux_rows:], compute_uv=False
+        ).tolist(),
+        "row_units": ["Wb" if kind == "flux" else "T" for kind in inverse.row_kinds],
         "response_numerical_rank": inverse.numerical_rank,
-        "response_rank_threshold": inverse.rank_threshold,
         "null_modes": _null_modes(inverse, circuit_names),
     }
 
@@ -229,29 +247,33 @@ def _arm_receipt(
             ),
             "current_step_fraction": item.inverse.current_step_fraction,
             "current_step_limited": item.inverse.current_step_limited,
-            "linear_row_prediction": (
-                item.inverse.response[:, item.inverse.free_circuits]
-                @ item.inverse.delta
-            ).tolist(),
+            "linear_row_prediction": item.inverse.linear_prediction.tolist(),
             "uncapped_linear_row_prediction": (
                 item.inverse.response[:, item.inverse.free_circuits]
-                @ item.inverse.uncapped_delta
+                @ (
+                    item.inverse.currents[item.inverse.free_circuits]
+                    - item.inverse.delta
+                    + item.inverse.uncapped_delta
+                )
             ).tolist(),
-            "linear_row_command": (
-                item.inverse.target - item.inverse.observed
-            ).tolist(),
+            "linear_row_right_hand_side": item.inverse.right_hand_side.tolist(),
             "least_squares_residual": item.inverse.least_squares_residual,
             "uncapped_least_squares_residual": (
                 item.inverse.uncapped_least_squares_residual
             ),
             "response_singular_values": item.inverse.singular_values.tolist(),
             "response_numerical_rank": item.inverse.numerical_rank,
-            "response_rank_threshold": item.inverse.rank_threshold,
             "response_conditioning_span": float(
                 item.inverse.singular_values[0]
                 / item.inverse.singular_values[item.inverse.numerical_rank - 1]
             ),
             "null_modes": _null_modes(item.inverse, circuit_names),
+            "placement_picard_total_currents_a": (
+                item.inverse.picard_currents.tolist()
+            ),
+            "placement_picard_boundary_flux_wb": (
+                item.inverse.picard_boundary_flux.tolist()
+            ),
             "commanded_turning_points_m": _points(target).tolist(),
             "achieved_turning_points_m": item.achieved_turning_points.tolist(),
             "turning_point_error_m": item.turning_point_error,
@@ -276,7 +298,8 @@ def _arm_receipt(
         "current_step_policy": {
             "reference": "fixed carrier seed current per circuit",
             "maximum_fraction_per_round": solver.current_step_fraction,
-            "maximum_rounds": solver.max_inverse_rounds,
+            "placement_picard_rounds": 3,
+            "nonlinear_forward_solves": 1,
         },
         "total_wall_s": float(sum(item["wall_s"] for item in rounds)),
         "total_trips": int(sum(item["trips"] for item in rounds)),
@@ -364,7 +387,7 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
 
 
 def measure(
-    directory: Path = DEFAULT_DIRECTORY, *, diagnose_upper: bool = False
+    directory: Path = DEFAULT_DIRECTORY, *, diagnose_inverse: bool = False
 ) -> dict[str, Any]:
     """Run both commanded-shape arms on MAST 22086/43."""
     configure_dtypes()
@@ -393,21 +416,29 @@ def measure(
         # by passive and vessel currents that are state, not shape actuators.
         drivable_circuits=tuple(range(int(policy["active_circuit_count"]))),
     )
+    if diagnose_inverse:
+        previous = type("Previous", (), {"flux": machine.seed})()
+        previous_target = achieved_target(profile, previous.flux)
+        diagnostics = [
+            _command_diagnostic(name, machine, previous, target, circuit_names)
+            for name, target in (
+                ("upper-point-plus-20mm", _upper_point_target(previous_target)),
+                ("elongation-plus-5pct", _elongation_target(previous_target)),
+            )
+        ]
+        payload = {
+            "source_commit": _source_revision(),
+            "machine": machine.identity,
+            "commands": diagnostics,
+        }
+        _write(directory / "pulse-design-inverse-diagnostic.json", payload)
+        print("INVERSE-DIAGNOSTIC " + json.dumps(payload), flush=True)
+        return payload
     prime_solver = ProductionSolver(machine)
     prime, _trips, _program = prime_solver._forward(
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)
-    if diagnose_upper:
-        diagnostic = _upper_command_diagnostic(
-            machine,
-            prime,
-            _upper_point_target(previous_target),
-            circuit_names,
-        )
-        _write(directory / "upper-point-plus-20mm-diagnostic.json", diagnostic)
-        print("UPPER-COMMAND-DIAGNOSTIC " + json.dumps(diagnostic), flush=True)
-        return {"diagnostic": diagnostic}
     null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
     definitions = (
@@ -487,9 +518,9 @@ def main() -> None:
     """Run the receipt from the command line."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
-    parser.add_argument("--diagnose-upper", action="store_true")
+    parser.add_argument("--diagnose-inverse", action="store_true")
     arguments = parser.parse_args()
-    measure(arguments.directory, diagnose_upper=arguments.diagnose_upper)
+    measure(arguments.directory, diagnose_inverse=arguments.diagnose_inverse)
 
 
 if __name__ == "__main__":

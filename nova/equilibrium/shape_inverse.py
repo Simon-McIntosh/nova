@@ -12,27 +12,21 @@ instead of compensating one constrained row at a time.
 The rows are the bounding-box set the constraint module already reads: the
 boundary flux at the four turning points (outer, upper, inner, lower), zero
 radial field at the outer and inner points, zero vertical field at the upper
-and lower points, and the two-gradient null at the commanded X-point.  Every
+and lower points, and both field components at the commanded X-point. Every
 row is evaluated by the same lattice interpolation the constraint rows use
 (``sample_lattice_flux`` and the field reads of ``FieldComponentConstraint``),
 and its response to every drivable circuit current is the observation
-Jacobian contracted with the operator's response carrier.  With the observed
-values taken at the current plasma iterate, the linear system the
-pseudo-inverse solves is ``response @ delta = target - observed`` — the plasma's
-own contribution enters subtracted, exactly as the inverse design moves it to
-the right-hand side. Field rows are weighted by ``sqrt(field_weight)`` and the
-Tikhonov ``gamma`` is a dimensionless fraction of the weighted response
-block's largest singular value. That keeps damping proportional to the
-fixture's actual current-to-row authority rather than to an unrelated plasma
-current scale.
+Jacobian contracted with the operator's response carrier. The unknowns are
+the total free-circuit currents. The fixed-conductor and plasma contribution
+is moved to the right-hand side, exactly as the pulse-design inverse moves its
+plasma column. Field rows are weighted by ``sqrt(field_weight)`` and the
+Tikhonov ``gamma`` is scaled by the plasma current.
 
-An unmoved command — the achieved boundary's own turning points read back
-through :meth:`BoundingBoxTarget.from_boundary` — reproduces the carrier's own
-currents to the interpolation discretisation, and a moved command is achieved
-by iterating the inverse step against the forward solve: solve currents from
-the present iterate, solve the reduced route forward on those currents
-warm-started from the previous frame, and re-inverse at the achieved plasma
-when the turning-point error exceeds the stated tolerance.
+Three Picard placement rounds alternate the current solve with one forward-map
+evaluation, which re-evaluates the fixed plasma profile inside the boundary
+flux produced by the total currents without running a nonlinear equilibrium
+solve. A final current solve follows the third placement. The app then runs
+one warm-started reduced forward solve on those prescribed currents.
 """
 
 from __future__ import annotations
@@ -53,7 +47,6 @@ from nova.equilibrium.constraint import (
     FieldComponentConstraint,
     IsofluxConstraint,
     XPointConstraint,
-    constraint_row_slices,
     sample_lattice_flux,
 )
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
@@ -66,11 +59,10 @@ if TYPE_CHECKING:
 #: Field-row weight whose square root scales the field and flux rows onto
 #: comparable residuals, the same factor the inverse design carries.
 FIELD_WEIGHT = 50.0
-#: Dimensionless Tikhonov fraction of the largest weighted response singular
-#: value. The scale follows the operator authority on the current fixture.
-GAMMA = 1.0e-6
-#: Relative threshold that removes only numerically zero response directions.
-RANK_RELATIVE_TOLERANCE = 1.0e-12
+#: Tikhonov factor multiplied by the absolute plasma current [A].
+GAMMA = 1.0e-12
+#: Number of plasma-placement updates before the final current solve.
+PICARD_ROUNDS = 3
 
 IsofluxReference = Literal["boundary", "reference_point"]
 
@@ -86,30 +78,21 @@ class ShapeInverseResult:
     response: np.ndarray
     observed: np.ndarray
     target: np.ndarray
+    right_hand_side: np.ndarray
+    linear_prediction: np.ndarray
     row_kinds: tuple[str, ...]
     plasma_current: float
     gamma: float
     field_weight: float
     singular_values: np.ndarray
     numerical_rank: int
-    rank_threshold: float
     right_null_space: np.ndarray
+    picard_currents: np.ndarray
+    picard_boundary_flux: np.ndarray
     current_step_fraction: float | None
     current_step_limited: bool
     least_squares_residual: float
     uncapped_least_squares_residual: float
-
-
-def _numerical_rank(singular_values: np.ndarray) -> tuple[int, float]:
-    """Return the exact-zero numerical rank and its absolute threshold."""
-    values = np.asarray(singular_values, dtype=float)
-    if values.ndim != 1 or values.size == 0:
-        raise ValueError("the shape response block has no singular values")
-    largest = float(values[0])
-    if not np.isfinite(largest) or largest <= 0.0:
-        raise ValueError("the shape response block has no finite circuit authority")
-    threshold = RANK_RELATIVE_TOLERANCE * largest
-    return int(np.count_nonzero(values >= threshold)), threshold
 
 
 def _cap_current_delta(
@@ -435,6 +418,120 @@ def response_matrix(
     return np.asarray(response)
 
 
+def _shape_values(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux: jax.Array,
+    *,
+    requested_class=None,
+    target_current=None,
+) -> jax.Array:
+    """Return traced absolute flux and field values at commanded points.
+
+    Unlike an isoflux residual, the flux block retains the absolute boundary
+    level. This is the row layout used by the pulse-design inverse: four psi
+    rows followed by Br and Bz turning-point rows and, for a diverted target,
+    Br and Bz at the X-point.
+    """
+    from nova.equilibrium.constraint import ConstraintContext
+
+    state = jnp.ravel(jnp.asarray(flux))
+    context = ConstraintContext(state, requested_class, target_current, None)
+    grid = jnp.reshape(state[: profile.lattice.node_count], profile.lattice.shape)
+    flux_points = jnp.asarray(target.flux_points, dtype=jnp.float64)
+    psi = jax.vmap(lambda point: sample_lattice_flux(profile.lattice, grid, point))(
+        flux_points
+    )
+    field_points = jnp.concatenate(
+        (
+            jnp.asarray(target.radial_field_points, dtype=jnp.float64),
+            jnp.asarray(target.vertical_field_points, dtype=jnp.float64),
+        )
+    )
+    field = FieldComponentConstraint(
+        components=("radial",) * int(jnp.shape(target.radial_field_points)[0])
+        + ("vertical",) * int(jnp.shape(target.vertical_field_points)[0])
+    ).observed(profile, context, field_points)
+    if target.x_point is not None and np.shape(target.x_point) == (2,):
+        x_point = jnp.asarray(target.x_point, dtype=jnp.float64)
+        x_field = FieldComponentConstraint(components=("radial", "vertical")).observed(
+            profile, context, x_point[None, :]
+        )
+        field = jnp.concatenate((field, x_field))
+    return jnp.concatenate((psi, field))
+
+
+def shape_values(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux: jax.Array,
+    *,
+    requested_class=None,
+    target_current=None,
+) -> np.ndarray:
+    """Return absolute flux and field values at the commanded points."""
+    return np.asarray(
+        _shape_values(
+            profile,
+            target,
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+    )
+
+
+def shape_response_matrix(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux: jax.Array,
+    *,
+    requested_class=None,
+    target_current=None,
+) -> np.ndarray:
+    """Return the absolute shape rows' coil coupling in Wb/A and T/A."""
+    field = profile.operator.prescribed_current_field
+    if field is None:
+        raise ValueError("the shape inverse needs a prescribed current field")
+    state = jnp.ravel(jnp.asarray(flux))
+
+    def rows(value):
+        return _shape_values(
+            profile,
+            target,
+            value,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+
+    jacobian = jax.jacrev(rows)(state)
+    return np.asarray(jacobian @ jnp.asarray(field.response))
+
+
+def shape_row_target(
+    profile: ForwardProfile,
+    target: BoundingBoxTarget,
+    flux: jax.Array,
+    *,
+    requested_class=None,
+) -> np.ndarray:
+    """Return boundary-flux and zero-field targets in forward conventions."""
+    _masks, topology = profile.operator.read(
+        jnp.asarray(flux), requested_class=requested_class
+    )
+    flux_rows = int(jnp.shape(target.flux_points)[0])
+    field_rows = int(jnp.shape(target.radial_field_points)[0]) + int(
+        jnp.shape(target.vertical_field_points)[0]
+    )
+    if target.x_point is not None and np.shape(target.x_point) == (2,):
+        field_rows += 2
+    # ForwardProfile already carries COCOS-17 total flux. This value is the
+    # sign-adjusted boundary psi that the legacy inverse supplied through
+    # update_constraints, so no second convention flip belongs here.
+    boundary = float(np.asarray(topology.boundary_flux))
+    return np.concatenate((np.full(flux_rows, boundary), np.zeros(field_rows)))
+
+
 def plasma_current(profile: ForwardProfile, flux, *, target_current=None) -> float:
     """Return the plasma current the Tikhonov scale keys to."""
     if target_current is not None:
@@ -454,130 +551,138 @@ def solve_shape_inverse(
     requested_class=None,
     target_current=None,
     free_circuits: Sequence[int] | None = None,
-    reference: IsofluxReference = "reference_point",
     gamma: float = GAMMA,
     field_weight: float = FIELD_WEIGHT,
+    picard_rounds: int = PICARD_ROUNDS,
     current_step_fraction: float | None = None,
     current_step_reference=None,
 ) -> ShapeInverseResult:
-    """Return the prescribed currents that drive the flux map to one target.
+    """Solve total free-circuit currents with three plasma-placement rounds.
 
-    The plasma's own contribution is the observed value at the supplied flux
-    state; subtracting it from the target leaves the current delta the
-    response matrix must supply.  Free circuits default to every prescribed
-    circuit; a caller that must not drive passive structure passes the
-    drivable indices explicitly.  Field rows are weighted by
-    ``sqrt(field_weight)`` and the Tikhonov factor is ``gamma`` times the
-    largest singular value of the weighted response block. The returned
-    ``gamma`` is that dimensional factor as passed to the pseudo-inverse. A
-    current-step fraction clips each free-circuit update against the magnitude
-    of its fixed seed-current reference so Picard rounds cannot destroy the
-    equilibrium with a single under-damped command.
+    At each round, the absolute coil coupling is solved against the current
+    boundary-flux and zero-field targets after the fixed-conductor and plasma
+    contribution has been subtracted. The solved values replace the total
+    free currents; they are not increments. Between solves one forward-map
+    evaluation re-evaluates the plasma profile inside the boundary produced
+    by those currents. No nonlinear equilibrium solve is run here.
     """
+    if picard_rounds < 0:
+        raise ValueError("picard_rounds must be non-negative")
+    field = profile.operator.prescribed_current_field
+    if field is None:
+        raise ValueError("the shape inverse needs a prescribed current field")
+    initial_current = np.asarray(
+        field.current if prescribed_current is None else prescribed_current,
+        dtype=float,
+    )
+    if initial_current.shape != (field.circuit_count,):
+        raise ValueError(
+            "prescribed_current must match the response column count "
+            f"{field.circuit_count}"
+        )
     state = jnp.asarray(flux)
-    span = _flux_span(profile, state)
-    pairs = bounding_box_pairs(profile, target, span=span, reference=reference)
-    observed = observed_values(
-        profile,
-        pairs,
-        state,
-        requested_class=requested_class,
-        target_current=target_current,
-    )
-    response = response_matrix(
-        profile,
-        pairs,
-        state,
-        requested_class=requested_class,
-        target_current=target_current,
-    )
+    current = initial_current.copy()
     if free_circuits is None:
-        free = np.arange(response.shape[1])
+        free = np.arange(field.circuit_count)
     else:
         free = np.unique(np.asarray(free_circuits, dtype=int))
     if free.size == 0:
         raise ValueError("the shape-inverse step needs at least one free circuit")
-
-    # Field rows sit in every pair after the flux rows; weight exactly those
-    # so the field and flux residuals trade off on comparable terms.
-    slices = constraint_row_slices(pairs)
-    field_weight_rows = []
-    for row_slice in slices[1:]:
-        field_weight_rows.extend(range(row_slice.start, row_slice.stop))
-    weight = np.ones(observed.shape[0])
-    weight[field_weight_rows] = np.sqrt(field_weight)
-    weighted = response[:, free] * weight[:, None]
-    rhs = (np.zeros(observed.shape[0]) - observed) * weight
-
-    ip = plasma_current(profile, state, target_current=target_current)
-    _left_vectors, singular_values, right_vectors_h = np.linalg.svd(
-        weighted, full_matrices=True
-    )
-    numerical_rank, rank_threshold = _numerical_rank(singular_values)
-    if numerical_rank == 0:
-        raise ValueError("the shape response block has no finite circuit authority")
-    largest_singular_value = float(singular_values[0])
-    regularisation = gamma * largest_singular_value
-    uncapped_delta = (
-        MoorePenrose(weighted, gamma=regularisation, rank=numerical_rank) / rhs
-    )
     if current_step_reference is None:
-        if prescribed_current is None:
-            step_reference = np.zeros(response.shape[1])
-        else:
-            step_reference = np.asarray(prescribed_current, dtype=float)
+        step_reference = initial_current
     else:
         step_reference = np.asarray(current_step_reference, dtype=float)
-    if step_reference.shape != (response.shape[1],):
+    if step_reference.shape != (field.circuit_count,):
         raise ValueError(
             "current_step_reference must match the response column count "
-            f"{response.shape[1]}"
+            f"{field.circuit_count}"
         )
-    delta_free, current_step_limited = _cap_current_delta(
-        uncapped_delta,
-        step_reference[free],
-        current_step_fraction,
-    )
-
-    if prescribed_current is None:
-        current = np.zeros(response.shape[1])
-    else:
-        current = np.asarray(prescribed_current, dtype=float).copy()
-        if current.shape != (response.shape[1],):
-            raise ValueError(
-                "prescribed_current must match the response column count "
-                f"{response.shape[1]}"
-            )
-    current[free] = current[free] + delta_free
-
-    row_kinds = tuple(
-        kind
-        for _pair, row_slice, kind in zip(
-            pairs, slices, ("flux", "field", "xpoint"), strict=False
+    picard_current_history = []
+    picard_boundary_history = []
+    current_step_limited = False
+    for iteration in range(picard_rounds + 1):
+        full_observed = shape_values(
+            profile,
+            target,
+            state,
+            requested_class=requested_class,
+            target_current=target_current,
         )
-        for _ in range(row_slice.stop - row_slice.start)
-    )
+        response = shape_response_matrix(
+            profile,
+            target,
+            state,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+        target_rows = shape_row_target(
+            profile, target, state, requested_class=requested_class
+        )
+        # Removing the present free-circuit image leaves the plasma plus every
+        # fixed conductor. Solving for total free currents against that base is
+        # the active-circuit analogue of moving the plasma column to the RHS.
+        base = full_observed - response[:, free] @ current[free]
+        right_hand_side = target_rows - base
+        flux_rows = int(jnp.shape(target.flux_points)[0])
+        weight = np.ones(target_rows.size)
+        weight[flux_rows:] = np.sqrt(field_weight)
+        weighted = response[:, free] * weight[:, None]
+        weighted_rhs = right_hand_side * weight
+        ip = plasma_current(profile, state, target_current=target_current)
+        regularisation = gamma * abs(ip)
+        solved_total = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
+        uncapped_round_delta = solved_total - current[free]
+        applied_round_delta, limited = _cap_current_delta(
+            uncapped_round_delta,
+            step_reference[free],
+            current_step_fraction,
+        )
+        current_step_limited = current_step_limited or limited
+        current[free] = current[free] + applied_round_delta
+        picard_current_history.append(current.copy())
+        picard_boundary_history.append(float(target_rows[0]))
+        if iteration < picard_rounds:
+            state = profile.flux_map(
+                requested_class=requested_class,
+                target_current=target_current,
+                prescribed_current=jnp.asarray(current),
+            )(state)
+
+    singular_values = np.linalg.svd(weighted, compute_uv=False)
+    numerical_rank = int(np.linalg.matrix_rank(weighted))
+    right_vectors_h = np.linalg.svd(weighted, full_matrices=True)[2]
+    uncapped_current = current.copy()
+    uncapped_current[free] = solved_total
+    delta_free = current[free] - initial_current[free]
+    uncapped_delta = uncapped_current[free] - initial_current[free]
+    linear_prediction = response[:, free] @ current[free]
+    row_kinds = ("flux",) * flux_rows + ("field",) * (target_rows.size - flux_rows)
     return ShapeInverseResult(
         currents=current,
         delta=delta_free,
         uncapped_delta=uncapped_delta,
         free_circuits=free,
         response=response,
-        observed=observed,
-        target=np.zeros(observed.shape[0]),
+        observed=base,
+        target=target_rows,
+        right_hand_side=right_hand_side,
+        linear_prediction=linear_prediction,
         row_kinds=row_kinds,
         plasma_current=float(ip),
         gamma=float(regularisation),
         field_weight=field_weight,
         singular_values=singular_values,
         numerical_rank=numerical_rank,
-        rank_threshold=rank_threshold,
         right_null_space=right_vectors_h[numerical_rank:],
+        picard_currents=np.asarray(picard_current_history),
+        picard_boundary_flux=np.asarray(picard_boundary_history),
         current_step_fraction=current_step_fraction,
         current_step_limited=current_step_limited,
-        least_squares_residual=float(np.linalg.norm(weighted @ delta_free - rhs)),
+        least_squares_residual=float(
+            np.linalg.norm(weighted @ current[free] - weighted_rhs)
+        ),
         uncapped_least_squares_residual=float(
-            np.linalg.norm(weighted @ uncapped_delta - rhs)
+            np.linalg.norm(weighted @ solved_total - weighted_rhs)
         ),
     )
 
@@ -602,7 +707,7 @@ def turning_point_error(
 __all__ = [
     "FIELD_WEIGHT",
     "GAMMA",
-    "RANK_RELATIVE_TOLERANCE",
+    "PICARD_ROUNDS",
     "ShapeInverseResult",
     "achieved_target",
     "boundary_polygon",
@@ -611,6 +716,9 @@ __all__ = [
     "plasma_current",
     "reference_point",
     "response_matrix",
+    "shape_response_matrix",
+    "shape_row_target",
+    "shape_values",
     "solve_shape_inverse",
     "turning_point_error",
 ]

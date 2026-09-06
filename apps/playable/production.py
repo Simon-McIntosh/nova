@@ -1,12 +1,11 @@
 """Production keyframe solver over one forward profile.
 
-Shape control is an inverse-forward step. The inverse solves every free coil
-current against the bounding-box flux and field rows; the forward solve then
-runs on those prescribed currents, warm-started from the previous frame. A
-second inverse-forward round is allowed when the first response leaves a
-turning point more than the stated tolerance from its command. Constraint
-pairs are deliberately absent from this path: they remain the diagnostic
-placement mechanism, not the shape actuator.
+Shape control is an inverse-forward step. The inverse solves total free-coil
+currents against the bounding-box flux and field rows, including three
+plasma-placement Picard updates that do not run a nonlinear equilibrium solve.
+The forward solve then runs once on those prescribed currents, warm-started
+from the previous frame. Constraint pairs are deliberately absent from this
+path: they remain the diagnostic placement mechanism, not the shape actuator.
 """
 
 from __future__ import annotations
@@ -37,12 +36,10 @@ from nova.equilibrium.shape_inverse import (
 from apps.playable.session import SolveResult
 from apps.playable.shape import PlasmaShape, move_bounding_box
 
-#: Another inverse-forward round is taken above this point error [m].
+#: Turning-point error recorded for the commanded response [m].
 TURNING_POINT_TOLERANCE = 2.0e-3
-#: Per-round circuit-current change as a fraction of the fixed seed magnitude.
-CURRENT_STEP_FRACTION = 0.1
-#: Bound Picard progress so the interactive solve remains a finite operation.
-MAX_INVERSE_ROUNDS = 12
+#: Optional circuit-current step guard; the pulse-design formulation leaves it off.
+CURRENT_STEP_FRACTION = None
 
 
 @dataclass(frozen=True)
@@ -75,7 +72,7 @@ class InverseRoundReceipt:
 
 @dataclass
 class ProductionSolver:
-    """Run bounded inverse-forward shape-control rounds on one machine."""
+    """Run one pulse-design inverse followed by one warm forward solve."""
 
     machine: ForwardMachine
     route: str = "reduced_newton"
@@ -83,8 +80,7 @@ class ProductionSolver:
     gmres_iterations: int = 4
     active_set_steps: int = 2
     turning_point_tolerance: float = TURNING_POINT_TOLERANCE
-    current_step_fraction: float = CURRENT_STEP_FRACTION
-    max_inverse_rounds: int = MAX_INVERSE_ROUNDS
+    current_step_fraction: float | None = CURRENT_STEP_FRACTION
     prescribed_current: np.ndarray = field(init=False, repr=False)
     reference_current: np.ndarray = field(init=False, repr=False)
     last_target: object | None = field(init=False, default=None, repr=False)
@@ -199,43 +195,35 @@ class ProductionSolver:
     def solve_target(
         self, previous: ForwardEquilibrium, target: object
     ) -> tuple[ForwardEquilibrium, object | None]:
-        """Drive one fixed bounding-box target through bounded Picard rounds."""
+        """Drive one target through placement Picard and one forward solve."""
         profile = self.machine.profile
         flux = np.asarray(previous.flux)
-        rounds = []
-        equilibrium = previous
-        program_out = None
-        for _ in range(self.max_inverse_rounds):
-            round_started = perf_counter()
-            inverse = solve_shape_inverse(
-                profile,
-                target,
-                flux,
-                prescribed_current=self.prescribed_current,
-                free_circuits=self.machine.drivable_circuits,
-                current_step_fraction=self.current_step_fraction,
-                current_step_reference=self.reference_current,
-            )
-            self.prescribed_current = inverse.currents
-            equilibrium, round_trips, program_out = self._forward(
-                profile, flux, self.prescribed_current
-            )
-            error = turning_point_error(profile, target, equilibrium.flux)
-            achieved = achieved_target(profile, equilibrium.flux)
-            rounds.append(
-                InverseRoundReceipt(
-                    inverse=inverse,
-                    achieved_turning_points=np.asarray(achieved.flux_points),
-                    turning_point_error=error,
-                    trips=round_trips,
-                    wall=perf_counter() - round_started,
-                )
-            )
-            if error <= self.turning_point_tolerance:
-                break
-            flux = np.asarray(equilibrium.flux)
+        round_started = perf_counter()
+        inverse = solve_shape_inverse(
+            profile,
+            target,
+            flux,
+            prescribed_current=self.prescribed_current,
+            free_circuits=self.machine.drivable_circuits,
+            current_step_fraction=self.current_step_fraction,
+            current_step_reference=self.reference_current,
+        )
+        self.prescribed_current = inverse.currents
+        equilibrium, round_trips, program_out = self._forward(
+            profile, flux, self.prescribed_current
+        )
+        error = turning_point_error(profile, target, equilibrium.flux)
+        achieved = achieved_target(profile, equilibrium.flux)
         self.last_target = target
-        self.last_rounds = tuple(rounds)
+        self.last_rounds = (
+            InverseRoundReceipt(
+                inverse=inverse,
+                achieved_turning_points=np.asarray(achieved.flux_points),
+                turning_point_error=error,
+                trips=round_trips,
+                wall=perf_counter() - round_started,
+            ),
+        )
         return equilibrium, program_out
 
     def __call__(

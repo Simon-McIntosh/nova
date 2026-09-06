@@ -179,6 +179,38 @@
     the free program; no batched or branch entry; <code>soft_mode_projection</code> is NaN, a Krylov reading with no subspace to read from.</p>
   </section>
 
+  <section id="labeller-contract">
+    <h2>The labeller contract: corpus, frame times, one operator, centre height, output file (2026-09-06)</h2>
+    <p><strong>Node:</strong> <code>pfs-labeller-contract-scout</code>, read-only on the local DeepSeek lane, run <code>r-20260905T210826553055</code>;
+    report <code>~/.config/reckon/crew/reports/nova/playable/labeller-contract.md</code>, measured from the imas-ambix checkout as data, the MAST
+    level-1 shot store, the excitation-corpus manifests and the frozen-six carrier directory.</p>
+    <table>
+      <caption>The decoder corpus the labeller must cover</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">corpus definition</th><td>the unified six-camera window manifest minus the 718-shot labeller cohort (zero overlap with the world-model splits)</td></tr>
+        <tr><th scope="row">shots / camera windows / camera frames</th><td>8,012 / 30,084 / 24,881,648</td></tr>
+        <tr><th scope="row">rbb alone</th><td>6,946 shots, 17,389,252 frames, native rates 30 to 166,667 fps (medians per camera 110 to 5,000)</td></tr>
+        <tr><th scope="row">shots with an efm reconstruction group</th><td>7,868 of 8,012, carrying 639,041 efm slices at about 200 Hz (median step 5 ms)</td></tr>
+        <tr><th scope="row">shots without efm</th><td>144 (143 without the group, one without a time array), for the dataset node to triage</td></tr>
+        <tr><th scope="row">operator sharing</th><td>all 8,012 shots share the one MAST forward operator whose circuit response is the persisted frozen-six carrier (1,126 targets by 101 circuits); one compile for the corpus</td></tr>
+        <tr><th scope="row">frozen six in the corpus</th><td>22086 only; 21978, 21983, 21985, 21986 and 21989 are cohort shots</td></tr>
+        <tr><th scope="row">centre height per slice</th><td><code>efm/current_centrd_z</code> (like for like with the current-centroid row) and <code>efm/magnetic_axis_z</code>, on <code>efm/time</code>; 57 of 60 finite on 22086</td></tr>
+        <tr><th scope="row">the figure the plan quoted</th><td>1,341,435 slices is the full L2 catalogue over 11,573 shots, 2.1 times the corpus workload</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Output file.</strong> One netCDF session per shot in the §5 <code>steering_frames</code> shape (group <code>steering</code>, COCOS 17,
+    time last), the point fields in the imas-ambix corpus key vocabulary, plus two per-slice channels the §8 decisions add:
+    <code>conditioning_flag</code> (bool, True where the height row was pinned from efm) and <code>target_source</code> (str, for example
+    <code>efm/current_centrd_z</code>), which are both the firewall's enforcement across the seam and the pin's removal mechanism. The firewall text
+    of <code>imas_ambix/eval/efit_referee.py</code> is quoted in the report: reconstruction outputs are evaluator-only and must never become a
+    training label or model input, sensor geometry is free; both of its guards act on code inside imas-ambix, and neither sees a number handed
+    across the seam as data.</p>
+    <p><strong>What it implies.</strong> Camera frames outnumber efm slices 39 to one, so the decoder side interpolates per-slice labels onto its frame
+    times as its evaluator reader already does for the L2 store, and the labeller writes per slice. At the measured 10 to 20 slices per second on
+    one H200 the corpus is 9 to 18 GPU-hours, one to two hours across eight; labels are written once to file ahead of training.</p>
+  </section>
+
 </main>
 </body>
 </html>

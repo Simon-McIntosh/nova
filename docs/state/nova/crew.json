@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T02:18:30",
+  "updated": "2026-09-06T03:02:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -106364,6 +106364,201 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T210826553055-pfs-labeller-contract-scout",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-labeller-contract-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2385,
+                "cached_input_tokens": 789903,
+                "input_tokens": 792320,
+                "output_tokens": 730,
+                "reasoning_output_tokens": 127,
+                "total_tokens": 793050,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-contract.md names, from the imas-ambix checkout read as data and the nova shot store, the corpus manifest and shot cohort the physics-carried-playable-plasma plan uses for the decoder (the unified six-camera window manifest minus the labeller cohort) with its shot and camera-frame counts and frame rate, the shots of the frozen-six response carrier under /work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers and how many corpus shots share one operator, the efm variable and time base carrying the plasma centre height per slice in the MAST shot store, the exact firewall text of imas_ambix/eval/efit_referee.py, and the per-shot file the labeller must write (field list in the steering_frames session shape with the corpus key vocabulary plus a per-slice conditioning flag and target source), with every count stated as a number, reading only, no code written",
+          "estimated_hours": null,
+          "goal": "The labeller contract: what the decoder corpus consumes, at which frame times, which shots the response carrier covers, what the efm store carries for the plasma centre height, the firewall text, the per-shot file to write",
+          "id": "pfs-labeller-contract-scout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210826553055-pfs-labeller-contract-scout/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-contract.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "pfs-labeller-scout-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-05T21:08:53Z",
+        "completed_at": "2026-09-06T01:00:15.672Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13843,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13882,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "9789e0b5b3f1020fb162fa55fbdd9de89404a015",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210826553055-pfs-labeller-contract-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "aba0a541-79bf-49f9-ae6c-738ef2366fa1",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 100.0,
+          "rate_limit_type": "rate-limit",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": "exhausted",
+          "surpassed_threshold": true,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 265406,
+            "input_tokens_cumulative": 265406,
+            "output_tokens": 1241,
+            "output_tokens_cumulative": 1241,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": true,
+          "detail": "the run died after 10 rate-limit retries (api_retry 429); the lane is exhausted",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 139846,
+              "budget_seconds": 2400,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The authoritative five gate Parquets contain no stored p-prime or FF-prime arrays; so the required EFIT-stored-profile ratio/sign comparison is impossible (0/5). No admissible mapping connects the unrelated DIII-D 200000.nc equilibrium profiles to the five hashed rows. In addition; positive-only q95 combined with both Bcoil polarities cannot yield one signed source COCOS: a blanket COCOS-5-to-17 q conversion violates the target sign tuple on frames 179 and 144.\"",
+              "elapsed_seconds": 142246,
+              "external_wait": null,
+              "log_age_seconds": 141344,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_cocos_measurement.json",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/five_frame_flux_exponent_probe.json",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/ambix_loader_probe.json",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/pf_active_probe.json",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/validation.log",
+                "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md; resolve the blocker before resuming the run",
+              "node": "dvf-diiid-cocos-resolution",
+              "phase": "blocked",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+              "session": "s19-relaunch",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+                "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 141400,
+              "terminal_at": "2026-09-04T05:52:02Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 383.304,
+          "generated_tokens": 1241,
+          "generation_seconds": 372.399,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 7.0,
+          "machine_seconds": 10.905,
+          "peak_input_tokens": 71474,
+          "tokens_per_second": 3.33,
+          "wall_tokens_per_second": 3.24
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "no_commit": "read-only investigate node, the contract report is the delivery",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-labeller-contract-scout",
+          "session_id": "aba0a541-79bf-49f9-ae6c-738ef2366fa1",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T01:00:15.672Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -106508,6 +106703,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1780
+    "_version": 1781
   }
 }

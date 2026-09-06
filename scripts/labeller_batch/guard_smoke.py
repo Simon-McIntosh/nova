@@ -9,9 +9,11 @@ import math
 from pathlib import Path
 from typing import Any, Sequence
 
+import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 
-from nova.equilibrium.steering_frames import frames_from_session, read_session
+from nova.equilibrium.steering_frames import SESSION_GROUP, frames_from_session
 
 
 FRAME_FIELDS = (
@@ -40,6 +42,8 @@ def _fraction(numerator: int, denominator: float) -> float | None:
 
 def _load_arm(root: Path, shot: int, *, flag_enabled: bool) -> dict[str, Any]:
     """Read one arm and assert its frame and companion contracts."""
+    if not root.is_absolute():
+        raise ValueError(f"smoke session root must be absolute: {root}")
     manifest_path = root / f"{shot}.manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest["status"] != "complete":
@@ -48,7 +52,9 @@ def _load_arm(root: Path, shot: int, *, flag_enabled: bool) -> dict[str, Any]:
     if bool(manifest["constraint"]["condition_on_guard_failure"]) != flag_enabled:
         raise ValueError(f"conditioning flag disagrees with arm: {manifest_path}")
 
-    dataset = read_session(filename=str(shot), dirname=str(root))
+    session_path = root / f"{shot}.nc"
+    with xr.open_dataset(session_path, group=SESSION_GROUP, cache=True) as stored:
+        dataset = stored.load()
     missing = sorted(set(FRAME_FIELDS) - set(dataset.variables))
     if missing:
         raise ValueError(f"session is missing frame fields: {missing}")
@@ -142,18 +148,59 @@ def _load_arm(root: Path, shot: int, *, flag_enabled: bool) -> dict[str, Any]:
     }
 
 
+def _plot_receipt(receipt: dict[str, Any], figure: Path) -> None:
+    """Plot the two arms' coverage, guard, and conditioning counts."""
+    arms = receipt["arms"]
+    labels = ("free only", "condition on guard failure")
+    rows = (arms["free_only"], arms["condition_on_guard_failure"])
+    metrics = (
+        ("admitted", "admitted"),
+        ("converged", "converged"),
+        ("qualified", "qualified"),
+        ("guard before", "guard_within_50mm_before"),
+        ("guard after", "guard_within_50mm_after"),
+        ("conditioned", "conditioned"),
+        ("exceptions", "exceptions"),
+    )
+    x = np.arange(len(labels), dtype=float)
+    width = 0.11
+    fig, axis = plt.subplots(figsize=(10, 5.5), constrained_layout=True)
+    for index, (name, key) in enumerate(metrics):
+        offset = (index - (len(metrics) - 1) / 2.0) * width
+        values = [int(row[key]) for row in rows]
+        bars = axis.bar(x + offset, values, width=width, label=name)
+        axis.bar_label(bars, padding=2, fontsize=8)
+    warm = [row["slices_per_second_warm"] for row in rows]
+    axis.set_title(
+        f"Shot {receipt['shot']} labeller guard conditioning\n"
+        f"warm slices/s: free {warm[0]:.3f}, conditioned {warm[1]:.3f}"
+    )
+    axis.set_ylabel("slice count")
+    axis.set_xticks(x, labels)
+    axis.grid(axis="y", alpha=0.25)
+    axis.legend(ncol=4, fontsize=8, loc="upper center")
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure, dpi=180)
+    plt.close(fig)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--conditioned-root", type=Path, required=True)
     parser.add_argument("--free-root", type=Path, required=True)
     parser.add_argument("--shot", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--figure", type=Path, required=True)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Write one quantitative comparison receipt."""
     arguments = _parser().parse_args(argv)
+    for name in ("conditioned_root", "free_root", "output", "figure"):
+        path = getattr(arguments, name)
+        if not path.is_absolute():
+            raise ValueError(f"{name} must be an absolute path: {path}")
     receipt = {
         "schema": "nova-forward-labeller-guard-conditioning-smoke",
         "shot": arguments.shot,
@@ -182,6 +229,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         json.dumps(receipt, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    _plot_receipt(receipt, arguments.figure)
     print(json.dumps(receipt, sort_keys=True))
     return 0
 

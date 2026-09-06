@@ -28,7 +28,7 @@ from benchmarks.efit_forward_parity_slice import (
     select_slices_by_shot,
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
-from nova.equilibrium.shape_inverse import achieved_target
+from nova.equilibrium.shape_inverse import achieved_target, solve_shape_inverse
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
     configure_dtypes,
@@ -139,6 +139,49 @@ def _null_modes(inverse, names: dict[int, str]) -> list[dict[str, Any]]:
             }
         )
     return modes
+
+
+def _upper_command_diagnostic(
+    machine: ForwardMachine,
+    previous,
+    target,
+    circuit_names: dict[int, str],
+) -> dict[str, Any]:
+    """Return the uncapped active-current command without solving it forward."""
+    seed = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    inverse = solve_shape_inverse(
+        machine.profile,
+        target,
+        previous.flux,
+        prescribed_current=seed,
+        free_circuits=machine.drivable_circuits,
+    )
+    fractions = np.abs(inverse.delta) / np.abs(seed[inverse.free_circuits])
+    return {
+        "command": "upper-point-plus-20mm",
+        "seed_current_by_family_a": {
+            _circuit_label(int(circuit), circuit_names): float(seed[circuit])
+            for circuit in inverse.free_circuits
+        },
+        "current_change_by_family_a": {
+            _circuit_label(int(circuit), circuit_names): float(delta)
+            for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
+        },
+        "change_fraction_of_seed_by_family": {
+            _circuit_label(int(circuit), circuit_names): float(fraction)
+            for circuit, fraction in zip(inverse.free_circuits, fractions, strict=True)
+        },
+        "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
+        "largest_change_fraction_of_seed": float(np.max(fractions)),
+        "linear_row_prediction": (
+            inverse.response[:, inverse.free_circuits] @ inverse.delta
+        ).tolist(),
+        "linear_row_command": (inverse.target - inverse.observed).tolist(),
+        "response_singular_values": inverse.singular_values.tolist(),
+        "response_numerical_rank": inverse.numerical_rank,
+        "response_rank_threshold": inverse.rank_threshold,
+        "null_modes": _null_modes(inverse, circuit_names),
+    }
 
 
 def _arm_receipt(
@@ -292,7 +335,9 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
     plt.close(figure)
 
 
-def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
+def measure(
+    directory: Path = DEFAULT_DIRECTORY, *, diagnose_upper: bool = False
+) -> dict[str, Any]:
     """Run both commanded-shape arms on MAST 22086/43."""
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
@@ -325,6 +370,16 @@ def measure(directory: Path = DEFAULT_DIRECTORY) -> dict[str, Any]:
         profile, machine.seed, prime_solver.prescribed_current
     )
     previous_target = achieved_target(profile, prime.flux)
+    if diagnose_upper:
+        diagnostic = _upper_command_diagnostic(
+            machine,
+            prime,
+            _upper_point_target(previous_target),
+            circuit_names,
+        )
+        _write(directory / "upper-point-plus-20mm-diagnostic.json", diagnostic)
+        print("UPPER-COMMAND-DIAGNOSTIC " + json.dumps(diagnostic), flush=True)
+        return {"diagnostic": diagnostic}
     null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
     null_points = _points(achieved_target(profile, null_equilibrium.flux))
     definitions = (
@@ -404,8 +459,9 @@ def main() -> None:
     """Run the receipt from the command line."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
+    parser.add_argument("--diagnose-upper", action="store_true")
     arguments = parser.parse_args()
-    measure(arguments.directory)
+    measure(arguments.directory, diagnose_upper=arguments.diagnose_upper)
 
 
 if __name__ == "__main__":

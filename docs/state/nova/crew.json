@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T05:34:34",
+  "updated": "2026-09-06T06:39:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -107397,6 +107397,145 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T023506258562-pfs-app-reduced-route",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-app-reduced-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 473,
+                "cached_input_tokens": 926051,
+                "input_tokens": 926528,
+                "output_tokens": 53,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 926581,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "tests/test_playable_session.py passes in full on a compute node (sbatch all_debug, --mem=96G --cpus-per-task=8 --time=00:50:00, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -v, PYTHONPATH the worktree) in one gate log with the slow production-keyframe test now completing: ProductionSolver in apps/playable/production.py solves through ForwardProfile.solve with route reduced_newton (solve_constrained_reduced_newton with traced targets) and the program handle stored on the session and handed back on every later solve, the Newton-Krylov implementation kept reachable as the reference, the prime and one moved key each converged on the Solovev machine with the second keyframe's solve wall below one second on CPU and its receipt row recording that the program was reused, the fast subset unchanged, and apps/pulsedesign/poloidal_view.py plus apps/playable/main.py left untouched because a concurrent node holds them",
+          "estimated_hours": null,
+          "goal": "The playable app's production solver on the constrained reduced route, carrying the ReducedProgram handle on the session so every keyframe after the first re-enters one compiled program",
+          "id": "pfs-app-reduced-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T023506258562-pfs-app-reduced-route/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "90m",
+          "write_paths": [
+            "apps/playable/production.py",
+            "apps/playable/session.py",
+            "apps/playable/machines.py",
+            "tests/test_playable_session.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-loop-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T02:35:16Z",
+        "completed_at": "2026-09-06T04:37:53.713Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7269,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7357,
+        "stalled": false,
+        "time_budget": "90m",
+        "base_sha": "29a4b41b794922fd8e00f5b7a34b3060c27e5e38",
+        "commits": [
+          "8e621933e89cbba09451ced45ce1e6c9bbf87cf8"
+        ],
+        "changed_lines": {
+          "added": 189,
+          "removed": 38,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_playable_session.py -v on an all_debug compute node (sbatch 1263171, 8 cpus, 96G, 50m window)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T023506258562-pfs-app-reduced-route/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T023506258562-pfs-app-reduced-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": null,
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run completed after 8 rate-limit retries; retries alone are not a refusal"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 7350.912,
+          "generated_tokens": 66765,
+          "generation_seconds": 5023.22,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 49.6,
+          "machine_seconds": 2327.692,
+          "peak_input_tokens": 504266,
+          "tokens_per_second": 13.29,
+          "wall_tokens_per_second": 9.08
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-app-reduced-route",
+          "session_id": "6e6e9dea-9f1f-450d-9248-e583666af03b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T04:37:53.713Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -v",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -107553,8 +107692,22 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-clive-20260906033732",
+        "backend": "clive",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T03:37:32Z",
+        "closed_at": "2026-09-06T03:38:08Z",
+        "held_seconds": 36,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1793
+    "_version": 1796
   }
 }

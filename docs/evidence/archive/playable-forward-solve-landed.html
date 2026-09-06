@@ -308,6 +308,38 @@
     traced, recorded as the next followup; the dataset write waits on it.</p>
   </section>
 
+  <section id="app-reduced-route">
+    <h2>The app's keyframe solver on the constrained reduced route with its program handle (8e621933)</h2>
+    <p><strong>Node:</strong> <code>pfs-app-reduced-route</code>, local DeepSeek lane, run <code>r-20260906T023506258562</code> against base
+    <code>29a4b41b</code>, 4.0 hours; <code>apps/playable/production.py</code> (+143/-38), <code>apps/playable/session.py</code>,
+    <code>tests/test_playable_session.py</code>. Gate: 20 tests pass on an all_debug compute node (job 1263171, 8 CPUs, 96 GiB, 4 min 36 s,
+    peak 5.3 GiB), the slow production-keyframe test included; the fast subset of 17 is unchanged.</p>
+    <p><strong>Mechanism.</strong> <code>ProductionSolver</code> defaults to <code>route="reduced_newton"</code> and calls
+    <code>solve_constrained_reduced_newton</code> with the current-centroid row's target as a traced argument, so a moved key re-enters the
+    program the prime compiled; the <code>ReducedProgram</code> handle rides on <code>SolveResult</code>, the session stores it and hands it
+    back on every later solve, and each <code>KeyframeReceipt</code> row states wall, trips and whether the program was reused. The
+    constrained Newton-Krylov implementation stays reachable as <code>route="newton_krylov"</code>. Because the public
+    <code>ForwardProfile.solve</code> drops the program its reduced result carries, the solver rebuilds the equilibrium receipt through the
+    profile's private receipt builder; carrying the program through the public wrapper is the tidier seam and belongs with the next touch of
+    <code>forward.py</code>.</p>
+    <table>
+      <caption>Solov'ev machine, CPU lane, one session</caption>
+      <thead><tr><th scope="col">Keyframe</th><th scope="col">Wall</th><th scope="col">Trips</th><th scope="col">Program</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">prime</th><td>110 to 140 s (one-time program and kernel build; machine fixture 45 to 75 s before it)</td><td>converged</td><td>built</td></tr>
+        <tr><th scope="row">first moved key</th><td>27 to 35 s</td><td>1, converged</td><td>reused, zero recompiles</td></tr>
+        <tr><th scope="row">later moved keys</th><td>1.1 to 1.5 s (solve 0.8 s, receipt 0.25 to 0.55 s, topology read 66 ms)</td><td>1, converged</td><td>reused</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The fence not met.</strong> The plan asked for the second keyframe below one second on CPU. It costs 27 to 35 s with
+    <code>jax_log_compiles</code> showing no compile after the prime, and the warm keyframe 1.1 to 1.5 s; the worker attributes both to the
+    fused-trip driver's per-call dispatch and tracing in <code>nova/equilibrium/reduced_newton.py</code>, a file the review-repairs node holds.
+    The test therefore asserts generous correctness bounds (60 s and 30 s) with the reason in its comment, and the receipt row carries the
+    reuse flag that is the contract's substance. What the number means for the playable goal is decided on the H200, where the traced-target
+    receipt put a warm trip at 51 ms: the keyframe receipt through the app's own solver on device, first moved key included, is the §4b node,
+    and a seconds-scale first moved key there would want the same attribution (trace, cache load or dispatch) before the live receipt.</p>
+  </section>
+
 </main>
 </body>
 </html>

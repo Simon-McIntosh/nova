@@ -50,6 +50,7 @@ from bokeh.models import (
 from bokeh.plotting import figure
 import numpy as np
 
+from nova.biot.contour import Contour
 from nova.equilibrium.wall_mask import inside_polygon
 
 # ---------------------------------------------------------------------------
@@ -290,109 +291,6 @@ def keyframe_receipt(
     )
 
 
-# ---------------------------------------------------------------------------
-# contour tracing: marching squares on the structured raster
-# ---------------------------------------------------------------------------
-
-
-def _key(point) -> tuple[float, float]:
-    """Return a rounded endpoint key for polyline chaining."""
-    return round(float(point[0]), 10), round(float(point[1]), 10)
-
-
-def _trace_level(psi2d, radius, height, level) -> list[np.ndarray]:
-    """Return one level's iso-lines as a list of (n, 2) polylines.
-
-    A linear-crossing marching-squares trace on the rectangular raster, with
-    saddle cells paired through their cell-centre value so the returned
-    polylines never cross.  Adjacent cells interpolate their shared edge with
-    matching orientation, so every polyline chains into whole level lines.
-    """
-    psi2d = np.asarray(psi2d, dtype=float)
-    radius = np.asarray(radius, dtype=float)
-    height = np.asarray(height, dtype=float)
-    n_radius, n_height = psi2d.shape
-    dr = radius[1] - radius[0]
-    dh = height[1] - height[0]
-
-    segments = []
-    for i in range(n_radius - 1):
-        for j in range(n_height - 1):
-            v = (psi2d[i, j], psi2d[i, j + 1], psi2d[i + 1, j + 1], psi2d[i + 1, j])
-            pos = [value > level for value in v]
-            inside = sum(pos)
-            if inside in (0, 4):
-                continue
-            crossed: list = []
-            for edge, (first, second) in enumerate(((0, 1), (1, 2), (2, 3), (3, 0))):
-                if pos[first] == pos[second]:
-                    continue
-                va, vb = v[first], v[second]
-                t = (level - va) / (vb - va)
-                if edge == 0:  # r fixed at radius[i], z from height[j] to j+1
-                    point = (radius[i], height[j] + t * dh)
-                elif edge == 1:  # z fixed at height[j+1], r from i to i+1
-                    point = (radius[i] + t * dr, height[j + 1])
-                elif edge == 2:  # r fixed at radius[i+1], z from j+1 down to j
-                    point = (radius[i + 1], height[j + 1] - t * dh)
-                else:  # z fixed at height[j], r from i+1 down to i
-                    point = (radius[i + 1] - t * dr, height[j])
-                crossed.append(point)
-
-            if len(crossed) == 2:
-                segments.append((crossed[0], crossed[1]))
-            elif len(crossed) == 4:
-                centre = 0.25 * (v[0] + v[1] + v[2] + v[3])
-                # pair through the cell centre so the low region stays connected
-                if centre <= level:
-                    segments.append((crossed[0], crossed[3]))
-                    segments.append((crossed[1], crossed[2]))
-                else:
-                    segments.append((crossed[0], crossed[1]))
-                    segments.append((crossed[2], crossed[3]))
-            else:  # pragma: no cover - a square has two or four crossings
-                raise AssertionError(f"unexpected crossing count {len(crossed)}")
-
-    return _chain(segments)
-
-
-def _chain(segments) -> list[np.ndarray]:
-    """Chain oriented crossing segments into whole iso-lines."""
-    neighbours = {}
-    for index, (start, end) in enumerate(segments):
-        neighbours.setdefault(_key(start), []).append(index)
-        neighbours.setdefault(_key(end), []).append(index)
-    used = [False] * len(segments)
-    lines: list[np.ndarray] = []
-    for start in range(len(segments)):
-        if used[start]:
-            continue
-        used[start] = True
-        chain = [list(segments[start][0]), list(segments[start][1])]
-        extended = True
-        while extended:
-            extended = False
-            for end_index in (0, -1):
-                key = _key(chain[end_index])
-                for other in neighbours.get(key, ()):
-                    if used[other]:
-                        continue
-                    used[other] = True
-                    other_start, other_end = segments[other]
-                    if _key(other_start) == key:
-                        following = other_end
-                    else:
-                        following = other_start
-                    if end_index == 0:
-                        chain.insert(0, list(following))
-                    else:
-                        chain.append(list(following))
-                    extended = True
-                    break
-        lines.append(np.asarray(chain))
-    return lines
-
-
 def contour_levels(n_contours: int = N_CONTOURS) -> np.ndarray:
     """Return the interior flux-surface levels between the axis and boundary.
 
@@ -416,6 +314,22 @@ def close_outline(outline: np.ndarray) -> np.ndarray:
     return outline
 
 
+def _closed_contour_lines(
+    x2d: np.ndarray,
+    z2d: np.ndarray,
+    psi2d: np.ndarray,
+    levels: np.ndarray,
+) -> list[np.ndarray]:
+    """Cut ``levels`` with Nova's contourer and return closed loops only."""
+    contour = Contour(x2d, z2d, psi2d, levels=np.asarray(levels, dtype=float))
+    return [
+        close_outline(surface.points)
+        for level in contour.psi
+        for surface in contour.levelset(float(level))
+        if surface.closed
+    ]
+
+
 def poloidal_channels(
     equilibrium,
     profile,
@@ -423,6 +337,8 @@ def poloidal_channels(
     wall: np.ndarray,
     coils=(),
     n_contours: int = N_CONTOURS,
+    surfaces: np.ndarray | None = None,
+    stride: int = 1,
 ) -> dict[str, dict[str, list]]:
     """Return the styled poloidal channels for one solved frame.
 
@@ -432,10 +348,12 @@ def poloidal_channels(
     :class:`~nova.equilibrium.separatrix_clip.AtomicCellMesh.clip` call and
     the same shared-node flux reconstruction the solve integrates over; only
     the solved core cells are drawn, so the clipped edge is the solved
-    boundary rather than a staircase.  Contours are unfilled level lines on
-    the raster normalised flux between the axis and the boundary, with the
-    solved separatrix as the outermost line.  Markers are read from the
-    frame's labelled points.
+    boundary rather than a staircase.  When ``surfaces`` is supplied, its
+    ``(n_surface, n_theta, 2)`` loops are drawn directly at ``stride`` and the
+    raster is not contoured.  Otherwise Nova's contourpy-backed
+    :class:`~nova.biot.contour.Contour` cuts closed loops at the interior flux
+    levels and the solved separatrix is appended as the outermost line.
+    Markers are read from the frame's labelled points.
     """
     operator = profile.operator
     geometry = operator.moment_geometry
@@ -468,17 +386,24 @@ def poloidal_channels(
     radius = np.asarray(raster.radius, dtype=float)
     height = np.asarray(raster.height, dtype=float)
     n_radius, n_height = radius.size, height.size
-    psi_norm = np.asarray(raster.psi_norm, dtype=float).reshape(n_radius, n_height)
-    contour_xs: list[list[float]] = []
-    contour_zs: list[list[float]] = []
-    for level in contour_levels(n_contours):
-        for polyline in _trace_level(psi_norm, radius, height, float(level)):
-            contour_xs.append(polyline[:, 0].tolist())
-            contour_zs.append(polyline[:, 1].tolist())
-    separatrix_count = int(np.asarray(raster.separatrix_vertex_count))
-    separatrix = np.asarray(raster.separatrix, dtype=float)[:separatrix_count]
-    contour_xs.append(separatrix[:, 0].tolist())
-    contour_zs.append(separatrix[:, 1].tolist())
+    if not isinstance(stride, int) or isinstance(stride, bool) or stride < 1:
+        raise ValueError("stride must be a positive integer")
+    if surfaces is not None:
+        surface_array = np.asarray(surfaces, dtype=float)
+        if surface_array.ndim != 3 or surface_array.shape[2] != 2:
+            raise ValueError("surfaces must have shape (n_surface, n_theta, 2)")
+        contour_lines = [close_outline(loop) for loop in surface_array[::stride]]
+    else:
+        psi2d = np.asarray(raster.psi, dtype=float).reshape(n_radius, n_height)
+        x2d, z2d = np.meshgrid(radius, height, indexing="ij")
+        axis_flux = boundary_flux - flux_span
+        levels = axis_flux + flux_span * contour_levels(n_contours)
+        contour_lines = _closed_contour_lines(x2d, z2d, psi2d, levels)
+        separatrix_count = int(np.asarray(raster.separatrix_vertex_count))
+        separatrix = np.asarray(raster.separatrix, dtype=float)[:separatrix_count]
+        contour_lines.append(separatrix)
+    contour_xs = [line[:, 0].tolist() for line in contour_lines]
+    contour_zs = [line[:, 1].tolist() for line in contour_lines]
 
     labelled = equilibrium.labelled_flux
     o_point = np.asarray(labelled.o_point, dtype=float)

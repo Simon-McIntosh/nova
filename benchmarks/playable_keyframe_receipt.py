@@ -44,6 +44,7 @@ from benchmarks.efit_forward_parity_slice import (
     select_slices_by_shot,
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
+from nova.equilibrium import reduced_newton
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import (
@@ -53,7 +54,7 @@ from nova.jax.config import (
 )
 
 from apps.playable.production import ForwardMachine, ProductionSolver
-from apps.playable.session import PlayableSession
+from apps.playable.session import PlayableSession, frame_push
 from apps.playable.shape import PlasmaShape
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,6 +167,23 @@ def _compiles_in(events: list[dict[str, Any]], phase: str) -> list[dict[str, Any
     return within
 
 
+def _stage_durations(marks: list[tuple[str, float]]) -> dict[str, float]:
+    """Return stage-name to wall for consecutive boundaries, aggregated.
+
+    ``marks`` is the [(name, perf_counter-stamp), ...] list the reduced solve
+    records.  The duration of a stage is the gap to the next boundary; a
+    synthetic ``solve_end`` boundary closes the last recorded stage.  Repeats
+    (one marker per trip) are summed so the receipt reports one number per
+    named stage.
+    """
+    durations: dict[str, float] = {}
+    for index in range(len(marks) - 1):
+        name, stamp = marks[index]
+        wall = marks[index + 1][1] - stamp
+        durations[name] = durations.get(name, 0.0) + wall
+    return durations
+
+
 def measure(
     *, output: Path, figure: Path, cache_root: Path | None = None
 ) -> dict[str, Any]:
@@ -242,26 +260,116 @@ def measure(
             identity="mast-22086/43",
         )
         solver = ProductionSolver(machine)
+        reduced_newton.set_stage_timing(True)
 
         # Per-press solve-vs-receipt split, measured from outside the session:
         # the instance methods the solver's call dispatches through are wrapped
-        # with timers, leaving the solver itself untouched.
+        # with timers, leaving the solver itself untouched.  The receipt's
+        # internal stages are the profile methods :meth:`ForwardProfile._receipt`
+        # walks; wrapping the instance methods intercepts the internal
+        # ``self._x()`` calls too, so one run attributes the whole per-keyframe
+        # rebuild without touching the profile's code.
         solve_walls: list[float] = []
         receipt_walls: list[float] = []
+        stage_mark_sets: list[list[tuple[str, float]]] = []
+        trip_census: list[dict[str, Any]] = []
+        channel_walls: list[float] = []
+        receipt_stages: dict[str, list[float]] = {
+            name: []
+            for name in (
+                "receipt_total",
+                "integral_state",
+                "raster",
+                "separatrix",
+                "labelled",
+                "lcfs",
+                "strike",
+                "secondary",
+            )
+        }
+        receipt_totals: dict[str, float] = {name: 0.0 for name in receipt_stages}
+
+        def receipt_stage_deltas() -> dict[str, float]:
+            """Return each receipt stage's wall since the previous press."""
+            deltas: dict[str, float] = {}
+            for name, values in receipt_stages.items():
+                total = sum(values)
+                deltas[name] = round(1000.0 * (total - receipt_totals[name]), 3)
+                receipt_totals[name] = total
+            return deltas
         _reduced = solver._reduced
         _receipt = solver._reduced_receipt
 
+        def _wrap(owner, name, bucket):
+            original = getattr(owner, name)
+
+            def timed(*args, **kwargs):
+                started = time.perf_counter()
+                output = original(*args, **kwargs)
+                bucket.append(time.perf_counter() - started)
+                return output
+
+            setattr(owner, name, timed)
+
+        for name, bucket in (
+            ("_receipt", receipt_stages["receipt_total"]),
+            ("_integral_state", receipt_stages["integral_state"]),
+            ("_raster_flux", receipt_stages["raster"]),
+            ("_raster_separatrix", receipt_stages["separatrix"]),
+            ("_labelled_flux", receipt_stages["labelled"]),
+            ("_lcfs_polyline", receipt_stages["lcfs"]),
+            ("_strike_points", receipt_stages["strike"]),
+            ("_secondary_x_point", receipt_stages["secondary"]),
+        ):
+            _wrap(profile, name, bucket)
+
         def timed_reduce(profile_, flux, commanded, program=None):
+            reduced_newton.clear_stage_marks()
             started = time.perf_counter()
             result = _reduced(profile_, flux, commanded, program)
+            # Drain the solve's tail device work (constraint records, the
+            # prescribed-current fold) into this stage so it does not land on
+            # the next press's first array conversion.
+            jax.block_until_ready(result.state)
             solve_walls.append(time.perf_counter() - started)
+            marks = reduced_newton.reduced_stage_marks()
+            marks.append(("solve_end", time.perf_counter()))
+            stage_mark_sets.append(marks)
+            trip_census.append(
+                {
+                    "trips": int(result.active_set_iterations),
+                    "jacobian_builds": list(result.jacobian_builds_per_trip),
+                    "jacobian_wall": list(result.jacobian_wall_per_trip),
+                    "newton_wall": list(result.newton_wall_per_trip),
+                    "boundary_wall": list(result.boundary_wall_per_trip),
+                    "trip_wall": list(result.trip_wall_per_trip),
+                    "newton_steps": list(result.newton_steps_per_trip),
+                    "map_evaluations": list(result.map_evaluations_per_trip),
+                }
+            )
             return result
 
         def timed_receipt(profile_, result):
             started = time.perf_counter()
             equilibrium = _receipt(profile_, result)
+            # Drain the receipt's device work into this stage.  JAX dispatch is
+            # asynchronous, so without a sync the raster and labelled kernels
+            # queue up and their wall lands on the next press's first transfer.
+            jax.block_until_ready(equilibrium.flux)
+            raster = getattr(equilibrium, "raster_flux", None)
+            labelled = getattr(equilibrium, "labelled_flux", None)
+            if raster is not None:
+                jax.block_until_ready(raster.psi)
+                jax.block_until_ready(raster.separatrix)
+            if labelled is not None:
+                jax.block_until_ready(labelled.lcfs)
             receipt_walls.append(time.perf_counter() - started)
             return equilibrium
+
+        def timed_channels(session_):
+            started = time.perf_counter()
+            frame_push(session_)
+            channel_walls.append(time.perf_counter() - started)
 
         solver._reduced = timed_reduce
         solver._reduced_receipt = timed_receipt
@@ -282,12 +390,17 @@ def measure(
 
         mark("prime")
         prime = session.prime()
+        timed_channels(session)
         receipt["prime"] = {
             "wall": prime.wall,
             "trips": prime.trips,
             "reused": prime.reused,
             "solve_wall": solve_walls[-1],
             "receipt_wall": receipt_walls[-1],
+            "channel_wall": channel_walls[-1],
+            "stages": _stage_durations(stage_mark_sets[-1]),
+            "trip_census": trip_census[-1],
+            "receipt_stages": receipt_stage_deltas(),
             "seed_centroid_m": centre.tolist(),
         }
         receipt["presses"].append(
@@ -300,6 +413,7 @@ def measure(
                 "reused": prime.reused,
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
+                "channel_wall": channel_walls[-1],
             }
         )
         _write(receipt, output)
@@ -309,6 +423,7 @@ def measure(
         moved_cache_before = _atime_entries(cache.directory)
         for index, key in enumerate(KEY_CHAIN, start=1):
             press = session.step(key)
+            timed_channels(session)
             entry = {
                 "index": index,
                 "press": key,
@@ -319,6 +434,10 @@ def measure(
                 "reused": press.reused,
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
+                "channel_wall": channel_walls[-1],
+                "stages": _stage_durations(stage_mark_sets[-1]),
+                "trip_census": trip_census[-1],
+                "receipt_stages": receipt_stage_deltas(),
             }
             receipt["presses"].append(entry)
             _write(receipt, output)

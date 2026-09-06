@@ -782,41 +782,49 @@ def _arm_receipt(
 
 def _null_receipt(
     machine: ForwardMachine,
-    previous,
     circuit_names: dict[int, str],
 ) -> tuple[dict[str, Any], object]:
-    """Run the null inverse command and return its one-solve motion baseline."""
+    """Run the seed-derived null command and return its one-solve baseline."""
     solver = ProductionSolver(machine)
-    target = achieved_target(machine.profile, previous.flux)
+    seed_flux = machine.seed
+    seed_current = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    target = achieved_target(machine.profile, seed_flux)
     inverse = solve_shape_inverse(
         machine.profile,
         target,
-        previous.flux,
+        seed_flux,
         prescribed_current=solver.prescribed_current,
         free_circuits=machine.drivable_circuits,
     )
     solver.prescribed_current = inverse.currents
     started = perf_counter()
     equilibrium, trips, _program = solver._forward(
-        machine.profile, previous.flux, solver.prescribed_current
+        machine.profile, seed_flux, solver.prescribed_current
     )
     wall = perf_counter() - started
-    prior = achieved_target(machine.profile, previous.flux)
+    prior = achieved_target(machine.profile, seed_flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
+    current_change = inverse.currents - seed_current
+    turning_point_drift = _points(achieved) - _points(prior)
     payload = {
         "arm": "null-resolve",
+        "status": "complete",
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
-        "turning_point_drift_m": (_points(achieved) - _points(prior)).tolist(),
+        "turning_point_drift_m": turning_point_drift.tolist(),
+        "maximum_turning_point_drift_m": float(
+            np.max(np.linalg.norm(turning_point_drift, axis=1))
+        ),
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
         "current_change_by_circuit_a": {
-            _circuit_label(int(circuit), circuit_names): float(delta)
-            for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
+            _circuit_label(index, circuit_names): float(delta)
+            for index, delta in enumerate(current_change)
         },
+        "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
         "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
         "target_point_rows": _boundary_point_rows(
             inverse, machine.profile, equilibrium.flux
@@ -1056,7 +1064,7 @@ def measure(
         },
     }
     if command in {None, "null-resolve"}:
-        null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
+        null_arm, null_equilibrium = _null_receipt(machine, circuit_names)
         null_points = _points(achieved_target(profile, null_equilibrium.flux))
         null_arm["runtime"] = runtime
         _write_command_receipt(directory / "null-resolve.json", null_arm)

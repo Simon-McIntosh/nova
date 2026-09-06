@@ -23,11 +23,12 @@ right-hand side. Each row is weighted by the reciprocal of its seed-level
 consistency floor, field rows retain the ``sqrt(field_weight)`` priority, and
 the Tikhonov ``gamma`` is scaled by the plasma current.
 
-Three Picard placement rounds alternate the current solve with one forward-map
-evaluation, which re-evaluates the fixed plasma profile inside the boundary
-flux produced by the total currents without running a nonlinear equilibrium
-solve. A final current solve follows the third placement. The app then runs
-one warm-started reduced forward solve on those prescribed currents.
+Three Picard placement rounds alternate a moved-command current solve with one
+forward-map evaluation, which re-evaluates the fixed plasma profile inside the
+boundary flux produced by the total currents without running a nonlinear
+equilibrium solve. An already satisfied row set skips those placement updates.
+A final current solve follows the last placement. The app then runs one
+warm-started reduced forward solve on those prescribed currents.
 """
 
 from __future__ import annotations
@@ -755,10 +756,25 @@ def solve_shape_inverse(
     )
     row_weight = 1.0 / consistency_floor
     row_weight[flux_rows:] *= np.sqrt(field_weight)
+    initial_right_hand_side = target_rows - initial_observed
+    numerical_zero = (
+        64.0
+        * np.finfo(float).eps
+        * max(
+            1.0,
+            float(np.max(np.abs(target_rows))),
+            float(np.max(np.abs(initial_observed))),
+        )
+    )
+    placement_rounds = (
+        0
+        if float(np.max(np.abs(initial_right_hand_side))) <= numerical_zero
+        else picard_rounds
+    )
     picard_current_history = []
     picard_boundary_history = []
     current_step_limited = False
-    for iteration in range(picard_rounds + 1):
+    for iteration in range(placement_rounds + 1):
         _masks, topology = profile.operator.read(state, requested_class=requested_class)
         picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
         full_observed = shape_values(
@@ -795,7 +811,7 @@ def solve_shape_inverse(
         current_step_limited = current_step_limited or limited
         current[free] = initial_current[free] + applied_round_delta
         picard_current_history.append(current.copy())
-        if iteration < picard_rounds:
+        if iteration < placement_rounds:
             state = profile.flux_map(
                 requested_class=requested_class,
                 target_current=target_current,

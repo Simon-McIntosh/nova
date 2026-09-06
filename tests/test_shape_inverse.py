@@ -13,7 +13,6 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
     GAMMA,
-    PICARD_ROUNDS,
     _cap_current_delta,
     achieved_target,
     bounding_box_pairs,
@@ -131,7 +130,7 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
     assert solved.flux_points.shape[0] > 100
     assert np.all(solved.consistency_floor > 0.0)
     assert solved.gamma == pytest.approx(GAMMA * solved.plasma_current)
-    assert solved.picard_currents.shape[0] == PICARD_ROUNDS + 1
+    assert solved.picard_currents.shape[0] == 1
     row_target, _previous = shape_steering_target(
         machine.profile, seed_target, machine.seed
     )
@@ -148,6 +147,32 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
         solved.free_circuits.size - solved.numerical_rank,
         solved.free_circuits.size,
     )
+
+
+def test_null_command_preserves_seed_through_one_forward_solve(machine, seed_target):
+    """A seed-derived target leaves its boundary and circuit currents unchanged."""
+    from apps.playable.production import ProductionSolver
+
+    profile = machine.profile
+    seed_current = np.asarray(profile.operator.prescribed_current_field.current)
+    inverse = solve_shape_inverse(
+        profile,
+        seed_target,
+        machine.seed,
+        prescribed_current=seed_current,
+        free_circuits=machine.drivable_circuits,
+    )
+    equilibrium, _trips, _program = ProductionSolver(machine)._forward(
+        profile, machine.seed, inverse.currents
+    )
+    achieved = achieved_target(profile, equilibrium.flux)
+    drift = np.linalg.norm(
+        np.asarray(achieved.flux_points) - np.asarray(seed_target.flux_points), axis=1
+    )
+
+    assert float(np.max(np.abs(inverse.right_hand_side))) < 1.0e-12
+    assert float(np.max(drift)) < 1.0e-9
+    assert float(np.max(np.abs(inverse.currents - seed_current))) < 1.0e3
 
 
 def test_current_step_cap_is_relative_to_each_seed_circuit():

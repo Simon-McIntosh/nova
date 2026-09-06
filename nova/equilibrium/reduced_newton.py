@@ -39,6 +39,18 @@ argument so every trip of one solve runs the same program.  Both predecessors
 stay available for comparison, ``eager`` scoring and the ``dispatched``
 boundary, because the semantics the fast routes must agree with is what those
 routes compute.
+
+When a constraint tuple is present, the merit and the exit test score the
+augmented residual against the flux block's own normalised reference rather
+than against the whole augmented vector.  A compensating unknown is
+dimensionless and bounded by nothing, so a reference that admitted it would
+let a warm-started loop whose unknown had accumulated toward order a hundred
+inflate the denominator and loosen the convergence tolerance on both blocks by
+that factor; scoring against the flux block alone removes that channel.  The
+reduced route also publishes ``soft_mode_projection`` as ``None`` rather than
+``NaN`` because a dense route carries no soft-mode projection, and refuses a
+constrained solve that has no prescribed current to fold its compensating
+currents into.
 """
 
 from __future__ import annotations
@@ -64,6 +76,7 @@ from nova.equilibrium.constraint import (
 from nova.equilibrium.forward_operator import CellCurrentMoments
 from nova.equilibrium.fixed_point import (
     _BACKTRACKING_FACTORS,
+    _RELATIVE_SUP_MERIT_EXPONENT,
     _relative_residual,
     _smooth_relative_sup_merit,
     FIXED_POINT_RESIDUAL_TOLERANCE,
@@ -285,6 +298,38 @@ def _timed(function, *arguments):
     return value, time.perf_counter() - start
 
 
+def _augmented_relative_residual(imaged, scored, reference):
+    """Return the augmented sup residual over the flux block's own reference.
+
+    The numerator is the same true max over both blocks the unaugmented exit
+    test reads; the reference is the flux block alone, with the production
+    floor, so a compensating unknown that has grown across warm starts cannot
+    inflate the denominator and loosen the tolerance it gates.
+    """
+    return jnp.max(jnp.abs(imaged - scored)) / jnp.maximum(
+        jnp.max(jnp.abs(reference)), 1.0e-30
+    )
+
+
+def _augmented_smooth_relative_sup_merit(imaged, scored, reference):
+    """Return the augmented smooth p-norm merit over the flux reference.
+
+    The residual numerator is the augmented vector's own; the reference is the
+    flux block alone, with the same finite floor the production merit carries.
+    The unknown is dimensionless and unbounded, so it must not set the scale
+    the rest of the system is judged against.
+    """
+    residual_vector = jnp.ravel(imaged - scored)
+    denominator_vector = jnp.concatenate(
+        (jnp.ravel(reference), jnp.asarray([1.0e-30], dtype=reference.dtype))
+    )
+    return jnp.linalg.vector_norm(
+        residual_vector, ord=_RELATIVE_SUP_MERIT_EXPONENT
+    ) / jnp.linalg.vector_norm(
+        denominator_vector, ord=_RELATIVE_SUP_MERIT_EXPONENT
+    )
+
+
 def _reduced_kernels(
     operator,
     coordinates: ReducedCoordinates,
@@ -342,10 +387,14 @@ def _reduced_kernels(
         """Return the merit and relative residual the selection reads.
 
         Unaugmented these are the production flux-space scores.  With rows
-        present they are the same two functions of the state the augmented
-        Newton-Krylov route scores: the flux normalised by its own span beside
-        the unknowns, so a row far from its target is visible to the line
-        search instead of hidden under the flux block.
+        present they are the augmented analogue with the flux normalised by its
+        own span beside the unknowns, so a row far from its target is visible
+        to the line search instead of hidden under the flux block; the
+        reference both score against is the flux block alone rather than the
+        concatenated vector, because a normalised compensating unknown is
+        bounded by nothing and a warm-started loop whose unknown had
+        accumulated would otherwise inflate the denominator and loosen the
+        tolerance on everything at once.
         """
         if augmentation is None:
             return (
@@ -355,9 +404,10 @@ def _reduced_kernels(
         scale = bound.flux_scale
         scored = jnp.concatenate((state / scale, unknowns))
         imaged = jnp.concatenate((mapped / scale, unknowns - rows))
+        reference = mapped / scale
         return (
-            _smooth_relative_sup_merit(imaged, scored),
-            _relative_residual(imaged, scored),
+            _augmented_smooth_relative_sup_merit(imaged, scored, reference),
+            _augmented_relative_residual(imaged, scored, reference),
         )
 
     def reconstruct(reduced, shadow, base_state, rows=None):
@@ -1231,10 +1281,20 @@ def solve_constrained_reduced_newton(
     constraint residuals extend the amplitude residual, so the square dense
     system one trip solves grows by one row and one column per constraint row
     and nothing else about the trip structure changes.  Scoring follows the
-    augmented Newton-Krylov route: the merit and the relative residual are read
-    on the flux normalised by its own span beside the unknowns, so a row that
-    is far from its target is visible to the line search rather than hidden
-    under the flux block.
+    augmented Newton-Krylov route in what it measures - the flux normalised by
+    its own span beside the unknowns, so a row that is far from its target is
+    visible to the line search rather than hidden under the flux block - but
+    both scores divide by the flux block's own reference, because a normalised
+    compensating unknown is bounded by nothing and must not set the scale the
+    whole system is judged against.
+
+    A constrained solve needs a prescribed current to fold its compensating
+    currents into: either ``prescribed_current`` or an operator-side
+    ``prescribed_current_field``.  With neither, the route refuses before any
+    compiler runs, with the reason stated, rather than solving an equilibrium
+    whose flux carries compensation its receipt does not record.  Rows' soft
+    mode projections are published as ``None`` because a dense route computes
+    none.
 
     An empty constraint tuple is the unconstrained solve.  Every kernel then
     evaluates the expression :func:`solve_reduced_newton` evaluates, so the two
@@ -1257,6 +1317,16 @@ def solve_constrained_reduced_newton(
     operator = profile.operator
     state = jnp.asarray(initial)
     pairs = tuple(constraint_pairs)
+    if (
+        pairs
+        and prescribed_current is None
+        and operator.prescribed_current_field is None
+    ):
+        raise ValueError(
+            "a constrained reduced solve needs a prescribed current field to "
+            "fold its rows' compensating currents into; pass prescribed_current "
+            "or set the operator's prescribed field"
+        )
     augmentation = (
         None
         if not pairs
@@ -1384,6 +1454,12 @@ def solve_constrained_reduced_newton(
             jnp.full(augmentation.row_count, jnp.nan),
             requested_class=requested_class,
             target_current=target_current,
+        )
+        # A dense route has no soft-mode projection; a NaN would report a
+        # number that does not exist rather than the absence a consumer can
+        # distinguish.  Publish the typed absence.
+        records = tuple(
+            record._replace(soft_mode_projection=None) for record in records
         )
         if circuit_current is not None:
             for pair, record in zip(pairs, records, strict=True):

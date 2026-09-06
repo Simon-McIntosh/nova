@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-06">
-<meta name="plan-version" content="99">
+<meta name="plan-version" content="100">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
 <meta name="plan-impl" content="0.9">
@@ -387,6 +387,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-persistent-sweep-margin-nan" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>Regression on main, surfaced incidentally by the stale-pin node.</strong> On today's head (255e33eb) the fixed-design class margin of the 81 by 81 persistent-saddle fixture in <code>tests/test_connectivity_boundary.py</code> reads NaN with <code>diverted</code> False for all 17 sweep shifts where the slow test <code>test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate</code> expects positive infinity and diverted, so the test now fails at its sweep assertion before reaching the X-coordinate pin it used to fail on (0.13 mm). The terminal X diagnostics on the same field raise because the class-margin operand moves beyond the roundoff bound. The two merges since that 0.13 mm measurement touching the topology read are the integration candidate (47b9f996, 07:36) and the over-capacity census repair (0895bc51, 14:07); which one introduced the NaN is not yet measured. Probe scripts and the head log are preserved under <code>~/.config/reckon/crew/reports/nova/attribution/persistent-sweep/</code>. A repair node is queued for the local lane once its endpoint is back.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260906T130819263846-nia-symmetric-null-fit-repair" data-who="nia-nullfit-x" data-when="2026-09-06T15:49:47.048Z">
+    <div class="r-comment-body"><p>tests/test_forward_operator_tangent.py passes again on the CPU (1 passed): the failing comparison straddled a residual-shadow branch cut (the map copies trial flux through shadowed wall nodes, so the two-sided difference is not the tangent where a wall node flips shadow); the test now compares exact against central only on branch-stable entries and keeps the finite-action assertion; the worker did not report the stable-entry count or the commit that moved the shadow read (the census publication 5a86f349 of 2026-09-05 is the candidate), recorded as the open remainder; local lane deepseek-v4-flash high, 160 min</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

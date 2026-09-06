@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T17:36:09",
+  "updated": "2026-09-06T17:51:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2849,9 +2849,11 @@
         "id": "pfs-topo-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07754-2572-79b1-aa83-4be652b2a38f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07754-2572-79b1-aa83-4be652b2a38f"
+        },
         "created": "2026-09-06"
       },
       {
@@ -111791,6 +111793,127 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T130819263846-nia-symmetric-null-fit-repair",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-symmetric-null-fit-repair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 10414,
+                "cached_input_tokens": 197875,
+                "input_tokens": 208291,
+                "output_tokens": 2647,
+                "reasoning_output_tokens": 858,
+                "total_tokens": 210938,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "JAX_PLATFORMS=cpu run of tests/test_forward_operator_tangent.py passes whole with the log captured to the run directory; the manifest names the root cause with file:line and the commit that introduced it (suspect 23a86b25, the complete stationary-point census admission, two days old); the assertion keeps its meaning (a finite exact residual action on the symmetric null fit) and is not loosened or skipped; if the contract itself is shown wrong, the manifest says why with the numbers and the test is rewritten to the correct contract, not deleted. Write paths: the test file and nova/biot/null.py, plus nova/equilibrium/forward_operator.py only if the defect is there; nova/equilibrium/forward.py, constraint.py, reduced_newton.py and flux_surface_connectivity.py are held by other nodes and must not change. Run everything from the worktree through the shared environment: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; never create a second environment. NEVER call Read on an image file (this lane is text-only and the process dies); verify a PNG through PIL. Commit each coherent step at once with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 1.0,
+          "goal": "Repair the failure of test_symmetric_null_fit_has_finite_exact_residual_action in tests/test_forward_operator_tangent.py at main",
+          "id": "nia-symmetric-null-fit-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130819263846-nia-symmetric-null-fit-repair/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/test_forward_operator_tangent.py",
+            "nova/biot/null.py",
+            "nova/equilibrium/forward_operator.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "nia-nullfit-x",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T13:08:33Z",
+        "completed_at": "2026-09-06T15:49:47.048Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9635,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9674,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "844b5befff3acc36b1023c5621c3379f6492eae0",
+        "commits": [
+          "9630de17d6c955bb3502a4247a9f0d30e7bad36b"
+        ],
+        "changed_lines": {
+          "added": 27,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_forward_operator_tangent.py -q; 1 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130819263846-nia-symmetric-null-fit-repair/diag.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130819263846-nia-symmetric-null-fit-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "e3a641f4-6952-4507-b4b2-d0ab8ff51ee9",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/nia-symmetric-null-fit-repair",
+          "session_id": "e3a641f4-6952-4507-b4b2-d0ab8ff51ee9",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T15:49:47.048Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -112017,8 +112140,22 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
         "closed_by_purpose": "resume",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906154241",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T15:42:41Z",
+        "closed_at": "2026-09-06T15:43:49Z",
+        "held_seconds": 68,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume; the stream had no parseable rejected rate-limit event, so created_at is only a lower bound on the refusal time, never a fresh refusal",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1886
+    "_version": 1890
   }
 }

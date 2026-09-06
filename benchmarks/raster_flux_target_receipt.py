@@ -373,6 +373,7 @@ def run(
         median_rebuild_ms = float(np.median(rebuild_spans_ms))
         worst_rebuild_ms = float(np.max(rebuild_spans_ms))
 
+        figure.parent.mkdir(parents=True, exist_ok=True)
         _render(
             figure,
             np.asarray(radius),

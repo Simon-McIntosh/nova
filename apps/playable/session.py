@@ -7,9 +7,13 @@ the app changing.  Each key press steps one control parameter by its stated
 signed size, re-solves as a warm start from the previous equilibrium, and
 records a receipt row of keyframe wall and trips.  The session also carries
 the compiled-program handle the reduced route returns, handing it back on
-every later solve so a keyframe chain re-enters one program.  ``frame_push``
-reduces the session to the ``ColumnDataSource`` channels the shared poloidal
-renderers bound, so a keyframe is pushed by writing those columns verbatim.
+every later solve so a keyframe chain re-enters one program.  The session also
+carries the camera :class:`~apps.playable.camera.FrameDecoder` loaded once per
+session; ``decode_frame`` runs after the poloidal push so a slow decode delays
+only the picture, and records the decode wall and decoder identity beside each
+frame in ``decoded_frames``.  ``frame_push`` reduces the session to the
+``ColumnDataSource`` channels the shared poloidal renderers bound, so a
+keyframe is pushed by writing those columns verbatim.
 """
 
 from __future__ import annotations
@@ -19,10 +23,12 @@ from typing import TYPE_CHECKING, NamedTuple, Protocol, runtime_checkable
 
 import numpy as np
 
+from apps.playable.camera import DecodedFrame, FrameDecoder
 from apps.playable.shape import PlasmaShape, keymap
 
 if TYPE_CHECKING:
     from nova.equilibrium.forward import ForwardEquilibrium
+    from nova.equilibrium.steering_frames import SteeringFrame
 
 
 class KeyframeReceipt(NamedTuple):
@@ -91,6 +97,37 @@ class PlayableSession:
     #: (radius bounds, height bounds) of the carrier's raster flux image.
     raster_bounds: tuple[tuple[float, float], tuple[float, float]] | None = None
     program: object | None = None
+    #: The camera decoder loaded once per session (the placeholder by
+    #: default); ``decode_frame`` calls it after each poloidal push.
+    decoder: FrameDecoder | None = None
+    #: One decode record per decoded keyframe, in step order, carrying the
+    #: decode wall and the decoder identity beside the receipts.
+    decoded_frames: list[DecodedFrame] = field(default_factory=list)
+    #: Whether the record and playback strip is currently recording.
+    recording: bool = False
+
+    @property
+    def frame_index(self) -> int:
+        """Return the current keyframe index (the prime is frame one)."""
+        return len(self.receipts)
+
+    def current_frame(self) -> SteeringFrame:
+        """Return the current equilibrium as the typed steering frame."""
+        return steering_frame(self)
+
+    def decode_frame(self) -> DecodedFrame | None:
+        """Decode the current frame through the session decoder and record it.
+
+        The app calls this after the poloidal push so a slow decode delays
+        only the picture; the returned record carries the decode wall and the
+        decoder identity and is appended beside the keyframe receipts, one
+        record per decoded frame.
+        """
+        if self.decoder is None:
+            return None
+        decoded = self.decoder.decode(self.current_frame())
+        self.decoded_frames.append(decoded)
+        return decoded
 
     def prime(self) -> KeyframeReceipt:
         """Solve the commanded shape from a cold start as the first frame."""
@@ -183,6 +220,137 @@ def frame_push(session: PlayableSession) -> dict[str, dict[str, np.ndarray]]:
             "trips": [int(receipt.trips)],
         },
     }
+
+
+def steering_frame(session: PlayableSession) -> SteeringFrame:
+    """Return the current equilibrium as a typed steering frame for the decode.
+
+    The frame is assembled, never computed: the raster channels come from the
+    current raster flux image, the labelled points from the consumer map, the
+    per-row compensation from the solve's constraint records, and the action,
+    keyframe wall and trip count from the latest receipt row.  Absent topology
+    slots stay absent (NaN coordinates, False finite-mask flags) per the frame
+    schema's no-imputation rule, and a carrier that publishes more fills the
+    corresponding fields.  The finished session record of the frame-schema
+    followup replaces this seam's policy and version fields when it lands.
+    """
+    from nova.equilibrium.solve_request import ForwardSolvePolicy
+    from nova.equilibrium.steering_frames import (
+        SteeringAction,
+        SteeringFrame,
+        policy_digest,
+    )
+
+    equilibrium = session.equilibrium
+    raster = getattr(equilibrium, "raster_flux", None)
+    labelled = getattr(equilibrium, "labelled_flux", None)
+
+    def channel(name: str, default):
+        return np.asarray(getattr(raster, name, default), dtype=np.float64)
+
+    radius = channel("radius", np.linspace(0.6, 1.42, 12))
+    height = channel("height", np.linspace(-0.42, 0.42, 10))
+    n_radius, n_height = radius.size, height.size
+    psi = channel("psi", np.zeros(n_radius * n_height)).reshape(n_radius, n_height)
+    psi_norm = channel("psi_norm", np.linspace(0.0, 1.0, n_radius * n_height)).reshape(
+        n_radius, n_height
+    )
+    domain = channel("domain_label", np.zeros(n_radius * n_height))
+    shape = np.asarray([n_radius, n_height], dtype=np.int32)
+
+    def slot(value, size: int) -> np.ndarray:
+        if value is None:
+            return np.full(size, np.nan)
+        array = np.asarray(value, dtype=np.float64)
+        if array.size == 0:
+            return np.full(size, np.nan)
+        if array.size < size:
+            array = np.append(array, np.full(size - array.size, np.nan))
+        return array[:size]
+
+    axis = slot(getattr(labelled, "o_point", None), 2)
+    primary = slot(getattr(labelled, "primary_x_point", None), 2)
+    secondary = slot(getattr(labelled, "secondary_x_point", None), 2)
+    raw_strike = getattr(labelled, "strike_points", None)
+    strike = np.full((2, 2), np.nan)
+    if raw_strike is not None and np.asarray(raw_strike).size >= 4:
+        strike = np.asarray(raw_strike, dtype=np.float64).reshape(2, 2)[:2]
+    lcfs = np.asarray(
+        getattr(labelled, "lcfs", np.full((1, 2), np.nan)), dtype=np.float64
+    ).reshape(-1, 2)
+    boundary_count = int(
+        getattr(
+            labelled,
+            "lcfs_vertex_count",
+            np.count_nonzero(np.isfinite(lcfs).all(axis=1)),
+        )
+    )
+
+    def present(point) -> bool:
+        """Return whether one coordinate pair is fully present."""
+        return bool(np.isfinite(np.asarray(point, dtype=float)).all())
+
+    finite_mask = np.asarray(
+        [
+            present(axis),
+            present(primary),
+            present(secondary),
+            present(strike[0]),
+            present(strike[1]),
+            int(boundary_count) > 0,
+        ],
+        dtype=bool,
+    )
+
+    rows = [
+        np.ravel(np.asarray(record.physical_unknown, dtype=np.float64))
+        for record in getattr(equilibrium, "constraints", ())
+        if getattr(record, "physical_unknown", None) is not None
+    ]
+    compensation = np.concatenate(rows) if rows else np.empty((0,), dtype=np.float64)
+
+    receipt = session.receipts[-1] if session.receipts else None
+    action = SteeringAction(
+        name=(None if receipt is None else receipt.parameter) or "prime",
+        delta=0.0 if receipt is None else float(receipt.delta),
+        commanded_control_points=np.asarray(
+            session.shape.control_points(), dtype=np.float64
+        ).T,
+    )
+
+    import nova
+
+    return SteeringFrame(
+        radius=radius,
+        height=height,
+        shape=shape,
+        psi=psi,
+        psi_norm=psi_norm,
+        domain_label=domain.astype(np.int8),
+        separatrix=np.asarray(
+            getattr(raster, "separatrix", np.full((30, 2), np.nan)),
+            dtype=np.float64,
+        ).reshape(-1, 2),
+        separatrix_vertex_count=np.int32(getattr(raster, "separatrix_vertex_count", 0)),
+        magnetic_axis_r=axis[0],
+        magnetic_axis_z=axis[1],
+        x_point_r=np.stack((primary[0], secondary[0])),
+        x_point_z=np.stack((primary[1], secondary[1])),
+        strike_points_r=strike[:, 0],
+        strike_points_z=strike[:, 1],
+        lcfs_r=lcfs[:, 0],
+        lcfs_z=lcfs[:, 1],
+        n_boundary_coords=np.int32(boundary_count),
+        finite_mask=finite_mask,
+        coil_current=np.empty((0,), dtype=np.float64),
+        compensating_current=compensation,
+        action=action,
+        wall_seconds=0.0 if receipt is None else float(receipt.wall),
+        trip_count=0 if receipt is None else int(receipt.trips),
+        carrier_identity=session.machine,
+        nova_version=nova.__version__,
+        policy_digest=policy_digest(ForwardSolvePolicy()),
+    )
 
 
 def compensating_currents(equilibrium: object) -> dict[str, np.ndarray]:

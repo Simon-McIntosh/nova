@@ -18,7 +18,9 @@ import numpy as np
 
 from benchmarks import coil_edit_latency as coil_edit
 from benchmarks import efit_forward_parity_slice as parity
+from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks import solovev_certificate as certificate
+from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium import ForwardProfile, reduced_newton
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import TopologyClass
@@ -107,7 +109,10 @@ def _comparison(closed: jax.Array, traced: jax.Array) -> dict[str, Any]:
 
 def _mast_fixture() -> tuple[str, Any, jax.Array, Any, float, dict[str, Any]]:
     """Return the frozen MAST carrier and its stored external field."""
-    response_cache, carrier = coil_edit._response_cache(coil_edit.DEFAULT_CARRIER)
+    response_cache, carrier = _persisted_response_cache(
+        response_carrier.DEFAULT_CARRIER,
+        response_carrier.DEFAULT_RECEIPT,
+    )
     selected_rows = parity.select_slices_by_shot(parity.DECOMPOSITION_BANK)
     selected, qualification = next(
         (row, row_qualification)

@@ -67,14 +67,19 @@ def _slice_record(
     cls: int | None,
     free_error: float,
     conditioned_error: float,
+    *,
+    converged: bool = True,
+    conditioned_guard: bool | None = None,
 ) -> dict:
+    if conditioned_guard is None:
+        conditioned_guard = conditioned
     record = {
         "row": row,
         "time": time,
         "written": True,
         "excluded": False,
         "geometry_masked": False,
-        "converged": True,
+        "converged": bool(converged),
         "qualified": True,
         "terminal_residual": 1e-7,
         "trips": 1,
@@ -86,10 +91,10 @@ def _slice_record(
         "conditioned": conditioned,
         "conditioning_flag": conditioned,
         "conditioning_target_source": "efm/current_centrd_z" if conditioned else None,
-        "free_converged": True,
-        "conditioned_converged": True if conditioned else None,
+        "free_converged": bool(converged),
+        "conditioned_converged": bool(converged) if conditioned else None,
         "free_branch_guard_ok": True,
-        "conditioned_branch_guard_ok": True if conditioned else None,
+        "conditioned_branch_guard_ok": bool(conditioned_guard) if conditioned else None,
         "free_centroid_error_m": free_error,
         "conditioned_centroid_error_m": conditioned_error,
         "achieved_current_centroid_r": 0.9,
@@ -113,18 +118,35 @@ def _write_shot(
     free_errors,
     conditioned_errors,
     *,
-    with_sessions: bool,
+    with_sessions: bool = False,
+    converged=None,
+    conditioned_guards=None,
 ) -> None:
     rows = np.arange(len(times), dtype=int)
+    if converged is None:
+        converged = np.ones(len(times), dtype=bool)
+    if conditioned_guards is None:
+        conditioned_guards = np.asarray(conditioned, dtype=bool)
     slices = [
-        _slice_record(int(row), float(time), bool(flag), cls, float(free), float(cond))
-        for row, time, flag, cls, free, cond in zip(
+        _slice_record(
+            int(row),
+            float(time),
+            bool(flag),
+            cls,
+            float(free),
+            float(cond),
+            converged=bool(converged_value),
+            conditioned_guard=bool(guard_value),
+        )
+        for row, time, flag, cls, free, cond, converged_value, guard_value in zip(
             rows,
             times,
             conditioned,
             classes,
             free_errors,
             conditioned_errors,
+            converged,
+            conditioned_guards,
             strict=True,
         )
     ]
@@ -341,6 +363,153 @@ def test_aggregate_baseline_keys_unchanged(tmp_path):
         assert key in result
     assert result["slices"] == TOTAL_SLICES
     assert result["completed_shots"] == 2
+
+
+# --------------------------------------------------------------------------
+# pin displacement-class cross-tabulation against convergence and the guard
+# --------------------------------------------------------------------------
+
+
+def _recompute_pin_crosstab(root):
+    """Recompute the overall pin cross-tabulation straight from disk.
+
+    Independent of the receipt's own helpers: reads each manifest and its
+    npz, joins the manifest slice records to the npz rows by row number over
+    the written-and-finite population, and tallies the four pin classes
+    against the manifest's converged and conditioned_branch_guard_ok flags.
+    """
+    names = (
+        "below_-50_mm",
+        "-50_to_0_mm",
+        "0_to_+50_mm",
+        "above_+50_mm",
+    )
+    overall = {
+        name: {
+            "slices": 0,
+            "converged": 0,
+            "conditioned_branch_guard_ok": 0,
+            "converged_and_conditioned_guard_ok": 0,
+        }
+        for name in names
+    }
+    for manifest_path in sorted(Path(root).glob("*.manifest.json")):
+        item = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if item.get("status") != "complete":
+            continue
+        written = {
+            int(rec["row"])
+            for rec in item.get("slices", ())
+            if rec.get("written") and rec.get("row") is not None
+        }
+        by_row = {int(rec["row"]): rec for rec in item["slices"]}
+        data = np.load(item["companion"])
+        rows = np.asarray(data["row"]).astype(np.int64)
+        keep = np.isin(rows, np.asarray(sorted(written), dtype=np.int64)) & np.isfinite(
+            np.asarray(data["time"], dtype=float)
+        )
+        free = np.asarray(data["free_centroid_error_m"], dtype=float)[keep]
+        conditioned = np.asarray(data["conditioned_centroid_error_m"], dtype=float)[
+            keep
+        ]
+        both = np.isfinite(free) & np.isfinite(conditioned)
+        for row_id, displacement in zip(
+            rows[keep][both], 1000.0 * (conditioned[both] - free[both]), strict=True
+        ):
+            record = by_row[int(row_id)]
+            if displacement < -50.0:
+                name = "below_-50_mm"
+            elif displacement < 0.0:
+                name = "-50_to_0_mm"
+            elif displacement <= 50.0:
+                name = "0_to_+50_mm"
+            else:
+                name = "above_+50_mm"
+            bucket = overall[name]
+            bucket["slices"] += 1
+            converged = bool(record.get("converged"))
+            guard_ok = bool(record.get("conditioned_branch_guard_ok"))
+            bucket["converged"] += int(converged)
+            bucket["conditioned_branch_guard_ok"] += int(guard_ok)
+            bucket["converged_and_conditioned_guard_ok"] += int(converged and guard_ok)
+    return overall
+
+
+def test_pin_crosstab_sums_and_manifest_join(tmp_path):
+    _build_root(tmp_path)
+    result = _aggregate(tmp_path)
+    crosstab = result["pin_displacement_crosstab"]
+    overall = crosstab["overall"]
+    assert crosstab["classes"] == list(receipt._PIN_CLASSES)
+    # class counts sum to the slices with both errors finite (the pin summary
+    # population), and the converged / guard-ok tallies match the manifest
+    total = sum(bucket["slices"] for bucket in overall.values())
+    assert total == result["pin_displacement_mm"]["overall"]["count"]
+    assert total == 7
+    assert overall == _recompute_pin_crosstab(tmp_path)
+    # every decile section is present and the decile buckets sum to the same
+    assert [str(d) for d in range(10)] == list(crosstab["by_decile"])
+    decile_total = sum(
+        bucket["slices"]
+        for decile in crosstab["by_decile"].values()
+        for bucket in decile.values()
+    )
+    assert decile_total == total
+
+
+def test_pin_crosstab_class_boundaries_and_flags(tmp_path):
+    times = np.asarray([0.000, 0.025, 0.050, 0.075])
+    conditioned = np.asarray([True, True, True, True])
+    classes = np.asarray([0, 0, 1, 1])
+    free_errors = np.asarray([0.100, 0.050, 0.001, 0.005])
+    conditioned_errors = np.asarray([0.040, 0.020, 0.021, 0.085])
+    converged = np.asarray([True, True, False, True])
+    guards = np.asarray([True, True, True, False])
+    _write_shot(
+        tmp_path,
+        41999,
+        times,
+        conditioned,
+        classes,
+        free_errors,
+        conditioned_errors,
+        converged=converged,
+        conditioned_guards=guards,
+    )
+    crosstab = _aggregate(tmp_path)["pin_displacement_crosstab"]
+    overall = crosstab["overall"]
+    # displacements -60, -30, +20, +80 mm land one per class with the
+    # manifest converged and conditioned_branch_guard_ok flags carried across
+    # the row join
+    assert overall["below_-50_mm"] == {
+        "slices": 1,
+        "converged": 1,
+        "conditioned_branch_guard_ok": 1,
+        "converged_and_conditioned_guard_ok": 1,
+    }
+    assert overall["-50_to_0_mm"] == {
+        "slices": 1,
+        "converged": 1,
+        "conditioned_branch_guard_ok": 1,
+        "converged_and_conditioned_guard_ok": 1,
+    }
+    assert overall["0_to_+50_mm"] == {
+        "slices": 1,
+        "converged": 0,
+        "conditioned_branch_guard_ok": 1,
+        "converged_and_conditioned_guard_ok": 0,
+    }
+    assert overall["above_+50_mm"] == {
+        "slices": 1,
+        "converged": 1,
+        "conditioned_branch_guard_ok": 0,
+        "converged_and_conditioned_guard_ok": 0,
+    }
+    # times 0, 25, 50, 75 ms fall in deciles 0, 3, 6, 9
+    assert crosstab["by_decile"]["0"]["below_-50_mm"]["slices"] == 1
+    assert crosstab["by_decile"]["3"]["-50_to_0_mm"]["slices"] == 1
+    assert crosstab["by_decile"]["6"]["0_to_+50_mm"]["slices"] == 1
+    assert crosstab["by_decile"]["9"]["above_+50_mm"]["slices"] == 1
 
 
 # --------------------------------------------------------------------------

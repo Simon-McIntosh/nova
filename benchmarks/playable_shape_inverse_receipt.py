@@ -101,6 +101,12 @@ def _write(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def _write_command_receipt(path: Path, payload: dict[str, Any]) -> None:
+    """Persist a completed command and publish a flushed progress marker."""
+    _write(path, payload)
+    print(f"receipt written {path.name}", flush=True)
+
+
 def _circuit_names(policy: dict[str, Any]) -> dict[int, str]:
     """Return active-family names keyed by zero-based response column."""
     return {
@@ -765,7 +771,7 @@ def _arm_receipt(
         "qualified_axis": True,
         "final_turning_point_error_m": error,
     }
-    _write(arm_path, payload)
+    _write_command_receipt(arm_path, payload)
     return payload, achieved
 
 
@@ -1047,7 +1053,7 @@ def measure(
     }
     arms = []
     null_arm["runtime"] = runtime
-    _write(directory / "null-resolve.json", null_arm)
+    _write_command_receipt(directory / "null-resolve.json", null_arm)
     for name, target, gamma_factor in definitions:
         arm, _achieved = _arm_receipt(
             name,

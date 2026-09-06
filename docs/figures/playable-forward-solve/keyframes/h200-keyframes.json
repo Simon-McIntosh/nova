@@ -1,0 +1,401 @@
+{
+  "artifact": "playable app keyframes on the constrained reduced route, H200",
+  "identity": "22086/43",
+  "source_commit": "97031da266ded99872372cbd484a58aa567ecbd6",
+  "runtime": {
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1263197",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "evidence_inputs": {
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005721191875636578,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-h200-keyframe-receipt/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.026750 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "persistent_compilation_cache": {
+      "selection": "explicit_per_recipe",
+      "root": "/home/ITER/mcintos/.cache",
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "version_key": "runtime-0745ecebea4cb264e054",
+      "runtime_identity": {
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_enable_x64": true,
+          "jax_default_matmul_precision": null,
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "process_index": 0,
+            "id": 0
+          }
+        ]
+      },
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "minimum_compile_seconds": 1.0,
+      "maximum_bytes": 8589934592
+    },
+    "key_chain": [
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-"
+    ]
+  },
+  "presses": [
+    {
+      "index": 0,
+      "press": null,
+      "key": "prime",
+      "wall": 20.530030987225473,
+      "trips": 2,
+      "reused": false,
+      "solve_wall": 7.985493858344853,
+      "receipt_wall": 12.544527360238135
+    },
+    {
+      "index": 1,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.6414016550406814,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.339399510063231,
+      "receipt_wall": 0.301994769833982
+    },
+    {
+      "index": 2,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5263435449451208,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27293452247977257,
+      "receipt_wall": 0.25340614188462496
+    },
+    {
+      "index": 3,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5217622937634587,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.26954804081469774,
+      "receipt_wall": 0.2522114384919405
+    },
+    {
+      "index": 4,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5193204088136554,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2649508826434612,
+      "receipt_wall": 0.25436636060476303
+    },
+    {
+      "index": 5,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.533066370524466,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2732243798673153,
+      "receipt_wall": 0.25983937084674835
+    },
+    {
+      "index": 6,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.529791378416121,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2709392486140132,
+      "receipt_wall": 0.25884948018938303
+    },
+    {
+      "index": 7,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5532186590135098,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27358186803758144,
+      "receipt_wall": 0.27963427174836397
+    },
+    {
+      "index": 8,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5374373476952314,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27105129696428776,
+      "receipt_wall": 0.26638353150337934
+    },
+    {
+      "index": 9,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5418706778436899,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2709059603512287,
+      "receipt_wall": 0.27096208557486534
+    },
+    {
+      "index": 10,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5131145538762212,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2684178100898862,
+      "receipt_wall": 0.24469390325248241
+    },
+    {
+      "index": 11,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5457832338288426,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2676025414839387,
+      "receipt_wall": 0.27817769907414913
+    },
+    {
+      "index": 12,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5478578051552176,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2750307247042656,
+      "receipt_wall": 0.27282438706606627
+    },
+    {
+      "index": 13,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5364784207195044,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27103005442768335,
+      "receipt_wall": 0.26544329058378935
+    },
+    {
+      "index": 14,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5223933011293411,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27276674564927816,
+      "receipt_wall": 0.24962389934808016
+    },
+    {
+      "index": 15,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5454691899940372,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2770423488691449,
+      "receipt_wall": 0.26842425391077995
+    },
+    {
+      "index": 16,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5261622881516814,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.268157422542572,
+      "receipt_wall": 0.2580025363713503
+    },
+    {
+      "index": 17,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5505803423002362,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27325861249119043,
+      "receipt_wall": 0.2773192822933197
+    },
+    {
+      "index": 18,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5401902263984084,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27493980806320906,
+      "receipt_wall": 0.2652472760528326
+    },
+    {
+      "index": 19,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.5410947389900684,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.2694802777841687,
+      "receipt_wall": 0.27161193545907736
+    },
+    {
+      "index": 20,
+      "press": "bulk_z-",
+      "parameter": "bulk_z",
+      "delta": -0.01,
+      "wall": 0.5361927635967731,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.27283807285130024,
+      "receipt_wall": 0.2633519247174263
+    }
+  ],
+  "first_moved": {
+    "press": {
+      "index": 1,
+      "press": "bulk_z+",
+      "parameter": "bulk_z",
+      "delta": 0.01,
+      "wall": 0.6414016550406814,
+      "trips": 1,
+      "reused": true,
+      "solve_wall": 0.339399510063231,
+      "receipt_wall": 0.301994769833982
+    },
+    "compile_events": 8,
+    "fresh_compiles": 0,
+    "fresh_compile_seconds": 0,
+    "cache_served_compiles": 2,
+    "cache_served_compile_seconds": 0.024240494,
+    "cache_artifacts_loaded": 0,
+    "dispatch_and_host_seconds": 0.6171611610406813
+  },
+  "prime": {
+    "wall": 20.530030987225473,
+    "trips": 2,
+    "reused": false,
+    "solve_wall": 7.985493858344853,
+    "receipt_wall": 12.544527360238135,
+    "seed_centroid_m": [
+      0.7781594025789568,
+      0.0026074364392189658
+    ]
+  },
+  "compile_events_total": 540,
+  "verdict": {
+    "presses_measured": 20,
+    "median_warm_keyframe_s": 0.5364784207195044,
+    "mean_warm_keyframe_s": 0.5351646076397676,
+    "first_moved_keyframe_s": 0.6414016550406814,
+    "prime_wall_s": 20.530030987225473,
+    "all_reused_after_prime": true,
+    "median_warm_vs_100ms": 5.364784207195044,
+    "first_moved_vs_1s": 0.6414016550406814
+  }
+}

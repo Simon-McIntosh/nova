@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T23:18:38",
+  "updated": "2026-09-06T23:21:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2846,9 +2846,11 @@
         "id": "pfs-rasterless-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0788b-497b-7742-904a-a569e41a8654",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0788b-497b-7742-904a-a569e41a8654"
+        },
         "created": "2026-09-06"
       },
       {
@@ -114953,6 +114955,144 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T210600142759-pfs-rasterless-session-read",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-rasterless-session-read",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 318,
+                "cached_input_tokens": 554004,
+                "input_tokens": 554326,
+                "output_tokens": 28,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 554354,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_steering_frames.py gains a test writing a rasterless session on the Solovev fixture through session_dataset and reading it back frame for frame, plus a test on one real corpus file under /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29 skipped when the store is unreachable; the test file passes with exit 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G (TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python called directly) with the log under the run directory, and the writer path plus the corpus layout are byte-for-byte unchanged (git diff shows no hunk in session_dataset or the write helpers)",
+          "estimated_hours": 1.5,
+          "goal": "read_session and frames_from_session in nova/equilibrium/steering_frames.py decode a session written with include_raster false, returning SteeringFrame values whose raster fields carry the documented absent marker while every other field round-trips unchanged",
+          "id": "pfs-rasterless-session-read",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210600142759-pfs-rasterless-session-read/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/rasterless-session-read.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-rasterless-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T21:06:28Z",
+        "completed_at": "2026-09-06T21:20:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 830,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 830,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b780497fdbac6b85fdfea7343ac8a047a8988241",
+        "commits": [
+          "550cc7f8e33dc5b09a4bd57ced672dded33478ac"
+        ],
+        "changed_lines": {
+          "added": 154,
+          "removed": 26,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc \"TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree> .venv python -m pytest -p no:cacheprovider tests/test_steering_frames.py -vv\" (13 passed, 263.5 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210600142759-pfs-rasterless-session-read/test-steering-frames.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T210600142759-pfs-rasterless-session-read/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0788b-497b-7742-904a-a569e41a8654",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9673088,
+            "cached_input_tokens_cumulative": 9673088,
+            "input_tokens": 9859403,
+            "input_tokens_cumulative": 9859403,
+            "output_tokens": 21956,
+            "output_tokens_cumulative": 21956,
+            "reasoning_output_tokens": 8680,
+            "reasoning_output_tokens_cumulative": 8680
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30636,
+          "peak_input_tokens": 19532491
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-rasterless-session-read",
+          "session_id": "01a0788b-497b-7742-904a-a569e41a8654",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T21:20:18Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -115265,6 +115405,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1949
+    "_version": 1951
   }
 }

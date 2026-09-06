@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T21:12:29",
+  "updated": "2026-09-06T21:32:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2795,6 +2795,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-receipt-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-reduced-route-x",
         "harness": "claude-opus",
         "role": "implement",
@@ -2836,6 +2845,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07755-4489-78e2-9857-3fe2a82a16fc"
         },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-scout-s",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-06"
       },
       {
@@ -113976,6 +113994,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1924
+    "_version": 1926
   }
 }

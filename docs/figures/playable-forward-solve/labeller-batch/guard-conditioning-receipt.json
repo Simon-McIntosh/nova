@@ -1,0 +1,109 @@
+{
+  "arms": {
+    "condition_on_guard_failure": {
+      "admitted": 61,
+      "companion": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/conditioned/22056.npz",
+      "companion_fields": [
+        "conditioned",
+        "conditioned_branch_guard_ok",
+        "conditioned_centroid_error_m",
+        "conditioned_guard_evaluated",
+        "conditioning_target_source",
+        "free_branch_guard_ok",
+        "free_centroid_error_m",
+        "free_guard_evaluated",
+        "row",
+        "time"
+      ],
+      "companion_fields_without_frame_home": [
+        "conditioned",
+        "conditioning_target_source",
+        "free_branch_guard_ok",
+        "conditioned_branch_guard_ok",
+        "free_centroid_error_m",
+        "conditioned_centroid_error_m"
+      ],
+      "conditioned": 20,
+      "converged": 45,
+      "exceptions": 14,
+      "finite_current_centroid_frames": 47,
+      "finite_ff_prime_frames": 61,
+      "finite_p_prime_frames": 61,
+      "finite_reference_centroid_frames": 61,
+      "frame_fields": [
+        "p_prime_face",
+        "ff_prime_face",
+        "current_centroid_r",
+        "current_centroid_z",
+        "reference_centroid_z",
+        "branch_guard_ok"
+      ],
+      "guard_evaluated_before": 59,
+      "guard_evaluated_conditioned": 18,
+      "guard_within_50mm_after": 47,
+      "guard_within_50mm_before": 42,
+      "guard_within_50mm_conditioned": 18,
+      "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/conditioned/22056.manifest.json",
+      "output_root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/conditioned",
+      "qualified": 7,
+      "session": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/conditioned/22056.nc",
+      "slices_per_second_warm": 0.9422116099072979,
+      "warm_slices": 60,
+      "warm_wall_seconds": 63.67996251489967
+    },
+    "free_only": {
+      "admitted": 61,
+      "companion": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/free/22056.npz",
+      "companion_fields": [
+        "conditioned",
+        "conditioned_branch_guard_ok",
+        "conditioned_centroid_error_m",
+        "conditioned_guard_evaluated",
+        "conditioning_target_source",
+        "free_branch_guard_ok",
+        "free_centroid_error_m",
+        "free_guard_evaluated",
+        "row",
+        "time"
+      ],
+      "companion_fields_without_frame_home": [
+        "conditioned",
+        "conditioning_target_source",
+        "free_branch_guard_ok",
+        "conditioned_branch_guard_ok",
+        "free_centroid_error_m",
+        "conditioned_centroid_error_m"
+      ],
+      "conditioned": 0,
+      "converged": 43,
+      "exceptions": 11,
+      "finite_current_centroid_frames": 50,
+      "finite_ff_prime_frames": 61,
+      "finite_p_prime_frames": 61,
+      "finite_reference_centroid_frames": 61,
+      "frame_fields": [
+        "p_prime_face",
+        "ff_prime_face",
+        "current_centroid_r",
+        "current_centroid_z",
+        "reference_centroid_z",
+        "branch_guard_ok"
+      ],
+      "guard_evaluated_before": 59,
+      "guard_evaluated_conditioned": 0,
+      "guard_within_50mm_after": 21,
+      "guard_within_50mm_before": 28,
+      "guard_within_50mm_conditioned": 0,
+      "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/free/22056.manifest.json",
+      "output_root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/free",
+      "qualified": 4,
+      "session": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T163249892932-pfs-labeller-guard-conditioning/sessions/smoke-retry/free/22056.nc",
+      "slices_per_second_warm": 3.0109553372245914,
+      "warm_slices": 60,
+      "warm_wall_seconds": 19.927230157889426
+    }
+  },
+  "conditioning_trigger": "free solve raised, did not converge, or missed the 0.05 m branch guard",
+  "schema": "nova-forward-labeller-guard-conditioning-smoke",
+  "shot": 22056
+}

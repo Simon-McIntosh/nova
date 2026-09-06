@@ -77,6 +77,11 @@ def _shot_metrics(item: dict[str, Any]) -> dict[str, Any]:
         and row.get("target_current_centroid_z") is not None
     ]
     slice_wall_seconds = sum(float(row.get("wall_seconds", 0.0)) for row in rows)
+    conditioned = [row for row in rows if row.get("conditioned")]
+    free_guarded = [row for row in rows if row.get("free_branch_guard_ok") is not None]
+    conditioned_guarded = [
+        row for row in conditioned if row.get("conditioned_branch_guard_ok") is not None
+    ]
     return {
         "shot": int(item["shot"]),
         "admitted_slices": len(rows),
@@ -94,6 +99,16 @@ def _shot_metrics(item: dict[str, Any]) -> dict[str, Any]:
         "branch_guard_agreement_slices": sum(
             bool(row.get("branch_guard_ok")) for row in rows
         ),
+        "free_guard_evaluated_slices": len(free_guarded),
+        "free_guard_agreement_slices": sum(
+            bool(row.get("free_branch_guard_ok")) for row in free_guarded
+        ),
+        "conditioned_slices": len(conditioned),
+        "conditioned_guard_evaluated_slices": len(conditioned_guarded),
+        "conditioned_guard_agreement_slices": sum(
+            bool(row.get("conditioned_branch_guard_ok")) for row in conditioned_guarded
+        ),
+        "exception_slices": sum(bool(row.get("exception")) for row in rows),
         "vertical_centroid_difference_mm": {
             "definition": (
                 "1000 * (achieved_current_centroid_z - efm/current_centrd_z)"
@@ -129,10 +144,12 @@ def aggregate(root: Path, *, expected_shots: int | None = None) -> dict[str, Any
     converged = sum(bool(row.get("converged")) for row in slices)
     unconverged = len(slices) - converged
     qualified = sum(bool(row.get("qualified")) for row in slices)
-    guarded = [
-        row for row in slices if row.get("target_source") == "efm/current_centrd_z"
-    ]
+    guarded = [row for row in slices if row.get("free_branch_guard_ok") is not None]
     guard_agreement = sum(bool(row.get("branch_guard_ok")) for row in guarded)
+    conditioned = [row for row in slices if row.get("conditioned")]
+    conditioned_guarded = [
+        row for row in conditioned if row.get("conditioned_branch_guard_ok") is not None
+    ]
     centroid_slices = sum(
         _finite_value(row.get("achieved_current_centroid_r"))
         and _finite_value(row.get("achieved_current_centroid_z"))
@@ -175,6 +192,26 @@ def aggregate(root: Path, *, expected_shots: int | None = None) -> dict[str, Any
         "branch_guard_evaluated_slices": len(guarded),
         "branch_guard_agreement_slices": guard_agreement,
         "branch_guard_agreement_fraction": _fraction(guard_agreement, len(guarded)),
+        "free_guard_agreement_slices": sum(
+            bool(row.get("free_branch_guard_ok")) for row in guarded
+        ),
+        "free_guard_agreement_fraction": _fraction(
+            sum(bool(row.get("free_branch_guard_ok")) for row in guarded),
+            len(guarded),
+        ),
+        "conditioned_slices": len(conditioned),
+        "conditioned_guard_evaluated_slices": len(conditioned_guarded),
+        "conditioned_guard_agreement_slices": sum(
+            bool(row.get("conditioned_branch_guard_ok")) for row in conditioned_guarded
+        ),
+        "conditioned_guard_agreement_fraction": _fraction(
+            sum(
+                bool(row.get("conditioned_branch_guard_ok"))
+                for row in conditioned_guarded
+            ),
+            len(conditioned_guarded),
+        ),
+        "exception_slices": sum(bool(row.get("exception")) for row in slices),
         "current_centroid_slices": centroid_slices,
         "companion_shots": len(companion_records),
         "companion_slices": companion_slices,

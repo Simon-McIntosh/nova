@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T21:51:17",
+  "updated": "2026-09-06T22:10:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2627,6 +2627,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-appgate-c",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
         "id": "pfs-batch-l",
         "harness": "codex",
         "role": "implement",
@@ -2681,9 +2690,11 @@
         "id": "pfs-engine-l",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07837-6c8b-7813-b2fb-05dd9564b40a",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07837-6c8b-7813-b2fb-05dd9564b40a"
+        },
         "created": "2026-09-06"
       },
       {
@@ -113846,6 +113857,164 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T053746703323-dvf-diiid-cocos-resolution",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "dvf-diiid-cocos-resolution",
+        "node_definition": {
+          "done_when": "Report ~/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md with one row per consumed quantity giving the measured sign tuple on at least two of the five gate frames (sign of the plasma current, of the toroidal field, of psi from axis to boundary, of q where available), the COCOS index each implies with the derivation shown, the factor to COCOS 17, the file:line of every Nova consumer under benchmarks/ and nova/imas/ that reads it, whether the imas-ambix reader already translates and to which convention, a per-frame table of p prime plus ff prime extracted from the label by the Grad-Shafranov operator beside EFIT's stored profiles after translation with the ratio and sign agreement stated, and a recommendation on where the translation should live given that ambix owns corpus reading, no nova/ change, the report written before the fence",
+          "estimated_hours": null,
+          "goal": "Determine from the data's own sign tuple the COCOS in which every DIII-D quantity Nova consumes is written (the EFIT psi map, p prime, ff prime, the plasma current, the vacuum toroidal field, the F-coil plus ohmic currents, the persisted pf_active description at docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc) together with the translation each needs to reach COCOS 17, this repository's convention (lead mandate 2026-09-04: the same EFIT regression may write each output in a different convention, so no convention is assumed from the code name, reuse map: the corpus reader plus COCOS conventions owned by imas-ambix at ~/Code/imas-ambix, the residual decomposition driver benchmarks/diiid_residual_decomposition.py which applies the Grad-Shafranov operator to the tared label, the exact clipped-cell tare benchmarks/diiid_exact_clipped_tare.py, the five gate frames in docs/figures/gs-absolute-accuracy/efit-reproduction.json, nova/imas/diiid_description.py, the rule that COCOS factors are derived from the sign tuple rather than the migration guide)",
+          "id": "dvf-diiid-cocos-resolution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "dvf-cocos-scout",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T05:37:56Z",
+        "completed_at": "2026-09-04T05:52:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 902,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 902,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "dfd9c48e575705d679b313c9859759f96bd6222e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only measurement over the five gate Parquets and the imas-ambix loader; five_frame_cocos_measurement.json in the run directory",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/cocos/diiid-cocos-resolution.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T053746703323-dvf-diiid-cocos-resolution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5931520,
+            "cached_input_tokens_cumulative": 5931520,
+            "input_tokens": 6226352,
+            "input_tokens_cumulative": 6226352,
+            "output_tokens": 35086,
+            "output_tokens_cumulative": 35086,
+            "reasoning_output_tokens": 10118,
+            "reasoning_output_tokens_cumulative": 10118
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 122656,
+              "budget_seconds": 10800,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 133456,
+              "external_wait": null,
+              "log_age_seconds": 127687,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[7a285cd9d78d9fb600da0b5740f9cc870c6e41a9",
+                "66db76756800f06a28e61332ba6948130bcf6da3]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T163323361856-pta-schema4-producer-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260902T163323361856-pta-schema4-producer-repair --gate <verdict> --commit [7a285cd9d78d9fb600da0b5740f9cc870c6e41a9 --commit 66db76756800f06a28e61332ba6948130bcf6da3]",
+              "node": "pta-schema4-producer-repair",
+              "phase": "complete",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260902T163323361856-pta-schema4-producer-repair",
+              "session": "s18-pta",
+              "terminal_age_seconds": 127732,
+              "terminal_at": "2026-09-02T18:08:59Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-schema4-producer-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 45204,
+          "peak_input_tokens": 12157872
+        },
+        "follow_on_paths": [
+          "psi/Ip/B0/current",
+          "row/frame"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only scout: the deliverable is the report and the five-frame measurement JSON at the fenced write paths; no source change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/dvf-diiid-cocos-resolution",
+          "session_id": "01a06aec-7864-7533-8be7-a9a9d174af98",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T05:52:58Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -114158,6 +114327,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1932
+    "_version": 1935
   }
 }

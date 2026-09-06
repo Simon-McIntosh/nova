@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T20:29:53",
+  "updated": "2026-09-06T21:03:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1276,9 +1276,11 @@
         "id": "fsa-raster-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "fe7448e5-027c-433f-b5f2-2e5403ceacb4",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "fe7448e5-027c-433f-b5f2-2e5403ceacb4"
+        },
         "created": "2026-09-04"
       },
       {
@@ -2615,6 +2617,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07746-b607-7752-ada9-b0bfccdd0d8c"
         },
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-batch-vmap-l",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-06"
       },
       {
@@ -113487,6 +113498,154 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T180341773873-pfs-compiled-slice-program",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-compiled-slice-program",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3055,
+                "cached_input_tokens": 653381,
+                "input_tokens": 656468,
+                "output_tokens": 3732,
+                "reasoning_output_tokens": 653,
+                "total_tokens": 660200,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "nova/equilibrium/reduced_newton.py gains a compiled slice program beside solve_reduced_newton (line 1199) and solve_constrained_reduced_newton (line 1582): the trip loop _drive_trips (line 1069) with its per-trip Newton ladder _plain_newton_trip (line 972) runs inside one jitted program with a fixed trip budget and masked convergence (a converged slice keeps its state through the remaining trips and reports the trip it converged on) instead of the host loop, the row and shadow preparation now done on the host before each trip (measured 97 ms a keyframe) and the post-trip constraint record and prescribed-current folding (118 ms) are done inside the program or once per slice, and the program returns the terminal state plus the flags and counters the receipt needs in one device-to-host read; the host ladder route stays available and unchanged so callers can compare. Contracts in tests/test_reduced_newton.py on the Solovev fixture on the CPU: bit-identical terminal state, converged flag and residual to the host route for a slice that converges inside the budget, and identical flags for one that does not; the fixed budget equals the production trip budget the host route uses. Measure on the H200 in one paired job: benchmarks/forward_labeller_throughput.py's free arm on 22086 with the host route and with the compiled program (add a route switch to that driver, do not fork it), reporting warm slices a second and the per-slice wall split, and the app keyframe through benchmarks/playable_keyframe_receipt.py with both routes; receipts under docs/figures/playable-forward-solve/compiled-slice/, report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compiled-slice-program.md stating the slices a second per card and the keyframe median against the 150 ms fence. Job shape --gres=gpu:1 --cpus-per-task=8 --mem=128G --reservation=gpu_0003_grpA --time=00:55:00, no --qos, JAX_PLATFORMS=cuda,cpu inside the wrapped command (never in --export), --chdir to the worktree with the checkout root passed explicitly (never derived from the script path), root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python, persistent compilation cache; a CPU prepare-only pass of the driver before any sbatch; the labeller corpus takes the reserved cores tonight so your H200 job may pend for hours, which is expected, not an error; park on it with the comma-form declared wait including wait_condition, unquoted wait_started_at and resume_brief, then end your turn. Grep every name before importing it. apps/playable/session.py and apps/playable/production.py are not yours (the light render receipt is a separate node). Run everything from the worktree through UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; commit each coherent step with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 4.0,
+          "goal": "Put the whole slice solve inside one compiled program so one call is one slice with one device-to-host read",
+          "id": "pfs-compiled-slice-program",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T180341773873-pfs-compiled-slice-program/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py",
+            "tests/test_reduced_newton_constraints.py",
+            "benchmarks/forward_labeller_throughput.py",
+            "benchmarks/playable_keyframe_receipt.py",
+            "docs/figures/playable-forward-solve/compiled-slice/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compiled-slice-program.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-slice-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T18:03:54Z",
+        "completed_at": "2026-09-06T18:35:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1885,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1885,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a2ca759ca9d8f6c3a5b023ba8f61970fc9544f20",
+        "commits": [
+          "77d85e2a8f8e454648c33b4847333e882f803e20",
+          "c171021e961b7cc7cf5bd49208a67640a86db7ed",
+          "7cb6a1a2818174b793d3dcfe8663ec46b85a1bd0"
+        ],
+        "changed_lines": {
+          "added": 683,
+          "removed": 10,
+          "files": 6
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_reduced_newton.py::test_compiled_slice_matches_the_fused_host_route and ::test_compiled_slice_keeps_a_nonconverged_result_masked (2 passed); CPU prepare-only passes for both drivers",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T180341773873-pfs-compiled-slice-program/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T180341773873-pfs-compiled-slice-program/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a077e4-243e-7782-ada6-c7101c502c66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18743040,
+            "cached_input_tokens_cumulative": 18743040,
+            "input_tokens": 19008180,
+            "input_tokens_cumulative": 19008180,
+            "output_tokens": 47887,
+            "output_tokens_cumulative": 47887,
+            "reasoning_output_tokens": 15273,
+            "reasoning_output_tokens_cumulative": 15273
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 63160,
+          "peak_input_tokens": 37751220
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-compiled-slice-program",
+          "session_id": "01a077e4-243e-7782-ada6-c7101c502c66",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T18:35:19Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -113799,6 +113958,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1919
+    "_version": 1922
   }
 }

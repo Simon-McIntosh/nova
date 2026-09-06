@@ -13,12 +13,14 @@ Both arms evaluate the same raster flux expression:
 
 ``source_target`` is the active-winding response on the raster (the matrix
 the forward solve's grid target holds), ``plasma_target`` the rectangular
-cell response, ``moments`` the base-state plasma cell currents, and
-``passive`` the constant contribution of the passive/vessel circuits for the
-edited active circuit.  The rebuilt arm reconstructs the two Green's
-matrices from the same geometry and grid the solve used, so the arm
-evaluations must be bitwise identical; the once arm merely times the
-matrices being reused instead of rebuilt.
+cell response, ``moments`` the plasma cell currents of the fitted reference
+flux on the raster, and ``passive`` the constant contribution of the
+passive/vessel circuits for the edited active circuit.  The moments are
+fixed across the ten edits so the measurement isolates the target's own
+evaluation cost from the solver's plasma response.  The rebuilt arm
+reconstructs the two Green's matrices from the same geometry and grid the
+solve used, so the arm evaluations must be bitwise identical; the once arm
+merely times the matrices being reused instead of rebuilt.
 
 Run on one reserved H200 through the root-venv python with the persistent
 compilation cache configured, exactly as the coil-edit-latency driver it
@@ -105,6 +107,72 @@ def _build_target(
     ):
         raise ValueError("raster target matrices must match the rectangular grid")
     return {"source_target": np.asarray(source), "plasma_target": np.asarray(plasma)}
+
+
+def _raster_case(carrier_path: Path) -> dict[str, Any]:
+    """Assemble the passive-inclusive raster case without solving.
+
+    Mirrors the non-solve fraction of the coil-edit-latency case preparation:
+    the persisted 101-circuit response on the 1126 raster-plus-wall targets,
+    the active-mapping and the P4/P5 boundary-circuit selection.  The plasma
+    moments come from the fitted reference flux on the raster, so the raster
+    flux keeps the solve's physics without depending on solve convergence.
+    """
+    response_cache, _metadata = coil_edit_latency._response_cache(carrier_path)
+    selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
+    case, context = parity._mast_case_from_selection(
+        SHOT_STORE, selected, qualification=None
+    )
+    _passive, profile, policy = parity._passive_inclusive_case(
+        case, context, response_cache
+    )
+    if not policy["response_matrix_reused"]:
+        raise RuntimeError("the persisted response carrier was not reused")
+    if policy["stored_circuit_count"] != 101:
+        raise RuntimeError("the passive-inclusive current vector is not complete")
+    prescribed = profile.operator.prescribed_current_field
+    if prescribed is None or prescribed.current.shape != (101,):
+        raise RuntimeError("the operator does not hold the 101-circuit vector")
+    response = np.asarray(prescribed.response, dtype=np.float64)
+    base_current = np.asarray(prescribed.current, dtype=np.float64)
+    wall_start = profile.operator.grid.node_number
+    candidates = []
+    for row in policy["active_mapping"]:
+        if row["family"] not in coil_edit_latency.BOUNDARY_COIL_FAMILIES:
+            continue
+        circuit = int(row["stored_circuit"])
+        candidates.append(
+            {
+                "family": row["family"],
+                "stored_circuit": circuit,
+                "two_percent_wall_flux_sup_wb": float(
+                    0.02
+                    * abs(base_current[circuit])
+                    * np.max(np.abs(response[wall_start:, circuit]))
+                ),
+            }
+        )
+    if len(candidates) != len(coil_edit_latency.BOUNDARY_COIL_FAMILIES):
+        raise RuntimeError("the P4/P5 boundary-circuit mapping is incomplete")
+    selected_coil = max(
+        candidates,
+        key=lambda row: row["two_percent_wall_flux_sup_wb"],
+    )
+    circuit_index = int(selected_coil["stored_circuit"])
+    reference_flux = np.asarray(case["state"], dtype=np.float64)[
+        : profile.lattice.node_count
+    ]
+    return {
+        "profile": profile,
+        "policy": policy,
+        "response": response,
+        "base_current": base_current,
+        "circuit_index": circuit_index,
+        "coil_mapping": selected_coil,
+        "reference_flux": reference_flux,
+        "target_current": abs(float(case["reference"]["plasma_current_a"])),
+        "reference": case["reference"],
+    }
 
 
 def _evaluate(
@@ -199,22 +267,23 @@ def run(
     )
     reporter.start()
     try:
-        profile, prepared, carrier = coil_edit_latency._prepare_case(carrier_path)
+        case_store = _raster_case(carrier_path)
+        profile = case_store["profile"]
         operator = profile.operator
         geometry = MachineGeometryRegistry.default().select(SHOT).configuration.geometry
         families = tuple(sorted(coil_sections(geometry)))
-        active_mapping = prepared["policy"]["active_mapping"]
+        active_mapping = case_store["policy"]["active_mapping"]
         coordinate = np.asarray(profile.lattice.coordinate, dtype=np.float64)
         radius = np.asarray(profile.lattice.radius, dtype=np.float64)
         height = np.asarray(profile.lattice.height, dtype=np.float64)
         dr = float(profile.lattice.radial_step)
         dz = float(profile.lattice.vertical_step)
         slots = _active_slots(active_mapping, families)
-        base_current = np.asarray(prepared["prescribed_current"], dtype=np.float64)
+        base_current = case_store["base_current"]
         base_active = np.asarray(base_current[slots], dtype=np.float64)
-        circuit_index = int(prepared["circuit_index"])
+        circuit_index = case_store["circuit_index"]
         active_position = int(np.flatnonzero(slots == circuit_index)[0])
-        response = np.asarray(carrier["response"], dtype=np.float64)
+        response = case_store["response"]
         response_raster = response[: profile.lattice.node_count]
 
         jitted = jax.jit(_evaluate)
@@ -228,20 +297,14 @@ def run(
         plasma_once = jnp.asarray(built_once["plasma_target"])
         held_source = np.asarray(operator.grid.source_target, dtype=np.float64)
         held_plasma = np.asarray(operator.grid.plasma_target, dtype=np.float64)
-        source_reproduces = float(
-            np.max(np.abs(np.asarray(source_once) - held_source))
-            / max(float(np.max(np.abs(held_source))), np.finfo(np.float64).tiny)
-        )
-        plasma_reproduces = float(
-            np.max(np.abs(np.asarray(plasma_once) - held_plasma))
-            / max(float(np.max(np.abs(held_plasma))), np.finfo(np.float64).tiny)
-        )
+        source_reproduces = float(np.max(np.abs(np.asarray(source_once) - held_source)))
+        plasma_reproduces = float(np.max(np.abs(np.asarray(plasma_once) - held_plasma)))
         if max(source_reproduces, plasma_reproduces) > 1.0e-9:
             raise RuntimeError("the rebuilt Green's matrices disagree with the solve")
         passive = response_raster @ base_current - held_source @ base_active
 
         base_moments = operator.cell_current_moments(
-            prepared["initial"], TopologyClass.DIVERTED
+            jnp.asarray(case_store["reference_flux"]), TopologyClass.DIVERTED
         )
         moments = jnp.asarray(base_moments.cell_current, dtype=jnp.float64)
         if moments.shape != (profile.lattice.node_count,):
@@ -328,7 +391,7 @@ def run(
                 "machine": "MAST",
                 "shot": SHOT,
                 "slice_index": SLICE_INDEX,
-                "plasma_current_a": float(prepared["reference"]["plasma_current_a"]),
+                "plasma_current_a": float(case_store["reference"]["plasma_current_a"]),
                 "frame": "raster receiver grid over the MAST vessel",
             },
             "execution": {
@@ -346,15 +409,15 @@ def run(
                 "vertical_step_m": dz,
                 "source_target_shape": list(source_once.shape),
                 "plasma_target_shape": list(plasma_once.shape),
-                "source_rebuild_relative_sup_vs_solve_target": source_reproduces,
-                "plasma_rebuild_relative_sup_vs_solve_target": plasma_reproduces,
+                "source_rebuild_abs_sup_wb_per_amp_turn": source_reproduces,
+                "plasma_rebuild_abs_sup_wb_per_amp_turn": plasma_reproduces,
             },
             "edits": {
-                "circuit": prepared["coil_mapping"],
+                "circuit": case_store["coil_mapping"],
                 "circuit_index": circuit_index,
                 "fractions_%": [float(f * 100.0) for f in TEN_EDIT_FRACTIONS],
                 "count": EDIT_COUNT,
-                "moments": "base endpoint terminal state, fixed across edits",
+                "moments": "fitted reference flux on the raster, fixed across edits",
                 "passive_constant_included": True,
             },
             "once_arm": {
@@ -447,6 +510,68 @@ def _identity_probe(profile, carrier_path: Path) -> dict[str, Any]:
         "plasma_reproduces_solve_target": plasma_reproduces_operator,
         "arm_flux_bitwise_identical": flux_bitwise,
     }
+
+
+def _check_case(arguments: argparse.Namespace) -> None:
+    """Validate the non-solve case wiring on any host before the H200 run."""
+    configure_dtypes()
+    case_store = _raster_case(arguments.carrier)
+    profile = case_store["profile"]
+    operator = profile.operator
+    families = tuple(
+        sorted(
+            coil_sections(
+                MachineGeometryRegistry.default().select(SHOT).configuration.geometry
+            )
+        )
+    )
+    slots = _active_slots(case_store["policy"]["active_mapping"], families)
+    base_current = case_store["base_current"]
+    circuit_index = case_store["circuit_index"]
+    active_position = int(np.flatnonzero(slots == circuit_index)[0])
+    moments = np.asarray(
+        operator.cell_current_moments(
+            jnp.asarray(case_store["reference_flux"]), TopologyClass.DIVERTED
+        ).cell_current
+    )
+    geometry = MachineGeometryRegistry.default().select(SHOT).configuration.geometry
+    rebuilt = _build_target(
+        geometry,
+        np.asarray(profile.lattice.coordinate, dtype=np.float64),
+        families,
+        float(profile.lattice.radial_step),
+        float(profile.lattice.vertical_step),
+    )
+    held_source = np.asarray(operator.grid.source_target, dtype=np.float64)
+    held_plasma = np.asarray(operator.grid.plasma_target, dtype=np.float64)
+    message = {
+        "circuit": {
+            "index": circuit_index,
+            "family": case_store["coil_mapping"]["family"],
+            "slot_position": active_position,
+            "active_slots": slots.tolist(),
+            "base_current_a": float(base_current[circuit_index]),
+        },
+        "moments": {
+            "shape": list(moments.shape),
+            "finite": bool(np.all(np.isfinite(moments))),
+            "scripted_source": "fitted reference flux on the raster",
+        },
+        "targets": {
+            "source_shape": list(operator.grid.source_target.shape),
+            "plasma_shape": list(operator.grid.plasma_target.shape),
+            "response_raster_shape": list(
+                case_store["response"][: profile.lattice.node_count].shape
+            ),
+            "rebuilt_source_abs_sup_vs_solve": float(
+                np.max(np.abs(rebuilt["source_target"] - held_source))
+            ),
+            "rebuilt_plasma_abs_sup_vs_solve": float(
+                np.max(np.abs(rebuilt["plasma_target"] - held_plasma))
+            ),
+        },
+    }
+    print(json.dumps(message, indent=2, sort_keys=True))
 
 
 def _selfcheck(arguments: argparse.Namespace) -> None:
@@ -567,8 +692,14 @@ def main() -> None:
     selfcheck_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
+    check_parser = subparsers.add_parser("checkcase")
+    check_parser.add_argument(
+        "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
+    )
     arguments = parser.parse_args()
-    if arguments.command == "selfcheck":
+    if arguments.command == "checkcase":
+        _check_case(arguments)
+    elif arguments.command == "selfcheck":
         _selfcheck(arguments)
     elif arguments.command == "run":
         run(

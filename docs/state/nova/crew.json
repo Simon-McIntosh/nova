@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T11:31:01",
+  "updated": "2026-09-06T11:39:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2525,9 +2525,11 @@
         "id": "pfs-inverse-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "4ac46918-f3c3-4d54-ac53-99d4dbf00fde",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "4ac46918-f3c3-4d54-ac53-99d4dbf00fde"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2562,6 +2564,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "6e6e9dea-9f1f-450d-9248-e583666af03b"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-luna-x",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "pfs-reduced-route-x",
@@ -2617,6 +2628,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "d2c3461a-c29b-4bbf-b54c-5c3a117ff099"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-sol-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
       },
       {
         "id": "pfs-traced-x",
@@ -108729,6 +108749,149 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T085454448925-pfs-view-nova-contourer",
+        "plan": "playable-forward-solve",
+        "section": "\u00a74",
+        "node": "pfs-view-nova-contourer",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 6143,
+                "cached_input_tokens": 518917,
+                "input_tokens": 525062,
+                "output_tokens": 1821,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 526883,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "In apps/pulsedesign/poloidal_view.py the functions _trace_level, _chain and _key are deleted. poloidal_channels gains an optional surfaces argument, an array (n_surface, n_theta, 2) of R, Z loops, plus a stride (default chosen so about ten lines show of thirty); when surfaces are given the levelset channel is those loops closed and no contouring runs; when absent the levelset channel is cut with nova.biot.contour.Contour from nova/biot/contour.py (the contourpy generator behind the pulse-design app LevelSet.contour) built on the raster x2d, z2d, psi grids at the psi values of the levels, closed loops only. Contracts in tests/test_poloidal_view.py: the existing tests stay green; a test asserts that no function named _trace_level, _chain or _key exists in the module and that the contour path instantiates Contour; a test that the Contour lines on the Solovev fixture agree with the previous marching-squares output within one raster cell size (regenerate the old lines from the parent commit in the test setup, or compare to the committed styled-frame channel data); a test that given surfaces are drawn verbatim. Measure the wall of the contour step per keyframe on the fixture for both paths and put the numbers in the report, since the lead allows a change of contourer only if performance dictates. Gate in the FOREGROUND on the all_debug partition under one bounded sbatch (--time under one hour, --mem=96G, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_poloidal_view.py, PYTHONPATH the worktree) with the log captured whole. Do NOT touch docs/figures/playable-forward-solve/view (held by the camera node) and do not re-render the PNG; verify through channel data. NEVER call Read on an image file: the model serving you is text-only and a Read of a PNG returns a 400 that ends your process. Write the manifest at the path the dispatch names before any wait. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/view-nova-contourer.md.",
+          "estimated_hours": 2.0,
+          "goal": "Replace the marching-squares tracer in the poloidal view with nova own contourer and let the view draw precomputed flux surfaces, as followup f-pfs-022 on the plan specifies",
+          "id": "pfs-view-nova-contourer",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T085454448925-pfs-view-nova-contourer/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "apps/pulsedesign/poloidal_view.py",
+            "tests/test_poloidal_view.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/view-nova-contourer.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-view-x3",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-06T08:55:15Z",
+        "completed_at": "2026-09-06T09:17:25.049Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1290,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1330,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "cf08c944fe4e3e119fb37b44448f0e79f606e64f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T085454448925-pfs-view-nova-contourer/manifest.md",
+        "scope_changed": false,
+        "session_id": "9d638352-b59e-4da2-92b8-c8987d235e45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": "backpressure",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1686271,
+            "input_tokens_cumulative": 1686271,
+            "output_tokens": 19560,
+            "output_tokens_cumulative": 19560,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run died after 31 consumer-queue retries (api_retry 429); the lane refused (queue full) \u2014 backpressure on an unmetered lane, not a spent budget",
+          "lane_backpressure": true,
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1326.279,
+          "generated_tokens": 19560,
+          "generation_seconds": 1085.882,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 11.1,
+          "machine_seconds": 240.397,
+          "peak_input_tokens": 112534,
+          "tokens_per_second": 18.01,
+          "wall_tokens_per_second": 14.75
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the run was killed at 11:17 by the local lane queue-full retry loop (ten 429 retries) while five workers shared the served model, before any edit or commit; the worktree is clean at its base; the node is redispatched under a new id on the codex sol backend as part of the codex lane evaluation",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-view-nova-contourer",
+          "session_id": "9d638352-b59e-4da2-92b8-c8987d235e45",
+          "session_source": "stream",
+          "retained_at": "2026-09-06T09:17:25.049Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -108901,6 +109064,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1812
+    "_version": 1816
   }
 }

@@ -90,6 +90,7 @@ import xarray as xr
 
 from nova.database.netcdf import netCDF
 from nova.equilibrium.labels import N_XPOINT_SLOTS
+from nova.equilibrium.flux_surface_geometry import PlasmaInternalGeometry
 from nova.equilibrium.solve_request import (
     ForwardSolvePolicy,
     ForwardSolveReceipt,
@@ -120,6 +121,44 @@ FINITE_MASK_COMPONENTS: tuple[str, ...] = (
 
 #: Session attribute naming the declared coordinate system.
 COCOS_ATTR = "cocos"
+
+# Fixed-shape topology blocks consumed by the decoder and transport reader.
+N_SURFACE = 11
+N_THETA = 64
+N_RHO = 25
+N_DIVERTOR_LEGS = 4
+N_DIVERTOR_LEG_POINTS = 32
+
+TORAX_PROFILE_FIELDS: tuple[str, ...] = (
+    "rho_face_norm",
+    "rho_tor",
+    "Phi",
+    "psi_face",
+    "Ip_profile",
+    "R_in",
+    "R_out",
+    "F",
+    "int_dl_over_Bp",
+    "inv_R",
+    "inv_R2",
+    "grad_psi",
+    "grad_psi2",
+    "grad_psi2_over_R2",
+    "B2",
+    "inv_B2",
+    "delta_upper",
+    "delta_lower",
+    "elongation",
+    "vpr",
+    "volume",
+    "area",
+    "q",
+    "g0",
+    "g1",
+    "g2",
+    "g3",
+    "psi_norm_face",
+)
 
 
 class SteeringAction(NamedTuple):
@@ -203,6 +242,48 @@ class SteeringFrame(NamedTuple):
     carrier_identity: str
     nova_version: str
     policy_digest: str
+    flux_surface_psi_norm: object
+    flux_surface_psi: object
+    flux_surface_r: object
+    flux_surface_z: object
+    flux_surface_angle: object
+    rho_face_norm: object
+    rho_tor: object
+    Phi: object
+    psi_face: object
+    Ip_profile: object
+    R_in: object
+    R_out: object
+    F: object
+    int_dl_over_Bp: object
+    inv_R: object
+    inv_R2: object
+    grad_psi: object
+    grad_psi2: object
+    grad_psi2_over_R2: object
+    B2: object
+    inv_B2: object
+    delta_upper: object
+    delta_lower: object
+    elongation: object
+    vpr: object
+    volume: object
+    area: object
+    q: object
+    g0: object
+    g1: object
+    g2: object
+    g3: object
+    psi_norm_face: object
+    R_major: float
+    a_minor: float
+    B_0: float
+    boundary_toroidal_flux: float
+    magnetic_axis_z_scalar: float
+    diverted: bool
+    divertor_leg_r: object
+    divertor_leg_z: object
+    divertor_leg_finite: object
 
 
 def _as_numpy(value) -> np.ndarray:
@@ -267,6 +348,104 @@ def _compensating_current(eq) -> np.ndarray:
     return np.concatenate(rows)
 
 
+def _empty_geometry_channels() -> dict[str, object]:
+    """Return masked fixed-shape geometry for a receipt without a producer."""
+    surface_psi_norm = np.linspace(0.0, 1.0, N_SURFACE)
+    angle = np.linspace(0.0, 2.0 * np.pi, N_THETA, endpoint=False)
+    return {
+        "flux_surface_psi_norm": surface_psi_norm,
+        "flux_surface_psi": np.full(N_SURFACE, np.nan),
+        "flux_surface_r": np.full((N_SURFACE, N_THETA), np.nan),
+        "flux_surface_z": np.full((N_SURFACE, N_THETA), np.nan),
+        "flux_surface_angle": angle,
+        **{
+            name: np.full(N_RHO + 1, np.nan)
+            for name in TORAX_PROFILE_FIELDS
+            if name != "rho_face_norm"
+        },
+        "rho_face_norm": np.linspace(0.0, 1.0, N_RHO + 1),
+        "R_major": np.nan,
+        "a_minor": np.nan,
+        "B_0": np.nan,
+        "boundary_toroidal_flux": np.nan,
+        "magnetic_axis_z_scalar": np.nan,
+        "diverted": False,
+        "divertor_leg_r": np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        "divertor_leg_z": np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+        "divertor_leg_finite": np.zeros(N_DIVERTOR_LEGS, dtype=bool),
+    }
+
+
+def _geometry_channels(
+    geometry: PlasmaInternalGeometry | None,
+    *,
+    divertor_leg_r=None,
+    divertor_leg_z=None,
+    divertor_leg_finite=None,
+) -> dict[str, object]:
+    """Flatten the ray-traced producer record into frame channel names."""
+    if geometry is None:
+        channels = _empty_geometry_channels()
+    else:
+        record = geometry.record
+        dvolume_dpsi = np.abs(np.asarray(record.volume_flux_derivative))
+        channels = {
+            "flux_surface_psi_norm": np.asarray(geometry.surface_psi_norm),
+            "flux_surface_psi": np.asarray(geometry.surface_psi),
+            "flux_surface_r": np.asarray(geometry.surface_r),
+            "flux_surface_z": np.asarray(geometry.surface_z),
+            "flux_surface_angle": np.asarray(geometry.surface_angle),
+            "rho_face_norm": np.asarray(record.rho_tor_norm),
+            "rho_tor": np.asarray(record.rho_tor),
+            "Phi": np.asarray(record.toroidal_flux),
+            "psi_face": np.asarray(record.poloidal_flux),
+            "Ip_profile": np.asarray(record.enclosed_toroidal_current),
+            "R_in": np.asarray(record.r_in),
+            "R_out": np.asarray(record.r_out),
+            "F": np.asarray(record.field_function),
+            "int_dl_over_Bp": np.asarray(record.int_dl_over_bp),
+            "inv_R": np.asarray(record.inverse_radius),
+            "inv_R2": np.asarray(record.inverse_square_radius),
+            "grad_psi": np.asarray(record.gradient_psi),
+            "grad_psi2": np.asarray(record.gradient_psi_squared),
+            "grad_psi2_over_R2": np.asarray(
+                record.gradient_psi_squared_over_radius_squared
+            ),
+            "B2": np.asarray(record.field_squared),
+            "inv_B2": np.asarray(record.inverse_field_squared),
+            "delta_upper": np.asarray(record.triangularity_upper),
+            "delta_lower": np.asarray(record.triangularity_lower),
+            "elongation": np.asarray(record.elongation),
+            "vpr": np.asarray(record.volume_derivative),
+            "volume": np.asarray(record.volume),
+            "area": np.asarray(record.area),
+            "q": np.asarray(record.safety_factor),
+            "g0": np.asarray(record.gradient_psi) * dvolume_dpsi,
+            "g1": np.asarray(record.gradient_psi_squared) * dvolume_dpsi**2,
+            "g2": np.asarray(record.gradient_psi_squared_over_radius_squared)
+            * dvolume_dpsi**2,
+            "g3": np.asarray(record.inverse_square_radius),
+            "psi_norm_face": np.asarray(record.psi_norm),
+            "R_major": float(geometry.r_major),
+            "a_minor": float(geometry.a_minor),
+            "B_0": float(geometry.b0),
+            "boundary_toroidal_flux": float(geometry.boundary_toroidal_flux),
+            "magnetic_axis_z_scalar": np.nan,
+            "diverted": bool(geometry.diverted),
+            "divertor_leg_r": np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+            "divertor_leg_z": np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan),
+            "divertor_leg_finite": np.zeros(N_DIVERTOR_LEGS, dtype=bool),
+        }
+    if divertor_leg_r is not None:
+        channels["divertor_leg_r"] = np.asarray(divertor_leg_r, dtype=float)
+    if divertor_leg_z is not None:
+        channels["divertor_leg_z"] = np.asarray(divertor_leg_z, dtype=float)
+    if divertor_leg_finite is not None:
+        channels["divertor_leg_finite"] = np.asarray(divertor_leg_finite, dtype=bool)
+    channels["magnetic_axis_z_scalar"] = channels.get("magnetic_axis_z_scalar", np.nan)
+    return channels
+
+
 def assemble_frame(
     receipt: ForwardSolveReceipt,
     *,
@@ -274,6 +453,10 @@ def assemble_frame(
     carrier_identity: str,
     applied_current,
     compensating_current=None,
+    internal_geometry: PlasmaInternalGeometry | None = None,
+    divertor_leg_r=None,
+    divertor_leg_z=None,
+    divertor_leg_finite=None,
 ) -> SteeringFrame:
     """Assemble one typed frame from one solved forward receipt.
 
@@ -315,6 +498,13 @@ def assemble_frame(
     if not isinstance(resolved, ResolvedForwardSolveDefaults):
         raise TypeError("a steering frame needs resolved forward-solve defaults")
     trips = int(np.asarray(equilibrium.fixed_point.active_set_iterations))
+    geometry = _geometry_channels(
+        internal_geometry,
+        divertor_leg_r=divertor_leg_r,
+        divertor_leg_z=divertor_leg_z,
+        divertor_leg_finite=divertor_leg_finite,
+    )
+    geometry["magnetic_axis_z_scalar"] = float(axis[1])
 
     return SteeringFrame(
         radius=_as_numpy(raster.radius),
@@ -343,6 +533,7 @@ def assemble_frame(
         carrier_identity=carrier_identity,
         nova_version=resolved.nova_version,
         policy_digest=policy_digest(resolved.policy),
+        **geometry,
     )
 
 
@@ -362,6 +553,11 @@ def _assert_homogeneous(frames: Sequence[SteeringFrame]) -> None:
         "circuits": int(_as_numpy(first.coil_current).size),
         "rows": int(_as_numpy(first.compensating_current).size),
         "control_points": _as_numpy(first.action.commanded_control_points).shape[0],
+        "surface": _as_numpy(first.flux_surface_psi_norm).size,
+        "theta": _as_numpy(first.flux_surface_angle).size,
+        "face": _as_numpy(first.rho_face_norm).size,
+        "leg": _as_numpy(first.divertor_leg_r).shape[0],
+        "leg_points": _as_numpy(first.divertor_leg_r).shape[1],
     }
     for frame in frames[1:]:
         for key, expected in capacities.items():
@@ -379,6 +575,16 @@ def _assert_homogeneous(frames: Sequence[SteeringFrame]) -> None:
                 actual = int(_as_numpy(frame.compensating_current).size)
             else:
                 actual = _as_numpy(frame.action.commanded_control_points).shape[0]
+            if key == "surface":
+                actual = _as_numpy(frame.flux_surface_psi_norm).size
+            elif key == "theta":
+                actual = _as_numpy(frame.flux_surface_angle).size
+            elif key == "face":
+                actual = _as_numpy(frame.rho_face_norm).size
+            elif key == "leg":
+                actual = _as_numpy(frame.divertor_leg_r).shape[0]
+            elif key == "leg_points":
+                actual = _as_numpy(frame.divertor_leg_r).shape[1]
             if actual != expected:
                 raise ValueError(
                     f"steering frames must share {key} capacity, "
@@ -390,6 +596,7 @@ def session_dataset(
     frames: Sequence[SteeringFrame],
     *,
     time=None,
+    include_raster: bool = True,
 ) -> xr.Dataset:
     """Return one recording session as a time-last xarray dataset.
 
@@ -505,10 +712,115 @@ def session_dataset(
             np.asarray([frame.policy_digest for frame in frames], dtype=str),
         ),
     }
+    variables.update(
+        {
+            "flux_surface_psi_norm": (
+                ("n_surface",),
+                np.asarray(first.flux_surface_psi_norm),
+            ),
+            "flux_surface_psi": (
+                (("n_surface", "time")),
+                _frame_stack(frames, "flux_surface_psi"),
+            ),
+            "flux_surface_r": (
+                (("n_surface", "n_theta", "time")),
+                _frame_stack(frames, "flux_surface_r"),
+            ),
+            "flux_surface_z": (
+                (("n_surface", "n_theta", "time")),
+                _frame_stack(frames, "flux_surface_z"),
+            ),
+            "flux_surface_angle": (
+                (("n_theta",)),
+                np.asarray(first.flux_surface_angle),
+            ),
+            **{
+                name: (("n_face", "time"), _frame_stack(frames, name))
+                for name in TORAX_PROFILE_FIELDS
+                if name != "rho_face_norm"
+            },
+            "rho_face_norm": (("n_face",), np.asarray(first.rho_face_norm)),
+            "R_major": ("time", _frame_stack(frames, "R_major")),
+            "a_minor": ("time", _frame_stack(frames, "a_minor")),
+            "B_0": ("time", _frame_stack(frames, "B_0")),
+            "boundary_toroidal_flux": (
+                "time",
+                _frame_stack(frames, "boundary_toroidal_flux"),
+            ),
+            "magnetic_axis_z_scalar": (
+                "time",
+                _frame_stack(frames, "magnetic_axis_z_scalar"),
+            ),
+            "diverted": (
+                "time",
+                _frame_stack(frames, "diverted").astype(bool),
+            ),
+            "divertor_leg_r": (
+                ("n_leg", "n_leg_point", "time"),
+                _frame_stack(frames, "divertor_leg_r"),
+            ),
+            "divertor_leg_z": (
+                ("n_leg", "n_leg_point", "time"),
+                _frame_stack(frames, "divertor_leg_z"),
+            ),
+            "divertor_leg_finite": (
+                ("n_leg", "time"),
+                _frame_stack(frames, "divertor_leg_finite").astype(bool),
+            ),
+        }
+    )
+    if not include_raster:
+        for name in (
+            "radius",
+            "height",
+            "shape",
+            "psi",
+            "psi_norm",
+            "domain_label",
+            "separatrix",
+            "separatrix_vertex_count",
+        ):
+            variables.pop(name, None)
+    training_inputs = ",".join(
+        (
+            "flux_surface_psi_norm",
+            "flux_surface_psi",
+            "flux_surface_r",
+            "flux_surface_z",
+            "flux_surface_angle",
+            "divertor_leg_r",
+            "divertor_leg_z",
+            "divertor_leg_finite",
+            "magnetic_axis_r",
+            "magnetic_axis_z",
+            "x_point_r",
+            "x_point_z",
+            "strike_points_r",
+            "strike_points_z",
+            "lcfs_r",
+            "lcfs_z",
+            "coil_current",
+            "compensating_current",
+            *TORAX_PROFILE_FIELDS,
+        )
+    )
+    diagnostic_only = ",".join(
+        (
+            "psi",
+            "psi_norm",
+            "domain_label",
+            "separatrix",
+            "separatrix_vertex_count",
+        )
+    )
     return xr.Dataset(
         variables,
         coords={"time": ("time", time_values)},
-        attrs={COCOS_ATTR: COCOS},
+        attrs={
+            COCOS_ATTR: COCOS,
+            "training_inputs": training_inputs,
+            "diagnostic_only": diagnostic_only,
+        },
     )
 
 
@@ -519,9 +831,10 @@ def write_session(
     dirname: str,
     group: str = SESSION_GROUP,
     time=None,
+    include_raster: bool = True,
 ) -> netCDF:
     """Record one steering session through the group-backed netCDF store."""
-    dataset = session_dataset(frames, time=time)
+    dataset = session_dataset(frames, time=time, include_raster=include_raster)
     store = netCDF(
         filename=filename,
         dirname=dirname,
@@ -588,6 +901,28 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
                 carrier_identity=str(frame["carrier_identity"].values),
                 nova_version=str(frame["nova_version"].values),
                 policy_digest=str(frame["policy_digest"].values),
+                flux_surface_psi_norm=np.asarray(
+                    dataset["flux_surface_psi_norm"].values
+                ),
+                flux_surface_psi=np.asarray(frame["flux_surface_psi"].values),
+                flux_surface_r=np.asarray(frame["flux_surface_r"].values),
+                flux_surface_z=np.asarray(frame["flux_surface_z"].values),
+                flux_surface_angle=np.asarray(dataset["flux_surface_angle"].values),
+                **{
+                    name: np.asarray(frame[name].values)
+                    for name in TORAX_PROFILE_FIELDS
+                    if name != "rho_face_norm"
+                },
+                rho_face_norm=np.asarray(dataset["rho_face_norm"].values),
+                R_major=float(frame["R_major"].values),
+                a_minor=float(frame["a_minor"].values),
+                B_0=float(frame["B_0"].values),
+                boundary_toroidal_flux=float(frame["boundary_toroidal_flux"].values),
+                magnetic_axis_z_scalar=float(frame["magnetic_axis_z_scalar"].values),
+                diverted=bool(frame["diverted"].values),
+                divertor_leg_r=np.asarray(frame["divertor_leg_r"].values),
+                divertor_leg_z=np.asarray(frame["divertor_leg_z"].values),
+                divertor_leg_finite=np.asarray(frame["divertor_leg_finite"].values),
             )
         )
     return frames

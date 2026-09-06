@@ -270,6 +270,7 @@ class FluxSurfaceGeometry:
     gradient_psi_squared_over_radius_squared: NDArray[np.float64]
     field_squared: NDArray[np.float64]
     inverse_field_squared: NDArray[np.float64]
+    int_dl_over_bp: NDArray[np.float64]
     area_derivative: NDArray[np.float64]
     r_in: NDArray[np.float64]
     r_out: NDArray[np.float64]
@@ -332,6 +333,7 @@ class FluxSurfaceGeometry:
             "gradient_psi_squared_over_radius_squared",
             "field_squared",
             "inverse_field_squared",
+            "int_dl_over_bp",
             "area_derivative",
             "r_in",
             "r_out",
@@ -722,6 +724,7 @@ class FluxSurfaceGeometry:
         )
         published_field_squared = resample(field_squared)
         published_inverse_field_squared = resample(inverse_field_squared)
+        published_int_dl_over_bp = resample(np.abs(2.0 * np.pi * inverse_gradient))
         published_r_in = resample(r_in)
         published_r_out = resample(r_out)
         published_elongation = resample(elongation)
@@ -755,6 +758,7 @@ class FluxSurfaceGeometry:
             ),
             field_squared=published_field_squared,
             inverse_field_squared=published_inverse_field_squared,
+            int_dl_over_bp=published_int_dl_over_bp,
             area_derivative=published_inverse_radius
             * published_volume_derivative
             / (2.0 * np.pi),

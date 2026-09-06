@@ -971,7 +971,12 @@ def main() -> None:
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument("--route", choices=("host", "compiled"), default="host")
+    parser.add_argument("--prepare-only", action="store_true")
     arguments = parser.parse_args()
+    if arguments.prepare_only:
+        configure_dtypes()
+        print(f"PREPARED route={arguments.route} platform={jax.default_backend()}")
+        return
     measure(
         output=arguments.output,
         figure=arguments.figure,

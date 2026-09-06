@@ -148,15 +148,18 @@ def boundary_polygon(profile: ForwardProfile, flux, *, angles: int = 181) -> np.
     polarity = float(profile.operator.polarity)
     lattice = profile.lattice
     grid = jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
-    reach = 0.5 * min(
-        float(lattice.radius[-1] - lattice.radius[0]),
-        float(lattice.height[-1] - lattice.height[0]),
-    )
+    lower = np.asarray((lattice.radius[0], lattice.height[0]), dtype=float)
+    upper = np.asarray((lattice.radius[-1], lattice.height[-1]), dtype=float)
     theta = 2.0 * np.pi * np.arange(angles) / angles
     points = []
     for angle in theta:
         ray = np.asarray([np.cos(angle), np.sin(angle)])
-        low, high = 0.0, reach
+        distances = np.where(
+            ray > 0.0,
+            (upper - axis) / np.maximum(ray, np.finfo(float).tiny),
+            (lower - axis) / np.minimum(ray, -np.finfo(float).tiny),
+        )
+        low, high = 0.0, 0.999 * float(np.min(distances))
         for _step in range(48):
             middle = 0.5 * (low + high)
             value = float(

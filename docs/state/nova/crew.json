@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T18:21:59",
+  "updated": "2026-09-06T18:32:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1809,9 +1809,11 @@
         "id": "mcs-quantum-x",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e"
+        },
         "created": "2026-09-06"
       },
       {
@@ -1902,9 +1904,11 @@
         "id": "msc-hooks-l",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0776b-79e1-7153-bb8a-7b05425ee19f",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0776b-79e1-7153-bb8a-7b05425ee19f"
+        },
         "created": "2026-09-06"
       },
       {
@@ -2648,6 +2652,15 @@
         "id": "pfs-gate-x",
         "harness": "clive",
         "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-guard-s",
+        "harness": "codex",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -112804,6 +112817,149 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260906T151122970233-pfs-labeller-batch-driver",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-labeller-batch-driver",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2665,
+                "cached_input_tokens": 509975,
+                "input_tokens": 512672,
+                "output_tokens": 2603,
+                "reasoning_output_tokens": 232,
+                "total_tokens": 515275,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "Deliverables under scripts/labeller_batch/: shard.py (labels one list of shots on one card into an output root given on the command line), run.sh (enumerates the decoder corpus into N shards and, with --dry-run, prints the shard plan and estimated GPU-hours; with --submit, submits one sbatch per shard), and receipt.py (aggregates the per-shot manifests into one JSON counting shots, slices, converged and qualified fractions, branch-guard agreement, slices per second per card and GPU-hours). Facts to build on, not to rediscover: the decoder corpus is the 8,012 distinct shots of /work/projects/imas_gpu/agents/excitation-corpus/curated_windows_unified_6cam.json minus the 718-shot labeller cohort listed in /home/ITER/mcintos/.config/reckon/crew/reports/physics-carried-playable-plasma/labeller-cohort-census.md (read /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-contract.md first, it states the store layout); per shot the efm group of the zarr store /work/projects/imas_gpu/mast/level1/shots/ followed by the shot number and .zarr holds about 60 to 75 slices at 5 ms with fitted currents and efm/current_centrd_z; the per-slice solve is exactly what benchmarks/forward_labeller_throughput.py measure() (line 542) does for the free arm (one shared operator through the frozen-six carrier /work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz, one compiled program for the whole corpus since the coil currents are traced arguments, warm-started slice to slice), so import and reuse its construction rather than re-deriving it and do not edit that file; the per-shot output is written with nova.equilibrium.steering_frames.write_session (line 975) after assemble_frame (line 581) per slice, one file per shot named by the shot number with the .nc suffix under the output root, beside a per-shot manifest JSON carrying the nova revision, carrier identity, policy digest and per slice: time, converged (unconverged slices are WRITTEN with converged false, never dropped), qualified, trips, wall, the achieved vertical current centroid beside efm/current_centrd_z with target_source recorded and a branch_guard_ok flag true when they agree within 50 mm (the row is not imposed, the flag is diagnostic); resumable: a shot whose session and manifest both exist under the output root is skipped. The smoke's output root is a sessions directory inside this run's own directory under /home/ITER/mcintos/.config/reckon/crew/runs; the full-corpus root is a launch-time argument the coordinator supplies. Job shape per shard: sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --cpus-per-task=4 --mem=128G --time=01:00:00, no --qos, with JAX_PLATFORMS=cuda,cpu set INSIDE the wrapped command (never in --export, which splits on the comma), the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python and the persistent compilation cache call the throughput driver makes. Evidence: a CPU prepare-only pass of shard.py (argument parsing, shot enumeration, operator construction) exits 0 with its log in the run directory before any sbatch; then ONE smoke shard on the H200 over two decoder-corpus shots (22086 and one other) producing two session files that frames_from_session(read_session(path)) reads back with every decoder field present, their manifests, the aggregated receipt under docs/figures/playable-forward-solve/labeller-batch/smoke-receipt.json with slices per second per card, and the run.sh --dry-run plan for the full corpus quoting the shard count and the GPU-hours it implies at the smoke rate; report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-batch.md. Do NOT submit the full corpus; the coordinator launches it. Grep every name before importing it; nova/equilibrium/reduced_newton.py and apps/playable/ are held by other nodes and must not change. Declared wait for the smoke job: manifest status waiting, wait_probe as a JSON argv list of squeue -h -j the job id -o %T, wait_terminal as the comma-separated bare list COMPLETED,FAILED,CANCELLED,TIMEOUT,exit:0, unquoted ISO wait_started_at, resume_brief, then end your turn. Run everything from the worktree through UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; commit each coherent step with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 3.0,
+          "goal": "Shard the labeller over the decoder shot list across single-card H200 jobs writing every shot as a steering-frame session file, resumable by shot, with a completion receipt",
+          "id": "pfs-labeller-batch-driver",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T151122970233-pfs-labeller-batch-driver/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "scripts/labeller_batch/",
+            "docs/figures/playable-forward-solve/labeller-batch/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-batch.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-batch-l",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T15:11:56Z",
+        "completed_at": "2026-09-06T16:30:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4702,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4702,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7fbc6a37544d9cfb20d7b5f48e8d6ea43b9421ec",
+        "commits": [
+          "bc3ba323cbce5aa3824d0ed92dde4de389d3d10b",
+          "e4b552e6cb9be0138965e8ec211c415de0e7f12f",
+          "e16873d04cd4be4794b65c9f1330d6fcd5611865",
+          "491a7712c63fc60cee30b9c6b99abd6bd519e38d"
+        ],
+        "changed_lines": {
+          "added": 1465,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "CPU prepare-only pass exit 0; sbatch 1263436 (gpu:1, 4 cores, 128G, JAX_PLATFORMS=cuda,cpu) staged smoke COMPLETED 0:0; read_session and frames_from_session round-trip of both sessions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T151122970233-pfs-labeller-batch-driver/smoke-isolated.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T151122970233-pfs-labeller-batch-driver/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07746-b607-7752-ada9-b0bfccdd0d8c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4408448,
+            "cached_input_tokens_cumulative": 4408448,
+            "input_tokens": 4466572,
+            "input_tokens_cumulative": 4466572,
+            "output_tokens": 25319,
+            "output_tokens_cumulative": 25319,
+            "reasoning_output_tokens": 7969,
+            "reasoning_output_tokens_cumulative": 7969
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 33288,
+          "peak_input_tokens": 8875020
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/pfs-labeller-batch-driver",
+          "session_id": "01a07746-b607-7752-ada9-b0bfccdd0d8c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-06T16:30:18Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -113072,8 +113228,22 @@
         "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "resume",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260906162927",
+        "backend": "codex",
+        "purpose": "resume",
+        "opened_at": "2026-09-06T16:29:27Z",
+        "closed_at": "2026-09-06T16:31:21Z",
+        "held_seconds": 114,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-08T07:38:00+02:00",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple unknown is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1904
+    "_version": 1910
   }
 }

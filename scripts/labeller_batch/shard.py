@@ -54,11 +54,12 @@ from nova.equilibrium.steering_frames import (
     N_SURFACE,
     N_THETA,
     TORAX_PROFILE_FIELDS,
+    SESSION_GROUP,
     SteeringAction,
     SteeringFrame,
     assemble_frame,
     policy_digest,
-    write_session,
+    session_dataset,
 )
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
@@ -624,6 +625,29 @@ def _write_companion(rows: Sequence[dict[str, Any]], path: Path) -> None:
     os.replace(temporary, path)
 
 
+def _write_session_file(
+    frames: Sequence[SteeringFrame],
+    path: Path,
+    *,
+    time_values: Sequence[float],
+    include_raster: bool,
+) -> None:
+    """Atomically write the steering dataset at one absolute filesystem path."""
+    if not path.is_absolute():
+        raise ValueError(f"session path must be absolute: {path}")
+    temporary = path.with_name(f".{path.stem}.{uuid.uuid4().hex}.tmp.nc")
+    dataset = session_dataset(
+        frames,
+        time=time_values,
+        include_raster=include_raster,
+    )
+    try:
+        dataset.to_netcdf(temporary, mode="w", group=SESSION_GROUP)
+    finally:
+        dataset.close()
+    os.replace(temporary, path)
+
+
 def label_shot(
     prepared: PreparedLabeller,
     shot: int,
@@ -1029,15 +1053,14 @@ def label_shot(
         else _masked_frame(prepared, template=template, **context)
         for frame, context in zip(frame_slots, frame_contexts, strict=True)
     ]
-    temporary_stem = f"{shot}-partial-{uuid.uuid4().hex}"
-    store = write_session(
+    _write_session_file(
         frames,
-        filename=temporary_stem,
-        dirname=output_root,
-        time=[item["time"] for item in manifest["slices"] if item.get("written")],
+        session_path,
+        time_values=[
+            item["time"] for item in manifest["slices"] if item.get("written")
+        ],
         include_raster=include_raster,
     )
-    os.replace(Path(store.filepath), session_path)
     _write_companion(companion_rows, companion_path)
     manifest["status"] = "complete"
     manifest["shot_wall_seconds"] = time.perf_counter() - shot_started

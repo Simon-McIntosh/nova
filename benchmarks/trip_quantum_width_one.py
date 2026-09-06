@@ -474,7 +474,6 @@ def _measure_full_trip(
     repeats: int,
 ) -> dict[str, Any]:
     flag = jnp.asarray(settlement)
-    result = _ready(compiled(initial, current, flag))
     samples = []
     for _ in range(repeats):
         started = time.perf_counter()

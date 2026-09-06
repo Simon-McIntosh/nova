@@ -8,9 +8,12 @@
     "device_count": 1,
     "slurm_job_id": null
   },
-  "source_revision": "4b0121d9c02d0ba3b866f1dfab79c09e4e80ddb0",
+  "source_revision": "0f4034f9aa4de23b810ddfa7c5f1ac28ccd6599d",
   "row_selection": [
-    21985
+    21985,
+    21986,
+    21989,
+    22086
   ],
   "hooks_attached_on_every_row": true
 }

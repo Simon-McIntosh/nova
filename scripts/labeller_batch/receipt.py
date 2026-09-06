@@ -363,6 +363,9 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
     class_buckets: dict[str, list[bool]] = {}
     displacements: list[float] = []
     displacement_by_class: dict[str, list[float]] = {}
+    free_errors_mm: list[float] = []
+    conditioned_errors_mm: list[float] = []
+    absolute_reductions_mm: list[float] = []
     crosstab_overall = {name: _empty_pin_tally() for name in _PIN_CLASSES}
     crosstab_by_decile: dict[str, dict[str, dict[str, int]]] = {}
     companion_shots = 0
@@ -387,6 +390,16 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
                     class_buckets.setdefault(str(label), []).append(bool(flag))
         free_error = rows["free_error_m"]
         conditioned_error = rows["conditioned_error_m"]
+        if free_error is not None:
+            finite_free = np.isfinite(free_error)
+            if finite_free.any():
+                free_errors_mm.extend((1000.0 * free_error[finite_free]).tolist())
+        if conditioned_error is not None:
+            finite_conditioned = np.isfinite(conditioned_error)
+            if finite_conditioned.any():
+                conditioned_errors_mm.extend(
+                    (1000.0 * conditioned_error[finite_conditioned]).tolist()
+                )
         if free_error is None or conditioned_error is None:
             continue
         both = np.isfinite(free_error) & np.isfinite(conditioned_error)
@@ -394,6 +407,11 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
             continue
         values = 1000.0 * (conditioned_error[both] - free_error[both])
         displacements.extend(float(value) for value in values)
+        absolute_reductions_mm.extend(
+            (
+                1000.0 * (np.abs(free_error[both]) - np.abs(conditioned_error[both]))
+            ).tolist()
+        )
         if labels is not None:
             for value, label in zip(
                 values.tolist(), labels[both].tolist(), strict=True
@@ -461,10 +479,17 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
                 for label, flags in sorted(class_buckets.items())
             },
         },
-        "pin_displacement_mm": {
+        "pin_correction_mm": {
             "definition": (
-                "1000 * (conditioned_centroid_error_m - free_centroid_error_m) "
-                "over written slices with both finite"
+                "signed pin correction = 1000 * (conditioned_centroid_error_m "
+                "- free_centroid_error_m), mm, over written slices with both "
+                "errors finite; each centroid error is achieved Z minus "
+                "target, so the correction is the signed vertical relocation "
+                "of the current centroid the pin produced"
+            ),
+            "sign_convention": (
+                "positive means the conditioned centroid sits above (higher Z "
+                "than) the free centroid"
             ),
             "unit": "mm",
             "overall": _distribution(displacements),
@@ -472,6 +497,35 @@ def _adjudication_tables(complete: Sequence[dict[str, Any]]) -> dict[str, Any]:
                 label: _distribution(values)
                 for label, values in sorted(displacement_by_class.items())
             },
+        },
+        "free_error_mm": {
+            "definition": (
+                "signed free centroid error = 1000 * free_centroid_error_m, "
+                "mm, over written slices with finite free error; positive is "
+                "the free centroid above the target"
+            ),
+            "unit": "mm",
+            "distribution": _distribution(free_errors_mm),
+        },
+        "conditioned_error_mm": {
+            "definition": (
+                "signed conditioned centroid error = 1000 * "
+                "conditioned_centroid_error_m, mm, over written slices with "
+                "finite conditioned error; positive is the conditioned "
+                "centroid above the target"
+            ),
+            "unit": "mm",
+            "distribution": _distribution(conditioned_errors_mm),
+        },
+        "absolute_error_reduction_mm": {
+            "definition": (
+                "1000 * (|free_centroid_error_m| - "
+                "|conditioned_centroid_error_m|), mm, over written slices "
+                "with both errors finite; positive means conditioning reduced "
+                "the absolute centroid error"
+            ),
+            "unit": "mm",
+            "distribution": _distribution(absolute_reductions_mm),
         },
         "pin_displacement_crosstab": {
             "definition": (

@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium.constraint import (
+    CompensatorRule,
     ConstraintBinding,
     ConstraintMultiplier,
     ConstraintPair,
+    select_compensating_directions,
 )
 
 
@@ -45,3 +49,23 @@ def test_list_typed_binding_leaves_survive_a_jitted_tree_read() -> None:
         )
 
     np.testing.assert_allclose(read_leaves(pair), [2.0, 1.0e-8, 3.0, 0.25])
+
+
+def test_banked_solovev_direction_selection_matches_record() -> None:
+    """The fallback Solovev bank preserves the recorded selection diagnostics."""
+    path = Path(__file__).parent / "data" / "solovev_constraint_response.npz"
+    with np.load(path) as bank:
+        response = np.asarray(bank["response"])
+        drivable = np.asarray(bank["drivable"])
+        selection = select_compensating_directions(response, circuits=drivable)
+
+        assert selection.rule is CompensatorRule[bank["rule"].item().upper()]
+        assert selection.leading_circuits(0, count=3) == tuple(
+            np.asarray(bank["leading_circuits"]).tolist()
+        )
+        np.testing.assert_allclose(
+            selection.singular_values,
+            bank["singular_values"],
+            rtol=1.0e-9,
+            atol=0.0,
+        )

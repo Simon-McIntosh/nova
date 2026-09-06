@@ -53,6 +53,11 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
 NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
 CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
 FORWARD_GAMMA_FACTOR = 1.0e-12
+COMMAND_NAMES = (
+    "null-resolve",
+    "upper-point-plus-20mm",
+    "elongation-plus-5pct",
+)
 
 
 def _source_revision() -> str:
@@ -915,8 +920,9 @@ def measure(
     *,
     diagnose_inverse: bool = False,
     diagnose_consistency: bool = False,
+    command: str | None = None,
 ) -> dict[str, Any]:
-    """Run both commanded-shape arms on MAST 22086/43."""
+    """Run all shape commands, or one independently schedulable command."""
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
@@ -970,8 +976,6 @@ def measure(
         _write(directory / "pulse-design-inverse-diagnostic.json", payload)
         print("INVERSE-DIAGNOSTIC " + json.dumps(payload), flush=True)
         return payload
-    null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
-    null_points = _points(achieved_target(profile, null_equilibrium.flux))
     consistency_path = directory / CONSISTENCY_DIAGNOSTIC
     consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
     command_evidence = {
@@ -1051,10 +1055,30 @@ def measure(
             "trips": int(prime.fixed_point.active_set_iterations),
         },
     }
+    if command in {None, "null-resolve"}:
+        null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
+        null_points = _points(achieved_target(profile, null_equilibrium.flux))
+        null_arm["runtime"] = runtime
+        _write_command_receipt(directory / "null-resolve.json", null_arm)
+        if command == "null-resolve":
+            return null_arm
+    else:
+        null_path = directory / "null-resolve.json"
+        null_arm = json.loads(null_path.read_text(encoding="utf-8"))
+        null_revision = null_arm.get("runtime", {}).get("source_commit")
+        if null_revision != runtime["source_commit"]:
+            raise ValueError(
+                "the null receipt must be measured at the current source revision"
+            )
+        null_points = np.asarray(null_arm["achieved_turning_points_m"], dtype=float)
+
+    selected_definitions = (
+        definitions
+        if command is None
+        else tuple(definition for definition in definitions if definition[0] == command)
+    )
     arms = []
-    null_arm["runtime"] = runtime
-    _write_command_receipt(directory / "null-resolve.json", null_arm)
-    for name, target, gamma_factor in definitions:
+    for name, target, gamma_factor in selected_definitions:
         arm, _achieved = _arm_receipt(
             name,
             machine,
@@ -1075,6 +1099,8 @@ def measure(
             f"wall_s={arm['total_wall_s']:.6g}",
             flush=True,
         )
+    if command is not None:
+        return arms[0]
     negative_control_path = directory / NEGATIVE_CONTROL
     if not negative_control_path.exists():
         raise FileNotFoundError(
@@ -1108,6 +1134,7 @@ def main() -> None:
     parser.add_argument("--diagnose-inverse", action="store_true")
     parser.add_argument("--diagnose-consistency", action="store_true")
     parser.add_argument("--finalize-measured-negative", action="store_true")
+    parser.add_argument("--command", choices=COMMAND_NAMES)
     arguments = parser.parse_args()
     if arguments.finalize_measured_negative:
         receipt = _finalize_measured_negative(arguments.directory)
@@ -1117,6 +1144,7 @@ def main() -> None:
         arguments.directory,
         diagnose_inverse=arguments.diagnose_inverse,
         diagnose_consistency=arguments.diagnose_consistency,
+        command=arguments.command,
     )
 
 

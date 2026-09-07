@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T08:10:48",
+  "updated": "2026-09-07T08:15:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117894,6 +117894,151 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T131920953151-dvf-displacement-decomposition",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a71",
+        "node": "dvf-displacement-decomposition",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 549,
+                "cached_input_tokens": 249983,
+                "input_tokens": 250564,
+                "output_tokens": 2194,
+                "reasoning_output_tokens": 296,
+                "total_tokens": 252758,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "The five-frame receipt written by benchmarks/diiid_forward_gs_match.py (extended at its scalar axis-distance write near line 1445, where labelled_axis is read; no new driver) carries per frame the radial and vertical offset of the magnetic axis, of the X-point and of the geometric centre of the terminal boundary between Nova's post-solve state and the EFIT label, with the sign convention recorded in the receipt (positive radial outward, positive vertical upward), and a classification of each frame's displacement as rigid shift, tilt or shape change by a rule stated in the receipt (rigid when the three vertical offsets agree within a stated fraction of their mean, tilt when axis and X-point offsets differ in sign or by more than that fraction, shape change otherwise); one five-panel figure under docs/figures/diiid-vertical-force-balance/displacement/ showing EFIT and Nova axis, X-point and centroid per frame; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/displacement-decomposition.md states from the banked numbers whether the displacement is dominantly vertical, quoting the five vertical and five radial axis offsets in metres. The solves run on the reserved H200 through sbatch with the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python and the persistent compilation cache call the driver already makes; the existing receipt fields and the seven known solver-failure frames stay as they are. Any compute-node job longer than a few minutes: submit it, write the manifest with status waiting, wait_condition, wait_probe as a JSON argv list of squeue -h -j the job id -o %T, wait_terminal written as the comma-separated bare list COMPLETED,FAILED,CANCELLED,TIMEOUT,exit:0, resume_brief, and an unquoted ISO wait_started_at, then end your turn; do not poll. Run everything from the worktree through the shared environment: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; never create a second environment. Verify a PNG through PIL. Commit each coherent step with a conventional subject and a body; no plan labels or node ids in code or comments.",
+          "estimated_hours": 2.5,
+          "goal": "Bank Nova's post-solve axis, X-point and boundary centroid beside the EFIT values for the five DIII-D gate frames with each offset split into radial and vertical components",
+          "id": "dvf-displacement-decomposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T131920953151-dvf-displacement-decomposition/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "docs/figures/diiid-vertical-force-balance/displacement/",
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/displacement-decomposition.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "dvf-axis-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T13:19:41Z",
+        "completed_at": "2026-09-07T06:15:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 60921,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "681657214ed3c3ce45f0ddac3245ae09f6a099b2",
+        "commits": [
+          "d0d189055734ee9b99e0fd3454eb14e1827beb75",
+          "2a1384517a3e209f11bbf469f527840c179dfa92",
+          "ef3a5a1dd040d0f53089e924d9d6d400805a0293"
+        ],
+        "changed_lines": {
+          "added": 1250,
+          "removed": 831,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused forward-GS tests 18 passed; checkpoint restoration and terminal raster-separatrix checks exit 0; SLURM jobs 1263495, 1263856, 1263857 COMPLETED exit 0; receipt validation 5/5 non-null, PIL verify",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T131920953151-dvf-displacement-decomposition/h200-landmarks-44-1263857.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T131920953151-dvf-displacement-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a076df-ef20-7b21-a35e-a62ec4ca9e3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 891264,
+            "cached_input_tokens_cumulative": 891264,
+            "input_tokens": 1201573,
+            "input_tokens_cumulative": 1201573,
+            "output_tokens": 7687,
+            "output_tokens_cumulative": 7687,
+            "reasoning_output_tokens": 2087,
+            "reasoning_output_tokens_cumulative": 2087
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 9774,
+          "peak_input_tokens": 2092837
+        },
+        "follow_on_paths": [
+          "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png",
+          "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_partial_receipt.json",
+          "5/5"
+        ],
+        "dispute_count": 0,
+        "attempt": 9,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/dvf-displacement-decomposition",
+          "session_id": "01a076df-ef20-7b21-a35e-a62ec4ca9e3b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T06:15:02Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -118206,6 +118351,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1978
+    "_version": 1979
   }
 }

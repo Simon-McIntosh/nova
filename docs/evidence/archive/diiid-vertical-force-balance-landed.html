@@ -145,6 +145,26 @@
       <li>§1 (axis decomposition) and §3 (frame 144 and the single-shot gate) are not yet dispatched; §2 landed negative for the missing-field hypothesis.</li>
     </ul>
   </section>
+  <section id="displacement-decomposition">
+    <h2>The displacement is vertical and it tilts: axis and X-point move in opposite senses on the two large frames (d0d18905 to ef3a5a1d; main aa346424)</h2>
+    <p><strong>Node:</strong> <code>dvf-displacement-decomposition</code> (codex sol at high effort; 19 hours across five H200 jobs: two two-hour jobs each holding
+    two frames after the first submissions failed on <code>--mem=0</code> and a comma-split <code>--export</code>, then one frame per job). Driver
+    <code>benchmarks/diiid_forward_gs_match.py</code>, which now banks per frame the radial and vertical offsets of the magnetic axis, the X-point and the
+    boundary centroid (Nova post-solve minus EFIT, positive radial outward, positive vertical upward), classifies each frame by a stated rule and resumes
+    from completed frame checkpoints. Figure and landmark JSONs under <code>docs/figures/diiid-vertical-force-balance/displacement/</code>; report
+    <code>~/.config/reckon/crew/reports/nova/vertical-mode/displacement-decomposition.md</code>.</p>
+    <table><thead><tr><th>Frame</th><th>Class</th><th>Axis dR, dZ (m)</th><th>X-point dR, dZ (m)</th><th>Centroid dR, dZ (m)</th></tr></thead><tbody>
+    <tr><td>179</td><td>tilt</td><td>-0.473, +1.519</td><td>-0.087, -1.555</td><td>-0.125, +0.133</td></tr>
+    <tr><td>44</td><td>tilt</td><td>-0.030, -1.166</td><td>-0.294, -2.589</td><td>-0.059, -1.189</td></tr>
+    <tr><td>144</td><td>shape change</td><td>0, 0 (round-off)</td><td>0, 0</td><td>+0.006, -0.166</td></tr>
+    <tr><td>146</td><td>tilt</td><td>+0.007, -0.036</td><td>-0.064, -0.099</td><td>-0.056, -0.247</td></tr>
+    <tr><td>137</td><td>tilt</td><td>+0.014, -0.037</td><td>-0.065, -0.102</td><td>-0.039, -0.276</td></tr>
+    </tbody></table>
+    <p><strong>Reading.</strong> Dominantly vertical on every frame (vertical-to-radial axis ratios 3.2, 38.5, 5.1 and 2.6 on the four moving frames; frame 144's
+    axis is unmoved at round-off and its vertical reading is not a resolved motion). With section 2's negative for a missing external field, the metre-scale
+    axis motion on 179 and 44 with the X-point moving the other way points at the solver's branch and vertical-mode behaviour, which section 3 takes up on the
+    corrected topology read.</p>
+  </section>
 </main>
 </body>
 </html>

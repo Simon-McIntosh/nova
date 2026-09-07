@@ -352,3 +352,29 @@ def test_a_boundary_outside_the_mesh_clips_to_nothing():
     cells = (_square(1.0, 0.0), _square(1.2, 0.0))
     far = np.array([[5.0, 5.0], [5.1, 5.0], [5.1, 5.1], [5.0, 5.1]])
     assert clip_to_boundary(cells, far) == ()
+
+
+def test_a_bare_poloidal_panel_fills_its_figure_at_the_machine_aspect():
+    """A single-panel figure must be the machine's shape, not a default box."""
+    from nova.media.layout import poloidal_view
+
+    extent = (0.0, 2.25, -2.65, 2.65)
+    view = poloidal_view(extent=extent, margin=0.0)
+    width, height = view.figure.get_size_inches()
+    assert width / height == pytest.approx(
+        (extent[1] - extent[0]) / (extent[3] - extent[2]), rel=1e-6
+    )
+    box = view.poloidal.get_position()
+    panel = (box.width * width) / (box.height * height)
+    assert panel == pytest.approx(width / height, rel=1e-6)
+
+
+def test_a_bare_poloidal_panel_restores_its_extent_on_clear():
+    from nova.media.layout import poloidal_view
+
+    extent = (0.1, 2.0, -1.5, 1.5)
+    view = poloidal_view(extent=extent)
+    view.poloidal.set_xlim(0.5, 0.6)
+    view.clear()
+    assert view.poloidal.get_xlim() == pytest.approx(extent[:2])
+    assert not view.poloidal.axison

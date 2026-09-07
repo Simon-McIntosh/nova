@@ -60,6 +60,59 @@ class ThreeView:
         return self
 
 
+@dataclass(frozen=True)
+class PoloidalView:
+    """One poloidal panel on its own figure, sized from its machine."""
+
+    figure: matplotlib.figure.Figure
+    poloidal: matplotlib.axes.Axes
+    extent: tuple[float, float, float, float]
+
+    def clear(self) -> PoloidalView:
+        """Empty the panel and restore its prepared state and extent."""
+        self.poloidal.clear()
+        poloidal_axes(self.poloidal)
+        self.poloidal.set_xlim(self.extent[0], self.extent[1])
+        self.poloidal.set_ylim(self.extent[2], self.extent[3])
+        self.poloidal.set_autoscale_on(False)
+        return self
+
+
+def poloidal_view(
+    extent: tuple[float, float, float, float],
+    height: float = 6.5,
+    style: InkStyle = DEFAULT_INK,
+    margin: float = 0.04,
+) -> PoloidalView:
+    """Return a bare poloidal panel whose figure is the machine's own shape.
+
+    For a figure that is only a machine view -- one that stacks above a camera
+    pane, or stands alone on a slide. The figure is sized so the panel fills
+    it: with no chrome to leave room for, a margin exists only to keep the
+    outermost conductor off the edge, so it defaults to a small fraction of
+    the panel rather than the inch-scale margins a trace column needs.
+
+    Prefer this to building a Figure and calling
+    :func:`nova.media.ink.poloidal_axes` yourself, so the aspect arithmetic
+    stays in one place and two figures of the same machine match.
+    """
+    r_min, r_max, z_min, z_max = (float(value) for value in extent)
+    if not (r_max > r_min and z_max > z_min):
+        raise ValueError("the poloidal extent must span a positive area")
+    import matplotlib.figure
+
+    inset = max(0.0, min(0.45, float(margin)))
+    panel_height = height * (1.0 - 2.0 * inset)
+    width = panel_height * (r_max - r_min) / (z_max - z_min) / (1.0 - 2.0 * inset)
+    figure = matplotlib.figure.Figure(
+        figsize=(width, height), dpi=style.figure_dpi, facecolor=style.figure_facecolor
+    )
+    axes = figure.add_axes((inset, inset, 1.0 - 2.0 * inset, 1.0 - 2.0 * inset))
+    return PoloidalView(
+        figure=figure, poloidal=axes, extent=(r_min, r_max, z_min, z_max)
+    ).clear()
+
+
 def three_view(
     extent: tuple[float, float, float, float],
     height: float = 6.5,

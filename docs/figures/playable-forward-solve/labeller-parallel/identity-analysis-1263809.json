@@ -1,0 +1,55 @@
+{
+  "job_id": 1263809,
+  "job_state": "FAILED",
+  "exit_code": "1:0",
+  "elapsed": "00:39:38",
+  "identity_passed": false,
+  "shot_count": 16,
+  "slice_count": 64,
+  "differing_field_count": 53,
+  "localized_difference": {
+    "shot": 24751,
+    "row": 82,
+    "manifest_fields": [
+      "achieved_current_centroid_r",
+      "achieved_current_centroid_z",
+      "centroid_error_m",
+      "conditioned_centroid_error_m",
+      "free_centroid_error_m",
+      "terminal_residual"
+    ],
+    "npz_fields": [
+      "conditioned_centroid_error_m",
+      "free_centroid_error_m"
+    ],
+    "session_field_count": 45
+  },
+  "discrete_field_difference_count": 0,
+  "comparison_policy": {
+    "discrete": "exact equality",
+    "float": "numpy.testing.assert_allclose(rtol=1e-12, atol=1e-14, equal_nan=True)",
+    "excluded_volatile_carrier_fields": [
+      "warm_load_seconds",
+      "warm_seconds"
+    ]
+  },
+  "known_exclusion": {
+    "field": "newton_steps",
+    "occurrences": 64,
+    "reason": "compiled trip counter defect",
+    "source": "nova/equilibrium/reduced_newton.py:1345-1352"
+  },
+  "maximum_relative_difference": {
+    "manifest": 0.6825396825396826,
+    "npz": 0.6825396825396826,
+    "session": 1.4960920655417973e-07
+  },
+  "performance": {
+    "engine_slices_per_second": 0.03145675413938598,
+    "host_assembly_wall_seconds_per_slice": 1.5843787273624912,
+    "pool_slices_per_second": 0.6311622232297299,
+    "frames_per_second_written": 0.02956219894239776,
+    "pool_below_engine": false
+  },
+  "interpretation": "The CUDA worker allocation failure is absent. Every discrete decision and label agrees. The remaining tolerance failures arise only on the fourth warm-started sample of shot 24751 after smaller host-versus-compiled state differences in the preceding conditioned sample. Repairing this numerical route is outside the scheduler write scope; resetting warm state in the smoke would conceal the production warm-start behavior."
+}

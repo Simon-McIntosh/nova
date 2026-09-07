@@ -454,6 +454,17 @@
     72.1 against 25.0 ms a member a trip (width 1024, Solov'ev workload). The lever is the number of device round trips a solve, not the arithmetic,
     which the compiled slice route and the batched labeller engine address (playable-forward-solve).</p>
   </section>
+  <section id="frozen-partition-hooks">
+    <h2>The frozen-partition hooks reach the public bank rows: 67 s for four rows against 1,231 s (c4d51f11 to abb502b1; main 99202eec)</h2>
+    <p><strong>Node:</strong> <code>msc-frozen-partition-hooks</code> (codex luna at high effort, 15 hours wall over three H200 jobs: a spooled-script root
+    failure, a 45-minute compile timeout, then per-row persistence; six hours held behind the corpus). <code>flux_map_with_shadow</code> in
+    <code>nova/equilibrium/forward_operator.py</code> attaches the frozen-partition read and map hooks for point-current maps without linear moments, so the
+    rows <code>_passive_inclusive_case</code> builds reach the revaluation path the active-set solver prefers. Paired measurement in one job
+    (<code>docs/figures/millisecond-converged-solve/frozen-partition/</code>): 21985/51, 21986/46, 21989/55 and 22086/43 solve in 67.2 s with the hooks against
+    1,230.7 s without (93.8 to 95.3 percent saving per row), converged flags and terminal residuals unchanged. All four rows end nonconverged in both
+    arms, two on the active-set iteration budget and two on a detected cycle, which is convergence evidence for this plan rather than a defect of the
+    hooks. Recovery and one-read-per-trip contracts 6 passed with a durable interruption checkpoint.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -229,6 +229,16 @@
     <p><strong>Follow-on outside this repository.</strong> The reckon-ship prior-art scout brief should name the seam so future nodes cite it in their
     reuse maps; that text lives in the reckon skill, not in nova.</p>
   </section>
+  <section id="raster-once">
+    <h2>The raster flux target built once: 0.19 ms an edit against 11.4 s (d7d210e6 to fc81c9a7; main c7efcc6c)</h2>
+    <p><strong>Node:</strong> <code>fsa-raster-flux-target-receipt</code> (local lane, 18 hours wall including two failed H200 jobs and six hours held behind the
+    corpus). Driver <code>benchmarks/raster_flux_target_receipt.py</code>; receipt and figure under <code>docs/figures/forward-solve-api/raster-receipt/</code>;
+    report <code>~/.config/reckon/crew/reports/nova/forward-solve-api/raster-receipt.md</code>. Ten coil edits on 22086/43 on the H200 (job 1263699): with the
+    raster (R,Z) FluxTarget built once, 0.19 ms median and 0.24 ms worst an edit; rebuilding it every edit, 11.4 s; the raster flux is bitwise identical
+    between arms. <strong>Where it is held.</strong> The operator already holds the target from its construction (<code>ForwardFluxOperator</code> in
+    <code>nova/equilibrium/forward_operator.py</code>, built at <code>nova/equilibrium/forward.py:474</code>), so a request contract binds to the operator build
+    and its grid; no new holder is needed.</p>
+  </section>
 </main>
 </body>
 </html>

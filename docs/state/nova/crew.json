@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T10:13:40",
+  "updated": "2026-09-07T10:37:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118935,6 +118935,158 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T074737321114-pfs-secondary-null-containment",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-secondary-null-containment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 606,
+                "cached_input_tokens": 338048,
+                "input_tokens": 338656,
+                "output_tokens": 714,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 339370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_forward_secondary_null.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, a test asserting the slot is NaN on a fixture whose highest-scoring distinct saddle lies outside the limiter, a second test asserting a diverted fixture keeps its in-vessel second null unchanged to 1e-12, ForwardSolve._secondary_x_point qualifying candidates with _points_inside_polygon from nova/equilibrium/connectivity_boundary.py against self.operator.topology.wall.coordinate alongside the existing finite plus distinct conditions, strike points left untouched because a strike point lies on the boundary, the production corpus job 1263846 left running because its worker pool already imported this module, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.5,
+          "goal": "the secondary x-point slot excludes saddles outside the wall polygon before ranking, returning NaN when nothing inside qualifies",
+          "id": "pfs-secondary-null-containment",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_forward_secondary_null.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/secondary-null-containment.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-nullguard-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T07:48:04Z",
+        "completed_at": "2026-09-07T08:35:10.466Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2817,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2826,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "1dbc0522b18b9107e30db8a6de3e40451e52b2e7",
+        "commits": [
+          "397d6c76c09aef3917eddd096895d0dac9b5640d"
+        ],
+        "changed_lines": {
+          "added": 233,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_forward_secondary_null.py -v",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+        "scope_changed": false,
+        "session_id": "b3ff31f1-8c83-4bfe-970e-292b6ae87a76",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 18423759,
+            "input_tokens_cumulative": 18423759,
+            "output_tokens": 82216,
+            "output_tokens_cumulative": 82216,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2822.072,
+          "generated_tokens": 82216,
+          "generation_seconds": 1625.287,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 21.5,
+          "machine_seconds": 1196.785,
+          "peak_input_tokens": 218928,
+          "tokens_per_second": 50.59,
+          "wall_tokens_per_second": 29.13
+        },
+        "follow_on_paths": [
+          "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-secondary-null-containment",
+          "session_id": "b3ff31f1-8c83-4bfe-970e-292b6ae87a76",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T08:35:10.466Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -119247,6 +119399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1990
+    "_version": 1991
   }
 }

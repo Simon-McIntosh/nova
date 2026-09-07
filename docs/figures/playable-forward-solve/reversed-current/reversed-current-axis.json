@@ -19,7 +19,13 @@
   "all_debug_tests": "11 passed",
   "h200_relabel": {
     "shots": [22475, 22550, 22626],
-    "job": 1263942,
+    "baseline_job": 1263942,
+    "baseline_converged": {
+      "22475": [0, 106],
+      "22550": [0, 68],
+      "22626": [0, 91]
+    },
+    "corrected_job": 1263954,
     "status": "pending"
   }
 }

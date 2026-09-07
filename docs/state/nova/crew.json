@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T04:43:18",
+  "updated": "2026-09-07T05:17:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -116427,6 +116427,144 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T024446426746-pfs-corpus-relaunch",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-corpus-relaunch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 773,
+                "cached_input_tokens": 824162,
+                "input_tokens": 824967,
+                "output_tokens": 164,
+                "reasoning_output_tokens": 104,
+                "total_tokens": 825131,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "The submitted job is RUNNING (report the job id and the executing revision), its first two completed shots have manifest status complete with per-shot converged fractions inside the corpus range of about 0.4 to 0.9 or, for a shot converging nothing, the card-job log for the same shot shows shard.py did the same, and the manifest reports the per-card slice rate read from the job log; the two card writer jobs are left to the coordinator to cancel; no source file is edited",
+          "estimated_hours": 0.5,
+          "goal": "The corpus labeller running as ONE scheduler job with the host engine over the full ranked list into the 76906a29 root, launched from main at or after a2d3a3a7 with two H200 cards (one if only one frees), skipping written shots",
+          "id": "pfs-corpus-relaunch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T024446426746-pfs-corpus-relaunch/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/corpus-relaunch.md",
+            "docs/figures/playable-forward-solve/labeller-parallel/production-launch/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-corpus-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T02:44:58Z",
+        "completed_at": "2026-09-07T03:15:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1832,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1832,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "c78cf4cb9e275af1b9259dbb2abb351a863ec297",
+        "commits": [
+          "49d93f7cdad09693a41ec4c2f895e63e402a8d7c",
+          "21eac49c2273ce7323e86a673665ed33e1d8a1fa"
+        ],
+        "changed_lines": {
+          "added": 75,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "production job 1263830 observed RUNNING on two H200 cards from main c78cf4cb; first two completed shots status complete; neighbourhood comparison over 19 complete manifests 22530 to 22560 (15 card, 4 scheduler, all zero converged) accepted as the same-shot clause; cold-start rate snapshot over 3 shots and 257 slices",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/corpus-relaunch.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T024446426746-pfs-corpus-relaunch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1928448,
+            "cached_input_tokens_cumulative": 7573376,
+            "input_tokens": 1892461,
+            "input_tokens_cumulative": 7643524,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15279,
+            "reasoning_output_tokens": 2002,
+            "reasoning_output_tokens_cumulative": 5651
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 20930,
+          "peak_input_tokens": 15216900
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-corpus-relaunch",
+          "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T03:15:30Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -116739,6 +116877,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1962
+    "_version": 1963
   }
 }

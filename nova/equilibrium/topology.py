@@ -811,26 +811,42 @@ class Topology(Pytree):
         else:
             flux = psi_grid[self.polish_gather]
             surface = None
-        census_authored = structured and hasattr(self.grid, "read_census")
+        census_authored = structured and hasattr(self.grid, "candidate_census")
         if census_authored:
-            (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
+            census = self.grid.candidate_census(psi_grid)
+            retained = census["retained_candidate"]
+            valid = census["retained_valid"][..., None]
+            vmap_o = jnp.where(valid[0], retained[0], jnp.nan)
+            vmap_x = jnp.where(valid[1], retained[1], jnp.nan)
         else:
             vmap_o, vmap_x = self.grid(psi_grid)
             census = None
-        data_w = self.wall(psi_wall, polarity)
+        if census_authored:
+            finite_flux = jnp.isfinite(vmap_o[:, 2])
+            dominant = jnp.nanargmax(
+                jnp.where(finite_flux, jnp.abs(vmap_o[:, 2]), -jnp.inf)
+            )
+            dominant_flux = vmap_o[dominant, 2]
+            inferred_polarity = jnp.where(dominant_flux >= 0.0, 1, -1)
+            read_polarity = jnp.where(
+                jnp.isfinite(dominant_flux), inferred_polarity, polarity
+            )
+        else:
+            read_polarity = polarity
+        data_w = self.wall(psi_wall, read_polarity)
         qualified_o = self.qualified_o_candidates(
             vmap_o,
             vmap_x,
             data_w,
-            polarity,
+            read_polarity,
             psi_grid,
             inside_material,
             surface,
         )
-        selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
+        selection = self.o_point_qualification(vmap_o, read_polarity, qualified_o)
         data_o = selection.data
-        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
-        emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
+        data_x = self.x_point_data(vmap_x, read_polarity, data_o[2])
+        emergent_boundary = self.boundary(data_o, vmap_x, data_w, read_polarity)
         if requested_class is None:
             data_b = emergent_boundary
             boundary_is_xpoint = jnp.equal(data_b[2], data_x[2])
@@ -842,8 +858,8 @@ class Topology(Pytree):
         if census_authored:
             selected_index = jnp.stack(
                 (
-                    self.o_point_index(vmap_o, polarity, qualified_o),
-                    self.x_point_index(vmap_x, polarity, data_o[2]),
+                    self.o_point_index(vmap_o, read_polarity, qualified_o),
+                    self.x_point_index(vmap_x, read_polarity, data_o[2]),
                 )
             )
             polish_receipt = census_stationary_receipt(
@@ -866,7 +882,7 @@ class Topology(Pytree):
                 self.connectivity_radius,
                 self.connectivity_height,
                 data_b[2],
-                polarity,
+                read_polarity,
                 data_o,
                 data_x,
                 surface=surface,
@@ -877,7 +893,7 @@ class Topology(Pytree):
                 self.polish_radial,
                 self.polish_vertical,
                 data_b[2],
-                polarity,
+                read_polarity,
                 data_o,
                 data_x,
                 self.polish_valid,
@@ -910,7 +926,7 @@ class Topology(Pytree):
         }
         psi_norm = self.normalize(data_o[2], data_b[2], comparison_flux)
         closed = self.psi_mask(
-            polarity,
+            read_polarity,
             comparison_flux,
             data_b[2],
             boundary_uncertainty,

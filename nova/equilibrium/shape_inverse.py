@@ -916,7 +916,7 @@ def solve_shape_inverse(
             penalty_rows = np.vstack(
                 (
                     regularisation * np.diag(delta_scale),
-                    delta_regularisation * np.eye(free.size),
+                    np.sqrt(delta_regularisation) * np.eye(free.size),
                 )
             )
             scaled_design = np.vstack((scaled_response, penalty_rows))

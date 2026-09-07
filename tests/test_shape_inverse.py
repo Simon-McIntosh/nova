@@ -221,7 +221,7 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
     matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
     scale = np.full(solved.free_circuits.size, ceiling)
     rhs = solved.right_hand_side * solved.row_weight
-    normal_matrix = matrix.T @ matrix + weight**2 * np.diag(1.0 / scale**2)
+    normal_matrix = matrix.T @ matrix + weight * np.diag(1.0 / scale**2)
     expected_delta = np.linalg.solve(normal_matrix, matrix.T @ rhs)
     stronger = solve_shape_inverse(
         machine.profile,

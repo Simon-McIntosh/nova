@@ -27,12 +27,13 @@ Run the bounded evidence smoke with:
 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" \
   uv run --no-sync python scripts/labeller_parallel/smoke.py \
   --output docs/figures/playable-forward-solve/labeller-parallel \
-  --devices 1 --batch-per-device 1 --host-workers 4 --max-slices 1 \
-  --run-reference --condition-on-guard-failure --replace
+  --engine host --devices 1 --batch-per-device 1 --host-workers 4 \
+  --max-slices 4 --condition-on-guard-failure --replace
 ```
 
 The smoke selects the first sixteen shots from the ranked decoder corpus and
-invokes `scripts/labeller_batch/shard.py` as an independent sequential
+compares against the existing independent `scripts/labeller_batch/shard.py`
+reference. Pass `--run-reference` only when deliberately replacing that
 reference. The identity arm uses four admitted slices per shot. Its receipt
 reports difference counts by manifest key, companion NPZ array and session
 variable. Independent wall-clock values are checked for the same typed shape;

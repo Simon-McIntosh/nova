@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="126">
+<meta name="plan-version" content="127">
 <meta name="plan-impl" content="0.97">
 <meta name="plan-commits" content="3afd3caf,81bec10b,672f3b43,d5e90aea,afdba34d,d4838cdb,f37907f9,58a8c8a5,2a7cda11,d2ffa5da,14c353c4,147051cc,bc08cd49,8e621933,2db98d26,7066b489,ef227db9,fdd2b79f,a4996202,43148bd2,d39ba24e,a01d4ca2,fb846c67,619f6e38,894f1030,ab6ec7ef,0395ebad,d63bb7c5,1c678115,3855ae7f,45ac7533,56a773a8,bb3ac89c">
 <meta name="plan-artifacts" content="docs/evidence/archive/playable-forward-solve-landed.html,nova/equilibrium/steering_frames.py,tests/test_steering_frames.py,nova/equilibrium/reduced_newton.py,tests/test_reduced_newton_constraints.py,benchmarks/reduced_newton_constrained_rows.py,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.json,docs/figures/playable-forward-solve/constrained-route/steered-keyframes.png,apps/playable/main.py,apps/playable/session.py,apps/playable/shape.py,apps/playable/production.py,apps/playable/machines.py,apps/playable/solovev.py,apps/pulsedesign/poloidal_view.py,tests/test_playable_session.py,benchmarks/forward_labeller_throughput.py,docs/figures/playable-forward-solve/labeller/forward-labeller-throughput.json,docs/figures/playable-forward-solve/labeller/forward-labeller-throughput.png,docs/figures/playable-forward-solve/labeller/labeller-throughput.md,docs/figures/playable-forward-solve/labeller/run_labeller_h200.sh">
@@ -789,6 +789,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260906T153743149071-pfs-worktree-triage-2-codex" data-who="wt-triage-x2" data-when="2026-09-06T16:13:25Z">
     <div class="r-comment-body"><p>stale worktree triage list 2 (revised once for verifiable supersession hashes): 7 remove, all verified mechanically against origin/main and removed; 5 carry-then-remove naming the commit and plan; 5 hold-for-lead with the deciding question each; codex terra xhigh, two turns</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260907T070341509374" data-who="coordinator" data-when="2026-09-07T07:00Z">
+    <div class="r-comment-body">Side job 1263887 finished: all six frozen-carrier shots are complete in the corpus root (21978 46/72, 21983 44/72, 21985 39/71, 21986 40/62, 21989 45/75, 22086 46/60); details under the demo-carrier-side-job anchor of the landed record. Corpus at 872 complete shots, 28 written in the last hour by the one-card host-route job 1263846. The H200 reservation is core-bound at 29 of 30, so the batched-engine receipt job 1263948 was shrunk in place from 8 to 5 cores (3 GPUs, on-device engine) to start when the case-current repair job 1263872 releases its 4 cores, without stopping the labeller. Open lead decision: demo carrier re-lock; imas-ambix recommends 21978/35 (app converges it without the centroid row, camera within six percent of 21989), fallback 22086/43.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260906T062332333142-pfs-inverse-step-shape-control" data-who="pfs-inverse-x" data-when="2026-09-06T09:40:12.957Z">
     <div class="r-comment-body"><p>Lane kill during the inverse-step shape-control investigation: the worker found the least-squares row set conflicted on the limited Solovev fixture (no X-point null row, weak shaping authority) and the forward solve refusing to converge on moved currents, was verifying the response matrix against central differences when killed; continued as pfs-inverse-step-shape-control-sol on the codex lane carrying the untracked module; not rework</p></div>

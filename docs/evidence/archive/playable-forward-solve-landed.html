@@ -880,6 +880,27 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     and remains the acceptance measure: one converging arm whose converged fraction matches the sequential reference of 38 of 48 with 7 inside the guard, proved on CPU
     before any card is requested.</p>
   </section>
+
+  <section id="conditioning-bites-and-that-is-the-external-test">
+    <h2>Conditioning moves the centroid onto the EFIT target to under half a centimetre, which makes an accidental no-op detectable from the data (2026-09-07, imas-ambix measurement)</h2>
+    <p>Measured on the 31 genuinely conditioned rows of the six frozen carriers that carry both error fields: conditioning moves the current centroid from a median
+    5.43 cm from the EFIT target to a median of 0.00 cm. Every one lands under 0.5 cm, none is worse than its free counterpart, and none is exactly equal to it. So the
+    conditioning provably bites today, and the numbers give the batched engine's repair an acceptance test that the parity contract alone does not provide.</p>
+    <p><strong>Why the parity contract is not sufficient on its own.</strong> The acceptance measure recorded for the engine repair was a converging arm whose converged
+    fraction matches the sequential reference. A repair that trimmed the conditioned branch to make the <code>lax.cond</code> shapes agree would delete the constraint
+    row, run cleanly, report conditioned slices, and could still match that converged fraction, because convergence of the free solve is not what conditioning changes.
+    The engine node therefore gains a second acceptance measure from these figures: on the same slices the sequential route conditions, every conditioned row from the
+    batched engine must carry a conditioned centroid error materially smaller than its own free error and under half a centimetre, and no conditioned row may have the
+    two errors coincide. A structural guard in the node says the free branch must gain the multiplier slot rather than the conditioned branch losing it; this is the
+    behavioural guard that catches the same mistake from outside if the structural one is circumvented.</p>
+    <p>The consumer is folding the same assertion into its dataset receipt as a violation count, so the failure mode surfaces in a data-integrity check rather than in a
+    training set. Two independent guards on one mistake, one structural and one behavioural, is the right shape for a defect that would otherwise pass a throughput gate
+    silently.</p>
+    <p><strong>A provenance consequence worth stating sharply, because the number changes its force.</strong> A conditioned slice does not loosely inherit one EFIT
+    scalar: it is pulled onto EFIT's centroid to within half a centimetre. Excluding conditioned rows from anything scored against the EFIT referee is therefore
+    necessary rather than conservative, and the consumer's split, carrying them for the demo while barring them from referee-scored evidence, is the correct one. Any
+    future use of this corpus that scores nova against EFIT must apply that exclusion, and the per-slice conditioned flag is what makes it enforceable on the data.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T09:17:31",
+  "updated": "2026-09-07T09:47:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2894,6 +2894,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-nullguard-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-rasterless-s",
         "harness": "codex",
         "role": "implement",
@@ -3007,9 +3016,11 @@
         "id": "pfs-signaxis-l",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07a87-e2fb-76d2-bb7c-565104c5412e",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07a87-e2fb-76d2-bb7c-565104c5412e"
+        },
         "created": "2026-09-07"
       },
       {
@@ -3884,6 +3895,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "session-455a78fa6d3eb0df92c3",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "snowflake-tests",
@@ -118909,6 +118929,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1985
+    "_version": 1988
   }
 }

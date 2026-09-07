@@ -1,0 +1,252 @@
+{
+  "acceptance_measure": "a repair is judged by the matched-epoch ratio of limited to diverted reaching one, NOT by the limited median reaching unity: the control is not at unity either, so an absolute target would fail a correct fix in the early bands where diverted sits at 0.70 and pass an incorrect one late where the control overshoots",
+  "arrays": {
+    "path": "docs/figures/limited-boundary-census/limited-class-census.npz",
+    "sha256": "8d069718b3755fd9feabf35b5e24cfc76759c02f6538f6b0b0b933dd1ac6604f"
+  },
+  "cautions": [
+    "the 0 to 50 ms diverted control carries only 36 frames, so that band's control is thin and should not be leaned on alone",
+    "the control drift is monotonic in time and spans 30 per cent low to 15 per cent high, a shape suggesting something scaling with the discharge rather than a defect in one branch, so it should not be assumed to belong to the same family as the limited defect"
+  ],
+  "crossed_table": {
+    "diverted/cold": {
+      "count": 5148,
+      "fraction_below_half": 0.11538461538461539,
+      "median": 0.8645442318030567,
+      "p10": 0.4675093936654841,
+      "p90": 1.1794011328364131
+    },
+    "diverted/warm": {
+      "count": 38858,
+      "fraction_below_half": 0.11837974162334654,
+      "median": 0.8375420188482727,
+      "p10": 0.4693190518624992,
+      "p90": 1.1871768290991171
+    },
+    "limited/cold": {
+      "count": 1228,
+      "fraction_below_half": 0.9438110749185668,
+      "median": 0.06619435790190203,
+      "p10": 0.008957791361330457,
+      "p90": 0.37463243354656817
+    },
+    "limited/warm": {
+      "count": 9181,
+      "fraction_below_half": 0.8765929637294413,
+      "median": 0.2845683802131863,
+      "p10": 0.0940982724753287,
+      "p90": 0.5327667135280021
+    }
+  },
+  "findings": [
+    "a cold start alone is harmless: diverted warm 0.838 against cold 0.865",
+    "the limited class is impaired: median 0.285 with 87.7 per cent below half",
+    "limited and cold together collapse: median 0.066 over 1228 frames",
+    "the limited defect survives time-matching at every epoch, sitting two to four fold below its own-epoch diverted control",
+    "the diverted control is itself not flat: it drifts monotonically from 0.70 early to 1.15 late, so every ratio quoted against a diverted baseline inherits that drift"
+  ],
+  "guarded_frames": 54415,
+  "method": "for every guarded frame of every labelled shot, the ratio of nova's stored axis-to-boundary flux span to EFIT's on the nearest efm slice; a frame is a cold start when its predecessor failed the branch guard; session files and the level-1 efm store only, no solve and no device",
+  "question": "does nova's axis-to-boundary flux span agree with EFIT's, and does the answer depend on the topology class or on the start condition",
+  "shots_attempted": 943,
+  "shots_with_a_limited_cold_start": 844,
+  "time_banded": [
+    {
+      "band_ms": [
+        0.0,
+        50.0
+      ],
+      "diverted_warm": {
+        "count": 36,
+        "fraction_below_half": 0.08333333333333333,
+        "median": 0.7015359776327807,
+        "p10": 0.6620417335637772,
+        "p90": 0.7497243007498093
+      },
+      "limited_cold": {
+        "count": 758,
+        "fraction_below_half": 0.996042216358839,
+        "median": 0.0599972245730081,
+        "p10": 0.008988585271166964,
+        "p90": 0.20198568615445323
+      },
+      "limited_over_diverted_median": 0.26170434992299557,
+      "limited_warm": {
+        "count": 1960,
+        "fraction_below_half": 0.9770408163265306,
+        "median": 0.18359501697398004,
+        "p10": 0.06369132837135862,
+        "p90": 0.3569376082765036
+      }
+    },
+    {
+      "band_ms": [
+        50.0,
+        100.0
+      ],
+      "diverted_warm": {
+        "count": 1829,
+        "fraction_below_half": 0.07599781301257517,
+        "median": 0.7199772544076445,
+        "p10": 0.5274581185034973,
+        "p90": 0.8303425991150112
+      },
+      "limited_cold": {
+        "count": 299,
+        "fraction_below_half": 0.9866220735785953,
+        "median": 0.039370928929439414,
+        "p10": 0.0057170975687288,
+        "p90": 0.1786748165021393
+      },
+      "limited_over_diverted_median": 0.3886033947411102,
+      "limited_warm": {
+        "count": 4770,
+        "fraction_below_half": 0.9134171907756813,
+        "median": 0.2797856051991946,
+        "p10": 0.100375655244616,
+        "p90": 0.484987183824704
+      }
+    },
+    {
+      "band_ms": [
+        100.0,
+        150.0
+      ],
+      "diverted_warm": {
+        "count": 5409,
+        "fraction_below_half": 0.08337955259752265,
+        "median": 0.6824360377776613,
+        "p10": 0.5117657312184971,
+        "p90": 0.8332402531606138
+      },
+      "limited_cold": {
+        "count": 79,
+        "fraction_below_half": 0.5949367088607594,
+        "median": 0.43155922148074405,
+        "p10": 0.06901618801703514,
+        "p90": 0.8213205010181432
+      },
+      "limited_over_diverted_median": 0.5460428771945895,
+      "limited_warm": {
+        "count": 1497,
+        "fraction_below_half": 0.7675350701402806,
+        "median": 0.3726393375693898,
+        "p10": 0.15588680460674456,
+        "p90": 0.649737094208284
+      }
+    },
+    {
+      "band_ms": [
+        150.0,
+        200.0
+      ],
+      "diverted_warm": {
+        "count": 5819,
+        "fraction_below_half": 0.21996906684997422,
+        "median": 0.660348604303721,
+        "p10": 0.3905196978869837,
+        "p90": 0.8800442613913781
+      },
+      "limited_cold": {
+        "count": 36,
+        "fraction_below_half": 0.8333333333333334,
+        "median": 0.36755658585602,
+        "p10": 0.28946896595071525,
+        "p90": 0.5320722287235705
+      },
+      "limited_over_diverted_median": 0.5343662405586186,
+      "limited_warm": {
+        "count": 479,
+        "fraction_below_half": 0.7954070981210856,
+        "median": 0.3528680011399102,
+        "p10": 0.22339074909768936,
+        "p90": 0.5690737637041359
+      }
+    },
+    {
+      "band_ms": [
+        200.0,
+        300.0
+      ],
+      "diverted_warm": {
+        "count": 11209,
+        "fraction_below_half": 0.19885806048710858,
+        "median": 0.8303869720272397,
+        "p10": 0.3272886165992679,
+        "p90": 1.0652134269774038
+      },
+      "limited_cold": {
+        "count": 10,
+        "fraction_below_half": 0.4,
+        "median": 0.5556457907429027,
+        "p10": 0.35391998273039565,
+        "p90": 0.881650000672213
+      },
+      "limited_over_diverted_median": 0.752203526598995,
+      "limited_warm": {
+        "count": 97,
+        "fraction_below_half": 0.36082474226804123,
+        "median": 0.6246200088007507,
+        "p10": 0.37396940102499343,
+        "p90": 0.7353017164371028
+      }
+    },
+    {
+      "band_ms": [
+        300.0,
+        400.0
+      ],
+      "diverted_warm": {
+        "count": 9047,
+        "fraction_below_half": 0.04752956781253454,
+        "median": 1.0161258944251919,
+        "p10": 0.7260033579317073,
+        "p90": 1.217834965724939
+      },
+      "limited_cold": {
+        "count": 12,
+        "fraction_below_half": 0.5833333333333334,
+        "median": 0.45067537500390753,
+        "p10": 0.3455126237754662,
+        "p90": 0.689785348885188
+      },
+      "limited_over_diverted_median": 0.4435066301092669,
+      "limited_warm": {
+        "count": 62,
+        "fraction_below_half": 0.6935483870967742,
+        "median": 0.45065857120328157,
+        "p10": 0.28300666789005346,
+        "p90": 0.5927186335393164
+      }
+    },
+    {
+      "band_ms": [
+        400.0,
+        1000.0
+      ],
+      "diverted_warm": {
+        "count": 5509,
+        "fraction_below_half": 0.012343438010528226,
+        "median": 1.1483920703526878,
+        "p10": 0.8437746361086796,
+        "p90": 1.3789440338576853
+      },
+      "limited_cold": {
+        "count": 34,
+        "fraction_below_half": 0.6176470588235294,
+        "median": 0.42240614507908436,
+        "p10": 0.23181451217355237,
+        "p90": 0.7036474370203695
+      },
+      "limited_over_diverted_median": 0.41285484092619334,
+      "limited_warm": {
+        "count": 316,
+        "fraction_below_half": 0.5316455696202531,
+        "median": 0.47411922552636077,
+        "p10": 0.22570118292582209,
+        "p90": 0.7437179120587177
+      }
+    }
+  ],
+  "unreadable_sessions": 0
+}

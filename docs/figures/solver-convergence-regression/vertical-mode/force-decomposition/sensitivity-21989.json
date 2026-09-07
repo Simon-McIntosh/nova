@@ -1,0 +1,437 @@
+{
+  "receipt": "seed-centroid radial-field sensitivity",
+  "source": {
+    "revision": "37b7844ec3348d454384a7c310a498b06ddf77e1",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cpu:0"
+    ]
+  },
+  "configuration": {
+    "field": "B_R at the public seed current centroid",
+    "p6_equivalent": "B_R divided by the P6 upper-minus-lower unit response at that centroid",
+    "current_uncertainty": "reported only when the store declares a current standard error",
+    "position_derivative": "symmetric one-millimetre finite difference",
+    "vertical_position_interval": "published Hall-probe copper z-offset magnitude; no radial interval is available from that source",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "version": "runtime-ea5c55820be3d80549fe"
+    }
+  },
+  "rows": [
+    {
+      "identity": "21986/46",
+      "current_centroid": {
+        "r_m": 0.7995247864306984,
+        "z_m": 0.09889428493417934
+      },
+      "p6_radial_response_t_per_a": -2.2173226878392575e-07,
+      "p6_definition": "stored P6 upper current minus stored P6 lower current",
+      "current_uncertainty": {
+        "availability": "not carried by the EFM store",
+        "reason": "fcoil_chisq is a fit diagnostic and fwtfc is a fit weight; neither declares a current standard error"
+      },
+      "active_circuit_sensitivities": [
+        {
+          "family": "sol",
+          "stored_circuit": 1,
+          "fitted_current_a": -34637.86328125,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.16938868793498624,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 4.153027534484863,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_inner_upper",
+          "stored_circuit": 2,
+          "fitted_current_a": 44451.26953125,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.05464775548547487,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.008028139360249043,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_outer_upper",
+          "stored_circuit": 3,
+          "fitted_current_a": 29459.822265625,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.07002523610085791,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.003992803394794464,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_inner_lower",
+          "stored_circuit": 4,
+          "fitted_current_a": 44597.9375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.03887368362537439,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.005462365690618753,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_outer_lower",
+          "stored_circuit": 5,
+          "fitted_current_a": 29847.888671875,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.049812769102038267,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0024627968668937683,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p3_upper",
+          "stored_circuit": 6,
+          "fitted_current_a": 28.47551155090332,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.5046342828867073,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 3.2019492209656164e-05,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p3_lower",
+          "stored_circuit": 7,
+          "fitted_current_a": 0.4602978527545929,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.36789976153307535,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 2.118741031154059e-05,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "fitted_current_a": -175149.75,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.43089907313890335,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0067777810618281364,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "fitted_current_a": -174814.9375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.3524097638555284,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.004301201086491346,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "fitted_current_a": -126193.3828125,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.3911096159377649,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.000318655715091154,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "fitted_current_a": -126059.828125,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.4435072193768274,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0003844049933832139,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p6_upper",
+          "stored_circuit": 12,
+          "fitted_current_a": 5772.97607421875,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.5476875280288298,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 1.203090596391121e-05,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p6_lower",
+          "stored_circuit": 13,
+          "fitted_current_a": -7496.02001953125,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.4523124719711702,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 8.541040187992621e-06,
+          "efm_fit_weight": 2.0
+        }
+      ],
+      "coil_position_sensitivities": [
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "fitted_current_a": -174814.9375,
+          "p6_ampere_equivalent_per_mm_radial": -26.27026398505347,
+          "p6_ampere_equivalent_per_mm_vertical": 66.85601451639694,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 6.638,
+          "vertical_p6_ampere_equivalent_at_tolerance": 443.7902243598429
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "fitted_current_a": -175149.75,
+          "p6_ampere_equivalent_per_mm_radial": 54.77927346900434,
+          "p6_ampere_equivalent_per_mm_vertical": 73.40792991580535,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 2.941,
+          "vertical_p6_ampere_equivalent_at_tolerance": 215.89272188238354
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "fitted_current_a": -126059.828125,
+          "p6_ampere_equivalent_per_mm_radial": -90.92688129109784,
+          "p6_ampere_equivalent_per_mm_vertical": -10.343607127135966,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 13.07,
+          "vertical_p6_ampere_equivalent_at_tolerance": -135.19094515166708
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "fitted_current_a": -126193.3828125,
+          "p6_ampere_equivalent_per_mm_radial": 100.0902367044787,
+          "p6_ampere_equivalent_per_mm_vertical": -62.84762412210385,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 0.562,
+          "vertical_p6_ampere_equivalent_at_tolerance": -35.32036475662236
+        }
+      ],
+      "compensation_reference_a": null,
+      "ranked_available_perturbations": []
+    },
+    {
+      "identity": "21989/55",
+      "current_centroid": {
+        "r_m": 0.8100958302708482,
+        "z_m": 0.012586049153551363
+      },
+      "p6_radial_response_t_per_a": -2.2522385906128132e-07,
+      "p6_definition": "stored P6 upper current minus stored P6 lower current",
+      "current_uncertainty": {
+        "availability": "not carried by the EFM store",
+        "reason": "fcoil_chisq is a fit diagnostic and fwtfc is a fit weight; neither declares a current standard error"
+      },
+      "active_circuit_sensitivities": [
+        {
+          "family": "sol",
+          "stored_circuit": 1,
+          "fitted_current_a": -35280.921875,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.028862664391712475,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 3.3864071369171143,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_inner_upper",
+          "stored_circuit": 2,
+          "fitted_current_a": 59075.87890625,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.04633313667894396,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.027994351461529732,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_outer_upper",
+          "stored_circuit": 3,
+          "fitted_current_a": 39241.23046875,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.05935605431991194,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.013077856041491032,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_inner_lower",
+          "stored_circuit": 4,
+          "fitted_current_a": 58962.8984375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.044482243323944626,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0026844339445233345,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p2_outer_lower",
+          "stored_circuit": 5,
+          "fitted_current_a": 39200.06640625,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.05701902949727671,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0011522563872858882,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p3_upper",
+          "stored_circuit": 6,
+          "fitted_current_a": 37.11402130126953,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.4334537657544012,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 2.4842618131515337e-06,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p3_lower",
+          "stored_circuit": 7,
+          "fitted_current_a": 22.283422470092773,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.4202753898274467,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 2.0129007680225186e-05,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "fitted_current_a": -204589.375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.3941118704894116,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.0008855112246237695,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "fitted_current_a": -204365.109375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.38533731889268624,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.00328024011105299,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "fitted_current_a": -150089.890625,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.4278460273520157,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 0.00044504646211862564,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "fitted_current_a": -149904.0,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.43220930653043804,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 8.467534939882171e-08,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p6_upper",
+          "stored_circuit": 12,
+          "fitted_current_a": -2813.853271484375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": 0.5062317549014026,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 1.2273916638605442e-07,
+          "efm_fit_weight": 2.0
+        },
+        {
+          "family": "p6_lower",
+          "stored_circuit": 13,
+          "fitted_current_a": 1982.6396484375,
+          "efm_current_uncertainty_a": null,
+          "p6_ampere_equivalent_per_ampere": -0.4937682450985973,
+          "p6_ampere_equivalent_per_uncertainty": null,
+          "efm_fit_chi_squared": 5.111829068482621e-06,
+          "efm_fit_weight": 2.0
+        }
+      ],
+      "coil_position_sensitivities": [
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "fitted_current_a": -204365.109375,
+          "p6_ampere_equivalent_per_mm_radial": -42.703659261344114,
+          "p6_ampere_equivalent_per_mm_vertical": 82.94339314135061,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 6.638,
+          "vertical_p6_ampere_equivalent_at_tolerance": 550.5782436722853
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "fitted_current_a": -204589.375,
+          "p6_ampere_equivalent_per_mm_radial": 46.309738446582344,
+          "p6_ampere_equivalent_per_mm_vertical": 84.03790873183185,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 2.941,
+          "vertical_p6_ampere_equivalent_at_tolerance": 247.15548958031746
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "fitted_current_a": -149904.0,
+          "p6_ampere_equivalent_per_mm_radial": -117.69630789838229,
+          "p6_ampere_equivalent_per_mm_vertical": -36.888914560708045,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 13.07,
+          "vertical_p6_ampere_equivalent_at_tolerance": -482.13811330845414
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "fitted_current_a": -150089.890625,
+          "p6_ampere_equivalent_per_mm_radial": 118.96764705299469,
+          "p6_ampere_equivalent_per_mm_vertical": -42.48659450684193,
+          "radial_position_tolerance_mm": null,
+          "vertical_position_tolerance_mm": 0.562,
+          "vertical_p6_ampere_equivalent_at_tolerance": -23.877466112845166
+        }
+      ],
+      "compensation_reference_a": 3022.326,
+      "ranked_available_perturbations": [
+        {
+          "perturbation": "p4_lower vertical position",
+          "available_p6_adjustment_a": 550.5782436722853,
+          "closure_fraction": 0.18217036933550032,
+          "closes_reference": false
+        },
+        {
+          "perturbation": "p5_lower vertical position",
+          "available_p6_adjustment_a": 482.13811330845414,
+          "closure_fraction": 0.1595255155494325,
+          "closes_reference": false
+        },
+        {
+          "perturbation": "p4_upper vertical position",
+          "available_p6_adjustment_a": 247.15548958031746,
+          "closure_fraction": 0.08177658187115402,
+          "closes_reference": false
+        },
+        {
+          "perturbation": "p5_upper vertical position",
+          "available_p6_adjustment_a": 23.877466112845166,
+          "closure_fraction": 0.00790036088524043,
+          "closes_reference": false
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "reference_compensation_a": 3022.326,
+    "leading_available_perturbation": {
+      "perturbation": "p4_lower vertical position",
+      "available_p6_adjustment_a": 550.5782436722853,
+      "closure_fraction": 0.18217036933550032,
+      "closes_reference": false
+    },
+    "single_perturbation_closes_reference": false
+  }
+}

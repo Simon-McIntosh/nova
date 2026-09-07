@@ -579,6 +579,7 @@ class Topology(Pytree):
         saddle=None,
         surface: TensorBSpline | None = None,
         boundary_uncertainty=0.0,
+        polarity=None,
     ):
         """Return the closed, in-material hex component containing the axis.
 
@@ -596,7 +597,16 @@ class Topology(Pytree):
         inward = _PRE_SADDLE_OFFSET_FRACTION * (
             jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
         )
-        direction = jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
+        # The plasma-current polarity is the authoritative ordering of the
+        # axis and boundary levels.  Using their sampled values here can
+        # silently reverse the flood when a trial map has not yet preserved
+        # the seed ordering; the same sign also governs psi_mask and saddle
+        # admission below.
+        direction = (
+            jnp.where(jnp.asarray(polarity) >= 0, 1.0, -1.0)
+            if polarity is not None
+            else jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
+        )
         comparison_boundary_flux = boundary_flux + direction * boundary_uncertainty
         component_flux = comparison_boundary_flux + direction * inward
         component_flux = jnp.where(saddle_cut, component_flux, comparison_boundary_flux)
@@ -732,6 +742,7 @@ class Topology(Pytree):
                 jnp.equal(data_b[2], data_x[2]),
                 data_x[:2],
                 surface,
+                polarity=polarity,
             )
             governed_size = jnp.sum(component & inside_material)
             governed_connection = governed_size >= connection_floor
@@ -915,6 +926,7 @@ class Topology(Pytree):
             data_x[:2],
             surface,
             boundary_uncertainty,
+            polarity=polarity,
         )
         masks = classify_domains(
             psi_norm,

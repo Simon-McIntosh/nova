@@ -395,6 +395,20 @@ def _benchmark_spatial_grid(
     return radius, height, reference, selection
 
 
+def plasma_current_polarity(current) -> int:
+    """Return the orientation of the largest finite signed current sample.
+
+    A zero-current record retains the canonical positive orientation because it
+    carries no physical sign and that is the existing vacuum-read convention.
+    """
+    samples = np.asarray(current, dtype=np.float64).reshape(-1)
+    finite = samples[np.isfinite(samples)]
+    if finite.size == 0:
+        raise ValueError("plasma current has no finite sample")
+    dominant = float(finite[np.argmax(np.abs(finite))])
+    return -1 if dominant < 0.0 else 1
+
+
 def build_profile(
     group: zarr.Group,
     shot: int,
@@ -455,6 +469,7 @@ def build_profile(
     )
     axis_flux = TOTAL_FLUX_FACTOR * float(group["psi_axis"][row])
     boundary_flux = TOTAL_FLUX_FACTOR * float(group["psi_boundary"][row])
+    polarity = plasma_current_polarity(group["plasma_current_c"][row])
     operator = DeclaredAnchorOperator(
         grid=FluxTarget(
             source_target=jnp.asarray(source_to_grid),
@@ -473,7 +488,7 @@ def build_profile(
         source=source,
         external_current=jnp.asarray(drive),
         area=jnp.asarray(lattice.cell_area),
-        polarity=1,
+        polarity=polarity,
         inside_material=jnp.asarray(material),
         use_linear_moments=False,
         declared_axis_flux=axis_flux,

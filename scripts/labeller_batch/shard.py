@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import os
 from pathlib import Path
@@ -25,6 +25,7 @@ from benchmarks.efit_forward_parity_slice import (
     TOTAL_FLUX_FACTOR,
     _mast_case_from_selection,
     _passive_inclusive_case,
+    plasma_current_polarity,
 )
 from benchmarks.forward_labeller_throughput import (
     KEYFRAME_SLICE,
@@ -264,6 +265,33 @@ def prepare_labeller() -> PreparedLabeller:
         cache_directory=str(cache.directory),
         setup_wall_seconds=time.perf_counter() - started,
     )
+
+
+def _prepared_with_polarity(
+    prepared: PreparedLabeller, polarity: int
+) -> PreparedLabeller:
+    """Return the shared profile with the shot's current orientation."""
+    polarity = int(polarity)
+    if polarity not in (-1, 1):
+        raise ValueError("plasma-current polarity must be either -1 or 1")
+    if int(prepared.profile.operator.polarity) == polarity:
+        return prepared
+    if hasattr(prepared.profile.operator, "prescribed_field"):
+        operator = replace(
+            prepared.profile.operator,
+            polarity=polarity,
+            prescribed_current_field=prepared.profile.operator.prescribed_field,
+        )
+    else:
+        operator = replace(prepared.profile.operator, polarity=polarity)
+    profile = replace(prepared.profile, operator=operator)
+    return replace(prepared, profile=profile)
+
+
+def _shot_polarity(shot: int) -> int:
+    """Read one shot's orientation from its signed plasma-current trace."""
+    group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
+    return plasma_current_polarity(group["plasma_current_c"])
 
 
 def _solve_policy():
@@ -1102,13 +1130,21 @@ def run_shard(
     """Prepare once, then label every requested shot with one carried program."""
     output_root.mkdir(parents=True, exist_ok=True)
     prepared = prepare_labeller()
-    programs = LabellerPrograms()
+    prepared_by_polarity = {int(prepared.profile.operator.polarity): prepared}
+    programs_by_polarity: dict[int, LabellerPrograms] = {}
     failures = []
     setup_unassigned = prepared.setup_wall_seconds
     for shot in shots:
         try:
+            polarity = _shot_polarity(int(shot))
+            if polarity not in prepared_by_polarity:
+                prepared_by_polarity[polarity] = _prepared_with_polarity(
+                    prepared, polarity
+                )
+            shot_prepared = prepared_by_polarity[polarity]
+            programs = programs_by_polarity.get(polarity, LabellerPrograms())
             programs, record = label_shot(
-                prepared,
+                shot_prepared,
                 int(shot),
                 output_root,
                 programs=programs,
@@ -1117,6 +1153,7 @@ def run_shard(
                 setup_wall_seconds=setup_unassigned,
                 max_slices=max_slices,
             )
+            programs_by_polarity[polarity] = programs
             if record["status"] != "skipped":
                 setup_unassigned = 0.0
         except Exception as error:  # one shot must not strand the shard

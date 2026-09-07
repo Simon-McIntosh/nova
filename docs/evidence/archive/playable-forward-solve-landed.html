@@ -712,11 +712,33 @@
     not the four-thousand-fold ratio between the engine's throughput and the pipeline's. That ratio is true as arithmetic and misleading as engineering: it says the
     engine has stopped being the constraint, and nothing more. Every further gain has to come from running assembly in parallel across host workers, which is what the
     scheduler exists to do, or from moving assembly onto the device. With assembly and IO near 0.54 s a slice, a pool of k workers caps the pipeline near k divided by
-    0.54 slices a second, so eight workers is about fifteen and eleven is about twenty, against one card's 2,327. One card is the right relaunch shape for as long as
-    assembly runs on the host.</p>
+    0.54 slices a second, so eight workers is about fifteen and eleven is about twenty. What the engine can supply against that ceiling is <strong>not yet known</strong>
+    &mdash; see the retraction below, which withdraws the figures this paragraph originally compared against.</p>
     <p>The decision taken now is to leave the running writer alone rather than swap it back. The batched engine is roughly two hours from a gated relaunch, in which
     window the difference is about 2,200 slices, and swapping the production writer twice in two hours is the churn that produced tonight's earlier rollback. The
     regression is instead folded into the relaunch as an acceptance figure.</p>
+  </section>
+
+  <section id="the-batched-throughput-figures-are-retracted">
+    <h2>Retraction: the batched-engine throughput figures measure a path that raises on every step (2026-09-07 08:10Z)</h2>
+    <p>Job <code>1263948</code> printed nine arm lines rising to 6,867 slices a second and then exited non-zero. The arm lines were read as throughput and reported as
+    such twice. They are not throughput. The receipt the same job wrote records <code>status: failed-fraction-parity</code>, and every arm carries
+    <code>converged_count: 0</code>, <code>guard_count: 0</code>, <code>conditioned_fraction: 1.0</code>, <code>converged_fraction_matches_sequential: false</code>, and
+    ten <code>TypeError</code> events per arm in both the <code>compile_and_first_execution</code> and <code>warmed_execution</code> phases. The batched engine raises on
+    every step, so the arms time exception handling rather than a solve, which is why the figures are physically implausible for a Grad-Shafranov solve and why they rise
+    so cleanly with batch size.</p>
+    <p>The sequential reference in the same job is healthy and is the contrast that exposes it: 48 slices, 38 converged for 0.792, 7 within the guard for 0.146, 42
+    conditioned for 0.875, 7 exception slices. The driver's own parity gate compared the two, refused, and set the failing status. <strong>The gate worked and the
+    reading of it did not.</strong> The job's non-zero exit was attributed to post-processing on the strength of the log ending after the last arm line, when the
+    artifact one directory away carried the verdict.</p>
+    <p>What this retracts: every batched slices-a-second figure, the claim that the engine has stopped being the constraint, and the conclusion that one card is the
+    right relaunch shape, which rested entirely on those figures. What survives, because it was measured independently from the corpus manifests: the parallel scheduler
+    runs at 1.982 seconds a slice against the sequential writer's 0.908 on convergence-matched shots, and the solve is roughly two fifths of the sequential writer's
+    per-slice cost with assembly and the write making up the rest. The relaunch card count is undetermined until a batched arm converges.</p>
+    <p>Two changes follow for the node. The engine's <code>TypeError</code> is now the deliverable rather than the throughput curve, and it must be reproduced with its
+    message and traceback: the receipt records only the exception class, which is why nothing here names the cause. And the driver should refuse to report a
+    slices-a-second figure for an arm whose converged count is zero, because a throughput number from a failing path is worse than no number &mdash; it reads as success
+    in a log, in a notification, and in a report headline.</p>
   </section>
 </main>
 </body>

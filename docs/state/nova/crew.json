@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T12:50:37",
+  "updated": "2026-09-07T13:16:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2956,6 +2956,15 @@
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "1cbf0e3e-aed5-4ee9-986e-3c62692b23cc"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-relabelval-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-repairs-x",
@@ -120368,6 +120377,138 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T110000750893-pfs-boundary-repair-validation-relabel",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-boundary-repair-validation-relabel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2029,
+                "cached_input_tokens": 941009,
+                "input_tokens": 943040,
+                "output_tokens": 745,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 943785,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "one sbatch job on betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=4 --mem=128G --time=00:59:00 runs scripts/labeller_batch/shard.py with an output root under /work/projects/imas_gpu/sophelio/labeller_sessions/ that is NOT 76906a29 and did not exist before, passing --shots 27079 21978 21983 21985 21986 21989 22086 and --condition-on-guard-failure, JAX_PLATFORMS=cuda,cpu set inside the wrapped command, the log captured once under the run directory, the report naming the new root and stating for each of the seven shots its written and converged slice counts beside the same counts from the corresponding session in 76906a29 so the before and after are one table, the report also recording the writer revision the job ran at and confirming that no file under 76906a29 was written or modified, no edit to any file under nova/ or scripts/, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "seven shots are relabelled at current main into a separate validation root so the boundary repair can be scored against the banked pre-repair census",
+          "id": "pfs-boundary-repair-validation-relabel",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T110000750893-pfs-boundary-repair-validation-relabel/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/boundary-repair-validation-relabel.md",
+            "docs/figures/playable-forward-solve/boundary-repair-validation/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-relabelval-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T11:00:12Z",
+        "completed_at": "2026-09-07T11:14:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 886,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 886,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "728266bef9f67b90d107154820e96ffba53c250e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/labeller_batch/shard.py /work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z --shots 27079 21978 21983 21985 21986 21989 22086 --condition-on-guard-failure",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T110000750893-pfs-boundary-repair-validation-relabel/boundary-repair-validation-1264318.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T110000750893-pfs-boundary-repair-validation-relabel/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07b86-9706-7e13-94ee-bd6f26acc1f6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4359936,
+            "cached_input_tokens_cumulative": 4359936,
+            "input_tokens": 4502913,
+            "input_tokens_cumulative": 4502913,
+            "output_tokens": 17845,
+            "output_tokens_cumulative": 17845,
+            "reasoning_output_tokens": 5190,
+            "reasoning_output_tokens_cumulative": 5190
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23035,
+          "peak_input_tokens": 8862849
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the node is a writer run against a separate output root plus a report file outside the repository, so it produces no source change by construction",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-boundary-repair-validation-relabel",
+          "session_id": "01a07b86-9706-7e13-94ee-bd6f26acc1f6",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T11:14:58Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -120680,6 +120821,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2005
+    "_version": 2007
   }
 }

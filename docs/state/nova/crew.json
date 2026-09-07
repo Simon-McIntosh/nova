@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T03:51:46",
+  "updated": "2026-09-07T03:58:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -116139,6 +116139,154 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T193538158103-pfs-corpus-scheduler",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-corpus-scheduler",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4026,
+                "cached_input_tokens": 260500,
+                "input_tokens": 264558,
+                "output_tokens": 4391,
+                "reasoning_output_tokens": 1452,
+                "total_tokens": 268949,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "A smoke over 16 corpus shots on 1 and 3 devices writes per-slice records identical to the sequential writer for the same shots, and its receipt under docs/figures/playable-forward-solve/labeller-parallel/ reports engine slices a second, host assembly wall per slice, pool slices a second and frames a second written, with the report stating whether the pool figure is below the engine figure",
+          "estimated_hours": 3.0,
+          "goal": "The corpus scheduler scripts/labeller_parallel/: one job walking the ranked decoder shot list, refilling B times devices slots as shots finish, stepping the batched engine (a stub honouring its array contract until it lands), pipelining frame assembly through a host process pool, writing per-shot sessions, manifests, receipts in the scripts/labeller_batch shape, resumable by shot",
+          "id": "pfs-corpus-scheduler",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193538158103-pfs-corpus-scheduler/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "scripts/labeller_parallel/",
+            "docs/figures/playable-forward-solve/labeller-parallel/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-parallel.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-corpus-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T19:35:49Z",
+        "completed_at": "2026-09-07T01:54:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 22746,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "d4dca9ac0c7016ddab1c76f61fbb6b79b54608d6",
+        "commits": [
+          "008ba7a4d6187543ce51dad19792fd70e4a15a3e",
+          "c2af5b201df2c66dcf79953a9c98cfd3dca8837d",
+          "54815ecca75d655f276e6b89050c991cb72e28af",
+          "470e03622d3629e061fe73a4bb1315d4c0138184",
+          "aca1199abe03dc481218ea16de056e75348960a8",
+          "62ba7f21d445eb88fdf16393e32eef367f7100d1",
+          "94e11c103d5a60e6f8dd56df30537d4ee814af42",
+          "4da7ffa9a1cfd62d0238ed73699e9270ea8d3308",
+          "0c878c37f014338b5f3e2308d06a7d1cf642a251",
+          "d563a2fd931c675584bb9b3bffa0b165b712aad7",
+          "9b4f3884ea06a15864b923e2943b13e73cc1f28e"
+        ],
+        "changed_lines": {
+          "added": 10436,
+          "removed": 0,
+          "files": 117
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 one-card identity job 1263809 over 16 corpus shots at 4 quartile slices each: discrete fields exact on 64 of 64 slices, floats within rtol 1e-12 on 63 of 64, one marginal slice keyed; production job 1263815 submitted and observed RUNNING",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/labeller-parallel.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T193538158103-pfs-corpus-scheduler/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7378176,
+            "cached_input_tokens_cumulative": 7378176,
+            "input_tokens": 7450943,
+            "input_tokens_cumulative": 7450943,
+            "output_tokens": 30583,
+            "output_tokens_cumulative": 30583,
+            "reasoning_output_tokens": 9375,
+            "reasoning_output_tokens_cumulative": 9375
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 39958,
+          "peak_input_tokens": 14829119
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 9,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-corpus-scheduler",
+          "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T01:54:55Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -116451,6 +116599,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1960
+    "_version": 1961
   }
 }

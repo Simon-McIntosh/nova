@@ -10,6 +10,7 @@ the same shaped-section Green kernel at the stored current centroid.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import platform
@@ -68,6 +69,16 @@ POSITION_OFFSET_M = {
     "p5_upper": 0.000562,
 }
 COMPENSATION_REFERENCE_A = {"21989/55": 3022.326}
+CASE_CURRENT_REPAIR_OUTPUT = ROOT / (
+    "docs/figures/solver-convergence-regression/vertical-mode/case-current-repair"
+)
+ELIMINATION_HEIGHTS_M = (
+    0.03889428493417936,
+    0.05889428493417936,
+    0.07889428493417936,
+    0.09889428493417936,
+    0.11889428493417936,
+)
 
 
 def _source_revision() -> str:
@@ -707,6 +718,329 @@ def _p6_constraint(
     )
 
 
+def _current_digest(current: np.ndarray) -> str:
+    return hashlib.sha256(np.asarray(current, dtype=np.float64).tobytes()).hexdigest()
+
+
+def _case_replacement_current(
+    shot: int, row: int, profile
+) -> tuple[np.ndarray, dict[str, Any]]:
+    group = _efm_group(shot)
+    time_s = float(group["time"][row])
+    geometry = MachineGeometryRegistry.default().select(shot).configuration.geometry
+    _families, _drives, mapping = _circuit_drives(group, row, geometry, "fcoil_c")
+    active = {int(item["stored_circuit"]): str(item["family"]) for item in mapping}
+    elements = _element_data(group)
+    case_groups = _case_element_groups(elements, geometry, set(active))
+    transducers = _interpolated_case_currents(shot, time_s)
+    fitted = np.asarray(group["fcoil_c"][row], dtype=np.float64)
+    field = profile.operator.prescribed_current_field
+    if field is None:
+        raise RuntimeError("the replacement solve requires prescribed circuit currents")
+    baseline = np.asarray(field.current, dtype=np.float64)
+    if not np.array_equal(baseline, fitted):
+        raise RuntimeError("the prescribed field is not the EFIT fitted current vector")
+    circuits_by_family: dict[str, set[int]] = {
+        family: set() for family in CASE_CURRENT_CHANNELS
+    }
+    for index, family in case_groups.items():
+        circuits_by_family[family].add(int(elements["fcoil_circ"][index]))
+    replacement = fitted.copy()
+    groups = []
+    selected = []
+    for family in sorted(circuits_by_family):
+        circuits = sorted(circuits_by_family[family])
+        if len(circuits) != 1:
+            raise RuntimeError(
+                f"case group {family} maps to stored circuits {circuits}, not one"
+            )
+        circuit = circuits[0]
+        selected.append(circuit - 1)
+        reading = transducers[family]
+        replacement[circuit - 1] = reading["current_a"]
+        groups.append(
+            {
+                "family": family,
+                "stored_circuit": circuit,
+                "fitted_current_a": float(fitted[circuit - 1]),
+                "transducer_current_a": float(reading["current_a"]),
+                "delta_current_a": float(reading["current_a"] - fitted[circuit - 1]),
+                "transducer": reading,
+            }
+        )
+    selected_indices = np.asarray(sorted(selected), dtype=int)
+    if selected_indices.size != 8 or np.unique(selected_indices).size != 8:
+        raise RuntimeError(
+            "the instrumented current replacement must select eight circuits"
+        )
+    other_indices = np.setdiff1d(np.arange(fitted.size), selected_indices)
+    if other_indices.size != 93 or not np.array_equal(
+        replacement[other_indices], fitted[other_indices]
+    ):
+        raise RuntimeError(
+            "a current outside the eight instrumented case circuits changed"
+        )
+    return replacement, {
+        "source": "nearest finite amc sample at the EFIT slice time",
+        "fitted_current_digest_sha256": _current_digest(fitted),
+        "replacement_current_digest_sha256": _current_digest(replacement),
+        "stored_circuit_count": int(fitted.size),
+        "replaced_case_circuit_count": int(selected_indices.size),
+        "unchanged_circuit_count": int(other_indices.size),
+        "groups": groups,
+    }
+
+
+def _terminal_centroid(profile, flux, target_current_a: float) -> dict[str, float]:
+    observation = profile.current_moment_observation(
+        jnp.asarray(flux),
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        target_current=target_current_a,
+    )
+    return {
+        "r_m": float(observation.centroid_r),
+        "z_m": float(observation.centroid_z),
+    }
+
+
+def _solve_case_current_state(
+    profile,
+    seed,
+    target_current_a: float,
+    prescribed_current: np.ndarray,
+    carrier_identity: str,
+    seed_centroid: dict[str, float],
+    constraint_pair: ConstraintPair | None = None,
+) -> dict[str, Any]:
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity=carrier_identity,
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.asarray(seed)),
+        target_current=target_current_a,
+        prescribed_current=jnp.asarray(prescribed_current),
+        constraint_pairs=() if constraint_pair is None else (constraint_pair,),
+    )
+    solved = profile.solve(request)
+    equilibrium = solved.equilibrium
+    fixed = equilibrium.fixed_point
+    centroid = _terminal_centroid(profile, equilibrium.flux, target_current_a)
+    result = {
+        "terminal_residual": _strict_float(fixed.residual),
+        "converged": bool(np.asarray(fixed.converged)),
+        "termination_code": int(np.asarray(fixed.termination_reason)),
+        "active_set_trips": int(np.asarray(fixed.active_set_iterations)),
+        "terminal_centroid": centroid,
+        "terminal_centroid_minus_seed_m": {
+            "r_m": centroid["r_m"] - seed_centroid["r_m"],
+            "z_m": centroid["z_m"] - seed_centroid["z_m"],
+        },
+        "resolved_defaults": solved.resolved_defaults.to_dict(),
+    }
+    if constraint_pair is not None:
+        record = equilibrium.constraints[0]
+        result["compensating_p6_current_a"] = _strict_float(record.physical_unknown[0])
+        result["constraint_qualified"] = bool(np.asarray(record.qualified[0]))
+    return result
+
+
+def _case_current_repair_row(shot: int, row: int) -> dict[str, Any]:
+    cache, carrier_evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = {
+        (int(item["shot"]), int(item["slice_index"])): (item, qualification)
+        for item, qualification in settled.select_slices_by_shot(
+            settled.DECOMPOSITION_BANK
+        )
+    }
+    selected_row, qualification = selected[(shot, row)]
+    case, context = settled._mast_case_from_selection(
+        settled.SHOT_STORE, selected_row, qualification
+    )
+    passive_case, profile, policy = settled._passive_inclusive_case(
+        case, context, cache
+    )
+    if int(policy["section_kernel_evaluations_this_shot"]) != 0:
+        raise RuntimeError("case-current repair rebuilt a direct response matrix")
+    seed = jnp.asarray(passive_case["state"])
+    target_current_a = abs(float(passive_case["reference"]["plasma_current_a"]))
+    seed_centroid = _terminal_centroid(profile, seed, target_current_a)
+    fitted = np.asarray(
+        profile.operator.prescribed_current_field.current, dtype=np.float64
+    )
+    replacement, replacement_evidence = _case_replacement_current(shot, row, profile)
+    free = {
+        "fitted_current_baseline": _solve_case_current_state(
+            profile,
+            seed,
+            target_current_a,
+            fitted,
+            f"mast:{shot}:{row}:case-current:fitted:free",
+            seed_centroid,
+        ),
+        "measured_case_current": _solve_case_current_state(
+            profile,
+            seed,
+            target_current_a,
+            replacement,
+            f"mast:{shot}:{row}:case-current:measured:free",
+            seed_centroid,
+        ),
+    }
+    scan = []
+    for target_z_m in ELIMINATION_HEIGHTS_M:
+        pair = _p6_constraint(
+            profile, policy, target_z_m, float(passive_case["span_wb"])
+        )
+        scan.append(
+            {
+                "target_centroid_z_m": target_z_m,
+                "fitted_current_baseline": _solve_case_current_state(
+                    profile,
+                    seed,
+                    target_current_a,
+                    fitted,
+                    f"mast:{shot}:{row}:case-current:fitted:z:{target_z_m:.9f}",
+                    seed_centroid,
+                    pair,
+                ),
+                "measured_case_current": _solve_case_current_state(
+                    profile,
+                    seed,
+                    target_current_a,
+                    replacement,
+                    f"mast:{shot}:{row}:case-current:measured:z:{target_z_m:.9f}",
+                    seed_centroid,
+                    pair,
+                ),
+            }
+        )
+    measured_values = [
+        sample["measured_case_current"]["compensating_p6_current_a"] for sample in scan
+    ]
+    return {
+        "identity": f"{shot}/{row}",
+        "seed_centroid": seed_centroid,
+        "free_production_solve": free,
+        "elimination_scan": scan,
+        "case_current_replacement": replacement_evidence,
+        "policy": policy,
+        "carrier_evidence": carrier_evidence,
+        "minimum_measured_case_compensation_a": min(measured_values, key=abs),
+    }
+
+
+def _draw_case_current_repair(rows: list[dict[str, Any]], path: Path) -> None:
+    figure, axes = plt.subplots(1, 2, figsize=(15, 6))
+    for row in rows:
+        free = row["free_production_solve"]
+        labels = ("fitted", "case measured")
+        residuals = [
+            free["fitted_current_baseline"]["terminal_residual"],
+            free["measured_case_current"]["terminal_residual"],
+        ]
+        axes[0].plot(labels, residuals, "o-", label=row["identity"])
+    axes[0].set_yscale("log")
+    axes[0].set_ylabel("Free-solve terminal residual")
+    axes[0].set_title("Free production solve from bank seed")
+    axes[0].grid(axis="y", alpha=0.2)
+    axes[0].legend(frameon=False)
+    for row in rows:
+        x = [item["target_centroid_z_m"] for item in row["elimination_scan"]]
+        fitted = [
+            item["fitted_current_baseline"]["compensating_p6_current_a"] / 1.0e3
+            for item in row["elimination_scan"]
+        ]
+        measured = [
+            item["measured_case_current"]["compensating_p6_current_a"] / 1.0e3
+            for item in row["elimination_scan"]
+        ]
+        axes[1].plot(x, fitted, "o--", label=f"{row['identity']} fitted")
+        axes[1].plot(x, measured, "o-", label=f"{row['identity']} case measured")
+    axes[1].axhline(0.0, color="0.3", linewidth=0.8)
+    axes[1].set_xlabel("Constrained current-centroid Z [m]")
+    axes[1].set_ylabel("P6 compensation [kA]")
+    axes[1].set_title("Five-height elimination scan")
+    axes[1].grid(alpha=0.2)
+    axes[1].legend(frameon=False)
+    figure.suptitle("Effect of measured coil-case currents on vertical balance")
+    figure.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def measure_case_current_repair(
+    output: Path, requested_rows: tuple[tuple[int, int], ...] = ROWS
+) -> dict[str, Any]:
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    output.mkdir(parents=True, exist_ok=True)
+    receipt_path = output / "case-current-repair.json"
+    existing_rows = []
+    if receipt_path.exists():
+        existing = json.loads(receipt_path.read_text(encoding="utf-8"))
+        existing_rows = existing.get("rows", [])
+    rows_by_identity = {row["identity"]: row for row in existing_rows}
+    for shot, row in requested_rows:
+        measured = _case_current_repair_row(shot, row)
+        rows_by_identity[measured["identity"]] = measured
+        rows = [
+            rows_by_identity[f"{item_shot}/{item_row}"]
+            for item_shot, item_row in ROWS
+            if f"{item_shot}/{item_row}" in rows_by_identity
+        ]
+        receipt_path.write_text(
+            json.dumps({"rows": rows}, indent=2) + "\n", encoding="utf-8"
+        )
+    rows = [
+        rows_by_identity[f"{shot}/{row}"]
+        for shot, row in ROWS
+        if f"{shot}/{row}" in rows_by_identity
+    ]
+    if len(rows) != len(ROWS):
+        return {"rows": rows}
+    receipt = {
+        "receipt": "free solve and elimination scan with measured coil-case currents",
+        "source": {
+            "revision": _source_revision(),
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+        },
+        "configuration": {
+            "replacement": "eight instrumented case-circuit values replace fcoil_c",
+            "other_circuits": (
+                "the remaining 93 stored circuit currents are byte-identical"
+            ),
+            "scan_heights_m": list(ELIMINATION_HEIGHTS_M),
+            "persistent_compilation_cache": {
+                "directory": str(cache.directory),
+                "version": cache.version_key,
+            },
+        },
+        "rows": rows,
+    }
+    repaired = next(row for row in rows if row["identity"] == "21986/46")
+    receipt["verdict"] = {
+        "minimum_measured_case_compensation_21986_46_a": repaired[
+            "minimum_measured_case_compensation_a"
+        ],
+        "free_measured_case_converged_21986_46": repaired["free_production_solve"][
+            "measured_case_current"
+        ]["converged"],
+        "free_measured_case_converged_21989_55": next(
+            row for row in rows if row["identity"] == "21989/55"
+        )["free_production_solve"]["measured_case_current"]["converged"],
+    }
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    _draw_case_current_repair(rows, output / "case-current-repair.png")
+    return receipt
+
+
 def _scan_current(output: Path) -> dict[str, Any]:
     """Run distant continuation samples through the typed public solve seam."""
 
@@ -910,9 +1244,32 @@ def main() -> None:
         action="store_true",
         help="write the active-current and coil-position sensitivity receipt only",
     )
+    parser.add_argument(
+        "--case-current-repair",
+        action="store_true",
+        help="solve fitted and measured-case current vectors from each bank seed",
+    )
+    parser.add_argument(
+        "--case-current-identity",
+        choices=[f"{shot}/{row}" for shot, row in ROWS],
+        action="append",
+        help="limit case-current repair to one missing shot and row",
+    )
     args = parser.parse_args()
+    if args.sensitivity_only and args.case_current_repair:
+        raise ValueError("choose one focused measurement")
     if args.sensitivity_only:
         receipt = measure_sensitivity(args.output)
+    elif args.case_current_repair:
+        requested_rows = (
+            tuple(
+                (int(identity.split("/")[0]), int(identity.split("/")[1]))
+                for identity in args.case_current_identity
+            )
+            if args.case_current_identity
+            else ROWS
+        )
+        receipt = measure_case_current_repair(args.output, requested_rows)
     else:
         receipt = measure(args.output)
         receipt["sensitivity"] = measure_sensitivity(args.output)

@@ -5,7 +5,7 @@
   },
   "checkpoint": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-zero-converged-census/docs/figures/playable-forward-solve/zero-converged-block/census.checkpoint.jsonl",
   "corpus_root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
-  "generated_at": "2026-09-07T06:10:32.019591+00:00",
+  "generated_at": "2026-09-07T06:14:15.042341+00:00",
   "neighbours_per_side": 20,
   "recommendation": {
     "action": "exclude-block",
@@ -8102,7 +8102,7 @@
       "unreadable_reason": null
     }
   ],
-  "source_revision": "2c7ebc99e44dc006fe459bd68a7badec7d39c9d8",
+  "source_revision": "2c727480bb790c374f6220995d71920423b739c3",
   "summary": {
     "block": {
       "complete_manifest_count": 70,

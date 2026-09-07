@@ -1,6 +1,6 @@
 # Zero-converged labeller block census
 
-Generated at `2026-09-07T06:10:32.019591+00:00` from Nova `2c7ebc99e44d`. The table contains every integer shot from 22475 through 22626, plus the nearest 20 complete converging corpus shots on each side. Missing or partial inputs remain explicit rows.
+Generated at `2026-09-07T06:14:15.042341+00:00` from Nova `2c727480bb79`. The table contains every integer shot from 22475 through 22626, plus the nearest 20 complete converging corpus shots on each side. Missing or partial inputs remain explicit rows.
 
 ## Headline
 

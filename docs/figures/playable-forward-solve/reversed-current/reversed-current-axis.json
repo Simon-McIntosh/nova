@@ -1,0 +1,25 @@
+{
+  "fixture": "smooth_axisymmetric_solovev",
+  "axis_position_m": [1.0, 0.0],
+  "positive_current": {
+    "polarity": 1,
+    "extremum_type": 1,
+    "axis_flux": -0.0,
+    "found": true
+  },
+  "reversed_current": {
+    "polarity": -1,
+    "extremum_type": -1,
+    "axis_flux": 0.0,
+    "found": true
+  },
+  "axis_position_absolute_difference_m": 0.0,
+  "axis_flux_sign_relation": "reversed_current = -positive_current",
+  "focused_tests": "2 passed",
+  "all_debug_tests": "11 passed",
+  "h200_relabel": {
+    "shots": [22475, 22550, 22626],
+    "job": 1263942,
+    "status": "pending"
+  }
+}

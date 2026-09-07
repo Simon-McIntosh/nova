@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -541,8 +542,11 @@ def run(
     response the shared carrier does not serve.
     """
     configure_dtypes()
-    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
-    print("stage: carrier cache", flush=True)
+    cache_root = os.environ.get("NOVA_JAX_CACHE_DIR")
+    if cache_root is None:
+        cache_root = str(default_persistent_compilation_cache_root())
+    configure_persistent_compilation_cache(cache_root)
+    print(f"stage: compilation cache {cache_root}", flush=True)
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )

@@ -1415,6 +1415,21 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <code>docs/figures/null-identification-authority/contained-anchor/</code> in the worktree; report at
     <code>~/.config/reckon/crew/reports/nova/null-identification/contained-anchor-corpus-route.md</code>.</p>
   </section>
+  <section id="the-axis-disagreement-is-a-solver-configuration-offset">
+    <h2>The 4 to 6 cm axis disagreement with EFIT is a solver-configuration offset, not a definition difference (2026-09-07 21:48Z)</h2>
+    <p>Node <code>pfs-axis-definition</code> (local lane, spec guided; commit <code>8625d49f</code>, merged; a benchmark over the 51 free
+    converged flat-top slices with its receipt and one signed-component figure). The consumer's fidelity gate was comparing the right pair.
+    EFIT's published magnetic axis sits 0.49 cm median from the flux extremum of its own stored map, every slice inside 2 cm, so the
+    definitional and provenance slop is bounded below half a centimetre. The remaining 4.4 to 4.8 cm median is a real offset of the
+    labeller's solve: the signed R and Z components vary per shot and are two-sided (median R &minus;1.89 cm and Z &minus;0.80 cm, p90 +1.91 and
+    +4.92 cm), which is the opposite of the consistent one-component offset a definition difference would leave. Scoring the alternative
+    referents the session carries settles where it comes from: the slice-native parity configuration, which reads each slice's own
+    reconstruction row, agrees with EFIT's axis to 0.2 mm, while the labeller's frozen operator derives its per-slice profiles and boundary
+    state from a single calibration row. This is the same carrier the axis-attribution measurement named for the 41.3 mm shift, now confirmed
+    over 51 slices from the other direction. No comparison fix is owed; the fix is a solver-configuration node on the labeller's operator.
+    Report at <code>~/.config/reckon/crew/reports/nova/playable/axis-definition.md</code>; receipt under
+    <code>docs/figures/playable-forward-solve/axis-definition/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

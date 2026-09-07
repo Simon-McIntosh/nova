@@ -1,0 +1,112 @@
+{
+  "edits": {
+    "circuit": {
+      "family": "p4_upper",
+      "stored_circuit": 8,
+      "two_percent_wall_flux_sup_wb": 0.018026559731829244
+    },
+    "circuit_index": 8,
+    "count": 10,
+    "fractions_%": [
+      -16.000000000000004,
+      -14.000000000000004,
+      -12.000000000000005,
+      -10.000000000000005,
+      -8.000000000000007,
+      -6.000000000000008,
+      -4.000000000000009,
+      -2.00000000000001,
+      -1.1102230246251565e-14,
+      1.999999999999988
+    ],
+    "moments": "fitted reference flux on the raster, fixed across edits",
+    "passive_constant_included": true
+  },
+  "execution": {
+    "cpus_per_task": "1",
+    "device": "cuda:0",
+    "elapsed_seconds": 157.54982504900545,
+    "job_id": "1263699",
+    "node": "98dci4-gpu-0003.iter.org",
+    "persistent_compilation_cache": "/home/ITER/mcintos/.cache"
+  },
+  "flux_difference": {
+    "bitwise_difference": true,
+    "expected": "zero bitwise; 0.0 absolute",
+    "policy": "same raster flux expression in both arms",
+    "sup_absolute_wb": 0.0
+  },
+  "once_arm": {
+    "bitwise_identity_held": true,
+    "first_edit_wall_ms": 205.6450303643942,
+    "median_per_edit_wall_ms": 0.1924671232700348,
+    "per_edit_wall_ms": [
+      0.34191273152828217,
+      0.24354364722967148,
+      0.21699443459510803,
+      0.20863953977823257,
+      0.1906389370560646,
+      0.20389258861541748,
+      0.1924671232700348,
+      0.18811970949172974,
+      0.1879725605249405,
+      0.18052849918603897
+    ],
+    "policy": "raster (R,Z) FluxTarget built once, reused",
+    "stablehlo_sha256": "c6abfe04461e14c3d31dda5b022cdddb9ae9646158959cb9c724466b7b8376a2",
+    "worst_per_edit_wall_ms": 0.24354364722967148
+  },
+  "raster": {
+    "node_count": 1089,
+    "plasma_rebuild_abs_sup_wb_per_amp_turn": 0.0,
+    "plasma_target_shape": [
+      1089,
+      1089
+    ],
+    "radial_step_m": 0.060625000041909516,
+    "shape": [
+      33,
+      33
+    ],
+    "source_rebuild_abs_sup_wb_per_amp_turn": 0.0,
+    "source_target_shape": [
+      1089,
+      13
+    ],
+    "vertical_step_m": 0.125
+  },
+  "rebuild_arm": {
+    "median_per_edit_wall_ms": 11445.716071873903,
+    "per_edit_wall_ms": [
+      11354.991329833865,
+      11506.123185157776,
+      11453.29599454999,
+      11387.944333255291,
+      11342.349189333618,
+      11494.311054237187,
+      11362.473644316196,
+      11450.435520149767,
+      11445.716071873903,
+      11357.167437672615
+    ],
+    "policy": "raster (R,Z) FluxTarget rebuilt each edit",
+    "worst_per_edit_wall_ms": 11506.123185157776
+  },
+  "reference": {
+    "frame": "raster receiver grid over the MAST vessel",
+    "machine": "MAST",
+    "plasma_current_a": 933034.875,
+    "shot": 22086,
+    "slice_index": 43
+  },
+  "schema": "nova.raster_flux_target_receipt_benchmark",
+  "schema_version": 1,
+  "summary": {
+    "median_per_edit_wall_ms_once": 0.1924671232700348,
+    "median_per_edit_wall_ms_rebuild": 11445.716071873903,
+    "median_ratio_rebuild_over_once": 59468.42181360689,
+    "raster_flux_arms_bitwise_identical": true,
+    "worst_per_edit_wall_ms_once": 0.24354364722967148,
+    "worst_per_edit_wall_ms_rebuild": 11506.123185157776
+  }
+}

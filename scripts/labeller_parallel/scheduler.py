@@ -882,44 +882,52 @@ class CorpusScheduler:
         for index in range(self.capacity):
             refill(index)
         context = multiprocessing.get_context("spawn")
-        with ProcessPoolExecutor(
-            max_workers=self.host_workers,
-            mp_context=context,
-            initializer=_initialize_assembly_worker,
-            initargs=(self.condition_on_guard_failure,),
-        ) as pool:
-            while any(slot is not None for slot in slots) or futures:
-                batch = self._pack(slots)
-                if np.any(batch.active):
-                    step_started = time.perf_counter()
-                    result = self.engine.step(batch)
-                    engine_wall += time.perf_counter() - step_started
-                    result.validate(self.capacity)
-                    for raw_index in np.flatnonzero(batch.active):
-                        index = int(raw_index)
-                        slot = slots[index]
-                        solved = result.solved[index]
-                        if slot is None or solved is None:
-                            raise RuntimeError(
-                                "active engine row returned no solve payload"
+        inherited_platforms = os.environ.get("JAX_PLATFORMS")
+        os.environ["JAX_PLATFORMS"] = "cpu"
+        try:
+            with ProcessPoolExecutor(
+                max_workers=self.host_workers,
+                mp_context=context,
+                initializer=_initialize_assembly_worker,
+                initargs=(self.condition_on_guard_failure,),
+            ) as pool:
+                while any(slot is not None for slot in slots) or futures:
+                    batch = self._pack(slots)
+                    if np.any(batch.active):
+                        step_started = time.perf_counter()
+                        result = self.engine.step(batch)
+                        engine_wall += time.perf_counter() - step_started
+                        result.validate(self.capacity)
+                        for raw_index in np.flatnonzero(batch.active):
+                            index = int(raw_index)
+                            slot = slots[index]
+                            solved = result.solved[index]
+                            if slot is None or solved is None:
+                                raise RuntimeError(
+                                    "active engine row returned no solve payload"
+                                )
+                            future = pool.submit(
+                                self.assembler, AssemblyRequest(slot.current(), solved)
                             )
-                        future = pool.submit(
-                            self.assembler, AssemblyRequest(slot.current(), solved)
+                            slot.awaiting = future
+                            futures[future] = index
+                            engine_slices += 1
+                    ready = [future for future in futures if future.done()]
+                    if (
+                        not ready
+                        and futures
+                        and not any(
+                            slot is not None and slot.awaiting is None for slot in slots
                         )
-                        slot.awaiting = future
-                        futures[future] = index
-                        engine_slices += 1
-                ready = [future for future in futures if future.done()]
-                if (
-                    not ready
-                    and futures
-                    and not any(
-                        slot is not None and slot.awaiting is None for slot in slots
-                    )
-                ):
-                    ready = list(wait(futures, return_when=FIRST_COMPLETED).done)
-                for future in ready:
-                    finish_future(future)
+                    ):
+                        ready = list(wait(futures, return_when=FIRST_COMPLETED).done)
+                    for future in ready:
+                        finish_future(future)
+        finally:
+            if inherited_platforms is None:
+                os.environ.pop("JAX_PLATFORMS", None)
+            else:
+                os.environ["JAX_PLATFORMS"] = inherited_platforms
 
         wall = time.perf_counter() - started
         engine_rate = engine_slices / engine_wall if engine_wall else 0.0

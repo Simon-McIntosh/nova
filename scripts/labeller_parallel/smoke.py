@@ -59,6 +59,27 @@ def _equal(expected: np.ndarray, actual: np.ndarray) -> bool:
     return bool(np.array_equal(expected, actual))
 
 
+def _stable_carrier_evidence(value: Any) -> tuple[Any, bool]:
+    """Remove elapsed measurements while retaining carrier identity evidence."""
+    stable = json.loads(json.dumps(value))
+    try:
+        warm_load = stable["carrier"].pop("warm_load_seconds")
+        check_stdout = stable["named_cache_only_check"]["stdout"]
+    except KeyError, TypeError:
+        return stable, False
+    timings_valid = (
+        isinstance(warm_load, int | float)
+        and isinstance(check_stdout, str)
+        and re.search(r"\bwarm_seconds=[0-9.]+\b", check_stdout) is not None
+    )
+    if not timings_valid:
+        return stable, False
+    stable["named_cache_only_check"]["stdout"] = re.sub(
+        r"\bwarm_seconds=[0-9.]+\b", "warm_seconds=<elapsed>", check_stdout
+    )
+    return stable, timings_valid
+
+
 def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str, Any]:
     differences: list[str] = []
     manifest_differences: dict[str, int] = {}
@@ -94,6 +115,18 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
                 )
             elif name in MANIFEST_PATH_FIELDS:
                 differs = Path(str(expected_value)).name != Path(str(actual_value)).name
+            elif name == "carrier":
+                expected_carrier, expected_timing_valid = _stable_carrier_evidence(
+                    expected_value
+                )
+                actual_carrier, actual_timing_valid = _stable_carrier_evidence(
+                    actual_value
+                )
+                differs = (
+                    not expected_timing_valid
+                    or not actual_timing_valid
+                    or expected_carrier != actual_carrier
+                )
             elif name == "nova_revision" and expected_value != actual_value:
                 valid_revisions = all(
                     isinstance(value, str)
@@ -197,6 +230,9 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
             ),
             "session_wall_clock_fields": sorted(SESSION_TIMING_VARIABLES),
             "wall_clock_comparison": "presence, numeric type, dimensions and dtype",
+            "carrier_timing_comparison": (
+                "warm-load fields have numeric/string shape; remaining evidence exact"
+            ),
             "artifact_path_comparison": "matching basename",
         },
     }

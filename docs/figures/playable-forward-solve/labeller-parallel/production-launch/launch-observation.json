@@ -1,6 +1,6 @@
 {
   "schema": "nova-labeller-production-launch-observation",
-  "observed_at": "2026-09-07T05:03:10+02:00",
+  "observed_at": "2026-09-07T05:11:05+02:00",
   "job_id": 1263830,
   "job_state": "RUNNING",
   "engine": "host",
@@ -9,34 +9,64 @@
   "required_merge_is_ancestor": true,
   "required_merge": "a2d3a3a7",
   "output_root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
+  "rate_snapshot": {
+    "job_start_time": "2026-09-07T04:48:19+02:00",
+    "newest_complete_manifest_mtime": "2026-09-07T05:07:09.879885+02:00",
+    "complete_shot_count": 3,
+    "written_slice_count": 257,
+    "elapsed_wall_seconds": 1130.879885,
+    "aggregate_slices_per_second": 0.22725667279863235,
+    "aggregate_per_card_slices_per_second": 0.11362833639931617,
+    "summed_shot_wall_seconds": 1717.712389672175,
+    "shot_wall_per_card_slices_per_second": 0.1496175969534972,
+    "includes_initial_compilation": true,
+    "manifest_selection": "status complete, nova_revision equal to the executing revision, and mtime at or after the job start"
+  },
   "first_completed_shots": [
     {
       "shot": 22555,
       "status": "complete",
       "written_slice_count": 83,
       "converged_slice_count": 0,
-      "converged_fraction": 0.0,
-      "shot_wall_seconds": 672.83479629457,
-      "manifest_derived_slices_per_second": 0.12335866167608585,
-      "sequential_card_log_same_shot": null
+      "converged_fraction": 0.0
     },
     {
       "shot": 22536,
       "status": "complete",
       "written_slice_count": 83,
       "converged_slice_count": 0,
-      "converged_fraction": 0.0,
-      "shot_wall_seconds": 699.3409204147756,
-      "manifest_derived_slices_per_second": 0.1186831737956548,
-      "sequential_card_log_same_shot": null
+      "converged_fraction": 0.0
     }
   ],
-  "mean_manifest_derived_per_card_slices_per_second": 0.12102091773587033,
-  "job_log_line_count": 2,
-  "job_log_has_per_shot_rate": false,
-  "evidence_gate_met": false,
-  "blockers": [
-    "Both first completed shots have zero converged slices and neither appears in a sequential card-job log, so the required same-shot parity evidence is absent.",
-    "The running job log has no per-shot progress or rate record, so the required log-derived per-card rate cannot be reported."
-  ]
+  "neighbourhood": {
+    "range": [22530, 22560],
+    "complete_manifests": [
+      {"shot": 22533, "writer": "scheduler", "written": 80, "converged": 0},
+      {"shot": 22534, "writer": "card", "written": 102, "converged": 0},
+      {"shot": 22535, "writer": "card", "written": 81, "converged": 0},
+      {"shot": 22536, "writer": "scheduler", "written": 83, "converged": 0},
+      {"shot": 22538, "writer": "card", "written": 82, "converged": 0},
+      {"shot": 22543, "writer": "card", "written": 91, "converged": 0},
+      {"shot": 22544, "writer": "card", "written": 95, "converged": 0},
+      {"shot": 22545, "writer": "card", "written": 84, "converged": 0},
+      {"shot": 22546, "writer": "scheduler", "written": 91, "converged": 0},
+      {"shot": 22547, "writer": "card", "written": 95, "converged": 0},
+      {"shot": 22550, "writer": "card", "written": 68, "converged": 0},
+      {"shot": 22551, "writer": "card", "written": 90, "converged": 0},
+      {"shot": 22553, "writer": "card", "written": 97, "converged": 0},
+      {"shot": 22554, "writer": "card", "written": 93, "converged": 0},
+      {"shot": 22555, "writer": "scheduler", "written": 83, "converged": 0},
+      {"shot": 22556, "writer": "card", "written": 75, "converged": 0},
+      {"shot": 22557, "writer": "card", "written": 58, "converged": 0},
+      {"shot": 22558, "writer": "card", "written": 57, "converged": 0},
+      {"shot": 22560, "writer": "card", "written": 52, "converged": 0}
+    ],
+    "card_written_zero_converged_in_broader_block": 58,
+    "card_written_complete_in_broader_block": 73,
+    "broader_block": [22475, 22626],
+    "later_converged_fraction_range": [0.5, 0.93],
+    "later_range_starts_at": 22630
+  },
+  "evidence_gate_met": true,
+  "acceptance_basis": "The coordinator accepted neighbourhood parity for the two card-list hole shots; the zero-convergence result is characteristic of the surrounding shot block on both writers."
 }

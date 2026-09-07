@@ -31,11 +31,15 @@ the integers 1 to 140; the real rows are 95 per cent finite positive
 temperature and the padding is zero per cent. Rows are therefore admitted by
 falling inside the shot's own time window, not by position.
 
-*Channel radius drifts between laser pulses.* ``radius`` is stored per time
-row and wanders by a few millimetres, so a channel's plotted position is the
-median of its finite radii rather than one arbitrary row's value.
+*Channel radius drifts between laser pulses, in the later era only.* ``ayc``
+and ``aye`` store ``radius`` per time row, where it wanders by a few
+millimetres -- 6 mm standard deviation core, 12 mm edge on shot 27079 -- so a
+channel's plotted position is the median of its finite radii rather than one
+arbitrary row's value. ``atm`` stores one radius per channel and needs no
+median, and its time axis carries no padding either, so the earlier era is
+the simpler of the two to read.
 
-*There is no stored vertical coordinate.* Both systems view the midplane, so
+*There is no stored vertical coordinate.* Every system views the midplane, so
 Z is taken as zero and that assumption is recorded in the provenance rather
 than being buried as a literal.
 """

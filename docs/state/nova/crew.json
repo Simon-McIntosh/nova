@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T07:14:35",
+  "updated": "2026-09-07T07:26:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1839,6 +1839,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "media-device-route",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "media-prior-art",
@@ -117447,6 +117456,159 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T045053603308-pfs-host-worker-default",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-host-worker-default",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 830,
+                "cached_input_tokens": 842400,
+                "input_tokens": 843234,
+                "output_tokens": 22,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 843256,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_parallel.py gains a test asserting the default resolves to SLURM_CPUS_PER_TASK minus one when that variable is set and to os.cpu_count minus one otherwise, and that an explicit --host-workers overrides it; the test file passes with exit 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=32G (TMPDIR=/tmp, JAX_PLATFORMS=cpu, environment python called directly) with the log under the run directory; scripts/labeller_parallel/run.sh --dry-run shows the resolved worker count in its submission line",
+          "estimated_hours": 0.5,
+          "goal": "The scheduler launcher and driver default the host assembly pool to the allocated cores minus one (SLURM_CPUS_PER_TASK minus one when set, os.cpu_count minus one otherwise) instead of three, printing the resolved value in the submission line and at job start",
+          "id": "pfs-host-worker-default",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045053603308-pfs-host-worker-default/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "scripts/labeller_parallel/run.sh",
+            "scripts/labeller_parallel/driver.py",
+            "tests/test_labeller_parallel.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/host-worker-default.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-receipt-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T04:51:27Z",
+        "completed_at": "2026-09-07T05:25:40.620Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2016,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2053,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "660cbd7c1f681db5db2f14c4486e41bdc9f35d38",
+        "commits": [
+          "05a20e0ccfda08d4442d053939c480b1466c3649"
+        ],
+        "changed_lines": {
+          "added": 59,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug: pytest tests/test_labeller_parallel.py -v (4 passed in 652 s: SLURM_CPUS_PER_TASK 8 resolves to 7, unset with cpu_count 12 resolves to 11, explicit 4 stays 4, plus the existing host-route identity test); run.sh --dry-run prints the resolved worker count",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045053603308-pfs-host-worker-default/test_labeller_parallel.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045053603308-pfs-host-worker-default/manifest.md",
+        "scope_changed": false,
+        "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2472729,
+            "input_tokens_cumulative": 11385588,
+            "output_tokens": 5310,
+            "output_tokens_cumulative": 26570,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2047.134,
+          "generated_tokens": 26570,
+          "generation_seconds": 1587.808,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 36.4,
+          "machine_seconds": 459.326,
+          "peak_input_tokens": 370364,
+          "tokens_per_second": 16.73,
+          "wall_tokens_per_second": 12.98
+        },
+        "follow_on_paths": [
+          "scripts/labeller_parallel/smoke.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-host-worker-default",
+          "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T05:25:40.620Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -117759,6 +117921,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1972
+    "_version": 1974
   }
 }

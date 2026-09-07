@@ -44,10 +44,12 @@ BANDS = (
     (0.30, 0.40),
     (0.40, 1.0),
 )
-#: Below this the cold-start cell is not expected to move: the repair
-#: deliberately keeps the unmasked read on a first iterate rather than
-#: deriving a shadow circularly from the boundary it is choosing.
-COLD_START_UNADDRESSED = True
+#: Whether a shadow is derived for the first iterate of a run. The wall-anchor
+#: masking alone leaves that read unmasked, so the cold cell stays put and a
+#: cold improvement is a finding; a corpus relabelled after a first-iterate
+#: repair lands should show the cell move, and reporting it as unexplained
+#: would then be backwards. The caller states which corpus it holds.
+COLD_START_ADDRESSED = False
 
 
 def _median_ratio(ratio, diverted, cold, time_s, low, high):
@@ -77,7 +79,9 @@ def _load(path: Path) -> dict[str, np.ndarray]:
         }
 
 
-def compare(before: Path, after: Path) -> dict[str, object]:
+def compare(
+    before: Path, after: Path, cold_start_addressed: bool = COLD_START_ADDRESSED
+) -> dict[str, object]:
     """Return the band-by-band verdict of a repaired census against a banked one."""
     old, new = _load(before), _load(after)
     bands = []
@@ -100,7 +104,7 @@ def compare(before: Path, after: Path) -> dict[str, object]:
     cold = {
         "before_median": float(np.median(old["ratio"][~old["diverted"] & old["cold"]])),
         "after_median": float(np.median(new["ratio"][~new["diverted"] & new["cold"]])),
-        "expected_to_move": not COLD_START_UNADDRESSED,
+        "expected_to_move": cold_start_addressed,
     }
     verdict = {
         "bands": bands,
@@ -127,10 +131,16 @@ def compare(before: Path, after: Path) -> dict[str, object]:
                 f"{band['band_ms'][0]:.0f}-{band['band_ms'][1]:.0f} ms, and a "
                 "diverted read is meant to be untouched by construction"
             )
-    if cold["after_median"] > 2.0 * cold["before_median"]:
+    moved = cold["after_median"] > 2.0 * cold["before_median"]
+    if moved and not cold_start_addressed:
         verdict["unexplained"].append(
-            "the limited cold-start cell improved, which the repair does not "
-            "address; report rather than bank it"
+            "the limited cold-start cell improved, and no first-iterate repair "
+            "is declared present in this corpus; report rather than bank it"
+        )
+    if cold_start_addressed and not moved:
+        verdict["unexplained"].append(
+            "a first-iterate repair is declared present and the limited "
+            "cold-start cell did not move, so it is not reaching those frames"
         )
     return verdict
 
@@ -140,8 +150,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--after", type=Path, required=True)
     parser.add_argument("--before", type=Path, default=BANKED)
+    parser.add_argument(
+        "--cold-start-addressed",
+        action="store_true",
+        help="the relabelled corpus carries a first-iterate shadow repair, so "
+        "the cold cell is expected to move rather than to stay put",
+    )
     arguments = parser.parse_args(argv)
-    verdict = compare(arguments.before, arguments.after)
+    verdict = compare(
+        arguments.before,
+        arguments.after,
+        cold_start_addressed=arguments.cold_start_addressed,
+    )
     print(json.dumps(verdict, indent=2, sort_keys=True))
     return 0
 

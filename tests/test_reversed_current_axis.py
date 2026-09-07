@@ -44,8 +44,8 @@ def test_reversed_current_axis_keeps_position_and_flips_flux_extremum():
     )
 
 
-def test_topology_inequalities_and_saddle_selection_follow_current_sign():
-    """Axis-side masks and saddle ranking reverse together."""
+def test_topology_selection_mask_and_flood_follow_the_same_current_sign():
+    """Axis-side selection, masks and component floods reverse together."""
     configure_dtypes()
     radial = np.linspace(0.5, 1.5, 17)
     vertical = np.linspace(-0.5, 0.5, 17)
@@ -62,6 +62,33 @@ def test_topology_inequalities_and_saddle_selection_follow_current_sign():
     )
     np.testing.assert_array_equal(
         np.asarray(topology.psi_mask(-1, values, 0.0)), [True, False, False]
+    )
+
+    positive_flux = 1.0 - 4.0 * ((radius - 1.0) ** 2 + height**2)
+    reversed_flux = -positive_flux
+    inside = np.ones(coordinate.shape[0], dtype=bool)
+    positive_closed = topology.psi_mask(1, positive_flux.ravel(), 0.2)
+    reversed_closed = topology.psi_mask(-1, reversed_flux.ravel(), -0.2)
+    positive_component = topology.axis_component(
+        positive_flux.ravel(),
+        0.2,
+        1.0,
+        np.asarray([1.0, 0.0]),
+        positive_closed,
+        inside,
+        polarity=1,
+    )
+    reversed_component = topology.axis_component(
+        reversed_flux.ravel(),
+        -0.2,
+        -1.0,
+        np.asarray([1.0, 0.0]),
+        reversed_closed,
+        inside,
+        polarity=-1,
+    )
+    np.testing.assert_array_equal(
+        np.asarray(positive_component), np.asarray(reversed_component)
     )
 
     candidates = np.asarray([[1.0, -0.3, 0.8, 0.0], [1.0, 0.3, 0.5, 0.0]], dtype=float)

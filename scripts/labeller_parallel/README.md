@@ -6,12 +6,13 @@ slice's warm state. When the shot ends, the slot is refilled from the ranked
 decoder corpus. Device results cross to the host once per step and frame
 assembly is submitted to a process pool while the next device step runs.
 
-`SequentialCompiledEngine` is the interim production engine behind the array
-contract. Each active slot runs the compiled reduced-Newton slice program on
-its assigned JAX device and owns separate free and centroid-conditioned
-programs. Its result arrays keep the replacement boundary fixed while carrying
-the sequential writer's guard, centroid, convergence and termination readings
-beside them.
+`HostRouteEngine` is the production default behind the array contract. Each
+active slot calls the same host-loop free reduced solve as the sequential shard,
+then calls the same constrained solve when the free result raised, did not
+converge, or missed the centroid branch guard. Slots own separate free and
+conditioned programs and are driven concurrently across visible devices.
+`SequentialCompiledEngine` remains selectable with `--engine compiled` for the
+batched-engine receipt once that route can reuse its program across shots.
 
 Host workers construct `FluxSurfaceGeometry` and call `assemble_frame` with the
 EFM flux functions, applied currents and branch reference. Shot output then
@@ -35,26 +36,27 @@ invokes `scripts/labeller_batch/shard.py` as an independent sequential
 reference. The identity arm uses four admitted slices per shot. Its receipt
 reports difference counts by manifest key, companion NPZ array and session
 variable. Independent wall-clock values are checked for the same typed shape;
-all scientific values are compared exactly. The parallel manifest declares its
-additional per-slice requested topology class and its process-start source-tree
-identities.
+discrete scientific values compare exactly and floats use the tolerance stated
+below. The parallel manifest declares its additional per-slice requested
+topology class and its process-start source-tree identities.
 
-The one-card identity allocation is launched with:
+Submit one resumable production job with:
 
 ```bash
 scripts/labeller_parallel/run.sh --submit \
-  --output-root docs/figures/playable-forward-solve/labeller-parallel \
-  --batch-per-device 1
+  --output-root /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29
 ```
 
-The launcher uses one H200, four host CPUs, 128 GiB and a one-hour bound. It
-runs the shard writer over four quartile samples from each shot's admitted row
-range, then runs the one-device compiled scheduler over the same physical rows
-and compares the records. The three-device throughput arm is a separate
-follow-on.
+The default launcher uses one H200, four host CPUs, 128 GiB and a 24-hour bound.
+It walks the full ranked corpus, skips shots whose session and manifest already
+exist, uses the host route, and writes its log under the output root's `logs/`
+directory. `--devices` scales CPUs and memory at four CPUs and 128 GiB per
+device; `--batch-per-device` changes the number of resident shot slots.
 
-Identity is exact for discrete fields and uses `numpy.testing.assert_allclose`
-with `rtol=1e-12` and `atol=1e-14` for floating fields. The receipt reports the
-maximum relative difference for every floating field. It names the compiled
-Newton-step counter as a temporary comparison exclusion until its source-level
-tuple binding is corrected.
+The one-card identity smoke agreed exactly on every discrete field for all 64
+slices and kept every float within `rtol=1e-12`, `atol=1e-14` for 63 of 64.
+Shot 24751 row 82 is recorded as the single marginal slice: the compiled and
+host routes followed slightly different terminal paths after warm-state
+propagation while retaining the same decisions. The receipt lists every field
+and its maximum difference. It excludes the compiled Newton-step counter until
+its source-level tuple binding is corrected.

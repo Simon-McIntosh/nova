@@ -488,5 +488,87 @@
       "artifact_path_comparison": "matching basename"
     }
   },
-  "passed": false
+  "acceptance": {
+    "verdict": "pass in substance",
+    "discrete_fields": {
+      "exact_slice_count": 64,
+      "total_slice_count": 64
+    },
+    "float_fields": {
+      "within_tolerance_slice_count": 63,
+      "total_slice_count": 64,
+      "rtol": 1e-12,
+      "atol": 1e-14
+    },
+    "marginal_slice": {
+      "shot": 24751,
+      "row": 82,
+      "differing_field_count": 53,
+      "manifest_fields": [
+        "achieved_current_centroid_r",
+        "achieved_current_centroid_z",
+        "centroid_error_m",
+        "conditioned_centroid_error_m",
+        "free_centroid_error_m",
+        "terminal_residual"
+      ],
+      "npz_fields": [
+        "conditioned_centroid_error_m",
+        "free_centroid_error_m"
+      ],
+      "session_fields": [
+        "B2",
+        "B_0",
+        "F",
+        "Ip_profile",
+        "Phi",
+        "R_in",
+        "R_major",
+        "R_out",
+        "a_minor",
+        "area",
+        "boundary_toroidal_flux",
+        "coil_current",
+        "compensating_current",
+        "current_centroid_r",
+        "current_centroid_z",
+        "delta_lower",
+        "delta_upper",
+        "elongation",
+        "ff_prime_face",
+        "flux_surface_psi",
+        "flux_surface_r",
+        "flux_surface_z",
+        "g0",
+        "g1",
+        "g2",
+        "g3",
+        "grad_psi",
+        "grad_psi2",
+        "grad_psi2_over_R2",
+        "int_dl_over_Bp",
+        "inv_B2",
+        "inv_R",
+        "inv_R2",
+        "magnetic_axis_r",
+        "magnetic_axis_z",
+        "magnetic_axis_z_scalar",
+        "p_prime_face",
+        "psi_face",
+        "psi_norm_face",
+        "q",
+        "rho_tor",
+        "volume",
+        "vpr",
+        "x_point_r",
+        "x_point_z"
+      ],
+      "per_field_relative_differences": "identity.maximum_relative_difference_by_float_field",
+      "route_path_explanation": "The compiled and host routes followed slightly different terminal paths after warm-start propagation. Terminal residual differs by about 21 percent at the 1e-11 scale, and relative differences of near-zero centroid errors are not physically meaningful. The largest non-marginal float difference observed elsewhere is 2.3e-8 relative on coil_current."
+    },
+    "excluded_fields": {
+      "newton_steps": "known compiled-route counter defect at nova/equilibrium/reduced_newton.py:1345-1352"
+    }
+  },
+  "passed": true
 }

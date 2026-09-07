@@ -3,15 +3,20 @@
 
 from __future__ import annotations
 
-from collections import deque
-from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
+from concurrent.futures import (
+    FIRST_COMPLETED,
+    Future,
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+    wait,
+)
 from dataclasses import dataclass, field, replace
 import multiprocessing
 import os
 from pathlib import Path
 import subprocess
 import time
-from typing import Any, Callable, Protocol, Sequence
+from typing import Any, Callable, ClassVar, Iterable, Protocol, Sequence
 
 import jax
 import jax.numpy as jnp
@@ -200,6 +205,8 @@ class EngineResult:
 class BatchEngine(Protocol):
     """Array boundary shared with the future vectorised implementation."""
 
+    name: str
+
     def step(self, batch: EngineBatch) -> EngineResult: ...
 
 
@@ -207,6 +214,7 @@ class BatchEngine(Protocol):
 class SequentialCompiledEngine:
     """Run one compiled production slice program per active device slot."""
 
+    name: ClassVar[str] = "sequential-compiled"
     prepared: PreparedLabeller
     device_count: int
     condition_on_guard_failure: bool
@@ -230,6 +238,58 @@ class SequentialCompiledEngine:
             self.free_programs.extend([None] * missing)
             self.conditioned_programs.extend([None] * missing)
 
+    def _free_solve(
+        self,
+        index: int,
+        device: jax.Device,
+        initial: np.ndarray,
+        requested_value: int,
+        target_current: float,
+        current: np.ndarray,
+    ) -> reduced_newton.ReducedNewtonResult:
+        with jax.default_device(device):
+            result = reduced_newton.solve_reduced_newton_compiled(
+                self.prepared.profile.operator,
+                jax.device_put(initial, device),
+                requested_class=jax.device_put(
+                    jnp.asarray(requested_value, dtype=jnp.int8), device
+                ),
+                target_current=jax.device_put(jnp.asarray(target_current), device),
+                prescribed_current=jax.device_put(jnp.asarray(current), device),
+                tolerance=FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=self.free_programs[index],
+                stream=False,
+            )
+        jax.block_until_ready(result.state)
+        return result
+
+    def _conditioned_solve(
+        self,
+        index: int,
+        device: jax.Device,
+        initial: np.ndarray,
+        pair: Any,
+        requested: jax.Array,
+        target_current: float,
+        current: np.ndarray,
+    ) -> reduced_newton.ReducedNewtonResult:
+        with jax.default_device(device):
+            result = reduced_newton.solve_constrained_reduced_newton_compiled(
+                self.prepared.profile,
+                jax.device_put(initial, device),
+                constraint_pairs=(pair,),
+                requested_class=jax.device_put(requested, device),
+                target_current=jax.device_put(jnp.asarray(target_current), device),
+                prescribed_current=jax.device_put(jnp.asarray(current), device),
+                tolerance=FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=self.conditioned_programs[index],
+                stream=False,
+            )
+        jax.block_until_ready(result.state)
+        return result
+
     def _solve_slot(self, batch: EngineBatch, index: int) -> SolvedSlice:
         device = jax.devices()[index % self.device_count]
         started = time.perf_counter()
@@ -247,22 +307,15 @@ class SequentialCompiledEngine:
 
         free_started = time.perf_counter()
         try:
-            with jax.default_device(device):
-                free_result = reduced_newton.solve_reduced_newton_compiled(
-                    self.prepared.profile.operator,
-                    jax.device_put(initial, device),
-                    requested_class=jax.device_put(
-                        jnp.asarray(requested_value, dtype=jnp.int8), device
-                    ),
-                    target_current=jax.device_put(jnp.asarray(target_current), device),
-                    prescribed_current=jax.device_put(jnp.asarray(current), device),
-                    tolerance=FIXED_POINT_CRITERION,
-                    newton_steps=NEWTON_STEPS,
-                    program=self.free_programs[index],
-                    stream=False,
-                )
+            free_result = self._free_solve(
+                index,
+                device,
+                initial,
+                requested_value,
+                target_current,
+                current,
+            )
             self.free_programs[index] = free_result.program
-            jax.block_until_ready(free_result.state)
             free_wall_seconds = time.perf_counter() - free_started
             free_centroid_r, free_centroid_z = _centroid_coordinates(
                 self.prepared, free_result.state, target_current
@@ -287,37 +340,27 @@ class SequentialCompiledEngine:
             conditioned = True
             conditioned_started = time.perf_counter()
             try:
-                requested = jnp.asarray(requested_value, dtype=jnp.int8)
-                pair, _selection = _centroid_pair(
-                    self.prepared.profile,
-                    jnp.asarray(initial),
-                    target=float(batch.centroid_target_z[index]),
-                    unknown=None,
-                    target_current=target_current,
-                    requested=requested,
-                    names=_circuit_names(self.prepared.policy_evidence),
-                )
                 with jax.default_device(device):
-                    conditioned_result = (
-                        reduced_newton.solve_constrained_reduced_newton_compiled(
-                            self.prepared.profile,
-                            jax.device_put(initial, device),
-                            constraint_pairs=(pair,),
-                            requested_class=jax.device_put(requested, device),
-                            target_current=jax.device_put(
-                                jnp.asarray(target_current), device
-                            ),
-                            prescribed_current=jax.device_put(
-                                jnp.asarray(current), device
-                            ),
-                            tolerance=FIXED_POINT_CRITERION,
-                            newton_steps=NEWTON_STEPS,
-                            program=self.conditioned_programs[index],
-                            stream=False,
-                        )
+                    requested = jnp.asarray(requested_value, dtype=jnp.int8)
+                    pair, _selection = _centroid_pair(
+                        self.prepared.profile,
+                        jnp.asarray(initial),
+                        target=float(batch.centroid_target_z[index]),
+                        unknown=None,
+                        target_current=target_current,
+                        requested=requested,
+                        names=_circuit_names(self.prepared.policy_evidence),
                     )
+                conditioned_result = self._conditioned_solve(
+                    index,
+                    device,
+                    initial,
+                    pair,
+                    requested,
+                    target_current,
+                    current,
+                )
                 self.conditioned_programs[index] = conditioned_result.program
-                jax.block_until_ready(conditioned_result.state)
                 conditioned_wall_seconds = time.perf_counter() - conditioned_started
                 conditioned_centroid_r, conditioned_centroid_z = _centroid_coordinates(
                     self.prepared, conditioned_result.state, target_current
@@ -401,6 +444,11 @@ class SequentialCompiledEngine:
             selected = replace(selected, program=None)
         return SolvedSlice(selected, np.asarray(applied_current), record)
 
+    def _solve_active(
+        self, batch: EngineBatch, indices: Sequence[int]
+    ) -> list[tuple[int, SolvedSlice]]:
+        return [(index, self._solve_slot(batch, index)) for index in indices]
+
     def step(self, batch: EngineBatch) -> EngineResult:
         size = batch.validate()
         self._ensure_slots(size)
@@ -412,9 +460,8 @@ class SequentialCompiledEngine:
         residual = np.full(size, np.nan)
         centroid = np.full((size, 2), np.nan)
         conditioned = np.zeros(size, dtype=bool)
-        for raw_index in np.flatnonzero(batch.active):
-            index = int(raw_index)
-            payload = self._solve_slot(batch, index)
+        indices = [int(raw_index) for raw_index in np.flatnonzero(batch.active)]
+        for index, payload in self._solve_active(batch, indices):
             solved[index] = payload
             result = payload.result
             conditioned[index] = bool(payload.record["conditioned"])
@@ -442,6 +489,70 @@ class SequentialCompiledEngine:
             },
             solved=tuple(solved),
         )
+
+
+@dataclass
+class HostRouteEngine(SequentialCompiledEngine):
+    """Drive the same host-loop reduced solves as the sequential shard writer."""
+
+    name: ClassVar[str] = "host-route"
+
+    def _free_solve(
+        self,
+        index: int,
+        device: jax.Device,
+        initial: np.ndarray,
+        requested_value: int,
+        target_current: float,
+        current: np.ndarray,
+    ) -> reduced_newton.ReducedNewtonResult:
+        with jax.default_device(device):
+            return reduced_newton.solve_reduced_newton(
+                self.prepared.profile.operator,
+                jnp.asarray(initial),
+                requested_class=jnp.asarray(requested_value, dtype=jnp.int8),
+                target_current=target_current,
+                prescribed_current=jnp.asarray(current),
+                tolerance=FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=self.free_programs[index],
+                stream=False,
+            )
+
+    def _conditioned_solve(
+        self,
+        index: int,
+        device: jax.Device,
+        initial: np.ndarray,
+        pair: Any,
+        requested: jax.Array,
+        target_current: float,
+        current: np.ndarray,
+    ) -> reduced_newton.ReducedNewtonResult:
+        with jax.default_device(device):
+            return reduced_newton.solve_constrained_reduced_newton(
+                self.prepared.profile,
+                jnp.asarray(initial),
+                constraint_pairs=(pair,),
+                requested_class=requested,
+                target_current=target_current,
+                prescribed_current=jnp.asarray(current),
+                tolerance=FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=self.conditioned_programs[index],
+                stream=False,
+            )
+
+    def _solve_active(
+        self, batch: EngineBatch, indices: Sequence[int]
+    ) -> list[tuple[int, SolvedSlice]]:
+        if len(indices) < 2:
+            return super()._solve_active(batch, indices)
+        with ThreadPoolExecutor(max_workers=len(indices)) as pool:
+            futures = {
+                pool.submit(self._solve_slot, batch, index): index for index in indices
+            }
+            return [(index, future.result()) for future, index in futures.items()]
 
 
 _ASSEMBLY_PREPARED: PreparedLabeller | None = None
@@ -848,22 +959,16 @@ class CorpusScheduler:
 
     def run(
         self,
-        ranked_shots: Sequence[ShotInput],
+        ranked_shots: Iterable[ShotInput],
         output_root: Path,
         *,
         prepared: PreparedLabeller,
         source_identity: SourceIdentity,
+        previously_written_shots: int = 0,
     ) -> dict[str, Any]:
         output_root.mkdir(parents=True, exist_ok=True)
-        pending = deque(
-            work
-            for work in ranked_shots
-            if not (
-                (output_root / f"{work.shot}.nc").is_file()
-                and (output_root / f"{work.shot}.manifest.json").is_file()
-            )
-        )
-        skipped = len(ranked_shots) - len(pending)
+        pending = iter(ranked_shots)
+        skipped = previously_written_shots
         slots: list[_Slot | None] = [None] * self.capacity
         completed: dict[int, list[AssembledSlice]] = {}
         shot_started: dict[int, float] = {}
@@ -874,13 +979,18 @@ class CorpusScheduler:
         setup_unassigned = prepared.setup_wall_seconds
 
         def refill(index: int) -> None:
-            if pending:
-                work = pending.popleft()
+            nonlocal skipped
+            for work in pending:
+                if (output_root / f"{work.shot}.nc").is_file() and (
+                    output_root / f"{work.shot}.manifest.json"
+                ).is_file():
+                    skipped += 1
+                    continue
                 slots[index] = _Slot(work)
                 completed[work.shot] = []
                 shot_started[work.shot] = time.perf_counter()
-            else:
-                slots[index] = None
+                return
+            slots[index] = None
 
         def finish_future(future: Future[AssembledSlice]) -> None:
             nonlocal assembly_wall, written, written_shots, setup_unassigned
@@ -967,7 +1077,7 @@ class CorpusScheduler:
         pool_rate = written / assembly_wall if assembly_wall else 0.0
         return {
             "schema": "nova-forward-labeller-parallel-receipt",
-            "engine": "sequential-compiled",
+            "engine": self.engine.name,
             "device_count": self.device_count,
             "batch_per_device": self.batch_per_device,
             "slot_count": self.capacity,
@@ -978,7 +1088,9 @@ class CorpusScheduler:
             "engine_wall_seconds": engine_wall,
             "engine_slices_per_second": engine_rate,
             "host_assembly_wall_seconds": assembly_wall,
-            "host_assembly_wall_seconds_per_slice": assembly_wall / written,
+            "host_assembly_wall_seconds_per_slice": (
+                assembly_wall / written if written else 0.0
+            ),
             "pool_slices_per_second": pool_rate,
             "frames_per_second_written": written / wall,
             "wall_seconds": wall,

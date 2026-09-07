@@ -1,0 +1,1075 @@
+{
+  "receipt": "seed-centroid radial-field decomposition by current family",
+  "source": {
+    "revision": "3ee825715d996339fc2fd93244eef64ee6e54c35",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cpu:0"
+    ]
+  },
+  "configuration": {
+    "field": "B_R at the stored EFIT current centroid",
+    "p6_equivalent": "B_R divided by the P6 upper-minus-lower unit response at that centroid",
+    "case_swap": "replace each fitted coil-case group current by its nearest finite transducer sample at the EFIT slice time",
+    "plasma": "native EFIT delta-star current density imaged through shaped cell sections",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "version": "runtime-ea5c55820be3d80549fe"
+    }
+  },
+  "rows": [
+    {
+      "identity": "21986/46",
+      "efit_time_s": 0.25,
+      "current_centroid": {
+        "r_m": 0.7995247864306984,
+        "z_m": 0.09889428493417934
+      },
+      "current_centroid_source": "public seed current-moment observation on all-domain support",
+      "archived_scalar_centroid": {
+        "r_m": 0.833924412727356,
+        "z_m": 0.0949496179819107
+      },
+      "p6_radial_response_t_per_a": -2.2173226878392575e-07,
+      "p6_definition": "stored P6 upper current minus stored P6 lower current",
+      "components": [
+        {
+          "radial_field_mT": 0.38441415513241756,
+          "p6_ampere_equivalent_a": -1733.6861127192203,
+          "radial_field_mT_with_case_transducers": 0.38441415513241756,
+          "p6_ampere_equivalent_a_with_case_transducers": -1733.6861127192203,
+          "category": "active_circuit",
+          "family": "p2_inner_lower",
+          "stored_circuits": [
+            4
+          ],
+          "section_element_count": 12
+        },
+        {
+          "radial_field_mT": -0.5386236255312036,
+          "p6_ampere_equivalent_a": 2429.162108362689,
+          "radial_field_mT_with_case_transducers": -0.5386236255312036,
+          "p6_ampere_equivalent_a_with_case_transducers": 2429.162108362689,
+          "category": "active_circuit",
+          "family": "p2_inner_upper",
+          "stored_circuits": [
+            2
+          ],
+          "section_element_count": 12
+        },
+        {
+          "radial_field_mT": 0.32967286464933293,
+          "p6_ampere_equivalent_a": -1486.805986595453,
+          "radial_field_mT_with_case_transducers": 0.32967286464933293,
+          "p6_ampere_equivalent_a_with_case_transducers": -1486.805986595453,
+          "category": "active_circuit",
+          "family": "p2_outer_lower",
+          "stored_circuits": [
+            5
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -0.4574183731121256,
+          "p6_ampere_equivalent_a": 2062.931009639701,
+          "radial_field_mT_with_case_transducers": -0.4574183731121256,
+          "p6_ampere_equivalent_a_with_case_transducers": 2062.931009639701,
+          "category": "active_circuit",
+          "family": "p2_outer_upper",
+          "stored_circuits": [
+            3
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": 3.754891186506986e-05,
+          "p6_ampere_equivalent_a": -0.16934347026260135,
+          "radial_field_mT_with_case_transducers": 3.754891186506986e-05,
+          "p6_ampere_equivalent_a_with_case_transducers": -0.16934347026260135,
+          "category": "active_circuit",
+          "family": "p3_lower",
+          "stored_circuits": [
+            7
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -0.003186230473556964,
+          "p6_ampere_equivalent_a": 14.36971935132225,
+          "radial_field_mT_with_case_transducers": -0.003186230473556964,
+          "p6_ampere_equivalent_a_with_case_transducers": 14.36971935132225,
+          "category": "active_circuit",
+          "family": "p3_upper",
+          "stored_circuits": [
+            6
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -13.66014698638885,
+          "p6_ampere_equivalent_a": 61606.49084279396,
+          "radial_field_mT_with_case_transducers": -13.66014698638885,
+          "p6_ampere_equivalent_a_with_case_transducers": 61606.49084279396,
+          "category": "active_circuit",
+          "family": "p4_lower",
+          "stored_circuits": [
+            9
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": 16.734547841504785,
+          "p6_ampere_equivalent_a": -75471.86493551063,
+          "radial_field_mT_with_case_transducers": 16.734547841504785,
+          "p6_ampere_equivalent_a_with_case_transducers": -75471.86493551063,
+          "category": "active_circuit",
+          "family": "p4_upper",
+          "stored_circuits": [
+            8
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": -12.396706098338443,
+          "p6_ampere_equivalent_a": 55908.44384683954,
+          "radial_field_mT_with_case_transducers": -12.396706098338443,
+          "p6_ampere_equivalent_a_with_case_transducers": 55908.44384683954,
+          "category": "active_circuit",
+          "family": "p5_lower",
+          "stored_circuits": [
+            11
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": 10.943694904382125,
+          "p6_ampere_equivalent_a": -49355.445485684206,
+          "radial_field_mT_with_case_transducers": 10.943694904382125,
+          "p6_ampere_equivalent_a_with_case_transducers": -49355.445485684206,
+          "category": "active_circuit",
+          "family": "p5_upper",
+          "stored_circuits": [
+            10
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": -0.7517928682925582,
+          "p6_ampere_equivalent_a": 3390.5433449795587,
+          "radial_field_mT_with_case_transducers": -0.7517928682925582,
+          "p6_ampere_equivalent_a_with_case_transducers": 3390.5433449795587,
+          "category": "active_circuit",
+          "family": "p6_lower",
+          "stored_circuits": [
+            13
+          ],
+          "section_element_count": 4
+        },
+        {
+          "radial_field_mT": -0.7010702039145131,
+          "p6_ampere_equivalent_a": 3161.7869954584457,
+          "radial_field_mT_with_case_transducers": -0.7010702039145131,
+          "p6_ampere_equivalent_a_with_case_transducers": 3161.7869954584457,
+          "category": "active_circuit",
+          "family": "p6_upper",
+          "stored_circuits": [
+            12
+          ],
+          "section_element_count": 4
+        },
+        {
+          "radial_field_mT": -1.3009613622786678,
+          "p6_ampere_equivalent_a": 5867.2622140823,
+          "radial_field_mT_with_case_transducers": -1.3009613622786678,
+          "p6_ampere_equivalent_a_with_case_transducers": 5867.2622140823,
+          "category": "active_circuit",
+          "family": "sol",
+          "stored_circuits": [
+            1
+          ],
+          "section_element_count": 656
+        },
+        {
+          "radial_field_mT": 0.04280643677769095,
+          "p6_ampere_equivalent_a": -193.05461046540358,
+          "radial_field_mT_with_case_transducers": 0.04103291968663323,
+          "p6_ampere_equivalent_a_with_case_transducers": -185.05614862318077,
+          "category": "instrumented_coil_case",
+          "family": "p2_lower",
+          "stored_circuits": [
+            15
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p2l_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 4397.953033447266
+          },
+          "case_swap_delta_mT": -0.0017735170910577213,
+          "case_swap_delta_p6_a": 7.998461842222807
+        },
+        {
+          "radial_field_mT": -0.0020316245471805783,
+          "p6_ampere_equivalent_a": 9.162511881210946,
+          "radial_field_mT_with_case_transducers": 0.004923000192754456,
+          "p6_ampere_equivalent_a_with_case_transducers": -22.202452623401577,
+          "category": "instrumented_coil_case",
+          "family": "p2_upper",
+          "stored_circuits": [
+            14
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p2u_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": -375.3070831298828
+          },
+          "case_swap_delta_mT": 0.006954624739935034,
+          "case_swap_delta_p6_a": -31.364964504612523
+        },
+        {
+          "radial_field_mT": 0.30489132204140834,
+          "p6_ampere_equivalent_a": -1375.0426300761828,
+          "radial_field_mT_with_case_transducers": 0.27563299471356517,
+          "p6_ampere_equivalent_a_with_case_transducers": -1243.089227496088,
+          "category": "instrumented_coil_case",
+          "family": "p3_lower",
+          "stored_circuits": [
+            17
+          ],
+          "section_element_count": 8,
+          "case_transducer": {
+            "channel": "p3l_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 3421.4186668395996
+          },
+          "case_swap_delta_mT": -0.02925832732784316,
+          "case_swap_delta_p6_a": 131.9534025800949
+        },
+        {
+          "radial_field_mT": 0.5462014593700917,
+          "p6_ampere_equivalent_a": -2463.3377106800617,
+          "radial_field_mT_with_case_transducers": 0.3339046349822448,
+          "p6_ampere_equivalent_a_with_case_transducers": -1505.8910316189888,
+          "category": "instrumented_coil_case",
+          "family": "p3_upper",
+          "stored_circuits": [
+            16
+          ],
+          "section_element_count": 8,
+          "case_transducer": {
+            "channel": "p3u_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": -2988.1908893585205
+          },
+          "case_swap_delta_mT": -0.2122968243878469,
+          "case_swap_delta_p6_a": 957.4466790610728
+        },
+        {
+          "radial_field_mT": 0.05213659776943723,
+          "p6_ampere_equivalent_a": -235.13310920136502,
+          "radial_field_mT_with_case_transducers": 0.0798270942820046,
+          "p6_ampere_equivalent_a_with_case_transducers": -360.01568341771093,
+          "category": "instrumented_coil_case",
+          "family": "p4_lower",
+          "stored_circuits": [
+            19
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p4l_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 1026.458740234375
+          },
+          "case_swap_delta_mT": 0.02769049651256737,
+          "case_swap_delta_p6_a": -124.88257421634593
+        },
+        {
+          "radial_field_mT": 0.10292569402474311,
+          "p6_ampere_equivalent_a": -464.1890627342221,
+          "radial_field_mT_with_case_transducers": -0.053841211086542336,
+          "p6_ampere_equivalent_a_with_case_transducers": 242.82081891747413,
+          "category": "instrumented_coil_case",
+          "family": "p4_upper",
+          "stored_circuits": [
+            18
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p4u_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 564.75830078125
+          },
+          "case_swap_delta_mT": -0.15676690511128544,
+          "case_swap_delta_p6_a": 707.0098816516963
+        },
+        {
+          "radial_field_mT": 0.2463871628911886,
+          "p6_ampere_equivalent_a": -1111.1921789394064,
+          "radial_field_mT_with_case_transducers": 0.09147412852760023,
+          "p6_ampere_equivalent_a_with_case_transducers": -412.5431495798213,
+          "category": "instrumented_coil_case",
+          "family": "p5_lower",
+          "stored_circuits": [
+            21
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p5l_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 936.3021850585938
+          },
+          "case_swap_delta_mT": -0.1549130343635884,
+          "case_swap_delta_p6_a": 698.6490293595853
+        },
+        {
+          "radial_field_mT": 0.2679670413580636,
+          "p6_ampere_equivalent_a": -1208.5162111392674,
+          "radial_field_mT_with_case_transducers": 0.23572552994394738,
+          "p6_ampere_equivalent_a_with_case_transducers": -1063.1088169384034,
+          "category": "instrumented_coil_case",
+          "family": "p5_upper",
+          "stored_circuits": [
+            20
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p5u_case_current",
+            "time_s": 0.25,
+            "sample_time_s": 0.2499999701976776,
+            "sample_time_offset_s": -2.9802322387695312e-08,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": -2754.9209594726562
+          },
+          "case_swap_delta_mT": -0.03224151141411621,
+          "case_swap_delta_p6_a": 145.40739420086393
+        },
+        {
+          "radial_field_mT": 0.2727631420428154,
+          "p6_ampere_equivalent_a": -1230.1463541538842,
+          "radial_field_mT_with_case_transducers": 0.2727631420428154,
+          "p6_ampere_equivalent_a_with_case_transducers": -1230.1463541538842,
+          "category": "passive_or_vessel",
+          "family": "passive_vessel_remaining",
+          "stored_circuits": [
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101
+          ],
+          "section_element_count": 86
+        },
+        {
+          "radial_field_mT": 4.390175568735447,
+          "p6_ampere_equivalent_a": -19799.443684101738,
+          "radial_field_mT_with_case_transducers": 4.390175568735447,
+          "p6_ampere_equivalent_a_with_case_transducers": -19799.443684101738,
+          "category": "plasma",
+          "family": "plasma_self",
+          "source": "native efm current density through delta-star and shaped cell sections",
+          "native_lattice_shape_rz": [
+            65,
+            65
+          ],
+          "admitted_cell_count": 830,
+          "admitted_current_a": 874028.7580205452
+        }
+      ],
+      "totals": {
+        "fitted_radial_field_mT": 4.806684366714312,
+        "fitted_p6_ampere_equivalent_a": -21677.874822082584,
+        "case_transducer_swap_radial_field_mT": 4.254079368271077,
+        "case_transducer_swap_p6_ampere_equivalent_a": -19185.657512108006,
+        "case_swap_delta_mT": -0.5526049984432353,
+        "case_swap_delta_p6_a": 2492.217309974577,
+        "direct_fitted_radial_field_mT": 4.806684366714294,
+        "direct_case_transducer_radial_field_mT": 4.254079368271056,
+        "sum_relative_error": 4.802003414761223e-15
+      }
+    },
+    {
+      "identity": "21989/55",
+      "efit_time_s": 0.29499998688697815,
+      "current_centroid": {
+        "r_m": 0.8100958302708482,
+        "z_m": 0.012586049153551363
+      },
+      "current_centroid_source": "public seed current-moment observation on all-domain support",
+      "archived_scalar_centroid": {
+        "r_m": 0.8466247320175171,
+        "z_m": 0.015480739064514637
+      },
+      "p6_radial_response_t_per_a": -2.2522385906128132e-07,
+      "p6_definition": "stored P6 upper current minus stored P6 lower current",
+      "components": [
+        {
+          "radial_field_mT": 0.5907175869535426,
+          "p6_ampere_equivalent_a": -2622.8019953819094,
+          "radial_field_mT_with_case_transducers": 0.5907175869535426,
+          "p6_ampere_equivalent_a_with_case_transducers": -2622.8019953819094,
+          "category": "active_circuit",
+          "family": "p2_inner_lower",
+          "stored_circuits": [
+            4
+          ],
+          "section_element_count": 12
+        },
+        {
+          "radial_field_mT": -0.6164761641327455,
+          "p6_ampere_equivalent_a": 2737.1707717920244,
+          "radial_field_mT_with_case_transducers": -0.6164761641327455,
+          "p6_ampere_equivalent_a_with_case_transducers": 2737.1707717920244,
+          "category": "active_circuit",
+          "family": "p2_inner_upper",
+          "stored_circuits": [
+            2
+          ],
+          "section_element_count": 12
+        },
+        {
+          "radial_field_mT": 0.5034090506336912,
+          "p6_ampere_equivalent_a": -2235.149742713175,
+          "radial_field_mT_with_case_transducers": 0.5034090506336912,
+          "p6_ampere_equivalent_a_with_case_transducers": -2235.149742713175,
+          "category": "active_circuit",
+          "family": "p2_outer_lower",
+          "stored_circuits": [
+            5
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -0.5245924501956629,
+          "p6_ampere_equivalent_a": 2329.204607283308,
+          "radial_field_mT_with_case_transducers": -0.5245924501956629,
+          "p6_ampere_equivalent_a_with_case_transducers": 2329.204607283308,
+          "category": "active_circuit",
+          "family": "p2_outer_upper",
+          "stored_circuits": [
+            3
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": 0.0021092606437692796,
+          "p6_ampere_equivalent_a": -9.365174065307926,
+          "radial_field_mT_with_case_transducers": 0.0021092606437692796,
+          "p6_ampere_equivalent_a_with_case_transducers": -9.365174065307926,
+          "category": "active_circuit",
+          "family": "p3_lower",
+          "stored_circuits": [
+            7
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -0.003623224034691041,
+          "p6_ampere_equivalent_a": 16.08721229532434,
+          "radial_field_mT_with_case_transducers": -0.003623224034691041,
+          "p6_ampere_equivalent_a_with_case_transducers": 16.08721229532434,
+          "category": "active_circuit",
+          "family": "p3_upper",
+          "stored_circuits": [
+            6
+          ],
+          "section_element_count": 8
+        },
+        {
+          "radial_field_mT": -17.736267037288926,
+          "p6_ampere_equivalent_a": 78749.50332177308,
+          "radial_field_mT_with_case_transducers": -17.736267037288926,
+          "p6_ampere_equivalent_a_with_case_transducers": 78749.50332177308,
+          "category": "active_circuit",
+          "family": "p4_lower",
+          "stored_circuits": [
+            9
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": 18.1600477869286,
+          "p6_ampere_equivalent_a": -80631.10126350966,
+          "radial_field_mT_with_case_transducers": 18.1600477869286,
+          "p6_ampere_equivalent_a_with_case_transducers": -80631.10126350966,
+          "category": "active_circuit",
+          "family": "p4_upper",
+          "stored_circuits": [
+            8
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": -14.592232181445683,
+          "p6_ampere_equivalent_a": 64789.90388613878,
+          "radial_field_mT_with_case_transducers": -14.592232181445683,
+          "p6_ampere_equivalent_a_with_case_transducers": 64789.90388613878,
+          "category": "active_circuit",
+          "family": "p5_lower",
+          "stored_circuits": [
+            11
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": 14.462831967142748,
+          "p6_ampere_equivalent_a": -64215.3634496048,
+          "radial_field_mT_with_case_transducers": 14.462831967142748,
+          "p6_ampere_equivalent_a_with_case_transducers": -64215.3634496048,
+          "category": "active_circuit",
+          "family": "p5_upper",
+          "stored_circuits": [
+            10
+          ],
+          "section_element_count": 23
+        },
+        {
+          "radial_field_mT": 0.22048616254514303,
+          "p6_ampere_equivalent_a": -978.9644998718843,
+          "radial_field_mT_with_case_transducers": 0.22048616254514303,
+          "p6_ampere_equivalent_a_with_case_transducers": -978.9644998718843,
+          "category": "active_circuit",
+          "family": "p6_lower",
+          "stored_circuits": [
+            13
+          ],
+          "section_element_count": 4
+        },
+        {
+          "radial_field_mT": 0.3208228016223937,
+          "p6_ampere_equivalent_a": -1424.461879658588,
+          "radial_field_mT_with_case_transducers": 0.3208228016223937,
+          "p6_ampere_equivalent_a_with_case_transducers": -1424.461879658588,
+          "category": "active_circuit",
+          "family": "p6_upper",
+          "stored_circuits": [
+            12
+          ],
+          "section_element_count": 4
+        },
+        {
+          "radial_field_mT": -0.22934577268656223,
+          "p6_ampere_equivalent_a": 1018.3014075083375,
+          "radial_field_mT_with_case_transducers": -0.22934577268656223,
+          "p6_ampere_equivalent_a_with_case_transducers": 1018.3014075083375,
+          "category": "active_circuit",
+          "family": "sol",
+          "stored_circuits": [
+            1
+          ],
+          "section_element_count": 656
+        },
+        {
+          "radial_field_mT": 0.021206325781440473,
+          "p6_ampere_equivalent_a": -94.15665760202798,
+          "radial_field_mT_with_case_transducers": 0.0289563003191107,
+          "p6_ampere_equivalent_a_with_case_transducers": -128.56675327293792,
+          "category": "instrumented_coil_case",
+          "family": "p2_lower",
+          "stored_circuits": [
+            15
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p2l_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 2672.8897094726562
+          },
+          "case_swap_delta_mT": 0.0077499745376702275,
+          "case_swap_delta_p6_a": -34.41009567090994
+        },
+        {
+          "radial_field_mT": -0.015480063628318401,
+          "p6_ampere_equivalent_a": 68.73189942148367,
+          "radial_field_mT_with_case_transducers": -0.020879177151649417,
+          "p6_ampere_equivalent_a_with_case_transducers": 92.70410887493223,
+          "category": "instrumented_coil_case",
+          "family": "p2_upper",
+          "stored_circuits": [
+            14
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p2u_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 1845.9281921386719
+          },
+          "case_swap_delta_mT": -0.005399113523331015,
+          "case_swap_delta_p6_a": 23.972209453448563
+        },
+        {
+          "radial_field_mT": 0.01996279325261528,
+          "p6_ampere_equivalent_a": -88.63533968301107,
+          "radial_field_mT_with_case_transducers": -0.00940464817614843,
+          "p6_ampere_equivalent_a_with_case_transducers": 41.75689118970967,
+          "category": "instrumented_coil_case",
+          "family": "p3_lower",
+          "stored_circuits": [
+            17
+          ],
+          "section_element_count": 8,
+          "case_transducer": {
+            "channel": "p3l_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": -100.61116516590118
+          },
+          "case_swap_delta_mT": -0.029367441428763713,
+          "case_swap_delta_p6_a": 130.39223087272075
+        },
+        {
+          "radial_field_mT": -0.0836376351728419,
+          "p6_ampere_equivalent_a": 371.3533527106685,
+          "radial_field_mT_with_case_transducers": -0.03703813435364688,
+          "p6_ampere_equivalent_a_with_case_transducers": 164.45031404763003,
+          "category": "instrumented_coil_case",
+          "family": "p3_upper",
+          "stored_circuits": [
+            16
+          ],
+          "section_element_count": 8,
+          "case_transducer": {
+            "channel": "p3u_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 380.0356090068817
+          },
+          "case_swap_delta_mT": 0.04659950081919501,
+          "case_swap_delta_p6_a": -206.90303866303844
+        },
+        {
+          "radial_field_mT": 0.033324287469403545,
+          "p6_ampere_equivalent_a": -147.96073385962325,
+          "radial_field_mT_with_case_transducers": 0.08497508303594616,
+          "p6_ampere_equivalent_a_with_case_transducers": -377.2916572432285,
+          "category": "instrumented_coil_case",
+          "family": "p4_lower",
+          "stored_circuits": [
+            19
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p4l_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 984.161376953125
+          },
+          "case_swap_delta_mT": 0.05165079556654261,
+          "case_swap_delta_p6_a": -229.33092338360524
+        },
+        {
+          "radial_field_mT": 0.04389702800111026,
+          "p6_ampere_equivalent_a": -194.903986567277,
+          "radial_field_mT_with_case_transducers": -0.07233785836566224,
+          "p6_ampere_equivalent_a_with_case_transducers": 321.1820393592482,
+          "category": "instrumented_coil_case",
+          "family": "p4_upper",
+          "stored_circuits": [
+            18
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p4u_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 816.1163330078125
+          },
+          "case_swap_delta_mT": -0.1162348863667725,
+          "case_swap_delta_p6_a": 516.0860259265253
+        },
+        {
+          "radial_field_mT": 0.10064748844057901,
+          "p6_ampere_equivalent_a": -446.8775593317303,
+          "radial_field_mT_with_case_transducers": 0.02383538254051756,
+          "p6_ampere_equivalent_a_with_case_transducers": -105.82974041854142,
+          "category": "instrumented_coil_case",
+          "family": "p5_lower",
+          "stored_circuits": [
+            21
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p5l_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": 246.15478515625
+          },
+          "case_swap_delta_mT": -0.07681210590006145,
+          "case_swap_delta_p6_a": 341.0478189131889
+        },
+        {
+          "radial_field_mT": -0.0069231674519980345,
+          "p6_ampere_equivalent_a": 30.739049942814027,
+          "radial_field_mT_with_case_transducers": 0.0048819746989323875,
+          "p6_ampere_equivalent_a_with_case_transducers": -21.67609914544643,
+          "category": "instrumented_coil_case",
+          "family": "p5_upper",
+          "stored_circuits": [
+            20
+          ],
+          "section_element_count": 4,
+          "case_transducer": {
+            "channel": "p5u_case_current",
+            "time_s": 0.29499998688697815,
+            "sample_time_s": 0.29499998688697815,
+            "sample_time_offset_s": 0.0,
+            "selection": "nearest finite amc sample to the EFIT slice time",
+            "current_a": -51.20849609375
+          },
+          "case_swap_delta_mT": 0.01180514215093042,
+          "case_swap_delta_p6_a": -52.415149088260456
+        },
+        {
+          "radial_field_mT": 0.1878415071622111,
+          "p6_ampere_equivalent_a": -834.0213507801639,
+          "radial_field_mT_with_case_transducers": 0.1878415071622111,
+          "p6_ampere_equivalent_a_with_case_transducers": -834.0213507801639,
+          "category": "passive_or_vessel",
+          "family": "passive_vessel_remaining",
+          "stored_circuits": [
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101
+          ],
+          "section_element_count": 86
+        },
+        {
+          "radial_field_mT": -0.5724527128732142,
+          "p6_ampere_equivalent_a": 2541.7054625525047,
+          "radial_field_mT_with_case_transducers": -0.5724527128732142,
+          "p6_ampere_equivalent_a_with_case_transducers": 2541.7054625525047,
+          "category": "plasma",
+          "family": "plasma_self",
+          "source": "native efm current density through delta-star and shaped cell sections",
+          "native_lattice_shape_rz": [
+            65,
+            65
+          ],
+          "admitted_cell_count": 898,
+          "admitted_current_a": 928648.0795185467
+        }
+      ],
+      "totals": {
+        "fitted_radial_field_mT": 0.2862736376666051,
+        "fitted_p6_ampere_equivalent_a": -1271.0626612108297,
+        "case_transducer_swap_radial_field_mT": 0.17626550352201464,
+        "case_transducer_swap_p6_ampere_equivalent_a": -782.6235828507603,
+        "case_swap_delta_mT": -0.11000813414459043,
+        "case_swap_delta_p6_a": 488.4390783600695,
+        "direct_fitted_radial_field_mT": 0.286273637666588,
+        "direct_case_transducer_radial_field_mT": 0.17626550352199752,
+        "sum_relative_error": 9.715565333352852e-14
+      }
+    }
+  ],
+  "extended_scan": {
+    "identity": "21986/46",
+    "baseline_protocol_samples_a": {
+      "0.038894285": -2730.0,
+      "0.058894285": -2581.0,
+      "0.078894285": -2885.0,
+      "0.098894285": -4103.0,
+      "0.118894285": -5764.0
+    },
+    "extension_samples": [
+      {
+        "target_centroid_z_m": 0.01889428493417936,
+        "compensating_current_a": -3564.275226074724,
+        "terminal_residual": 4.3315187419223996e-10,
+        "converged": true,
+        "active_set_trips": 1,
+        "termination_code": 1,
+        "resolved_defaults": {
+          "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+          "policy": {
+            "route": "newton_krylov",
+            "newton_steps": 10,
+            "gmres_iterations": 30,
+            "warmup": 0,
+            "relaxation": 0.5,
+            "step_cap": 10.0,
+            "active_set_steps": 16,
+            "kernel_tolerance": 1e-08,
+            "qualification_tolerance": 1e-10,
+            "current_pin": true,
+            "settled_exit": true,
+            "own_mask_acceptance": true,
+            "continuation": true,
+            "best_iterate_retention": true,
+            "stagnation_stop": true,
+            "exact_kernels": true,
+            "cached_machine": true,
+            "compilation_cache": true
+          },
+          "deviations": {},
+          "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe"
+        }
+      },
+      {
+        "target_centroid_z_m": 0.13889428493417935,
+        "compensating_current_a": -6974.554605929583,
+        "terminal_residual": 6.598234949473584e-10,
+        "converged": true,
+        "active_set_trips": 2,
+        "termination_code": 1,
+        "resolved_defaults": {
+          "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+          "policy": {
+            "route": "newton_krylov",
+            "newton_steps": 10,
+            "gmres_iterations": 30,
+            "warmup": 0,
+            "relaxation": 0.5,
+            "step_cap": 10.0,
+            "active_set_steps": 16,
+            "kernel_tolerance": 1e-08,
+            "qualification_tolerance": 1e-10,
+            "current_pin": true,
+            "settled_exit": true,
+            "own_mask_acceptance": true,
+            "continuation": true,
+            "best_iterate_retention": true,
+            "stagnation_stop": true,
+            "exact_kernels": true,
+            "cached_machine": true,
+            "compilation_cache": true
+          },
+          "deviations": {},
+          "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe"
+        }
+      }
+    ],
+    "zero_exists_in_extended_samples": false,
+    "verdict": "no zero-current sign change appears in the requested distant samples",
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.007756298407912254,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-vertical-force-decomposition/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024612 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "verdict": {
+    "sum_relative_error_max": 9.715565333352852e-14,
+    "extended_zero_exists": false,
+    "largest_fitted_component_per_row": {
+      "21986/46": "p4_upper",
+      "21989/55": "p4_upper"
+    }
+  }
+}

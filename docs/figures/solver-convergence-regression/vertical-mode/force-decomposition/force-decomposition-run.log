@@ -1,0 +1,4 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+{"extended_zero_exists": false, "largest_fitted_component_per_row": {"21986/46": "p4_upper", "21989/55": "p4_upper"}, "sum_relative_error_max": 9.715565333352852e-14}
+EXIT=0

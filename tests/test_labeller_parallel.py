@@ -155,34 +155,38 @@ def test_both_writers_pass_the_solved_class_into_the_centroid_reads(
 ):
     """The free and conditioned achieved-centroid reads get the solved class.
 
-    Each writer reads its own achieved centroid with the class it solved
-    with, so the read reproduces the solve's admission decision instead of
-    re-deriving the topology emergently.  One real free and conditioned
-    solve runs on each writer and the forwarded requested_class seen by the
-    centroid read is recorded.
+    Each writer must read its achieved centroid with the class it solved
+    with, so the achieved read reproduces the solve's admission instead of
+    re-deriving the topology emergently.  Solves, the centroid read and the
+    pair derivation are stubbed so no topology compute runs; the assertion is
+    that the class forwarded into every achieved-centroid read (free and
+    conditioned on each writer) is the slice's requested class and never the
+    unconstrained ``None``.
     """
     fixture = _solovev_fixture(tmp_path)
     seen: list[object] = []
 
-    real_centroid = shard._centroid_coordinates
+    def recording_centroid(
+        _prepared, _flux, _target_current, *, requested_class=None, **_kwargs
+    ):
+        seen.append(requested_class)
+        # Far below the moved target so the branch guard fails and the
+        # conditioned re-solve is entered on each writer.
+        return (0.66, 5.0)
 
-    def traced_centroid(*_args, **_kwargs):
-        seen.append(_kwargs.get("requested_class"))
-        return real_centroid(*_args, **_kwargs)
+    def solved(*_args, **_kwargs):
+        return scheduler.reduced_newton.ReducedNewtonResult(
+            state=np.zeros(1126),
+            terminal_residual=0.0,
+            active_set_iterations=1,
+            converged=True,
+            termination_reason=0,
+            program=None,
+            newton_steps_per_trip=[1],
+        )
 
-    monkeypatch.setattr(shard, "_centroid_coordinates", traced_centroid)
-    monkeypatch.setattr(scheduler, "_centroid_coordinates", traced_centroid)
-
-    monkeypatch.setattr(
-        shard.zarr, "open_group", lambda *_args, **_kwargs: {"efm": fixture.group}
-    )
-    monkeypatch.setattr(shard, "_slice_inputs", lambda *_args: fixture.inputs)
-    monkeypatch.setattr(shard, "_slices_seed", lambda *_args: fixture.seed)
-    monkeypatch.setattr(
-        shard, "_requested_class", lambda *_args: fixture.requested_class
-    )
-    monkeypatch.setattr(shard, "_write_session_file", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(shard, "_write_companion", lambda *_args, **_kwargs: None)
+    def pair(*_args, **_kwargs):
+        return (("dummy-pair",), None)
 
     def receipt(_prepared, result, **_arguments):
         return SimpleNamespace(
@@ -193,11 +197,27 @@ def test_both_writers_pass_the_solved_class_into_the_centroid_reads(
         return SimpleNamespace(branch_guard_ok=True)
 
     for module in (shard, scheduler):
+        monkeypatch.setattr(module, "_centroid_coordinates", recording_centroid)
+        monkeypatch.setattr(module, "_centroid_pair", pair)
         monkeypatch.setattr(module, "_forward_receipt", receipt)
         monkeypatch.setattr(
             module, "_internal_geometry", lambda *_args, **_kwargs: None
         )
         monkeypatch.setattr(module, "assemble_frame", frame)
+    monkeypatch.setattr(shard.reduced_newton, "solve_reduced_newton", solved)
+    monkeypatch.setattr(
+        shard.reduced_newton, "solve_constrained_reduced_newton", solved
+    )
+    monkeypatch.setattr(
+        shard.zarr, "open_group", lambda *_args, **_kwargs: {"efm": fixture.group}
+    )
+    monkeypatch.setattr(shard, "_slice_inputs", lambda *_args: fixture.inputs)
+    monkeypatch.setattr(shard, "_slices_seed", lambda *_args: fixture.seed)
+    monkeypatch.setattr(
+        shard, "_requested_class", lambda *_args: fixture.requested_class
+    )
+    monkeypatch.setattr(shard, "_write_session_file", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(shard, "_write_companion", lambda *_args, **_kwargs: None)
 
     shard_output = tmp_path / "shard"
     shard_output.mkdir()

@@ -30,6 +30,7 @@ class TraceScale:
 
     x_limit: tuple[float, float]
     y_limit: tuple[float, float]
+    log: bool = False
 
     @classmethod
     def over(
@@ -39,6 +40,7 @@ class TraceScale:
         pad: float = 0.05,
         symmetric: bool = False,
         quantile: float | None = None,
+        log: bool = False,
     ) -> TraceScale:
         """Measure limits covering every frame's data.
 
@@ -56,20 +58,33 @@ class TraceScale:
         The excluded frames are then drawn outside the axes rather than
         rescaling it, which is the intended trade and worth stating in a
         caption.
+
+        ``log`` measures the ordinate over its positive samples only and
+        returns limits a logarithmic axis can hold. Reach for it when the
+        quantity spans the pulse by more than about a decade: measured on MAST
+        27079, core electron temperature runs from a few hundred eV at the
+        edge of the flat top to 6.9 keV, so no fixed LINEAR axis can both
+        avoid clipping and leave the ordinary frames readable. A log axis
+        satisfies the fixed-scale requirement and stays legible at both ends.
         """
         x = _finite_bounds(abscissa)
+        positive = _positive(ordinate) if log else ordinate
         y = (
-            _finite_bounds(ordinate)
+            _finite_bounds(positive)
             if quantile is None
-            else _quantile_bounds(ordinate, quantile)
+            else _quantile_bounds(positive, quantile)
         )
         if symmetric:
             reach = max(abs(y[0]), abs(y[1]))
             y = (-reach, reach)
+        if log:
+            return cls(x_limit=_padded(x, pad), y_limit=_log_padded(y), log=True)
         return cls(x_limit=_padded(x, pad), y_limit=_padded(y, pad))
 
     def apply(self, axes: matplotlib.axes.Axes) -> matplotlib.axes.Axes:
         """Pin ``axes`` to these limits and stop it autoscaling again."""
+        if self.log:
+            axes.set_yscale("log")
         axes.set_xlim(*self.x_limit)
         axes.set_ylim(*self.y_limit)
         axes.set_autoscale_on(False)
@@ -135,6 +150,27 @@ def _quantile_bounds(values, quantile: float) -> tuple[float, float]:
         float(np.quantile(lows, tail)),
         float(np.quantile(highs, 1.0 - tail)),
     )
+
+
+def _positive(values) -> list[np.ndarray]:
+    """Return each series with its non-positive samples masked out.
+
+    A logarithmic axis cannot hold a zero or a negative sample, and a channel
+    reporting one is a failed measurement rather than a cold plasma, so it is
+    masked rather than clamped to a floor that would invent a value.
+    """
+    masked = []
+    for array in _series(values):
+        masked.append(np.where(array > 0.0, array, np.nan))
+    return masked
+
+
+def _log_padded(bounds: tuple[float, float]) -> tuple[float, float]:
+    """Widen ``bounds`` by a fixed factor for a logarithmic axis."""
+    low, high = bounds
+    if not (low > 0.0 and high > 0.0):
+        raise ValueError("a logarithmic scale needs positive bounds")
+    return low / 1.6, high * 1.6
 
 
 def _padded(bounds: tuple[float, float], pad: float) -> tuple[float, float]:

@@ -55,6 +55,39 @@ class EquilibriumFrame:
 
 
 @dataclass(frozen=True)
+class SurfaceFrame:
+    """One slice of a solve recorded as flux surfaces rather than a map.
+
+    A rasterless record carries the nested surfaces themselves, each with the
+    absolute flux it sits at, so it can be drawn against another source's map
+    at shared levels without a 2-D field ever existing. It is a different
+    record from :class:`EquilibriumFrame` on purpose: code that needs a map
+    cannot accidentally be handed surfaces and contour them.
+    """
+
+    time: float
+    surface_flux: np.ndarray
+    surfaces: tuple[np.ndarray, ...]
+    boundary: np.ndarray
+    magnetic_axis: np.ndarray
+    x_points: np.ndarray
+    legs: tuple[np.ndarray, ...] = ()
+    strike_points: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+    psi_norm: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    p_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    ff_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    guarded: bool = True
+
+    def __post_init__(self) -> None:
+        """Reject a frame whose surfaces and their flux values disagree."""
+        if len(self.surfaces) != self.surface_flux.size:
+            raise ValueError(
+                f"{len(self.surfaces)} surfaces carry "
+                f"{self.surface_flux.size} flux values"
+            )
+
+
+@dataclass(frozen=True)
 class MachineGeometry:
     """Static poloidal geometry: the wall and the conductor sections."""
 

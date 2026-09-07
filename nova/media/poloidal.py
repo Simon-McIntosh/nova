@@ -182,6 +182,65 @@ def draw_boundary(
     )
 
 
+def draw_surfaces(
+    axes: matplotlib.axes.Axes,
+    surfaces: Iterable[np.ndarray],
+    style: InkStyle = DEFAULT_INK,
+    color: str | None = None,
+    linewidth: float | None = None,
+    close: bool = True,
+    **kwargs,
+) -> None:
+    """Draw nested flux surfaces as closed curves.
+
+    This is the rasterless counterpart to :func:`draw_flux_contours`: the
+    surfaces are already curves at known flux, so nothing is contoured and no
+    2-D field is interpolated into existence to draw them.
+    """
+    for surface in surfaces:
+        points = np.asarray(surface, dtype=float).reshape(-1, 2)
+        points = points[np.all(np.isfinite(points), axis=1)]
+        if points.shape[0] < 2:
+            continue
+        if close and not np.allclose(points[0], points[-1]):
+            points = np.vstack((points, points[:1]))
+        axes.plot(
+            points[:, 0],
+            points[:, 1],
+            color=color or style.flux_color,
+            linewidth=linewidth or style.flux_linewidth,
+            zorder=kwargs.pop("zorder", style.zorder_flux),
+            **kwargs,
+        )
+
+
+def draw_legs(
+    axes: matplotlib.axes.Axes,
+    legs: Iterable[np.ndarray],
+    style: InkStyle = DEFAULT_INK,
+    **kwargs,
+) -> None:
+    """Draw divertor legs as open polylines, never closed.
+
+    A leg runs from the X-point to a strike point and is not a loop; closing
+    it would draw a chord across the private-flux region that no field line
+    follows.
+    """
+    for leg in legs:
+        points = np.asarray(leg, dtype=float).reshape(-1, 2)
+        points = points[np.all(np.isfinite(points), axis=1)]
+        if points.shape[0] < 2:
+            continue
+        axes.plot(
+            points[:, 0],
+            points[:, 1],
+            color=kwargs.pop("color", style.separatrix_color),
+            linewidth=kwargs.pop("linewidth", 1.2),
+            zorder=kwargs.pop("zorder", style.zorder_separatrix),
+            **kwargs,
+        )
+
+
 def draw_nulls(
     axes: matplotlib.axes.Axes,
     magnetic_axis: Sequence[float] | None = None,

@@ -1,0 +1,106 @@
+{
+  "achieved_seconds": 10.2,
+  "bytes": 2557588,
+  "contact_sheet": {
+    "bytes": 329089,
+    "columns": 3,
+    "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
+    "rows": 2,
+    "size": [
+      2875,
+      1568
+    ],
+    "tile_indices": [
+      0,
+      20,
+      40,
+      61,
+      81,
+      101
+    ],
+    "tiles": 6
+  },
+  "frame_milliseconds": 100,
+  "frames": 102,
+  "labels": {
+    "admission": "branch_guard_ok",
+    "boundary_source": "outermost nested surface at normalised flux one",
+    "cocos": 17,
+    "flux_unit": "Wb",
+    "guarded_frame_count": 102,
+    "p_prime_source": "efm",
+    "raster": "absent; the session records nested surfaces, not a map",
+    "selected_frame_count": 102,
+    "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
+    "shot": 27079,
+    "stored_frame_count": 114,
+    "surface_count": 11
+  },
+  "left_panel": "nova nested flux surfaces, rasterless",
+  "machine": "MAST",
+  "orientation_note": "both MAST systems view the midplane, so the split is core against edge rather than vertical against horizontal",
+  "path": "docs/figures/presentation-media/mast-27079-nova-thomson.gif",
+  "profile_limit_quantile": 0.98,
+  "profile_limits_fixed": true,
+  "pulse": "27079",
+  "requested_seconds": 10.0,
+  "size": [
+    953,
+    780
+  ],
+  "temperature_axis": "logarithmic, fixed over the pulse",
+  "thomson_systems": [
+    {
+      "channels": 131,
+      "colour": "#3366cc",
+      "name": "core",
+      "provenance": {
+        "admission": "time inside the core system's shot window",
+        "admitted_row_count": 141,
+        "group": "ayc",
+        "height_m": 0.0,
+        "height_source": "both systems view the midplane; no stored Z leaf",
+        "shot_window_s": [
+          0.004159899894148111,
+          0.5874665975570679
+        ],
+        "source": "/work/projects/imas_gpu/mast/level1/shots/27079.zarr",
+        "stored_row_count": 141,
+        "usable_sample_fraction": 0.9065562232689081
+      },
+      "rows": 141,
+      "temperature_limit_ev": [
+        1.367708295583725,
+        3540.166796874992
+      ]
+    },
+    {
+      "channels": 16,
+      "colour": "#cc7722",
+      "name": "edge",
+      "provenance": {
+        "admission": "time inside the core system's shot window",
+        "admitted_row_count": 141,
+        "group": "aye",
+        "height_m": 0.0,
+        "height_source": "both systems view the midplane; no stored Z leaf",
+        "shot_window_s": [
+          0.004159899894148111,
+          0.5874665975570679
+        ],
+        "source": "/work/projects/imas_gpu/mast/level1/shots/27079.zarr",
+        "stored_row_count": 282,
+        "usable_sample_fraction": 0.9521276595744681
+      },
+      "rows": 141,
+      "temperature_limit_ev": [
+        0.6868682935833933,
+        4375.617093749998
+      ]
+    }
+  ],
+  "time_span_s": [
+    0.029999999329447746,
+    0.574999988079071
+  ]
+}

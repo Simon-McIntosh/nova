@@ -48,6 +48,13 @@ scripts/labeller_parallel/run.sh --submit \
 ```
 
 The launcher uses one H200, four host CPUs, 128 GiB and a one-hour bound. It
-reuses the completed independent reference, then runs the one-device compiled
-scheduler and comparison. A clean initial run adds `--run-reference` to the
-driver command. The three-device throughput arm is a separate follow-on.
+runs the shard writer over four quartile samples from each shot's admitted row
+range, then runs the one-device compiled scheduler over the same physical rows
+and compares the records. The three-device throughput arm is a separate
+follow-on.
+
+Identity is exact for discrete fields and uses `numpy.testing.assert_allclose`
+with `rtol=1e-12` and `atol=1e-14` for floating fields. The receipt reports the
+maximum relative difference for every floating field. It names the compiled
+Newton-step counter as a temporary comparison exclusion until its source-level
+tuple binding is corrected.

@@ -567,7 +567,35 @@ def assemble_frame_on_host(request: AssemblyRequest) -> AssembledSlice:
     )
 
 
-def load_shot(shot: int, *, max_slices: int | None) -> ShotInput:
+def admitted_quartile_rows(shot: int, *, count: int = 4) -> tuple[int, ...]:
+    """Select evenly spaced quartile endpoints from a shot's admitted rows."""
+    if count < 1:
+        raise ValueError("quartile count must be positive")
+    group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
+    admitted = [
+        row
+        for row in range(int(group["time"].shape[0]))
+        if _slice_inputs(group, row) is not None
+    ]
+    if len(admitted) < count:
+        raise RuntimeError(
+            f"shot {shot} has {len(admitted)} admitted rows, fewer than {count}"
+        )
+    positions = [
+        round((len(admitted) - 1) * slot / count) for slot in range(1, count + 1)
+    ]
+    selected = tuple(admitted[position] for position in positions)
+    if len(set(selected)) != count:
+        raise RuntimeError(f"shot {shot} quartile selection is not unique: {selected}")
+    return selected
+
+
+def load_shot(
+    shot: int,
+    *,
+    max_slices: int | None,
+    selected_rows: Sequence[int] | None = None,
+) -> ShotInput:
     """Read the same admitted rows and reconstruction seeds as the shard."""
     group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
     full_r = np.asarray(group["gridr"], dtype=np.float64)
@@ -576,9 +604,14 @@ def load_shot(shot: int, *, max_slices: int | None) -> ShotInput:
     slices, excluded = [], []
     reset_warm = False
     admitted = 0
-    for row in range(int(group["time"].shape[0])):
+    row_sequence = (
+        range(int(group["time"].shape[0])) if selected_rows is None else selected_rows
+    )
+    for row in row_sequence:
         inputs = _slice_inputs(group, row)
         if inputs is None:
+            if selected_rows is not None:
+                raise ValueError(f"selected shot {shot} row {row} is not admitted")
             reset_warm = True
             excluded.append(
                 {

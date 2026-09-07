@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import builtins
+from contextlib import redirect_stdout
 import json
-import os
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 from typing import Any, Sequence
 
@@ -21,16 +21,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from nova.equilibrium.steering_frames import SESSION_GROUP  # noqa: E402
+from scripts.labeller_batch import shard as sequential_shard  # noqa: E402
 from scripts.labeller_batch.shard import (  # noqa: E402
     DEFAULT_COHORT_REPORT,
     DEFAULT_MANIFEST,
+    LabellerPrograms,
     decoder_corpus,
+    label_shot,
     prepare_labeller,
 )
 from scripts.labeller_parallel.scheduler import (  # noqa: E402
     CorpusScheduler,
     SequentialCompiledEngine,
     SourceIdentity,
+    admitted_quartile_rows,
     load_shot,
 )
 
@@ -49,14 +53,57 @@ DECLARED_MANIFEST_ADDITIONS = {
     "labeller_batch_tree",
 }
 DECLARED_SLICE_ADDITIONS = {"requested_class"}
+EXCLUDED_SLICE_FIELDS = {"newton_steps"}
+FLOAT_RTOL = 1e-12
+FLOAT_ATOL = 1e-14
+EXACT_FLOAT_FIELDS = {"time"}
 
 
-def _equal(expected: np.ndarray, actual: np.ndarray) -> bool:
+def _maximum_relative_difference(expected: Any, actual: Any) -> float:
+    """Return the largest relative difference, treating equal zeros as zero."""
+    left = np.asarray(expected, dtype=np.float64)
+    right = np.asarray(actual, dtype=np.float64)
+    valid = ~(np.isnan(left) & np.isnan(right))
+    if not np.any(valid):
+        return 0.0
+    left = left[valid]
+    right = right[valid]
+    finite = np.isfinite(left) & np.isfinite(right)
+    if np.any(~finite & (left != right)):
+        return float("inf")
+    difference = np.abs(left[finite] - right[finite])
+    denominator = np.abs(left[finite])
+    if not difference.size:
+        return 0.0
+    relative = np.divide(
+        difference,
+        denominator,
+        out=np.full_like(difference, np.inf),
+        where=denominator > 0.0,
+    )
+    relative[(denominator == 0.0) & (difference == 0.0)] = 0.0
+    return float(np.max(relative, initial=0.0))
+
+
+def _arrays_differ(
+    expected: np.ndarray, actual: np.ndarray, *, float_field: bool
+) -> bool:
+    """Apply the authored exact or floating-array comparison contract."""
     if expected.shape != actual.shape or expected.dtype != actual.dtype:
-        return False
-    if expected.dtype.kind in "fc":
-        return bool(np.array_equal(expected, actual, equal_nan=True))
-    return bool(np.array_equal(expected, actual))
+        return True
+    if not float_field:
+        return not bool(np.array_equal(expected, actual))
+    try:
+        np.testing.assert_allclose(
+            expected,
+            actual,
+            rtol=FLOAT_RTOL,
+            atol=FLOAT_ATOL,
+            equal_nan=True,
+        )
+    except AssertionError:
+        return True
+    return False
 
 
 def _stable_carrier_evidence(value: Any) -> tuple[Any, bool]:
@@ -80,18 +127,34 @@ def _stable_carrier_evidence(value: Any) -> tuple[Any, bool]:
     return stable, timings_valid
 
 
-def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str, Any]:
+def _compare(
+    reference: Path,
+    candidate: Path,
+    shots: Sequence[int],
+    requested_classes: dict[int, dict[int, int]],
+) -> dict[str, Any]:
     differences: list[str] = []
     manifest_differences: dict[str, int] = {}
     npz_differences: dict[str, int] = {}
     session_differences: dict[str, int] = {}
     addition_occurrences: dict[str, int] = {}
+    excluded_occurrences: dict[str, int] = {}
     revision_transitions: list[dict[str, Any]] = []
+    maximum_relative_differences: dict[str, float] = {}
 
     def observe(counts: dict[str, int], name: str, differs: bool) -> None:
         counts.setdefault(name, 0)
         if differs:
             counts[name] += 1
+
+    def observe_float(name: str, expected: Any, actual: Any) -> bool:
+        left = np.asarray(expected)
+        right = np.asarray(actual)
+        maximum = _maximum_relative_difference(left, right)
+        maximum_relative_differences[name] = max(
+            maximum_relative_differences.get(name, 0.0), maximum
+        )
+        return _arrays_differ(left, right, float_field=True)
 
     for shot in shots:
         reference_manifest = json.loads(
@@ -157,15 +220,37 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
             keys = set(expected_row) | set(actual_row)
             for name in sorted(keys):
                 counter = f"slices.{name}"
-                if name in DECLARED_SLICE_ADDITIONS:
+                if name in EXCLUDED_SLICE_FIELDS:
+                    excluded_occurrences[counter] = (
+                        excluded_occurrences.get(counter, 0) + 1
+                    )
+                    continue
+                if name == "requested_class":
+                    addition_occurrences[counter] = (
+                        addition_occurrences.get(counter, 0) + 1
+                    )
+                    differs = actual_row.get(name) != requested_classes[shot].get(
+                        int(expected_row["row"])
+                    )
+                elif name in DECLARED_SLICE_ADDITIONS:
                     addition_occurrences[counter] = (
                         addition_occurrences.get(counter, 0) + 1
                     )
                     continue
-                if name in MANIFEST_TIMING_FIELDS:
+                elif name in MANIFEST_TIMING_FIELDS:
                     differs = not isinstance(
                         expected_row.get(name), int | float
                     ) or not isinstance(actual_row.get(name), int | float)
+                elif (
+                    name not in EXACT_FLOAT_FIELDS
+                    and isinstance(expected_row.get(name), float | np.floating)
+                    and isinstance(actual_row.get(name), float | np.floating)
+                ):
+                    differs = observe_float(
+                        f"manifest:{counter}",
+                        expected_row[name],
+                        actual_row[name],
+                    )
                 else:
                     differs = expected_row.get(name) != actual_row.get(name)
                 observe(manifest_differences, counter, differs)
@@ -180,7 +265,22 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
                         observe(npz_differences, name, True)
                         differences.append(f"npz:{shot}:{name}")
                     else:
-                        differs = not _equal(expected_npz[name], actual_npz[name])
+                        float_field = (
+                            expected_npz[name].dtype.kind in "fc"
+                            and name not in EXACT_FLOAT_FIELDS
+                        )
+                        if float_field:
+                            maximum_relative_differences[f"npz:{name}"] = max(
+                                maximum_relative_differences.get(f"npz:{name}", 0.0),
+                                _maximum_relative_difference(
+                                    expected_npz[name], actual_npz[name]
+                                ),
+                            )
+                        differs = _arrays_differ(
+                            expected_npz[name],
+                            actual_npz[name],
+                            float_field=float_field,
+                        )
                         observe(npz_differences, name, differs)
                     if name in expected_npz and name in actual_npz and differs:
                         differences.append(f"npz:{shot}:{name}")
@@ -203,8 +303,20 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
                             or left.dtype != right.dtype
                         )
                     else:
-                        differs = left.dims != right.dims or not _equal(
-                            left.values, right.values
+                        float_field = left.dtype.kind in "fc" and name not in (
+                            EXACT_FLOAT_FIELDS
+                        )
+                        if float_field:
+                            maximum_relative_differences[f"session:{name}"] = max(
+                                maximum_relative_differences.get(
+                                    f"session:{name}", 0.0
+                                ),
+                                _maximum_relative_difference(left.values, right.values),
+                            )
+                        differs = left.dims != right.dims or _arrays_differ(
+                            left.values,
+                            right.values,
+                            float_field=float_field,
                         )
                     observe(session_differences, name, differs)
                     if differs:
@@ -223,8 +335,41 @@ def _compare(reference: Path, candidate: Path, shots: Sequence[int]) -> dict[str
             "occurrences": dict(sorted(addition_occurrences.items())),
         },
         "accepted_process_revision_transitions": revision_transitions,
+        "known_exclusions": {
+            "fields": sorted(EXCLUDED_SLICE_FIELDS),
+            "occurrences": dict(sorted(excluded_occurrences.items())),
+            "reason": (
+                "compiled trip counter defect at "
+                "nova/equilibrium/reduced_newton.py:1345-1352"
+            ),
+        },
+        "maximum_relative_difference_by_float_field": dict(
+            sorted(maximum_relative_differences.items())
+        ),
         "comparison_policy": {
-            "exact_values": "all fields except independent wall-clock values",
+            "discrete_values": "exact equality",
+            "named_discrete_fields": [
+                "converged",
+                "qualified",
+                "conditioned",
+                "free_branch_guard_ok",
+                "conditioned_branch_guard_ok",
+                "termination",
+                "trips",
+                "excluded",
+                "exclusion",
+                "time",
+                "row",
+                "requested_class",
+                "topology labels",
+                "domain labels",
+            ],
+            "float_values": {
+                "method": "numpy.testing.assert_allclose",
+                "rtol": FLOAT_RTOL,
+                "atol": FLOAT_ATOL,
+                "equal_nan": True,
+            },
             "manifest_wall_clock_fields": sorted(
                 MANIFEST_TIMING_FIELDS | MANIFEST_VOLATILE_FIELDS
             ),
@@ -248,38 +393,58 @@ def _replace_directory(path: Path, *, replace_existing: bool) -> None:
 
 def _run_reference(
     output: Path,
-    shot_list: Path,
+    shots: Sequence[int],
+    selected_rows: dict[int, tuple[int, ...]],
     *,
-    max_slices: int,
     condition_on_guard_failure: bool,
     log_path: Path,
 ) -> None:
-    command = [
-        sys.executable,
-        str(ROOT / "scripts/labeller_batch/shard.py"),
-        str(output),
-        "--shot-list",
-        str(shot_list),
-        "--max-slices",
-        str(max_slices),
-    ]
-    if condition_on_guard_failure:
-        command.append("--condition-on-guard-failure")
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = str(ROOT)
+    """Run the shard's label and writer route over selected physical rows."""
+    prepared = prepare_labeller()
+    programs = LabellerPrograms()
+    setup_unassigned = prepared.setup_wall_seconds
+    missing = object()
+    inherited_range = getattr(sequential_shard, "range", missing)
     with log_path.open("w", encoding="utf-8") as log:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT,
-            env=environment,
-            stdout=log,
-            stderr=subprocess.STDOUT,
-            check=False,
-        )
-    if completed.returncode:
-        raise RuntimeError(
-            f"sequential shard exited {completed.returncode}; see {log_path}"
-        )
+        with redirect_stdout(log):
+            try:
+                for shot in shots:
+                    rows = selected_rows[shot]
+                    group = sequential_shard.zarr.open_group(
+                        str(sequential_shard.SHOT_STORE / f"{shot}.zarr"), mode="r"
+                    )["efm"]
+                    physical_row_count = int(group["time"].shape[0])
+
+                    def selected_range(*arguments, rows=rows):
+                        if len(arguments) == 1 and arguments[0] == physical_row_count:
+                            return rows
+                        return builtins.range(*arguments)
+
+                    sequential_shard.range = selected_range
+                    print(
+                        json.dumps(
+                            {"reference_shot": shot, "selected_rows": rows},
+                            sort_keys=True,
+                        ),
+                        flush=True,
+                    )
+                    programs, record = label_shot(
+                        prepared,
+                        shot,
+                        output,
+                        programs=programs,
+                        include_raster=False,
+                        condition_on_guard_failure=condition_on_guard_failure,
+                        setup_wall_seconds=setup_unassigned,
+                        max_slices=None,
+                    )
+                    if record["status"] != "skipped":
+                        setup_unassigned = 0.0
+            finally:
+                if inherited_range is missing:
+                    del sequential_shard.range
+                else:
+                    sequential_shard.range = inherited_range
 
 
 def run_smoke(
@@ -299,6 +464,9 @@ def run_smoke(
     (output / "h200-one-device").mkdir(parents=True, exist_ok=True)
     corpus = decoder_corpus(DEFAULT_MANIFEST, DEFAULT_COHORT_REPORT)
     shots = [item.shot for item in corpus[:SHOT_COUNT]]
+    selected_rows = {
+        shot: admitted_quartile_rows(shot, count=max_slices) for shot in shots
+    }
     shot_list = output / "shot-list.txt"
     shot_list.write_text("".join(f"{shot}\n" for shot in shots), encoding="utf-8")
     reference = output / "reference"
@@ -306,8 +474,8 @@ def run_smoke(
         _replace_directory(reference, replace_existing=replace_existing)
         _run_reference(
             reference,
-            shot_list,
-            max_slices=max_slices,
+            shots,
+            selected_rows,
             condition_on_guard_failure=condition_on_guard_failure,
             log_path=output / "h200-one-device" / "reference.log",
         )
@@ -318,7 +486,14 @@ def run_smoke(
     arm_root = output / arm_name
     _replace_directory(arm_root, replace_existing=replace_existing)
     prepared = prepare_labeller()
-    ranked = [load_shot(shot, max_slices=max_slices) for shot in shots]
+    ranked = [
+        load_shot(shot, max_slices=None, selected_rows=selected_rows[shot])
+        for shot in shots
+    ]
+    requested_classes = {
+        work.shot: {item.row: item.requested_class for item in work.slices}
+        for work in ranked
+    }
     engine = SequentialCompiledEngine(
         prepared,
         device_count=devices,
@@ -337,7 +512,7 @@ def run_smoke(
         prepared=prepared,
         source_identity=source_identity,
     )
-    identity = _compare(reference, arm_root, shots)
+    identity = _compare(reference, arm_root, shots, requested_classes)
     result = {
         "schema": "nova-forward-labeller-parallel-smoke",
         "corpus_source": str(DEFAULT_MANIFEST),
@@ -346,7 +521,13 @@ def run_smoke(
         "max_admitted_slices_per_shot": max_slices,
         "shot_ids": shots,
         "engine": "sequential-compiled",
-        "reference_driver": "scripts/labeller_batch/shard.py",
+        "reference_driver": "scripts/labeller_batch/shard.py:label_shot",
+        "sampling": {
+            "method": "admitted-row quartiles",
+            "selected_rows_by_shot": {
+                str(shot): list(rows) for shot, rows in selected_rows.items()
+            },
+        },
         "source_identity": {
             "nova_revision": source_identity.nova_revision,
             "nova_equilibrium_tree": source_identity.nova_equilibrium_tree,

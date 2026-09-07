@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T14:43:08",
+  "updated": "2026-09-07T15:27:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2875,9 +2875,11 @@
         "id": "pfs-limitedfix-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07baf-bdc4-7a20-9c36-308b9ecebd5c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07baf-bdc4-7a20-9c36-308b9ecebd5c"
+        },
         "created": "2026-09-07"
       },
       {
@@ -120803,6 +120805,163 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T090008348172-pfs-axis-configuration-attribution",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-axis-configuration-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 919,
+                "cached_input_tokens": 585812,
+                "input_tokens": 586733,
+                "output_tokens": 860,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 587593,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "a driver solves efm row 36 of shot 21978 at t=0.195 s repeatedly on all_debug through srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, arms varying exactly one factor at a time from the labeller configuration toward the wide-grid parity configuration covering the solve grid extent and resolution, the seed policy, and the solve route with its residual tolerance, a JSON receipt recording per arm the resolved magnetic axis major radius and height, the final residual, the topology class, and the minimum and maximum curvature of the selected axis candidate from the stationary-point census, the report naming which single factor moves the axis major radius by more than one centimetre and quoting each arm against the EFIT axis at R 0.90593 and Z 0.00048 and against the two banked nova results at R 0.90611 with Z 0.01869 and R 0.86478 with Z -0.01485, a figure under the axis-configuration directory, no edit to any solver module, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "one MAST slice solved under varied configurations attributes the magnetic-axis position shift to a named single factor",
+          "id": "pfs-axis-configuration-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T090008348172-pfs-axis-configuration-attribution/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "benchmarks/axis_configuration_attribution.py",
+            "docs/figures/playable-forward-solve/axis-configuration/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/axis-configuration-attribution.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "dvf-axisconfig-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T09:00:45Z",
+        "completed_at": "2026-09-07T13:26:15.238Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 15893,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 15930,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "7a0b59c2de7f6216e734e2300355572d074031a5",
+        "commits": [
+          "51202689500a83eb9b9e6604c98bb93c46754eac",
+          "391372dadd41b387201c04a9023d75868ea90237",
+          "b5a395eb388797f2daebc318c66513c11bc23a20",
+          "ba6e642df19ccdbe7d69e40a8e44dfe1ddd7edbe",
+          "e77f3ea2ab52c40e837b95b467043b7ae9f5cec4",
+          "33e562cda89f8de050d162c33ae68ab1e0ec544b"
+        ],
+        "changed_lines": {
+          "added": 2355,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/axis_configuration_attribution.py via sbatch on all_debug, five of six arms landed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T090008348172-pfs-axis-configuration-attribution/axis-configuration-sbatch.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T090008348172-pfs-axis-configuration-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "898da3a4-9bc9-4232-9b29-cc88e420000c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2235629,
+            "input_tokens_cumulative": 2235629,
+            "output_tokens": 10679,
+            "output_tokens_cumulative": 10679,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 270.543,
+          "generated_tokens": 10679,
+          "generation_seconds": 266.629,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 37.4,
+          "machine_seconds": 3.914,
+          "peak_input_tokens": 380539,
+          "tokens_per_second": 40.05,
+          "wall_tokens_per_second": 39.47
+        },
+        "follow_on_paths": [
+          "p'/FF"
+        ],
+        "dispute_count": 0,
+        "attempt": 7,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-axis-configuration-attribution",
+          "session_id": "898da3a4-9bc9-4232-9b29-cc88e420000c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T13:26:15.238Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -121115,6 +121274,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2012
+    "_version": 2014
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T22:28:58",
+  "updated": "2026-09-07T22:30:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3213,9 +3213,11 @@
         "id": "pfs-schema-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "1cc432a2-cb63-4f2e-8017-684f1a21ec9a",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "1cc432a2-cb63-4f2e-8017-684f1a21ec9a"
+        },
         "created": "2026-09-07"
       },
       {
@@ -122549,6 +122551,159 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164751222645-pfs-session-wall-group",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-session-wall-group",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "tests/test_steering_frames.py gains a test on a rasterless Solovev session asserting the wall group round-trips closed against the operator's own vertices to 1e-12 and a count assertion on a fixture carrying one out-of-vessel X-point and one on-boundary strike point (X-points tested by inclusion, strike points by proximity within a tolerance), both green in the default lane; the schema header names the polygon as the containment reference for the labelled points",
+          "estimated_hours": 0.8,
+          "goal": "The labeller session carries the wall polygon as its own closed group written once per session, with the receipt counting labelled points outside it",
+          "id": "pfs-session-wall-group",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164751222645-pfs-session-wall-group/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-schema-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:47:56Z",
+        "completed_at": "2026-09-07T20:27:45.293Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13160,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13189,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "cc06321f5df9b06a315f8c5c5abb46c231c53311"
+        ],
+        "changed_lines": {
+          "added": 315,
+          "removed": 14,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/test_steering_frames.py -m 'not slow' (16 passed, 1 deselected)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164751222645-pfs-session-wall-group/steering-frames-fast-lane.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164751222645-pfs-session-wall-group/manifest.md",
+        "scope_changed": false,
+        "session_id": "1cc432a2-cb63-4f2e-8017-684f1a21ec9a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 10738620,
+            "input_tokens_cumulative": 10738620,
+            "output_tokens": 61916,
+            "output_tokens_cumulative": 61916,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 13186.092,
+          "generated_tokens": 61916,
+          "generation_seconds": 12895.473,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 19.9,
+          "machine_seconds": 290.619,
+          "peak_input_tokens": 201951,
+          "tokens_per_second": 4.8,
+          "wall_tokens_per_second": 4.7
+        },
+        "follow_on_paths": [
+          "0.0",
+          "scripts/labeller_batch/shard.py::_write_session_file",
+          "scripts/labeller_batch/receipt.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-session-wall-group",
+          "session_id": "1cc432a2-cb63-4f2e-8017-684f1a21ec9a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T20:27:45.293Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -122861,6 +123016,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2058
+    "_version": 2060
   }
 }

@@ -1359,6 +1359,21 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     Consequence for readers of the stopped root 76906a29: its 1,024 empty-polyline shots now refuse in this reader by design, which is the
     provenance discipline the census findings asked for. Report at <code>~/.config/reckon/crew/reports/nova/playable/label-reader-contract.md</code>.</p>
   </section>
+  <section id="the-session-carries-its-wall">
+    <h2>The session carries its wall, so a containment question about a session is answered inside it (2026-09-07 20:17Z)</h2>
+    <p>Node <code>pfs-session-wall-group</code> (local lane, spec exact; commit <code>cc06321f</code>, merged). The labeller session now
+    writes the wall polygon it was solved against as its own closed group, once per session rather than per frame, closed by repeating the first
+    vertex regardless of how the operator published it, with the schema header naming it as the containment reference for the labelled points.
+    The receipt gains a per-shot count of labelled points outside that polygon, and the two measured facts from the followup shape the test:
+    X-points are judged by inclusion, because the ones that fail sit 17 to 292 mm outside, while strike points are judged by proximity within a
+    stated tolerance, because they land on the ring at 0.000 mm and strict inclusion returns false at a degenerate position. Gate: the fast
+    steering-frame lane at 16 passed, including the round trip of the wall group against the operator's own vertices to 1e-12 on a rasterless
+    Solovev session and a count fixture carrying one out-of-vessel X-point and one on-boundary strike point.</p>
+    <p>One consequence for the next touch of this group, raised by the lead the same evening: the polygon is a single closed ring, and some
+    machines define the first wall entirely by discrete limiter surfaces stored as multiple units. The group therefore needs a unit dimension
+    before the corpus relabel writes it at scale; that generalisation is the subject of the multi-unit limiter plan and is sequenced ahead of
+    the relabel rather than after it.</p>
+  </section>
 </main>
 </body>
 </html>

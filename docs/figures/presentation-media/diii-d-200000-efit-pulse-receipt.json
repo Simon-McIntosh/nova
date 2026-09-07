@@ -1,0 +1,66 @@
+{
+  "achieved_seconds": 10.2,
+  "bytes": 3242609,
+  "contact_sheet": {
+    "bytes": 468115,
+    "columns": 3,
+    "path": "docs/figures/presentation-media/diii-d-200000-efit-pulse-frames.png",
+    "rows": 2,
+    "size": [
+      3154,
+      1568
+    ],
+    "tile_indices": [
+      0,
+      17,
+      34,
+      50,
+      67,
+      84
+    ],
+    "tiles": 6
+  },
+  "contour_levels": 24,
+  "ff_prime_limit": [
+    -0.8688856693747238,
+    0.07829984132319785
+  ],
+  "frame_milliseconds": 120,
+  "frames": 85,
+  "level_span_wb": [
+    -2.77048727263538,
+    4.054459527164953
+  ],
+  "levels_shared_across_frames": true,
+  "machine": "DIII-D",
+  "p_prime_limit": [
+    -103224.53535870422,
+    18471.517448105824
+  ],
+  "path": "docs/figures/presentation-media/diii-d-200000-efit-pulse.gif",
+  "profile_limit_quantile": 0.98,
+  "profile_limits_fixed": true,
+  "provenance": {
+    "convention": "EFIT stored psi, no sign or factor applied",
+    "dd_version": "3.41.0",
+    "flux_unit": "Wb",
+    "homogeneous_time": 1,
+    "ids": "equilibrium",
+    "section_count": 140,
+    "selected_slice_count": 85,
+    "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "stored_slice_count": 340,
+    "stride": 4,
+    "total_flux_factor": 1.0
+  },
+  "pulse": "200000",
+  "requested_seconds": 10.0,
+  "size": [
+    1046,
+    780
+  ],
+  "time_span_s": [
+    0.1,
+    7.08
+  ]
+}

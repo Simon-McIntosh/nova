@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T09:47:25",
+  "updated": "2026-09-07T10:09:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118617,6 +118617,138 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T072301404554-pfs-seed-admission-outcome",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-seed-admission-outcome",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 727,
+                "cached_input_tokens": 255144,
+                "input_tokens": 255873,
+                "output_tokens": 849,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 256722,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_parallel.py plus tests/test_labeller_receipt.py exit 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, new tests asserting that a slice whose centroid-target derivation raises NoQualifiedAxisError records the new skipped outcome carrying its reason with conditioned false, that a failure raised after the constrained solve begins still records conditioned true with conditioned_converged false, that scripts/labeller_batch/receipt.py counts both columns over a synthetic root, the production corpus job 1263846 left untouched because its worker pool already imported these modules, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "both labeller writers record a seed axis-admission failure as its own per-slice outcome rather than as a conditioned-solve failure, with the receipt column that counts it",
+          "id": "pfs-seed-admission-outcome",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "scripts/labeller_batch/shard.py",
+            "scripts/labeller_parallel/scheduler.py",
+            "scripts/labeller_batch/receipt.py",
+            "tests/test_labeller_parallel.py",
+            "tests/test_labeller_receipt.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/seed-admission-outcome.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-455a78fa6d3eb0df92c3",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T07:23:14Z",
+        "completed_at": "2026-09-07T08:07:49.262Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2667,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2675,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "3a9fa104b1b0e2924a9c0b6b0eb9dbd7cea6797e",
+        "commits": [
+          "60ef5a933e0914f5230572b6d479f7da32e5920f"
+        ],
+        "changed_lines": {
+          "added": 359,
+          "removed": 53,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_labeller_parallel.py tests/test_labeller_receipt.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/gate-all_debug-pass.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/manifest.md",
+        "scope_changed": false,
+        "session_id": "b3e96ddd-35fd-4505-b85f-217ac1651ab9",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [
+          "nova/equilibrium/batched_labeller.py",
+          "BatchedLabeller.solve",
+          "try/except",
+          "shard.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-seed-admission-outcome",
+          "session_id": "b3e96ddd-35fd-4505-b85f-217ac1651ab9",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T08:07:49.262Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -118929,6 +119061,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1988
+    "_version": 1989
   }
 }

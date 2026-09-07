@@ -269,6 +269,21 @@
     well-conditioned row; on the marginal row the leading membership is a property of the converged state, so a diagnostic-placement row that
     reuses a seed compensator across a trajectory should re-derive when the plasma moves by more than the centroid shift measured here.</p>
   </section>
+  <section id="thomson-inventory-and-the-crossing-point-contract">
+    <h2>The Thomson inventory: what the competition dataset carries, and the crossing-point contract Nova would consume (2026-09-07 22:27Z)</h2>
+    <p>Section 4 C0, the read-only scout through the imas-ambix reader (three attempts: two local-lane sessions died before writing, the
+    third on codex wrote the report from the inventory the first had saved). Over the five DIII-D gate shots the corpus carries electron
+    density in m<sup>&minus;3</sup> and electron temperature in eV per channel on each family's native clock, core and tangential, with
+    point positions but no laser or collection line-of-sight endpoints, so a chord is a string of measured points rather than a geometric
+    line, and the corpus does not mark the plasma edge. imas-ambix carries a DD 4.1.1 <code>thomson_scattering</code> implementation with
+    typed core and edge profile values on native time bases and the chord geometry beside them. The proposed contract is one immutable
+    record per admissible crossing: position with its R-Z covariance, chord coordinate and bracketing channels, an edge-definition
+    enumeration and a mandatory calibration identity, a normalised-flux target with its sigma, the DD pin, COCOS 17, and a validity flag with
+    its reason; Nova consumes only valid, bracketed, calibrated records and forms &psi;<sub>N</sub>(R, Z) &minus; 1 = 0 weighted by the
+    reported covariance, never falling back to the EFIT label or inferring a crossing the string does not bracket. The edge definition is the
+    open decision <code>thomson-crossing-source</code> on this plan and is the lead's; the C1 prototype waits on it. Report at
+    <code>~/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

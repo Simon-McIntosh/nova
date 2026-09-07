@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T00:19:12",
+  "updated": "2026-09-08T00:29:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -664,9 +664,11 @@
         "id": "cank-thomson-x",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07df2-0cfc-7a70-a332-18255d10e70c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a07df2-0cfc-7a70-a332-18255d10e70c"
+        },
         "created": "2026-09-07"
       },
       {
@@ -123916,6 +123918,137 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T221637452668-cank-thomson-scout-3",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-thomson-scout-3",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 619,
+                "cached_input_tokens": 690640,
+                "input_tokens": 691291,
+                "output_tokens": 1758,
+                "reasoning_output_tokens": 441,
+                "total_tokens": 693049,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md exists, built by a short Python script that reads /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165624217254-cank-thomson-scout/thomson_inventory.json (588 KB, keyed by five DIII-D gate shots plus gate_shots) and prints only the per-shot summaries (channel positions and chord geometry, quantities per channel, time base, edge marking, units and convention) the report needs, never printing the whole file; the report also states whether a DD4 thomson_scattering IDS exists in /home/ITER/mcintos/Code/imas-ambix by one grep, cites file:line for the ambix Thomson readers found by one grep each, and proposes the typed crossing-point contract Nova would consume in COCOS 17; the report is under 200 lines and is written in one Write call",
+          "estimated_hours": 0.4,
+          "goal": "The Thomson scattering inventory report written from the inventory JSON a previous scout gathered, extracted by script rather than loaded into context",
+          "id": "cank-thomson-scout-3",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T221637452668-cank-thomson-scout-3/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "cank-thomson-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-07T22:16:49Z",
+        "completed_at": "2026-09-07T22:27:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 651,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 651,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f0f2d24cf10ed04459895437dd4ec59c05352e96",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "bounded report-contract check: 147 lines, 5 per-shot summaries, 2 reader citations, DD4 IDS confirmed, typed contract proposed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T221637452668-cank-thomson-scout-3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07df2-0cfc-7a70-a332-18255d10e70c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3804288,
+            "cached_input_tokens_cumulative": 3804288,
+            "input_tokens": 3947516,
+            "input_tokens_cumulative": 3947516,
+            "output_tokens": 17236,
+            "output_tokens_cumulative": 17236,
+            "reasoning_output_tokens": 6392,
+            "reasoning_output_tokens_cumulative": 6392
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23628,
+          "peak_input_tokens": 7751804
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only scout; its deliverable is the inventory report",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/cank-thomson-scout-3",
+          "session_id": "01a07df2-0cfc-7a70-a332-18255d10e70c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T22:27:40Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -124228,6 +124361,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2081
+    "_version": 2083
   }
 }

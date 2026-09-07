@@ -586,6 +586,9 @@ def _write_companion(rows: Sequence[dict[str, Any]], path: Path) -> None:
         row=np.asarray([item["row"] for item in rows], dtype=np.int32),
         time=np.asarray([item["time"] for item in rows], dtype=np.float64),
         conditioned=np.asarray([item["conditioned"] for item in rows], dtype=bool),
+        conditioning_skipped=np.asarray(
+            [item["conditioning_skipped"] or "" for item in rows], dtype=str
+        ),
         conditioning_target_source=np.asarray(
             [item["conditioning_target_source"] or "none" for item in rows],
             dtype=str,
@@ -752,6 +755,7 @@ def label_shot(
         frame = None
         free_exception = None
         conditioning_exception = None
+        conditioning_skipped = None
         processing_exception = None
         free_centroid_r = None
         free_centroid_z = None
@@ -819,8 +823,8 @@ def label_shot(
             or free_guard is not True
         )
         if should_condition:
-            conditioned = True
             conditioned_started = time.perf_counter()
+            pair = None
             try:
                 if slice_seed is None:
                     raise ValueError("non-finite reconstruction flux seed")
@@ -833,33 +837,47 @@ def label_shot(
                     requested=requested,
                     names=circuit_names,
                 )
-                conditioned_result = reduced_newton.solve_constrained_reduced_newton(
-                    prepared.profile,
-                    slice_seed,
-                    constraint_pairs=(pair,),
-                    requested_class=requested,
-                    target_current=target_current,
-                    prescribed_current=current,
-                    tolerance=FIXED_POINT_CRITERION,
-                    newton_steps=NEWTON_STEPS,
-                    program=conditioned_program,
-                    stream=False,
-                )
-                conditioned_program = conditioned_result.program
-                conditioned_wall_seconds = time.perf_counter() - conditioned_started
-                conditioned_centroid_r, conditioned_centroid_z = _centroid_coordinates(
-                    prepared, conditioned_result.state, target_current
-                )
-                conditioned_centroid_error = (
-                    conditioned_centroid_z - inputs["target_centroid_z"]
-                )
-                conditioned_guard = bool(
-                    np.isfinite(conditioned_centroid_error)
-                    and abs(conditioned_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
-                )
             except Exception as error:
-                conditioned_wall_seconds = time.perf_counter() - conditioned_started
-                conditioning_exception = f"{type(error).__name__}: {error}"
+                # Deriving the centroid constraint from the seed admits the
+                # slice into conditioning.  A failure here (for example
+                # NoQualifiedAxisError) means the constrained solve never
+                # began, so the slice is recorded as skipped, not as a
+                # conditioned-solve failure.
+                conditioning_skipped = f"{type(error).__name__}: {error}"
+            if pair is not None:
+                conditioned = True
+                try:
+                    conditioned_result = (
+                        reduced_newton.solve_constrained_reduced_newton(
+                            prepared.profile,
+                            slice_seed,
+                            constraint_pairs=(pair,),
+                            requested_class=requested,
+                            target_current=target_current,
+                            prescribed_current=current,
+                            tolerance=FIXED_POINT_CRITERION,
+                            newton_steps=NEWTON_STEPS,
+                            program=conditioned_program,
+                            stream=False,
+                        )
+                    )
+                    conditioned_program = conditioned_result.program
+                    conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                    conditioned_centroid_r, conditioned_centroid_z = (
+                        _centroid_coordinates(
+                            prepared, conditioned_result.state, target_current
+                        )
+                    )
+                    conditioned_centroid_error = (
+                        conditioned_centroid_z - inputs["target_centroid_z"]
+                    )
+                    conditioned_guard = bool(
+                        np.isfinite(conditioned_centroid_error)
+                        and abs(conditioned_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
+                    )
+                except Exception as error:
+                    conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                    conditioning_exception = f"{type(error).__name__}: {error}"
 
         selected_result = conditioned_result if conditioned else free_result
         solve_wall_seconds = time.perf_counter() - started
@@ -995,6 +1013,8 @@ def label_shot(
             row_record["free_solve_exception"] = free_exception
         if conditioning_exception is not None:
             row_record["conditioning_exception"] = conditioning_exception
+        if conditioning_skipped is not None:
+            row_record["conditioning_skipped"] = conditioning_skipped
         if processing_exception is not None:
             row_record["frame_exception"] = processing_exception
 
@@ -1019,6 +1039,7 @@ def label_shot(
                 "row": row,
                 "time": inputs["time"],
                 "conditioned": conditioned,
+                "conditioning_skipped": row_record.get("conditioning_skipped"),
                 "conditioning_target_source": row_record["conditioning_target_source"],
                 "free_branch_guard_ok": free_guard,
                 "conditioned_branch_guard_ok": conditioned_guard,

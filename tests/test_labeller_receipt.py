@@ -70,6 +70,7 @@ def _slice_record(
     *,
     converged: bool = True,
     conditioned_guard: bool | None = None,
+    conditioning_skipped: str | None = None,
 ) -> dict:
     if conditioned_guard is None:
         conditioned_guard = conditioned
@@ -106,6 +107,8 @@ def _slice_record(
     }
     if cls is not None:
         record["requested_class"] = int(cls)
+    if conditioning_skipped is not None:
+        record["conditioning_skipped"] = conditioning_skipped
     return record
 
 
@@ -121,12 +124,15 @@ def _write_shot(
     with_sessions: bool = False,
     converged=None,
     conditioned_guards=None,
+    conditioning_skipped=None,
 ) -> None:
     rows = np.arange(len(times), dtype=int)
     if converged is None:
         converged = np.ones(len(times), dtype=bool)
     if conditioned_guards is None:
         conditioned_guards = np.asarray(conditioned, dtype=bool)
+    if conditioning_skipped is None:
+        conditioning_skipped = [None] * len(times)
     slices = [
         _slice_record(
             int(row),
@@ -137,8 +143,11 @@ def _write_shot(
             float(cond),
             converged=bool(converged_value),
             conditioned_guard=bool(guard_value),
+            conditioning_skipped=skipped_value,
         )
-        for row, time, flag, cls, free, cond, converged_value, guard_value in zip(
+        for row, time, flag, cls, free, cond, converged_value, guard_value, (
+            skipped_value
+        ) in zip(
             rows,
             times,
             conditioned,
@@ -147,6 +156,7 @@ def _write_shot(
             conditioned_errors,
             converged,
             conditioned_guards,
+            conditioning_skipped,
             strict=True,
         )
     ]
@@ -373,6 +383,50 @@ def test_per_shot_free_and_conditioned_counts(tmp_path):
             entry["free_slices"] + entry["conditioned_slices"]
             == (entry["admitted_slices"])
         )
+
+
+def test_conditioning_skipped_is_counted_separately_from_conditioned(tmp_path):
+    _build_root(tmp_path)
+    # Shot 41003: one slice enters the conditioned solve, two fail seed
+    # admission (NoQualifiedAxisError / non-finite seed) and are recorded as
+    # conditioning_skipped with conditioned false.
+    times = np.asarray([0.000, 0.025, 0.050])
+    conditioned = np.asarray([True, False, False])
+    classes = np.asarray([0, 1, 1])
+    free_errors = np.asarray([0.010, 0.020, 0.030])
+    conditioned_errors = np.asarray([0.002, np.nan, np.nan])
+    converged = np.asarray([True, False, False])
+    skipped = [
+        None,
+        "NoQualifiedAxisError: no qualified magnetic-axis candidate "
+        "has a resolved component",
+        "ValueError: non-finite reconstruction flux seed",
+    ]
+    _write_shot(
+        tmp_path,
+        41003,
+        times,
+        conditioned,
+        classes,
+        free_errors,
+        conditioned_errors,
+        converged=converged,
+        conditioning_skipped=skipped,
+    )
+    result = _aggregate(tmp_path)
+    assert result["conditioning_skipped_slices"] == 2
+    # the conditioned column counts only slices that entered the constrained
+    # solve: the baseline four plus the one on 41003
+    assert result["conditioned_slices"] == TOTAL_CONDITIONED + 1
+    shots = {entry["shot"]: entry for entry in result["shots"]}
+    assert shots[41003]["conditioning_skipped_slices"] == 2
+    assert shots[41003]["conditioned_slices"] == 1
+    assert shots[41003]["free_slices"] == 2
+    # the adjudication tables count conditioned from the companion rows, so a
+    # skipped slice is never conditioned there either
+    totals = _bin_slice_totals(result)
+    assert totals["deciles"][1] == TOTAL_CONDITIONED + 1
+    assert totals["absolute_50ms"][1] == TOTAL_CONDITIONED + 1
 
 
 def test_aggregate_baseline_keys_unchanged(tmp_path):

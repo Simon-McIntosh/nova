@@ -295,6 +295,7 @@ class SequentialCompiledEngine:
         started = time.perf_counter()
         free_result = conditioned_result = None
         free_exception = conditioning_exception = None
+        conditioning_skipped = None
         free_centroid_r = free_centroid_z = free_centroid_error = free_guard = None
         conditioned_centroid_r = conditioned_centroid_z = None
         conditioned_centroid_error = conditioned_guard = None
@@ -340,8 +341,8 @@ class SequentialCompiledEngine:
             or free_guard is not True
         )
         if should_condition:
-            conditioned = True
             conditioned_started = time.perf_counter()
+            pair = None
             try:
                 if slice_seed is None:
                     raise ValueError("non-finite reconstruction flux seed")
@@ -356,30 +357,42 @@ class SequentialCompiledEngine:
                         requested=requested,
                         names=_circuit_names(self.prepared.policy_evidence),
                     )
-                conditioned_result = self._conditioned_solve(
-                    index,
-                    device,
-                    slice_seed,
-                    pair,
-                    requested,
-                    target_current,
-                    current,
-                )
-                self.conditioned_programs[index] = conditioned_result.program
-                conditioned_wall_seconds = time.perf_counter() - conditioned_started
-                conditioned_centroid_r, conditioned_centroid_z = _centroid_coordinates(
-                    self.prepared, conditioned_result.state, target_current
-                )
-                conditioned_centroid_error = conditioned_centroid_z - float(
-                    batch.centroid_target_z[index]
-                )
-                conditioned_guard = bool(
-                    np.isfinite(conditioned_centroid_error)
-                    and abs(conditioned_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
-                )
             except Exception as error:
-                conditioned_wall_seconds = time.perf_counter() - conditioned_started
-                conditioning_exception = f"{type(error).__name__}: {error}"
+                # Deriving the centroid constraint from the seed admits the
+                # slice into conditioning.  A failure here (for example
+                # NoQualifiedAxisError) means the constrained solve never
+                # began, so the slice is recorded as skipped, not as a
+                # conditioned-solve failure.
+                conditioning_skipped = f"{type(error).__name__}: {error}"
+            if pair is not None:
+                conditioned = True
+                try:
+                    conditioned_result = self._conditioned_solve(
+                        index,
+                        device,
+                        slice_seed,
+                        pair,
+                        requested,
+                        target_current,
+                        current,
+                    )
+                    self.conditioned_programs[index] = conditioned_result.program
+                    conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                    conditioned_centroid_r, conditioned_centroid_z = (
+                        _centroid_coordinates(
+                            self.prepared, conditioned_result.state, target_current
+                        )
+                    )
+                    conditioned_centroid_error = conditioned_centroid_z - float(
+                        batch.centroid_target_z[index]
+                    )
+                    conditioned_guard = bool(
+                        np.isfinite(conditioned_centroid_error)
+                        and abs(conditioned_centroid_error) <= BRANCH_GUARD_TOLERANCE_M
+                    )
+                except Exception as error:
+                    conditioned_wall_seconds = time.perf_counter() - conditioned_started
+                    conditioning_exception = f"{type(error).__name__}: {error}"
 
         selected = conditioned_result if conditioned else free_result
         solve_wall_seconds = time.perf_counter() - started
@@ -445,6 +458,8 @@ class SequentialCompiledEngine:
             record["free_solve_exception"] = free_exception
         if conditioning_exception is not None:
             record["conditioning_exception"] = conditioning_exception
+        if conditioning_skipped is not None:
+            record["conditioning_skipped"] = conditioning_skipped
         if selected is not None:
             selected = replace(selected, program=None)
         return SolvedSlice(selected, np.asarray(applied_current), record)
@@ -824,6 +839,7 @@ def _shot_manifest(
             "row": item.record["row"],
             "time": item.record["time"],
             "conditioned": item.record["conditioned"],
+            "conditioning_skipped": item.record.get("conditioning_skipped"),
             "conditioning_target_source": item.record["conditioning_target_source"],
             "free_branch_guard_ok": item.record["free_branch_guard_ok"],
             "conditioned_branch_guard_ok": item.record["conditioned_branch_guard_ok"],

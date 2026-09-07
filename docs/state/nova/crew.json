@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T07:10:47",
+  "updated": "2026-09-07T07:12:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117165,6 +117165,157 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260906T155154456153-msc-frozen-partition-hooks",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-frozen-partition-hooks",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2881,
+                "cached_input_tokens": 518526,
+                "input_tokens": 521409,
+                "output_tokens": 2434,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 523843,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "dd78377c-cf7b-4c8d-abb4-b994aab17b87",
+            "session_id": "s19-playable"
+          },
+          "done_when": "The manifest states the chosen construction with file:line: flux_map_with_shadow in nova/equilibrium/forward_operator.py attaches _read_frozen_partition and _map_frozen_partition only when moment_geometry is not None and use_linear_moments is true (line 1735), while the bank rows are built by benchmarks/efit_forward_parity_slice.py _passive_inclusive_case (line 2831) with use_linear_moments False and moment_geometry None, so the path is unreachable on them; read what _internal_on_partition and _frozen_topology_partition actually need from the moment geometry and either make the hooks attach without it (the preferred construction if the partition revaluation does not depend on linear moments) or build the bank rows with linear moments and a supplied moment geometry, stating why the other construction was rejected. Evidence: a same-job paired H200 receipt under docs/figures/millisecond-converged-solve/frozen-partition/ over the four bank rows with hooks absent and hooks attached, per row the topology reads per map evaluation, trips, per-trip wall, whole-solve wall, terminal residual, termination reason and converged flag, with any change in the converged flag or terminal residual beyond 1e-10 stated as a defect; the two existing CPU tests tests/test_recovery_frozen_partition.py and tests/test_one_read_per_trip.py pass with JAX_PLATFORMS=cpu (logs kept in the run directory) plus one new test in tests/test_recovery_frozen_partition.py asserting the hooks attach on a bank-row-shaped construction using the smallest machine that compiles on the CPU in under a minute (no MAST carrier compile on the CPU); the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/frozen-partition-hooks.md gives the per-row saving. Rules: grep every name before importing it and copy fixture construction from tests/test_recovery_frozen_partition.py rather than inventing it; run a CPU prepare-only pass of the driver before any sbatch; the H200 job uses --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --cpus-per-task=8 --mem=128G and no --qos, with JAX_PLATFORMS=cuda,cpu set inside the wrapped command (never inside --export, which splits on the comma) and the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with the persistent compilation cache call; after submitting, write the manifest with status waiting, wait_condition, wait_probe as a JSON argv list of squeue -h -j the job id -o %T, wait_terminal as the comma-separated bare list COMPLETED,FAILED,CANCELLED,TIMEOUT,exit:0, an unquoted ISO wait_started_at and a resume_brief, then end your turn. nova/equilibrium/reduced_newton.py and apps/playable/ are held by other nodes and must not change. Run everything from the worktree through UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync followed by the command; commit each coherent step with a conventional subject and a body; no plan labels or node ids in code or comments; verify PNGs through PIL.",
+          "estimated_hours": 3.0,
+          "goal": "Make the frozen-partition revaluation path reachable on the four bank rows through the public route with its saving re-measured",
+          "id": "msc-frozen-partition-hooks",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "benchmarks/efit_forward_parity_slice.py",
+            "tests/test_recovery_frozen_partition.py",
+            "tests/test_one_read_per_trip.py",
+            "docs/figures/millisecond-converged-solve/frozen-partition/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/frozen-partition-hooks.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-hooks-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-06T15:52:06Z",
+        "completed_at": "2026-09-07T05:11:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 47967,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "4b0121d9c02d0ba3b866f1dfab79c09e4e80ddb0",
+        "commits": [
+          "c4d51f118fe8302e436adb5ce1894b82e2b9efcc",
+          "35eef831ed60f7f2ce2f789a180fddf47cfbbf44",
+          "0f4034f9aa4de23b810ddfa7c5f1ac28ccd6599d",
+          "1aa6951ed3305629ade0f56b2c5c47c048cdd09c",
+          "a2d071b7812627ce4ea586694c9bb8d470b312bb",
+          "58b5a2ebe44733ea67bf1c40af14c08778dc858e",
+          "abb502b1c46415be54049b2f85ae77a3678e4f2e"
+        ],
+        "changed_lines": {
+          "added": 2041,
+          "removed": 39,
+          "files": 7
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_recovery_frozen_partition.py tests/test_one_read_per_trip.py -q (6 passed); explicit-root CPU prepare-only over the four rows exit 0; H200 paired job 1263489 wrote frozen-partition-savings.json and PNG",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/slurm-1263489.err",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T155154456153-msc-frozen-partition-hooks/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0776b-79e1-7153-bb8a-7b05425ee19f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3139712,
+            "cached_input_tokens_cumulative": 3139712,
+            "input_tokens": 3315502,
+            "input_tokens_cumulative": 3315502,
+            "output_tokens": 17360,
+            "output_tokens_cumulative": 17360,
+            "reasoning_output_tokens": 6226,
+            "reasoning_output_tokens_cumulative": 6226
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23586,
+          "peak_input_tokens": 6455214
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 6,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks",
+          "session_id": "01a0776b-79e1-7153-bb8a-7b05425ee19f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T05:11:33Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -117477,6 +117628,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1970
+    "_version": 1971
   }
 }

@@ -4,9 +4,15 @@ A session records each solve as nested flux surfaces with their absolute flux,
 the topology points, the divertor legs and the TORAX face profiles. It carries
 no 2-D map -- these sessions are rasterless -- so a frame arrives as a
 :class:`~nova.media.sources.frame.SurfaceFrame` and is drawn as curves at
-known flux rather than contoured. A session may also carry no boundary
-polyline, in which case the outermost nested surface supplies it; see
-:func:`_boundary`.
+known flux rather than contoured.
+
+The boundary is the stored LCFS polyline and nothing else. The writer persists
+``lcfs_r``/``lcfs_z`` as the authored boundary -- the raster-derived separatrix
+when one exists, else the outermost traced surface closed onto itself -- so the
+reader takes the stored polyline as authoritative and refuses a frame that
+carries none. There is no fallback to the outermost nested surface: a session
+that mixes stored and unstored frames must fail rather than silently draw two
+boundary sources inside one corpus.
 
 Frames are admitted on ``branch_guard_ok``, the per-frame validity flag this
 schema carries; there is no ``converged`` variable in the frame, by design --
@@ -43,21 +49,6 @@ def _finite_pairs(radius: np.ndarray, height: np.ndarray) -> np.ndarray:
     return pairs[np.all(np.isfinite(pairs), axis=1)]
 
 
-def _boundary(surfaces: tuple[np.ndarray, ...], psi_norm: np.ndarray) -> np.ndarray:
-    """Return the surface at normalised flux one, which is the LCFS.
-
-    Some sessions store no boundary polyline: their ``lcfs_r`` carries a
-    zero-length vertex dimension and ``n_boundary_coords`` is zero for every
-    frame. The outermost nested surface sits at normalised flux one and is the
-    last closed surface by definition, so it is the boundary rather than a
-    substitute for it. The choice is recorded in the provenance so a figure
-    caption can say which curve it drew.
-    """
-    if psi_norm.size != len(surfaces):
-        raise ValueError("each surface needs one normalised-flux value")
-    return surfaces[int(np.argmax(psi_norm))]
-
-
 def _frame(dataset, index: int) -> SurfaceFrame:
     """Return one session slice as a rasterless record."""
     take = dataset.isel(time=index)
@@ -80,16 +71,18 @@ def _frame(dataset, index: int) -> SurfaceFrame:
         if leg_finite[leg]
     )
     stored_boundary = _finite_pairs(value("lcfs_r"), value("lcfs_z"))
-    surface_psi_norm = np.asarray(dataset["flux_surface_psi_norm"].values, dtype=float)
+    if stored_boundary.size == 0:
+        raise ValueError(
+            "the session's slice has no stored boundary polyline: the label "
+            "reader takes lcfs_r/lcfs_z as the authoritative boundary and "
+            "refuses a frame without one rather than substituting the "
+            "outermost nested surface"
+        )
     return SurfaceFrame(
         time=float(np.asarray(take["time"].values, dtype=float)),
         surface_flux=value("flux_surface_psi"),
         surfaces=surfaces,
-        boundary=(
-            stored_boundary
-            if stored_boundary.size
-            else _boundary(surfaces, surface_psi_norm)
-        ),
+        boundary=stored_boundary,
         magnetic_axis=np.array(
             [float(value("magnetic_axis_r")), float(value("magnetic_axis_z"))]
         ),
@@ -194,8 +187,7 @@ def read_labels(
         "conditioning_source": f"{shot}.npz companion, aligned by time",
         "surface_count": len(frames[0].surfaces),
         "boundary_source": (
-            "stored lcfs polyline"
-            if np.any(np.asarray(dataset["n_boundary_coords"].values))
-            else "outermost nested surface at normalised flux one"
+            "stored lcfs polyline; a frame without one is refused, never "
+            "substituted from the nested surfaces"
         ),
     }

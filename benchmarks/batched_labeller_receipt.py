@@ -341,6 +341,7 @@ def _sequential_reference(profile, inputs: dict[str, np.ndarray]) -> dict[str, A
                     free.state,
                     support=MomentIntegralSupport.ALL_DOMAIN,
                     target_current=target_current,
+                    requested_class=requested,
                 ).stack()[1:]
                 free_centroid = np.asarray(centroid)
                 guard = bool(

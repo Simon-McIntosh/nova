@@ -61,7 +61,7 @@ bokeh = ["bokeh>=3.6"]
 # core import graph stays free of the server stack. Pinned to the fork RCs
 # converging on the first upstream release; flip to PyPI ranges on release.
 io = [
-  "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc56",
+  "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.9.0",
   "imas-standard-names-catalog @ git+https://github.com/Simon-McIntosh/imas-standard-names-catalog.git@v0.2.0rc64",
 ]
 # dolfinx itself is conda/spack-provisioned (no PyPI wheels); this extra

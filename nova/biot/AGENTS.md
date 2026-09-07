@@ -72,6 +72,29 @@ conclusion from reading `nova/biot/polygon.py` alone is wrong.
   `betelgeuse`, or must be handed its input by a path the node can see. A
   `FileNotFoundError` on a path the login node can `stat` is this, and probing
   it costs one two-minute job.
+- **The wall target set depends silently on a construction-time argument.**
+  `plasmawall` builds NO targets when `CoilSet(nwall=...)` is unset, so a
+  containment or limiter-flux read against it returns an empty dataset rather
+  than raising — measured 2026-09-07, `plasmawall.solve()` returning in 0.1 s
+  with `sizes {}`. `nwall` appears nowhere in `nova/equilibrium/forward.py`,
+  `forward_operator.py` or the parity benchmark: it comes from whatever built
+  the machine, which makes the wall node count an invisible property of the
+  caller. State `nwall` explicitly when a build's wall matters.
+
+  It does not change the wall's SHAPE. Measured on MAST 21858: 36 nodes at
+  `nwall=1` and 72 at `nwall=2`, both spanning R 0.1952 to 1.9000 — the same
+  36-vertex efm outline, sampled more densely. So there is no finer wall
+  polygon in the tree at any setting, and a claim that the operator's wall is
+  finer than the stored limiter is false.
+- **Choose containment or proximity by what the point IS.** An interior null
+  must be INSIDE the wall; a wall-intersection quantity lies ON it. Measured
+  across three labelled MAST shots: x-points that fail inclusion sit 17 to
+  32 mm outside at the median and 291.78 mm at worst, so containment is the
+  right test and a tolerance would admit real excursions; strike points that
+  fail inclusion sit at 0.000 mm from the limiter ring on every shot, so
+  proximity within a tolerance is the right test and strict inclusion reports
+  clean points as defects indefinitely. Test distance, not only inclusion,
+  before concluding a point is out of bounds.
 - **A frozen carrier answers one grid only.** The frozen-six MAST response
   (`1d2c4a2b…`) is a 22086-based matrix on the 1126-target EFIT-domain grid.
   A build on a different shot, target set or extent can take nothing from it,

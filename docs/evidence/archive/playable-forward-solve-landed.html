@@ -1284,6 +1284,29 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     the question concerns. The habit underneath it is cheaper still, and is the one that prevented the worst instance: ask what a number would have
     to be measured on before sending it.</p>
   </section>
+  <section id="routing-the-writer-through-the-gate-moves-a-boundary-that-is-not-wall-bounded">
+    <h2>Routing the writer through the shadow-gated read moves the boundary, and neither read is wall-bounded (2026-09-07 18:12Z)</h2>
+    <p>Node <code>pfs-boundary-routing</code> (codex, fresh base <code>52ca3c4e</code>, no merge of main; commits <code>8ed58503</code>,
+    <code>04cf1244</code>, <code>6ab5ae30</code> held unmerged in its worktree; ledger gate failed, negative result). The wiring question is
+    answered: the public <code>ForwardFluxOperator.read</code> is what forward receipts and the surface writer consume, the private
+    <code>_read_active_partition</code> additionally carries connectivity and residual-shadow state for the frozen active-set support, and the
+    two must choose one boundary. Wiring the writer to the gated partition demonstrably changed what the writer stores: on a fresh H200 relabel of
+    27079 the first drawn frames moved from area ratios 0.0418457614, 0.3353593144 and 0.5710731398 to 2.6664344365, 2.7245655030 and
+    2.4471573838. Read like for like, the moved boundary is not a repair. Only 39 of 64 boundary vertices sit inside the 36-vertex limiter
+    polygon on rows 11 to 13 (containment 0.609), rising to 41 of 64 by row 16; the rows the baseline triple was measured on, 15 to 17 at 30 to
+    40 ms, read 1.97, 1.95 and 1.84 against a target of one. A 1.2 m<sup>2</sup> boundary on this machine is close to the vessel cross-section.
+    Drawn counts are 11 of 16 written against the baseline's 81 of 114, so admission did not collapse; the early rows 11 to 14 now draw where
+    they did not.</p>
+    <p>The second variant, an explicit <code>boundary_gate</code> argument recorded on the receipt so the condition is data, kept the Solovev
+    certificate, the twelve positive-current bank rows and the pinned diverted read bit-identical by construction and fired on 0 of 16 compiled
+    writer receipts: the labeller's compiled slice route never carries the gated partition, so that variant retained the collapsed
+    0.0418457480, 0.3353593144 and 0.5710731412 on rows 15 to 17 at containment 1.0. Every writer receipt on 27079 selects wall node 10 at
+    R 0.5649 m, Z 1.7281 m, an upper-wall segment, as the limited anchor. So neither read selects a wall-bounded limited boundary near ratio
+    one on the early frames of 27079, and the shadow-gated partition is unreachable from the route that writes the corpus. The counted
+    firing, 0 of 16, is what separated this attempt from the three refused before it. No anchor repair was attempted, as instructed.
+    Artifacts in the worktree under <code>docs/figures/playable-forward-solve/boundary-routing/</code> (row-aligned drawn-boundary table,
+    anchor receipts, two relabelled sessions) and the report at <code>~/.config/reckon/crew/reports/nova/playable/boundary-routing.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T06:21:27",
+  "updated": "2026-09-07T06:48:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1839,6 +1839,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "media-prior-art",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "moment-blocks",
@@ -116714,6 +116723,148 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T035105208154-scr-vertical-force-decomposition",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-vertical-force-decomposition",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1251,
+                "cached_input_tokens": 894699,
+                "input_tokens": 895982,
+                "output_tokens": 203,
+                "reasoning_output_tokens": 146,
+                "total_tokens": 896185,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "JSON tables and one figure under docs/figures/solver-convergence-regression/vertical-mode/force-decomposition/ give, per row and per family, the radial field at the centroid and its P6 ampere-equivalent, summing to the total within 1 percent, with the fitted-versus-transducer case-current swap shown as a separate column; a second arm extends the compensating-current scan on 21986/46 from Z 0.0389 m toward the wall and above 0.1189 m in 2 cm steps and reports whether a zero exists; every computation runs through srun or sbatch on all_debug (TMPDIR=/tmp, environment python called directly, one-hour cap, declared waits for sbatch) or, if a constrained solve provably needs the H200, through a declared wait on that job; the report closes with one paragraph naming the mechanism per row for section 4",
+          "estimated_hours": 2.0,
+          "goal": "The vertical force at the EFIT seed of 21986/46 and 21989/55 decomposed by current family (plasma self-field, each active circuit, the eight instrumented coil-case groups under both the fitted currents and the transducer readings, passive and vessel circuits) as radial field at the current centroid in mT with its P6 ampere-equivalent, naming which family carries the 0.6 mT that the elimination measured as a 2.6 kA minimum compensating current",
+          "id": "scr-vertical-force-decomposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T035105208154-scr-vertical-force-decomposition/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/vertical_force_decomposition.py",
+            "docs/figures/solver-convergence-regression/vertical-mode/force-decomposition/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/force-decomposition.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-force-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T03:51:19Z",
+        "completed_at": "2026-09-07T04:47:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3387,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3387,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0da67aba55dedeabc15c8b9b1a293af38b57e1af",
+        "commits": [
+          "ff1af1adec7cb88b3c72cdbde86d3207bd7e6641",
+          "4f95a3aed28854664e855077f2b999f7c6eb162f",
+          "3ee825715d996339fc2fd93244eef64ee6e54c35",
+          "d193831b9ec9649bbf161bb008e115b0250c457d",
+          "0cce138d757d54aa81caeffb0dbdc0bad5213506"
+        ],
+        "changed_lines": {
+          "added": 1858,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1263851 (benchmarks/vertical_force_decomposition.py, 4 CPU, 32G, 5 min 20 s, exit 0) with JSON acceptance assertions: per-family sums equal the direct total within 1e-13 relative on both rows; figure job 1263852; ruff and git diff --check clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-vertical-force-decomposition/docs/figures/solver-convergence-regression/vertical-mode/force-decomposition/force-decomposition-run.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T035105208154-scr-vertical-force-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22427648,
+            "cached_input_tokens_cumulative": 22427648,
+            "input_tokens": 23043411,
+            "input_tokens_cumulative": 23043411,
+            "output_tokens": 47834,
+            "output_tokens_cumulative": 47834,
+            "reasoning_output_tokens": 11931,
+            "reasoning_output_tokens_cumulative": 11931
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 59765,
+          "peak_input_tokens": 45471059
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-vertical-force-decomposition",
+          "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T04:47:46Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -117026,6 +117177,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1966
+    "_version": 1968
   }
 }

@@ -606,6 +606,25 @@
     remaining remedy has an exact test bed. The one untested remedy is the policy itself: score pre-settlement
     candidates on the incumbent partition (a scoped re-opening of <code>a2e65fda</code>), which the lead locked on 2026-09-03 (decision presettlement-acceptance-scoring, prototype in flight); see the handoff at <a href="/nova/research/convergence-stall-handoff">convergence-stall-handoff</a>.</p>
   </section>
+
+  <section id="force-decomposition">
+    <h2>The vertical force at the seed, decomposed by current family (2026-09-07)</h2>
+    <p><strong>Node:</strong> <code>scr-vertical-force-decomposition</code> (codex terra, 56 min wall; driver <code>benchmarks/vertical_force_decomposition.py</code>;
+    all_debug jobs 1263851 and 1263852; receipts under <code>docs/figures/solver-convergence-regression/vertical-mode/force-decomposition/</code>; report
+    <code>~/.config/reckon/crew/reports/nova/vertical-mode/force-decomposition.md</code>). Decision <code>no-zero-compensation-root</code> (lead, 2026-09-07):
+    the 2.6 kA minimum compensating current is the measurement; attribute it by family.</p>
+    <p><strong>Method.</strong> The radial field at the EFIT current centroid of each vertical-mode bank row is summed over 23 families (plasma self-field imaged
+    through the cell sections, the 13 active circuits, the eight instrumented coil-case groups under EFIT's fitted currents and again under their exact-time
+    transducer readings from the raw <code>amc</code> group, the remaining passive and vessel sections) and expressed in mT and in P6 upper-minus-lower
+    ampere-equivalents (responses -2.217e-7 and -2.252e-7 T/A). The family sums close on the direct total to 9.7e-14 relative.</p>
+    <p><strong>21986/46.</strong> The fitted case groups carry 1.561 mT, the transducer readings 1.009 mT: the 0.553 mT fitted excess is 2.49 kA in P6 units,
+    96.6 percent of the 2.58 kA minimum compensation the elimination measured, concentrated in the P3 upper, P4 upper and P5 lower cases. On this row the
+    missing radial field is EFIT's regression absorbing diagnostic error into its fitted coil-case currents, the lead's reading. The extended scan at target
+    heights 0.019 and 0.139 m gives -3.56 and -6.97 kA, so no zero exists among seven samples from 0.019 to 0.139 m.</p>
+    <p><strong>21989/55.</strong> The same swap moves only 0.110 mT (0.49 kA) against a roughly 3 kA constrained correction; the independently measured case
+    currents do not explain this row, whose carrier stays open (followup f-scr-005). The largest single fitted terms on both rows are the P4 and P5 pairs at 11 to
+    18 mT each, cancelling to within a few mT, so the residual is a small difference of large terms and sensitive to any one circuit's current or position.</p>
+  </section>
 </main>
 </body>
 </html>

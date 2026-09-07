@@ -227,7 +227,8 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
 
     assert solved.delta_regularisation == weight
     np.testing.assert_allclose(solved.delta_current_scale, scale)
-    assert np.linalg.norm(normal_residual) < 1.0e-10 * np.sqrt(augmented.shape[0])
+    normal_scale = np.linalg.norm(augmented.T @ rhs)
+    assert np.linalg.norm(normal_residual) < 1.0e-12 * normal_scale
 
 
 def test_dimensionless_delta_regularisation_requires_a_scale(machine, seed_target):

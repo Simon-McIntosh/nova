@@ -1,0 +1,45 @@
+{
+  "achieved_seconds": 9.8,
+  "bytes": 2624734,
+  "contour_levels": 24,
+  "ff_prime_limit": [
+    -0.06572370147705085,
+    1.380197731018068
+  ],
+  "frame_milliseconds": 140,
+  "frames": 70,
+  "level_span_wb": [
+    -1.567454132447658,
+    0.5917907161958645
+  ],
+  "levels_shared_across_frames": true,
+  "machine": "MAST",
+  "p_prime_limit": [
+    -57071.692872070256,
+    459214.6176962891
+  ],
+  "path": "docs/figures/presentation-media/mast_21978_efit_pulse.gif",
+  "profile_limit_quantile": 0.98,
+  "profile_limits_fixed": true,
+  "provenance": {
+    "flux_unit": "Wb",
+    "group": "efm",
+    "plasma_current_floor_a": 10000.0,
+    "section_count": 938,
+    "selected_slice_count": 70,
+    "source": "/work/projects/imas_gpu/mast/level1/shots/21978.zarr",
+    "stored_flux_unit": "Wb/rad",
+    "stored_slice_count": 72,
+    "total_flux_factor": 6.283185307179586
+  },
+  "pulse": "21978",
+  "requested_seconds": 10.0,
+  "size": [
+    963,
+    780
+  ],
+  "time_span_s": [
+    0.019999999552965164,
+    0.3649999797344208
+  ]
+}

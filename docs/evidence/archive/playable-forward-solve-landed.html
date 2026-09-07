@@ -1070,9 +1070,24 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <p><strong>The pattern again, fifth instance.</strong> The emergent boundary path carries a private-flux shadow rule that excludes wall contacts lying beyond the
     x-point band, on the reasoning that such a contact sits in a null's shadow and cannot bind the plasma. The pinned path, which is the one the labeller uses, has no
     equivalent. One member of a pair filtered, the other not.</p>
-    <p>Decisive test, one job: on the worst frame print the chosen wall node's R, Z and psi beside the axis psi and beside the outboard contact EFIT implies. A node
-    near R 0.195 confirms the mechanism and makes the repair a reachability filter on the pinned wall anchor; an outboard node refutes it and returns the saddle-search
-    hypothesis to the table.</p>
+    <p><strong>Tested against EFIT's own map within the hour, which confirms the direction, refutes the culprit and leaves the magnitude open.</strong> Evaluating
+    EFIT's psirz bicubically at the 36 limiter nodes on 27079 and taking the argmax of total flux: at 30 ms the global wall maximum is 0.2955 Wb against a published
+    boundary of 0.2793 and an axis of 0.3834, so a selector taking that maximum places the boundary 16 mWb inboard of where it belongs, a shrink, which is the
+    mechanism's load-bearing half and is confirmed. The culprit is not: the winning node is the <em>upper roof</em> at R 0.565, Z 1.728 at every early time, migrating
+    to the lower roof and reaching an inboard corner only at 355 ms, by which time the plasma is diverted and the anchor unused. So the missing test is reachability in
+    general &mdash; a remote wall point 1.7 m above a midplane plasma cannot bind it &mdash; and a filter written against the centre column would have been the wrong
+    filter in the right class. The private-flux shadow rule on the emergent path is presumably what already excludes these.</p>
+    <p><strong>The magnitude is unexplained and no account should stand yet.</strong> Sixteen mWb of a 104 mWb span is a 15 per cent shrink; the frame collapses by 99
+    per cent to a 1.17 mWb span. Two candidates, and the first has a counter-argument. Self-consistent amplification, where a boundary too close to the axis shrinks
+    the plasma, weakens its own contribution and moves the wall flux again, would explain both the size and why the guard passes, since each iterate is
+    self-consistent. But the writer prescribes the measured coil currents and pins the absolute reference plasma current, so the coil field at the wall is fixed and a
+    collapsing plasma's own wall contribution tends to a filament's, bounding the wall maximum; and a pinned current squeezed into a shrinking area raises its density
+    and deepens the axis, which grows the span rather than collapsing it. The mechanism has to survive both pins to be the account. The second candidate needs no
+    solve: the writer carries a warm start from the previous slice and carries it whenever that slice finished cleanly, which these frames did because the guard
+    passed, so a collapsed frame is a legitimate warm start for the next and the collapse can propagate and deepen along the run. Its test is whether the failing
+    frames are contiguous and whether the shrink grows monotonically; a first limited frame already at 99 per cent rules propagation out.</p>
+    <p>The decisive test remains nova's own map rather than EFIT's, since the two solutions genuinely differ there: at 30 ms nova's axis sits at R 0.658 against an
+    EFIT plasma centred near 0.9. Print the node the selector actually chose, on nova's map, on that frame.</p>
     <p>Two consequences, both worse than an outline error. A compressed flux span means psi_norm is compressed, so the 26 TORAX faces with their p_prime and ff_prime
     sit on a wrong abscissa in those frames, corrupting the profile coordinate itself, and anything trained or scored on limited-phase labels inherits it. And the
     mechanism predicts the defect is worst when the solenoid is strongest and the plasma weakest, which is precisely the early phase where the consumer measured its

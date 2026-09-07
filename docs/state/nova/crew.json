@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T07:26:31",
+  "updated": "2026-09-07T07:53:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2689,6 +2689,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-census-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-contract-rev",
@@ -117921,6 +117930,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1974
+    "_version": 1975
   }
 }

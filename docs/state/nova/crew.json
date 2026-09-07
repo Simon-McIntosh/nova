@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T23:22:06",
+  "updated": "2026-09-07T23:29:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3139,6 +3139,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-placement-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-rasterless-s",
         "harness": "codex",
         "role": "implement",
@@ -3787,6 +3796,15 @@
       },
       {
         "id": "s19-score-c5",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c6",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -123161,6 +123179,160 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T192027007481-nia-contained-anchor-corpus-route",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-contained-anchor-corpus-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 980,
+                "cached_input_tokens": 542642,
+                "input_tokens": 543654,
+                "output_tokens": 1959,
+                "reasoning_output_tokens": 122,
+                "total_tokens": 545613,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The report states which of the two mechanisms was built and why (carrying the solver's shadow partition into the receipt read, or recomputing the wall shadow from the axis and qualified saddles at the receipt read) with the code path by file:line; on a fresh H200 relabel of 27079 into a fresh root the rows 15, 16 and 17 area ratios move toward one from 0.0418457614, 0.3353593144 and 0.5710731398 at containment 1.0, printed beside the drawn-of-written count, with the count of frames whose selected wall node changed and the node it moved to; the twelve positive-current bank rows and the Solovev certificate are bit-identical, the pinned diverted read is untouched, and the seven referee tests plus the hex reference gates are green; a test pins the contained-set wall-extremum comparison on a flux map where an out-of-vessel or shadowed wall node outscores the true limiter point; no structure is excluded by name, no tolerance is set from observed values, nova/equilibrium/reduced_newton.py is not edited (report NEEDS-HELP if the result type must change), the worktree base is fresh main with no merge of main into it, and the commit is held unmerged for the lead with status blocked stating merge awaits the lead; H200 jobs use one card, at most 4 cores, a per-job TMPDIR and the persistent compilation cache",
+          "estimated_hours": 3.0,
+          "goal": "A held prototype in which the limited anchor selection on the corpus writer route runs on the unshadowed contained wall-candidate set, measured on the three converged frames of 27079 whose census sits on main",
+          "id": "nia-contained-anchor-corpus-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T192027007481-nia-contained-anchor-corpus-route/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/forward.py",
+            "scripts/labeller_batch/shard.py",
+            "tests/test_topology_boundary.py",
+            "tests/test_wall_anchor_shadow.py",
+            "tests/test_boundary_read_routing.py",
+            "docs/figures/null-identification-authority/contained-anchor/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/contained-anchor-corpus-route.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-boundary-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T19:20:43Z",
+        "completed_at": "2026-09-07T21:26:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7520,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "d1e5e03dadb3bac362a10e4b079a93af0beb42ae",
+        "commits": [
+          "daa0cec7e13acc81898459f54ea694453c7af58e",
+          "d762a79471b93b321853bdb795159a80558ce8b8",
+          "79fa93156658879d481a83aa868dc54fc536c86f",
+          "0ef524667f4bd8c79700ef97cc278d97a1a4c75e",
+          "faebc70a8e1b31a79577a9a052bd5376cc88140b",
+          "73f789b5990981aab20ad3b40ab55a22f10aab8b",
+          "f074cd5ebee9eb3032d14c3571bd844868cf207f"
+        ],
+        "changed_lines": {
+          "added": 5197,
+          "removed": 41,
+          "files": 19
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T192027007481-nia-contained-anchor-corpus-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07cc2-9bdd-7053-83b1-9b8293d56ffc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5387264,
+            "cached_input_tokens_cumulative": 16767232,
+            "input_tokens": 5559477,
+            "input_tokens_cumulative": 17005066,
+            "output_tokens": 20610,
+            "output_tokens_cumulative": 47941,
+            "reasoning_output_tokens": 7583,
+            "reasoning_output_tokens_cumulative": 14749
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 62690,
+          "peak_input_tokens": 33772298
+        },
+        "follow_on_paths": [
+          "counts/margins",
+          "tests/test_newton_trajectory_continuation.py::test_continuation_accumulates_contracting_segments_eager_and_jit;"
+        ],
+        "dispute_count": 0,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "resume_waiver": {
+          "session_id": "01a07cc2-9bdd-7053-83b1-9b8293d56ffc",
+          "source": "pointer",
+          "reason": "The node's authorised replays are exhausted and its finding is complete; the successor is a vertical-placement diagnosis, not another anchor repair; commits and worktree preserved"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-contained-anchor-corpus-route",
+          "session_id": "01a07cc2-9bdd-7053-83b1-9b8293d56ffc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T21:26:03Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -123473,6 +123645,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2070
+    "_version": 2073
   }
 }

@@ -22,6 +22,7 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from typing import Any, Sequence
 
 import numpy as np
@@ -275,13 +276,18 @@ def _select_inputs(
     return arrays, evidence
 
 
-def _prepare_inputs() -> tuple[Any, dict[str, np.ndarray], list[dict[str, Any]]]:
+def _prepare_inputs(
+    *, shot_limit: int = CORPUS_SHOT_COUNT, slice_limit: int | None = None
+) -> tuple[Any, dict[str, np.ndarray], list[dict[str, Any]]]:
     """Construct the shared operator and one quartile from 48 corpus shots."""
     from nova.equilibrium.solve_request import default_forward_compilation_cache_root
     from nova.jax.config import configure_persistent_compilation_cache
     from scripts.labeller_batch import shard
 
-    arrays, evidence = _select_inputs()
+    arrays, evidence = _select_inputs(
+        shot_limit=shot_limit,
+        slice_limit=slice_limit,
+    )
     prepared = shard.prepare_labeller()
     cache = configure_persistent_compilation_cache(
         default_forward_compilation_cache_root()
@@ -426,8 +432,10 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
     labeller = BatchedLabeller(profile)
     device_tokens = _visible_device_tokens()[:device_count]
     solve_exceptions = []
+    first_solve_exception_traceback = None
 
     def solve_step(step: int, *, phase: str, repeat: int | None):
+        nonlocal first_solve_exception_traceback
         try:
             return labeller.solve(
                 steps["initial"][step],
@@ -438,12 +446,16 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
                 centroid_target=steps["centroid_target"][step],
             )
         except Exception as error:
+            full_traceback = traceback.format_exc()
+            if first_solve_exception_traceback is None:
+                first_solve_exception_traceback = full_traceback
             solve_exceptions.append(
                 {
                     "phase": phase,
                     "repeat": repeat,
                     "step": step,
                     "exception_class": type(error).__name__,
+                    "exception_message": str(error),
                     "slice_count": total_batch,
                 }
             )
@@ -485,7 +497,9 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
     conditioned = np.concatenate(
         [result_flag(result, "conditioned") for result in last_results]
     )
+    converged_count = int(np.count_nonzero(converged))
     first_execution_estimate = median_wall / steps["initial"].shape[0]
+    attempted_slices_per_second = measured_slices / median_wall
     return {
         "device_count": device_count,
         "batch_per_device": batch_per_device,
@@ -506,8 +520,12 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
             "minimum": float(np.min(timings)),
             "maximum": float(np.max(timings)),
         },
-        "slices_per_second": measured_slices / median_wall,
-        "converged_count": int(np.count_nonzero(converged)),
+        "slices_per_second": (
+            attempted_slices_per_second if converged_count > 0 else None
+        ),
+        "attempted_slices_per_second": attempted_slices_per_second,
+        "throughput_valid": converged_count > 0,
+        "converged_count": converged_count,
         "guard_count": int(np.count_nonzero(guard)),
         "conditioned_count": int(np.count_nonzero(conditioned)),
         "converged_fraction": float(np.mean(converged)),
@@ -520,6 +538,7 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
         "solve_exception_classes": sorted(
             {item["exception_class"] for item in solve_exceptions}
         ),
+        "first_solve_exception_traceback": first_solve_exception_traceback,
         "solve_exceptions": solve_exceptions,
         "nvidia_smi": utilisation,
         "cache_directory": str(inputs["cache_directory"]),
@@ -529,6 +548,34 @@ def _measure_one(batch_per_device: int, device_count: int) -> dict[str, Any]:
             "devices": [str(device) for device in jax.devices()],
             "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
         },
+    }
+
+
+def _diagnose_two() -> dict[str, Any]:
+    """Let the smallest conditioned batch fail with its complete traceback."""
+    import jax
+
+    from nova.equilibrium.batched_labeller import BatchedLabeller
+
+    profile, inputs, evidence = _prepare_inputs(shot_limit=2, slice_limit=2)
+    if len(jax.devices()) != 2:
+        raise RuntimeError(
+            f"two host devices are required, JAX discovered {len(jax.devices())}"
+        )
+    result = BatchedLabeller(profile).solve(
+        inputs["initial"],
+        prescribed_current=inputs["prescribed_current"],
+        target_current=inputs["target_current"],
+        requested_class=inputs["requested_class"],
+        reference_centroid=inputs["reference_centroid"],
+        centroid_target=inputs["centroid_target"],
+    )
+    return {
+        "status": "unexpected-success",
+        "selected_slices": evidence,
+        "converged": np.asarray(result.converged),
+        "guard": np.asarray(result.guard),
+        "conditioned": np.asarray(result.conditioned),
     }
 
 
@@ -576,8 +623,13 @@ def _child(
 def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     """Write the decision-facing table and name the fastest configuration."""
     arms = receipt["arms"]
-    successful = [item for item in arms if item.get("status") == "complete"]
-    best = max(successful, key=lambda item: item["slices_per_second"])
+    successful = [
+        item
+        for item in arms
+        if item.get("status") == "complete"
+        and item.get("throughput_valid") is True
+        and item.get("slices_per_second") is not None
+    ]
     lines = [
         "# Batched labeller throughput",
         "",
@@ -604,15 +656,27 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             f"{arm['converged_fraction']:.6f} | "
             f"{arm['guard_fraction']:.6f} | {mean_utilisation:.1f}% |"
         )
+    lines.extend(["", "## Best configuration", ""])
+    if successful:
+        best = max(successful, key=lambda item: item["slices_per_second"])
+        lines.extend(
+            [
+                f"The fastest measured arm used **{best['device_count']} devices "
+                f"with {best['batch_per_device']} elements per device**, reaching "
+                f"**{best['slices_per_second']:.3f} slices/s**.",
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "No arm produced a nonzero converged count, so no "
+                "slices-per-second result or fastest configuration is reported.",
+                "",
+            ]
+        )
     lines.extend(
         [
-            "",
-            "## Best configuration",
-            "",
-            f"The fastest measured arm used **{best['device_count']} devices with "
-            f"{best['batch_per_device']} elements per device**, reaching "
-            f"**{best['slices_per_second']:.3f} slices/s**.",
-            "",
             "The JSON receipt retains every timing sample, per-card utilisation "
             "aggregate, corpus shot and row, cache directory, and the scalar "
             "compiled-route convergence and guard fractions.",
@@ -675,7 +739,9 @@ def _run(output: Path, report: Path) -> dict[str, Any]:
                 receipt["status"] = "failed"
                 _write_json(output, receipt)
                 raise
-            arm["status"] = "complete"
+            arm["status"] = (
+                "complete" if arm["throughput_valid"] else "failed-zero-convergence"
+            )
             arm["converged_fraction_matches_sequential"] = (
                 arm["converged_count"] * reference["slice_count"]
                 == reference["converged_count"] * arm["measured_slices_per_repeat"]
@@ -686,12 +752,20 @@ def _run(output: Path, report: Path) -> dict[str, Any]:
             )
             receipt["arms"].append(arm)
             _write_json(output, receipt)
-            print(
-                f"ARM complete devices={device_count} "
-                f"batch_per_device={batch_per_device} "
-                f"slices_per_second={arm['slices_per_second']:.3f}",
-                flush=True,
-            )
+            if arm["throughput_valid"]:
+                print(
+                    f"ARM complete devices={device_count} "
+                    f"batch_per_device={batch_per_device} "
+                    f"slices_per_second={arm['slices_per_second']:.3f}",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"ARM invalid devices={device_count} "
+                    f"batch_per_device={batch_per_device} "
+                    "reason=zero-converged-slices",
+                    flush=True,
+                )
     receipt["status"] = "complete"
     if not all(
         arm["converged_fraction_matches_sequential"]
@@ -714,6 +788,7 @@ def _parser() -> argparse.ArgumentParser:
     measure.add_argument("--batch-per-device", type=int, required=True)
     measure.add_argument("--device-count", type=int, required=True)
     subparsers.add_parser("prepare-only")
+    subparsers.add_parser("diagnose-two")
     subparsers.add_parser("reference")
     return parser
 
@@ -754,6 +829,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 allow_nan=False,
             )
         )
+        return 0
+    if arguments.command == "diagnose-two":
+        print(json.dumps(_strict(_diagnose_two()), sort_keys=True, allow_nan=False))
         return 0
     receipt = _run(arguments.output, arguments.report)
     return 0 if receipt["status"] == "complete" else 1

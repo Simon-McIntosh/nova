@@ -30,6 +30,7 @@ from benchmarks.efit_forward_parity_slice import (
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium.shape_inverse import (
     achieved_target,
+    boundary_polygon,
     shape_response_matrix,
     shape_row_target,
     shape_values,
@@ -52,6 +53,22 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
 NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
 CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
 FORWARD_GAMMA_FACTOR = 1.0e-12
+DELTA_CURRENT_CEILING_A = 20_000.0
+DELTA_REGULARISATION_WEIGHTS = (
+    0.0,
+    1.0e-4,
+    1.0e-3,
+    1.0e-2,
+    1.0e-1,
+    1.0,
+    10.0,
+    100.0,
+)
+COMMAND_NAMES = (
+    "null-resolve",
+    "upper-point-plus-20mm",
+    "elongation-plus-5pct",
+)
 
 
 def _source_revision() -> str:
@@ -98,6 +115,12 @@ def _write(path: Path, payload: dict[str, Any]) -> None:
     """Persist one complete arm as soon as it lands."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _write_command_receipt(path: Path, payload: dict[str, Any]) -> None:
+    """Persist a completed command and publish a flushed progress marker."""
+    _write(path, payload)
+    print(f"receipt written {path.name}", flush=True)
 
 
 def _circuit_names(policy: dict[str, Any]) -> dict[int, str]:
@@ -235,6 +258,101 @@ def _linear_closure(
     ]
 
 
+def _row_floor_table(inverse) -> list[dict[str, Any]]:
+    """Attach each commanded row change to the scale used to weight it."""
+    return [
+        {
+            **row,
+            "absolute_commanded_change": abs(row["right_hand_side"]),
+            "commanded_change_to_consistency_floor": (
+                abs(row["right_hand_side"]) / max(row["consistency_floor"], 1.0e-15)
+            ),
+            "commanded_change_exceeds_consistency_floor": bool(
+                abs(row["right_hand_side"]) > row["consistency_floor"]
+            ),
+        }
+        for row in _linear_closure(inverse, inverse.consistency_floor)
+    ]
+
+
+def _delta_regularisation_sweep(
+    machine: ForwardMachine,
+    previous,
+    target,
+    *,
+    gamma_factor: float,
+) -> tuple[dict[str, Any], Any]:
+    """Sweep dimensionless delta penalties and retain the ceiling choice."""
+    profile = machine.profile
+    seed = np.asarray(profile.operator.prescribed_current_field.current)
+    free = machine.drivable_circuits
+    entries: list[dict[str, Any]] = []
+    selected_inverse = None
+    ceiling_weight = None
+    for weight in DELTA_REGULARISATION_WEIGHTS:
+        inverse = solve_shape_inverse(
+            profile,
+            target,
+            previous.flux,
+            prescribed_current=seed,
+            free_circuits=free,
+            gamma=gamma_factor,
+            delta_regularisation=weight,
+            delta_current_scale=DELTA_CURRENT_CEILING_A,
+        )
+        rows = _linear_closure(inverse, inverse.consistency_floor)
+        exercised = [
+            row
+            for row in rows
+            if abs(row["right_hand_side"]) > row["consistency_floor"]
+        ]
+        closed = [row for row in exercised if row["closes_at_least_eighty_percent"]]
+        maximum_change = float(np.max(np.abs(inverse.delta)))
+        within_ceiling = maximum_change <= DELTA_CURRENT_CEILING_A
+        entry = {
+            "delta_regularisation_weight": weight,
+            "dimensionless_penalty": "sum((delta_current_a / scale_a)**2)",
+            "current_scale_a": DELTA_CURRENT_CEILING_A,
+            "exercised_row_count": len(exercised),
+            "closed_exercised_row_count": len(closed),
+            "closure_fraction_exercised_rows": (
+                float(len(closed) / len(exercised)) if exercised else 1.0
+            ),
+            "every_exercised_row_closes_at_least_eighty_percent": bool(
+                all(row["closes_at_least_eighty_percent"] for row in exercised)
+            ),
+            "maximum_absolute_current_change_a": maximum_change,
+            "within_twenty_ka_ceiling": within_ceiling,
+            "h200_admitted": bool(
+                within_ceiling
+                and all(row["closes_at_least_eighty_percent"] for row in exercised)
+            ),
+        }
+        entries.append(entry)
+        if selected_inverse is None and within_ceiling:
+            selected_inverse = inverse
+            ceiling_weight = weight
+    if selected_inverse is None:
+        selected_inverse = inverse
+        selection = "strongest_swept_weight_without_ceiling_compliance"
+    else:
+        selection = "smallest_weight_with_twenty_ka_compliance"
+    return (
+        {
+            "weight_curve": entries,
+            "delta_current_scale_a": DELTA_CURRENT_CEILING_A,
+            "minimum_weight_with_every_circuit_below_twenty_ka": ceiling_weight,
+            "selected_delta_regularisation_weight": (
+                ceiling_weight
+                if ceiling_weight is not None
+                else DELTA_REGULARISATION_WEIGHTS[-1]
+            ),
+            "selection": selection,
+        },
+        selected_inverse,
+    )
+
+
 def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
     """Name a standard eight- or ten-row shape block."""
     names = [
@@ -252,6 +370,36 @@ def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
     if len(names) != len(kinds):
         names = [f"{kind}_{index}" for index, kind in enumerate(kinds)]
     return names[: len(kinds)]
+
+
+def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
+    """Report each polygon target beside its prior and one-solve achieved point."""
+    achieved = np.concatenate(
+        (
+            np.asarray(achieved_target(profile, flux).flux_points, dtype=float),
+            boundary_polygon(profile, flux),
+        )
+    )
+    return [
+        {
+            "index": index,
+            "previous_m": previous.tolist(),
+            "commanded_m": commanded.tolist(),
+            "achieved_m": actual.tolist(),
+            "consistency_floor": float(floor),
+            "row_weight": float(weight),
+        }
+        for index, (previous, commanded, actual, floor, weight) in enumerate(
+            zip(
+                inverse.previous_flux_points,
+                inverse.flux_points,
+                achieved,
+                inverse.consistency_floor[: inverse.flux_points.shape[0]],
+                inverse.row_weight[: inverse.flux_points.shape[0]],
+                strict=True,
+            )
+        )
+    ]
 
 
 def _seed_consistency_diagnostic(
@@ -391,7 +539,9 @@ def _seed_consistency_diagnostic(
         "boundary_consistency_tolerance_wb": boundary_tolerance,
         "boundary_stable_within_consistency_floor": bool(boundary_passes),
         "passes": bool(current_passes and boundary_passes),
-        "linear_row_closure": _linear_closure(null_inverse, tolerances),
+        "linear_row_closure": _linear_closure(
+            null_inverse, null_inverse.consistency_floor
+        ),
     }
     _write(path, payload)
 
@@ -428,9 +578,8 @@ def _seed_consistency_diagnostic(
                 )
             else:
                 closure = inverse.linear_prediction - inverse.right_hand_side
-                weighted_closure = closure.copy()
-                weighted_closure[4:] *= np.sqrt(inverse.field_weight)
-                row_closure = _linear_closure(inverse, tolerances)
+                weighted_closure = closure * inverse.row_weight
+                row_closure = _linear_closure(inverse, inverse.consistency_floor)
                 max_change = float(np.max(np.abs(inverse.delta)))
                 all_rows_close = all(
                     row["closes_at_least_eighty_percent"] for row in row_closure
@@ -577,13 +726,16 @@ def _arm_receipt(
     null_points: np.ndarray,
     circuit_names: dict[int, str],
     gamma_factor: float,
+    delta_regularisation_weight: float,
     row_floor_table: list[dict[str, Any]],
+    delta_regularisation_sweep: dict[str, Any],
     directory: Path,
     runtime: dict[str, Any],
 ) -> tuple[dict[str, Any], object]:
     """Persist inverse currents, run one forward solve, and return its receipt."""
     solver = ProductionSolver(machine, inverse_gamma=gamma_factor)
     profile = machine.profile
+    seed_current = np.asarray(solver.prescribed_current).copy()
     prior = achieved_target(profile, previous.flux)
     inverse_started = perf_counter()
     inverse = solve_shape_inverse(
@@ -595,6 +747,8 @@ def _arm_receipt(
         gamma=gamma_factor,
         current_step_fraction=solver.current_step_fraction,
         current_step_reference=solver.reference_current,
+        delta_regularisation=delta_regularisation_weight,
+        delta_current_scale=DELTA_CURRENT_CEILING_A,
     )
     inverse_wall = perf_counter() - inverse_started
     solver.prescribed_current = inverse.currents
@@ -606,6 +760,9 @@ def _arm_receipt(
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "gamma_factor_per_ampere": gamma_factor,
+        "delta_regularisation_weight": delta_regularisation_weight,
+        "delta_current_scale_a": DELTA_CURRENT_CEILING_A,
+        "delta_regularisation_sweep": delta_regularisation_sweep,
         "prescribed_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(inverse.currents)
@@ -619,6 +776,8 @@ def _arm_receipt(
         ),
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "commanded_change_against_consistency_floor": row_floor_table,
+        "row_consistency_floor": inverse.consistency_floor.tolist(),
+        "row_weight": inverse.row_weight.tolist(),
         "inverse_wall_s": inverse_wall,
     }
     _write(arm_path, persisted)
@@ -658,6 +817,7 @@ def _arm_receipt(
         _write(arm_path, persisted)
         raise
     error = turning_point_error(profile, target, equilibrium.flux)
+    current_change = inverse.currents - seed_current
     round_receipt = {
         "index": 1,
         "coil_current_a": inverse.currents.tolist(),
@@ -673,6 +833,11 @@ def _arm_receipt(
             _circuit_label(int(circuit), circuit_names): float(delta)
             for circuit, delta in zip(inverse.free_circuits, inverse.delta, strict=True)
         },
+        "current_change_by_circuit_a": {
+            _circuit_label(index, circuit_names): float(delta)
+            for index, delta in enumerate(current_change)
+        },
+        "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "uncapped_current_change_l2_a": float(np.linalg.norm(inverse.uncapped_delta)),
         "current_step_fraction": inverse.current_step_fraction,
@@ -682,6 +847,11 @@ def _arm_receipt(
             inverse.response[:, inverse.free_circuits] @ inverse.uncapped_delta
         ).tolist(),
         "linear_row_right_hand_side": inverse.right_hand_side.tolist(),
+        "delta_regularisation_weight": inverse.delta_regularisation,
+        "delta_current_scale_a": inverse.delta_current_scale.tolist(),
+        "row_consistency_floor": inverse.consistency_floor.tolist(),
+        "row_weight": inverse.row_weight.tolist(),
+        "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
         "least_squares_residual": inverse.least_squares_residual,
         "uncapped_least_squares_residual": inverse.uncapped_least_squares_residual,
         "response_singular_values": inverse.singular_values.tolist(),
@@ -696,6 +866,7 @@ def _arm_receipt(
         "commanded_change_against_consistency_floor": row_floor_table,
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
+        "target_point_rows": _boundary_point_rows(inverse, profile, equilibrium.flux),
         "turning_point_error_m": error,
         "trips": int(trips),
         "inverse_wall_s": inverse_wall,
@@ -724,13 +895,14 @@ def _arm_receipt(
             "placement_picard_rounds": 3,
             "nonlinear_forward_solves": 1,
         },
+        "delta_regularisation_sweep": delta_regularisation_sweep,
         "total_wall_s": round_receipt["wall_s"],
         "total_trips": int(trips),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
         "qualified_axis": True,
         "final_turning_point_error_m": error,
     }
-    _write(arm_path, payload)
+    _write_command_receipt(arm_path, payload)
     return payload, achieved
 
 
@@ -738,9 +910,24 @@ def _null_receipt(
     machine: ForwardMachine,
     previous,
     circuit_names: dict[int, str],
+    *,
+    delta_regularisation_weight: float,
+    delta_regularisation_sweep: dict[str, Any],
 ) -> tuple[dict[str, Any], object]:
-    """Re-solve unchanged currents and return the physical motion baseline."""
+    """Run the seed-frame null command and return its one-solve baseline."""
     solver = ProductionSolver(machine)
+    seed_current = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    target = achieved_target(machine.profile, previous.flux)
+    inverse = solve_shape_inverse(
+        machine.profile,
+        target,
+        previous.flux,
+        prescribed_current=solver.prescribed_current,
+        free_circuits=machine.drivable_circuits,
+        delta_regularisation=delta_regularisation_weight,
+        delta_current_scale=DELTA_CURRENT_CEILING_A,
+    )
+    solver.prescribed_current = inverse.currents
     started = perf_counter()
     equilibrium, trips, _program = solver._forward(
         machine.profile, previous.flux, solver.prescribed_current
@@ -748,15 +935,34 @@ def _null_receipt(
     wall = perf_counter() - started
     prior = achieved_target(machine.profile, previous.flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
+    current_change = inverse.currents - seed_current
+    turning_point_drift = _points(achieved) - _points(prior)
     payload = {
         "arm": "null-resolve",
+        "status": "complete",
         "previous_turning_points_m": _points(prior).tolist(),
+        "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
-        "turning_point_drift_m": (_points(achieved) - _points(prior)).tolist(),
+        "turning_point_drift_m": turning_point_drift.tolist(),
+        "maximum_turning_point_drift_m": float(
+            np.max(np.linalg.norm(turning_point_drift, axis=1))
+        ),
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
         },
+        "current_change_by_circuit_a": {
+            _circuit_label(index, circuit_names): float(delta)
+            for index, delta in enumerate(current_change)
+        },
+        "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
+        "delta_regularisation_weight": inverse.delta_regularisation,
+        "delta_current_scale_a": inverse.delta_current_scale.tolist(),
+        "delta_regularisation_sweep": delta_regularisation_sweep,
+        "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
+        "target_point_rows": _boundary_point_rows(
+            inverse, machine.profile, equilibrium.flux
+        ),
         "trips": int(trips),
         "wall_s": float(wall),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
@@ -856,8 +1062,9 @@ def measure(
     *,
     diagnose_inverse: bool = False,
     diagnose_consistency: bool = False,
+    command: str | None = None,
 ) -> dict[str, Any]:
-    """Run both commanded-shape arms on MAST 22086/43."""
+    """Run all shape commands, or one independently schedulable command."""
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
@@ -911,52 +1118,16 @@ def measure(
         _write(directory / "pulse-design-inverse-diagnostic.json", payload)
         print("INVERSE-DIAGNOSTIC " + json.dumps(payload), flush=True)
         return payload
-    null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
-    null_points = _points(achieved_target(profile, null_equilibrium.flux))
-    consistency_path = directory / CONSISTENCY_DIAGNOSTIC
-    consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
-    command_evidence = {
-        item["command"]: next(
-            row
-            for row in item["gamma_sweep"]
-            if row["gamma_factor_per_ampere"] == FORWARD_GAMMA_FACTOR
-        )
-        for item in consistency["check_3_command_gamma_sweep"]["commands"]
-    }
-    gamma_by_command = dict.fromkeys(command_evidence, FORWARD_GAMMA_FACTOR)
-    maximum_change_a = 20_000.0
-    for name, evidence in command_evidence.items():
-        measured = evidence["placement_result"]["maximum_absolute_current_change_a"]
-        if measured > maximum_change_a:
-            raise ValueError(
-                f"{name} requests {measured:.6g} A, above the hardware ceiling"
-            )
-    row_floor_by_command = {
-        name: [
-            {
-                **row,
-                "absolute_commanded_change": abs(row["right_hand_side"]),
-                "commanded_change_to_consistency_floor": (
-                    abs(row["right_hand_side"]) / max(row["consistency_floor"], 1.0e-15)
-                ),
-                "commanded_change_exceeds_consistency_floor": bool(
-                    abs(row["right_hand_side"]) > row["consistency_floor"]
-                ),
-            }
-            for row in evidence["placement_result"]["linear_row_closure"]
-        ]
-        for name, evidence in command_evidence.items()
-    }
     definitions = (
         (
             "upper-point-plus-20mm",
             _upper_point_target(previous_target),
-            float(gamma_by_command["upper-point-plus-20mm"]),
+            FORWARD_GAMMA_FACTOR,
         ),
         (
             "elongation-plus-5pct",
             _elongation_target(previous_target),
-            float(gamma_by_command["elongation-plus-5pct"]),
+            FORWARD_GAMMA_FACTOR,
         ),
     )
     runtime = {
@@ -972,13 +1143,16 @@ def measure(
         },
         "carrier": carrier_evidence,
         "policy": policy,
-        "inverse_gamma_factor_by_command": gamma_by_command,
-        "hardware_current_ceiling_a": maximum_change_a,
-        "gamma_selection": (
-            "fixed weak damping after interpreting row closure against each "
-            "row's measured consistency floor"
-        ),
-        "cpu_consistency_source_commit": consistency["source_commit"],
+        "inverse_gamma_factor_by_command": {
+            name: gamma_factor for name, _target, gamma_factor in definitions
+        },
+        "hardware_current_ceiling_a": DELTA_CURRENT_CEILING_A,
+        "delta_regularisation": {
+            "term": "weight**2 * sum((delta_current_a / scale_a)**2)",
+            "scale": "caller-stated 20 kA per active circuit",
+            "weights": DELTA_REGULARISATION_WEIGHTS,
+            "selection": "smallest weight with every circuit under 20 kA",
+        },
         "active_circuits": [
             {
                 "index": index,
@@ -992,10 +1166,51 @@ def measure(
             "trips": int(prime.fixed_point.active_set_iterations),
         },
     }
+    if command in {None, "null-resolve"}:
+        null_target = achieved_target(profile, prime.flux)
+        null_sweep, _null_inverse = _delta_regularisation_sweep(
+            machine,
+            prime,
+            null_target,
+            gamma_factor=FORWARD_GAMMA_FACTOR,
+        )
+        null_arm, null_equilibrium = _null_receipt(
+            machine,
+            prime,
+            circuit_names,
+            delta_regularisation_weight=float(
+                null_sweep["selected_delta_regularisation_weight"]
+            ),
+            delta_regularisation_sweep=null_sweep,
+        )
+        null_points = _points(achieved_target(profile, null_equilibrium.flux))
+        null_arm["runtime"] = runtime
+        _write_command_receipt(directory / "null-resolve.json", null_arm)
+        if command == "null-resolve":
+            return null_arm
+    else:
+        null_path = directory / "null-resolve.json"
+        null_arm = json.loads(null_path.read_text(encoding="utf-8"))
+        null_revision = null_arm.get("runtime", {}).get("source_commit")
+        if null_revision != runtime["source_commit"]:
+            raise ValueError(
+                "the null receipt must be measured at the current source revision"
+            )
+        null_points = np.asarray(null_arm["achieved_turning_points_m"], dtype=float)
+
+    selected_definitions = (
+        definitions
+        if command is None
+        else tuple(definition for definition in definitions if definition[0] == command)
+    )
     arms = []
-    null_arm["runtime"] = runtime
-    _write(directory / "null-resolve.json", null_arm)
-    for name, target, gamma_factor in definitions:
+    for name, target, gamma_factor in selected_definitions:
+        delta_sweep, selected_inverse = _delta_regularisation_sweep(
+            machine,
+            prime,
+            target,
+            gamma_factor=gamma_factor,
+        )
         arm, _achieved = _arm_receipt(
             name,
             machine,
@@ -1004,7 +1219,9 @@ def measure(
             null_points,
             circuit_names,
             gamma_factor,
-            row_floor_by_command[name],
+            float(delta_sweep["selected_delta_regularisation_weight"]),
+            _row_floor_table(selected_inverse),
+            delta_sweep,
             directory,
             runtime,
         )
@@ -1016,6 +1233,8 @@ def measure(
             f"wall_s={arm['total_wall_s']:.6g}",
             flush=True,
         )
+    if command is not None:
+        return arms[0]
     negative_control_path = directory / NEGATIVE_CONTROL
     if not negative_control_path.exists():
         raise FileNotFoundError(
@@ -1049,6 +1268,7 @@ def main() -> None:
     parser.add_argument("--diagnose-inverse", action="store_true")
     parser.add_argument("--diagnose-consistency", action="store_true")
     parser.add_argument("--finalize-measured-negative", action="store_true")
+    parser.add_argument("--command", choices=COMMAND_NAMES)
     arguments = parser.parse_args()
     if arguments.finalize_measured_negative:
         receipt = _finalize_measured_negative(arguments.directory)
@@ -1058,6 +1278,7 @@ def main() -> None:
         arguments.directory,
         diagnose_inverse=arguments.diagnose_inverse,
         diagnose_consistency=arguments.diagnose_consistency,
+        command=arguments.command,
     )
 
 

@@ -17,6 +17,12 @@ string on this machine to contrast with.
 
 The machine outline comes from the shot's own EFIT record, which is the same
 geometry the labelled solve was driven from.
+
+Only free solves are drawn. A slice the labeller conditioned on the reference
+current centroid is not something Nova found unaided, so presenting one as
+"nova solve" would credit it with a position it was handed; those slices are
+excluded and the counts recorded. Pass ``--include-conditioned`` to draw them,
+in which case each such frame is labelled in the figure itself.
 """
 
 from __future__ import annotations
@@ -40,6 +46,7 @@ def render_thomson(
     duration: float = 10.0,
     height: float = 6.5,
     quantile: float | None = 0.98,
+    include_conditioned: bool = False,
 ) -> dict[str, object]:
     """Write the surfaces-and-Thomson animation and return its receipt."""
     from nova.media.sources.mast_efit import read_pulse
@@ -47,7 +54,7 @@ def render_thomson(
     from nova.media.sources.nova_labels import read_labels
 
     style = DEFAULT_INK
-    frames, labels = read_labels(shot)
+    frames, labels = read_labels(shot, free_only=not include_conditioned)
     strings = read_thomson(shot)
     if not strings:
         raise ValueError(f"MAST {shot} carries no Thomson system")
@@ -108,9 +115,12 @@ def render_thomson(
                 "major radius  [m]" if axes is view.lower else None,
                 f"{string.name} $T_e$  [eV]",
             )
+        conditioning = (
+            "\ncentroid pinned to EFIT" if frame.conditioned else "\nfree solve"
+        )
         tr.annotate_time(
             view.upper,
-            f"MAST {shot}  nova solve\nt = {1e3 * frame.time:.0f} ms",
+            f"MAST {shot}  nova{conditioning}\nt = {1e3 * frame.time:.0f} ms",
         )
 
     receipt = gif.animate(
@@ -125,6 +135,7 @@ def render_thomson(
         "machine": "MAST",
         "pulse": str(shot),
         "left_panel": "nova nested flux surfaces, rasterless",
+        "conditioned_frames_drawn": sum(1 for f in frames if f.conditioned),
         "profile_limits_fixed": True,
         "profile_limit_quantile": quantile,
         "temperature_axis": "logarithmic, fixed over the pulse",
@@ -156,6 +167,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--height", type=float, default=6.5)
     parser.add_argument("--quantile", type=float, default=0.98)
+    parser.add_argument(
+        "--include-conditioned",
+        action="store_true",
+        help="also draw slices pinned to the reference current centroid",
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args(argv)
 
@@ -166,6 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         duration=arguments.duration,
         height=arguments.height,
         quantile=arguments.quantile,
+        include_conditioned=arguments.include_conditioned,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

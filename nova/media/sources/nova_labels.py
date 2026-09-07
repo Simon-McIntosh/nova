@@ -8,14 +8,24 @@ known flux rather than contoured. A session may also carry no boundary
 polyline, in which case the outermost nested surface supplies it; see
 :func:`_boundary`.
 
-Frames are admitted on ``branch_guard_ok``, which is the per-frame validity
-flag this schema actually carries; there is no ``converged`` variable in it.
+Frames are admitted on ``branch_guard_ok``, the per-frame validity flag this
+schema carries; there is no ``converged`` variable in the frame, by design --
+the conditioning and guard flags live per slice in the ``.npz`` companion
+beside each session file, which :func:`read_labels` reads and aligns by time.
+
+That companion carries the fact a caption depends on: ``conditioned`` marks a
+slice that was pinned to the reference's own current centroid. Such a slice is
+not a free solve, so it is excluded by default rather than drawn as one --
+measured on shot 27079, 23 of 114 slices are conditioned and 81 are both
+guarded and free.
+
 The session's own attributes record COCOS 17 and that the flux-function
 gradients come from EFIT, so no convention factor is applied here.
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -93,10 +103,35 @@ def _frame(dataset, index: int) -> SurfaceFrame:
     )
 
 
+def _conditioning(shot: int, dirname: Path, time: np.ndarray) -> np.ndarray:
+    """Return the per-slice conditioned flag, aligned to the frame times.
+
+    Alignment is by time equality rather than by the companion's ``row``
+    column: that column is the upstream source index -- it starts at 11 on
+    shot 27079 -- so using it to index frames would silently shift the flags.
+    The companion's own time vector is bit-identical to the session's, so an
+    exact comparison is the right check and a mismatch is a refusal.
+    """
+    companion = Path(dirname) / f"{shot}.npz"
+    if not companion.exists():
+        return np.zeros(time.size, dtype=bool)
+    with np.load(companion, allow_pickle=True) as loaded:
+        if "conditioned" not in loaded.files:
+            return np.zeros(time.size, dtype=bool)
+        companion_time = np.asarray(loaded["time"], dtype=float)
+        conditioned = np.asarray(loaded["conditioned"], dtype=bool)
+    if companion_time.size != time.size or not np.array_equal(companion_time, time):
+        raise ValueError(
+            f"the {shot}.npz companion does not share the session's time base"
+        )
+    return conditioned
+
+
 def read_labels(
     shot: int,
     dirname: Path | str = SESSION_ROOT,
     guarded_only: bool = True,
+    free_only: bool = True,
 ) -> tuple[tuple[SurfaceFrame, ...], dict]:
     """Return one shot's label frames and the session's provenance.
 
@@ -104,16 +139,31 @@ def read_labels(
     frame is a solve whose branch selection is not trusted, so drawing one
     beside a reconstruction would compare a reference against a solve its own
     author flagged.
+
+    ``free_only`` drops the conditioned slices. Keep it on for any figure that
+    presents the solve as Nova's own: a conditioned slice was handed the
+    reference current centroid, so including one silently credits the solve
+    with a position it was given.
     """
     from nova.equilibrium.steering_frames import read_session
 
     dataset = read_session(filename=str(shot), dirname=str(dirname))
     count = int(dataset.sizes["time"])
     guard = np.asarray(dataset["branch_guard_ok"].values, dtype=bool)
-    selected = np.flatnonzero(guard) if guarded_only else np.arange(count)
+    time = np.asarray(dataset["time"].values, dtype=float)
+    conditioned = _conditioning(shot, Path(dirname), time)
+    admitted = np.ones(count, dtype=bool)
+    if guarded_only:
+        admitted &= guard
+    if free_only:
+        admitted &= ~conditioned
+    selected = np.flatnonzero(admitted)
     if selected.size == 0:
-        raise ValueError(f"shot {shot} has no branch-guarded label frame")
-    frames = tuple(_frame(dataset, int(index)) for index in selected)
+        raise ValueError(f"shot {shot} has no admissible label frame")
+    frames = tuple(
+        replace(_frame(dataset, int(index)), conditioned=bool(conditioned[index]))
+        for index in selected
+    )
     return frames, {
         "session": str(Path(dirname)),
         "shot": int(shot),
@@ -123,8 +173,20 @@ def read_labels(
         "raster": "absent; the session records nested surfaces, not a map",
         "stored_frame_count": count,
         "guarded_frame_count": int(guard.sum()),
+        "conditioned_frame_count": int(conditioned.sum()),
+        "free_guarded_frame_count": int((guard & ~conditioned).sum()),
         "selected_frame_count": len(frames),
-        "admission": "branch_guard_ok" if guarded_only else "every stored frame",
+        "admission": ", ".join(
+            filter(
+                None,
+                (
+                    "branch_guard_ok" if guarded_only else "",
+                    "not conditioned on the reference centroid" if free_only else "",
+                ),
+            )
+        )
+        or "every stored frame",
+        "conditioning_source": f"{shot}.npz companion, aligned by time",
         "surface_count": len(frames[0].surfaces),
         "boundary_source": (
             "stored lcfs polyline"

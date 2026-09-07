@@ -77,6 +77,12 @@ class SurfaceFrame:
     p_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
     ff_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
     guarded: bool = True
+    conditioned: bool = False
+    """Whether this solve was pinned to the reference's own current centroid.
+
+    A conditioned slice is not a free solve: it was given the reference
+    centroid, so showing one beside that reference overstates how much the
+    solve found on its own. A figure drawing one must say so."""
 
     def __post_init__(self) -> None:
         """Reject a frame whose surfaces and their flux values disagree."""

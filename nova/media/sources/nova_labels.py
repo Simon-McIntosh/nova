@@ -100,6 +100,11 @@ def _frame(dataset, index: int) -> SurfaceFrame:
         p_prime=value("p_prime_face"),
         ff_prime=value("ff_prime_face"),
         guarded=bool(np.asarray(take["branch_guard_ok"].values)),
+        diverted=(
+            bool(np.asarray(take["diverted"].values))
+            if "diverted" in dataset.data_vars
+            else None
+        ),
     )
 
 

@@ -35,7 +35,7 @@ from pathlib import Path
 import numpy as np
 
 from nova.media import gif, poloidal as pol, traces as tr
-from nova.media.poloidal import chord_crossings
+from nova.media.poloidal import boundary_wall_gap, chord_crossings
 from nova.media.ink import DEFAULT_INK
 from nova.media.layout import three_view
 
@@ -46,6 +46,18 @@ _QUANTITIES = {
     "te": ("temperature", "$T_e$", "eV"),
     "ne": ("density", "$n_e$", "m$^{-3}$"),
 }
+
+
+def _gap_summary(gaps: np.ndarray) -> dict[str, float] | None:
+    """Return the millimetre gap statistics of one topology class."""
+    finite = gaps[np.isfinite(gaps)]
+    if finite.size == 0:
+        return None
+    return {
+        "count": int(finite.size),
+        "median_mm": float(1e3 * np.median(finite)),
+        "max_mm": float(1e3 * finite.max()),
+    }
 
 
 def render_thomson(
@@ -106,6 +118,14 @@ def render_thomson(
 
     view = three_view(extent=machine.bounds(), height=height, style=style)
     nulls: list[dict[str, int]] = []
+
+    # A limited boundary must touch its limiter. Reporting the standoff per
+    # class turns a boundary that has collapsed inward into a receipt number
+    # rather than something a reader has to catch in the animation.
+    gaps = np.array(
+        [boundary_wall_gap(frame.boundary, machine.limiter) for frame in frames]
+    )
+    limited = np.array([frame.diverted is False for frame in frames])
 
     def render(index: int) -> None:
         frame = frames[index]
@@ -196,6 +216,15 @@ def render_thomson(
         "quantity_label": f"{label} [{unit}]",
         "profile_axis": "logarithmic, fixed over the pulse",
         "separatrix_crossing_marked": True,
+        "boundary_wall_gap_mm": {
+            "limited": _gap_summary(gaps[limited]),
+            "diverted": _gap_summary(gaps[~limited]),
+            "note": (
+                "a limited boundary must touch its limiter, so a non-zero "
+                "limited gap is a solve defect rather than a standoff; the "
+                "diverted gap is expected"
+            ),
+        },
         "thomson_systems": [
             {
                 "name": string.name,

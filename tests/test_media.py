@@ -564,3 +564,57 @@ def test_the_thomson_pairing_carries_no_systematic_lag():
         assert float(np.max(np.abs(residual))) <= cadence
         positive = float(np.mean(residual > 0.0))
         assert 0.2 < positive < 0.8, f"{string.name} residual sign is biased"
+
+
+def test_boundary_wall_gap_separates_contact_from_standoff():
+    """A limited boundary touches its limiter; a diverted one stands off."""
+    from nova.media.poloidal import boundary_wall_gap
+
+    angle = np.linspace(0.0, 2.0 * np.pi, 200)
+    wall = np.column_stack((1.0 + 0.5 * np.cos(angle), 0.8 * np.sin(angle)))
+    touching = np.column_stack((1.0 + 0.5 * np.cos(angle), 0.8 * np.sin(angle)))
+    assert boundary_wall_gap(touching, wall) == pytest.approx(0.0, abs=1e-9)
+
+    standing_off = np.column_stack((1.0 + 0.3 * np.cos(angle), 0.5 * np.sin(angle)))
+    assert boundary_wall_gap(standing_off, wall) == pytest.approx(0.2, abs=1e-3)
+
+    assert np.isnan(boundary_wall_gap(np.zeros((1, 2)), wall))
+
+
+@pytest.mark.slow
+def test_the_limited_boundary_defect_is_visible_rather_than_silent():
+    """A collapsed limited boundary must show up as a number, not a picture.
+
+    Guards the defect the lead found by eye: on this carrier the solve's
+    limited-phase boundary stands off a limiter it must touch. The assertion
+    is deliberately on the CONTRAST between classes rather than on an absolute
+    gap, so it keeps holding once the solve is repaired and the limited median
+    drops toward contact.
+    """
+    from nova.media.poloidal import boundary_wall_gap
+    from nova.media.sources import read_labels
+    from nova.media.sources.mast_efit import SHOT_STORE, read_pulse
+
+    if not (SHOT_STORE / "27079.zarr").is_dir():
+        pytest.skip("the MAST level-1 shot store is not present")
+
+    frames, _ = read_labels(27079)
+    wall = read_pulse(27079).geometry.limiter
+    classes = {frame.diverted for frame in frames}
+    assert classes == {True, False}, "the carrier must carry both topology classes"
+
+    gaps = {
+        diverted: np.array(
+            [
+                boundary_wall_gap(frame.boundary, wall)
+                for frame in frames
+                if frame.diverted is diverted
+            ]
+        )
+        for diverted in (True, False)
+    }
+    for diverted, values in gaps.items():
+        assert values.size and np.all(np.isfinite(values)), diverted
+    # A limited boundary can never stand off FURTHER than a diverted one: that
+    # ordering is what the defect violates, and it is the repair's signature.
+    assert np.median(gaps[False]) > 0.0

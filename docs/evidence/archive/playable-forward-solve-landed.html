@@ -637,6 +637,12 @@
     every other shot; the scheduler walk skips shots that already have a session, so the two writers cannot collide. Camera facts from imas-ambix for the
     re-lock: five of the six carry 512x512 rbb over 0.085 to about 0.38 s; 22086 is 128x172 and so the worst carrier for anything a person watches despite
     converging best.</p>
+    <p><strong>Outcome (07:00Z).</strong> Job <code>1263887</code> completed in 7 min 13 s and all six sessions are <code>status: complete</code> in the corpus root
+    (converged / slices): 21978 46/72, 21983 44/72, 21985 39/71, 21986 40/62, 21989 45/75, 22086 46/60. imas-ambix-1d was told the same night and read them with the
+    contract filter (converged and branch_guard_ok, conditioned as a per-sample flag). Its recommendation to the lead, recorded on its plan at version 86: re-lock the
+    demo carrier to 21978/35 because the app's keyframe route (constrained reduced Newton with an empty constraint set, no centroid row) converges it as is and its
+    camera sits within six percent of 21989's; keep 22086/43 as the receipted physics fallback; do not add the centroid row to the app's forward for the demo. The
+    served-carrier swap in the app (seeded from 21978's persisted state) is the nova node that follows the lead's decision.</p>
   </section>
 </main>
 </body>

@@ -684,6 +684,56 @@ def _trace_divertor_legs(
     return result_r, result_z, finite
 
 
+def _outer_surface_lcfs(
+    geometry: dict[str, object],
+) -> tuple[np.ndarray, np.ndarray, int] | None:
+    """Return the closed LCFS ring traced from the outermost flux surface.
+
+    The outermost ray-traced flux surface that is fully finite carries the
+    plane boundary of the plasma; the ring repeats its first vertex so the
+    LCFS polyline is closed.  ``None`` when the traced surfaces are absent
+    or none of them is finite.
+    """
+    norm = np.asarray(geometry["flux_surface_psi_norm"], dtype=float)
+    radius = np.asarray(geometry["flux_surface_r"], dtype=float)
+    height = np.asarray(geometry["flux_surface_z"], dtype=float)
+    if norm.ndim != 1 or radius.ndim != 2:
+        return None
+    if radius.shape != height.shape or radius.shape[0] != norm.size:
+        return None
+    finite = np.all(np.isfinite(radius), axis=1) & np.all(np.isfinite(height), axis=1)
+    candidates = np.nonzero(finite)[0]
+    if not candidates.size:
+        return None
+    surface_r = np.asarray(radius[candidates[-1]], dtype=float)
+    surface_z = np.asarray(height[candidates[-1]], dtype=float)
+    return (
+        np.concatenate((surface_r, surface_r[:1])),
+        np.concatenate((surface_z, surface_z[:1])),
+        int(surface_r.size + 1),
+    )
+
+
+def _lcfs_channels(
+    geometry: dict[str, object],
+    labelled_lcfs: np.ndarray,
+    boundary_count: int,
+    raster_separatrix_count: int,
+) -> tuple[np.ndarray, np.ndarray, int]:
+    """Return the frame LCFS channels, filling from the outer surface if empty.
+
+    The raster-derived polyline is kept whenever one exists.  When no raster
+    separatrix (or its derived LCFS) exists, the channels come from the
+    outermost traced flux surface so a rasterless session still carries a
+    closed boundary for the decoder; an all-masked geometry stays empty.
+    """
+    if raster_separatrix_count == 0 or boundary_count == 0:
+        outer = _outer_surface_lcfs(geometry)
+        if outer is not None:
+            return outer
+    return labelled_lcfs[:, 0], labelled_lcfs[:, 1], boundary_count
+
+
 def assemble_frame(
     receipt: ForwardSolveReceipt,
     *,
@@ -754,6 +804,12 @@ def assemble_frame(
         divertor_leg_finite=divertor_leg_finite,
     )
     geometry["magnetic_axis_z_scalar"] = float(axis[1])
+    lcfs_r, lcfs_z, boundary_count = _lcfs_channels(
+        geometry,
+        lcfs,
+        boundary_count,
+        int(np.asarray(raster.separatrix_vertex_count)),
+    )
     if (
         wall is not None
         and internal_geometry is not None
@@ -804,8 +860,8 @@ def assemble_frame(
         x_point_z=np.stack((primary[1], secondary[1])),
         strike_points_r=strike[:, 0],
         strike_points_z=strike[:, 1],
-        lcfs_r=lcfs[:, 0],
-        lcfs_z=lcfs[:, 1],
+        lcfs_r=lcfs_r,
+        lcfs_z=lcfs_z,
         n_boundary_coords=np.int32(boundary_count),
         finite_mask=_mask_components(axis, primary, secondary, strike, boundary_count),
         coil_current=np.asarray(applied_current, dtype=np.float64),

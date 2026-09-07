@@ -13,14 +13,13 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
     GAMMA,
-    PICARD_ROUNDS,
     _cap_current_delta,
     achieved_target,
     bounding_box_pairs,
     observed_values,
     response_matrix,
     shape_response_matrix,
-    shape_row_target,
+    shape_steering_target,
     shape_values,
     solve_shape_inverse,
 )
@@ -62,6 +61,25 @@ def test_x_point_adds_both_field_components(machine, seed_target):
     response = shape_response_matrix(machine.profile, target, machine.seed)
     assert values.shape == (10,)
     assert response.shape == (10, machine.circuit_count)
+
+
+def test_shape_steering_target_carries_the_full_boundary_polygon(machine, seed_target):
+    """The inverse constrains every measured boundary point, not four extrema."""
+    rows, previous = shape_steering_target(machine.profile, seed_target, machine.seed)
+    assert rows.flux_points.shape[0] > 100
+    np.testing.assert_allclose(rows.flux_points[:4], seed_target.flux_points)
+    np.testing.assert_allclose(previous[:4], seed_target.flux_points)
+
+
+def test_shape_steering_target_keeps_a_moved_x_point_commanded(machine, seed_target):
+    """Null rows are evaluated where the operator commands the X-point."""
+    commanded_x_point = np.asarray([1.05, -0.15])
+    rows, _previous = shape_steering_target(
+        machine.profile,
+        replace(seed_target, x_point=commanded_x_point),
+        machine.seed,
+    )
+    np.testing.assert_allclose(rows.x_point, commanded_x_point)
 
 
 def test_response_matrix_matches_central_differences(machine, seed_target):
@@ -107,28 +125,58 @@ def test_unmoved_inverse_solves_seed_anchored_delta(machine, seed_target):
         rtol=0.0,
         atol=1.0e-12,
     )
-    assert solved.row_kinds == ("flux",) * 4 + ("field",) * 4
+    assert solved.row_kinds == ("flux",) * solved.flux_points.shape[0] + ("field",) * 4
+    assert solved.flux_points.shape[0] > 100
+    assert np.all(solved.consistency_floor > 0.0)
     assert solved.gamma == pytest.approx(GAMMA * solved.plasma_current)
-    assert solved.picard_currents.shape[0] == PICARD_ROUNDS + 1
-    expected_target = shape_row_target(machine.profile, seed_target, machine.seed)
-    np.testing.assert_allclose(solved.target, expected_target, rtol=0.0, atol=0.0)
-    assert solved.picard_boundary_flux[0] == pytest.approx(expected_target[0])
-    weight = np.asarray(
-        [
-            1.0 if kind == "flux" else np.sqrt(solved.field_weight)
-            for kind in solved.row_kinds
-        ]
+    assert solved.picard_currents.shape[0] == 1
+    row_target, _previous = shape_steering_target(
+        machine.profile, seed_target, machine.seed
     )
-    matrix = solved.response[:, solved.free_circuits] * weight[:, None]
-    vector = solved.right_hand_side * weight
+    expected_target = shape_values(machine.profile, row_target, machine.seed)
+    np.testing.assert_allclose(solved.target, expected_target, rtol=0.0, atol=0.0)
+    np.testing.assert_allclose(solved.right_hand_side, 0.0, rtol=0.0, atol=0.0)
+    assert solved.picard_boundary_flux[0] == pytest.approx(expected_target[0])
+    matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
+    vector = solved.right_hand_side * solved.row_weight
     normal_residual = (
         matrix.T @ (matrix @ solved.delta - vector) + solved.gamma**2 * solved.delta
     )
-    assert np.linalg.norm(normal_residual) < 1.0e-10
+    assert np.linalg.norm(normal_residual) < 3.0e-10 * np.sqrt(matrix.shape[0])
     assert solved.right_null_space.shape == (
         solved.free_circuits.size - solved.numerical_rank,
         solved.free_circuits.size,
     )
+
+
+def test_null_command_preserves_seed_through_one_forward_solve(machine):
+    """A seed-derived target leaves its boundary and circuit currents unchanged."""
+    from apps.playable.production import ProductionSolver
+
+    profile = machine.profile
+    seed_current = np.asarray(profile.operator.prescribed_current_field.current)
+    solver = ProductionSolver(machine)
+    seed_result = solver._reduced(profile, machine.seed, seed_current)
+    seed = ProductionSolver._reduced_receipt(profile, seed_result)
+    seed_target = achieved_target(profile, seed.flux)
+    inverse = solve_shape_inverse(
+        profile,
+        seed_target,
+        seed.flux,
+        prescribed_current=seed_current,
+        free_circuits=machine.drivable_circuits,
+    )
+    equilibrium, _trips, _program = solver._forward(
+        profile, seed.flux, inverse.currents
+    )
+    achieved = achieved_target(profile, equilibrium.flux)
+    drift = np.linalg.norm(
+        np.asarray(achieved.flux_points) - np.asarray(seed_target.flux_points), axis=1
+    )
+
+    assert float(np.max(np.abs(inverse.right_hand_side))) < 1.0e-12
+    assert float(np.max(drift)) < 1.0e-9
+    assert float(np.max(np.abs(inverse.currents - seed_current))) < 1.0e3
 
 
 def test_current_step_cap_is_relative_to_each_seed_circuit():
@@ -140,6 +188,68 @@ def test_current_step_cap_is_relative_to_each_seed_circuit():
     )
     np.testing.assert_array_equal(applied, np.asarray([10.0, -20.0, 0.0]))
     assert limited
+
+
+def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
+    machine, seed_target
+):
+    """A delta penalty applies to fractions of each caller-stated ceiling."""
+    current = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    points = np.asarray(seed_target.flux_points).copy()
+    points[1, 1] += 0.02
+    target = replace(
+        seed_target,
+        flux_points=points,
+        radial_field_points=points[[0, 2]],
+        vertical_field_points=points[[1, 3]],
+    )
+    ceiling = 20_000.0
+    weight = 0.25
+    free_circuits = np.arange(0, current.size, 2)
+    solved = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        gamma=0.0,
+        picard_rounds=0,
+        free_circuits=free_circuits,
+        delta_regularisation=weight,
+        delta_current_scale=ceiling,
+    )
+
+    matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
+    scale = np.full(solved.free_circuits.size, ceiling)
+    rhs = solved.right_hand_side * solved.row_weight
+    normal_matrix = matrix.T @ matrix + weight * np.diag(1.0 / scale**2)
+    expected_delta = np.linalg.solve(normal_matrix, matrix.T @ rhs)
+    stronger = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        gamma=0.0,
+        picard_rounds=0,
+        free_circuits=free_circuits,
+        delta_regularisation=2.0 * weight,
+        delta_current_scale=ceiling,
+    )
+
+    assert solved.delta_regularisation == weight
+    np.testing.assert_allclose(solved.delta_current_scale, scale)
+    np.testing.assert_allclose(solved.delta, expected_delta, rtol=1.0e-6)
+    assert np.linalg.norm(stronger.delta) < np.linalg.norm(solved.delta)
+
+
+def test_dimensionless_delta_regularisation_requires_a_scale(machine, seed_target):
+    """A nonzero dimensionless penalty cannot silently use seed currents."""
+    with pytest.raises(ValueError, match="delta_current_scale"):
+        solve_shape_inverse(
+            machine.profile,
+            seed_target,
+            machine.seed,
+            delta_regularisation=1.0,
+        )
 
 
 @pytest.mark.parametrize("parameter", ("bulk_r", "bulk_z"))

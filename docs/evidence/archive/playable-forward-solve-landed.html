@@ -1121,6 +1121,33 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     the first iterate does, when no previous shadow exists, which is the case that produced the worst frame: a cold start has nothing to carry, so the ordering problem
     is real there even after the wiring, and the answer may be to iterate the read once rather than to accept its first anchor.</p>
   </section>
+
+  <section id="the-limited-class-is-impaired-from-a-good-seed-too">
+    <h2>A 2x2 on class against start condition: the solid finding is that limited frames are impaired even warm (2026-09-07 10:32Z)</h2>
+    <p>Span ratio, nova against EFIT, on 27079, crossing the topology class with whether the frame inherited a converged predecessor:</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median</th><th>Min</th><th>Max</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>67</td><td>0.979</td><td>0.364</td><td>1.380</td></tr>
+        <tr><td>diverted, cold</td><td>7</td><td>1.086</td><td>0.510</td><td>1.311</td></tr>
+        <tr><td>limited, warm</td><td>27</td><td>0.410</td><td>0.105</td><td>0.588</td></tr>
+        <tr><td>limited, cold</td><td>1</td><td>0.011</td><td>&mdash;</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p>A cold start is harmless on its own, 1.086 against 0.979 over 7 and 67 frames, which is what the account requires since a diverted frame never consults the wall
+    anchor. <strong>The solid finding is that the limited class is impaired even warm, 0.410 against 0.979 over 27 and 67 frames</strong>, so the anchor is wrong even
+    from a good seed. The limited cold cell collapses a further 37-fold, and rests on one frame.</p>
+    <p><strong>This corrects the coordinator's mechanism for the interaction.</strong> The claim was that a cold first iterate lacks a shadow to inherit while later
+    frames have one. That is wrong on its own evidence: the shadow is never applied to the anchor in any case, so inheriting it changes nothing there, and the warm-cold
+    axis cannot be a shadow effect. It is a seed effect. A cold limited frame seeds from the reconstruction flux rather than a converged predecessor, and the anchor
+    chosen from the worse seed lands worse still. The prediction was right in outcome and wrong in mechanism.</p>
+    <p><strong>The acceptance measure for the repair follows from the marginals rather than from the mechanism.</strong> Masking the anchor must recover the 27 warm
+    limited frames and not merely the single catastrophic one. If the limited median moves from 0.41 toward unity the account is confirmed; if 30 ms is fixed and the
+    class stays at 0.41, there is a second defect in that branch and the ordering was only its tail.</p>
+    <p>One observation carried unlabelled because it sits in the class being used as the healthy control: the diverted ratio is not a median near unity with scatter but
+    has structure, running 1.2 to 1.38 above EFIT through the mid-discharge around 420 to 490 ms and falling to 0.46 by 575 ms. If the control carries its own
+    time-dependent discrepancy then every ratio quoted against it inherits that. Open observation, not a finding.</p>
+  </section>
 </main>
 </body>
 </html>

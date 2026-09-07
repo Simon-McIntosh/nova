@@ -37,9 +37,11 @@ Coordinate convention
 ---------------------
 All coordinates are cylindrical ``(R, phi, Z)`` in COCOS 17 with ``Z`` upward
 and ``phi`` measured anticlockwise from ``+R`` viewed from above.  ``psi`` is
-the poloidal flux per radian of toroidal angle; its sign follows the Nova
-observation convention (NOVA_COCOS = 17).  ``psi_norm`` is dimensionless,
-``(psi - psi_axis) / (psi_LCFS - psi_axis)`` with the boundary at unity.
+the total poloidal flux in Wb under the COCOS 17 convention (``e_Bp = 1``,
+the 2 pi convention), so the schema carries one unit — Wb — for it; its sign
+follows the Nova observation convention (NOVA_COCOS = 17).  ``psi_norm`` is
+dimensionless, ``(psi - psi_axis) / (psi_LCFS - psi_axis)`` with the boundary
+at unity.
 
 X-point ordering is NOT order-invariant: slot 0 always holds the primary
 X-point the topology read selected and slot 1 the secondary one, with NaN in
@@ -52,8 +54,8 @@ drop the trailing ``time`` entry; ``n_r``/``n_z`` are the raster axes,
 ``n_circuits`` the driven circuit count, ``n_rows`` the registered constraint
 row count, ``n_cp`` the commanded control-point count, ``n_wall`` the wall
 polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
-``(R, phi, Z)`` metres; ``psi`` is Wb per radian and ``psi_norm``
-dimensionless.
+``(R, phi, Z)`` metres; ``psi`` is the total poloidal flux in Wb and
+``psi_norm`` dimensionless.
 
 +--------------------------+-----------------+---------+--------------------+
 | field                    | session shape   | dtype   | units              |
@@ -62,7 +64,7 @@ dimensionless.
 | radius                   | (n_r,)          | float64 | m                  |
 | height                   | (n_z,)          | float64 | m                  |
 | shape                    | (2,)            | int32   | grid cells         |
-| psi                      | (n_r, n_z, nt)  | float64 | Wb (per radian)    |
+| psi                      | (n_r, n_z, nt)  | float64 | Wb                 |
 | psi_norm                 | (n_r, n_z, nt)  | float64 | dimensionless      |
 | domain_label             | (n_r, n_z, nt)  | int8    | ForwardDomainLabel |
 | separatrix               | (n_s, 2, nt)    | float64 | m (NaN-padded)     |
@@ -246,7 +248,7 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("radius", ("n_r",), "float64", "m"),
     ("height", ("n_z",), "float64", "m"),
     ("shape", ("2",), "int32", "grid cells"),
-    ("psi", ("n_r", "n_z", "nt"), "float64", "Wb (per radian)"),
+    ("psi", ("n_r", "n_z", "nt"), "float64", "Wb"),
     ("psi_norm", ("n_r", "n_z", "nt"), "float64", "dimensionless"),
     ("domain_label", ("n_r", "n_z", "nt"), "int8", "ForwardDomainLabel"),
     ("separatrix", ("n_s", "2", "nt"), "float64", "m"),
@@ -1260,6 +1262,7 @@ def session_dataset(
     )
     attrs = {
         COCOS_ATTR: COCOS,
+        "flux_unit": "Wb",
         "training_inputs": training_inputs,
         "diagnostic_only": diagnostic_only,
         "p_prime_source": p_prime_source,

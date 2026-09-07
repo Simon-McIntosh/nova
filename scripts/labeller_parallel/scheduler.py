@@ -301,16 +301,19 @@ class SequentialCompiledEngine:
         conditioned = False
         free_wall_seconds = conditioned_wall_seconds = 0.0
         initial = np.asarray(batch.initial_state[index])
+        slice_seed = initial if np.all(np.isfinite(initial)) else None
         requested_value = int(batch.requested_class[index])
         target_current = float(batch.target_current[index])
         current = np.asarray(batch.prescribed_current[index])
 
         free_started = time.perf_counter()
         try:
+            if slice_seed is None:
+                raise ValueError("non-finite reconstruction flux seed")
             free_result = self._free_solve(
                 index,
                 device,
-                initial,
+                slice_seed,
                 requested_value,
                 target_current,
                 current,
@@ -340,11 +343,13 @@ class SequentialCompiledEngine:
             conditioned = True
             conditioned_started = time.perf_counter()
             try:
+                if slice_seed is None:
+                    raise ValueError("non-finite reconstruction flux seed")
                 with jax.default_device(device):
                     requested = jnp.asarray(requested_value, dtype=jnp.int8)
                     pair, _selection = _centroid_pair(
                         self.prepared.profile,
-                        jnp.asarray(initial),
+                        jnp.asarray(slice_seed),
                         target=float(batch.centroid_target_z[index]),
                         unknown=None,
                         target_current=target_current,
@@ -354,7 +359,7 @@ class SequentialCompiledEngine:
                 conditioned_result = self._conditioned_solve(
                     index,
                     device,
-                    initial,
+                    slice_seed,
                     pair,
                     requested,
                     target_current,

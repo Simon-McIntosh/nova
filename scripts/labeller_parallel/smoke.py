@@ -32,6 +32,7 @@ from scripts.labeller_batch.shard import (  # noqa: E402
 )
 from scripts.labeller_parallel.scheduler import (  # noqa: E402
     CorpusScheduler,
+    HostRouteEngine,
     SequentialCompiledEngine,
     SourceIdentity,
     admitted_quartile_rows,
@@ -124,6 +125,17 @@ def _stable_carrier_evidence(value: Any) -> tuple[Any, bool]:
     stable["named_cache_only_check"]["stdout"] = re.sub(
         r"\bwarm_seconds=[0-9.]+\b", "warm_seconds=<elapsed>", check_stdout
     )
+    command = stable["named_cache_only_check"].get("command")
+    if isinstance(command, list):
+        stable["named_cache_only_check"]["command"] = [
+            (
+                "benchmarks/mast_response_carrier_warm.py"
+                if isinstance(value, str)
+                and value.endswith("/benchmarks/mast_response_carrier_warm.py")
+                else value
+            )
+            for value in command
+        ]
     return stable, timings_valid
 
 
@@ -141,6 +153,9 @@ def _compare(
     excluded_occurrences: dict[str, int] = {}
     revision_transitions: list[dict[str, Any]] = []
     maximum_relative_differences: dict[str, float] = {}
+    compared_slice_count = 0
+    reference_converged_count = 0
+    candidate_converged_count = 0
 
     def observe(counts: dict[str, int], name: str, differs: bool) -> None:
         counts.setdefault(name, 0)
@@ -213,6 +228,13 @@ def _compare(
 
         expected_rows = reference_manifest["slices"]
         actual_rows = candidate_manifest["slices"]
+        compared_slice_count += min(len(expected_rows), len(actual_rows))
+        reference_converged_count += sum(
+            bool(item.get("converged")) for item in expected_rows
+        )
+        candidate_converged_count += sum(
+            bool(item.get("converged")) for item in actual_rows
+        )
         if len(expected_rows) != len(actual_rows):
             observe(manifest_differences, "slices.length", True)
             differences.append(f"manifest:{shot}:slice_count")
@@ -321,9 +343,21 @@ def _compare(
                     observe(session_differences, name, differs)
                     if differs:
                         differences.append(f"session:{shot}:{name}")
+    differing_field_count = len(differences)
+    converged_count_equal = reference_converged_count == candidate_converged_count
     return {
-        "differing_field_count": len(differences),
+        "differing_field_count": differing_field_count,
         "differing_fields": differences,
+        "compared_slice_count": compared_slice_count,
+        "discrete_exact_slice_count": (
+            compared_slice_count if differing_field_count == 0 else None
+        ),
+        "float_within_tolerance_slice_count": (
+            compared_slice_count if differing_field_count == 0 else None
+        ),
+        "reference_converged_count": reference_converged_count,
+        "candidate_converged_count": candidate_converged_count,
+        "converged_count_equal": converged_count_equal,
         "differing_fields_by_surface": {
             "manifest": dict(sorted(manifest_differences.items())),
             "npz": dict(sorted(npz_differences.items())),
@@ -458,6 +492,7 @@ def run_smoke(
     replace_existing: bool,
     condition_on_guard_failure: bool,
     source_identity: SourceIdentity,
+    engine_name: str = "compiled",
 ) -> dict[str, Any]:
     """Run one real arm and compare all persisted fields with the shard."""
     output.mkdir(parents=True, exist_ok=True)
@@ -494,7 +529,11 @@ def run_smoke(
         work.shot: {item.row: item.requested_class for item in work.slices}
         for work in ranked
     }
-    engine = SequentialCompiledEngine(
+    engine_type = {
+        "compiled": SequentialCompiledEngine,
+        "host": HostRouteEngine,
+    }[engine_name]
+    engine = engine_type(
         prepared,
         device_count=devices,
         condition_on_guard_failure=condition_on_guard_failure,
@@ -520,7 +559,7 @@ def run_smoke(
         "shot_count": SHOT_COUNT,
         "max_admitted_slices_per_shot": max_slices,
         "shot_ids": shots,
-        "engine": "sequential-compiled",
+        "engine": engine.name,
         "reference_driver": "scripts/labeller_batch/shard.py:label_shot",
         "sampling": {
             "method": "admitted-row quartiles",
@@ -541,10 +580,37 @@ def run_smoke(
         ],
         "performance": performance,
         "identity": identity,
-        "passed": identity["differing_field_count"] == 0,
+        "passed": (
+            identity["differing_field_count"] == 0 and identity["converged_count_equal"]
+        ),
     }
     receipt = output / "h200-one-device" / "identity-receipt.json"
     receipt.parent.mkdir(parents=True, exist_ok=True)
+    receipt.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    return result
+
+
+def compare_existing_outputs(output: Path) -> dict[str, Any]:
+    """Re-evaluate persisted H200 outputs without repeating either solve arm."""
+    receipt = output / "h200-one-device" / "identity-receipt.json"
+    result = json.loads(receipt.read_text(encoding="utf-8"))
+    shots = [int(value) for value in result["shot_ids"]]
+    candidate = output / "one-device"
+    requested_classes = {}
+    for shot in shots:
+        manifest = json.loads(
+            (candidate / f"{shot}.manifest.json").read_text(encoding="utf-8")
+        )
+        requested_classes[shot] = {
+            int(item["row"]): int(item["requested_class"])
+            for item in manifest["slices"]
+            if item.get("written")
+        }
+    identity = _compare(output / "reference", candidate, shots, requested_classes)
+    result["identity"] = identity
+    result["passed"] = (
+        identity["differing_field_count"] == 0 and identity["converged_count_equal"]
+    )
     receipt.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
@@ -559,6 +625,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-reference", action="store_true")
     parser.add_argument("--replace", action="store_true")
     parser.add_argument("--condition-on-guard-failure", action="store_true")
+    parser.add_argument("--engine", choices=("host", "compiled"), default="compiled")
+    parser.add_argument("--compare-existing", action="store_true")
     parser.add_argument("--prepare-only", action="store_true")
     return parser
 
@@ -590,6 +658,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         )
         return 0
+    if arguments.compare_existing:
+        result = compare_existing_outputs(arguments.output.resolve())
+        print(json.dumps(result, sort_keys=True))
+        return 0 if result["passed"] else 1
     result = run_smoke(
         arguments.output.resolve(),
         devices=arguments.devices,
@@ -600,6 +672,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         replace_existing=arguments.replace,
         condition_on_guard_failure=arguments.condition_on_guard_failure,
         source_identity=source_identity,
+        engine_name=arguments.engine,
     )
     print(json.dumps(result, sort_keys=True))
     return 0 if result["passed"] else 1

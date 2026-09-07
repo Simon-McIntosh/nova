@@ -1,0 +1,148 @@
+"""Identity checks for the host-route corpus scheduler."""
+
+from __future__ import annotations
+
+from copy import deepcopy
+from types import SimpleNamespace
+
+import numpy as np
+
+from apps.playable.solovev import build_machine
+from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.topology import TopologyClass
+from scripts.labeller_batch import shard
+from scripts.labeller_batch.shard import LabellerPrograms, PreparedLabeller
+from scripts.labeller_parallel import scheduler
+
+
+def _without_elapsed(record: dict[str, object]) -> dict[str, object]:
+    stable = deepcopy(record)
+    for name in ("wall_seconds", "free_wall_seconds", "conditioned_wall_seconds"):
+        stable[name] = 0.0
+    return stable
+
+
+def test_host_route_matches_shard_slice_record_on_solovev(monkeypatch, tmp_path):
+    """One real free and conditioned solve yields the shard's slice record."""
+    machine = build_machine()
+    profile = machine.profile
+    seed = np.asarray(machine.seed)
+    current = np.asarray(profile.operator.prescribed_current_field.current)
+    target_current = abs(float(np.sum(np.asarray(profile.operator.cell_current(seed)))))
+    observation = profile.current_moment_observation(
+        seed,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        target_current=target_current,
+    )
+    target_centroid_z = float(np.asarray(observation.centroid_z)) + 0.1
+    requested_class = int(TopologyClass.LIMITED)
+    policy_evidence = {
+        "active_mapping": [
+            {"stored_circuit": index + 1, "family": f"circuit_{index}"}
+            for index in range(current.size)
+        ]
+    }
+    prepared = PreparedLabeller(
+        profile=profile,
+        wall=np.asarray(machine.wall),
+        carrier_evidence={},
+        policy_evidence=policy_evidence,
+        cache_directory=str(tmp_path),
+        setup_wall_seconds=0.0,
+    )
+    inputs = {
+        "time": 0.25,
+        "magnetic_axis_z": 0.0,
+        "target_centroid_z": target_centroid_z,
+        "reference_plasma_current": target_current,
+        "current": current,
+    }
+    group = {
+        "time": np.asarray([inputs["time"]]),
+        "gridr": np.asarray([0.0]),
+        "gridz": np.asarray([0.0]),
+        "psi_norm": np.asarray([0.0, 1.0]),
+        "pprime": np.asarray([[0.0, 0.0]]),
+        "ffprime": np.asarray([[0.0, 0.0]]),
+    }
+
+    monkeypatch.setattr(
+        shard.zarr, "open_group", lambda *_args, **_kwargs: {"efm": group}
+    )
+    monkeypatch.setattr(shard, "_slice_inputs", lambda *_args: inputs)
+    monkeypatch.setattr(shard, "_slices_seed", lambda *_args: seed)
+    monkeypatch.setattr(shard, "_requested_class", lambda *_args: requested_class)
+
+    def receipt(_prepared, result, **_arguments):
+        return SimpleNamespace(
+            qualified=bool(result.converged), terminal_state=object()
+        )
+
+    def frame(_receipt, **_arguments):
+        return SimpleNamespace(branch_guard_ok=True)
+
+    for module in (shard, scheduler):
+        monkeypatch.setattr(module, "_forward_receipt", receipt)
+        monkeypatch.setattr(
+            module, "_internal_geometry", lambda *_args, **_kwargs: None
+        )
+        monkeypatch.setattr(module, "assemble_frame", frame)
+    monkeypatch.setattr(shard, "_write_session_file", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(shard, "_write_companion", lambda *_args, **_kwargs: None)
+
+    shard_output = tmp_path / "shard"
+    shard_output.mkdir()
+    _programs, manifest = shard.label_shot(
+        prepared,
+        1,
+        shard_output,
+        programs=LabellerPrograms(),
+        include_raster=False,
+        condition_on_guard_failure=True,
+        setup_wall_seconds=0.0,
+        max_slices=1,
+    )
+
+    item = scheduler.SliceInput(
+        shot=1,
+        row=0,
+        time=float(inputs["time"]),
+        initial_state=seed,
+        prescribed_current=current,
+        target_current=target_current,
+        requested_class=requested_class,
+        centroid_target_z=target_centroid_z,
+        p_prime_psi_norm=np.asarray(group["psi_norm"]),
+        p_prime=np.asarray(group["pprime"])[0],
+        ff_prime_psi_norm=np.asarray(group["psi_norm"]),
+        ff_prime=np.asarray(group["ffprime"])[0],
+    )
+    batch = scheduler.EngineBatch(
+        active=np.asarray([True]),
+        shot=np.asarray([item.shot]),
+        row=np.asarray([item.row]),
+        time=np.asarray([item.time]),
+        initial_state=np.asarray([item.initial_state]),
+        prescribed_current=np.asarray([item.prescribed_current]),
+        target_current=np.asarray([item.target_current]),
+        requested_class=np.asarray([item.requested_class], dtype=np.int8),
+        centroid_target_z=np.asarray([item.centroid_target_z]),
+    )
+    engine = scheduler.HostRouteEngine(
+        prepared,
+        device_count=1,
+        condition_on_guard_failure=True,
+    )
+    engine._ensure_slots(1)
+    solved = engine._solve_slot(batch, 0)
+    monkeypatch.setattr(scheduler, "_ASSEMBLY_PREPARED", prepared)
+    monkeypatch.setattr(scheduler, "_CONDITION_ON_GUARD_FAILURE", True)
+    assembled = scheduler.assemble_frame_on_host(
+        scheduler.AssemblyRequest(item, solved)
+    )
+
+    expected = dict(manifest["slices"][0])
+    expected["requested_class"] = requested_class
+    assert expected["conditioned"] is True
+    assert assembled.record["conditioned"] is True
+    assert _without_elapsed(assembled.record) == _without_elapsed(expected)

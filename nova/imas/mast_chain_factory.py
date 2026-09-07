@@ -171,7 +171,13 @@ class MastCurrentDiffusion(CurrentDiffusion):
 
 
 def _wall_grid(ids, radial_points: int, vertical_points: int) -> _Grid:
-    unit = ids["wall"].description_2d[0].limiter.unit[0]
+    wall = ids["wall"]
+    if len(wall.description_2d) != 1:
+        raise ValueError("expected exactly one wall description")
+    limiter = wall.description_2d[0].limiter
+    if len(limiter.unit) != 1:
+        raise ValueError("expected exactly one limiter unit")
+    unit = limiter.unit[0]
     limiter_r = np.asarray(unit.outline.r, dtype=float)
     limiter_z = np.asarray(unit.outline.z, dtype=float)
     margin = 0.02

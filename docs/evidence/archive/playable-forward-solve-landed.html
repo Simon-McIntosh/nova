@@ -652,6 +652,12 @@
     microseconds, which the consumer mitigates by pairing the camera panel with the label cartoon rather than by swapping shots. The side job still paid: 21978 and 21989
     gave the domain-shift measurement (decoded mean absolute error 87 and 102 against persistence 12 and 8.5) showing a corpus-trained decoder does not transfer to an
     unseen camera, and 22086's own session, 46 of 60 converged, is the demo carrier's label set.</p>
+    <p><strong>Where the cohort is defined.</strong> The authority for the 718-shot camera-topology cohort lives in imas-ambix at main:
+    <code>imas_ambix/worldmodel/camera_topology_labeller.py</code> carries the cohort report and split reader, and that project's plan section on the cohort, with its landed
+    evidence record, states the four partitions (472 train, 58 validation, 87 clean same-campaign test, 101 held-out campaign test). The shot ids themselves are being
+    packaged into that repository as data so the list stops living only in a crew report on this workstation; when that lands the citation here becomes the packaged file.
+    The rule nova needs from it is one line: the ranked corpus walk this labeller consumes is the unified camera manifest minus that cohort, so a shot absent from the walk
+    is a cohort member rather than a tail-ranked shot.</p>
   </section>
 </main>
 </body>

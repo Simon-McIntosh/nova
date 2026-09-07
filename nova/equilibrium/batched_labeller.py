@@ -17,10 +17,13 @@ import numpy as np
 
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.constraint import (
+    CircuitCurrentUnknown,
+    CompensatorRule,
     ConstraintBinding,
     ConstraintMultiplier,
     ConstraintPair,
     CurrentCentroidConstraint,
+    constraint_response_matrix,
 )
 from nova.equilibrium.forward import ForwardLabelledFlux
 from nova.equilibrium.observation import MomentIntegralSupport
@@ -421,8 +424,15 @@ def _make_solver(
     return solve
 
 
-def _centroid_pair(profile, state, target):
-    """Build the static response direction for a centroid conditioning row."""
+def _centroid_pair(
+    profile,
+    state,
+    target,
+    *,
+    requested_class=None,
+    target_current=None,
+):
+    """Build one slice's traced response direction for centroid conditioning."""
     scale = float(np.ptp(np.asarray(profile.lattice.height)))
     seed = ConstraintPair(
         functional=CurrentCentroidConstraint(
@@ -437,8 +447,25 @@ def _centroid_pair(profile, state, target):
             initial_unknown=jnp.asarray([0.0]),
         ),
     )
-    pairs, _selection = profile.derived_constraint_pairs((seed,), jnp.asarray(state))
-    return pairs[0]
+    response = constraint_response_matrix(
+        profile,
+        (seed,),
+        jnp.asarray(state),
+        requested_class=requested_class,
+        target_current=target_current,
+    )[0]
+    authority = response / jnp.asarray(scale, dtype=response.dtype)
+    peak = jnp.max(jnp.abs(authority))
+    direction = authority / jnp.where(peak > 0.0, peak, 1.0)
+    direction_authority = jnp.dot(authority, direction)
+    unknown = CircuitCurrentUnknown(
+        direction=direction[:, None],
+        ampere_scale=jnp.asarray([1.0 / direction_authority]),
+        singular_values=jnp.asarray([jnp.linalg.norm(authority)]),
+        authority=jnp.asarray([direction_authority]),
+        rule=CompensatorRule.DOMINANT_AUTHORITY,
+    )
+    return dataclasses.replace(seed, unknown=unknown)
 
 
 class BatchedLabeller:
@@ -461,6 +488,7 @@ class BatchedLabeller:
         self.active_set_steps = active_set_steps
         self.guard_tolerance = guard_tolerance
         self.constraint_pairs = tuple(constraint_pairs)
+        self._derive_centroid_pairs = not self.constraint_pairs
         self._compiled = None
 
     def _build(
@@ -559,6 +587,12 @@ class BatchedLabeller:
                 requested_value,
                 None,
             )
+            if initial_unknown is not None:
+                free = (
+                    free[0],
+                    jnp.concatenate((free[1], jnp.zeros_like(initial_unknown))),
+                    *free[2:],
+                )
             free_state = free[0]
             free_centroid = self.profile.current_moment_observation(
                 free_state,
@@ -574,16 +608,27 @@ class BatchedLabeller:
             def conditioned(_):
                 if conditioned_solver is None:
                     return free, jnp.asarray(True)
-                rows = tuple(
-                    dataclasses.replace(
-                        pair,
-                        binding=dataclasses.replace(
-                            pair.binding,
-                            target=jnp.asarray(condition_target),
+                if self._derive_centroid_pairs:
+                    rows = (
+                        _centroid_pair(
+                            self.profile,
+                            initial_value,
+                            condition_target[0],
+                            requested_class=requested_value,
+                            target_current=target_value,
                         ),
                     )
-                    for pair in self.constraint_pairs
-                )
+                else:
+                    rows = tuple(
+                        dataclasses.replace(
+                            pair,
+                            binding=dataclasses.replace(
+                                pair.binding,
+                                target=jnp.asarray(condition_target),
+                            ),
+                        )
+                        for pair in self.constraint_pairs
+                    )
                 row_arguments = reduced_newton._RowArguments(
                     rows,
                     jnp.maximum(
@@ -674,7 +719,13 @@ class BatchedLabeller:
         devices = jax.devices()
         if batch % len(devices):
             raise ValueError("batch size must be divisible by the visible device count")
-        if centroid_target is not None and not self.constraint_pairs:
+        zeros_current = None if current is None else jnp.asarray(current)
+        zeros_prescribed = (
+            None if prescribed_current is None else jnp.asarray(prescribed_current)
+        )
+        target = None if target_current is None else jnp.asarray(target_current)
+        requested = None if requested_class is None else jnp.asarray(requested_class)
+        if centroid_target is not None and self._derive_centroid_pairs:
             if (
                 prescribed_current is None
                 and self.operator.prescribed_current_field is None
@@ -682,15 +733,16 @@ class BatchedLabeller:
                 raise ValueError(
                     "centroid conditioning needs a prescribed current response"
                 )
-            self.constraint_pairs = (
-                _centroid_pair(self.profile, initial[0], centroid_target[0]),
-            )
-        zeros_current = None if current is None else jnp.asarray(current)
-        zeros_prescribed = (
-            None if prescribed_current is None else jnp.asarray(prescribed_current)
-        )
-        target = None if target_current is None else jnp.asarray(target_current)
-        requested = None if requested_class is None else jnp.asarray(requested_class)
+            if not self.constraint_pairs:
+                self.constraint_pairs = (
+                    _centroid_pair(
+                        self.profile,
+                        initial[0],
+                        jnp.asarray(centroid_target).reshape((batch, -1))[0, 0],
+                        requested_class=(None if requested is None else requested[0]),
+                        target_current=None if target is None else target[0],
+                    ),
+                )
         if reference_centroid is None:
             reference = jnp.full((batch, 2), jnp.nan, dtype=initial.dtype)
         else:

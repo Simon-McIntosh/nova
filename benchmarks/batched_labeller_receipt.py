@@ -47,6 +47,11 @@ QUARTILE_COUNT = 4
 MINIMUM_CONVERGED_SLICES = 20
 TIMING_REPEATS = 3
 UTILISATION_INTERVAL_SECONDS = 1.0
+REFERENCE_CONVERGED_COUNT = 38
+REFERENCE_GUARD_COUNT = 7
+REFERENCE_CONDITIONED_COUNT = 42
+CONDITIONED_CENTROID_ERROR_LIMIT_M = 5.0e-3
+MATERIAL_CENTROID_IMPROVEMENT_M = 1.0e-6
 
 
 def _strict(value: Any) -> Any:
@@ -579,6 +584,130 @@ def _diagnose_two() -> dict[str, Any]:
     }
 
 
+def _cpu_acceptance() -> dict[str, Any]:
+    """Check fraction parity and the conditioning effect on 48 CPU slices."""
+    import jax
+
+    from nova.equilibrium.batched_labeller import BatchedLabeller
+
+    profile, inputs, evidence = _prepare_inputs()
+    if len(jax.devices()) != 2:
+        raise RuntimeError(
+            f"two host devices are required, JAX discovered {len(jax.devices())}"
+        )
+    steps = _expanded_steps(inputs, total_batch=2)
+    free_labeller = BatchedLabeller(profile)
+    conditioned_labeller = BatchedLabeller(profile)
+    free_centroids = []
+    conditioned_centroids = []
+    converged = []
+    guards = []
+    conditioned_flags = []
+    for step in range(steps["initial"].shape[0]):
+        common = {
+            "prescribed_current": steps["prescribed_current"][step],
+            "target_current": steps["target_current"][step],
+            "requested_class": steps["requested_class"][step],
+        }
+        free = free_labeller.solve(steps["initial"][step], **common)
+        result = conditioned_labeller.solve(
+            steps["initial"][step],
+            reference_centroid=steps["reference_centroid"][step],
+            centroid_target=steps["centroid_target"][step],
+            **common,
+        )
+        free_centroids.append(np.asarray(free.achieved_centroid))
+        conditioned_centroids.append(np.asarray(result.achieved_centroid))
+        converged.append(np.asarray(result.converged))
+        guards.append(np.asarray(result.guard))
+        conditioned_flags.append(np.asarray(result.conditioned))
+
+    free_centroid = np.concatenate(free_centroids)
+    achieved_centroid = np.concatenate(conditioned_centroids)
+    converged_values = np.concatenate(converged)
+    guard_values = np.concatenate(guards)
+    conditioned_values = np.concatenate(conditioned_flags)
+    targets = np.asarray(inputs["centroid_target"])[:, 0]
+    conditioned_indices = np.flatnonzero(conditioned_values)
+    free_error = np.abs(free_centroid[:, 1] - targets)
+    achieved_error = np.abs(achieved_centroid[:, 1] - targets)
+    selected_free_error = free_error[conditioned_indices]
+    selected_achieved_error = achieved_error[conditioned_indices]
+
+    converged_count = int(np.count_nonzero(converged_values))
+    guard_count = int(np.count_nonzero(guard_values))
+    conditioned_count = int(np.count_nonzero(conditioned_values))
+    finite = bool(
+        np.all(np.isfinite(selected_free_error))
+        and np.all(np.isfinite(selected_achieved_error))
+    )
+    materially_improved = bool(
+        finite
+        and np.all(
+            selected_achieved_error
+            <= selected_free_error - MATERIAL_CENTROID_IMPROVEMENT_M
+        )
+    )
+    under_limit = bool(
+        finite and np.all(selected_achieved_error <= CONDITIONED_CENTROID_ERROR_LIMIT_M)
+    )
+    no_coincident_rows = bool(
+        finite
+        and not np.any(
+            np.isclose(
+                selected_achieved_error,
+                selected_free_error,
+                rtol=0.0,
+                atol=MATERIAL_CENTROID_IMPROVEMENT_M,
+            )
+        )
+    )
+    no_worse_rows = bool(
+        finite and np.all(selected_achieved_error <= selected_free_error)
+    )
+    receipt = {
+        "status": "passed",
+        "slice_count": len(converged_values),
+        "corpus_shots": evidence,
+        "converged_count": converged_count,
+        "reference_converged_count": REFERENCE_CONVERGED_COUNT,
+        "guard_count": guard_count,
+        "reference_guard_count": REFERENCE_GUARD_COUNT,
+        "conditioned_count": conditioned_count,
+        "reference_conditioned_count": REFERENCE_CONDITIONED_COUNT,
+        "conditioned_indices": conditioned_indices,
+        "free_centroid_error_m": selected_free_error,
+        "conditioned_centroid_error_m": selected_achieved_error,
+        "median_free_centroid_error_m": float(np.median(selected_free_error)),
+        "median_conditioned_centroid_error_m": float(
+            np.median(selected_achieved_error)
+        ),
+        "maximum_conditioned_centroid_error_m": float(np.max(selected_achieved_error)),
+        "materially_improved": materially_improved,
+        "under_half_centimetre": under_limit,
+        "no_coincident_rows": no_coincident_rows,
+        "no_worse_rows": no_worse_rows,
+    }
+    checks = {
+        "slice count": len(converged_values) == CORPUS_SHOT_COUNT,
+        "converged fraction": converged_count == REFERENCE_CONVERGED_COUNT,
+        "guard fraction": guard_count == REFERENCE_GUARD_COUNT,
+        "conditioned rows": conditioned_count == REFERENCE_CONDITIONED_COUNT,
+        "finite centroid errors": finite,
+        "material conditioning improvement": materially_improved,
+        "conditioned error limit": under_limit,
+        "no coincident free and conditioned rows": no_coincident_rows,
+        "no conditioned row worse than free": no_worse_rows,
+    }
+    failed = [name for name, passed in checks.items() if not passed]
+    if failed:
+        receipt["status"] = "failed"
+        receipt["failed_checks"] = failed
+        print(json.dumps(_strict(receipt), sort_keys=True, allow_nan=False), flush=True)
+        raise AssertionError("CPU acceptance failed: " + ", ".join(failed))
+    return receipt
+
+
 def _child(
     mode: str, batch_per_device: int | None, device_tokens: Sequence[str]
 ) -> dict[str, Any]:
@@ -789,6 +918,7 @@ def _parser() -> argparse.ArgumentParser:
     measure.add_argument("--device-count", type=int, required=True)
     subparsers.add_parser("prepare-only")
     subparsers.add_parser("diagnose-two")
+    subparsers.add_parser("cpu-acceptance")
     subparsers.add_parser("reference")
     return parser
 
@@ -832,6 +962,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if arguments.command == "diagnose-two":
         print(json.dumps(_strict(_diagnose_two()), sort_keys=True, allow_nan=False))
+        return 0
+    if arguments.command == "cpu-acceptance":
+        print(json.dumps(_strict(_cpu_acceptance()), sort_keys=True, allow_nan=False))
         return 0
     receipt = _run(arguments.output, arguments.report)
     return 0 if receipt["status"] == "complete" else 1

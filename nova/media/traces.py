@@ -160,8 +160,16 @@ def _positive(values) -> list[np.ndarray]:
     masked rather than clamped to a floor that would invent a value.
     """
     masked = []
+    positive = 0
     for array in _series(values):
-        masked.append(np.where(array > 0.0, array, np.nan))
+        keep = array > 0.0
+        positive += int(np.count_nonzero(keep))
+        masked.append(np.where(keep, array, np.nan))
+    if positive == 0:
+        raise ValueError(
+            "a logarithmic scale needs at least one positive sample; every "
+            "sample given was zero, negative or non-finite"
+        )
     return masked
 
 

@@ -58,6 +58,26 @@ conclusion from reading `nova/biot/polygon.py` alone is wrong.
   are fully allocated, titan is the faster lane despite the older card. Treat a
   cross-backend result as a different numerical measurement from an H200
   receipt rather than as the same number.
+- **Titan sees the MAST level-1 store but not the corpus tree under it.**
+  Measured 2026-09-07 with two probe jobs, after a node failed twice on what
+  looked like an absent mount. `/work/projects/imas_gpu` IS mounted on titan
+  and `/work/projects/imas_gpu/mast/level1/shots/<shot>.zarr` reads normally
+  there, but `ls /work/projects/imas_gpu/sophelio` returns only `jax-cache`
+  where the login node returns eight subdirectories, and `stat` reports
+  `links=3` against the login node's eight. `df` resolves both to the same
+  `HPC_T2 /work/projects` device, so this is a stale metadata view on that node
+  rather than a missing mount or a permissions mask. Consequences: a titan job
+  may read the level-1 store; a job needing anything under `sophelio` -- frozen
+  response carriers, labeller sessions, the challenge corpus -- belongs on
+  `betelgeuse`, or must be handed its input by a path the node can see. A
+  `FileNotFoundError` on a path the login node can `stat` is this, and probing
+  it costs one two-minute job.
+- **A frozen carrier answers one grid only.** The frozen-six MAST response
+  (`1d2c4a2b…`) is a 22086-based matrix on the 1126-target EFIT-domain grid.
+  A build on a different shot, target set or extent can take nothing from it,
+  and rebuilding under its path would break the identity every corpus manifest
+  pins -- so a wider or finer grid is a NEW carrier at its own path, and needs
+  no seed from the old one.
 
 ## Enforce authored shape at construction
 

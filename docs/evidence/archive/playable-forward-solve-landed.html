@@ -686,6 +686,31 @@
     The failure signature to recognise is a selection that returns nothing at all rather than something wrong, on every input, while each line of the change reads
     plausibly on its own.</p>
   </section>
+
+  <section id="single-job-scheduler-is-slower-than-the-writer-it-replaced">
+    <h2>The parallel scheduler writes at less than half the sequential writer's per-slice rate (2026-09-07 07:58Z, coordinator measurement)</h2>
+    <p>Measured from the corpus root's own shot manifests, per-slice wall as <code>shot_wall_seconds</code> divided by written slices, which is one card's rate however
+    many cards were running. The parallel scheduler took over the walk at about 04:52Z, so the manifests split cleanly at that boundary. Restricting both sides to shots
+    whose converged fraction exceeds one half, which matches the two groups at a median converged fraction of 0.75 against 0.74 and removes the cost of failing and
+    re-solved slices as an explanation:</p>
+    <table>
+      <thead><tr><th>Writer</th><th>Shots</th><th>Median s per slice</th><th>Slices per second per card</th></tr></thead>
+      <tbody>
+        <tr><td>Sequential <code>scripts/labeller_batch/shard.py</code></td><td>156</td><td>0.908</td><td>1.10</td></tr>
+        <tr><td>Parallel <code>scripts/labeller_parallel</code>, host-route engine</td><td>58</td><td>1.982</td><td>0.50</td></tr>
+      </tbody>
+    </table>
+    <p>So reshaping the walk into one job cost 2.2 times the per-card label rate. The host-route engine was always a placeholder that calls the scalar reduced-Newton
+    solve per slot with one compiled program per slot, and it is what the batched engine replaces, so the regression is expected to be temporary. It is recorded because
+    it changes what the wiring node must prove: the wired scheduler has to beat <strong>0.908 s per slice on convergence-matched shots</strong>, which is the writer it
+    replaced, and not merely beat the placeholder it inherits. A gate that compares the batched engine against the host-route engine would report a large win while the
+    pipeline was still slower than it was this afternoon.</p>
+    <p>The sequential writer's best observed figure is better still: 0.369 s per slice as the median over 397 slices of the six frozen-carrier shots, which converge
+    well and are cheap. That is the optimistic end of the same path rather than a comparable measurement.</p>
+    <p>The decision taken now is to leave the running writer alone rather than swap it back. The batched engine is roughly two hours from a gated relaunch, in which
+    window the difference is about 2,200 slices, and swapping the production writer twice in two hours is the churn that produced tonight's earlier rollback. The
+    regression is instead folded into the relaunch as an acceptance figure.</p>
+  </section>
 </main>
 </body>
 </html>

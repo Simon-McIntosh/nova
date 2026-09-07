@@ -531,3 +531,36 @@ def test_chord_crossings_closes_an_open_polyline():
 
     square = np.array([[0.5, -1.0], [1.5, -1.0], [1.5, 1.0], [0.5, 1.0]])
     assert chord_crossings(square, 0.0) == pytest.approx([0.5, 1.5])
+
+
+@pytest.mark.slow
+def test_the_thomson_pairing_carries_no_systematic_lag():
+    """Two clocks paired by nearest row must not drift against each other.
+
+    A figure that draws an equilibrium beside a measurement pairs two time
+    bases, and a constant offset between them is invisible in the figure and
+    in every aggregate over it: the profile simply belongs to a different
+    moment than the boundary drawn with it. The check is that the signed
+    residual is centred, not merely small -- a lag shows as a consistently
+    signed residual, which rounding cannot produce.
+    """
+    from nova.media.sources import read_labels, read_thomson
+    from nova.media.sources.mast_thomson import SHOT_STORE
+
+    if not (SHOT_STORE / "27079.zarr").is_dir():
+        pytest.skip("the MAST level-1 shot store is not present")
+
+    frames, _ = read_labels(27079)
+    label_time = np.asarray([frame.time for frame in frames])
+    for string in read_thomson(27079):
+        cadence = float(np.median(np.diff(string.time)))
+        selected = np.asarray(
+            [string.time[int(np.argmin(np.abs(string.time - t)))] for t in label_time]
+        )
+        residual = selected - label_time
+        # Centred to well inside half a sampling interval: nearest-row
+        # rounding cannot bias the sign, so a biased median is a real lag.
+        assert abs(float(np.median(residual))) < 0.5 * cadence
+        assert float(np.max(np.abs(residual))) <= cadence
+        positive = float(np.mean(residual > 0.0))
+        assert 0.2 < positive < 0.8, f"{string.name} residual sign is biased"

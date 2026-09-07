@@ -125,12 +125,18 @@ not comparable with any production receipt.
 `default_forward_compilation_cache_root` in
 `nova/equilibrium/solve_request.py` selects where forward solves keep
 compiled JAX programs.  Its default is
-`~/.local/share/nova/forward-compilation-cache/user-<uid>/host-<hostname>`
+`~/.cache/nova/forward-compilation-cache/user-<uid>/host-<hostname>`
 on the shared home filesystem, and a launch that must name its own location
 sets `NOVA_FORWARD_COMPILATION_CACHE_ROOT` to that base directory.  The root
 is deliberately **not** TMPDIR-derived: every SLURM step on this cluster
 lands TMPDIR on the node-local filesystem, so a TMPDIR-derived root dies with
-the allocation and no job banks a compile for its successor.
+the allocation and no job banks a compile for its successor.  The base sits
+under `~/.cache`, **not** under `~/.local/share/nova`: the per-user data tree
+inherits a setgid group down the hierarchy whose name the cluster's name
+service cannot resolve, and JAX's cache runtime calls `grp.getgrgid` on every
+cached file while evicting, so a root inside that tree writes at most one
+entry and then aborts every later write.  `~/.cache` is not setgid, so files
+beneath it carry the user's own resolvable group.
 
 Isolation and keying argument, kept here because it governs every consumer:
 

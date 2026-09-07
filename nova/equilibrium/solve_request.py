@@ -34,9 +34,9 @@ JsonScalar = str | int | float | bool | None
 def default_forward_compilation_cache_root() -> Path:
     """Return the shared, per-host root that keeps forward compiled programs.
 
-    The root defaults to ``~/.local/share/nova/forward-compilation-cache`` on
-    the shared home filesystem, so a build written by one SLURM allocation
-    survives for the next allocation that lands on the same host.  An explicit
+    The root defaults to ``~/.cache/nova/forward-compilation-cache`` on the
+    shared home filesystem, so a build written by one SLURM allocation survives
+    for the next allocation that lands on the same host.  An explicit
     ``NOVA_FORWARD_COMPILATION_CACHE_ROOT`` replaces that base directory for a
     launch that must name its own location; the user and host keys still sit
     below it.
@@ -55,6 +55,15 @@ def default_forward_compilation_cache_root() -> Path:
     flag, and the device topology, so a build for one runtime is never read by
     another.
 
+    The base deliberately sits under ``~/.cache`` rather than ``~/.local``:
+    the shared filesystem carries the per-user data tree with its setgid group
+    inherited down the hierarchy, and that group has no name in the cluster's
+    name service.  JAX's cache runtime resolves every cached file's group
+    through ``grp.getgrgid`` while evicting, and a group that cannot be
+    resolved aborts the write of every entry after the first, so a root inside
+    that tree would silently stop persisting compiles.  ``~/.cache`` is not
+    setgid; files written beneath it carry the user's own resolvable group.
+
     TMPDIR is deliberately not consulted: every SLURM step on this cluster sets
     TMPDIR onto the node-local filesystem, so a TMPDIR-derived root dies with
     the allocation and no job banks a compile for its successor.
@@ -64,7 +73,7 @@ def default_forward_compilation_cache_root() -> Path:
     if override:
         base = Path(override)
     else:
-        base = Path.home() / ".local" / "share" / "nova" / "forward-compilation-cache"
+        base = Path.home() / ".cache" / "nova" / "forward-compilation-cache"
     return base.expanduser() / f"user-{os.getuid()}" / f"host-{socket.gethostname()}"
 
 

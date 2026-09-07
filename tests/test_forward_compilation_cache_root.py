@@ -127,8 +127,7 @@ def test_default_cache_root_persists_on_the_shared_home_filesystem(
 
     assert default_forward_compilation_cache_root() == (
         tmp_path
-        / ".local"
-        / "share"
+        / ".cache"
         / "nova"
         / "forward-compilation-cache"
         / f"user-{os.getuid()}"
@@ -146,8 +145,7 @@ def test_default_cache_root_ignores_tmpdir(monkeypatch, tmp_path: Path) -> None:
     assert not root.is_relative_to(Path("/node-local-tmp"))
     assert root == (
         tmp_path
-        / ".local"
-        / "share"
+        / ".cache"
         / "nova"
         / "forward-compilation-cache"
         / f"user-{os.getuid()}"

@@ -1,0 +1,182 @@
+{
+  "arrays": {
+    "path": "docs/figures/limited-boundary-census/repaired-class-census.npz",
+    "sha256": "fce5719a0059ee830c274a829d77cac53a06104a35211d35fa6b9eb50f14c562"
+  },
+  "crossed_table": {
+    "diverted/cold": {
+      "count": 25,
+      "fraction_below_half": 0.0,
+      "median": 1.006671950352,
+      "p10": 0.7634265910034959,
+      "p90": 1.2164542864727963
+    },
+    "diverted/warm": {
+      "count": 191,
+      "fraction_below_half": 0.09947643979057591,
+      "median": 0.8303832999901395,
+      "p10": 0.5724766760822486,
+      "p90": 1.1397379409332415
+    },
+    "limited/cold": {
+      "count": 7,
+      "fraction_below_half": 1.0,
+      "median": 0.2569604067728555,
+      "p10": 0.11063639111537879,
+      "p90": 0.291497484162904
+    },
+    "limited/warm": {
+      "count": 140,
+      "fraction_below_half": 0.4714285714285714,
+      "median": 0.5091581906199958,
+      "p10": 0.35490516166162694,
+      "p90": 0.6657263646926345
+    }
+  },
+  "guarded_frames": 363,
+  "method": "for every guarded frame of every labelled shot, the ratio of nova's stored axis-to-boundary flux span to EFIT's on the nearest efm slice; a frame is a cold start when its predecessor failed the branch guard; session files and the level-1 efm store only, no solve and no device",
+  "question": "does nova's axis-to-boundary flux span agree with EFIT's, and does the answer depend on the topology class or on the start condition",
+  "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+  "shots_attempted": 7,
+  "shots_with_a_limited_cold_start": 7,
+  "source_records_its_own_provenance": true,
+  "time_banded": [
+    {
+      "band_ms": [
+        0.0,
+        50.0
+      ],
+      "diverted_warm": null,
+      "limited_cold": {
+        "count": 7,
+        "fraction_below_half": 1.0,
+        "median": 0.2569604067728555,
+        "p10": 0.11063639111537879,
+        "p90": 0.291497484162904
+      },
+      "limited_over_diverted_median": null,
+      "limited_warm": {
+        "count": 34,
+        "fraction_below_half": 0.9705882352941176,
+        "median": 0.42170833511110206,
+        "p10": 0.3148592386073502,
+        "p90": 0.4593600601483537
+      }
+    },
+    {
+      "band_ms": [
+        50.0,
+        100.0
+      ],
+      "diverted_warm": {
+        "count": 6,
+        "fraction_below_half": 0.0,
+        "median": 0.7799992655909084,
+        "p10": 0.7374500052358811,
+        "p90": 0.8768218013460034
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": 0.7307167541957209,
+      "limited_warm": {
+        "count": 64,
+        "fraction_below_half": 0.3125,
+        "median": 0.5699585316276347,
+        "p10": 0.42848029597517295,
+        "p90": 0.6747700853499417
+      }
+    },
+    {
+      "band_ms": [
+        100.0,
+        150.0
+      ],
+      "diverted_warm": {
+        "count": 31,
+        "fraction_below_half": 0.0,
+        "median": 0.6873964373426862,
+        "p10": 0.652257114915819,
+        "p90": 0.764001909703093
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": 0.7998889387462009,
+      "limited_warm": {
+        "count": 38,
+        "fraction_below_half": 0.2631578947368421,
+        "median": 0.5498408067639606,
+        "p10": 0.3559603617639358,
+        "p90": 0.6657827673834404
+      }
+    },
+    {
+      "band_ms": [
+        150.0,
+        200.0
+      ],
+      "diverted_warm": {
+        "count": 57,
+        "fraction_below_half": 0.12280701754385964,
+        "median": 0.7933498624074631,
+        "p10": 0.4883397906862837,
+        "p90": 0.8791561089299493
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": 0.37377662488862645,
+      "limited_warm": {
+        "count": 4,
+        "fraction_below_half": 0.75,
+        "median": 0.2965356339265177,
+        "p10": 0.27557029892605117,
+        "p90": 0.4502890974273798
+      }
+    },
+    {
+      "band_ms": [
+        200.0,
+        300.0
+      ],
+      "diverted_warm": {
+        "count": 51,
+        "fraction_below_half": 0.17647058823529413,
+        "median": 0.9871211704841371,
+        "p10": 0.3815382870118249,
+        "p90": 1.049811898038166
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": null,
+      "limited_warm": null
+    },
+    {
+      "band_ms": [
+        300.0,
+        400.0
+      ],
+      "diverted_warm": {
+        "count": 17,
+        "fraction_below_half": 0.0,
+        "median": 1.066000745948248,
+        "p10": 0.9366461668265635,
+        "p90": 1.1381207974164649
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": null,
+      "limited_warm": null
+    },
+    {
+      "band_ms": [
+        400.0,
+        1000.0
+      ],
+      "diverted_warm": {
+        "count": 29,
+        "fraction_below_half": 0.10344827586206896,
+        "median": 1.2060521817719974,
+        "p10": 0.6354583994937002,
+        "p90": 1.2998406156147402
+      },
+      "limited_cold": null,
+      "limited_over_diverted_median": null,
+      "limited_warm": null
+    }
+  ],
+  "unreadable_sessions": 0
+}

@@ -4407,16 +4407,18 @@ def _split_single_shot_gate_fields(
     }
     for row in rows:
         qualification = row["solver_qualification"]
-        residual = float(qualification["fixed_point_residual"])
+        raw_residual = qualification["fixed_point_residual"]
+        residual = float(raw_residual) if raw_residual is not None else None
         tolerance = float(qualification["fixed_point_tolerance"])
-        residual_converged = bool(
-            qualification["finite"] and np.isfinite(residual) and residual <= tolerance
+        residual_is_finite = bool(
+            qualification["finite"] and residual is not None and np.isfinite(residual)
         )
+        residual_converged = bool(residual_is_finite and residual <= tolerance)
         row["source_combined_convergence"] = bool(qualification["converged"])
         row["residual_converged"] = residual_converged
         row["residual_convergence"] = {
             "satisfied": residual_converged,
-            "finite": bool(qualification["finite"]),
+            "finite": residual_is_finite,
             "fixed_point_residual": residual,
             "fixed_point_tolerance": tolerance,
             "criterion": "finite fixed-point residual at or below tolerance",

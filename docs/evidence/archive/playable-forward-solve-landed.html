@@ -785,6 +785,41 @@
     <p>Worth keeping as a reading habit rather than only as a fact about these sessions: a flag that records <em>whether a value was computed</em> aggregates every
     reason it was not, while a counter that records <em>how far a procedure got</em> distinguishes them. The counter was already in the records and nobody had asked it.</p>
   </section>
+
+  <section id="axis-admission-refuses-the-efit-map-at-flat-top">
+    <h2>The axis admission refuses EFIT's own reconstruction flux on most flat-top slices of four of six carriers (2026-09-07 08:25Z)</h2>
+    <p>The 119 wrongly excluded rows of the frozen six all carry one message from one site, no qualified magnetic-axis candidate with a resolved component. Those are
+    ordinary positive-current shots, outside the reversed-current block, and 113 of the 119 fall inside the flat-top span against about 50 free-converged rows in the
+    same span. The per-shot split, failures against free-converged rows inside flat top, is a map of where the forward solve is weakest on the shots the corpus ships
+    from:</p>
+    <table>
+      <thead><tr><th>Shot</th><th>Refused</th><th>Free converged</th></tr></thead>
+      <tbody>
+        <tr><td>21978</td><td>21</td><td>13</td></tr>
+        <tr><td>21983</td><td>23</td><td>5</td></tr>
+        <tr><td>21985</td><td>22</td><td>5</td></tr>
+        <tr><td>21986</td><td>17</td><td>4</td></tr>
+        <tr><td>21989</td><td>22</td><td>11</td></tr>
+        <tr><td>22086</td><td>8</td><td>12</td></tr>
+      </tbody>
+    </table>
+    <p><strong>What the rule was looking at when it refused.</strong> Three lines of the writer settle it, and the answer is not the one the sequence suggests. The
+    conditioning seed is computed <em>before</em> the free solve runs: it is the carried warm-start state when one exists and otherwise this slice's EFIT reconstruction
+    flux. The warm start carries forward only when a slice finished cleanly and is reset to nothing otherwise. So the first failure in a run of failures clears the warm
+    start and every later slice in that run seeds from EFIT's map. On the bulk of these rows, therefore, nova's magnetic-axis admission is looking at EFIT's own
+    reconstruction flux and reporting no qualified candidate &mdash; a map on which EFIT found an axis, since that axis is exactly what the fidelity referee reads. This
+    is not a free solve leaving a state too broken to resolve, which is the reading the ordering invites; it is an admission rule refusing a map that demonstrably has
+    an axis.</p>
+    <p>Two nested facts, in the order that matters. At flat top the free solve fails more often than it converges on four of the six carriers. Where it fails, the
+    conditioned fallback cannot derive its target, so the fallback is unavailable precisely where it is needed. The second hides the first, which is why the counts
+    matter: the evidence set the fidelity gate scored was the minority that got through.</p>
+    <p>Bounds and caveats, both kept because the magnitude is not yet settled. The first failing slice of each run seeds from the previous slice's converged state
+    rather than from EFIT, so a minority of the 119 are that case; the count is bounded by the number of distinct failure runs and is recoverable from the row indices.
+    And the 113 was counted against the aggregate flat-top span 0.175 to 0.365 s while the gate applies a per-shot window at 80 per cent of each shot's own peak and
+    additionally requires convergence, so 113 and 163 bound the change in that gate's denominator rather than measure it. Direction is safe, magnitude is open.</p>
+    <p>This wants its own solver node and is held on one sequencing constraint: the axis admission rule is being edited by the reversed-current polarity node, so no
+    second worker enters that file until it lands.</p>
+  </section>
 </main>
 </body>
 </html>

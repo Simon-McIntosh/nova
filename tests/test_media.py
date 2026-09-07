@@ -503,3 +503,31 @@ def test_strike_points_are_exempt_from_containment():
         contain=wall,
     )
     assert tally["strike_points_drawn"] == 2
+
+
+def test_chord_crossings_finds_both_sides_of_a_closed_boundary():
+    """A Thomson string samples through the boundary where it crosses its chord."""
+    from nova.media.poloidal import chord_crossings
+
+    angle = np.linspace(0.0, 2.0 * np.pi, 200)
+    loop = np.column_stack((1.0 + 0.4 * np.cos(angle), 0.6 * np.sin(angle)))
+    inboard, outboard = chord_crossings(loop, 0.0)
+    assert inboard == pytest.approx(0.6, abs=1e-3)
+    assert outboard == pytest.approx(1.4, abs=1e-3)
+
+
+def test_chord_crossings_returns_nothing_off_the_boundary():
+    from nova.media.poloidal import chord_crossings
+
+    angle = np.linspace(0.0, 2.0 * np.pi, 200)
+    loop = np.column_stack((1.0 + 0.4 * np.cos(angle), 0.6 * np.sin(angle)))
+    assert chord_crossings(loop, 5.0) == []
+    assert chord_crossings(np.zeros((2, 2)), 0.0) == []
+
+
+def test_chord_crossings_closes_an_open_polyline():
+    """A stored boundary need not repeat its first vertex."""
+    from nova.media.poloidal import chord_crossings
+
+    square = np.array([[0.5, -1.0], [1.5, -1.0], [1.5, 1.0], [0.5, 1.0]])
+    assert chord_crossings(square, 0.0) == pytest.approx([0.5, 1.5])

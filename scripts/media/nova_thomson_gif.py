@@ -35,10 +35,17 @@ from pathlib import Path
 import numpy as np
 
 from nova.media import gif, poloidal as pol, traces as tr
+from nova.media.poloidal import chord_crossings
 from nova.media.ink import DEFAULT_INK
 from nova.media.layout import three_view
 
 DEFAULT_OUTPUT = Path("docs/figures/presentation-media")
+
+#: The measured quantities a panel can carry, as (string attribute, label, unit).
+_QUANTITIES = {
+    "te": ("temperature", "$T_e$", "eV"),
+    "ne": ("density", "$n_e$", "m$^{-3}$"),
+}
 
 
 def render_thomson(
@@ -49,6 +56,7 @@ def render_thomson(
     quantile: float | None = 0.98,
     include_conditioned: bool = False,
     cells: int = 1200,
+    quantity: str = "te",
 ) -> dict[str, object]:
     """Write the surfaces-and-Thomson animation and return its receipt."""
     from nova.media.sources.mast_efit import read_pulse
@@ -77,14 +85,21 @@ def render_thomson(
         [[string.name] * string.positions.shape[0] for string in strings]
     )
 
+    if quantity not in _QUANTITIES:
+        raise ValueError(
+            f"unknown quantity {quantity!r}, not one of {list(_QUANTITIES)}"
+        )
+    column, label, unit = _QUANTITIES[quantity]
+
     # One scale per system over every admitted row, so the panels never move.
     # Each row is passed as its own series, because the quantile must cover a
     # fraction of the MEASUREMENTS rather than of the pooled samples: pooling
     # lets one hot row set the axis for the whole pulse.
     scales = {}
     for string in strings:
-        usable = np.isfinite(string.temperature) & (string.temperature > 0.0)
-        rows = list(np.where(usable, string.temperature, np.nan))
+        stored = getattr(string, column)
+        usable = np.isfinite(stored) & (stored > 0.0)
+        rows = list(np.where(usable, stored, np.nan))
         scales[string.name] = tr.TraceScale.over(
             [string.positions[:, 0]], rows, quantile=quantile, log=True
         )
@@ -115,11 +130,12 @@ def render_thomson(
         )
         pol.draw_thomson(view.poloidal, positions, group, chords=False)
         for axes, string in zip((view.upper, view.lower), strings):
-            radius, temperature, _ = string.finite(frame.time)
+            radius, temperature, density = string.finite(frame.time)
+            values = temperature if column == "temperature" else density
             tr.draw_samples(
                 axes,
                 radius,
-                temperature,
+                values,
                 color=colour[string.name],
                 style=style,
                 markersize=2.5,
@@ -128,8 +144,17 @@ def render_thomson(
             tr.label_axes(
                 axes,
                 "major radius  [m]" if axes is view.lower else None,
-                f"{string.name} $T_e$  [eV]",
+                f"{string.name} {label}  [{unit}]",
             )
+            # The boundary is the thing the profile is meant to reveal, so mark
+            # where the solved separatrix crosses this string's own chord.
+            for crossing in chord_crossings(frame.boundary, string.positions[0, 1]):
+                axes.axvline(
+                    crossing,
+                    color=style.separatrix_color,
+                    linewidth=0.8,
+                    alpha=0.7,
+                )
         conditioning = (
             "\ncentroid pinned to EFIT" if frame.conditioned else "\nfree solve"
         )
@@ -167,14 +192,17 @@ def render_thomson(
         "strike_points_drawn": "none; outside the brief and containment unresolved",
         "profile_limits_fixed": True,
         "profile_limit_quantile": quantile,
-        "temperature_axis": "logarithmic, fixed over the pulse",
+        "quantity": quantity,
+        "quantity_label": f"{label} [{unit}]",
+        "profile_axis": "logarithmic, fixed over the pulse",
+        "separatrix_crossing_marked": True,
         "thomson_systems": [
             {
                 "name": string.name,
                 "channels": int(string.positions.shape[0]),
                 "rows": len(string),
                 "colour": colour[string.name],
-                "temperature_limit_ev": list(scales[string.name].y_limit),
+                "value_limit": list(scales[string.name].y_limit),
                 "provenance": string.provenance,
             }
             for string in strings
@@ -198,6 +226,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--quantile", type=float, default=0.98)
     parser.add_argument("--cells", type=int, default=1200)
     parser.add_argument(
+        "--quantity",
+        choices=tuple(_QUANTITIES),
+        default="te",
+        help="which measured profile the right-hand panels carry",
+    )
+    parser.add_argument(
         "--include-conditioned",
         action="store_true",
         help="also draw slices pinned to the reference current centroid",
@@ -205,7 +239,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args(argv)
 
-    name = f"mast-{arguments.shot}-nova-thomson"
+    suffix = "" if arguments.quantity == "te" else f"-{arguments.quantity}"
+    name = f"mast-{arguments.shot}-nova-thomson{suffix}"
     receipt = render_thomson(
         arguments.shot,
         arguments.output / f"{name}.gif",
@@ -214,6 +249,7 @@ def main(argv: list[str] | None = None) -> int:
         quantile=arguments.quantile,
         include_conditioned=arguments.include_conditioned,
         cells=arguments.cells,
+        quantity=arguments.quantity,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

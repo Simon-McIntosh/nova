@@ -1,9 +1,10 @@
 """Measure the playable app's keyframe cost through its own solver on the H200.
 
 Drives :class:`~apps.playable.session.PlayableSession` with
-:class:`apps.playable.production.ProductionSolver` on the MAST 22086/43
-machine through a scripted chain of twenty key presses, in one foreground
-sbatch on the reserved H200, recording per press the wall, trips, reuse flag,
+:class:`apps.playable.production.ProductionSolver` on one frozen-six MAST
+carrier (default 22086/43, selectable via ``--shot``/``--slice``) through a
+scripted chain of twenty key presses, in one foreground sbatch on the
+reserved H200, recording per press the wall, trips, reuse flag,
 the solve wall against the receipt-build wall, and for the first moved key the
 split between trace/compile, persistent-cache load and dispatch (from
 ``jax_log_compiles`` events plus a count of persistent-cache artifacts loaded).
@@ -58,23 +59,44 @@ from apps.playable.session import PlayableSession, frame_push
 from apps.playable.shape import PlasmaShape
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGET = (22086, 43)
+#: The default frozen-six carrier the receipt measures, kept so an unchanged
+#: invocation reproduces the existing 22086/43 receipt exactly.
+DEFAULT_TARGET = (22086, 43)
 DEFAULT_OUTPUT = (
     ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes.json"
 )
 DEFAULT_FIGURE = (
     ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes.png"
 )
+DEFAULT_THROUGHPUT_FIGURE = (
+    ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes-throughput.png"
+)
 #: One press against each sign of the vertical bulk control, ten round trips:
 #: the chain stays near the free centroid while exercising both moved
-#: targets.  The horizontal +R centroid move is deliberately excluded: on
-#: 22086/43 it drives the solved state off the qualified magnetic axis
-#: (measured NoQualifiedAxisError on the moved key), so the vertical direction
-#: is the one the steering rows hold on this machine and the cost of a warm
-#: moved keyframe is what the receipt reads.
+#: targets.  The horizontal +R centroid move is deliberately excluded: on the
+#: 22086/43 carrier it drives the solved state off the qualified magnetic
+#: axis (measured NoQualifiedAxisError on the moved key), so the vertical
+#: direction is the one the steering rows hold on that machine and the cost
+#: of a warm moved keyframe is what the receipt reads.
 KEY_CHAIN = ("bulk_z+", "bulk_z-") * 10
 #: A compile event this fast was served by the persistent cache, not built.
 CACHE_SERVED_COMPILE_SECONDS = 0.5
+
+
+def _second_x_point_finite(frame) -> bool:
+    """Return whether the assembled frame's second X-point slot is finite.
+
+    The frame carries the R and Z slot columns primary-first, so slot one is
+    the secondary X-point; an absent secondary is masked to NaN by the solve
+    rather than dropped, which is what a frame channel records.
+    """
+    if frame is None:
+        return False
+    x_r = np.asarray(getattr(frame, "x_point_r", None))
+    x_z = np.asarray(getattr(frame, "x_point_z", None))
+    if x_r.size < 2 or x_z.size < 2:
+        return False
+    return bool(np.all(np.isfinite(x_r[1])) and np.all(np.isfinite(x_z[1])))
 
 
 def _source_revision() -> str:
@@ -127,6 +149,34 @@ def _draw(receipt: dict[str, Any], figure: Path) -> None:
         )
     plt.xlabel("key press")
     plt.ylabel("keyframe wall / ms")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(figure, dpi=150)
+    plt.close()
+
+
+def _draw_throughput(receipt: dict[str, Any], figure: Path) -> None:
+    """Draw the keyframe rate per press beside the ten-hertz warm fence.
+
+    A warm keyframe on the hundred-millisecond budget is ten a second; the
+    figure reads the measured chain's throughput against that line.
+    """
+    presses = [press for press in receipt["presses"] if press["press"] is not None]
+    if not presses:
+        return
+    index = [press["index"] for press in presses]
+    rate = [1.0 / press["wall"] for press in presses]
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    plt.figure(figsize=(8, 4))
+    plt.bar(index, rate, color="steelblue")
+    plt.axhline(
+        10.0, color="tab:green", linestyle="--", label="10 keyframes/s warm fence"
+    )
+    plt.axhline(
+        1.0, color="tab:red", linestyle="--", label="1 keyframe/s first-moved fence"
+    )
+    plt.xlabel("key press")
+    plt.ylabel("keyframes / second")
     plt.legend()
     plt.tight_layout()
     plt.savefig(figure, dpi=150)
@@ -188,10 +238,18 @@ def measure(
     *,
     output: Path,
     figure: Path,
+    throughput_figure: Path | None = None,
+    target: tuple[int, int] = DEFAULT_TARGET,
     cache_root: Path | None = None,
     route: str = "host",
 ) -> dict[str, Any]:
-    """Drive the playable session over the MAST 22086/43 machine on the H200."""
+    """Drive the playable session over one frozen-six MAST carrier on the H200.
+
+    ``target`` is the (shot, slice) pair the keyframe chain steers; it
+    defaults to the 22086/43 carrier the receipt was born on.  The carrier a
+    run actually reached is recorded in the receipt beside the one it was
+    configured with, so a missed selection is visible rather than silent.
+    """
     if route not in ("host", "compiled"):
         raise ValueError("route must be 'host' or 'compiled'")
     import sys
@@ -213,16 +271,19 @@ def measure(
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
+    target = (int(target[0]), int(target[1]))
     selected = {
         (int(row["shot"]), int(row["slice_index"])): (row, qualification)
         for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
     }
-    identity = f"{TARGET[0]}/{TARGET[1]}"
+    configured_identity = f"{target[0]}/{target[1]}"
+    reached_identity: str | None = None
 
     receipt: dict[str, Any] = {
         "artifact": "playable app keyframes on the constrained reduced route, H200",
         "route": route,
-        "identity": identity,
+        "configured_identity": configured_identity,
+        "reached_identity": reached_identity,
         "source_commit": _source_revision(),
         "runtime": {
             "python": platform.python_version(),
@@ -247,7 +308,17 @@ def measure(
 
     with _stderr_tee(compile_log):
         mark("build")
-        selected_row, qualification = selected[TARGET]
+        if target not in selected:
+            raise KeyError(
+                f"target {target[0]}/{target[1]} has no qualified row in the "
+                "frozen-six decomposition bank"
+            )
+        selected_row, qualification = selected[target]
+        reached_identity = (
+            f"{int(selected_row['shot'])}/{int(selected_row['slice_index'])}"
+        )
+        receipt["reached_identity"] = reached_identity
+        receipt_machine = f"mast-{reached_identity}"
         case, context = _mast_case_from_selection(
             SHOT_STORE, selected_row, qualification
         )
@@ -264,7 +335,7 @@ def measure(
             profile=profile,
             seed=seed,
             wall=np.asarray(profile.operator.wall.coordinate),
-            identity="mast-22086/43",
+            identity=receipt_machine,
         )
         solver = ProductionSolver(machine)
         reduced_newton.set_stage_timing(True)
@@ -346,7 +417,7 @@ def measure(
                     program=None,
                 )
             else:
-                result = _reduced(profile_, flux, commanded, program)
+                result = _reduced(profile_, flux, commanded)
             # Drain the solve's tail device work (constraint records, the
             # prescribed-current fold) into this stage so it does not land on
             # the next press's first array conversion.
@@ -406,11 +477,12 @@ def measure(
             inner_gap=0.02,
             outer_gap=0.02,
         )
-        session = PlayableSession(solver=solver, shape=command, machine="mast-22086/43")
+        session = PlayableSession(solver=solver, shape=command, machine=receipt_machine)
 
         mark("prime")
         prime = session.prime()
         timed_channels(session)
+        prime_frame = session.frame
         receipt["prime"] = {
             "wall": prime.wall,
             "trips": prime.trips,
@@ -418,6 +490,8 @@ def measure(
             "solve_wall": solve_walls[-1],
             "receipt_wall": receipt_walls[-1],
             "channel_wall": channel_walls[-1],
+            "frame_assembly_wall": session.frame_assembly_walls[-1],
+            "second_x_point_finite": _second_x_point_finite(prime_frame),
             "stages": _stage_durations(stage_mark_sets[-1]),
             "trip_census": trip_census[-1],
             "receipt_stages": receipt_stage_deltas(),
@@ -434,6 +508,8 @@ def measure(
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
                 "channel_wall": channel_walls[-1],
+                "frame_assembly_wall": session.frame_assembly_walls[-1],
+                "second_x_point_finite": _second_x_point_finite(prime_frame),
             }
         )
         _write(receipt, output)
@@ -455,6 +531,8 @@ def measure(
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
                 "channel_wall": channel_walls[-1],
+                "frame_assembly_wall": session.frame_assembly_walls[-1],
+                "second_x_point_finite": _second_x_point_finite(session.frame),
                 "stages": _stage_durations(stage_mark_sets[-1]),
                 "trip_census": trip_census[-1],
                 "receipt_stages": receipt_stage_deltas(),
@@ -506,6 +584,7 @@ def measure(
     receipt["verdict"] = {
         "presses_measured": len(receipt["presses"]) - 1,
         "median_warm_keyframe_s": float(np.median(warm)),
+        "worst_warm_keyframe_s": float(np.max(warm)),
         "mean_warm_keyframe_s": float(np.mean(warm)),
         "first_moved_keyframe_s": receipt["presses"][1]["wall"],
         "prime_wall_s": receipt["prime"]["wall"],
@@ -517,6 +596,8 @@ def measure(
     }
     _write(receipt, output)
     _draw(receipt, figure)
+    if throughput_figure is not None:
+        _draw_throughput(receipt, throughput_figure)
     return receipt
 
 
@@ -542,8 +623,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    parser.add_argument(
+        "--throughput-figure", type=Path, default=DEFAULT_THROUGHPUT_FIGURE
+    )
     parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument("--route", choices=("host", "compiled"), default="host")
+    parser.add_argument("--shot", type=int, default=DEFAULT_TARGET[0])
+    parser.add_argument("--slice", type=int, default=DEFAULT_TARGET[1])
     parser.add_argument("--prepare-only", action="store_true")
     arguments = parser.parse_args()
     if arguments.prepare_only:
@@ -555,6 +641,8 @@ def main() -> None:
         measure(
             output=arguments.output,
             figure=arguments.figure,
+            throughput_figure=arguments.throughput_figure,
+            target=(arguments.shot, arguments.slice),
             cache_root=arguments.cache_root,
             route=arguments.route,
         )

@@ -5,6 +5,8 @@ pinned is the behaviour that went wrong while the package was written, so a
 regression reintroduces a measured defect rather than an imagined one.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -485,9 +487,7 @@ def test_draw_nulls_drops_an_x_point_outside_the_wall():
 def test_draw_nulls_without_containment_draws_every_finite_point():
     """Containment is opt-in, so the count says what was actually drawn."""
     view = three_view(extent=(0.0, 2.0, -1.5, 1.5))
-    tally = draw_nulls(
-        view.poloidal, x_points=np.array([[1.0, 0.0], [0.30, 0.0]])
-    )
+    tally = draw_nulls(view.poloidal, x_points=np.array([[1.0, 0.0], [0.30, 0.0]]))
     assert tally["x_points_drawn"] == 2
     assert tally["x_points_dropped_outside_wall"] == 0
 
@@ -549,8 +549,10 @@ def test_the_thomson_pairing_carries_no_systematic_lag():
 
     if not (SHOT_STORE / "27079.zarr").is_dir():
         pytest.skip("the MAST level-1 shot store is not present")
+    if not (BOUNDARY_LABEL_ROOT / "27079.nc").is_file():
+        pytest.skip("the carrier's boundary-carrying label session is absent")
 
-    frames, _ = read_labels(27079)
+    frames, _ = read_labels(27079, dirname=BOUNDARY_LABEL_ROOT)
     label_time = np.asarray([frame.time for frame in frames])
     for string in read_thomson(27079):
         cadence = float(np.median(np.diff(string.time)))
@@ -597,8 +599,10 @@ def test_the_limited_boundary_defect_is_visible_rather_than_silent():
 
     if not (SHOT_STORE / "27079.zarr").is_dir():
         pytest.skip("the MAST level-1 shot store is not present")
+    if not (BOUNDARY_LABEL_ROOT / "27079.nc").is_file():
+        pytest.skip("the carrier's boundary-carrying label session is absent")
 
-    frames, _ = read_labels(27079)
+    frames, _ = read_labels(27079, dirname=BOUNDARY_LABEL_ROOT)
     wall = read_pulse(27079).geometry.limiter
     classes = {frame.diverted for frame in frames}
     assert classes == {True, False}, "the carrier must carry both topology classes"
@@ -618,3 +622,212 @@ def test_the_limited_boundary_defect_is_visible_rather_than_silent():
     # A limited boundary can never stand off FURTHER than a diverted one: that
     # ordering is what the defect violates, and it is the repair's signature.
     assert np.median(gaps[False]) > 0.0
+
+
+# --------------------------------------------------------------------------
+# nova_labels: the boundary contract is the stored LCFS polyline, and an
+# empty one is refused rather than substituted from the nested surfaces
+# --------------------------------------------------------------------------
+
+# The carrier's boundary-carrying relabelled sessions: the shipped
+# presentation-media receipts read this root (boundary_source "stored lcfs
+# polyline"), and the label reader now refuses a session that carries none,
+# so the carrier slow tests above must read the root that has them rather
+# than the production root where every frame's polyline is still empty.
+BOUNDARY_LABEL_ROOT = Path(
+    "/work/projects/imas_gpu/sophelio/labeller_sessions/"
+    "boundary-repair-validation-20260907T1124Z"
+)
+
+
+def _label_geometry(index: int = 0) -> dict[str, object]:
+    """Return deterministic nested-surface geometry for a synthetic session."""
+    surface = np.linspace(0.0, 1.0, 11)
+    angle = np.linspace(0.0, 2.0 * np.pi, 64, endpoint=False)
+    radius = 1.0 + 0.25 * surface[:, None] * np.cos(angle)[None, :]
+    height = 0.02 * index + 0.35 * surface[:, None] * np.sin(angle)[None, :]
+    faces = np.linspace(0.0, 1.0, 26)
+    scale = 1.0 + index * 0.01
+    profiles = {
+        name: faces
+        for name in (
+            "rho_tor",
+            "Phi",
+            "psi_face",
+            "Ip_profile",
+            "R_in",
+            "R_out",
+            "F",
+            "int_dl_over_Bp",
+            "inv_R",
+            "inv_R2",
+            "grad_psi",
+            "grad_psi2",
+            "grad_psi2_over_R2",
+            "B2",
+            "inv_B2",
+            "delta_upper",
+            "delta_lower",
+            "elongation",
+            "vpr",
+            "volume",
+            "area",
+            "q",
+            "g0",
+            "g1",
+            "g2",
+            "g3",
+            "psi_norm_face",
+        )
+    }
+    return {
+        "flux_surface_psi_norm": surface,
+        "flux_surface_psi": scale * surface,
+        "flux_surface_r": radius,
+        "flux_surface_z": height,
+        "flux_surface_angle": angle,
+        "rho_face_norm": faces,
+        "p_prime_face": -2.0e5 * (1.0 - faces),
+        "ff_prime_face": -0.2 * (1.0 - faces),
+        **profiles,
+        "R_major": 1.0,
+        "a_minor": 0.35,
+        "B_0": 2.0,
+        "boundary_toroidal_flux": 0.5,
+        "magnetic_axis_z_scalar": 0.02 * index,
+        "diverted": False,
+        "divertor_leg_r": np.full((4, 32), np.nan),
+        "divertor_leg_z": np.full((4, 32), np.nan),
+        "divertor_leg_finite": np.zeros(4, dtype=bool),
+    }
+
+
+def _label_frame(
+    lcfs: np.ndarray,
+    *,
+    index: int = 0,
+    boundary_slots: int = 8,
+    guarded: bool = True,
+) -> object:
+    """Return one synthetic steering frame carrying ``lcfs`` as its polyline.
+
+    The stored polyline is NaN-padded to ``boundary_slots`` and counted by
+    ``n_boundary_coords``, mirroring the corpus store; a zero-row ``lcfs`` is
+    an empty boundary, exactly the shape a pre-persistence session carries.
+    """
+    from nova.equilibrium.steering_frames import (
+        SteeringAction,
+        SteeringFrame,
+    )
+
+    radial_count, vertical_count = 4, 3
+    radius = np.linspace(0.6, 1.42, radial_count, dtype=np.float64)
+    height = np.linspace(-0.42, 0.42, vertical_count, dtype=np.float64)
+    packed = np.full((boundary_slots, 2), np.nan)
+    vertex_count = int(lcfs.shape[0])
+    packed[:vertex_count] = np.asarray(lcfs, dtype=float)
+    strike = np.array([[np.nan, np.nan], [1.2, 0.06]])
+    return SteeringFrame(
+        radius=radius,
+        height=height,
+        shape=np.array([radial_count, vertical_count], dtype=np.int32),
+        psi=np.arange(radial_count * vertical_count, dtype=np.float64).reshape(
+            radial_count, vertical_count
+        )
+        * (1.0 + 0.1 * index),
+        psi_norm=np.linspace(0.0, 1.0, radial_count * vertical_count).reshape(
+            radial_count, vertical_count
+        ),
+        domain_label=np.full((radial_count, vertical_count), 0, dtype=np.int8),
+        separatrix=np.empty((0, 2), dtype=np.float64),
+        separatrix_vertex_count=np.int32(0),
+        magnetic_axis_r=0.9 + 0.05 * index,
+        magnetic_axis_z=0.02 * index,
+        x_point_r=np.array([0.65, 0.86]),
+        x_point_z=np.array([0.15, -0.36]),
+        strike_points_r=strike[:, 0],
+        strike_points_z=strike[:, 1],
+        lcfs_r=packed[:, 0],
+        lcfs_z=packed[:, 1],
+        n_boundary_coords=np.int32(vertex_count),
+        finite_mask=np.array([True, True, True, False, True, vertex_count > 0]),
+        coil_current=np.arange(3, dtype=np.float64) * 1.0e4,
+        compensating_current=np.array([1.0, -2.0], dtype=np.float64),
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.array([[0.8, 0.0], [1.2, 0.1]]),
+        ),
+        wall_seconds=0.25,
+        trip_count=index + 1,
+        carrier_identity="synthetic",
+        nova_version="9.9.9",
+        policy_digest="0" * 64,
+        p_prime_source="efm",
+        current_centroid_r=1.5,
+        current_centroid_z=0.02 * index,
+        reference_centroid_z=0.02 * index,
+        branch_guard_ok=guarded,
+        **_label_geometry(index),
+    )
+
+
+def _write_label_session(tmp_path, frames, shot=4242) -> None:
+    """Record one synthetic rasterless session into ``tmp_path``."""
+    from nova.equilibrium.steering_frames import write_session
+
+    write_session(
+        tuple(frames),
+        filename=str(shot),
+        dirname=str(tmp_path),
+        include_raster=False,
+    )
+
+
+def _stored_ring():
+    """Return a closed LCFS ring distinct from the outermost nested surface."""
+    angle = np.linspace(0.0, 2.0 * np.pi, 64, endpoint=False)
+    return np.column_stack((1.0 + 0.30 * np.cos(angle), 0.40 * np.sin(angle)))
+
+
+def test_a_session_with_an_empty_boundary_variable_raises(tmp_path):
+    """A frame with no stored polyline is refused, never substituted."""
+    from nova.media.sources.nova_labels import read_labels
+
+    _write_label_session(tmp_path, (_label_frame(np.empty((0, 2))),))
+    with pytest.raises(ValueError, match="boundary polyline"):
+        read_labels(4242, dirname=tmp_path)
+
+
+def test_the_stored_polyline_is_the_boundary_the_reader_draws(tmp_path):
+    """A populated lcfs is taken as the LCFS, not the nested surface.
+
+    The stored ring is deliberately a different curve from the outermost
+    nested surface, so this only passes because the reader selected the
+    stored polyline -- the previous prefer-if-present branch and the
+    nested-surface contract would both draw something else.
+    """
+    from nova.media.sources.nova_labels import read_labels
+
+    stored = _stored_ring()
+    _write_label_session(tmp_path, (_label_frame(stored, boundary_slots=64),))
+    frames, provenance = read_labels(4242, dirname=tmp_path)
+
+    assert np.array_equal(frames[0].boundary, stored)
+    assert not np.array_equal(frames[0].boundary, frames[0].surfaces[-1])
+    assert "stored lcfs polyline" in provenance["boundary_source"]
+
+
+def test_a_session_mixing_stored_and_empty_frames_is_refused(tmp_path):
+    """A partially relabelled corpus fails rather than blends boundary sources."""
+    from nova.media.sources.nova_labels import read_labels
+
+    _write_label_session(
+        tmp_path,
+        (
+            _label_frame(_stored_ring(), index=0, boundary_slots=64),
+            _label_frame(np.empty((0, 2)), index=1, boundary_slots=64),
+        ),
+    )
+    with pytest.raises(ValueError, match="boundary polyline"):
+        read_labels(4242, dirname=tmp_path)

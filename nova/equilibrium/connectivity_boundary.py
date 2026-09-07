@@ -278,7 +278,7 @@ def _print_wall_height_eligibility(
     )
 
 
-@partial(jax.jit, static_argnames=("report_eligibility",))
+@partial(jax.jit, static_argnames=("report_eligibility", "return_report"))
 def wall_height_shadow_mask(
     wall_height,
     axis_height,
@@ -290,6 +290,7 @@ def wall_height_shadow_mask(
     qualification_distance,
     *,
     report_eligibility: bool = False,
+    return_report: bool = False,
 ):
     """Return the hysteretic private-wall exclusion from qualified saddles.
 
@@ -370,32 +371,32 @@ def wall_height_shadow_mask(
     proposed = jnp.where(upper_eligible, proposed | upper_enter | upper_stay, proposed)
     proposed = jnp.where(upper_fallback, True, proposed)
 
+    indices = jnp.arange(qualified_x_points.shape[0])
+    lower_other = lower_side & (indices != lower_index)
+    upper_other = upper_side & (indices != upper_index)
+    lower_separation = jnp.min(
+        jnp.where(
+            lower_other,
+            jnp.abs(qualified_x_points[:, 1] - lower),
+            jnp.inf,
+        )
+    )
+    upper_separation = jnp.min(
+        jnp.where(
+            upper_other,
+            jnp.abs(qualified_x_points[:, 1] - upper),
+            jnp.inf,
+        )
+    )
+    lower_candidate_removed = jnp.sum(
+        private_wall & (wall_height < axis_height) & ~(lower_enter | lower_stay),
+        dtype=jnp.int32,
+    )
+    upper_candidate_removed = jnp.sum(
+        private_wall & (wall_height > axis_height) & ~(upper_enter | upper_stay),
+        dtype=jnp.int32,
+    )
     if report_eligibility:
-        indices = jnp.arange(qualified_x_points.shape[0])
-        lower_other = lower_side & (indices != lower_index)
-        upper_other = upper_side & (indices != upper_index)
-        lower_separation = jnp.min(
-            jnp.where(
-                lower_other,
-                jnp.abs(qualified_x_points[:, 1] - lower),
-                jnp.inf,
-            )
-        )
-        upper_separation = jnp.min(
-            jnp.where(
-                upper_other,
-                jnp.abs(qualified_x_points[:, 1] - upper),
-                jnp.inf,
-            )
-        )
-        lower_candidate_removed = jnp.sum(
-            private_wall & (wall_height < axis_height) & ~(lower_enter | lower_stay),
-            dtype=jnp.int32,
-        )
-        upper_candidate_removed = jnp.sum(
-            private_wall & (wall_height > axis_height) & ~(upper_enter | upper_stay),
-            dtype=jnp.int32,
-        )
         jax.debug.callback(
             _print_wall_height_eligibility,
             jnp.asarray(0, dtype=jnp.int8),
@@ -424,7 +425,30 @@ def wall_height_shadow_mask(
             upper_candidate_removed,
             ordered=True,
         )
-    return proposed & private_wall
+    mask = proposed & private_wall
+    if return_report:
+        return mask, {
+            "qualified_saddle_count": jnp.sum(finite, dtype=jnp.int32),
+            "lower_reference_valid": lower_valid,
+            "upper_reference_valid": upper_valid,
+            "lower_eligible": lower_eligible,
+            "upper_eligible": upper_eligible,
+            "lower_branch": jnp.where(
+                lower_eligible,
+                jnp.asarray(1, dtype=jnp.int8),
+                jnp.where(lower_valid, 2, 0).astype(jnp.int8),
+            ),
+            "upper_branch": jnp.where(
+                upper_eligible,
+                jnp.asarray(1, dtype=jnp.int8),
+                jnp.where(upper_valid, 2, 0).astype(jnp.int8),
+            ),
+            "lower_candidate_removed_wall_cells": lower_candidate_removed,
+            "upper_candidate_removed_wall_cells": upper_candidate_removed,
+            "masked_wall_node_count": jnp.sum(mask, dtype=jnp.int32),
+            "wall_node_count": jnp.asarray(mask.size, dtype=jnp.int32),
+        }
+    return mask
 
 
 def _bilerp(field: jnp.ndarray, rg: jnp.ndarray, zg: jnp.ndarray, r, z):

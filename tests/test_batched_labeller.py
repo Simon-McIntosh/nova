@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 
+import jax.numpy as jnp
 from matplotlib.figure import Figure
 import numpy as np
 
@@ -11,9 +13,13 @@ from nova.equilibrium import reduced_newton
 from nova.equilibrium.batched_labeller import (
     CENTROID_REPORTING_QUANTUM,
     BatchedLabeller,
+    _centroid_pair,
 )
+from nova.equilibrium.constraint import ConstraintMultiplier
+from nova.equilibrium.forward_operator import PrescribedCurrentField
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
+from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_persistent_compilation_cache
 
 from tests.test_reduced_newton import machine as machine_fixture  # noqa: F401
@@ -27,6 +33,22 @@ FIGURE_PATH = (
 )
 
 configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+
+
+def _offer_prescribed_currents(profile) -> np.ndarray:
+    """Expose the fixture's conductor response as traced prescribed currents."""
+    operator = profile.operator
+    response = jnp.concatenate(
+        (
+            jnp.asarray(operator.grid.source_target),
+            jnp.asarray(operator.wall.source_target),
+        )
+    )
+    operator.prescribed_field = PrescribedCurrentField(
+        response=response,
+        current=jnp.zeros(response.shape[1]),
+    )
+    return np.zeros(response.shape[1])
 
 
 def _write_state_parity_figure(actual, reference) -> float:
@@ -152,3 +174,83 @@ def test_result_contains_fixed_shape_topology_fields(machine_fixture):  # noqa: 
     assert labels.domain_label.shape[0] == 2
     assert labels.o_point.shape == (2, 2)
     assert result.achieved_centroid.shape == (2, 2)
+
+
+def test_masked_conditioning_keeps_the_augmented_multiplier(machine_fixture):  # noqa: F811
+    """Both guard branches retain the row slot and a conditioned row executes."""
+    profile, seed = machine_fixture
+    prescribed_current = _offer_prescribed_currents(profile)
+    target_current = abs(float(np.sum(np.asarray(profile.operator.cell_current(seed)))))
+    requested_class = int(TopologyClass.LIMITED)
+    observed = np.asarray(
+        profile.current_moment_observation(
+            seed,
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=target_current,
+        ).stack()[1:]
+    )
+    batch = np.stack((np.asarray(seed), np.asarray(seed)))
+    result = BatchedLabeller(
+        profile,
+        newton_steps=1,
+        active_set_steps=1,
+    ).solve(
+        batch,
+        prescribed_current=np.stack((prescribed_current, prescribed_current)),
+        target_current=np.asarray([target_current, target_current]),
+        requested_class=np.asarray([requested_class, requested_class]),
+        reference_centroid=np.stack((observed, observed + np.asarray([0.0, 1.0]))),
+        centroid_target=np.asarray([[observed[1]], [observed[1] + 1.0e-3]]),
+        active=np.asarray([False, True]),
+    )
+
+    np.testing.assert_array_equal(np.asarray(result.conditioned), [False, True])
+    np.testing.assert_array_equal(np.asarray(result.state[0]), np.asarray(seed))
+    assert np.asarray(result.state).shape == batch.shape
+
+
+def test_centroid_pair_matches_the_slice_response_context(machine_fixture):  # noqa: F811
+    """The traced pair retains the response derived for its own slice context."""
+    profile, seed = machine_fixture
+    _offer_prescribed_currents(profile)
+    target_current = abs(float(np.sum(np.asarray(profile.operator.cell_current(seed)))))
+    requested_class = int(TopologyClass.LIMITED)
+    target = float(
+        np.asarray(
+            profile.current_moment_observation(
+                seed,
+                support=MomentIntegralSupport.ALL_DOMAIN,
+                target_current=target_current,
+            ).centroid_z
+        )
+    )
+    actual = _centroid_pair(
+        profile,
+        seed,
+        target,
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+    seeded = dataclasses.replace(
+        actual,
+        unknown=ConstraintMultiplier(multiplier_scale=jnp.asarray([1.0])),
+    )
+    (expected,), _selection = profile.derived_constraint_pairs(
+        (seeded,),
+        jnp.asarray(seed),
+        requested_class=jnp.asarray(requested_class),
+        target_current=jnp.asarray(target_current),
+    )
+
+    np.testing.assert_allclose(
+        np.asarray(actual.unknown.direction),
+        np.asarray(expected.unknown.direction),
+        rtol=1.0e-12,
+        atol=1.0e-14,
+    )
+    np.testing.assert_allclose(
+        np.asarray(actual.unknown.ampere_scale),
+        np.asarray(expected.unknown.ampere_scale),
+        rtol=1.0e-12,
+        atol=1.0e-14,
+    )

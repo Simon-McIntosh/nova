@@ -241,6 +241,7 @@ def _sequential_reference(profile, inputs: dict[str, np.ndarray]) -> dict[str, A
     free_program = None
     conditioned_program = None
     rows = []
+    centroid_observation_failures = 0
     for index in range(CORPUS_SHOT_COUNT):
         initial = jnp.asarray(inputs["initial"][index])
         target_current = jnp.asarray(inputs["target_current"][index])
@@ -255,15 +256,21 @@ def _sequential_reference(profile, inputs: dict[str, np.ndarray]) -> dict[str, A
             program=free_program,
         )
         free_program = free.program
-        centroid = profile.current_moment_observation(
-            free.state,
-            support=MomentIntegralSupport.ALL_DOMAIN,
-            target_current=target_current,
-        ).stack()[1:]
-        guard = bool(
-            np.linalg.norm(np.asarray(centroid) - inputs["reference_centroid"][index])
-            <= 5.0e-2
-        )
+        try:
+            centroid = profile.current_moment_observation(
+                free.state,
+                support=MomentIntegralSupport.ALL_DOMAIN,
+                target_current=target_current,
+            ).stack()[1:]
+            guard = bool(
+                np.linalg.norm(
+                    np.asarray(centroid) - inputs["reference_centroid"][index]
+                )
+                <= 5.0e-2
+            )
+        except Exception:
+            centroid_observation_failures += 1
+            guard = False
         conditioned = not bool(free.converged) or not guard
         result = free
         if conditioned:
@@ -299,6 +306,7 @@ def _sequential_reference(profile, inputs: dict[str, np.ndarray]) -> dict[str, A
         "converged_fraction": float(np.mean([item["converged"] for item in rows])),
         "guard_fraction": float(np.mean([item["guard"] for item in rows])),
         "conditioned_fraction": float(np.mean([item["conditioned"] for item in rows])),
+        "centroid_observation_failure_count": centroid_observation_failures,
     }
 
 

@@ -394,7 +394,7 @@ def measure(
                     program=None,
                 )
             else:
-                result = _reduced(profile_, flux, commanded, program)
+                result = _reduced(profile_, flux, commanded)
             # Drain the solve's tail device work (constraint records, the
             # prescribed-current fold) into this stage so it does not land on
             # the next press's first array conversion.

@@ -218,17 +218,24 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
 
     matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
     scale = np.full(solved.free_circuits.size, ceiling)
-    scaled_delta = solved.delta / scale
-    augmented = np.vstack((matrix * scale, weight * np.eye(scale.size)))
-    rhs = np.concatenate(
-        (solved.right_hand_side * solved.row_weight, np.zeros(scale.size))
+    rhs = solved.right_hand_side * solved.row_weight
+    normal_matrix = matrix.T @ matrix + weight**2 * np.diag(1.0 / scale**2)
+    expected_delta = np.linalg.solve(normal_matrix, matrix.T @ rhs)
+    stronger = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        gamma=0.0,
+        picard_rounds=0,
+        delta_regularisation=2.0 * weight,
+        delta_current_scale=ceiling,
     )
-    normal_residual = augmented.T @ (augmented @ scaled_delta - rhs)
 
     assert solved.delta_regularisation == weight
     np.testing.assert_allclose(solved.delta_current_scale, scale)
-    normal_scale = np.linalg.norm(augmented.T @ rhs)
-    assert np.linalg.norm(normal_residual) < 1.0e-12 * normal_scale
+    np.testing.assert_allclose(solved.delta, expected_delta, rtol=1.0e-6)
+    assert np.linalg.norm(stronger.delta) < np.linalg.norm(solved.delta)
 
 
 def test_dimensionless_delta_regularisation_requires_a_scale(machine, seed_target):

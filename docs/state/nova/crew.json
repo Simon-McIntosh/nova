@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T03:58:08",
+  "updated": "2026-09-07T04:43:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -116287,6 +116287,146 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T020110343871-pfs-host-engine-identity",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-host-engine-identity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4036,
+                "cached_input_tokens": 786345,
+                "input_tokens": 790413,
+                "output_tokens": 1802,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 792215,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "A one-card H200 identity smoke with --engine host against the existing 16-shot reference under docs/figures/playable-forward-solve/labeller-parallel/reference/ (no shard.py rerun) reports discrete fields exact on 64 of 64 slices, floats within rtol 1e-12 on at least 63 of 64, and a converged count equal to the reference; a CPU test on the Solovev fixture asserting HostRouteEngine and shard.py label_shot produce identical slice records for one slice runs green through srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=32G (TMPDIR=/tmp, JAX_PLATFORMS=cpu, environment python called directly); the report names the argument or carry difference that caused the failure; no production job is launched by this node",
+          "estimated_hours": 1.5,
+          "goal": "The HostRouteEngine in scripts/labeller_parallel/scheduler.py repaired so that it performs per slot exactly the free solve, conditioning trigger and conditioned re-solve of scripts/labeller_batch/shard.py label_shot (same functions, arguments, warm-state carry and failure re-seeding), with the cause of the all-failing conditioned re-solves on shots 22589 and 22533 named",
+          "id": "pfs-host-engine-identity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T020110343871-pfs-host-engine-identity/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "scripts/labeller_parallel/",
+            "tests/test_labeller_parallel.py",
+            "docs/figures/playable-forward-solve/labeller-parallel/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/host-engine-identity.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-corpus-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T02:01:24Z",
+        "completed_at": "2026-09-07T02:41:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2409,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2409,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "8381c6cdc3ae8d4403dd9247bc629500f669852b",
+        "commits": [
+          "fc264ebd927ba70becb35d81bf31bca387ccf8f7",
+          "012428eba8d23eac69eeedab7feb1cfbe989ab8a"
+        ],
+        "changed_lines": {
+          "added": 817,
+          "removed": 639,
+          "files": 40
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1263821 host-route identity against the existing 16-shot reference (discrete 64 of 64, floats 64 of 64 within rtol 1e-12, converged 40 of 40 both arms, zero differing fields) plus srun all_debug tests/test_labeller_parallel.py (1 passed in 734.76 s: HostRouteEngine slice record equals shard.py label_shot on the Solovev fixture)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/host-engine-identity.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T020110343871-pfs-host-engine-identity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5644928,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5751063,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21009,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3649
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 24658,
+          "peak_input_tokens": 11395991
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-host-engine-identity",
+          "session_id": "01a07838-4979-72e1-bcb1-f8bd2907cd75",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T02:41:33Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -116599,6 +116739,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1961
+    "_version": 1962
   }
 }

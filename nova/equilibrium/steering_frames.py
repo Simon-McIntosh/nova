@@ -50,9 +50,10 @@ Frame schema (session shapes carry time as the last axis; per-frame shapes
 drop the trailing ``time`` entry; ``n_r``/``n_z`` are the raster axes,
 ``n_s`` the traced separatrix capacity, ``n_b`` the LCFS capacity,
 ``n_circuits`` the driven circuit count, ``n_rows`` the registered constraint
-row count, ``n_cp`` the commanded control-point count, ``nt`` the frame
-count).  All coordinates are COCOS 17 ``(R, phi, Z)`` metres; ``psi`` is Wb
-per radian and ``psi_norm`` dimensionless.
+row count, ``n_cp`` the commanded control-point count, ``n_wall`` the wall
+polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
+``(R, phi, Z)`` metres; ``psi`` is Wb per radian and ``psi_norm``
+dimensionless.
 
 +--------------------------+-----------------+---------+--------------------+
 | field                    | session shape   | dtype   | units              |
@@ -106,7 +107,19 @@ per radian and ``psi_norm`` dimensionless.
 | carrier_identity         | (nt,)           | str     | response carrier   |
 | nova_version             | (nt,)           | str     | package version    |
 | policy_digest            | (nt,)           | str     | policy sha256      |
+| wall_r                   | (n_wall,)       | float64 | m (closed ring)    |
+| wall_z                   | (n_wall,)       | float64 | m (closed ring)    |
 +--------------------------+-----------------+---------+--------------------+
+
+The session carries the wall polygon as its own closed group
+(:data:`WALL_GROUP`), written once per session rather than per frame and
+closed by repeating the first vertex.  It is the containment reference for
+the labelled points: the magnetic axis and the X-points are tested against it
+by ray-cast point-in-polygon inclusion, and the strike points by proximity
+within :data:`STRIKE_WALL_TOLERANCE_M` metres (they land on the wall, where
+ray-cast inclusion is ambiguous).
+:func:`count_labelled_outside_wall` returns the labeller receipt's count of
+labelled point slots judged outside it.
 """
 
 from __future__ import annotations
@@ -138,6 +151,17 @@ N_STRIKE_POINTS = 2
 
 #: Default netCDF group a recorded steering session is written under.
 SESSION_GROUP = "steering"
+
+#: Session subgroup the wall polygon is written into as its own closed group.
+#: The wall is session-scoped (written once per session, never per frame) and
+#: is the containment reference for the labelled points (see the docstring).
+WALL_GROUP = "wall"
+
+#: Metres of proximity a strike point may sit from the wall polygon and still
+#: count as on the boundary.  Strike points are wall crossings, so the
+#: tolerance absorbs the crossing numerics and only genuinely displaced
+#: strike points are judged outside in the containment receipt.
+STRIKE_WALL_TOLERANCE_M = 0.05
 
 #: Ordered point components ``finite_mask`` labels, one flag per component.
 #: A component is present (finite coordinate values and a True mask flag) or
@@ -376,6 +400,37 @@ def _as_numpy(value) -> np.ndarray:
 def _point_absent(point) -> bool:
     """Return whether a coordinate pair is fully absent (NaN)."""
     return not bool(np.all(np.isfinite(point)))
+
+
+def _closed_wall_loop(wall) -> np.ndarray:
+    """Return the wall as a closed R-Z ring, repeating the first vertex.
+
+    A wall supplied already closed is returned unchanged; an open outline is
+    closed by appending its first vertex, so the stored polygon is always a
+    closed loop regardless of how the operator published it.
+    """
+    loop = np.asarray(wall, dtype=np.float64)
+    if loop.ndim != 2 or loop.shape[1] != 2 or loop.shape[0] < 2:
+        raise ValueError("the wall must be a polygon of R-Z vertex pairs")
+    if not np.all(loop[0] == loop[-1]):
+        loop = np.vstack((loop, loop[:1]))
+    return loop
+
+
+def _point_polygon_distance(point, vertices) -> float:
+    """Return the minimum Euclidean distance from a point to a polygon ring."""
+    point = np.asarray(point, dtype=np.float64).ravel()
+    vertices = np.asarray(vertices, dtype=np.float64)
+    if vertices.ndim != 2 or vertices.shape[1] != 2 or vertices.shape[0] < 2:
+        raise ValueError("the wall must be a polygon of R-Z vertex pairs")
+    delta = np.diff(vertices, axis=0)
+    length_squared = np.einsum("ij,ij->i", delta, delta)
+    offset = point - vertices[:-1]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        fraction = np.einsum("ij,ij->i", offset, delta) / length_squared
+    fraction = np.clip(fraction, 0.0, 1.0)
+    closest = vertices[:-1] + fraction[:, None] * delta
+    return float(np.min(np.linalg.norm(closest - point, axis=1)))
 
 
 def policy_digest(policy: ForwardSolvePolicy) -> str:
@@ -943,6 +998,7 @@ def session_dataset(
     *,
     time=None,
     include_raster: bool = True,
+    wall=None,
 ) -> xr.Dataset:
     """Return one recording session as a time-last xarray dataset.
 
@@ -951,6 +1007,13 @@ def session_dataset(
     coordinates; the fixed slots (X-points, strike points, LCFS vertices,
     circuits, constraint rows, control points, mask components) are named
     axes.  ``time`` defaults to the integer frame index in seconds.
+
+    ``wall`` names the R-Z wall polygon the session was solved against, closed
+    to a loop and carried session-scoped (once per session, no time axis) as
+    the containment reference for the labelled points.  ``write_session``
+    additionally writes it into its own subgroup (:data:`WALL_GROUP`), which
+    ``read_session`` merges back, so the in-memory dataset is complete in
+    either layout.
     """
     frames = tuple(frames)
     if not frames:
@@ -1195,15 +1258,21 @@ def session_dataset(
             "branch_guard_ok",
         )
     )
+    attrs = {
+        COCOS_ATTR: COCOS,
+        "training_inputs": training_inputs,
+        "diagnostic_only": diagnostic_only,
+        "p_prime_source": p_prime_source,
+    }
+    if wall is not None:
+        loop = _closed_wall_loop(wall)
+        variables["wall_r"] = ("wall_vertex", loop[:, 0])
+        variables["wall_z"] = ("wall_vertex", loop[:, 1])
+        attrs["containment_reference"] = WALL_GROUP
     return xr.Dataset(
         variables,
         coords={"time": ("time", time_values)},
-        attrs={
-            COCOS_ATTR: COCOS,
-            "training_inputs": training_inputs,
-            "diagnostic_only": diagnostic_only,
-            "p_prime_source": p_prime_source,
-        },
+        attrs=attrs,
     )
 
 
@@ -1215,16 +1284,76 @@ def write_session(
     group: str = SESSION_GROUP,
     time=None,
     include_raster: bool = True,
+    wall=None,
 ) -> netCDF:
-    """Record one steering session through the group-backed netCDF store."""
-    dataset = session_dataset(frames, time=time, include_raster=include_raster)
+    """Record one steering session through the group-backed netCDF store.
+
+    ``wall`` is written once per session into its own closed subgroup
+    (``<group>/<WALL_GROUP>``) so the session file carries the containment
+    reference for the labelled points alongside the frame channels.
+    """
+    dataset = session_dataset(
+        frames,
+        time=time,
+        include_raster=include_raster,
+        wall=wall,
+    )
+    wall_dataset = None
+    if wall is not None:
+        loop = _closed_wall_loop(wall)
+        wall_dataset = xr.Dataset(
+            {
+                "wall_r": ("wall_vertex", loop[:, 0]),
+                "wall_z": ("wall_vertex", loop[:, 1]),
+            },
+            attrs={
+                COCOS_ATTR: COCOS,
+                # netCDF4 attributes are string-or-numeric only, so the
+                # booleans are stored in their string form.
+                "closed": "true",
+                "containment_reference": "true",
+            },
+        )
+        dataset = dataset.drop_vars(("wall_r", "wall_z"))
     store = netCDF(
         filename=filename,
         dirname=dirname,
         group=group,
         data=dataset,
     )
-    return store.store()
+    stored = store.store()
+    if wall_dataset is not None:
+        subgroup = store.subgroup(WALL_GROUP)
+        mode = "a"
+        if store.host is not None:
+            with store.fsys.open(str(store.filepath), mode + "b") as file:
+                wall_dataset.to_netcdf(file, mode=mode, group=subgroup)
+        else:
+            wall_dataset.to_netcdf(str(store.filepath), mode=mode, group=subgroup)
+    return stored
+
+
+def _read_wall_group(store: netCDF) -> dict[str, np.ndarray] | None:
+    """Return the session's wall-polygon variables, or None when absent.
+
+    Older sessions carry no wall subgroup; a session whose wall variables were
+    written inline (not through :func:`write_session`) already has them in the
+    main group and needs no merge.
+    """
+    subgroup = store.subgroup(WALL_GROUP)
+    if subgroup is None:
+        return None
+    try:
+        with xr.open_dataset(str(store.filepath), group=subgroup) as wall:
+            wall.load()
+    except OSError, ValueError, KeyError:
+        return None
+    if "wall_r" not in wall.variables or "wall_z" not in wall.variables:
+        return None
+    return {
+        "wall_r": ("wall_vertex", np.asarray(wall["wall_r"].values)),
+        "wall_z": ("wall_vertex", np.asarray(wall["wall_z"].values)),
+    }
 
 
 def read_session(
@@ -1233,10 +1362,20 @@ def read_session(
     dirname: str,
     group: str = SESSION_GROUP,
 ) -> xr.Dataset:
-    """Return one recorded session, including sessions without a raster block."""
+    """Return one recorded session, including sessions without a raster block.
+
+    When the file carries the wall polygons in its own subgroup
+    (:data:`WALL_GROUP`), it is merged back into the returned dataset so the
+    containment reference is available to every caller of the reader.
+    """
     store = netCDF(filename=filename, dirname=dirname, group=group)
     store.load()
-    return store.data
+    dataset = store.data
+    if "wall_r" not in dataset.variables:
+        wall_data = _read_wall_group(store)
+        if wall_data is not None:
+            dataset = dataset.assign(wall_data)
+    return dataset
 
 
 def _raster_values(frame: xr.Dataset, dataset: xr.Dataset) -> dict[str, object]:
@@ -1335,14 +1474,77 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
     return frames
 
 
+def count_labelled_outside_wall(
+    dataset: xr.Dataset,
+    *,
+    strike_tolerance: float = STRIKE_WALL_TOLERANCE_M,
+) -> int:
+    """Return the labelled point slots judged outside the session's wall.
+
+    The wall polygon is the containment reference for the labelled points
+    (see the session schema): the magnetic axis and the X-points are tested by
+    ray-cast point-in-polygon inclusion, and the strike points by proximity to
+    the polygon within ``strike_tolerance`` metres, because a strike point
+    lands on the wall where ray-cast inclusion is ambiguous.  An absent
+    (NaN) slot never counts.  This is the count the labeller receipt records
+    — how many labelled points fall outside the vessel across every frame.
+    """
+    if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
+        raise ValueError(
+            "the session carries no wall polygon to test the labelled points "
+            "against (write it with write_session(..., wall=...))"
+        )
+    wall_r = np.asarray(dataset["wall_r"].values)
+    wall_z = np.asarray(dataset["wall_z"].values)
+    wall_loop = np.column_stack((wall_r, wall_z))
+    outside = 0
+    for index in range(int(dataset.sizes["time"])):
+        frame = dataset.isel(time=index)
+        axis = np.asarray(
+            [
+                float(frame["magnetic_axis_r"].values),
+                float(frame["magnetic_axis_z"].values),
+            ]
+        )
+        x_points = np.column_stack(
+            (
+                np.asarray(frame["x_point_r"].values),
+                np.asarray(frame["x_point_z"].values),
+            )
+        )
+        strikes = np.column_stack(
+            (
+                np.asarray(frame["strike_points_r"].values),
+                np.asarray(frame["strike_points_z"].values),
+            )
+        )
+        if not _point_absent(axis) and not bool(
+            inside_polygon(axis[0], axis[1], wall_r, wall_z)
+        ):
+            outside += 1
+        for x_point in x_points:
+            if not _point_absent(x_point) and not bool(
+                inside_polygon(x_point[0], x_point[1], wall_r, wall_z)
+            ):
+                outside += 1
+        for strike in strikes:
+            if not _point_absent(strike) and (
+                _point_polygon_distance(strike, wall_loop) > strike_tolerance
+            ):
+                outside += 1
+    return int(outside)
+
+
 __all__ = [
     "COCOS",
     "FINITE_MASK_COMPONENTS",
     "N_STRIKE_POINTS",
     "SESSION_GROUP",
+    "STRIKE_WALL_TOLERANCE_M",
     "SteeringAction",
     "SteeringFrame",
     "assemble_frame",
+    "count_labelled_outside_wall",
     "frames_from_session",
     "policy_digest",
     "read_session",

@@ -901,6 +901,30 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     necessary rather than conservative, and the consumer's split, carrying them for the demo while barring them from referee-scored evidence, is the correct one. Any
     future use of this corpus that scores nova against EFIT must apply that exclusion, and the per-slice conditioned flag is what makes it enforceable on the data.</p>
   </section>
+
+  <section id="corpus-quality-at-911-shots">
+    <h2>Corpus quality at 911 complete shots (2026-09-07 08:48Z, from the shot manifests)</h2>
+    <table>
+      <thead><tr><th>Population</th><th>Shots</th><th>Slices written</th><th>Converged</th><th>Fraction</th></tr></thead>
+      <tbody>
+        <tr><td>All complete shots</td><td>911</td><td>74,725</td><td>50,286</td><td>0.673</td></tr>
+        <tr><td>Excluding the reversed-current block</td><td>840</td><td>68,664</td><td>50,282</td><td>0.732</td></tr>
+        <tr><td>Shots at or above 0.6 converged</td><td>663</td><td>56,421</td><td>44,293</td><td>0.785</td></tr>
+        <tr><td>Shots from 0.2 to 0.6</td><td>175</td><td>12,212</td><td>5,989</td><td>0.490</td></tr>
+        <tr><td>Zero-converged shots</td><td>72</td><td>6,061</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>Seventy-one of the 72 zero-converged shots are the reversed-current block 22475 to 22626, which is campaign sign rather than a writer fault and is excluded from
+    cohorts until the polarity repair lands; they are 8.1 per cent of written slices. The one remaining zero shot and the single shot below 0.2 are unexplained and too
+    small to chase. <strong>The clean training core is the 663 shots at or above 0.6 converged, carrying 44,293 converged slices.</strong> That is the figure a consumer
+    should size against, not the 911.</p>
+    <p><strong>What the class-argument repair could add, stated as an unknown rather than an estimate.</strong> An aborted slice records converged false, so every row
+    lost to the unconstrained achieved-centroid read sits inside the 24,439 unconverged written slices here. On the six frozen carriers 119 of 372 free-converged rows
+    aborted that way, 32 per cent, but those six are measured and the corpus-wide rate is not: extrapolating their rate to the whole corpus gives a free-converged count
+    exceeding the written count, which is impossible, so the six are worse than typical and no corpus figure can be inferred from them. The before-and-after count on a
+    rerun carrier is the measure the writer pass-through node owes, and until it exists the honest statement is that the repair recovers an unknown share of the
+    unconverged third.</p>
+  </section>
 </main>
 </body>
 </html>

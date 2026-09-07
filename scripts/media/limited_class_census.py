@@ -4,8 +4,15 @@ Reads only session files and the level-1 efm store: no solve, no device. For
 every labelled shot it computes, per frame, the branch guard, the topology
 class, whether the frame follows a guard failure (a cold start), and the
 ratio of nova's axis-to-boundary flux span to EFIT's on the nearest slice.
+
+The session root is an argument because the census is read at least twice:
+once over the corpus as written, and again over a corpus relabelled into a
+new root after a solver repair. Both readings must come from this one
+implementation -- a second implementation reading the same shape would make
+its own first divergence look like a repair effect.
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -17,17 +24,18 @@ from nova.equilibrium.steering_frames import read_session
 
 SESSION = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
 STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
+DEFAULT_OUTPUT = Path.home() / "nova-media-logs/limited_class_census.json"
 
 
-def shot_rows(shot: int) -> list[dict]:
+def shot_rows(shot: int, session: Path, store: Path) -> list[dict]:
     """Return one row per frame of one shot, or an empty list when unreadable."""
-    dataset = read_session(filename=str(shot), dirname=str(SESSION))
+    dataset = read_session(filename=str(shot), dirname=str(session))
     time = np.asarray(dataset["time"].values, dtype=float)
     guard = np.asarray(dataset["branch_guard_ok"].values, dtype=bool)
     diverted = np.asarray(dataset["diverted"].values, dtype=bool)
     surface = np.asarray(dataset["flux_surface_psi"].values, dtype=float)
 
-    group = zarr.open_group(str(STORE / f"{shot}.zarr"), mode="r")["efm"]
+    group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
     stored = np.asarray(group["time"], dtype=float)
     axis = np.asarray(group["psi_axis"], dtype=float)
     boundary = np.asarray(group["psi_boundary"], dtype=float)
@@ -57,16 +65,23 @@ def shot_rows(shot: int) -> list[dict]:
     return rows
 
 
-def main() -> None:
-    """Census every labelled shot and print the crossed table."""
-    shots = sorted(int(path.stem) for path in SESSION.glob("*.nc"))
+def main(argv: list[str] | None = None) -> None:
+    """Census every labelled shot of one session root and print the table."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--session", type=Path, default=SESSION)
+    parser.add_argument("--store", type=Path, default=STORE)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    arguments = parser.parse_args(argv)
+    session, store = arguments.session, arguments.store
+    shots = sorted(int(path.stem) for path in session.glob("*.nc"))
+    print(f"censusing {len(shots)} shots under {session}")
     rows: list[dict] = []
     unreadable = []
     for position, shot in enumerate(shots):
-        if not (STORE / f"{shot}.zarr").is_dir():
+        if not (store / f"{shot}.zarr").is_dir():
             continue
         try:
-            rows.extend(shot_rows(shot))
+            rows.extend(shot_rows(shot, session, store))
         except Exception as error:  # a corpus read, not a gate
             unreadable.append((shot, f"{type(error).__name__}: {error}"))
         if position % 100 == 0:
@@ -121,9 +136,20 @@ def main() -> None:
             f"  {1e3 * low:4.0f}-{1e3 * high:4.0f} ms  n={band.sum():5d}"
             f"  median {np.median(ratio[band]):.3f}"
         )
-    Path("/home/ITER/mcintos/nova-media-logs/limited_class_census.json").write_text(
-        json.dumps({"rows": rows, "unreadable": unreadable}, indent=1)
+    arguments.output.parent.mkdir(parents=True, exist_ok=True)
+    arguments.output.write_text(
+        json.dumps(
+            {
+                "session": str(session),
+                "store": str(store),
+                "shots_attempted": len(shots),
+                "rows": rows,
+                "unreadable": unreadable,
+            },
+            indent=1,
+        )
     )
+    print(f"\nwrote {arguments.output}")
 
 
 if __name__ == "__main__":

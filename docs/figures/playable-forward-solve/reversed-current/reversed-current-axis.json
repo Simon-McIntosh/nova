@@ -15,8 +15,8 @@
   },
   "axis_position_absolute_difference_m": 0.0,
   "axis_flux_sign_relation": "reversed_current = -positive_current",
-  "focused_tests": "2 passed",
-  "all_debug_tests": "11 passed",
+  "focused_tests": "4 passed",
+  "all_debug_tests": "21 passed",
   "h200_relabel": {
     "shots": [22475, 22550, 22626],
     "baseline_job": 1263942,
@@ -25,7 +25,34 @@
       "22550": [0, 68],
       "22626": [0, 91]
     },
-    "corrected_job": 1263954,
-    "status": "pending"
+    "rejected_job": 1263954,
+    "rejected_job_status": "cancelled before measurement",
+    "corrected_job": 1264028,
+    "corrected_converged": {
+      "22475": [0, 106],
+      "22550": [0, 68],
+      "22626": [0, 91]
+    },
+    "corrected_qualified": {
+      "22475": [0, 106],
+      "22550": [0, 68],
+      "22626": [0, 91]
+    },
+    "converged_fraction_delta_percentage_points": {
+      "22475": 0.0,
+      "22550": 0.0,
+      "22626": 0.0
+    },
+    "first_failure_row": {
+      "22475": 1,
+      "22550": 1,
+      "22626": 1
+    },
+    "first_failure_flags": {
+      "branch_guard_ok": false,
+      "converged": false,
+      "qualified": false
+    },
+    "status": "scientific gate failed: caller supplied positive polarity"
   }
 }

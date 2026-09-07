@@ -378,3 +378,87 @@ def test_a_bare_poloidal_panel_restores_its_extent_on_clear():
     view.clear()
     assert view.poloidal.get_xlim() == pytest.approx(extent[:2])
     assert not view.poloidal.axison
+
+
+# --------------------------------------------------------------------------
+# Thomson: two disjoint eras, and a position can be absent where data is not
+# --------------------------------------------------------------------------
+
+
+def _string(positions, temperature, density=None):
+    from nova.media.sources.mast_thomson import ThomsonString
+
+    temperature = np.atleast_2d(np.asarray(temperature, dtype=float))
+    return ThomsonString(
+        name="core",
+        positions=np.asarray(positions, dtype=float),
+        time=np.arange(temperature.shape[0], dtype=float) * 0.01,
+        temperature=temperature,
+        density=(
+            np.ones_like(temperature) if density is None else np.atleast_2d(density)
+        ),
+    )
+
+
+def test_a_channel_with_a_non_finite_position_is_dropped():
+    """Both eras carry one; a NaN abscissa silently poisons any fit or scale."""
+    positions = np.array([[0.4, 0.0], [np.nan, 0.0], [1.2, 0.0]])
+    radius, temperature, _ = _string(positions, [[100.0, 200.0, 300.0]]).finite(0.0)
+    assert np.all(np.isfinite(radius))
+    assert radius.size == 2 and temperature.size == 2
+    assert 200.0 not in temperature
+
+
+def test_a_non_positive_measurement_is_dropped():
+    positions = np.array([[0.4, 0.0], [0.8, 0.0], [1.2, 0.0]])
+    radius, temperature, _ = _string(positions, [[100.0, 0.0, -5.0]]).finite(0.0)
+    assert radius.size == 1 and temperature[0] == 100.0
+
+
+def test_a_profile_is_read_from_the_nearest_row_not_interpolated():
+    """The laser fires at its own cadence; averaging two rows invents a profile."""
+    positions = np.array([[0.5, 0.0]])
+    string = _string(positions, [[10.0], [20.0], [30.0]])
+    assert string.at(0.0)[0][0] == 10.0
+    assert string.at(0.0104)[0][0] == 20.0
+    assert string.at(0.019)[0][0] == 30.0
+
+
+def test_channel_positions_accept_both_stored_layouts():
+    """atm stores one radius per channel; ayc stores one per time row."""
+    from nova.media.sources.mast_thomson import _channel_positions
+
+    flat = _channel_positions(np.array([0.4, 0.8, 1.2]))
+    assert flat.shape == (3, 2)
+    assert np.allclose(flat[:, 0], [0.4, 0.8, 1.2])
+    assert np.allclose(flat[:, 1], 0.0)
+
+    drifting = np.array([[0.40, 0.80, np.nan], [0.42, 0.82, np.nan]])
+    per_time = _channel_positions(drifting)
+    assert per_time.shape == (3, 2)
+    assert per_time[0, 0] == pytest.approx(0.41)
+    assert not np.isfinite(per_time[2, 0])
+
+
+@pytest.mark.slow
+def test_both_thomson_eras_are_served_from_the_level_one_store():
+    """An atm shot returns core alone; an ayc shot may return core and edge."""
+    from nova.media.sources import read_thomson
+    from nova.media.sources.mast_thomson import SHOT_STORE
+
+    if not (SHOT_STORE / "22086.zarr").is_dir():
+        pytest.skip("the MAST level-1 shot store is not present")
+
+    early = read_thomson(22086)
+    assert len(early) == 1
+    assert early[0].provenance["era"] == "atm"
+    assert early[0].provenance["group"] == "atm"
+
+    late = read_thomson(27079)
+    assert [string.provenance["group"] for string in late] == ["ayc", "aye"]
+    assert late[0].provenance["era"] == "ayc"
+
+    for string in early + late:
+        radius, temperature, _ = string.finite(0.15)
+        assert radius.size and np.all(np.isfinite(radius))
+        assert np.all(temperature > 0.0)

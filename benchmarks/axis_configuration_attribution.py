@@ -336,7 +336,9 @@ def _solve_continuation(
         wall_seconds = time.perf_counter() - started
         program = result.program
         state_values = np.asarray(result.state, dtype=np.float64)
-        converged = bool(result.converged) and np.all(np.isfinite(state_values))
+        converged = bool(result.converged) and bool(
+            np.all(np.isfinite(state_values))
+        )
         item = {
             "slice_index": row,
             "time_s": scalars["time_s"],

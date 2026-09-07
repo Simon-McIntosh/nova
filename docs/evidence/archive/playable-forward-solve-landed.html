@@ -989,6 +989,32 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     code could enter mid-run. Its six most recent shots all stamp 660cbd7c, so no mixing has occurred, and the revision stamp is the instrument that would show it if
     a worker were ever replaced.</p>
   </section>
+
+  <section id="the-centroid-major-radius-is-systematically-inboard">
+    <h2>Nova's current-centroid major radius is inboard of EFIT's on 51 of 51 slices, in the component nothing has ever checked (2026-09-07 09:35Z)</h2>
+    <p>The radial check the consumer ran after the Z-only premise was withdrawn returns both outcomes at once, and EFIT does publish a current-centroid major radius on
+    all six carriers, so nothing was substituted for it.</p>
+    <p><strong>The Shafranov reading holds, in the component it was guessed to hold in.</strong> Both centroid-to-axis distances are overwhelmingly radial: the centroid
+    sits 13.25 cm inboard of nova's axis and 14.16 cm inboard of EFIT's, against vertical components of 0.08 and 1.33 cm, and the axis is outboard of the centroid in
+    both codes, which is the correct Shafranov sign. So the positive control stands and is no longer provisional: both quantities behave like magnetic axes rather than
+    like moments, and the residual 4.56 cm axis disagreement is about O-point location in a quantity both codes compute correctly in kind.</p>
+    <p><strong>And nova's centroid major radius is systematically wrong.</strong> It is inboard of EFIT's on every one of the 51 evidence slices, median 5.62 cm, mean
+    6.06, standard deviation 3.14, with per-shot medians from 2.68 cm on 21978 to 8.67 cm on 21986. Zero of 51 outboard is a systematic sign rather than scatter. This
+    is the fourth defect tonight in one family and the family is now worth naming: <strong>where a pair exists and only one member is validated, the unvalidated member
+    is wrong.</strong> The primary saddle selector applied wall containment and the secondary did not, so the second slot held out-of-vessel nulls. The solve read the
+    topology with a requested class and its own diagnostic read did not, so a third of converged slices aborted. The writer guarded the centroid height and never
+    compared the centroid major radius, so the major radius drifted 5.6 cm inboard unnoticed. Three independent instances in one night, each found by a different route,
+    none by the tests.</p>
+    <p><strong>A hypothesis that would make two of them one cause, with its test.</strong> The centroid comes from the same moment observation that runs the
+    unconstrained topology read. If its domain mask is the emergent boundary where the solve used the requested class, the moment integral is taken over the wrong
+    support and the centroid is displaced systematically, which is the observed shape. The test falls out of the repair already in flight: supply the class and see
+    whether the centroid major radius moves toward EFIT's on real slices where the emergent and requested classes differ. Note this does not contradict that repair's
+    own gate, which asserts a bit-identical centroid when the class is supplied to a flux that already reads cleanly without one; that pins the argument as
+    non-perturbing when the two classes agree, and the 5.6 cm question is what happens when they do not. The two measurements are different and both are wanted.</p>
+    <p>What this does not disturb: the axis result, because the axis offset was measured against EFIT's axis directly rather than through any centroid; and it does not
+    rescue the withdrawn prediction that nova reports a moment as an axis, since a 5.6 cm centroid offset cannot make a 13.25 cm axis-to-centroid distance a
+    coincidence.</p>
+  </section>
 </main>
 </body>
 </html>

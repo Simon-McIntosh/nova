@@ -1,9 +1,10 @@
 """Animate Nova's solved surfaces beside the Thomson profiles they sample.
 
-Left: Nova's nested flux surfaces at their own absolute flux, the boundary,
-the divertor legs and the topology points, with the Thomson scattering volumes
-overlaid and coloured by system. Right: that system's measured profiles as the
-pulse steps, core above and edge below.
+Left: the wall-clipped hexagonal plasma mesh in light purple, cut to each
+frame's solved boundary, under Nova's nested flux surfaces at their own
+absolute flux with the boundary, divertor legs and topology points, and the
+Thomson scattering volumes overlaid and coloured by system. Right: that
+system's measured profiles as the pulse steps, core above and edge below.
 
 Both right-hand panels hold limits measured once over the whole pulse, so a
 channel that heats looks like a channel that heats rather than a still curve
@@ -47,11 +48,13 @@ def render_thomson(
     height: float = 6.5,
     quantile: float | None = 0.98,
     include_conditioned: bool = False,
+    cells: int = 1200,
 ) -> dict[str, object]:
     """Write the surfaces-and-Thomson animation and return its receipt."""
     from nova.media.sources.mast_efit import read_pulse
     from nova.media.sources.mast_thomson import read_thomson
     from nova.media.sources.nova_labels import read_labels
+    from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
     style = DEFAULT_INK
     frames, labels = read_labels(shot, free_only=not include_conditioned)
@@ -59,6 +62,10 @@ def render_thomson(
     if not strings:
         raise ValueError(f"MAST {shot} carries no Thomson system")
     machine = read_pulse(shot).geometry
+    # Built once: the tessellation is a property of the wall, and only the
+    # boundary cut changes between frames.
+    mesh, mesh_provenance = hex_mesh(machine.limiter, cells=cells)
+    clipped = [clip_to_boundary(mesh, frame.boundary) for frame in frames]
 
     palette = (style.thomson_primary_color, style.thomson_secondary_color)
     colour = {
@@ -87,6 +94,7 @@ def render_thomson(
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
+        pol.draw_plasma_cells(view.poloidal, clipped[index])
         pol.draw_surfaces(view.poloidal, frame.surfaces)
         pol.draw_coils(view.poloidal, machine.coils)
         pol.draw_wall(view.poloidal, *machine.limiter.T)
@@ -134,7 +142,16 @@ def render_thomson(
     receipt |= {
         "machine": "MAST",
         "pulse": str(shot),
-        "left_panel": "nova nested flux surfaces, rasterless",
+        "left_panel": "nova nested flux surfaces over the clipped hex mesh",
+        "plasma_mesh": mesh_provenance
+        | {
+            "boundary_clip": "geometric intersection with the solved boundary "
+            "polygon; a rasterless session carries no flux field to cut at",
+            "clipped_cell_count_range": [
+                min(len(item) for item in clipped),
+                max(len(item) for item in clipped),
+            ],
+        },
         "conditioned_frames_drawn": sum(1 for f in frames if f.conditioned),
         "profile_limits_fixed": True,
         "profile_limit_quantile": quantile,
@@ -167,6 +184,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--height", type=float, default=6.5)
     parser.add_argument("--quantile", type=float, default=0.98)
+    parser.add_argument("--cells", type=int, default=1200)
     parser.add_argument(
         "--include-conditioned",
         action="store_true",
@@ -183,6 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         height=arguments.height,
         quantile=arguments.quantile,
         include_conditioned=arguments.include_conditioned,
+        cells=arguments.cells,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

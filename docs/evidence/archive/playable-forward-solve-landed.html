@@ -1043,6 +1043,41 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     non-empty acceptance list instead. This is the same shape as a docstring asserting a property the framework does not provide, and as a height-only figure standing
     in for a two-component agreement: a true-looking field carrying the wrong answer to the question an auditor would actually ask.</p>
   </section>
+
+  <section id="the-pinned-limited-boundary-has-no-reachability-filter">
+    <h2>The limited branch sources its boundary flux from an unfiltered wall maximum, and the centre column can win it (2026-09-07 10:05Z)</h2>
+    <p>Found by the media session because the lead saw a floating plasma in a published figure and asked whether it was a plot artefact. It is not: the figure renders a
+    wrong boundary faithfully, and the defect is confined to the limited branch. Measured on 27079's 81 guard-ok unconditioned label frames, split by the session's own
+    diverted flag, axis-to-boundary flux span against EFIT's on the same slices, and boundary distance to the 36-vertex limiter:</p>
+    <table>
+      <thead><tr><th>Class</th><th>n</th><th>Nova span</th><th>EFIT span</th><th>Ratio</th><th>Boundary to limiter, nova</th><th>EFIT</th></tr></thead>
+      <tbody>
+        <tr><td>diverted</td><td>53</td><td>396.09 mWb</td><td>381.76</td><td>1.086</td><td>median 103.7 mm</td><td>40&ndash;80 mm standoff</td></tr>
+        <tr><td>limited</td><td>28</td><td>91.10 mWb</td><td>227.08</td><td>0.399</td><td>median 142.9 mm, max 391.6</td><td>1.0&ndash;1.1 mm, contact</td></tr>
+      </tbody>
+    </table>
+    <p>The worst frame, at 30 ms, has its eleven nested surface fluxes spanning 0.3056 to 0.3045 Wb, an entire axis-to-boundary interval of 1.1 mWb, a boundary area of
+    0.0318 m<sup>2</sup> against EFIT's 0.759, and surface areas growing linearly from zero, so it is a self-similar family of tiny contours around the axis rather
+    than a tracer stopping short. <code>branch_guard_ok</code> is true on every one of these frames: the solve reports success.</p>
+    <p><strong>Mechanism candidate, from reading three functions, which revises the reporter's saddle-search guess rather than confirming it.</strong> With a class
+    requested, the read calls a pinned selector returning the x-point anchor for diverted and the wall anchor for limited, so the source is right in shape. The wall
+    anchor is the extremum of the polarity-signed flux over the wall nodes, which for positive current is the maximum of psi on the wall, and that is the correct
+    definition of a limiter contact. But the wall polygon spans R 0.195 to 1.900 and therefore includes the centre column, which is a conductor. Early in a shot the
+    solenoid is strongest and the plasma current weakest, so psi on the inboard wall can exceed psi at the outboard contact and approach the axis value. The selector
+    takes a global maximum with no test that the winning node is on the plasma-facing side, and <strong>the pinned path applies no filter at all</strong>. Every
+    measured number follows: a span collapsing toward zero, a contour family near the axis, the area factor, the standoff from a wall EFIT touches, and a guard that
+    passes because nothing in it compares the boundary to the limiter. So does the class signature, since diverted frames take the x-point anchor.</p>
+    <p><strong>The pattern again, fifth instance.</strong> The emergent boundary path carries a private-flux shadow rule that excludes wall contacts lying beyond the
+    x-point band, on the reasoning that such a contact sits in a null's shadow and cannot bind the plasma. The pinned path, which is the one the labeller uses, has no
+    equivalent. One member of a pair filtered, the other not.</p>
+    <p>Decisive test, one job: on the worst frame print the chosen wall node's R, Z and psi beside the axis psi and beside the outboard contact EFIT implies. A node
+    near R 0.195 confirms the mechanism and makes the repair a reachability filter on the pinned wall anchor; an outboard node refutes it and returns the saddle-search
+    hypothesis to the table.</p>
+    <p>Two consequences, both worse than an outline error. A compressed flux span means psi_norm is compressed, so the 26 TORAX faces with their p_prime and ff_prime
+    sit on a wrong abscissa in those frames, corrupting the profile coordinate itself, and anything trained or scored on limited-phase labels inherits it. And the
+    mechanism predicts the defect is worst when the solenoid is strongest and the plasma weakest, which is precisely the early phase where the consumer measured its
+    dR structure before 0.21 s; if the centre-column test confirms, that becomes one cause rather than two findings.</p>
+  </section>
 </main>
 </body>
 </html>

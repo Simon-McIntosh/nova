@@ -1,9 +1,9 @@
 {
   "achieved_seconds": 9.72,
-  "bytes": 2289592,
+  "bytes": 2289636,
   "conditioned_frames_drawn": 0,
   "contact_sheet": {
-    "bytes": 406976,
+    "bytes": 405153,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
@@ -69,6 +69,7 @@
     953,
     780
   ],
+  "strike_points_drawn": "none; outside the brief and containment unresolved",
   "temperature_axis": "logarithmic, fixed over the pulse",
   "thomson_systems": [
     {
@@ -78,6 +79,7 @@
       "provenance": {
         "admission": "time inside the core system's shot window",
         "admitted_row_count": 141,
+        "era": "ayc",
         "group": "ayc",
         "height_m": 0.0,
         "height_source": "both systems view the midplane; no stored Z leaf",
@@ -102,6 +104,7 @@
       "provenance": {
         "admission": "time inside the core system's shot window",
         "admitted_row_count": 141,
+        "era": "ayc",
         "group": "aye",
         "height_m": 0.0,
         "height_source": "both systems view the midplane; no stored Z leaf",
@@ -123,5 +126,7 @@
   "time_span_s": [
     0.029999999329447746,
     0.574999988079071
-  ]
+  ],
+  "x_points_drawn": 152,
+  "x_points_dropped_outside_wall": 10
 }

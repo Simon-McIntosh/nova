@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T08:21:26",
+  "updated": "2026-09-07T08:35:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1862,9 +1862,11 @@
         "id": "media-wide-solve",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07a7e-c55a-7950-b765-e73138bf27cc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07a7e-c55a-7950-b765-e73138bf27cc"
+        },
         "created": "2026-09-07"
       },
       {
@@ -118556,6 +118558,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1982
+    "_version": 1983
   }
 }

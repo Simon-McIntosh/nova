@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T10:37:59",
+  "updated": "2026-09-07T10:59:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1017,6 +1017,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a076df-ef20-7b21-a35e-a62ec4ca9e3b"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "dvf-axisconfig-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "dvf-cocos-scout",
@@ -2658,6 +2667,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-13"
+      },
+      {
+        "id": "pfs-appdemo-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-appframe-s",
@@ -119087,6 +119105,201 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T062129684488-dvf-frame144-two-field-gate",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a73",
+        "node": "dvf-frame144-two-field-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3783,
+                "cached_input_tokens": 942403,
+                "input_tokens": 946218,
+                "output_tokens": 214,
+                "reasoning_output_tokens": 111,
+                "total_tokens": 946432,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "benchmarks/diiid_forward_gs_match.py rerun on the eleven frames reports both fields per frame with the normalisation stated per row and frame 144 carries a named mechanism, the run submitted as one H200 job (--gres=gpu:1 --cpus-per-task=4 --mem=128G, JAX_PLATFORMS=cuda,cpu inside the wrap, persistent compilation cache on, the manifest written with a declared wait before the job starts) after a CPU prepare-only pass; receipts under docs/figures/diiid-vertical-force-balance/two-field-gate/ and the report",
+          "estimated_hours": 2.0,
+          "goal": "Frame 144 root-caused on the corrected topology read with its mechanism named against section 2, and the DIII-D single-shot gate split into residual convergence and branch persistence as two fields per frame with the MAST and DIII-D error columns normalised on one stated denominator or each labelled with its own",
+          "id": "dvf-frame144-two-field-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062129684488-dvf-frame144-two-field-gate/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "docs/figures/diiid-vertical-force-balance/two-field-gate/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/frame144-two-field-gate.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "dvf-axis-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T06:21:49Z",
+        "completed_at": "2026-09-07T08:54:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9135,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "439a3c9f0428ad199897846e52b4b03cf3705738",
+        "commits": [
+          "71c605b18e3d63f539a8bd4330b9d873a8e993c9",
+          "c6b4b4aff1c4138755a331f27862c8812e1d4c7f",
+          "118cf5ebf10e02078ec05a883338bd589ce3a57a"
+        ],
+        "changed_lines": {
+          "added": 1849,
+          "removed": 0,
+          "files": 13
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": {
+          "command": "sbatch betelgeuse gpu_0003_grpA one card: benchmarks/diiid_forward_gs_match.py single-shot gate over 11 frames",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062129684488-dvf-frame144-two-field-gate/h200-1263946.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062129684488-dvf-frame144-two-field-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a076df-ef20-7b21-a35e-a62ec4ca9e3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2306560,
+            "cached_input_tokens_cumulative": 3197824,
+            "input_tokens": 2100081,
+            "input_tokens_cumulative": 3301654,
+            "output_tokens": 11469,
+            "output_tokens_cumulative": 19156,
+            "reasoning_output_tokens": 2152,
+            "reasoning_output_tokens_cumulative": 4239
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3109,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3135,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23395,
+          "peak_input_tokens": 6499478
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/dvf-frame144-two-field-gate",
+          "session_id": "01a076df-ef20-7b21-a35e-a62ec4ca9e3b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T08:54:04Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -119399,6 +119612,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1991
+    "_version": 1994
   }
 }

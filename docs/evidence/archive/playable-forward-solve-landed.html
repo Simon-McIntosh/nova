@@ -940,6 +940,40 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <p>This retires a decision that looked live an hour ago. The scheduler being 2.2 times slower than the writer it replaced is real and recorded, but swapping back halves a figure that is thirty times too large, so it is a rounding error rather than a remedy and the churn is not worth it. <strong>The batched engine is the only path to a complete corpus</strong>, and until it converges an arm the corpus does not complete on any horizon that matters. The projected 15 slices a second is the host-assembly ceiling from the measured per-slice decomposition, not an engine figure, so it is what the pool can absorb rather than what a card can supply; it is a projection and is labelled as one.</p>
     <p><strong>The question this raises is whether corpus completion is on the critical path at all.</strong> The clean training core already written is 663 shots and 44,293 converged slices, and the consumer has been sizing against it. If that suffices for the prototype, then the labels are delivered, the engine work is an efficiency project for later scale rather than a blocker, and the effort now sitting on it is misallocated against the demo. If the prototype needs the full walk, nothing else on this plan matters until the engine converges. That is a lead question and not a coordinator one, and it is asked rather than assumed.</p>
   </section>
+
+  <section id="the-axis-offset-is-configuration-dependent">
+    <h2>Two nova solves of one slice disagree by more than either disagrees with EFIT (2026-09-07 09:00Z)</h2>
+    <p>The decisive datum on the axis question, contributed by the media session from an overlay rather than from a search for it. Shot 21978, efm row 36, t = 0.195 s,
+    the same currents in every case:</p>
+    <table>
+      <thead><tr><th>Source</th><th>Axis R (m)</th><th>Axis Z (m)</th><th>Offset from EFIT</th></tr></thead>
+      <tbody>
+        <tr><td>EFIT</td><td>0.90593</td><td>+0.00048</td><td>reference</td></tr>
+        <tr><td>Nova, wide-grid parity route</td><td>0.90611</td><td>+0.01869</td><td>1.82 cm, essentially all in Z; R agrees to 0.18 mm</td></tr>
+        <tr><td>Nova, labeller configuration</td><td>0.86478</td><td>&minus;0.01485</td><td>4.39 cm, 4.1 cm of it inboard in R</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The two nova solves differ from each other by 5.32 cm on the same shot, the same slice and the same currents.</strong> The same currents cannot displace
+    the plasma differently in two solves, so this is not a physics disagreement between nova and EFIT and it is not a displaced plasma. It is a configuration-dependent
+    O-point resolution inside nova, and the aggregate finding that nova sits inboard of EFIT on 72.55 per cent of slices is a property of the labeller configuration
+    rather than of nova. One configuration reaches EFIT's major radius to a fifth of a millimetre.</p>
+    <p>Three factors differ between the two and none is yet attributed: grid extent and resolution (150 by 350 over R 0.02 to 2.20 against the frozen-six carrier grid),
+    seed policy (an explicit case-state seed against the labeller's), and route with its residual tolerance (the parity reduced-Newton finishing at 1.6e-12 with the
+    current pin on, against what the sequential writer drives). Node pfs-axis-configuration-attribution varies exactly one at a time on this slice and reports the
+    resolved axis with the selected candidate's minimum and maximum curvature, which is the readout that would show a flat extremum making the subgrid fit
+    ill-conditioned.</p>
+    <p>Two leads die with this. The consumer's time structure in dR, a median &minus;4.04 cm before 0.21 s against +0.44 cm after, is recorded as a discarded lead
+    rather than a finding: time and shot were already confounded at that split, and if the offset moves with configuration at fixed slice it may be tracking the
+    labeller's seeding across the shot rather than anything physical. And the reading that this is a definition mismatch between two quantities is gone, because one
+    nova configuration matches EFIT's axis almost exactly.</p>
+    <p><strong>A premise both sessions had been propagating all night is also withdrawn here.</strong> Every centroid agreement figure in this record is a
+    <em>Z-component</em> figure. The writer takes its target as the EFIT current centroid height alone, its error is that one scalar difference, and its branch guard is
+    the absolute value of that one component; there is no major-radius comparison anywhere in either writer, and the conditioning target is the height too. So "the
+    centroid agrees with EFIT to 1.08 cm" means agrees in height, and nova's centroid major radius has never been compared with anything although the sessions carry it.
+    A Z-only bound cannot constrain a two-component distance, which retires an inference that EFIT's axis sits 14.46 cm from its own centroid give or take 1.08. The
+    radial check is running consumer-side, instructed to report an absence as its verdict if EFIT publishes no current-centroid major radius rather than substituting
+    the magnetic axis for it.</p>
+  </section>
 </main>
 </body>
 </html>

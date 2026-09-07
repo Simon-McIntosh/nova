@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T22:22:34",
+  "updated": "2026-09-07T22:28:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -122412,6 +122412,143 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T185805308697-s19-reuse-map-2",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "s19-reuse-map-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2179,
+                "cached_input_tokens": 505507,
+                "input_tokens": 507688,
+                "output_tokens": 1207,
+                "reasoning_output_tokens": 72,
+                "total_tokens": 508895,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/reuse-map.md exists within the budget, written incrementally row by row starting from the first grep, with one row per capability (public versus private boundary read consumers in nova/equilibrium/forward_operator.py and topology.py, poloidal painters and shadow-mask extraction in nova/media/poloidal.py and nova/equilibrium/connectivity_boundary.py, session schema wall group in nova/equilibrium/steering_frames.py, label reader boundary fallback in nova/media/sources/nova_labels.py, compilation cache root in nova/equilibrium/solve_request.py, centroid major-radius referents in nova/equilibrium/moment.py and observation.py, diverted census rows under docs/figures/limited-boundary-census, axis definition referents in the labeller session schema, Thomson geometry readers under /home/ITER/mcintos/Code/imas-ambix/imas_ambix), each row naming file:symbol from one grep and a fitness verdict, with no file read in full and no plan HTML read; the report stays under 150 lines",
+          "estimated_hours": 0.4,
+          "goal": "A reuse map for the S19 labeller wave built from targeted greps only, one table row per capability with file:symbol and a one-line fitness verdict",
+          "id": "s19-reuse-map-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T185805308697-s19-reuse-map-2/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "s19-scout-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T18:58:17Z",
+        "completed_at": "2026-09-07T20:26:40.548Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4546,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5303,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "ff2d0188985c1bc72d85bb1ca86a983d722d4063",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T185805308697-s19-reuse-map-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "39cc4122-fcad-4727-8c5e-58ff73038278",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1099303,
+            "input_tokens_cumulative": 1099303,
+            "output_tokens": 15622,
+            "output_tokens_cumulative": 15622,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 5300.165,
+          "generated_tokens": 15622,
+          "generation_seconds": 5290.495,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 8.5,
+          "machine_seconds": 9.67,
+          "peak_input_tokens": 86839,
+          "tokens_per_second": 2.95,
+          "wall_tokens_per_second": 2.95
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/s19-reuse-map-2",
+          "session_id": "39cc4122-fcad-4727-8c5e-58ff73038278",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T20:26:40.548Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -122724,6 +122861,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2057
+    "_version": 2058
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T07:53:46",
+  "updated": "2026-09-07T07:55:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117618,6 +117618,142 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T045046488298-pfs-zero-converged-block-triage",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-zero-converged-block-triage",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2439,
+                "cached_input_tokens": 833750,
+                "input_tokens": 836221,
+                "output_tokens": 4975,
+                "reasoning_output_tokens": 1087,
+                "total_tokens": 841196,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "The report /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/zero-converged-block.md gives the block boundaries from the corpus manifests under /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29, a per-shot table over the block and ten converging neighbours on each side with the efm summary columns and the first failing stage per shot (admission, free solve exception class, conditioning exception class), read through imas-python or the level-1 zarr with the same reader scripts/labeller_batch/shard.py uses, and closes with one recommendation and the shot count it affects; any store read heavier than a few seconds runs through srun on all_debug",
+          "estimated_hours": 0.75,
+          "goal": "A read-only triage of the zero-converged labeller shot block 22475 to 22626: what distinguishes it from its converging neighbours in the efm store (campaign date, plasma current, magnetic_axis_z and current_centrd_z ranges, admission counts, wall and coil state), whether the seed the writer builds from efm is degenerate there, and a recommendation to exclude the block from the demo cohort or to repair the seed",
+          "id": "pfs-zero-converged-block-triage",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045046488298-pfs-zero-converged-block-triage/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/zero-converged-block.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "pfs-scout-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-07T04:51:14Z",
+        "completed_at": "2026-09-07T05:52:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3681,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3681,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "660cbd7c1f681db5db2f14c4486e41bdc9f35d38",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "login-node scalar census over 130 shots (five one-dimensional efm arrays each) interrupted at the 40-minute fence with no output; srun and sbatch refused by the read-only sandbox",
+          "exit_status": 130,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045046488298-pfs-zero-converged-block-triage/scalar-census-run.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045046488298-pfs-zero-converged-block-triage/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16352384,
+            "cached_input_tokens_cumulative": 21956736,
+            "input_tokens": 16141072,
+            "input_tokens_cumulative": 22014498,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 22890,
+            "reasoning_output_tokens": 1931,
+            "reasoning_output_tokens_cumulative": 7559
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30449,
+          "peak_input_tokens": 43971234
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "read-only investigate node; its census could not run",
+        "resume_waiver": {
+          "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+          "source": "pointer",
+          "reason": "the node shape is wrong, not the worker: a read-only sandbox cannot reach SLURM and the login node cannot do the census in the fence, so the work is redispatched as an execution-capable node and this session holds nothing a resume could use"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-zero-converged-block-triage",
+          "session_id": "01a07839-160e-7b13-a3fb-be4aa343b686",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T05:52:35Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -117930,6 +118066,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1975
+    "_version": 1976
   }
 }

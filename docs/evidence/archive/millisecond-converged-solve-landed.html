@@ -442,6 +442,18 @@
     again and not an assertion.</p>
   </section>
 
+  <section id="trip-quantum-width-one">
+    <h2>The per-trip quantum at width one: a 46 ms compiled boundary and a 100 ms per-solve synchronisation (dcda6a1a to 3f3f8ac0; main 7c01f9c7)</h2>
+    <p><strong>Node:</strong> <code>mcs-trip-quantum-width-one</code> (local lane, 14.7 hours across four H200 jobs; the first two timed out before the
+    per-member incremental persistence landed). Driver <code>benchmarks/trip_quantum_width_one.py</code>; receipt and figure under
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/</code>; report <code>~/.config/reckon/crew/reports/nova/millisecond/trip-quantum-width-one.md</code>.</p>
+    <p><strong>Result.</strong> Each bank member solved alone splits its trip into a constant 46.1 ms compiled trip-close boundary and 69.6 ms a trip of
+    device work outside the trip (topology shadow read, initial gather, final synchronisation), the latter a near-fixed cost of about 100 ms a solve
+    that amortises over trips: one-trip members pay 150 to 160 ms a trip, five-trip members 75 ms. Host reconciliation is 0.004 ms and retrace 0.
+    The stale baselines re-measured at HEAD in the same job read slower than banked: complete map 1.75 ms a member against 0.78, per-trip quantum
+    72.1 against 25.0 ms a member a trip (width 1024, Solov'ev workload). The lever is the number of device round trips a solve, not the arithmetic,
+    which the compiled slice route and the batched labeller engine address (playable-forward-solve).</p>
+  </section>
 </main>
 </body>
 </html>

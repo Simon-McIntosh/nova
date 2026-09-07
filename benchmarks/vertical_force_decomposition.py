@@ -27,6 +27,7 @@ import zarr
 from benchmarks import settled_mask_stall as settled
 from benchmarks.efit_flux_decomposition import _density_from_flux
 from benchmarks.efit_forward_parity_slice import _circuit_drives
+from benchmarks.efit_native_grid_decomposition import _uniform_axis
 from benchmarks.efit_topology_boundary_score import _live_flux_map, _stored_lcfs
 from nova.biot.polygon import polygon_greens
 from nova.catalog.mast_geometry import MachineGeometryRegistry, shaped_section_vertices
@@ -191,8 +192,8 @@ def _plasma_br(
 ) -> tuple[float, dict[str, Any]]:
     """Integrate the seed current density on its native 65-point lattice."""
 
-    radius = np.asarray(group["gridr"], dtype=np.float64)
-    height = np.asarray(group["gridz"], dtype=np.float64)
+    radius = _uniform_axis(np.asarray(group["gridr"], dtype=np.float64), "gridr")
+    height = _uniform_axis(np.asarray(group["gridz"], dtype=np.float64), "gridz")
     lattice = FluxLattice(radius, height)
     total_flux = TOTAL_FLUX_FACTOR * _live_flux_map(group, row, len(radius))
     density, valid = _density_from_flux(lattice, total_flux)

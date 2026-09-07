@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T21:44:44",
+  "updated": "2026-09-07T22:22:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3034,9 +3034,11 @@
         "id": "pfs-labelreader-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "3311fc95-b80a-48d4-bcc4-5bc4a0cc8387",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "3311fc95-b80a-48d4-bcc4-5bc4a0cc8387"
+        },
         "created": "2026-09-07"
       },
       {
@@ -122254,6 +122256,162 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164912574856-pfs-label-reader-contract",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-label-reader-contract",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The report names which contract was taken (stored polyline authoritative with a session lacking one refused, or nested surface authoritative with the stored polyline never read for a boundary) and why, and establishes from the commit history why the writer began persisting a boundary; a test proves a session with an empty boundary variable raises rather than falling back and a test proves the chosen source is used, both green in the default lane; receipts produced by nova/media/sources/nova_labels.py readers carry a boundary source field",
+          "estimated_hours": 0.8,
+          "goal": "An explicit boundary contract in the label reader replacing the prefer-if-present fallback, with the unchosen path raising",
+          "id": "pfs-label-reader-contract",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164912574856-pfs-label-reader-contract/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/media/sources/nova_labels.py",
+            "tests/test_media.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/label-reader-contract.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-labelreader-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:49:18Z",
+        "completed_at": "2026-09-07T20:20:33.442Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12666,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12675,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "da945eccfb567fe1af85e2adc9235be9d9bdc4da"
+        ],
+        "changed_lines": {
+          "added": 237,
+          "removed": 32,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_media.py -m 'not slow' (43 passed) plus -m slow -k 'thomson_pairing or limited_boundary_defect' (2 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164912574856-pfs-label-reader-contract/test-media-fast.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164912574856-pfs-label-reader-contract/manifest.md",
+        "scope_changed": false,
+        "session_id": "3311fc95-b80a-48d4-bcc4-5bc4a0cc8387",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11905544,
+            "input_tokens_cumulative": 11905544,
+            "output_tokens": 58565,
+            "output_tokens_cumulative": 58565,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 12672.013,
+          "generated_tokens": 58702,
+          "generation_seconds": 12386.399,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 19.4,
+          "machine_seconds": 285.614,
+          "peak_input_tokens": 196793,
+          "tokens_per_second": 4.74,
+          "wall_tokens_per_second": 4.63
+        },
+        "follow_on_paths": [
+          "nova_thomson_gif.py",
+          "/",
+          "emit_boundary_contact.py",
+          "emit_sequence_start_condition.py",
+          "tests/test_media.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-label-reader-contract",
+          "session_id": "3311fc95-b80a-48d4-bcc4-5bc4a0cc8387",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T20:20:33.442Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -122566,6 +122724,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2055
+    "_version": 2057
   }
 }

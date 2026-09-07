@@ -1345,6 +1345,20 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <code>docs/figures/playable-forward-solve/limited-anchor/</code>; report at
     <code>~/.config/reckon/crew/reports/nova/playable/limited-anchor-diagnosis.md</code>.</p>
   </section>
+  <section id="the-label-reader-has-one-boundary-authority">
+    <h2>The label reader has one boundary authority, and refuses rather than substitutes (2026-09-07 20:11Z)</h2>
+    <p>Node <code>pfs-label-reader-contract</code> (local lane, spec guided; commit <code>da945ecc</code>, merged with the reader change
+    and its tests). The prefer-if-present branch in <code>nova/media/sources/nova_labels.py</code>, which drew the stored LCFS polyline when
+    present and the outermost nested surface when not, is gone. The contract taken: the stored polyline is authoritative, a frame whose
+    <code>lcfs_r</code> is empty raises with the contract named, and a session mixing stored and empty frames is refused so one corpus can never
+    draw two boundary sources. The provenance receipt field <code>boundary_source</code> is now a constant naming the contract rather than a
+    per-frame flag. The report answers why the writer began persisting a boundary: the empty-LCFS fill on the labeller writer closed the
+    polyline from the outermost traced surface when the raster separatrix was absent, so every session written after it carries one, and the
+    77 populated against 1,024 empty shots in the stopped corpus root are that landing's boundary in time. Gate: three contract tests on
+    synthetic sessions, the media fast lane at 43 passed, the two slow media tests re-pointed at a boundary-carrying root and green.
+    Consequence for readers of the stopped root 76906a29: its 1,024 empty-polyline shots now refuse in this reader by design, which is the
+    provenance discipline the census findings asked for. Report at <code>~/.config/reckon/crew/reports/nova/playable/label-reader-contract.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

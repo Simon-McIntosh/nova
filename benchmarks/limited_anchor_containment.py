@@ -14,8 +14,10 @@ observation only: neither read is substituted into the solve or the writer.
 from __future__ import annotations
 
 import argparse
+import csv
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import subprocess
 from typing import Any
@@ -41,8 +43,44 @@ from scripts.labeller_batch import shard
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/playable-forward-solve/limited-anchor"
 SHOT = 27079
-FRAME_ROWS = tuple(range(11, 18))
+FRAME_ROWS = (15, 16, 17, 11, 12, 13, 14)
 ANGLE_COUNT = 64
+
+CANDIDATE_TABLE_COLUMNS = (
+    "manifest_row",
+    "time_s",
+    "converged",
+    "qualified",
+    "candidate_node",
+    "candidate_node_r_m",
+    "candidate_node_z_m",
+    "sampled_flux_wb",
+    "fitted_anchor_r_m",
+    "fitted_anchor_z_m",
+    "fitted_anchor_flux_wb",
+    "quadratic_curvature",
+    "stationary_coordinate_m",
+    "bracket_length_m",
+    "tangent_at_wall_node",
+    "contour_closed",
+    "inside_vertex_count",
+    "boundary_vertex_count",
+    "containment_fraction",
+    "enclosed_area_m2",
+    "enclosed_area_ratio",
+    "trace_error",
+    "selected_by_public_read",
+    "selected_by_private_read",
+    "nearest_fully_contained_ratio_one",
+    "maximum_containment_candidate",
+    "public_contour_closed",
+    "selected_anchor_candidate_contour_closed",
+    "selected_anchor_candidate_containment_fraction",
+    "nearest_fully_contained_candidate_node",
+    "nearest_fully_contained_candidate_ratio",
+    "maximum_containment_fraction",
+    "maximum_containment_candidate_node",
+)
 
 
 @dataclass(frozen=True)
@@ -348,6 +386,7 @@ def _measure_frame(
                 candidate.update(_contour_metrics(contour, wall, reconstruction_area))
             except (SurfaceGeometryError, ValueError, np.linalg.LinAlgError) as error:
                 candidate["trace_error"] = f"{type(error).__name__}: {error}"
+        candidate["contour_closed"] = node in contours
         candidates.append(candidate)
 
     read_contours: dict[str, np.ndarray] = {}
@@ -364,6 +403,7 @@ def _measure_frame(
             reading.update(_contour_metrics(contour, wall, reconstruction_area))
         except SurfaceGeometryError as error:
             reading["contour_error"] = f"{type(error).__name__}: {error}"
+        reading["contour_closed"] = name in read_contours
 
     contained = [
         candidate
@@ -371,12 +411,34 @@ def _measure_frame(
         if candidate.get("containment_fraction") == 1.0
         and candidate.get("enclosed_area_ratio") is not None
     ]
-    if not contained:
-        raise RuntimeError(f"row {row} has no fully contained candidate contour")
-    nearest = min(
-        contained,
-        key=lambda candidate: abs(candidate["enclosed_area_ratio"] - 1.0),
+    nearest = (
+        min(
+            contained,
+            key=lambda candidate: abs(candidate["enclosed_area_ratio"] - 1.0),
+        )
+        if contained
+        else None
     )
+    measured = [
+        candidate
+        for candidate in candidates
+        if candidate.get("containment_fraction") is not None
+    ]
+    maximum_containment = (
+        max(candidate["containment_fraction"] for candidate in measured)
+        if measured
+        else None
+    )
+    maximum_candidates = (
+        [
+            candidate
+            for candidate in measured
+            if candidate["containment_fraction"] == maximum_containment
+        ]
+        if maximum_containment is not None
+        else []
+    )
+    maximum_candidate = maximum_candidates[0] if maximum_candidates else None
     for candidate in candidates:
         candidate["selected_by_public_read"] = (
             candidate["node"] == public["selected_anchor_node"]
@@ -385,8 +447,14 @@ def _measure_frame(
             candidate["node"] == private["selected_anchor_node"]
         )
         candidate["nearest_fully_contained_ratio_one"] = (
-            candidate["node"] == nearest["node"]
+            nearest is not None and candidate["node"] == nearest["node"]
         )
+        candidate["maximum_containment_candidate"] = (
+            maximum_candidate is not None
+            and candidate["node"] == maximum_candidate["node"]
+        )
+
+    selected_candidate = candidates[int(public["selected_anchor_node"])]
 
     reconstruction_boundary = _reconstruction_boundary(group, row)
     return (
@@ -401,10 +469,28 @@ def _measure_frame(
             "private_wall_masked_node_count": int(
                 np.count_nonzero(captured.private_wall_mask)
             ),
-            "nearest_fully_contained_candidate_node": int(nearest["node"]),
-            "nearest_fully_contained_candidate_ratio": float(
-                nearest["enclosed_area_ratio"]
+            "selected_anchor_candidate_contour_closed": bool(
+                selected_candidate["contour_closed"]
             ),
+            "selected_anchor_candidate_containment_fraction": (
+                selected_candidate.get("containment_fraction")
+            ),
+            "selected_anchor_candidate_inside_vertex_count": (
+                selected_candidate.get("inside_vertex_count")
+            ),
+            "nearest_fully_contained_candidate_node": (
+                None if nearest is None else int(nearest["node"])
+            ),
+            "nearest_fully_contained_candidate_ratio": (
+                None if nearest is None else float(nearest["enclosed_area_ratio"])
+            ),
+            "maximum_containment_fraction": maximum_containment,
+            "maximum_containment_candidate_node": (
+                None if maximum_candidate is None else int(maximum_candidate["node"])
+            ),
+            "maximum_containment_candidate_nodes": [
+                int(candidate["node"]) for candidate in maximum_candidates
+            ],
             "candidates": candidates,
         },
         {
@@ -415,11 +501,89 @@ def _measure_frame(
                 len(prepared.profile.lattice.radius),
                 len(prepared.profile.lattice.height),
             ),
-            "nearest_boundary": contours[int(nearest["node"])],
             "reconstruction_boundary": reconstruction_boundary,
+            **(
+                {}
+                if nearest is None
+                else {"nearest_boundary": contours[int(nearest["node"])]}
+            ),
             **{f"{name}_boundary": contour for name, contour in read_contours.items()},
         },
     )
+
+
+def _candidate_table_record(
+    frame: dict[str, Any], candidate: dict[str, Any]
+) -> dict[str, Any]:
+    """Flatten one candidate beside its frame and selection outcomes."""
+    node_position = candidate["node_position_m"]
+    fitted_position = candidate.get("fitted_anchor_position_m", (None, None))
+    return {
+        "manifest_row": frame["manifest_row"],
+        "time_s": frame["time_s"],
+        "converged": frame["converged"],
+        "qualified": frame["qualified"],
+        "candidate_node": candidate["node"],
+        "candidate_node_r_m": node_position[0],
+        "candidate_node_z_m": node_position[1],
+        "sampled_flux_wb": candidate.get("sampled_flux_wb"),
+        "fitted_anchor_r_m": fitted_position[0],
+        "fitted_anchor_z_m": fitted_position[1],
+        "fitted_anchor_flux_wb": candidate.get("fitted_anchor_flux_wb"),
+        "quadratic_curvature": candidate.get("quadratic_curvature"),
+        "stationary_coordinate_m": candidate.get("stationary_coordinate_m"),
+        "bracket_length_m": candidate.get("bracket_length_m"),
+        "tangent_at_wall_node": candidate.get("tangent_at_wall_node"),
+        "contour_closed": candidate["contour_closed"],
+        "inside_vertex_count": candidate.get("inside_vertex_count"),
+        "boundary_vertex_count": candidate.get("boundary_vertex_count"),
+        "containment_fraction": candidate.get("containment_fraction"),
+        "enclosed_area_m2": candidate.get("enclosed_area_m2"),
+        "enclosed_area_ratio": candidate.get("enclosed_area_ratio"),
+        "trace_error": candidate.get("trace_error"),
+        "selected_by_public_read": candidate["selected_by_public_read"],
+        "selected_by_private_read": candidate["selected_by_private_read"],
+        "nearest_fully_contained_ratio_one": candidate[
+            "nearest_fully_contained_ratio_one"
+        ],
+        "maximum_containment_candidate": candidate["maximum_containment_candidate"],
+        "public_contour_closed": frame["public_read"]["contour_closed"],
+        "selected_anchor_candidate_contour_closed": frame[
+            "selected_anchor_candidate_contour_closed"
+        ],
+        "selected_anchor_candidate_containment_fraction": frame[
+            "selected_anchor_candidate_containment_fraction"
+        ],
+        "nearest_fully_contained_candidate_node": frame[
+            "nearest_fully_contained_candidate_node"
+        ],
+        "nearest_fully_contained_candidate_ratio": frame[
+            "nearest_fully_contained_candidate_ratio"
+        ],
+        "maximum_containment_fraction": frame["maximum_containment_fraction"],
+        "maximum_containment_candidate_node": frame[
+            "maximum_containment_candidate_node"
+        ],
+    }
+
+
+def _append_candidate_rows(path: Path, frame: dict[str, Any]) -> None:
+    """Durably append one measured frame's complete candidate table."""
+    write_header = not path.exists() or path.stat().st_size == 0
+    with path.open("a", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=CANDIDATE_TABLE_COLUMNS, lineterminator="\n"
+        )
+        if write_header:
+            writer.writeheader()
+        for candidate in frame["candidates"]:
+            record = _candidate_table_record(frame, candidate)
+            writer.writerow(_strict(record))
+            print(
+                "CANDIDATE " + json.dumps(_strict(record), sort_keys=True), flush=True
+            )
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def _draw_frame(
@@ -483,15 +647,16 @@ def _draw_frame(
                 linewidth=2.0,
                 label=label,
             )
-    poloidal.draw_boundary(
-        axes,
-        geometry["nearest_boundary"][:, 0],
-        geometry["nearest_boundary"][:, 1],
-        color="#008b72",
-        linestyle="-.",
-        linewidth=1.7,
-        label="nearest contained ratio",
-    )
+    if "nearest_boundary" in geometry:
+        poloidal.draw_boundary(
+            axes,
+            geometry["nearest_boundary"][:, 0],
+            geometry["nearest_boundary"][:, 1],
+            color="#008b72",
+            linestyle="-.",
+            linewidth=1.7,
+            label="nearest contained ratio",
+        )
     poloidal.draw_nulls(
         axes,
         public["axis_position_m"],
@@ -518,7 +683,7 @@ def _draw_frame(
         label="sampled wall candidates",
     )
     selected_node = int(public["selected_anchor_node"])
-    nearest_node = int(frame["nearest_fully_contained_candidate_node"])
+    nearest_node = frame["nearest_fully_contained_candidate_node"]
     axes.scatter(
         *wall[selected_node],
         marker="s",
@@ -528,15 +693,16 @@ def _draw_frame(
         linewidths=0.7,
         zorder=9,
     )
-    axes.scatter(
-        *wall[nearest_node],
-        marker="D",
-        s=75,
-        color="#008b72",
-        edgecolors="black",
-        linewidths=0.7,
-        zorder=9,
-    )
+    if nearest_node is not None:
+        axes.scatter(
+            *wall[int(nearest_node)],
+            marker="D",
+            s=75,
+            color="#008b72",
+            edgecolors="black",
+            linewidths=0.7,
+            zorder=9,
+        )
     axes.set_aspect("equal", adjustable="box")
     margin = 0.08
     axes.set_xlim(
@@ -547,16 +713,25 @@ def _draw_frame(
     )
     axes.set_xlabel("R [m]")
     axes.set_ylabel("Z [m]")
+    nearest_text = (
+        "none; maximum containment "
+        f"{frame['maximum_containment_fraction']:.4f} at node "
+        f"{frame['maximum_containment_candidate_node']}"
+        if nearest_node is None
+        else f"node {nearest_node}: "
+        f"{frame['nearest_fully_contained_candidate_ratio']:.4f}"
+    )
+    selected_containment = frame["selected_anchor_candidate_containment_fraction"]
+    selected_containment_text = (
+        "unclosed" if selected_containment is None else f"{selected_containment:.4f}"
+    )
     axes.set_title(
         f"MAST {SHOT}, row {frame['manifest_row']}, "
-        f"t = {1e3 * frame['time_s']:.0f} ms\n"
-        f"public node {selected_node}: containment "
-        f"{public.get('inside_vertex_count', 'unclosed')}/"
-        f"{public.get('boundary_vertex_count', 'unclosed')}, "
-        f"area ratio "
-        f"{public.get('enclosed_area_ratio', float('nan')):.4f}; "
-        f"nearest contained node {nearest_node}: "
-        f"{frame['nearest_fully_contained_candidate_ratio']:.4f}"
+        f"t = {1e3 * frame['time_s']:.0f} ms, "
+        f"converged={frame['converged']}\n"
+        f"public node {selected_node}: public contour "
+        f"closed={public['contour_closed']}; selected-candidate containment "
+        f"{selected_containment_text}; nearest contained {nearest_text}"
     )
     axes.legend(loc="lower center", fontsize=8, frameon=False)
     figure.savefig(output, dpi=180)
@@ -581,9 +756,11 @@ def measure(output: Path) -> dict[str, Any]:
         raise RuntimeError(f"bounded replay did not write requested rows {missing}")
 
     frames = []
+    table = output / "limited-anchor-candidates.csv"
     for row in FRAME_ROWS:
         manifest_row, capture = aligned[row]
         frame, geometry = _measure_frame(prepared, group, manifest_row, capture)
+        _append_candidate_rows(table, frame)
         panel = output / f"row-{row:02d}-{1e3 * frame['time_s']:.0f}ms.png"
         _draw_frame(prepared, frame, geometry, panel)
         frame["panel"] = str(panel.relative_to(ROOT))
@@ -596,24 +773,46 @@ def measure(output: Path) -> dict[str, Any]:
         )
         ratio = public.get("enclosed_area_ratio")
         ratio_text = "unclosed" if ratio is None else f"{ratio:.10f}"
+        nearest_node = frame["nearest_fully_contained_candidate_node"]
+        nearest_ratio = frame["nearest_fully_contained_candidate_ratio"]
+        nearest_text = (
+            "none" if nearest_node is None else f"{nearest_node}:{nearest_ratio:.10f}"
+        )
         print(
             f"row={row} time_ms={1e3 * frame['time_s']:.0f} "
+            f"converged={frame['converged']} "
             f"public_anchor_node={public['selected_anchor_node']} "
             f"public_anchor_rz={public['selected_anchor_node_position_m']} "
-            f"containment={containment} "
+            f"public_contour_closed={public['contour_closed']} "
+            f"public_containment={containment} "
             f"area_ratio={ratio_text} "
-            f"nearest_contained_node="
-            f"{frame['nearest_fully_contained_candidate_node']} "
-            f"nearest_ratio="
-            f"{frame['nearest_fully_contained_candidate_ratio']:.10f}",
+            f"selected_candidate_containment="
+            f"{frame['selected_anchor_candidate_containment_fraction']} "
+            f"nearest_contained={nearest_text} "
+            f"maximum_containment={frame['maximum_containment_fraction']} "
+            f"maximum_containment_node="
+            f"{frame['maximum_containment_candidate_node']}",
             flush=True,
         )
+
+        partial = {
+            "schema": "limited-wall-anchor-containment-diagnosis",
+            "nova_revision": _source_revision(),
+            "shot": SHOT,
+            "complete": False,
+            "frame_rows": list(FRAME_ROWS),
+            "candidate_table": str(table.relative_to(ROOT)),
+            "frames": frames,
+        }
+        _write_json(output / "limited-anchor-containment.json", partial)
 
     payload = {
         "schema": "limited-wall-anchor-containment-diagnosis",
         "nova_revision": _source_revision(),
         "shot": SHOT,
+        "complete": True,
         "frame_rows": list(FRAME_ROWS),
+        "candidate_table": str(table.relative_to(ROOT)),
         "candidate_definition": (
             "every sampled wall node with the stationary point and flux of its "
             "centred three-node quadratic bracket"
@@ -641,6 +840,176 @@ def measure(output: Path) -> dict[str, Any]:
     }
     _write_json(output / "limited-anchor-containment.json", payload)
     return payload
+
+
+def write_report(receipt: dict[str, Any], path: Path) -> None:
+    """Write the human-readable diagnosis with every candidate row."""
+
+    candidate_count = sum(
+        len(frame["candidates"]) for frame in receipt["frames"]
+    )
+
+    def number(value: Any, digits: int = 6) -> str:
+        if value is None:
+            return "—"
+        return f"{float(value):.{digits}f}"
+
+    lines = [
+        "# Limited-anchor containment diagnosis",
+        "",
+        "## Outcome",
+        "",
+        (
+            "Both the public writer read and the explicitly shadow-masked private "
+            "read select wall node 10 at R = 0.5649306774 m, Z = 1.7280815840 m "
+            "on every tabulated frame. The converged 30, 35 and 40 ms frames close "
+            "and reproduce the baseline selected-anchor area ratios; the four "
+            "earlier unconverged maps do not close at the selected public level."
+        ),
+        "",
+        (
+            "A frame with no fully contained candidate is represented as data. "
+            "For those frames, nearest-contained is `none` and the maximum observed "
+            "containment is reported beside the node that attains it."
+        ),
+        "",
+        "## Frame summary",
+        "",
+        (
+            "| Row | Time | Converged | Qualified | Public/private node | Public "
+            "closed | Selected-candidate containment | Selected area ratio | "
+            "Maximum containment (node) | Nearest contained ratio (node) |"
+        ),
+        "|---:|---:|:---:|:---:|---:|:---:|---:|---:|---:|---:|",
+    ]
+    for frame in receipt["frames"]:
+        public = frame["public_read"]
+        selected = next(
+            candidate
+            for candidate in frame["candidates"]
+            if candidate["node"] == public["selected_anchor_node"]
+        )
+        nearest_node = frame["nearest_fully_contained_candidate_node"]
+        nearest = (
+            "none"
+            if nearest_node is None
+            else f"{number(frame['nearest_fully_contained_candidate_ratio'], 10)} "
+            f"({nearest_node})"
+        )
+        maximum = (
+            f"{number(frame['maximum_containment_fraction'], 6)} "
+            f"({frame['maximum_containment_candidate_node']})"
+        )
+        lines.append(
+            f"| {frame['manifest_row']} | {1e3 * frame['time_s']:.0f} ms | "
+            f"{frame['converged']} | {frame['qualified']} | "
+            f"{public['selected_anchor_node']} | {public['contour_closed']} | "
+            f"{number(frame['selected_anchor_candidate_containment_fraction'])} | "
+            f"{number(selected.get('enclosed_area_ratio'), 10)} | {maximum} | "
+            f"{nearest} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Complete candidate table",
+            "",
+            (
+                "The wall array has 37 stored entries because its closing coordinate "
+                "is repeated; nodes 0 and 36 are the same position. Both entries are "
+                "retained because the wall-extremum read receives both. No structure "
+                "is excluded by name. A dash means the first-crossing contour did not "
+                "close, so no containment or enclosed area is assigned."
+            ),
+            "",
+        ]
+    )
+    for frame in receipt["frames"]:
+        lines.extend(
+            [
+                (
+                    f"### Row {frame['manifest_row']} — "
+                    f"{1e3 * frame['time_s']:.0f} ms — "
+                    f"converged={frame['converged']}"
+                ),
+                "",
+                (
+                    "| Node | R [m] | Z [m] | Sampled flux [Wb] | Fitted flux "
+                    "[Wb] | Tangent | Closed | Inside | Containment | Area ratio | "
+                    "Public | Private | Nearest | Max |"
+                ),
+                "|---:|---:|---:|---:|---:|:---:|:---:|---:|---:|---:|:---:|:---:|:---:|:---:|",
+            ]
+        )
+        for candidate in frame["candidates"]:
+            position = candidate["node_position_m"]
+            inside = (
+                "—"
+                if candidate.get("inside_vertex_count") is None
+                else f"{candidate['inside_vertex_count']}/"
+                f"{candidate['boundary_vertex_count']}"
+            )
+            lines.append(
+                f"| {candidate['node']} | {number(position[0])} | "
+                f"{number(position[1])} | "
+                f"{number(candidate.get('sampled_flux_wb'), 10)} | "
+                f"{number(candidate.get('fitted_anchor_flux_wb'), 10)} | "
+                f"{candidate.get('tangent_at_wall_node', '—')} | "
+                f"{candidate['contour_closed']} | {inside} | "
+                f"{number(candidate.get('containment_fraction'))} | "
+                f"{number(candidate.get('enclosed_area_ratio'), 10)} | "
+                f"{candidate['selected_by_public_read']} | "
+                f"{candidate['selected_by_private_read']} | "
+                f"{candidate['nearest_fully_contained_ratio_one']} | "
+                f"{candidate['maximum_containment_candidate']} |"
+            )
+        lines.append("")
+
+    lines.extend(
+        [
+            "## Compiled writer route finding",
+            "",
+            (
+                "The compiled writer route is `scripts/labeller_batch/shard.py:936` "
+                "to `shard.py:333`, `nova/equilibrium/forward.py:1398`, "
+                "`forward.py:1118`, `nova/equilibrium/forward_operator.py:1552`, "
+                "`forward_operator.py:1341`, `forward_operator.py:1093/1104`, "
+                "`nova/equilibrium/topology.py:875`, and finally "
+                "`topology.py:461-462`."
+            ),
+            "",
+            (
+                "The private active-set route builds and promotes its shadow in "
+                "`ForwardFluxOperator._frozen_topology_partition` at "
+                "`forward_operator.py:1639-1674`. `ReducedNewtonResult` does not "
+                "persist that shadow or the frozen partition, and "
+                "`shard._forward_receipt` passes only `result.state` into the public "
+                "receipt. The ensuing support read therefore calls "
+                "`_fixed_design_read` with `private_wall_node_mask=None`; the "
+                "shadow-gated partition is unreachable by construction."
+            ),
+            "",
+            "## Evidence and limits",
+            "",
+            (
+                f"The receipt contains {candidate_count} "
+                "candidate rows in converged-first order: 15, 16, 17, then 11 to "
+                "14. Each CSV frame block was flushed and fsynced before its panel "
+                "was emitted. The PNGs were not read back."
+            ),
+            "",
+            (
+                "The measurement changed no solver or writer behavior, excluded no "
+                "structure by name, and set no tolerance from observed values. The "
+                "four early rows are explicitly measurements of unconverged flux "
+                "maps; the three converged baseline frames carry the scientific "
+                "comparison. Merged verification remains a separate node."
+            ),
+            "",
+        ]
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:

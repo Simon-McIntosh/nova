@@ -592,12 +592,22 @@ def _internal_geometry(prepared: PreparedLabeller, equilibrium, diverted: bool):
 
 
 def _centroid_coordinates(
-    prepared: PreparedLabeller, flux, target_current: float
+    prepared: PreparedLabeller,
+    flux,
+    target_current: float,
+    *,
+    requested_class=None,
 ) -> tuple[float, float]:
-    """Return the solved plasma-current centroid in metres."""
+    """Return the solved plasma-current centroid in metres.
+
+    ``requested_class`` reproduces the class the producing solve ran with:
+    an unconstrained emergent read may refuse the very flux a classed solve
+    already converged.
+    """
     observation = prepared.profile.current_moment_observation(
         jnp.asarray(flux),
         support=MomentIntegralSupport.ALL_DOMAIN,
+        requested_class=requested_class,
         target_current=target_current,
     )
     return (
@@ -834,7 +844,10 @@ def label_shot(
             free_program = free_result.program
             free_wall_seconds = time.perf_counter() - free_started
             free_centroid_r, free_centroid_z = _centroid_coordinates(
-                prepared, free_result.state, target_current
+                prepared,
+                free_result.state,
+                target_current,
+                requested_class=requested_value,
             )
             free_centroid_error = free_centroid_z - inputs["target_centroid_z"]
             free_guard = bool(
@@ -893,7 +906,10 @@ def label_shot(
                     conditioned_wall_seconds = time.perf_counter() - conditioned_started
                     conditioned_centroid_r, conditioned_centroid_z = (
                         _centroid_coordinates(
-                            prepared, conditioned_result.state, target_current
+                            prepared,
+                            conditioned_result.state,
+                            target_current,
+                            requested_class=requested_value,
                         )
                     )
                     conditioned_centroid_error = (

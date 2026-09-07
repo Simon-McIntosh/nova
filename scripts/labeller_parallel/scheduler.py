@@ -323,7 +323,10 @@ class SequentialCompiledEngine:
             self.free_programs[index] = free_result.program
             free_wall_seconds = time.perf_counter() - free_started
             free_centroid_r, free_centroid_z = _centroid_coordinates(
-                self.prepared, free_result.state, target_current
+                self.prepared,
+                free_result.state,
+                target_current,
+                requested_class=requested_value,
             )
             free_centroid_error = free_centroid_z - float(
                 batch.centroid_target_z[index]
@@ -381,7 +384,10 @@ class SequentialCompiledEngine:
                     conditioned_wall_seconds = time.perf_counter() - conditioned_started
                     conditioned_centroid_r, conditioned_centroid_z = (
                         _centroid_coordinates(
-                            self.prepared, conditioned_result.state, target_current
+                            self.prepared,
+                            conditioned_result.state,
+                            target_current,
+                            requested_class=requested_value,
                         )
                     )
                     conditioned_centroid_error = conditioned_centroid_z - float(
@@ -968,17 +974,11 @@ def _shot_manifest(
             "written_shots": throughput["written_shots"],
             "written_slices": throughput["written_slices"],
             "elapsed_wall_seconds": throughput["elapsed_wall_seconds"],
-            "aggregate_slices_per_second": throughput[
-                "aggregate_slices_per_second"
-            ],
-            "per_device_slices_per_second": throughput[
-                "per_device_slices_per_second"
-            ],
+            "aggregate_slices_per_second": throughput["aggregate_slices_per_second"],
+            "per_device_slices_per_second": throughput["per_device_slices_per_second"],
             "host_pool_occupancy": throughput["host_pool_occupancy"],
             "engine_wall_seconds": throughput["engine_wall_seconds"],
-            "host_assembly_wall_seconds": throughput[
-                "host_assembly_wall_seconds"
-            ],
+            "host_assembly_wall_seconds": throughput["host_assembly_wall_seconds"],
         },
         "slice_count": len(rows),
         "admitted_slice_count": len(ordered),

@@ -150,6 +150,106 @@ def test_host_route_matches_shard_slice_record_on_solovev(monkeypatch, tmp_path)
     assert _without_elapsed(assembled.record) == _without_elapsed(expected)
 
 
+def test_both_writers_pass_the_solved_class_into_the_centroid_reads(
+    monkeypatch, tmp_path
+):
+    """The free and conditioned achieved-centroid reads get the solved class.
+
+    Each writer reads its own achieved centroid with the class it solved
+    with, so the read reproduces the solve's admission decision instead of
+    re-deriving the topology emergently.  One real free and conditioned
+    solve runs on each writer and the forwarded requested_class seen by the
+    centroid read is recorded.
+    """
+    fixture = _solovev_fixture(tmp_path)
+    seen: list[object] = []
+
+    real_centroid = shard._centroid_coordinates
+
+    def traced_centroid(*_args, **_kwargs):
+        seen.append(_kwargs.get("requested_class"))
+        return real_centroid(*_args, **_kwargs)
+
+    monkeypatch.setattr(shard, "_centroid_coordinates", traced_centroid)
+    monkeypatch.setattr(scheduler, "_centroid_coordinates", traced_centroid)
+
+    monkeypatch.setattr(
+        shard.zarr, "open_group", lambda *_args, **_kwargs: {"efm": fixture.group}
+    )
+    monkeypatch.setattr(shard, "_slice_inputs", lambda *_args: fixture.inputs)
+    monkeypatch.setattr(shard, "_slices_seed", lambda *_args: fixture.seed)
+    monkeypatch.setattr(
+        shard, "_requested_class", lambda *_args: fixture.requested_class
+    )
+    monkeypatch.setattr(shard, "_write_session_file", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(shard, "_write_companion", lambda *_args, **_kwargs: None)
+
+    def receipt(_prepared, result, **_arguments):
+        return SimpleNamespace(
+            qualified=bool(result.converged), terminal_state=object()
+        )
+
+    def frame(_receipt, **_arguments):
+        return SimpleNamespace(branch_guard_ok=True)
+
+    for module in (shard, scheduler):
+        monkeypatch.setattr(module, "_forward_receipt", receipt)
+        monkeypatch.setattr(
+            module, "_internal_geometry", lambda *_args, **_kwargs: None
+        )
+        monkeypatch.setattr(module, "assemble_frame", frame)
+
+    shard_output = tmp_path / "shard"
+    shard_output.mkdir()
+    shard.label_shot(
+        fixture.prepared,
+        1,
+        shard_output,
+        programs=LabellerPrograms(),
+        include_raster=False,
+        condition_on_guard_failure=True,
+        setup_wall_seconds=0.0,
+        max_slices=1,
+    )
+
+    item = scheduler.SliceInput(
+        shot=1,
+        row=0,
+        time=float(fixture.inputs["time"]),
+        initial_state=fixture.seed,
+        prescribed_current=fixture.current,
+        target_current=fixture.target_current,
+        requested_class=fixture.requested_class,
+        centroid_target_z=fixture.target_centroid_z,
+        p_prime_psi_norm=np.asarray(fixture.group["psi_norm"]),
+        p_prime=np.asarray(fixture.group["pprime"])[0],
+        ff_prime_psi_norm=np.asarray(fixture.group["psi_norm"]),
+        ff_prime=np.asarray(fixture.group["ffprime"])[0],
+    )
+    batch = scheduler.EngineBatch(
+        active=np.asarray([True]),
+        shot=np.asarray([item.shot]),
+        row=np.asarray([item.row]),
+        time=np.asarray([item.time]),
+        initial_state=np.asarray([item.initial_state]),
+        prescribed_current=np.asarray([item.prescribed_current]),
+        target_current=np.asarray([item.target_current]),
+        requested_class=np.asarray([item.requested_class], dtype=np.int8),
+        centroid_target_z=np.asarray([item.centroid_target_z]),
+    )
+    engine = scheduler.HostRouteEngine(
+        fixture.prepared,
+        device_count=1,
+        condition_on_guard_failure=True,
+    )
+    engine._ensure_slots(1)
+    engine._solve_slot(batch, 0)
+
+    expected = int(fixture.requested_class)
+    actual = [None if value is None else int(value) for value in seen]
+    assert actual == [expected] * 4  # free and conditioned on each writer
+
+
 def test_host_worker_default_tracks_the_allocation(monkeypatch):
     monkeypatch.setenv("SLURM_CPUS_PER_TASK", "8")
     assert driver._default_host_workers() == 7
@@ -502,9 +602,7 @@ def test_cumulative_log_entry_carries_aggregate_and_per_device_rates():
     }
 
 
-def test_corpus_run_reports_throughput_on_the_synthetic_root(
-    monkeypatch, tmp_path
-):
+def test_corpus_run_reports_throughput_on_the_synthetic_root(monkeypatch, tmp_path):
     """One scheduler run writes a parseable job log and manifest blocks.
 
     Both land on the synthetic output root: each shot manifest carries the
@@ -513,15 +611,11 @@ def test_corpus_run_reports_throughput_on_the_synthetic_root(
     line on every tenth shot.
     """
     fixture = _solovev_fixture(tmp_path)
-    monkeypatch.setattr(
-        scheduler, "_initialize_assembly_worker", _noop_initializer
-    )
+    monkeypatch.setattr(scheduler, "_initialize_assembly_worker", _noop_initializer)
     monkeypatch.setattr(
         scheduler, "_write_session_file", lambda *_args, **_kwargs: None
     )
-    monkeypatch.setattr(
-        scheduler, "_write_diagnostics", lambda *_args, **_kwargs: None
-    )
+    monkeypatch.setattr(scheduler, "_write_diagnostics", lambda *_args, **_kwargs: None)
     output_root = tmp_path / "output"
     corpus = scheduler.CorpusScheduler(
         engine=_StubEngine(),
@@ -543,8 +637,7 @@ def test_corpus_run_reports_throughput_on_the_synthetic_root(
     )
     log_path = output_root / scheduler.THROUGHPUT_LOG_NAME
     lines = [
-        json.loads(line)
-        for line in log_path.read_text(encoding="utf-8").splitlines()
+        json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()
     ]
     assert len(lines) == 12 + 1  # one per shot plus one cumulative at shot ten
     first = lines[0]

@@ -540,10 +540,76 @@ def _map_and_substages(repeats: int) -> dict[str, Any]:
     }
 
 
+def _apportion_substages(
+    control_quantum_ms: float,
+    per_member: dict[str, float],
+    launch_ms_member: float,
+) -> dict[str, Any]:
+    """Apportion the re-measured quantum into disjoint sub-stage shares.
+
+    The sub-stage probes overlap — the first-GMRES probe contains the
+    relinearization — so the same three disjoint components the original
+    width-1024 attribution used are derived here: mask reconciliation by
+    itself, Newton re-linearization by itself, and the first GMRES action as
+    the difference against the re-linearization probe.  The empty-dispatch
+    launch floor is subtracted from the two standalone probes.  Each share is
+    the component's fraction of the positive disjoint total, scaled to the
+    re-measured per-trip quantum so the mask-plus-relinearization-plus-first
+    action rows sum to the quantum.
+    """
+    mask_compute = max(
+        per_member["mask_reconciliation_gather_scatter_comparison"] - launch_ms_member,
+        0.0,
+    )
+    relinearization_compute = max(
+        per_member["newton_relinearization"] - launch_ms_member, 0.0
+    )
+    first_action_compute = max(
+        per_member["newton_relinearization_and_first_gmres_action"]
+        - per_member["newton_relinearization"],
+        0.0,
+    )
+    direct = {
+        "mask_reconciliation_gather_scatter_comparison": mask_compute,
+        "newton_relinearization": relinearization_compute,
+        "preconditioner_assembly": 0.0,
+        "first_gmres_action_synchronization": first_action_compute,
+        "fixed_host_launch_overhead_per_trip": 0.0,
+    }
+    denominator = sum(direct.values())
+    if denominator <= 0.0:
+        raise RuntimeError("sub-stage probes have no positive disjoint latency")
+    substages = []
+    for name, seconds in direct.items():
+        each_share = seconds / denominator
+        substages.append(
+            {
+                "substage": name,
+                "direct_probe_ms_per_member": seconds,
+                "share_of_positive_direct_probe_latency": each_share,
+                "attributed_ms_per_member_per_trip": control_quantum_ms * each_share,
+            }
+        )
+    by_name = {row["substage"]: row for row in substages}
+    return {
+        "substage_apportionment": substages,
+        "mask_reconciliation_ms_per_member_per_trip": by_name[
+            "mask_reconciliation_gather_scatter_comparison"
+        ]["attributed_ms_per_member_per_trip"],
+        "relinearization_ms_per_member_per_trip": by_name["newton_relinearization"][
+            "attributed_ms_per_member_per_trip"
+        ],
+        "first_gmres_action_sync_ms_per_member_per_trip": by_name[
+            "first_gmres_action_synchronization"
+        ]["attributed_ms_per_member_per_trip"],
+    }
+
+
 def _full_trip_measure(
     workload,
     seed,
     probes: dict[str, Any],
+    launch_ms_member: float,
     *,
     persist: Callable[[dict[str, Any]], None],
 ) -> None:
@@ -567,33 +633,15 @@ def _full_trip_measure(
     )
     control = _measure_full_trip(compiled, initial, current, False, 1)
     control_quantum = control["quantum_ms_per_member_per_trip"]
-    positive = {
-        name: max(probe["steady"]["median_ms_per_member"], 0.0)
-        for name, probe in probes.items()
-    }
-    total_positive = sum(positive.values())
-    substages = []
-    for name, direct in positive.items():
-        share = direct / total_positive if total_positive else 0.0
-        substages.append(
-            {
-                "substage": name,
-                "direct_probe_ms_per_member": direct,
-                "share_of_positive_direct_latency": share,
-                "attributed_ms_per_member_per_trip": control_quantum * share,
-            }
-        )
-    by_name = {row["substage"]: row for row in substages}
-    relinearization = by_name["newton_relinearization"][
-        "attributed_ms_per_member_per_trip"
-    ]
-    first_action_sync = max(
-        by_name["newton_relinearization_and_first_gmres_action"][
-            "attributed_ms_per_member_per_trip"
-        ]
-        - relinearization,
-        0.0,
+    apportioned = _apportion_substages(
+        control_quantum,
+        {
+            name: probe["steady"]["median_ms_per_member"]
+            for name, probe in probes.items()
+        },
+        launch_ms_member,
     )
+    relinearization = apportioned["relinearization_ms_per_member_per_trip"]
     persist(
         {
             "per_trip_quantum": {
@@ -604,12 +652,14 @@ def _full_trip_measure(
                 "banked_ms": BANKED_QUANTUM_MS,
                 "banked_source": str(SOLVER_QUANTUM_RECEIPT.relative_to(ROOT)),
             },
-            "substage_apportionment": substages,
-            "mask_reconciliation_ms_per_member_per_trip": by_name[
-                "mask_reconciliation_gather_scatter_comparison"
-            ]["attributed_ms_per_member_per_trip"],
+            "substage_apportionment": apportioned["substage_apportionment"],
+            "mask_reconciliation_ms_per_member_per_trip": apportioned[
+                "mask_reconciliation_ms_per_member_per_trip"
+            ],
             "relinearization_ms_per_member_per_trip": relinearization,
-            "first_gmres_action_sync_ms_per_member_per_trip": first_action_sync,
+            "first_gmres_action_sync_ms_per_member_per_trip": apportioned[
+                "first_gmres_action_sync_ms_per_member_per_trip"
+            ],
         }
     )
     print(
@@ -845,7 +895,8 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
     figure.suptitle(
         "Per-trip quantum at width one with the stale width-1024 baselines "
         "re-measured at HEAD\n"
-        f"revision {payload['measurement_revision'][:10]}",
+        "device sync = per-solve topology shadow read + initial gather + final "
+        f"sync amortized per trip | revision {payload['measurement_revision'][:10]}",
         fontsize=15,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -893,6 +944,7 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
     }
     named_owner = max(named, key=named.get)
     host_broad = f"{1.0e3 * np.mean(host):.4f}"
+    boundary_broad = f"{1.0e3 * np.mean(boundary):.4f}"
     sync_broad = f"{1.0e3 * np.mean(sync):.4f}"
     retrace_broad = "0.0000"
     head_quantum = summary["head_quantum_ms"]
@@ -952,17 +1004,24 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
         [
             "",
             "Across the width-1 members the per-trip split is "
+            f"**{shares['device sync']:.1f}%** outside-trip device work "
+            f"(per-solve topology shadow read, initial gather and final "
+            f"device synchronisation amortized over the trips, "
+            f"**{sync_broad} ms**/trip), "
             f"**{shares['compiled boundary dispatch']:.1f}%** compiled "
-            f"trip-close boundary dispatch, **{host_broad} ms** host reconciliation "
-            f"per trip ({shares['host reconciliation']:.1f}%), "
-            f"**{sync_broad} ms** final device sync per trip "
-            f"({shares['device sync']:.1f}%), and "
-            f"**{retrace_broad} ms** retrace below the compiled boundary "
-            f"({shares['retrace']:.1f}%).  Of the three host-side stages the plan "
+            f"trip-close boundary dispatch (**{boundary_broad} ms**/trip), "
+            f"**{shares['host reconciliation']:.1f}%** host reconciliation "
+            f"(**{host_broad} ms**/trip), and "
+            f"**{shares['retrace']:.1f}%** retrace below the compiled boundary "
+            f"({retrace_broad} ms/trip).  Of the three host-side stages the plan "
             f"names — host reconciliation, retrace below the compiled boundary, "
-            f"and device sync — **{named_owner}** owns the quantum (`{named_owner}` "
-            f"is the largest at {named[named_owner]:.1f}%), while the compiled "
-            "trip body remains the majority of the trip.",
+            "and device sync — the width-1 per-trip quantum at this converged "
+            "scale is owned by the "
+            f"**device side ({named_owner} at {named[named_owner]:.1f}%)**: the "
+            "two to five trips per settled solve amortize a per-solve device-setup "
+            "lump (the topology shadow read and initial gather, each trip closing "
+            "with its own synchronized boundary dispatch) that dominates the "
+            "microsecond-level host reconciliation.",
             "",
             "Warm-program solves re-trace nothing: the reduced program's kernel "
             "cache sizes are recorded before and after each solve and report zero "
@@ -1122,11 +1181,15 @@ def run(
         receipt["baseline_summary"] = _baseline_summary(receipt)
         _write_json(output, receipt)
 
+    launch_ms_member = (
+        1.0e3 * float(fast["scalar_compiled_dispatch_probe"]["median"]) / WIDTH
+    )
     try:
         _full_trip_measure(
             fast["workload"],
             fast["seed"],
             fast["direct_width_1024_probes"],
+            launch_ms_member,
             persist=persist_full,
         )
     except Exception as error:  # noqa: BLE001 - the fast baselines are already

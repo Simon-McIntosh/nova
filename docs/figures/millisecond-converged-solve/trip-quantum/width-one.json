@@ -1,0 +1,1520 @@
+{
+  "assignment": {
+    "cpu_count": 4,
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1263478,
+    "job_name": "trip-quantum-width-one",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "requested_memory_mib": 131072,
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "baseline_summary": {
+    "head_map_ms": 1.7488913490524283,
+    "head_quantum_ms": 72.14173589665052,
+    "map_delta_x": 2.231682954507253,
+    "quantum_delta_x": 2.8861355340715593,
+    "quantum_qualification": null,
+    "quantum_state": "complete",
+    "stale_baseline_map_ms": 0.7836647878320946,
+    "stale_baseline_quantum_ms": 24.99596260986329
+  },
+  "baselines": {
+    "direct_width_1024_probes": {
+      "mask_reconciliation_gather_scatter_comparison": {
+        "compile_seconds": 1.7225854666903615,
+        "steady": {
+          "median_batch_seconds": 1.7913138745352626,
+          "median_ms_per_member": 1.7493299556008424,
+          "sample_count": 8,
+          "samples_seconds": [
+            1.7913055839017034,
+            1.7914270889014006,
+            1.7913221651688218,
+            1.7913735127076507,
+            1.7912890212610364,
+            1.791231864131987,
+            1.7914198571816087,
+            1.7912318408489227
+          ]
+        }
+      },
+      "newton_relinearization": {
+        "compile_seconds": 4.564691131003201,
+        "steady": {
+          "median_batch_seconds": 1.7920020991005003,
+          "median_ms_per_member": 1.7500020499028324,
+          "sample_count": 8,
+          "samples_seconds": [
+            1.7919853450730443,
+            1.7919561052694917,
+            1.7920740004628897,
+            1.7919473769143224,
+            1.7921980684623122,
+            1.7920188531279564,
+            1.7920769788324833,
+            1.7919052494689822
+          ]
+        }
+      },
+      "newton_relinearization_and_first_gmres_action": {
+        "compile_seconds": 3.55580610409379,
+        "steady": {
+          "median_batch_seconds": 1.8249042960815132,
+          "median_ms_per_member": 1.7821331016421027,
+          "sample_count": 8,
+          "samples_seconds": [
+            1.8247142732143402,
+            1.82478354498744,
+            1.8248617071658373,
+            1.824946884997189,
+            1.824800836853683,
+            1.824971342459321,
+            1.825191325508058,
+            1.8251217985525727
+          ]
+        }
+      }
+    },
+    "first_gmres_action_sync_ms_per_member_per_trip": 0.6564971988755536,
+    "map": {
+      "banked_ms": 0.7836647878320946,
+      "banked_source": "docs/figures/single-grid-solver-cutover/h200-solve-profile.json",
+      "compile_seconds": 2.572301072999835,
+      "median_ms_per_member_width_1024": 1.7488913490524283
+    },
+    "mask_reconciliation_ms_per_member_per_trip": 35.73575328004203,
+    "per_trip_quantum": {
+      "banked_ms": 24.99596260986329,
+      "banked_source": "docs/figures/solver-trip-orchestration/trip-quantum.json",
+      "control_active_set_iterations": 16,
+      "control_ms_per_member_per_trip": 72.14173589665052,
+      "full_trip_compile_seconds": 1517.289011215791,
+      "full_trip_measurement_job_id": 1263806,
+      "settled_active_set_iterations": 16,
+      "settled_ms_per_member": 1133.8383237689413,
+      "state": "complete"
+    },
+    "relinearization_ms_per_member_per_trip": 35.74948541773293,
+    "scalar_compiled_dispatch_probe": {
+      "maximum": 0.0005013234913349152,
+      "mean": 0.00030280498322099447,
+      "median": 0.00031644804403185844,
+      "p95": 0.0004975745920091868,
+      "sample_count": 8,
+      "values": [
+        0.0005013234913349152,
+        0.0003056572750210762,
+        0.0004906123504042625,
+        0.0003272388130426407,
+        0.0002662837505340576,
+        0.00038896873593330383,
+        7.248017936944962e-05,
+        6.987527012825012e-05
+      ]
+    },
+    "substage_apportionment": [
+      {
+        "attributed_ms_per_member_per_trip": 35.73575328004203,
+        "direct_probe_ms_per_member": 1.7490209243078425,
+        "share_of_positive_direct_probe_latency": 0.4953547739859864,
+        "substage": "mask_reconciliation_gather_scatter_comparison"
+      },
+      {
+        "attributed_ms_per_member_per_trip": 35.74948541773293,
+        "direct_probe_ms_per_member": 1.7496930186098325,
+        "share_of_positive_direct_probe_latency": 0.49554512340744417,
+        "substage": "newton_relinearization"
+      },
+      {
+        "attributed_ms_per_member_per_trip": 0.0,
+        "direct_probe_ms_per_member": 0.0,
+        "share_of_positive_direct_probe_latency": 0.0,
+        "substage": "preconditioner_assembly"
+      },
+      {
+        "attributed_ms_per_member_per_trip": 0.6564971988755536,
+        "direct_probe_ms_per_member": 0.03213105173927033,
+        "share_of_positive_direct_probe_latency": 0.009100102606569441,
+        "substage": "first_gmres_action_synchronization"
+      },
+      {
+        "attributed_ms_per_member_per_trip": 0.0,
+        "direct_probe_ms_per_member": 0.0,
+        "share_of_positive_direct_probe_latency": 0.0,
+        "substage": "fixed_host_launch_overhead_per_trip"
+      }
+    ]
+  },
+  "captured_at": "2026-09-07T01:47:16.355887+00:00",
+  "configuration": {
+    "baseline_probe_repeats": 8,
+    "baseline_trip_limit": 16,
+    "baseline_width": 1024,
+    "baselines_only": false,
+    "reduced_active_set_steps": 16,
+    "reduced_newton_steps_per_trip": 12,
+    "width_one_member_repeats": 2
+  },
+  "execution": {
+    "elapsed_seconds": 3960.2359979404137,
+    "full_trip_job_id": 1263806,
+    "merged": true,
+    "width_one_job_id": 1263478,
+    "width_one_member_count": 12
+  },
+  "measurement_revision": "6ce12e00016ca1920849bba0a469a24b25c43563",
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-0745ecebea4cb264e054"
+  },
+  "project_absolute_figure_src": "/nova/figures/millisecond-converged-solve/trip-quantum/width-one.png",
+  "schema": "nova.trip-quantum-width-one",
+  "source": {
+    "driver": "benchmarks/trip_quantum_width_one.py",
+    "driver_sha256": "68812ba407e3a64eb3a3c8d894304fd11fa52f7a77021516aac9d3198d9abf44",
+    "required_ancestor": "588578a0"
+  },
+  "width_one": {
+    "inputs": {
+      "bank_route": {
+        "current_pin": "absolute bank reference plasma current as target",
+        "path": "benchmarks/bank_revision_reproduction.py",
+        "profile_construction": "passive-inclusive case on the current revision with the exact persisted response carrier"
+      },
+      "member_count": 12,
+      "response_carrier": {
+        "carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.004836072213947773
+        },
+        "loaded_from_persisted_carrier": true,
+        "named_cache_only_check": {
+          "command": [
+            "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+            "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/mcs-trip-quantum-width-one/benchmarks/mast_response_carrier_warm.py",
+            "check",
+            "--carrier",
+            "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "--receipt",
+            "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+          ],
+          "direct_green_operator_builder_entries": 0,
+          "passes": true,
+          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021679 direct_builders=0 verdict=PASS"
+        }
+      },
+      "state_cache": {
+        "authority": {
+          "response_carrier_semantic_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "schema_revision": 4,
+          "selection_source_commit": "80706f89"
+        },
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T143942750055-sto-mast-bank-telemetry-relaunch/logs/exact-operand-cache.npz",
+        "sha256": "05d664ce6bfcca4e42bba8acefb487b3c396b8de46a193b124f057e9a0547197"
+      }
+    },
+    "members": [
+      {
+        "boundary_per_trip_s": 0.04669658855224649,
+        "final_device_sync_per_trip_s": 0.0692511536180973,
+        "first_solve_converged": true,
+        "first_solve_termination": "converged",
+        "first_solve_trips": 3,
+        "first_solve_with_build_wall_s": 29.918075442314148,
+        "host_reconciliation_per_trip_s": 0.0003398945555090904,
+        "identity": "21978/35 pure",
+        "initial_state_sha256": "a6ba852249891c9dd4aad49292e1c956795d57393a93c79c4c314999db32e1c1",
+        "per_trip_quantum_s": 0.128863249750187,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13956173323094845,
+            "converged": true,
+            "final_device_sync_s": 0.31722291838377714,
+            "host_reconciliation_s": 0.0008348887786269188,
+            "jacobian_s": 0.00163285993039608,
+            "kernel_cache_growth": {},
+            "newton_s": 0.036808392964303493,
+            "per_trip_boundary_s": [
+              0.04705844447016716,
+              0.046190474182367325,
+              0.04631281457841396
+            ],
+            "per_trip_jacobian_s": [
+              0.0003507426008582115,
+              0.0005999086424708366,
+              0.0006822086870670319
+            ],
+            "per_trip_newton_s": [
+              0.03311740234494209,
+              0.0036909906193614006,
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              12,
+              1,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.08063374552875757,
+              0.05050842370837927,
+              0.0476957056671381
+            ],
+            "solve_wall_s": 0.4960607932880521,
+            "terminal_residual": 3.749118409700448e-12,
+            "termination": "converged",
+            "trip_count": 3
+          },
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.1406177980825305,
+            "converged": true,
+            "final_device_sync_s": 0.09828400332480669,
+            "host_reconciliation_s": 0.0012044785544276237,
+            "jacobian_s": 0.0012698713690042496,
+            "kernel_cache_growth": {},
+            "newton_s": 0.035742553882300854,
+            "per_trip_boundary_s": [
+              0.04631052352488041,
+              0.04656407702714205,
+              0.04774319753050804
+            ],
+            "per_trip_jacobian_s": [
+              0.00031608156859874725,
+              0.0004222393035888672,
+              0.0005315504968166351
+            ],
+            "per_trip_newton_s": [
+              0.03229606989771128,
+              0.0034464839845895767,
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              12,
+              1,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.0790370861068368,
+              0.0504610612988472,
+              0.04933655448257923
+            ],
+            "solve_wall_s": 0.2771187052130699,
+            "terminal_residual": 3.749118409700448e-12,
+            "termination": "converged",
+            "trip_count": 3
+          }
+        ],
+        "trips": 3,
+        "wall_per_solve_s": 0.386589749250561
+      },
+      {
+        "boundary_per_trip_s": 0.04662750009447336,
+        "final_device_sync_per_trip_s": 0.10092650260776281,
+        "first_solve_converged": true,
+        "first_solve_termination": "converged",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 25.009171906858683,
+        "host_reconciliation_per_trip_s": 0.0007154131308197975,
+        "identity": "21978/35 mixed",
+        "initial_state_sha256": "57798125d18e4d1e0067b892e70a6057cc98d52d2e45f11ea47f4acbc55f7f83",
+        "per_trip_quantum_s": 0.14878731640055776,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 0,
+          "flux_scores": 0,
+          "grade": 0,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 0
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.046704321168363094,
+            "converged": true,
+            "final_device_sync_s": 0.10285718273371458,
+            "host_reconciliation_s": 0.0007080519571900368,
+            "jacobian_s": 0.0006621824577450752,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0,
+            "per_trip_boundary_s": [
+              0.046704321168363094
+            ],
+            "per_trip_jacobian_s": [
+              0.0006621824577450752
+            ],
+            "per_trip_newton_s": [
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.048074555583298206
+            ],
+            "solve_wall_s": 0.1509317383170128,
+            "terminal_residual": 3.830812218111081e-09,
+            "termination": "converged",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.04655067902058363,
+            "converged": true,
+            "final_device_sync_s": 0.09899582248181105,
+            "host_reconciliation_s": 0.0007227743044495583,
+            "jacobian_s": 0.0003736186772584915,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0,
+            "per_trip_boundary_s": [
+              0.04655067902058363
+            ],
+            "per_trip_jacobian_s": [
+              0.0003736186772584915
+            ],
+            "per_trip_newton_s": [
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.04764707200229168
+            ],
+            "solve_wall_s": 0.14664289448410273,
+            "terminal_residual": 3.830812218111081e-09,
+            "termination": "converged",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.14878731640055776
+      },
+      {
+        "boundary_per_trip_s": 0.046649469528347254,
+        "final_device_sync_per_trip_s": 0.10004546260461211,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 27.667742955498397,
+        "host_reconciliation_per_trip_s": 2.4542678147554398e-05,
+        "identity": "21983/35 pure",
+        "initial_state_sha256": "88a740a13dc93cf1ee71ae862504543bee479c74904f884721ed69c24eac1b19",
+        "per_trip_quantum_s": 0.15139656700193882,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.046757359988987446,
+            "converged": false,
+            "final_device_sync_s": 0.09981315862387419,
+            "host_reconciliation_s": 2.756807953119278e-05,
+            "jacobian_s": 0.0006721187382936478,
+            "kernel_cache_growth": {},
+            "newton_s": 0.004479578696191311,
+            "per_trip_boundary_s": [
+              0.046757359988987446
+            ],
+            "per_trip_jacobian_s": [
+              0.0006721187382936478
+            ],
+            "per_trip_newton_s": [
+              0.004479578696191311
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.0519366255030036
+            ],
+            "solve_wall_s": 0.15174978412687778,
+            "terminal_residual": 0.00039283985135864815,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.04654157906770706,
+            "converged": false,
+            "final_device_sync_s": 0.10027776658535004,
+            "host_reconciliation_s": 2.1517276763916016e-05,
+            "jacobian_s": 0.0003716740757226944,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0038308128714561462,
+            "per_trip_boundary_s": [
+              0.04654157906770706
+            ],
+            "per_trip_jacobian_s": [
+              0.0003716740757226944
+            ],
+            "per_trip_newton_s": [
+              0.0038308128714561462
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.05076558329164982
+            ],
+            "solve_wall_s": 0.15104334987699986,
+            "terminal_residual": 0.00039283985135864815,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.15139656700193882
+      },
+      {
+        "boundary_per_trip_s": 0.045568089466542006,
+        "final_device_sync_per_trip_s": 0.097564403899014,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 10.31049843877554,
+        "host_reconciliation_per_trip_s": -0.0003395727835595608,
+        "identity": "21983/35 mixed",
+        "initial_state_sha256": "18e74b498a9269979899fa8a525eb540ea2f6f0ac325867966eae422f58dc0b5",
+        "per_trip_quantum_s": 0.15970417531207204,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.04572589509189129,
+            "converged": false,
+            "final_device_sync_s": 0.0989424679428339,
+            "host_reconciliation_s": -0.00032632239162921906,
+            "jacobian_s": 0.0009759180247783661,
+            "kernel_cache_growth": {},
+            "newton_s": 0.016204040497541428,
+            "per_trip_boundary_s": [
+              0.04572589509189129
+            ],
+            "per_trip_jacobian_s": [
+              0.0009759180247783661
+            ],
+            "per_trip_newton_s": [
+              0.016204040497541428
+            ],
+            "per_trip_newton_steps": [
+              2
+            ],
+            "per_trip_wall_s": [
+              0.06257953122258186
+            ],
+            "solve_wall_s": 0.16152199916541576,
+            "terminal_residual": 0.0005170960259637544,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.04541028384119272,
+            "converged": false,
+            "final_device_sync_s": 0.09618633985519409,
+            "host_reconciliation_s": -0.0003528231754899025,
+            "jacobian_s": 0.000751853920519352,
+            "kernel_cache_growth": {},
+            "newton_s": 0.01589069701731205,
+            "per_trip_boundary_s": [
+              0.04541028384119272
+            ],
+            "per_trip_jacobian_s": [
+              0.000751853920519352
+            ],
+            "per_trip_newton_s": [
+              0.01589069701731205
+            ],
+            "per_trip_newton_steps": [
+              2
+            ],
+            "per_trip_wall_s": [
+              0.06170001160353422
+            ],
+            "solve_wall_s": 0.1578863514587283,
+            "terminal_residual": 0.0005170960259637544,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.15970417531207204
+      },
+      {
+        "boundary_per_trip_s": 0.04641418702279528,
+        "final_device_sync_per_trip_s": 0.03361276878664891,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 3,
+        "first_solve_with_build_wall_s": 27.824741205200553,
+        "host_reconciliation_per_trip_s": -0.00010497309267520905,
+        "identity": "21985/51 pure",
+        "initial_state_sha256": "ae51f7228c9f79f51143ee35280a701240e8c6c7a828f445aa85347b47d86cdd",
+        "per_trip_quantum_s": 0.0873497265080611,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.1387903532013297,
+            "converged": false,
+            "final_device_sync_s": 0.10215338692069054,
+            "host_reconciliation_s": -0.0003218492493033409,
+            "jacobian_s": 0.0016853287816047668,
+            "kernel_cache_growth": {},
+            "newton_s": 0.02095653861761093,
+            "per_trip_boundary_s": [
+              0.04646696895360947,
+              0.045998990535736084,
+              0.04632439371198416
+            ],
+            "per_trip_jacobian_s": [
+              0.0007295673713088036,
+              0.0005430569872260094,
+              0.0004127044230699539
+            ],
+            "per_trip_newton_s": [
+              0.011138050816953182,
+              0.005080235190689564,
+              0.004738252609968185
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.05797205679118633,
+              0.05164409056305885,
+              0.05149422399699688
+            ],
+            "solve_wall_s": 0.2632637582719326,
+            "terminal_residual": 0.0009125802199345642,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          },
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13969476893544197,
+            "converged": false,
+            "final_device_sync_s": 0.09952322579920292,
+            "host_reconciliation_s": -0.00030798930674791336,
+            "jacobian_s": 0.0021116454154253006,
+            "kernel_cache_growth": {},
+            "newton_s": 0.019812949933111668,
+            "per_trip_boundary_s": [
+              0.04677386488765478,
+              0.04712116625159979,
+              0.0457997377961874
+            ],
+            "per_trip_jacobian_s": [
+              0.0008089244365692139,
+              0.000713123008608818,
+              0.0005895979702472687
+            ],
+            "per_trip_newton_s": [
+              0.011659990064799786,
+              0.0042315516620874405,
+              0.0039214082062244415
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.058893668465316296,
+              0.052085873670876026,
+              0.050331832841038704
+            ],
+            "solve_wall_s": 0.26083460077643394,
+            "terminal_residual": 0.0009125802199345642,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          }
+        ],
+        "trips": 3,
+        "wall_per_solve_s": 0.2620491795241833
+      },
+      {
+        "boundary_per_trip_s": 0.04542614156380296,
+        "final_device_sync_per_trip_s": 0.02006057258695364,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 5,
+        "first_solve_with_build_wall_s": 26.442359952256083,
+        "host_reconciliation_per_trip_s": -0.0001854822039604187,
+        "identity": "21985/51 mixed",
+        "initial_state_sha256": "e71f57072a457d7f3337d4fe7ac9940a432d1e1a8410031b1a8aa902dbd849ca",
+        "per_trip_quantum_s": 0.07515000561252236,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 5,
+            "boundary_s": 0.2276661889627576,
+            "converged": false,
+            "final_device_sync_s": 0.10172071866691113,
+            "host_reconciliation_s": -0.0009237043559551239,
+            "jacobian_s": 0.0036659659817814827,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0450819106772542,
+            "per_trip_boundary_s": [
+              0.04519384074956179,
+              0.045173619873821735,
+              0.04562644474208355,
+              0.04613923653960228,
+              0.045533047057688236
+            ],
+            "per_trip_jacobian_s": [
+              0.0006298404186964035,
+              0.0005040550604462624,
+              0.0008677523583173752,
+              0.0009486526250839233,
+              0.0007156655192375183
+            ],
+            "per_trip_newton_s": [
+              0.012808208353817463,
+              0.0038604391738772392,
+              0.012230513617396355,
+              0.011761964298784733,
+              0.00442078523337841
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              1,
+              1,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.05828808806836605,
+              0.049558987841010094,
+              0.05840092245489359,
+              0.058551360853016376,
+              0.050691002048552036
+            ],
+            "solve_wall_s": 0.37721107993274927,
+            "terminal_residual": 0.000938534168729585,
+            "termination": "active_set_settled",
+            "trip_count": 5
+          },
+          {
+            "active_set_iterations": 5,
+            "boundary_s": 0.226595226675272,
+            "converged": false,
+            "final_device_sync_s": 0.09888500720262527,
+            "host_reconciliation_s": -0.0009311176836490631,
+            "jacobian_s": 0.003729170188307762,
+            "kernel_cache_growth": {},
+            "newton_s": 0.046010689809918404,
+            "per_trip_boundary_s": [
+              0.04580638464540243,
+              0.046072570607066154,
+              0.04573215916752815,
+              0.04331398010253906,
+              0.04567013215273619
+            ],
+            "per_trip_jacobian_s": [
+              0.0007219603285193443,
+              0.000747116282582283,
+              0.0007016072049736977,
+              0.0011070920154452324,
+              0.00045139435678720474
+            ],
+            "per_trip_newton_s": [
+              0.012195177376270294,
+              0.0043626101687550545,
+              0.01234649308025837,
+              0.013244247063994408,
+              0.003862162120640278
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              1,
+              1,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.058432793244719505,
+              0.051201715134084225,
+              0.058485064655542374,
+              0.05728220846503973,
+              0.05000218749046326
+            ],
+            "solve_wall_s": 0.37428897619247437,
+            "terminal_residual": 0.000938534168729585,
+            "termination": "active_set_settled",
+            "trip_count": 5
+          }
+        ],
+        "trips": 5,
+        "wall_per_solve_s": 0.3757500280626118
+      },
+      {
+        "boundary_per_trip_s": 0.0449795483921965,
+        "final_device_sync_per_trip_s": 0.03314448536063234,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 3,
+        "first_solve_with_build_wall_s": 24.392836052924395,
+        "host_reconciliation_per_trip_s": -0.00010438263416290283,
+        "identity": "21986/46 pure",
+        "initial_state_sha256": "1022f57e1253c47d3c5f912accf8946f20c6a38a292482b747d6bac165c2bdbe",
+        "per_trip_quantum_s": 0.08541911126424868,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13666962273418903,
+            "converged": false,
+            "final_device_sync_s": 0.10133701283484697,
+            "host_reconciliation_s": -0.0003561917692422867,
+            "jacobian_s": 0.0017311880365014076,
+            "kernel_cache_growth": {},
+            "newton_s": 0.021085448563098907,
+            "per_trip_boundary_s": [
+              0.045908757485449314,
+              0.045050221495330334,
+              0.045710643753409386
+            ],
+            "per_trip_jacobian_s": [
+              0.0008411537855863571,
+              0.0003927759826183319,
+              0.0004972582682967186
+            ],
+            "per_trip_newton_s": [
+              0.012296576984226704,
+              0.004788625985383987,
+              0.004000245593488216
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.05865325219929218,
+              0.050248690880835056,
+              0.05022812448441982
+            ],
+            "solve_wall_s": 0.26046708039939404,
+            "terminal_residual": 0.0018516493026281022,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          },
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13320766761898994,
+            "converged": false,
+            "final_device_sync_s": 0.09752989932894707,
+            "host_reconciliation_s": -0.0002701040357351303,
+            "jacobian_s": 0.0017506517469882965,
+            "kernel_cache_growth": {},
+            "newton_s": 0.01982947252690792,
+            "per_trip_boundary_s": [
+              0.04416247922927141,
+              0.0443854546174407,
+              0.04465973377227783
+            ],
+            "per_trip_jacobian_s": [
+              0.0006207702681422234,
+              0.000598222017288208,
+              0.0005316594615578651
+            ],
+            "per_trip_newton_s": [
+              0.01162234041839838,
+              0.004250234924256802,
+              0.003956897184252739
+            ],
+            "per_trip_newton_steps": [
+              1,
+              0,
+              0
+            ],
+            "per_trip_wall_s": [
+              0.05610093753784895,
+              0.04924999363720417,
+              0.04916675668209791
+            ],
+            "solve_wall_s": 0.2520475871860981,
+            "terminal_residual": 0.0018516493026281022,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          }
+        ],
+        "trips": 3,
+        "wall_per_solve_s": 0.25625733379274607
+      },
+      {
+        "boundary_per_trip_s": 0.04561458295211196,
+        "final_device_sync_per_trip_s": 0.03344304719939828,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 3,
+        "first_solve_with_build_wall_s": 29.787757696583867,
+        "host_reconciliation_per_trip_s": -0.0003804912169774373,
+        "identity": "21986/46 mixed",
+        "initial_state_sha256": "3bf614bae21fb06ab68934c97cda0d6a29f0ea2fc20fdb61378f9bc4de5b5318",
+        "per_trip_quantum_s": 0.09275925966600577,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "production seed retained for unavailable cached geometry",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13786728587001562,
+            "converged": false,
+            "final_device_sync_s": 0.1031207898631692,
+            "host_reconciliation_s": -0.0010043550282716751,
+            "jacobian_s": 0.0026837382465600967,
+            "kernel_cache_growth": {},
+            "newton_s": 0.038546688854694366,
+            "per_trip_boundary_s": [
+              0.04621832352131605,
+              0.045789350755512714,
+              0.045859611593186855
+            ],
+            "per_trip_jacobian_s": [
+              0.0009699044749140739,
+              0.0006582047790288925,
+              0.0010556289926171303
+            ],
+            "per_trip_newton_s": [
+              0.022910714149475098,
+              0.0037438487634062767,
+              0.011892125941812992
+            ],
+            "per_trip_newton_steps": [
+              3,
+              0,
+              1
+            ],
+            "per_trip_wall_s": [
+              0.06948212720453739,
+              0.050211088731884956,
+              0.05840014200657606
+            ],
+            "solve_wall_s": 0.2812141478061676,
+            "terminal_residual": 0.001967697918924135,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          },
+          {
+            "active_set_iterations": 3,
+            "boundary_s": 0.13582021184265614,
+            "converged": false,
+            "final_device_sync_s": 0.09753749333322048,
+            "host_reconciliation_s": -0.001278592273592949,
+            "jacobian_s": 0.0026685623452067375,
+            "kernel_cache_growth": {},
+            "newton_s": 0.040593734942376614,
+            "per_trip_boundary_s": [
+              0.04559516068547964,
+              0.04536176286637783,
+              0.044863288290798664
+            ],
+            "per_trip_jacobian_s": [
+              0.0013852622359991074,
+              0.0003873798996210098,
+              0.0008959202095866203
+            ],
+            "per_trip_newton_s": [
+              0.024019906297326088,
+              0.004459111951291561,
+              0.012114716693758965
+            ],
+            "per_trip_newton_steps": [
+              3,
+              0,
+              1
+            ],
+            "per_trip_wall_s": [
+              0.07010494265705347,
+              0.05022539757192135,
+              0.05747357662767172
+            ],
+            "solve_wall_s": 0.275341410189867,
+            "terminal_residual": 0.001967697918924135,
+            "termination": "active_set_settled",
+            "trip_count": 3
+          }
+        ],
+        "trips": 3,
+        "wall_per_solve_s": 0.2782777789980173
+      },
+      {
+        "boundary_per_trip_s": 0.046132713090628386,
+        "final_device_sync_per_trip_s": 0.0985103826969862,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 29.602141374722123,
+        "host_reconciliation_per_trip_s": -0.00031899288296699524,
+        "identity": "21989/55 pure",
+        "initial_state_sha256": "445257abde5f688aff10915b2520a04d72eed03b469df2a666569c33b8df394e",
+        "per_trip_quantum_s": 0.15750427171587944,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.046263023279607296,
+            "converged": false,
+            "final_device_sync_s": 0.10078676976263523,
+            "host_reconciliation_s": -0.0003309762105345726,
+            "jacobian_s": 0.000999506562948227,
+            "kernel_cache_growth": {},
+            "newton_s": 0.012560995295643806,
+            "per_trip_boundary_s": [
+              0.046263023279607296
+            ],
+            "per_trip_jacobian_s": [
+              0.000999506562948227
+            ],
+            "per_trip_newton_s": [
+              0.012560995295643806
+            ],
+            "per_trip_newton_steps": [
+              1
+            ],
+            "per_trip_wall_s": [
+              0.05949254892766476
+            ],
+            "solve_wall_s": 0.1602793186903,
+            "terminal_residual": 0.0012047285926774273,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.046002402901649475,
+            "converged": false,
+            "final_device_sync_s": 0.09623399563133717,
+            "host_reconciliation_s": -0.0003070095553994179,
+            "jacobian_s": 0.0006490936502814293,
+            "kernel_cache_growth": {},
+            "newton_s": 0.01215074211359024,
+            "per_trip_boundary_s": [
+              0.046002402901649475
+            ],
+            "per_trip_jacobian_s": [
+              0.0006490936502814293
+            ],
+            "per_trip_newton_s": [
+              0.01215074211359024
+            ],
+            "per_trip_newton_steps": [
+              1
+            ],
+            "per_trip_wall_s": [
+              0.05849522911012173
+            ],
+            "solve_wall_s": 0.1547292247414589,
+            "terminal_residual": 0.0012047285926774273,
+            "termination": "active_set_settled",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.15750427171587944
+      },
+      {
+        "boundary_per_trip_s": 0.04589463374577463,
+        "final_device_sync_per_trip_s": 0.049960552947595716,
+        "first_solve_converged": false,
+        "first_solve_termination": "active_set_settled",
+        "first_solve_trips": 2,
+        "first_solve_with_build_wall_s": 28.699551448225975,
+        "host_reconciliation_per_trip_s": -0.00037476280704140663,
+        "identity": "21989/55 mixed",
+        "initial_state_sha256": "65cbdef65ec0f3d69bf82549e33ceb0351e6b382fa8b766984db37d1f88e7a42",
+        "per_trip_quantum_s": 0.10836379462853074,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 1
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 2,
+            "boundary_s": 0.09216185286641121,
+            "converged": false,
+            "final_device_sync_s": 0.10197775345295668,
+            "host_reconciliation_s": -0.0007837396115064621,
+            "jacobian_s": 0.0018180180341005325,
+            "kernel_cache_growth": {},
+            "newton_s": 0.024101363494992256,
+            "per_trip_boundary_s": [
+              0.04609139263629913,
+              0.046070460230112076
+            ],
+            "per_trip_jacobian_s": [
+              0.0008500982075929642,
+              0.0009679198265075684
+            ],
+            "per_trip_newton_s": [
+              0.01194394938647747,
+              0.012157414108514786
+            ],
+            "per_trip_newton_steps": [
+              1,
+              1
+            ],
+            "per_trip_wall_s": [
+              0.05852813459932804,
+              0.058769360184669495
+            ],
+            "solve_wall_s": 0.2192752482369542,
+            "terminal_residual": 0.0009983573617288282,
+            "termination": "active_set_settled",
+            "trip_count": 2
+          },
+          {
+            "active_set_iterations": 2,
+            "boundary_s": 0.0914166821166873,
+            "converged": false,
+            "final_device_sync_s": 0.09786445833742619,
+            "host_reconciliation_s": -0.0007153116166591644,
+            "jacobian_s": 0.0016601290553808212,
+            "kernel_cache_growth": {},
+            "newton_s": 0.02395397238433361,
+            "per_trip_boundary_s": [
+              0.04564390052109957,
+              0.04577278159558773
+            ],
+            "per_trip_jacobian_s": [
+              0.0007157130166888237,
+              0.0009444160386919975
+            ],
+            "per_trip_newton_s": [
+              0.01174551248550415,
+              0.01220845989882946
+            ],
+            "per_trip_newton_steps": [
+              1,
+              1
+            ],
+            "per_trip_wall_s": [
+              0.05773099325597286,
+              0.0585844786837697
+            ],
+            "solve_wall_s": 0.21417993027716875,
+            "terminal_residual": 0.0009983573617288282,
+            "termination": "active_set_settled",
+            "trip_count": 2
+          }
+        ],
+        "trips": 2,
+        "wall_per_solve_s": 0.21672758925706148
+      },
+      {
+        "boundary_per_trip_s": 0.04608697397634387,
+        "final_device_sync_per_trip_s": 0.10045464849099517,
+        "first_solve_converged": true,
+        "first_solve_termination": "converged",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 25.412965287454426,
+        "host_reconciliation_per_trip_s": 6.024772301316261e-05,
+        "identity": "22086/43 pure",
+        "initial_state_sha256": "17f35c3dcff35310ca8c256fb85c0391ad95e489f7486f477936137cbd339ae8",
+        "per_trip_quantum_s": 0.161016714759171,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 1,
+          "flux_scores": 0,
+          "grade": 1,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 0
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.046588025987148285,
+            "converged": true,
+            "final_device_sync_s": 0.1024651788175106,
+            "host_reconciliation_s": 5.987752228975296e-05,
+            "jacobian_s": 0.000630444847047329,
+            "kernel_cache_growth": {},
+            "newton_s": 0.014285999350249767,
+            "per_trip_boundary_s": [
+              0.046588025987148285
+            ],
+            "per_trip_jacobian_s": [
+              0.000630444847047329
+            ],
+            "per_trip_newton_s": [
+              0.014285999350249767
+            ],
+            "per_trip_newton_steps": [
+              5
+            ],
+            "per_trip_wall_s": [
+              0.061564347706735134
+            ],
+            "solve_wall_s": 0.16402952652424574,
+            "terminal_residual": 4.689548758917088e-09,
+            "termination": "converged",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.045585921965539455,
+            "converged": true,
+            "final_device_sync_s": 0.09844411816447973,
+            "host_reconciliation_s": 6.0617923736572266e-05,
+            "jacobian_s": 0.00048738252371549606,
+            "kernel_cache_growth": {},
+            "newton_s": 0.013425862416625023,
+            "per_trip_boundary_s": [
+              0.045585921965539455
+            ],
+            "per_trip_jacobian_s": [
+              0.00048738252371549606
+            ],
+            "per_trip_newton_s": [
+              0.013425862416625023
+            ],
+            "per_trip_newton_steps": [
+              5
+            ],
+            "per_trip_wall_s": [
+              0.05955978482961655
+            ],
+            "solve_wall_s": 0.15800390299409628,
+            "terminal_residual": 4.689548758917088e-09,
+            "termination": "converged",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.161016714759171
+      },
+      {
+        "boundary_per_trip_s": 0.046950533986091614,
+        "final_device_sync_per_trip_s": 0.09861881425604224,
+        "first_solve_converged": true,
+        "first_solve_termination": "converged",
+        "first_solve_trips": 1,
+        "first_solve_with_build_wall_s": 23.976314856670797,
+        "host_reconciliation_per_trip_s": 0.0007116245105862617,
+        "identity": "22086/43 mixed",
+        "initial_state_sha256": "e5fe737cfb6a8e9e088d21fbf79a67fd7840c3204001c5c68fa4f7c0c4738f69",
+        "per_trip_quantum_s": 0.14679194800555706,
+        "program_kernel_cache_sizes": {
+          "boundary": 1,
+          "direction": 0,
+          "flux_scores": 0,
+          "grade": 0,
+          "initial_gather": 1,
+          "jacobian": 1,
+          "ladder": 0,
+          "leakage": 0,
+          "reconstruct": 0,
+          "reduced_map": 0,
+          "reduced_residual": 0,
+          "step_scores": 1,
+          "tail": 0
+        },
+        "requested_class": "diverted",
+        "retrace_total_s": 0.0,
+        "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+        "steady_warm_metrics": [
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.047522841952741146,
+            "converged": true,
+            "final_device_sync_s": 0.10103297885507345,
+            "host_reconciliation_s": 0.0008121402934193611,
+            "jacobian_s": 0.0006145648658275604,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0,
+            "per_trip_boundary_s": [
+              0.047522841952741146
+            ],
+            "per_trip_jacobian_s": [
+              0.0006145648658275604
+            ],
+            "per_trip_newton_s": [
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.04894954711198807
+            ],
+            "solve_wall_s": 0.14998252596706152,
+            "terminal_residual": 1.2995561329596457e-14,
+            "termination": "converged",
+            "trip_count": 1
+          },
+          {
+            "active_set_iterations": 1,
+            "boundary_s": 0.04637822601944208,
+            "converged": true,
+            "final_device_sync_s": 0.09620464965701103,
+            "host_reconciliation_s": 0.0006111087277531624,
+            "jacobian_s": 0.0004073856398463249,
+            "kernel_cache_growth": {},
+            "newton_s": 0.0,
+            "per_trip_boundary_s": [
+              0.04637822601944208
+            ],
+            "per_trip_jacobian_s": [
+              0.0004073856398463249
+            ],
+            "per_trip_newton_s": [
+              0.0
+            ],
+            "per_trip_newton_steps": [
+              0
+            ],
+            "per_trip_wall_s": [
+              0.04739672038704157
+            ],
+            "solve_wall_s": 0.1436013700440526,
+            "terminal_residual": 1.2995561329596457e-14,
+            "termination": "converged",
+            "trip_count": 1
+          }
+        ],
+        "trips": 1,
+        "wall_per_solve_s": 0.14679194800555706
+      }
+    ]
+  }
+}

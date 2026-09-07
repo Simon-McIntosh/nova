@@ -971,19 +971,38 @@ def _draw_case_current_repair(rows: list[dict[str, Any]], path: Path) -> None:
     plt.close(figure)
 
 
-def measure_case_current_repair(output: Path) -> dict[str, Any]:
+def measure_case_current_repair(
+    output: Path, requested_rows: tuple[tuple[int, int], ...] = ROWS
+) -> dict[str, Any]:
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
     output.mkdir(parents=True, exist_ok=True)
-    rows = []
-    for shot, row in ROWS:
+    receipt_path = output / "case-current-repair.json"
+    existing_rows = []
+    if receipt_path.exists():
+        existing = json.loads(receipt_path.read_text(encoding="utf-8"))
+        existing_rows = existing.get("rows", [])
+    rows_by_identity = {row["identity"]: row for row in existing_rows}
+    for shot, row in requested_rows:
         measured = _case_current_repair_row(shot, row)
-        rows.append(measured)
-        (output / "case-current-repair.json").write_text(
+        rows_by_identity[measured["identity"]] = measured
+        rows = [
+            rows_by_identity[f"{item_shot}/{item_row}"]
+            for item_shot, item_row in ROWS
+            if f"{item_shot}/{item_row}" in rows_by_identity
+        ]
+        receipt_path.write_text(
             json.dumps({"rows": rows}, indent=2) + "\n", encoding="utf-8"
         )
+    rows = [
+        rows_by_identity[f"{shot}/{row}"]
+        for shot, row in ROWS
+        if f"{shot}/{row}" in rows_by_identity
+    ]
+    if len(rows) != len(ROWS):
+        return {"rows": rows}
     receipt = {
         "receipt": "free solve and elimination scan with measured coil-case currents",
         "source": {
@@ -1017,9 +1036,7 @@ def measure_case_current_repair(output: Path) -> dict[str, Any]:
             row for row in rows if row["identity"] == "21989/55"
         )["free_production_solve"]["measured_case_current"]["converged"],
     }
-    (output / "case-current-repair.json").write_text(
-        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
-    )
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     _draw_case_current_repair(rows, output / "case-current-repair.png")
     return receipt
 
@@ -1232,13 +1249,27 @@ def main() -> None:
         action="store_true",
         help="solve fitted and measured-case current vectors from each bank seed",
     )
+    parser.add_argument(
+        "--case-current-identity",
+        choices=[f"{shot}/{row}" for shot, row in ROWS],
+        action="append",
+        help="limit case-current repair to one missing shot and row",
+    )
     args = parser.parse_args()
     if args.sensitivity_only and args.case_current_repair:
         raise ValueError("choose one focused measurement")
     if args.sensitivity_only:
         receipt = measure_sensitivity(args.output)
     elif args.case_current_repair:
-        receipt = measure_case_current_repair(args.output)
+        requested_rows = (
+            tuple(
+                (int(identity.split("/")[0]), int(identity.split("/")[1]))
+                for identity in args.case_current_identity
+            )
+            if args.case_current_identity
+            else ROWS
+        )
+        receipt = measure_case_current_repair(args.output, requested_rows)
     else:
         receipt = measure(args.output)
         receipt["sensitivity"] = measure_sensitivity(args.output)

@@ -197,47 +197,70 @@ def _replay_shot(
         requested = jnp.asarray(requested_value, dtype=jnp.int8)
         target_current = abs(inputs["reference_plasma_current"])
         current = jnp.asarray(inputs["current"])
-        free = reduced_newton.solve_reduced_newton(
-            prepared.profile.operator,
-            initial,
-            requested_class=requested,
-            target_current=target_current,
-            prescribed_current=current,
-            tolerance=shard.FIXED_POINT_CRITERION,
-            newton_steps=NEWTON_STEPS,
-            program=programs.free,
-            stream=False,
-        )
-        free_program = free.program
+        free = None
+        replay_exceptions = []
+        try:
+            free = reduced_newton.solve_reduced_newton(
+                prepared.profile.operator,
+                initial,
+                requested_class=requested,
+                target_current=target_current,
+                prescribed_current=current,
+                tolerance=shard.FIXED_POINT_CRITERION,
+                newton_steps=NEWTON_STEPS,
+                program=programs.free,
+                stream=False,
+            )
+        except Exception as error:
+            replay_exceptions.append(f"free {type(error).__name__}: {error}")
+        free_program = programs.free if free is None else free.program
         conditioned_program = programs.conditioned
         selected = free
         decision = companion.get(row)
         if decision is None:
             raise ValueError(f"companion omits written row: shot={shot} row={row}")
         if decision["conditioned"]:
-            pair, _selection = _centroid_pair(
-                prepared.profile,
-                initial,
-                target=inputs["target_centroid_z"],
-                unknown=None,
-                target_current=target_current,
-                requested=requested,
-                names=circuit_names,
-            )
-            selected = reduced_newton.solve_constrained_reduced_newton(
-                prepared.profile,
-                initial,
-                constraint_pairs=(pair,),
-                requested_class=requested,
-                target_current=target_current,
-                prescribed_current=current,
-                tolerance=shard.FIXED_POINT_CRITERION,
-                newton_steps=NEWTON_STEPS,
-                program=programs.conditioned,
-                stream=False,
-            )
-            conditioned_program = selected.program
+            try:
+                pair, _selection = _centroid_pair(
+                    prepared.profile,
+                    initial,
+                    target=inputs["target_centroid_z"],
+                    unknown=None,
+                    target_current=target_current,
+                    requested=requested,
+                    names=circuit_names,
+                )
+                selected = reduced_newton.solve_constrained_reduced_newton(
+                    prepared.profile,
+                    initial,
+                    constraint_pairs=(pair,),
+                    requested_class=requested,
+                    target_current=target_current,
+                    prescribed_current=current,
+                    tolerance=shard.FIXED_POINT_CRITERION,
+                    newton_steps=NEWTON_STEPS,
+                    program=programs.conditioned,
+                    stream=False,
+                )
+                conditioned_program = selected.program
+            except Exception as error:
+                replay_exceptions.append(f"conditioned {type(error).__name__}: {error}")
+                selected = None
         programs = ReplayPrograms(free_program, conditioned_program)
+        observed = (
+            selected.state
+            if selected is not None
+            else free.state
+            if free is not None
+            else initial
+        )
+        state_source = (
+            "selected_terminal"
+            if selected is not None
+            else "free_terminal_after_conditioning_exception"
+            if free is not None
+            else "solve_input_after_route_exceptions"
+        )
         if requested_value == int(TopologyClass.LIMITED):
             frames.append(
                 {
@@ -245,14 +268,24 @@ def _replay_shot(
                     "row": row,
                     "time_s": float(inputs["time"]),
                     "conditioned": bool(decision["conditioned"]),
-                    "replay_terminal_residual": float(selected.terminal_residual),
-                    "source_terminal_residual": record.get("terminal_residual"),
-                    **_wall_report(
-                        prepared.profile.operator, selected.state, requested
+                    "mask_observation_state": state_source,
+                    "replay_terminal_residual": (
+                        None if selected is None else float(selected.terminal_residual)
                     ),
+                    "source_terminal_residual": record.get("terminal_residual"),
+                    "replay_exceptions": replay_exceptions,
+                    **_wall_report(prepared.profile.operator, observed, requested),
                 }
             )
-        state = None if record.get("geometry_masked") else selected.state
+        if record.get("geometry_masked"):
+            state = None
+        elif selected is None:
+            raise RuntimeError(
+                "source session retained a state the replay lacks: "
+                f"shot={shot} row={row}"
+            )
+        else:
+            state = selected.state
     summary = {
         "shot": shot,
         "written_frames_replayed": replayed,

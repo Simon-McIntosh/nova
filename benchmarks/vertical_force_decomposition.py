@@ -61,6 +61,13 @@ DEFAULT_OUTPUT = ROOT / (
 )
 ROWS = ((21986, 46), (21989, 55))
 SCAN_HEIGHTS_M = (0.01889428493417936, 0.13889428493417936)
+POSITION_OFFSET_M = {
+    "p4_lower": 0.006638,
+    "p4_upper": 0.002941,
+    "p5_lower": 0.013070,
+    "p5_upper": 0.000562,
+}
+COMPENSATION_REFERENCE_A = {"21989/55": 3000.0}
 
 
 def _source_revision() -> str:
@@ -140,6 +147,24 @@ def _element_br_per_ampere(
     elements: dict[str, np.ndarray], index: int, target: tuple[float, float]
 ) -> float:
     vertices = _element_vertices(elements, index)
+    _psi, radial, _vertical = polygon_greens(target[0], target[1], vertices)
+    return (
+        float(radial)
+        * float(elements["fcoil_turns"][index])
+        * float(elements["fcoil_xmult"][index])
+    )
+
+
+def _offset_element_br_per_ampere(
+    elements: dict[str, np.ndarray],
+    index: int,
+    target: tuple[float, float],
+    radial_offset_m: float,
+    vertical_offset_m: float,
+) -> float:
+    vertices = _element_vertices(elements, index) + np.asarray(
+        [radial_offset_m, vertical_offset_m]
+    )
     _psi, radial, _vertical = polygon_greens(target[0], target[1], vertices)
     return (
         float(radial)
@@ -283,6 +308,231 @@ def _p6_response(
     if abs(response) < np.finfo(np.float64).tiny:
         raise ValueError("P6 radial response is zero")
     return response
+
+
+def _circuit_br_per_ampere(
+    elements: dict[str, np.ndarray], circuit: int, target: tuple[float, float]
+) -> float:
+    return sum(
+        _element_br_per_ampere(elements, int(index), target)
+        for index in np.flatnonzero(elements["fcoil_circ"] == circuit)
+    )
+
+
+def _displaced_circuit_field(
+    elements: dict[str, np.ndarray],
+    circuit: int,
+    current_a: float,
+    target: tuple[float, float],
+    radial_offset_m: float,
+    vertical_offset_m: float,
+) -> float:
+    return current_a * sum(
+        _offset_element_br_per_ampere(
+            elements,
+            int(index),
+            target,
+            radial_offset_m,
+            vertical_offset_m,
+        )
+        for index in np.flatnonzero(elements["fcoil_circ"] == circuit)
+    )
+
+
+def _position_sensitivity(
+    elements: dict[str, np.ndarray],
+    circuit: int,
+    current_a: float,
+    target: tuple[float, float],
+    p6_response_t_per_a: float,
+    radial: bool,
+) -> float:
+    offset_m = 0.001
+    positive = _displaced_circuit_field(
+        elements,
+        circuit,
+        current_a,
+        target,
+        offset_m if radial else 0.0,
+        0.0 if radial else offset_m,
+    )
+    negative = _displaced_circuit_field(
+        elements,
+        circuit,
+        current_a,
+        target,
+        -offset_m if radial else 0.0,
+        0.0 if radial else -offset_m,
+    )
+    return (positive - negative) / (2.0 * p6_response_t_per_a)
+
+
+def _sensitivity_row(shot: int, row: int) -> dict[str, Any]:
+    group = _efm_group(shot)
+    target = _seed_current_centroid(shot, row)
+    geometry = MachineGeometryRegistry.default().select(shot).configuration.geometry
+    _families, _drives, mapping = _circuit_drives(group, row, geometry, "fcoil_c")
+    active = {int(item["stored_circuit"]): str(item["family"]) for item in mapping}
+    elements = _element_data(group)
+    fitted = np.asarray(group["fcoil_c"][row], dtype=np.float64)
+    p6 = _p6_response(elements, active, target)
+    active_rows = []
+    for circuit, family in sorted(active.items()):
+        response = _circuit_br_per_ampere(elements, circuit, target) / p6
+        active_rows.append(
+            {
+                "family": family,
+                "stored_circuit": circuit,
+                "fitted_current_a": float(fitted[circuit - 1]),
+                "efm_current_uncertainty_a": None,
+                "p6_ampere_equivalent_per_ampere": response,
+                "p6_ampere_equivalent_per_uncertainty": None,
+                "efm_fit_chi_squared": _strict_float(
+                    group["fcoil_chisq"][row, circuit - 1]
+                ),
+                "efm_fit_weight": _strict_float(group["fwtfc"][row, circuit - 1]),
+            }
+        )
+    positions = []
+    inverse = {family: circuit for circuit, family in active.items()}
+    for family, vertical_offset_m in POSITION_OFFSET_M.items():
+        circuit = inverse[family]
+        current_a = float(fitted[circuit - 1])
+        radial_per_mm = _position_sensitivity(
+            elements, circuit, current_a, target, p6, radial=True
+        )
+        vertical_per_mm = _position_sensitivity(
+            elements, circuit, current_a, target, p6, radial=False
+        )
+        positions.append(
+            {
+                "family": family,
+                "stored_circuit": circuit,
+                "fitted_current_a": current_a,
+                "p6_ampere_equivalent_per_mm_radial": radial_per_mm,
+                "p6_ampere_equivalent_per_mm_vertical": vertical_per_mm,
+                "radial_position_tolerance_mm": None,
+                "vertical_position_tolerance_mm": vertical_offset_m * 1.0e3,
+                "vertical_p6_ampere_equivalent_at_tolerance": vertical_per_mm
+                * vertical_offset_m
+                * 1.0e3,
+            }
+        )
+    identity = f"{shot}/{row}"
+    compensation = COMPENSATION_REFERENCE_A.get(identity)
+    ranked = []
+    if compensation is not None:
+        for item in positions:
+            available = abs(item["vertical_p6_ampere_equivalent_at_tolerance"])
+            ranked.append(
+                {
+                    "perturbation": f"{item['family']} vertical position",
+                    "available_p6_adjustment_a": available,
+                    "closure_fraction": min(available / compensation, 1.0),
+                    "closes_reference": available >= compensation,
+                }
+            )
+        ranked.sort(key=lambda item: item["available_p6_adjustment_a"], reverse=True)
+    return {
+        "identity": identity,
+        "current_centroid": {"r_m": target[0], "z_m": target[1]},
+        "p6_radial_response_t_per_a": p6,
+        "p6_definition": "stored P6 upper current minus stored P6 lower current",
+        "current_uncertainty": {
+            "availability": "not carried by the EFM store",
+            "reason": (
+                "fcoil_chisq is a fit diagnostic and fwtfc is a fit weight; neither "
+                "declares a current standard error"
+            ),
+        },
+        "active_circuit_sensitivities": active_rows,
+        "coil_position_sensitivities": positions,
+        "compensation_reference_a": compensation,
+        "ranked_available_perturbations": ranked,
+    }
+
+
+def _draw_sensitivity(rows: list[dict[str, Any]], path: Path) -> None:
+    figure, axes = plt.subplots(1, 2, figsize=(15, 7))
+    for row in rows:
+        values = row["active_circuit_sensitivities"]
+        labels = [item["family"] for item in values]
+        response = [item["p6_ampere_equivalent_per_ampere"] for item in values]
+        axes[0].plot(response, labels, "o", label=row["identity"])
+    axes[0].axvline(0.0, color="0.3", linewidth=0.8)
+    axes[0].set_xlabel("P6 ampere-equivalent per circuit ampere [A/A]")
+    axes[0].set_title("Active-current response")
+    axes[0].grid(axis="x", alpha=0.2)
+    axes[0].legend(frameon=False)
+    measured = next(row for row in rows if row["identity"] == "21989/55")
+    positions = measured["coil_position_sensitivities"]
+    labels = [item["family"] for item in positions]
+    available = [
+        abs(item["vertical_p6_ampere_equivalent_at_tolerance"]) / 1.0e3
+        for item in positions
+    ]
+    axes[1].bar(labels, available)
+    axes[1].axhline(3.0, color="0.3", linewidth=0.8, label="3 kA reference")
+    axes[1].set_ylabel("Available vertical-position adjustment [kA]")
+    axes[1].set_title("Published copper-offset interval")
+    axes[1].grid(axis="y", alpha=0.2)
+    axes[1].legend(frameon=False)
+    figure.suptitle("Seed-centroid radial-field sensitivity")
+    figure.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def measure_sensitivity(output: Path) -> dict[str, Any]:
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    output.mkdir(parents=True, exist_ok=True)
+    rows = [_sensitivity_row(shot, row) for shot, row in ROWS]
+    measured = next(row for row in rows if row["identity"] == "21989/55")
+    ranked = measured["ranked_available_perturbations"]
+    receipt = {
+        "receipt": "seed-centroid radial-field sensitivity",
+        "source": {
+            "revision": _source_revision(),
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+        },
+        "configuration": {
+            "field": "B_R at the public seed current centroid",
+            "p6_equivalent": (
+                "B_R divided by the P6 upper-minus-lower unit response at that centroid"
+            ),
+            "current_uncertainty": (
+                "reported only when the store declares a current standard error"
+            ),
+            "position_derivative": "symmetric one-millimetre finite difference",
+            "vertical_position_interval": (
+                "published Hall-probe copper z-offset magnitude; no radial interval is "
+                "available from that source"
+            ),
+            "persistent_compilation_cache": {
+                "directory": str(cache.directory),
+                "version": cache.version_key,
+            },
+        },
+        "rows": rows,
+    }
+    receipt["verdict"] = {
+        "reference_compensation_a": measured["compensation_reference_a"],
+        "leading_available_perturbation": ranked[0] if ranked else None,
+        "single_perturbation_closes_reference": any(
+            item["closes_reference"] for item in ranked
+        ),
+    }
+    (output / "sensitivity-21989.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    _draw_sensitivity(rows, output / "sensitivity-21989.png")
+    return receipt
 
 
 def _decompose_row(shot: int, row: int) -> dict[str, Any]:
@@ -655,8 +905,17 @@ def measure(output: Path) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--sensitivity-only",
+        action="store_true",
+        help="write the active-current and coil-position sensitivity receipt only",
+    )
     args = parser.parse_args()
-    receipt = measure(args.output)
+    receipt = (
+        measure_sensitivity(args.output)
+        if args.sensitivity_only
+        else measure(args.output)
+    )
     print(json.dumps(receipt["verdict"], sort_keys=True))
 
 

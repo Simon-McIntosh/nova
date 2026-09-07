@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T08:15:49",
+  "updated": "2026-09-07T08:18:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2703,9 +2703,11 @@
         "id": "pfs-census-s",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07a6f-357c-7cb2-8adf-a6c719315ed3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07a6f-357c-7cb2-8adf-a6c719315ed3"
+        },
         "created": "2026-09-07"
       },
       {
@@ -118039,6 +118041,200 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T055447787833-pfs-zero-converged-census",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-zero-converged-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2790,
+                "cached_input_tokens": 911551,
+                "input_tokens": 914373,
+                "output_tokens": 52,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 914425,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "docs/figures/playable-forward-solve/zero-converged-block/census.json and census.md hold the per-shot table (block plus 20 neighbours each side, every row present or marked unreadable with the reason) produced by an sbatch all_debug job (--time=00:59:00 --cpus-per-task=4 --mem=32G, TMPDIR=/tmp, environment python called directly, a checkpoint file appended per shot so a timeout keeps the rows, declared wait on the job id written before it starts, a second job for any rows a timeout misses); the seed-degeneracy check reports for six shots whether the writer seed is finite, whether the extrapolated boundary flux bounds the map, and the axis candidate count at the first admitted row; the report closes with one recommendation and the shot count it affects; the reader reuses scripts/labeller_batch/shard.py admission and seed helpers rather than a new reader",
+          "estimated_hours": 1.5,
+          "goal": "The census of the zero-converged labeller shot block 22475 to 22626 against twenty converging neighbours on each side, run on the debug partition with per-shot checkpointing: per-shot efm scalar summary (time span, plasma current range, magnetic_axis_z and current_centrd_z ranges, fcoil finiteness), admission counts and the first failing stage from the corpus manifests, a seed-degeneracy check on three block shots and three neighbours, and one recommendation to exclude the block from the demo cohort or to repair the seed",
+          "id": "pfs-zero-converged-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T055447787833-pfs-zero-converged-census/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/figures/playable-forward-solve/zero-converged-block/",
+            "benchmarks/zero_converged_block_census.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/zero-converged-block.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-census-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T05:55:03Z",
+        "completed_at": "2026-09-07T06:16:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1310,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1310,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "2c7ebc99e44dc006fe459bd68a7badec7d39c9d8",
+        "commits": [
+          "2c727480bb790c374f6220995d71920423b739c3",
+          "b66ac879ed3a42b15d6396181dee83e3007ad70d"
+        ],
+        "changed_lines": {
+          "added": 9706,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch all_debug jobs 1263907 (census, 192 checkpointed rows, exit 0), 1263919 (report) and 1263924 (committed-revision rerun, exit 0) plus a structural jq gate: 192 rows, 152 block shots, 20 converging neighbours per side, 6 seed checks, one recommendation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-zero-converged-census/docs/figures/playable-forward-solve/zero-converged-block/slurm-1263924.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T055447787833-pfs-zero-converged-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07a6f-357c-7cb2-8adf-a6c719315ed3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17579648,
+            "cached_input_tokens_cumulative": 17579648,
+            "input_tokens": 18014142,
+            "input_tokens_cumulative": 18014142,
+            "output_tokens": 51993,
+            "output_tokens_cumulative": 51993,
+            "reasoning_output_tokens": 14392,
+            "reasoning_output_tokens_cumulative": 14392
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1507,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 1533,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 66385,
+          "peak_input_tokens": 35593790
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-zero-converged-census",
+          "session_id": "01a07a6f-357c-7cb2-8adf-a6c719315ed3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T06:16:53Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -118351,6 +118547,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1979
+    "_version": 1981
   }
 }

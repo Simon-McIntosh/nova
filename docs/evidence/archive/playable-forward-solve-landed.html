@@ -659,6 +659,30 @@
     The rule nova needs from it is one line: the ranked corpus walk this labeller consumes is the unified camera manifest minus that cohort, so a shot absent from the walk
     is a cohort member rather than a tail-ranked shot.</p>
   </section>
+
+  <section id="polarity-is-not-the-sign-of-the-flux">
+    <h2>A gauge-carrying flux sign is not a plasma-current polarity (2026-09-07 07:30Z, coordinator review)</h2>
+    <p>The sign-aware axis read for the reversed-current block was reviewed before merge, after its first two relabel jobs exited zero with zero converged
+    <em>and</em> zero qualified slices on all three shots. The change has two halves that contradict each other. In <code>nova/equilibrium/stencil_nulls.py</code> the
+    axis selection is correct: it widens the candidate slots from one to eight and picks the extremum whose <code>ntype</code> matches the polarity, positive current
+    selecting a maximum and negative a minimum. That is the right instrument, because <code>ntype</code> comes from the sign of the Hessian trace at the stationary
+    point and so does not move with the flux gauge.</p>
+    <p>In <code>nova/equilibrium/topology.py</code> the same change infers a polarity from the <em>sign of the flux value</em> at the largest-magnitude O-point and then
+    substitutes that inferred value for the caller's polarity through the whole read. The equilibrium guidance states that the Biot-Savart composition sets nova's
+    poloidal-flux gauge and that raw flux amplitudes may be compared only within a declared gauge, so the axis flux carries the external-coil contribution and its sign
+    is not a function of the plasma-current direction. The inference therefore inverts the read on any shot whose gauge places the axis flux on the other side of zero,
+    positive-current shots included, which is both the observed all-zero result and a latent regression on the shots that work today. The correction is to drop the
+    inference and pass the caller's polarity through, using <code>ntype</code> wherever a gauge-free orientation is needed, exactly as the same commit already does one
+    module away.</p>
+    <p>Two smaller things travel with it. The inline reconstruction of the census rows from <code>candidate_census</code> drops the extremum-type filter that
+    <code>read_census</code> applies; the filter is inert in production because its polarity defaults to unset, but a test still pins it, so the contract is split
+    between two implementations. And the inferred polarity was threaded into every selection call while the component flood kept the original, so the flood direction
+    and the candidate selection could disagree; both resolve to the caller's polarity once the inference goes. The relabel job was cancelled rather than left to
+    measure the defective path, and the node continues.</p>
+    <p>The reading worth carrying past this node: when a physical sign is needed, take it from a curvature or an index, never from an amplitude that carries a gauge.
+    The failure signature to recognise is a selection that returns nothing at all rather than something wrong, on every input, while each line of the change reads
+    plausibly on its own.</p>
+  </section>
 </main>
 </body>
 </html>

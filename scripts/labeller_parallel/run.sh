@@ -74,7 +74,16 @@ fi
 CPUS=$((4 * DEVICES))
 MEMORY_GIB=$((128 * DEVICES))
 if [[ -z "${HOST_WORKERS}" ]]; then
-  HOST_WORKERS=$((CPUS - 1))
+  if [[ -n "${SLURM_CPUS_PER_TASK:-}" ]]; then
+    # the launcher itself runs inside an allocation; its granted cores
+    # govern (the same rule the driver applies at job start).
+    HOST_WORKERS=$((SLURM_CPUS_PER_TASK - 1))
+  else
+    # the launcher grants CPUS cores to the job it submits; the host
+    # assembly pool defaults to those allocated cores minus one.
+    HOST_WORKERS=$((CPUS - 1))
+  fi
+  ((HOST_WORKERS >= 1)) || HOST_WORKERS=1
 fi
 if ((HOST_WORKERS < 1)); then
   echo "host worker count must be positive" >&2
@@ -111,4 +120,4 @@ fi
 
 mkdir -p -- "${OUTPUT_ROOT}/logs"
 JOB_ID="$("${COMMAND[@]}")"
-echo "submitted job_id=${JOB_ID} engine=${ENGINE} devices=${DEVICES} cpus=${CPUS} memory=${MEMORY_GIB}G log=${LOG}"
+echo "submitted job_id=${JOB_ID} engine=${ENGINE} devices=${DEVICES} cpus=${CPUS} memory=${MEMORY_GIB}G host_workers=${HOST_WORKERS} log=${LOG}"

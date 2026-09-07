@@ -43,10 +43,16 @@ def _summary_function():
     return module._gap_summary
 
 
-def contact(shot: int) -> dict[str, object]:
-    """Return one shot's per-class boundary-to-limiter contact in millimetres."""
+def contact(shot: int, session: Path | None = None) -> dict[str, object]:
+    """Return one shot's per-class boundary-to-limiter contact in millimetres.
+
+    ``session`` names the labeller session root, so the same measurement can
+    be taken on a corpus relabelled into a new root and the two records
+    compared directly.
+    """
     summarise = _summary_function()
-    frames, provenance = read_labels(shot)
+    keywords = {} if session is None else {"dirname": session}
+    frames, provenance = read_labels(shot, **keywords)
     machine = read_pulse(shot).geometry
     gaps = np.array(
         [boundary_wall_gap(frame.boundary, machine.limiter) for frame in frames]
@@ -79,9 +85,16 @@ def main(argv: list[str] | None = None) -> int:
     """Print one shot's contact record."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--shot", type=int, default=27079)
+    parser.add_argument(
+        "--session",
+        type=Path,
+        default=None,
+        help="labeller session root to read; defaults to the root the source "
+        "module names",
+    )
     parser.add_argument("--output", type=Path, default=None)
     arguments = parser.parse_args(argv)
-    record = contact(arguments.shot)
+    record = contact(arguments.shot, session=arguments.session)
     text = json.dumps(record, indent=2, sort_keys=True)
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

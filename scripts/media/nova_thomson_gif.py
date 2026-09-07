@@ -69,15 +69,26 @@ def render_thomson(
     include_conditioned: bool = False,
     cells: int = 1200,
     quantity: str = "te",
+    session: Path | None = None,
 ) -> dict[str, object]:
-    """Write the surfaces-and-Thomson animation and return its receipt."""
+    """Write the surfaces-and-Thomson animation and return its receipt.
+
+    ``session`` names the labeller session root to read. It is worth being an
+    argument rather than a module constant: a corpus relabelled after a solver
+    repair is written to a NEW root so the earlier artefact survives, and a
+    figure that could only read one root could not be regenerated against the
+    repair. The root reached is recorded in the receipt's label provenance, so
+    two receipts can be told apart by what they read rather than by their
+    timestamps.
+    """
     from nova.media.sources.mast_efit import read_pulse
     from nova.media.sources.mast_thomson import read_thomson
     from nova.media.sources.nova_labels import read_labels
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
     style = DEFAULT_INK
-    frames, labels = read_labels(shot, free_only=not include_conditioned)
+    keywords = {} if session is None else {"dirname": session}
+    frames, labels = read_labels(shot, free_only=not include_conditioned, **keywords)
     strings = read_thomson(shot)
     if not strings:
         raise ValueError(f"MAST {shot} carries no Thomson system")
@@ -265,6 +276,14 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="also draw slices pinned to the reference current centroid",
     )
+    parser.add_argument(
+        "--session",
+        type=Path,
+        default=None,
+        help="labeller session root to read; defaults to the root the source "
+        "module names, and a corpus relabelled after a solver repair lands in "
+        "a new one",
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args(argv)
 
@@ -279,6 +298,7 @@ def main(argv: list[str] | None = None) -> int:
         include_conditioned=arguments.include_conditioned,
         cells=arguments.cells,
         quantity=arguments.quantity,
+        session=arguments.session,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

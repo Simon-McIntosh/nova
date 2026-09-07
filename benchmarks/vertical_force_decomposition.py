@@ -911,11 +911,11 @@ def main() -> None:
         help="write the active-current and coil-position sensitivity receipt only",
     )
     args = parser.parse_args()
-    receipt = (
-        measure_sensitivity(args.output)
-        if args.sensitivity_only
-        else measure(args.output)
-    )
+    if args.sensitivity_only:
+        receipt = measure_sensitivity(args.output)
+    else:
+        receipt = measure(args.output)
+        receipt["sensitivity"] = measure_sensitivity(args.output)
     print(json.dumps(receipt["verdict"], sort_keys=True))
 
 

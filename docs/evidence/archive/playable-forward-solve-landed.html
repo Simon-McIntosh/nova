@@ -974,6 +974,21 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     radial check is running consumer-side, instructed to report an absence as its verdict if EFIT publishes no current-centroid major radius rather than substituting
     the magnetic axis for it.</p>
   </section>
+
+  <section id="the-corpus-is-heterogeneous-in-revision-but-uniform-in-defect">
+    <h2>Forty-two writer revisions in the corpus, and every one of them pre-dates tonight's three fixes (2026-09-07 09:22Z)</h2>
+    <p>Each shot manifest stamps the checkout revision it was written at, and the 923 complete shots carry <strong>42 distinct revisions</strong>, the largest single
+    group being 297 shots and the running job's being 660cbd7c on 94 and counting. That heterogeneity is a standing caveat for anyone comparing frame channels across
+    the corpus: two shots may have been written by materially different code.</p>
+    <p>It is also, for the three defects fixed tonight, not a complication at all. None of tonight's fix commits appears in any manifest, so the empty LCFS, the
+    mislabelled conditioned flag and the uncontained second X-point slot are present uniformly across all 923 shots. There is therefore no revision boundary to reason
+    about <em>within</em> the corpus for these three; the only boundary is the writer relaunch, and it has not happened. A consumer partitioning its data for these
+    defects needs one cut, not forty-two.</p>
+    <p>The running job was also checked for the hazard that made this worth measuring. Three of tonight's merges went into modules the live writer imported at launch,
+    and its assembly pool is created once with no per-child task ceiling, so its children hold the launch revision and a replacement child would be the only way new
+    code could enter mid-run. Its six most recent shots all stamp 660cbd7c, so no mixing has occurred, and the revision stamp is the instrument that would show it if
+    a worker were ever replaced.</p>
+  </section>
 </main>
 </body>
 </html>

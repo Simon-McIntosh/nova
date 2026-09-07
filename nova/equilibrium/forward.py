@@ -94,6 +94,7 @@ from nova.equilibrium.solve_request import (
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium import fixed_point
+from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.equilibrium.conservation import (
     ConservationLedger,
     FluxLattice,
@@ -1092,7 +1093,7 @@ class ForwardProfile:
     def _secondary_x_point(
         self, flux: jax.Array, topology: ForwardTopologyState
     ) -> jax.Array:
-        """Return the next-qualified saddle after the selected primary one."""
+        """Return the next-qualified in-vessel saddle after the selected primary one."""
 
         physical = jnp.asarray(flux)[: self.operator.physical_node_number]
         grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)
@@ -1105,9 +1106,16 @@ class ForwardProfile:
             x_candidates[:, :2] - topology.x_point, axis=1
         )
         distinct = primary_distance > self.operator._x_qualification_distance
-        qualified_score = jnp.where(finite & distinct, score, -jnp.inf)
+        inside_wall = _points_inside_polygon(
+            x_candidates[:, 0],
+            x_candidates[:, 1],
+            self.operator.topology.wall.coordinate[:, 0],
+            self.operator.topology.wall.coordinate[:, 1],
+        )
+        qualified = finite & distinct & inside_wall
+        qualified_score = jnp.where(qualified, score, -jnp.inf)
         index = jnp.argmax(qualified_score)
-        available = jnp.any(finite & distinct)
+        available = jnp.any(qualified)
         return jnp.where(available, x_candidates[index, :2], jnp.nan)
 
     def _lcfs_polyline(

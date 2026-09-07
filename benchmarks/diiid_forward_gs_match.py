@@ -121,6 +121,18 @@ DISPLACEMENT_FIGURE_NAME = "displacement_decomposition.png"
 DISPLACEMENT_PUBLICATION_DIRECTORY = (
     "/nova/figures/diiid-vertical-force-balance/displacement"
 )
+DEFAULT_SINGLE_SHOT_GATE_OUTPUT = Path(
+    "docs/figures/diiid-vertical-force-balance/two-field-gate"
+)
+SINGLE_SHOT_GATE_RECEIPT_NAME = "single_shot_gate_receipt.json"
+SINGLE_SHOT_GATE_FIGURE_DIRECTORY = "frames"
+SINGLE_SHOT_GATE_PUBLICATION_DIRECTORY = (
+    "/nova/figures/diiid-vertical-force-balance/two-field-gate"
+)
+RESIDUAL_DECOMPOSITION_RECEIPT = Path(
+    "docs/figures/diiid-vertical-force-balance/residual-decomposition.json"
+)
+SINGLE_SHOT_GATE_FRAME_COUNT = 11
 DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/wall-topology-surface.json"
 )
@@ -4199,6 +4211,356 @@ def run_margin_frame_remeasure(
     return receipt
 
 
+def _corrected_topology_mechanism(
+    forward_receipt_path: Path = BANKED_PSEUDO_WALL_RECEIPT,
+    residual_receipt_path: Path = RESIDUAL_DECOMPOSITION_RECEIPT,
+) -> dict[str, Any]:
+    """Name the frame mechanism from corrected topology and field evidence."""
+
+    forward_receipt = json.loads(forward_receipt_path.read_text())
+    residual_receipt = json.loads(residual_receipt_path.read_text())
+    frame_record = next(
+        record
+        for record in forward_receipt["result"]["frame_records"]
+        if record["frame"] == 144
+    )
+    residual_record = next(
+        record for record in residual_receipt["records"] if record["frame"] == 144
+    )
+    branch_selection = frame_record["branch_selection"]
+    diverted = branch_selection["branches"]["diverted"]
+    limited = branch_selection["branches"]["limited"]
+    displacement = frame_record["displacement_decomposition"]
+    if frame_record["achieved_topology_class"] != "diverted":
+        raise RuntimeError("the corrected frame 144 terminal topology is not diverted")
+    if diverted["achieved_class"] != "diverted" or not diverted["topology_consistent"]:
+        raise RuntimeError("the corrected diverted branch evidence changed")
+    if (
+        frame_record["fixed_point_relative_residual"]
+        <= frame_record["residual_tolerance"]
+    ):
+        raise RuntimeError("frame 144 no longer exhibits the banked residual stall")
+    if residual_record["verdict"]["classification"] != (
+        "inside-label-gs-inconsistency"
+    ):
+        raise RuntimeError("frame 144 now names a physical external-field source")
+    if residual_receipt["verdict_counts"] != {
+        "candidate-physical-source": 0,
+        "inside-label-gs-inconsistency": 5,
+    }:
+        raise RuntimeError("the five-frame external-field verdict changed")
+    axis_offset = displacement["magnetic_axis"]
+    x_point_offset = displacement["x_point"]
+    centroid_offset = displacement["terminal_boundary_centroid"]
+    return {
+        "name": "diverted_branch_residual_stall_with_landmark_retention",
+        "statement": (
+            "The corrected terminal read is diverted, not limited. Both requested "
+            "branches miss residual tolerance and the selector therefore has no "
+            "available branch; the diverted terminal axis and X-point remain at "
+            "their EFIT-seeded landmarks to roundoff while the terminal-boundary "
+            "centroid changes shape. The five-frame field tare names no missing "
+            "physical external source."
+        ),
+        "shot": frame_record["shot"],
+        "frame": frame_record["frame"],
+        "corrected_terminal_topology_class": frame_record["achieved_topology_class"],
+        "selector_reason": branch_selection["reason"],
+        "selected_class": branch_selection["selected_class"],
+        "diverted_branch": {
+            "residual": diverted["residual"],
+            "residual_tolerance": frame_record["residual_tolerance"],
+            "residual_to_tolerance_ratio": (
+                diverted["residual"] / frame_record["residual_tolerance"]
+            ),
+            "topology_consistent": diverted["topology_consistent"],
+            "achieved_class": diverted["achieved_class"],
+            "converged": diverted["converged"],
+        },
+        "limited_branch": {
+            "residual": limited["residual"],
+            "residual_tolerance": frame_record["residual_tolerance"],
+            "residual_to_tolerance_ratio": (
+                limited["residual"] / frame_record["residual_tolerance"]
+            ),
+            "topology_consistent": limited["topology_consistent"],
+            "achieved_class": limited["achieved_class"],
+            "converged": limited["converged"],
+        },
+        "landmark_displacement_m": {
+            "axis": float(
+                np.hypot(
+                    axis_offset["radial_offset_m"],
+                    axis_offset["vertical_offset_m"],
+                )
+            ),
+            "x_point": float(
+                np.hypot(
+                    x_point_offset["radial_offset_m"],
+                    x_point_offset["vertical_offset_m"],
+                )
+            ),
+            "terminal_boundary_centroid": float(
+                np.hypot(
+                    centroid_offset["radial_offset_m"],
+                    centroid_offset["vertical_offset_m"],
+                )
+            ),
+        },
+        "external_field_evidence": {
+            "source": str(residual_receipt_path),
+            "source_sha256": hashlib.sha256(
+                residual_receipt_path.read_bytes()
+            ).hexdigest(),
+            "frame_verdict": residual_record["verdict"],
+            "candidate_physical_source_count": 0,
+            "inside_label_gs_inconsistency_count": 5,
+            "missing_external_field_supported": False,
+        },
+        "forward_evidence": {
+            "source": str(forward_receipt_path),
+            "source_sha256": hashlib.sha256(
+                forward_receipt_path.read_bytes()
+            ).hexdigest(),
+        },
+    }
+
+
+def prepare_single_shot_gate() -> dict[str, Any]:
+    """Validate the eleven fixture identities and all banked gate inputs."""
+
+    from benchmarks import efit_reproduction_gate as reproduction
+
+    mast_selected = reproduction.mast.select_slices_by_shot(
+        reproduction.mast.DECOMPOSITION_BANK
+    )
+    diiid_selected = select_frames(
+        sorted(DEFAULT_DATA.glob("*.parquet")),
+        EXECUTION_FRAME_COUNT,
+        polarity_population(),
+    )
+    if len(mast_selected) + len(diiid_selected) != SINGLE_SHOT_GATE_FRAME_COUNT:
+        raise RuntimeError("the single-shot gate no longer declares eleven rows")
+    required_inputs = (
+        reproduction.DEFAULT_ZERO_RECEIPT,
+        reproduction.DEFAULT_ZERO_FIELDS,
+        reproduction.DEFAULT_MAST_RESPONSE_CARRIER,
+        reproduction.DEFAULT_BACKEND_RECEIPT,
+        BANKED_PSEUDO_WALL_RECEIPT,
+        RESIDUAL_DECOMPOSITION_RECEIPT,
+    )
+    missing = [str(path) for path in required_inputs if not path.exists()]
+    if missing:
+        raise FileNotFoundError(f"single-shot gate inputs are missing: {missing}")
+    floor_rows, fields = reproduction._floor_inputs(
+        reproduction.DEFAULT_ZERO_RECEIPT, reproduction.DEFAULT_ZERO_FIELDS
+    )
+    fields.close()
+    reproduction._backend_qualification(reproduction.DEFAULT_BACKEND_RECEIPT)
+    mechanism = _corrected_topology_mechanism()
+    return {
+        "prepared": True,
+        "declared_frame_count": SINGLE_SHOT_GATE_FRAME_COUNT,
+        "mast_frame_count": len(mast_selected),
+        "diiid_frame_count": len(diiid_selected),
+        "mast_frames": [
+            {
+                "shot": int(record["shot"]),
+                "slice_index": int(record["slice_index"]),
+            }
+            for record, _qualification in mast_selected
+        ],
+        "diiid_frames": [
+            {"shot": selected.path.name, "frame": selected.frame}
+            for selected in diiid_selected
+        ],
+        "normalisation_policy": {
+            "choice": "label_each_machine_with_its_own_denominator",
+            "MAST": "fraction of EFIT label peak-to-peak span",
+            "DIII-D": "fraction of centred EFIT label RMS",
+            "cross_machine_scale_comparison_allowed": False,
+        },
+        "banked_floor_machines": sorted(floor_rows),
+        "frame_144_mechanism": mechanism,
+        "inputs": {
+            str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in required_inputs
+        },
+    }
+
+
+def _split_single_shot_gate_fields(
+    receipt: dict[str, Any], preparation: dict[str, Any]
+) -> dict[str, Any]:
+    """Separate residual convergence from history-dependent persistence."""
+
+    from benchmarks import efit_reproduction_gate as reproduction
+
+    data = receipt["data"]
+    rows = data["rows"]
+    if len(rows) != SINGLE_SHOT_GATE_FRAME_COUNT:
+        raise RuntimeError("the executed single-shot gate did not retain eleven rows")
+    forward_receipt = json.loads(BANKED_PSEUDO_WALL_RECEIPT.read_text())
+    banked_diiid = {
+        (record["shot"], record["frame"]): record
+        for record in forward_receipt["result"]["frame_records"]
+    }
+    for row in rows:
+        qualification = row["solver_qualification"]
+        residual = float(qualification["fixed_point_residual"])
+        tolerance = float(qualification["fixed_point_tolerance"])
+        residual_converged = bool(
+            qualification["finite"] and np.isfinite(residual) and residual <= tolerance
+        )
+        row["source_combined_convergence"] = bool(qualification["converged"])
+        row["residual_converged"] = residual_converged
+        row["residual_convergence"] = {
+            "satisfied": residual_converged,
+            "finite": bool(qualification["finite"]),
+            "fixed_point_residual": residual,
+            "fixed_point_tolerance": tolerance,
+            "criterion": "finite fixed-point residual at or below tolerance",
+        }
+        row["branch_persistence_satisfied"] = None
+        if row["machine"] == "DIII-D":
+            identity = (
+                row["frame_identity"]["shot"],
+                int(row["frame_identity"]["frame"]),
+            )
+            banked = banked_diiid[identity]
+            selection = banked["branch_selection"]
+            persistence = {
+                "evaluable": False,
+                "satisfied": None,
+                "observation_count": 1,
+                "required_observation_count": selection["policy"][
+                    "persistence_threshold"
+                ],
+                "selector_reason": selection["reason"],
+                "selected_class": selection["selected_class"],
+                "policy": selection["policy"],
+                "criterion": (
+                    "requires an ordered history of independently completed solves; "
+                    "one static frame reports no persistence verdict"
+                ),
+            }
+            if int(row["frame_identity"]["frame"]) == 144:
+                row["named_mechanism"] = preparation["frame_144_mechanism"]["name"]
+                row["mechanism_evidence"] = preparation["frame_144_mechanism"]
+        else:
+            persistence = {
+                "evaluable": False,
+                "satisfied": None,
+                "observation_count": 1,
+                "required_observation_count": None,
+                "selector_reason": None,
+                "selected_class": qualification.get("achieved_class"),
+                "policy": None,
+                "criterion": (
+                    "the direct frozen MAST branch has no cross-solve persistence "
+                    "policy; one static row reports no persistence verdict"
+                ),
+            }
+        row["branch_persistence"] = persistence
+        row["normalisation"] = {
+            "policy": "machine-specific denominator labelled on every row",
+            "solve_against_label_denominator": row["solve_against_label"]["field_unit"],
+            "label_gs_inconsistency_denominator": row["label_gs_inconsistency"][
+                "field_unit"
+            ],
+            "cross_machine_scale_comparison_allowed": False,
+        }
+        row["error_at_or_below_banked_floor"] = bool(
+            row["solve_against_label"]["value"]
+            <= row["label_gs_inconsistency"]["value"]
+        )
+        row["passes"] = bool(
+            residual_converged and row["error_at_or_below_banked_floor"]
+        )
+        row["pass_rule"] = (
+            "residual_converged and solve-against-label error at or below the "
+            "machine's banked floor; branch persistence is reported independently "
+            "and does not gate an isolated static solve"
+        )
+        figure_name = Path(row["figure_src"]).name
+        row["figure_src"] = (
+            f"{SINGLE_SHOT_GATE_PUBLICATION_DIRECTORY}/"
+            f"{SINGLE_SHOT_GATE_FIGURE_DIRECTORY}/{figure_name}"
+        )
+    aggregate = data["aggregate"]
+    aggregate["source_combined_convergence_count"] = sum(
+        row["source_combined_convergence"] for row in rows
+    )
+    aggregate["residual_converged_count"] = sum(
+        row["residual_converged"] for row in rows
+    )
+    aggregate["branch_persistence_evaluable_count"] = sum(
+        row["branch_persistence"]["evaluable"] for row in rows
+    )
+    aggregate["branch_persistence_satisfied_count"] = sum(
+        row["branch_persistence_satisfied"] is True for row in rows
+    )
+    aggregate["pass_count"] = sum(row["passes"] for row in rows)
+    aggregate["fail_count"] = len(rows) - aggregate["pass_count"]
+    aggregate["verdict"] = (
+        "PASS_ALL_SINGLE_SHOT_ROWS"
+        if aggregate["pass_count"] == len(rows)
+        else "FAIL_ONE_OR_MORE_SINGLE_SHOT_ROWS"
+    )
+    data["single_shot_gate_contract"] = {
+        "residual_convergence_field": "residual_converged",
+        "branch_persistence_field": "branch_persistence_satisfied",
+        "branch_persistence_is_not_a_single_shot_gate": True,
+        "normalisation": preparation["normalisation_policy"],
+        "frame_144_mechanism": preparation["frame_144_mechanism"],
+    }
+    row_schema = receipt["schema"]["properties"]["rows"]["items"]
+    row_schema["required"].extend(
+        [
+            "residual_converged",
+            "branch_persistence_satisfied",
+            "normalisation",
+        ]
+    )
+    row_schema["properties"].update(
+        {
+            "residual_converged": {"type": "boolean"},
+            "branch_persistence_satisfied": {"type": ["boolean", "null"]},
+            "normalisation": {"type": "object"},
+        }
+    )
+    reproduction.Draft202012Validator(receipt["schema"]).validate(data)
+    return _strict_json_value(receipt)
+
+
+def run_single_shot_gate(
+    output_directory: Path = DEFAULT_SINGLE_SHOT_GATE_OUTPUT,
+    *,
+    prepare_only: bool = False,
+) -> dict[str, Any]:
+    """Run or prepare the eleven-row gate with two independent status fields."""
+
+    from benchmarks import efit_reproduction_gate as reproduction
+
+    preparation = prepare_single_shot_gate()
+    if prepare_only:
+        return preparation
+    receipt_path = output_directory / SINGLE_SHOT_GATE_RECEIPT_NAME
+    figure_directory = output_directory / SINGLE_SHOT_GATE_FIGURE_DIRECTORY
+    receipt = reproduction.run(
+        receipt_path,
+        figure_directory,
+        reproduction.DEFAULT_ZERO_RECEIPT,
+        reproduction.DEFAULT_ZERO_FIELDS,
+        reproduction.DEFAULT_BACKEND_RECEIPT,
+        reproduction.DEFAULT_MAST_RESPONSE_CARRIER,
+        reproduction.DEFAULT_DIIID_MACHINE_ARTIFACT_CACHE,
+    )
+    receipt = _split_single_shot_gate_fields(receipt, preparation)
+    _atomic_write_strict_json(receipt_path, receipt)
+    return receipt
+
+
 def run(
     data: Path,
     output: Path,
@@ -4354,6 +4716,13 @@ def main() -> None:
     parser.add_argument("--preregister-only", action="store_true")
     parser.add_argument("--wall-topology-surface", action="store_true")
     parser.add_argument("--margin-frame-remeasure", action="store_true")
+    parser.add_argument("--single-shot-gate", action="store_true")
+    parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument(
+        "--single-shot-output",
+        type=Path,
+        default=DEFAULT_SINGLE_SHOT_GATE_OUTPUT,
+    )
     parser.add_argument(
         "--machine-artifact-cache",
         type=Path,
@@ -4364,6 +4733,21 @@ def main() -> None:
         default=DEFAULT_MACHINE_ARTIFACT_DIGEST,
     )
     arguments = parser.parse_args()
+    if arguments.single_shot_gate:
+        if (
+            arguments.preregister_only
+            or arguments.wall_topology_surface
+            or arguments.margin_frame_remeasure
+        ):
+            raise ValueError("the single-shot gate must run as its own named check")
+        receipt = run_single_shot_gate(
+            arguments.single_shot_output,
+            prepare_only=arguments.prepare_only,
+        )
+        print(json.dumps(receipt, indent=2, sort_keys=True))
+        return
+    if arguments.prepare_only:
+        raise ValueError("--prepare-only requires --single-shot-gate")
     if arguments.margin_frame_remeasure:
         if arguments.preregister_only or arguments.wall_topology_surface:
             raise ValueError("margin remeasurement must run as its own named check")

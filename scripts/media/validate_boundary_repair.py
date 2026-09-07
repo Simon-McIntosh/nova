@@ -63,6 +63,12 @@ MINIMUM_BAND_FRAMES = 20
 #: would then be backwards. The caller states which corpus it holds.
 COLD_START_ADDRESSED = False
 
+#: Below this a class is reporting no movement at all. A repair that leaves
+#: the class it targets bit-identical has not reached those frames, and that
+#: is a finding rather than the absence of one -- the null result otherwise
+#: reads exactly like a clean pass.
+NULL_EFFECT_FLOOR = 1.0e-12
+
 #: How far a diverted frame's ratio may move before it is a finding. The
 #: masking gives a private wall anchor a losing score rather than an infinite
 #: one, because the wall reader interpolates at fixed shape, so a diverted
@@ -290,6 +296,20 @@ def compare(
             "the banded ratio is unreadable here and the verdict rests on the "
             "paired comparison alone"
         )
+
+    # The class the repair targets must actually move. Nothing here is a
+    # finding, not a quiet pass: it says the change did not reach the frames
+    # it was written for.
+    for name in ("limited_warm", "limited_cold"):
+        cell = paired.get(name, {})
+        movement = cell.get("maximum_absolute_change")
+        if cell.get("count") and movement is not None and movement < NULL_EFFECT_FLOOR:
+            verdict["unexplained"].append(
+                f"{cell['count']} {name.replace('_', ' ')} frames came back "
+                f"with a maximum absolute change of {movement:.3e}, so the "
+                "relabelled corpus is the banked one to within round-off and "
+                "the repair did not reach the class it targets"
+            )
 
     # A diverted frame should be untouched by construction, so any movement
     # there is a finding rather than a success.

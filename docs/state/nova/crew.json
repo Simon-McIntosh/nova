@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T22:30:50",
+  "updated": "2026-09-07T22:39:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3318,6 +3318,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-strike-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-topo-x",
         "harness": "clive",
         "role": "implement",
@@ -3745,6 +3754,15 @@
       },
       {
         "id": "s19-score-c4",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c5",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -123016,6 +123034,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2060
+    "_version": 2062
   }
 }

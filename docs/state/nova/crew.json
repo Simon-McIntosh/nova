@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T11:44:33",
+  "updated": "2026-09-07T12:20:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3131,6 +3131,24 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-wallshadow-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-wallshadow-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "plan-wording",
@@ -119810,6 +119828,226 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T101416931856-pfs-wall-anchor-shadow-order",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-wall-anchor-shadow-order",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1708,
+                "cached_input_tokens": 822808,
+                "input_tokens": 824518,
+                "output_tokens": 900,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 825418,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_wall_anchor_shadow.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, the topology read accepting a per-wall-node private mask and applying it to the wall flux before the extremum is selected, the previous-iterate wall shadow that is already threaded into the frozen topology partition supplied as that mask, a documented decision on what the first iterate does when no previous shadow exists since that is the case that produced the worst observed frame, one test asserting a wall node marked private cannot win the anchor on a fixture where it carries the extreme flux, a second test asserting a diverted fixture is bit-identical because it never consults the wall anchor, the twelve positive-current bank rows and the Solovev certificate staying bit-identical, the report stating whether the change is expected to move the limited-class span ratio from its measured 0.410 median over 27 warm frames toward unity or only to repair the single cold frame at 0.011, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 1.0,
+          "goal": "the wall flux extremum that anchors a limited boundary is masked by the private-wall shadow before the extremum is taken",
+          "id": "pfs-wall-anchor-shadow-order",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T101416931856-pfs-wall-anchor-shadow-order/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_wall_anchor_shadow.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-anchor-shadow-order.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-wallshadow-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T10:14:28Z",
+        "completed_at": "2026-09-07T10:15:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 84,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 84,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a826c6e088ed1480bb51444448d79cba1697b61d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T101416931856-pfs-wall-anchor-shadow-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07b5c-b844-7f11-8234-a7fb5c97f3dd",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "dispute_count": "unknown",
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped two minutes in for a coordinator correction to its acceptance measure, before any work: a corpus census arriving in the same minute replaced the target of moving the limited median toward unity with the ratio of limited to diverted at matched epoch, because the diverted control is itself not at unity. Nothing was written, the worktree sat at the main tip and was removed clean, and the node is redispatched with the corrected brief.",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T101217193119-pfs-wall-anchor-carries-the-shadow",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-wall-anchor-carries-the-shadow",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1037,
+                "cached_input_tokens": 819381,
+                "input_tokens": 820420,
+                "output_tokens": 877,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 821297,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_wall_anchor_shadow.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, the topology read accepting a per-wall-node private mask and applying it to the wall flux before the extremum is selected, the previous-iterate wall shadow already threaded into the frozen topology partition supplied as that mask, a documented decision on what the first iterate does when no previous shadow exists since that is the case that produced the worst observed frame, one test asserting that a wall node marked private cannot win the anchor on a fixture where it carries the extreme flux, a second test asserting a diverted fixture is bit-identical because it never consults the wall anchor, the twelve positive-current bank rows and the Solovev certificate staying bit-identical, the report stating whether the change is expected to move the limited-class span ratio from its measured 0.410 median over 27 warm frames toward unity or only to repair the single cold frame at 0.011, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 1.0,
+          "goal": "the wall flux extremum that anchors a limited boundary is masked by the private-wall shadow before the extremum is taken",
+          "id": "pfs-wall-anchor-carries-the-shadow",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T101217193119-pfs-wall-anchor-carries-the-shadow/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_wall_anchor_shadow.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-anchor-carries-the-shadow.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-wallshadow-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T10:12:33Z",
+        "completed_at": "2026-09-07T10:13:44.611Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 46,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 71,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a826c6e088ed1480bb51444448d79cba1697b61d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T101217193119-pfs-wall-anchor-carries-the-shadow/manifest.md",
+        "scope_changed": false,
+        "session_id": "fc60dfea-ad52-4e0c-94da-910b2b9a3129",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped one minute in on a lead routing instruction that this work goes to the codex sol lane rather than the local one, before any work. Nothing was written and the worktree sat at the main tip.",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-wall-anchor-carries-the-shadow",
+          "session_id": "fc60dfea-ad52-4e0c-94da-910b2b9a3129",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T10:13:44.611Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -120122,6 +120360,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1997
+    "_version": 2001
   }
 }

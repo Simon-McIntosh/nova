@@ -1043,6 +1043,138 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     non-empty acceptance list instead. This is the same shape as a docstring asserting a property the framework does not provide, and as a height-only figure standing
     in for a two-component agreement: a true-looking field carrying the wrong answer to the question an auditor would actually ask.</p>
   </section>
+
+  <section id="the-pinned-limited-boundary-has-no-reachability-filter">
+    <h2>The limited branch sources its boundary flux from an unfiltered wall maximum, and the centre column can win it (2026-09-07 10:05Z)</h2>
+    <p>Found by the media session because the lead saw a floating plasma in a published figure and asked whether it was a plot artefact. It is not: the figure renders a
+    wrong boundary faithfully, and the defect is confined to the limited branch. Measured on 27079's 81 guard-ok unconditioned label frames, split by the session's own
+    diverted flag, axis-to-boundary flux span against EFIT's on the same slices, and boundary distance to the 36-vertex limiter:</p>
+    <table>
+      <thead><tr><th>Class</th><th>n</th><th>Nova span</th><th>EFIT span</th><th>Ratio</th><th>Boundary to limiter, nova</th><th>EFIT</th></tr></thead>
+      <tbody>
+        <tr><td>diverted</td><td>53</td><td>396.09 mWb</td><td>381.76</td><td>1.086</td><td>median 103.7 mm</td><td>40&ndash;80 mm standoff</td></tr>
+        <tr><td>limited</td><td>28</td><td>91.10 mWb</td><td>227.08</td><td>0.399</td><td>median 142.9 mm, max 391.6</td><td>1.0&ndash;1.1 mm, contact</td></tr>
+      </tbody>
+    </table>
+    <p>The worst frame, at 30 ms, has its eleven nested surface fluxes spanning 0.3056 to 0.3045 Wb, an entire axis-to-boundary interval of 1.1 mWb, a boundary area of
+    0.0318 m<sup>2</sup> against EFIT's 0.759, and surface areas growing linearly from zero, so it is a self-similar family of tiny contours around the axis rather
+    than a tracer stopping short. <code>branch_guard_ok</code> is true on every one of these frames: the solve reports success.</p>
+    <p><strong>Mechanism candidate, from reading three functions, which revises the reporter's saddle-search guess rather than confirming it.</strong> With a class
+    requested, the read calls a pinned selector returning the x-point anchor for diverted and the wall anchor for limited, so the source is right in shape. The wall
+    anchor is the extremum of the polarity-signed flux over the wall nodes, which for positive current is the maximum of psi on the wall, and that is the correct
+    definition of a limiter contact. But the wall polygon spans R 0.195 to 1.900 and therefore includes the centre column, which is a conductor. Early in a shot the
+    solenoid is strongest and the plasma current weakest, so psi on the inboard wall can exceed psi at the outboard contact and approach the axis value. The selector
+    takes a global maximum with no test that the winning node is on the plasma-facing side, and <strong>the pinned path applies no filter at all</strong>. Every
+    measured number follows: a span collapsing toward zero, a contour family near the axis, the area factor, the standoff from a wall EFIT touches, and a guard that
+    passes because nothing in it compares the boundary to the limiter. So does the class signature, since diverted frames take the x-point anchor.</p>
+    <p><strong>The pattern again, fifth instance.</strong> The emergent boundary path carries a private-flux shadow rule that excludes wall contacts lying beyond the
+    x-point band, on the reasoning that such a contact sits in a null's shadow and cannot bind the plasma. The pinned path, which is the one the labeller uses, has no
+    equivalent. One member of a pair filtered, the other not.</p>
+    <p><strong>Tested against EFIT's own map within the hour, which confirms the direction, refutes the culprit and leaves the magnitude open.</strong> Evaluating
+    EFIT's psirz bicubically at the 36 limiter nodes on 27079 and taking the argmax of total flux: at 30 ms the global wall maximum is 0.2955 Wb against a published
+    boundary of 0.2793 and an axis of 0.3834, so a selector taking that maximum places the boundary 16 mWb inboard of where it belongs, a shrink, which is the
+    mechanism's load-bearing half and is confirmed. The culprit is not: the winning node is the <em>upper roof</em> at R 0.565, Z 1.728 at every early time, migrating
+    to the lower roof and reaching an inboard corner only at 355 ms, by which time the plasma is diverted and the anchor unused. So the missing test is reachability in
+    general &mdash; a remote wall point 1.7 m above a midplane plasma cannot bind it &mdash; and a filter written against the centre column would have been the wrong
+    filter in the right class. The private-flux shadow rule on the emergent path is presumably what already excludes these.</p>
+    <p><strong>The magnitude is unexplained and no account should stand yet.</strong> Sixteen mWb of a 104 mWb span is a 15 per cent shrink; the frame collapses by 99
+    per cent to a 1.17 mWb span. Two candidates, and the first has a counter-argument. Self-consistent amplification, where a boundary too close to the axis shrinks
+    the plasma, weakens its own contribution and moves the wall flux again, would explain both the size and why the guard passes, since each iterate is
+    self-consistent. But the writer prescribes the measured coil currents and pins the absolute reference plasma current, so the coil field at the wall is fixed and a
+    collapsing plasma's own wall contribution tends to a filament's, bounding the wall maximum; and a pinned current squeezed into a shrinking area raises its density
+    and deepens the axis, which grows the span rather than collapsing it. The mechanism has to survive both pins to be the account. The second candidate needs no
+    solve: the writer carries a warm start from the previous slice and carries it whenever that slice finished cleanly, which these frames did because the guard
+    passed, so a collapsed frame is a legitimate warm start for the next and the collapse can propagate and deepen along the run. Its test is whether the failing
+    frames are contiguous and whether the shrink grows monotonically; a first limited frame already at 99 per cent rules propagation out.</p>
+    <p>The decisive test remains nova's own map rather than EFIT's, since the two solutions genuinely differ there: at 30 ms nova's axis sits at R 0.658 against an
+    EFIT plasma centred near 0.9. Print the node the selector actually chose, on nova's map, on that frame.</p>
+    <p>Two consequences, both worse than an outline error. A compressed flux span means psi_norm is compressed, so the 26 TORAX faces with their p_prime and ff_prime
+    sit on a wrong abscissa in those frames, corrupting the profile coordinate itself, and anything trained or scored on limited-phase labels inherits it. And the
+    mechanism predicts the defect is worst when the solenoid is strongest and the plasma weakest, which is precisely the early phase where the consumer measured its
+    dR structure before 0.21 s; if the centre-column test confirms, that becomes one cause rather than two findings.</p>
+  </section>
+
+  <section id="the-shadow-is-computed-after-the-boundary-it-should-gate">
+    <h2>The private-wall shadow exists, is per-node, and is computed from the read that already chose the boundary (2026-09-07 10:20Z)</h2>
+    <p>Investigated on the lead's instruction to establish the mechanism before assuming a fix, the lead's suspicion being that the winning roof node sits inside the
+    divertor box and should have been shadowed. It should have been, the machinery to shadow it exists, and the reason it did not is an ordering rather than a missing
+    filter.</p>
+    <p><strong>What exists.</strong> <code>wall_height_shadow_mask</code> in <code>nova/equilibrium/connectivity_boundary.py</code> returns a per-wall-node private
+    exclusion built from the qualified saddles with a hysteresis band, and it consumes a <code>private_wall_node_mask</code> that the connectivity read derives from
+    the flood fill, with connectivity-proven common wall nodes always participating. That is precisely the mechanism the lead described, and a roof node beyond the
+    X-point is exactly what it is built to exclude.</p>
+    <p><strong>Why it does not gate the anchor.</strong> In <code>_frozen_topology_partition</code> the order is: complete the topology read, which selects the
+    boundary, and then call <code>_residual_shadow_components_from_read(physical, masks, topology, previous_shadow)</code>, which takes the finished read's axis height
+    and primary X-point as <em>inputs</em> to build the shadow. So the shadow is downstream of the selection it would have to constrain. Its name says what it is for:
+    it is a <em>residual</em> shadow, excluding shadowed wall nodes from the residual equations, and nothing carries it back to the anchor. Confirmed at the two ends:
+    <code>_fixed_design_read(physical, requested_class)</code> accepts no shadow argument, and all four call sites of the wall reader are
+    <code>self.wall(psi_wall, polarity)</code> with no mask, so the wall extremum is a global argmax over every node including those the same machinery is about to
+    mark private.</p>
+    <p><strong>What this changes about the repair, and it is the reason the lead's instruction was right.</strong> The fix is not a new reachability filter of the kind
+    proposed earlier, and it is not a test naming the centre column or the roof. The per-node exclusion already exists and is already correct in intent; it is simply
+    not supplied at the point of selection. And the plumbing to supply it is present: <code>previous_shadow</code> is already threaded into
+    <code>_frozen_topology_partition</code>, so the previous iterate's wall shadow is in scope at the moment the read is made, with a hysteresis band designed for
+    exactly this carry. So the candidate repair is to pass that shadow into the read and mask the wall flux before the extremum is taken, which is a wiring change
+    within existing machinery rather than a new rule, and it inherits the hysteresis that stops a boundary flickering between anchors across iterates.</p>
+    <p>Two things this does not settle and must not be assumed. Whether masking the anchor is sufficient to recover the frames, since the current evidence says the
+    solve carried roughly four per cent of the reference plasma current and it is not yet established whether that is a cause or a consequence of the anchor. And what
+    the first iterate does, when no previous shadow exists, which is the case that produced the worst frame: a cold start has nothing to carry, so the ordering problem
+    is real there even after the wiring, and the answer may be to iterate the read once rather than to accept its first anchor.</p>
+  </section>
+
+  <section id="the-limited-class-is-impaired-from-a-good-seed-too">
+    <h2>A 2x2 on class against start condition: the solid finding is that limited frames are impaired even warm (2026-09-07 10:32Z)</h2>
+    <p>Span ratio, nova against EFIT, on 27079, crossing the topology class with whether the frame inherited a converged predecessor:</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median</th><th>Min</th><th>Max</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>67</td><td>0.979</td><td>0.364</td><td>1.380</td></tr>
+        <tr><td>diverted, cold</td><td>7</td><td>1.086</td><td>0.510</td><td>1.311</td></tr>
+        <tr><td>limited, warm</td><td>27</td><td>0.410</td><td>0.105</td><td>0.588</td></tr>
+        <tr><td>limited, cold</td><td>1</td><td>0.011</td><td>&mdash;</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p>A cold start is harmless on its own, 1.086 against 0.979 over 7 and 67 frames, which is what the account requires since a diverted frame never consults the wall
+    anchor. <strong>The solid finding is that the limited class is impaired even warm, 0.410 against 0.979 over 27 and 67 frames</strong>, so the anchor is wrong even
+    from a good seed. The limited cold cell collapses a further 37-fold, and rests on one frame.</p>
+    <p><strong>This corrects the coordinator's mechanism for the interaction.</strong> The claim was that a cold first iterate lacks a shadow to inherit while later
+    frames have one. That is wrong on its own evidence: the shadow is never applied to the anchor in any case, so inheriting it changes nothing there, and the warm-cold
+    axis cannot be a shadow effect. It is a seed effect. A cold limited frame seeds from the reconstruction flux rather than a converged predecessor, and the anchor
+    chosen from the worse seed lands worse still. The prediction was right in outcome and wrong in mechanism.</p>
+    <p><strong>The acceptance measure for the repair follows from the marginals rather than from the mechanism.</strong> Masking the anchor must recover the 27 warm
+    limited frames and not merely the single catastrophic one. If the limited median moves from 0.41 toward unity the account is confirmed; if 30 ms is fixed and the
+    class stays at 0.41, there is a second defect in that branch and the ordering was only its tail.</p>
+    <p>One observation carried unlabelled because it sits in the class being used as the healthy control: the diverted ratio is not a median near unity with scatter but
+    has structure, running 1.2 to 1.38 above EFIT through the mid-discharge around 420 to 490 ms and falling to 0.46 by 575 ms. If the control carries its own
+    time-dependent discrepancy then every ratio quoted against it inherits that. Open observation, not a finding.</p>
+  </section>
+
+  <section id="the-limited-defect-and-the-control-drift-are-corpus-wide">
+    <h2>A 54,415-frame census: the limited defect is corpus-wide and the healthy control is not healthy (2026-09-07 10:18Z)</h2>
+    <p>943 shots, 54,415 guarded frames, no unreadable sessions, two minutes on a debug partition, reading session files and the efm store with no solve.</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median span ratio</th><th>p10</th><th>p90</th><th>Fraction below 0.5</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>38,858</td><td>0.838</td><td>0.469</td><td>1.187</td><td>0.118</td></tr>
+        <tr><td>diverted, cold</td><td>5,148</td><td>0.865</td><td>0.468</td><td>1.179</td><td>0.115</td></tr>
+        <tr><td>limited, warm</td><td>9,181</td><td>0.285</td><td>0.094</td><td>0.533</td><td>0.877</td></tr>
+        <tr><td>limited, cold</td><td>1,228</td><td>0.066</td><td>0.009</td><td>0.375</td><td>0.944</td></tr>
+      </tbody>
+    </table>
+    <p>Cold starts are harmless at scale, 0.838 warm against 0.865 cold over 44,000 diverted frames. The limited class is impaired corpus-wide with 88 per cent of
+    frames below half, 844 of 943 shots contribute a limited cold start, and the interaction that rested on one frame now has 1,228 behind it. Banding by time to remove
+    the confound that limited frames live early, the defect survives time-matching at every epoch at two to four fold below its own-epoch control, so it is not the
+    early phase in disguise.</p>
+    <p><strong>And the class used as the healthy control is not healthy.</strong> Banded in time the diverted median drifts monotonically from 0.70 early through 0.83
+    to 1.15 late: about thirty per cent low early and fifteen per cent high late, corpus-wide, over tens of thousands of frames. That was carried as an incidental
+    observation an hour ago and is now a second finding with its own consequence, since every ratio quoted against a diverted baseline tonight inherits it. The
+    earliest band's control has n of 36 and should not be leaned on alone.</p>
+    <p><strong>This changed the repair's acceptance measure, which had been set wrongly.</strong> The measure was moving the limited median toward unity. Unity is the
+    wrong target because the control is not at unity, so an absolute target would fail a correct fix in the early bands where even diverted sits at 0.70, and pass an
+    incorrect one late where the control overshoots. The measure is now the ratio of the limited median to the diverted median <em>at matched time epoch</em> reaching
+    one, currently 0.26 to 0.55 in the bands where limited frames are common. The correction arrived in the same minute the repair node was dispatched, which cost two
+    stopped runs and is recorded as such rather than as a failure.</p>
+  </section>
 </main>
 </body>
 </html>

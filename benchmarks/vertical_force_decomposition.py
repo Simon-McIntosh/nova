@@ -86,6 +86,28 @@ def _centroid(group: zarr.Group, row: int) -> tuple[float, float]:
     return radius, height
 
 
+def _seed_current_centroid(shot: int, row: int) -> tuple[float, float]:
+    """Evaluate the seed current centroid through the public moment observation."""
+
+    selected = {
+        (int(item["shot"]), int(item["slice_index"])): (item, qualification)
+        for item, qualification in settled.select_slices_by_shot(
+            settled.DECOMPOSITION_BANK
+        )
+    }
+    selected_row, qualification = selected[(shot, row)]
+    case, context = settled._mast_case_from_selection(
+        settled.SHOT_STORE, selected_row, qualification
+    )
+    target_current = abs(float(case["reference"]["plasma_current_a"]))
+    observation = context["profile"].current_moment_observation(
+        jnp.asarray(case["state"]),
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        target_current=target_current,
+    )
+    return float(observation.centroid_r), float(observation.centroid_z)
+
+
 def _element_data(group: zarr.Group) -> dict[str, np.ndarray]:
     return {
         name: np.asarray(group[name], dtype=np.float64)
@@ -127,7 +149,9 @@ def _element_br_per_ampere(
 
 
 def _case_element_groups(
-    elements: dict[str, np.ndarray], geometry: dict[str, Any]
+    elements: dict[str, np.ndarray],
+    geometry: dict[str, Any],
+    active_circuits: set[int],
 ) -> dict[int, str]:
     """Map stored shaped sections to the eight independently measured case groups."""
 
@@ -142,6 +166,8 @@ def _case_element_groups(
     }
     groups: dict[int, str] = {}
     for index in range(len(elements["fcoil_circ"])):
+        if int(elements["fcoil_circ"][index]) in active_circuits:
+            continue
         element = shapely.Polygon(_element_vertices(elements, index))
         overlap = {
             family: max(
@@ -261,7 +287,8 @@ def _p6_response(
 
 def _decompose_row(shot: int, row: int) -> dict[str, Any]:
     group = _efm_group(shot)
-    target = _centroid(group, row)
+    archived_centroid = _centroid(group, row)
+    target = _seed_current_centroid(shot, row)
     time_s = float(group["time"][row])
     geometry = MachineGeometryRegistry.default().select(shot).configuration.geometry
     _families, _drives, mapping = _circuit_drives(group, row, geometry, "fcoil_c")
@@ -271,42 +298,57 @@ def _decompose_row(shot: int, row: int) -> dict[str, Any]:
     indices = np.asarray(group["fcoil_n"], dtype=int)
     if not np.array_equal(indices, np.arange(fitted.size)):
         raise ValueError("fcoil_n does not use zero-based stored-current order")
-    case_groups = _case_element_groups(elements, geometry)
+    case_groups = _case_element_groups(elements, geometry, set(active))
     transducers = _interpolated_case_currents(shot, time_s)
     p6 = _p6_response(elements, active, target)
-    component_fields: dict[str, float] = {"plasma_self": 0.0}
-    replacement_fields: dict[str, float] = {"plasma_self": 0.0}
+    plasma_key = "plasma::self"
+    component_fields: dict[str, float] = {plasma_key: 0.0}
+    replacement_fields: dict[str, float] = {plasma_key: 0.0}
     component_meta: dict[str, dict[str, Any]] = {}
     plasma, plasma_meta = _plasma_br(group, row, target)
-    component_fields["plasma_self"] = plasma
-    replacement_fields["plasma_self"] = plasma
-    component_meta["plasma_self"] = {"category": "plasma", **plasma_meta}
+    component_fields[plasma_key] = plasma
+    replacement_fields[plasma_key] = plasma
+    component_meta[plasma_key] = {
+        "category": "plasma",
+        "family": "plasma_self",
+        **plasma_meta,
+    }
+    direct_fitted = plasma
+    direct_replacement = plasma
     for circuit in range(1, fitted.size + 1):
         active_family = active.get(circuit)
-        fallback = "passive_vessel_remaining"
         for index in np.flatnonzero(elements["fcoil_circ"] == circuit):
-            family = active_family or case_groups.get(int(index), fallback)
-            field = _element_br_per_ampere(elements, int(index), target)
-            component_fields[family] = (
-                component_fields.get(family, 0.0) + fitted[circuit - 1] * field
-            )
-            if family in transducers:
-                replacement = transducers[family]["current_a"]
+            case_family = case_groups.get(int(index))
+            if active_family is not None:
+                key = f"active::{active_family}"
+                family = active_family
+                category = "active_circuit"
+            elif case_family is not None:
+                key = f"case::{case_family}"
+                family = case_family
+                category = "instrumented_coil_case"
             else:
-                replacement = fitted[circuit - 1]
-            replacement_fields[family] = (
-                replacement_fields.get(family, 0.0) + replacement * field
+                key = "passive::vessel_remaining"
+                family = "passive_vessel_remaining"
+                category = "passive_or_vessel"
+            field = _element_br_per_ampere(elements, int(index), target)
+            fitted_field = fitted[circuit - 1] * field
+            component_fields[key] = component_fields.get(key, 0.0) + fitted_field
+            if category == "instrumented_coil_case":
+                replacement_current = transducers[family]["current_a"]
+            else:
+                replacement_current = fitted[circuit - 1]
+            replacement_field = replacement_current * field
+            replacement_fields[key] = (
+                replacement_fields.get(key, 0.0) + replacement_field
             )
+            direct_fitted += fitted_field
+            direct_replacement += replacement_field
             metadata = component_meta.setdefault(
-                family,
+                key,
                 {
-                    "category": (
-                        "active_circuit"
-                        if active_family
-                        else "instrumented_coil_case"
-                        if family in transducers
-                        else "passive_or_vessel"
-                    ),
+                    "category": category,
+                    "family": family,
                     "stored_circuits": set(),
                     "section_element_count": 0,
                 },
@@ -314,21 +356,20 @@ def _decompose_row(shot: int, row: int) -> dict[str, Any]:
             metadata["stored_circuits"].add(circuit)
             metadata["section_element_count"] += 1
     components = []
-    for family, field in component_fields.items():
-        metadata = component_meta[family]
+    for key, field in component_fields.items():
+        metadata = component_meta[key]
         if "stored_circuits" in metadata:
             metadata["stored_circuits"] = sorted(metadata["stored_circuits"])
-        replacement = replacement_fields[family]
+        replacement = replacement_fields[key]
         item = {
-            "family": family,
             "radial_field_mT": field * 1.0e3,
             "p6_ampere_equivalent_a": field / p6,
             "radial_field_mT_with_case_transducers": replacement * 1.0e3,
             "p6_ampere_equivalent_a_with_case_transducers": replacement / p6,
             **metadata,
         }
-        if family in transducers:
-            item["case_transducer"] = transducers[family]
+        if metadata["category"] == "instrumented_coil_case":
+            item["case_transducer"] = transducers[metadata["family"]]
             item["case_swap_delta_mT"] = (replacement - field) * 1.0e3
             item["case_swap_delta_p6_a"] = (replacement - field) / p6
         components.append(item)
@@ -337,10 +378,34 @@ def _decompose_row(shot: int, row: int) -> dict[str, Any]:
     transducer_total = float(
         sum(item["radial_field_mT_with_case_transducers"] for item in components)
     )
+    direct_fitted_mT = direct_fitted * 1.0e3
+    direct_replacement_mT = direct_replacement * 1.0e3
+    fitted_error = abs(fitted_total - direct_fitted_mT) / max(
+        abs(direct_fitted_mT), np.finfo(np.float64).tiny
+    )
+    replacement_error = abs(transducer_total - direct_replacement_mT) / max(
+        abs(direct_replacement_mT), np.finfo(np.float64).tiny
+    )
+    active_count = sum(item["category"] == "active_circuit" for item in components)
+    case_count = sum(
+        item["category"] == "instrumented_coil_case" for item in components
+    )
+    if active_count != 13 or case_count != 8:
+        raise RuntimeError(
+            "current partition produced "
+            f"{active_count} active and {case_count} case groups"
+        )
     return {
         "identity": f"{shot}/{row}",
         "efit_time_s": time_s,
         "current_centroid": {"r_m": target[0], "z_m": target[1]},
+        "current_centroid_source": (
+            "public seed current-moment observation on all-domain support"
+        ),
+        "archived_scalar_centroid": {
+            "r_m": archived_centroid[0],
+            "z_m": archived_centroid[1],
+        },
         "p6_radial_response_t_per_a": p6,
         "p6_definition": "stored P6 upper current minus stored P6 lower current",
         "components": components,
@@ -353,7 +418,9 @@ def _decompose_row(shot: int, row: int) -> dict[str, Any]:
             / p6,
             "case_swap_delta_mT": transducer_total - fitted_total,
             "case_swap_delta_p6_a": (transducer_total - fitted_total) * 1.0e-3 / p6,
-            "sum_relative_error": 0.0,
+            "direct_fitted_radial_field_mT": direct_fitted_mT,
+            "direct_case_transducer_radial_field_mT": direct_replacement_mT,
+            "sum_relative_error": max(fitted_error, replacement_error),
         },
     }
 
@@ -449,7 +516,7 @@ def _scan_current(output: Path) -> dict[str, Any]:
     zero_bracket = any(
         first * second <= 0.0 for first, second in zip(values, values[1:], strict=False)
     )
-    return {
+    scan = {
         "identity": "21986/46",
         "baseline_protocol_samples_a": {
             "0.038894285": -2730.0,
@@ -467,6 +534,8 @@ def _scan_current(output: Path) -> dict[str, Any]:
         ),
         "carrier_evidence": carrier_evidence,
     }
+    output.write_text(json.dumps(scan, indent=2) + "\n", encoding="utf-8")
+    return scan
 
 
 def _draw(rows: list[dict[str, Any]], scan: dict[str, Any], path: Path) -> None:
@@ -538,8 +607,8 @@ def measure(output: Path) -> dict[str, Any]:
                 "B_R divided by the P6 upper-minus-lower unit response at that centroid"
             ),
             "case_swap": (
-                "replace each fitted coil-case group current by its interpolated "
-                "exact-time transducer reading"
+                "replace each fitted coil-case group current by its nearest finite "
+                "transducer sample at the EFIT slice time"
             ),
             "plasma": (
                 "native EFIT delta-star current density imaged through "

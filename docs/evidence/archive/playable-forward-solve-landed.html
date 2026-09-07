@@ -1015,6 +1015,34 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     rescue the withdrawn prediction that nova reports a moment as an axis, since a 5.6 cm centroid offset cannot make a 13.25 cm axis-to-centroid distance a
     coincidence.</p>
   </section>
+
+  <section id="two-opposite-ledger-defects-a-naive-count-conflates">
+    <h2>Auditing the crew ledger against its own manifests: 62 incomplete rows, 124 suspect manifest hashes, and a flag that lies (2026-09-07 09:58Z)</h2>
+    <p>Prompted by finding one of my own promotions incomplete, and using an audit query the consumer supplied, every ledger row whose manifest records forty-character
+    commit hashes was compared against the row's own commit list. 720 rows checked:</p>
+    <table>
+      <thead><tr><th>Class</th><th>Rows</th><th>Which record is wrong</th></tr></thead>
+      <tbody>
+        <tr><td>Ledger list equals the manifest's</td><td>534</td><td>neither</td></tr>
+        <tr><td>Ledger list is a strict subset of the manifest's</td><td>62</td><td>the ledger, incomplete at promotion</td></tr>
+        <tr><td>They disagree without being a subset</td><td>124</td><td>probably the manifest, the known confabulated-SHA trap</td></tr>
+      </tbody>
+    </table>
+    <p><strong>A naive mismatch count returns 186 and conflates two opposite defects.</strong> The 62 are promotions that passed a tip commit where a node had landed
+    several, so the ledger under-records what the node did; the worst is a node with 31 commits recorded as one, and the reversed-current axis node tonight is in this
+    class at 8 recorded as 1. The 124 are rows where a worker's manifest quoted a hash the coordinator correctly declined to use, promoting the verified head instead,
+    so there the <em>ledger</em> is right and the manifest is the defective record. Reporting the single number would have sent someone to fix the wrong side on two
+    thirds of the hits, which is why the split is the finding rather than the total.</p>
+    <p>The practical consequence of the 62, and why it matters beyond tidiness: the out-of-scope boundary check runs against the commits the promotion presents, so an
+    incomplete promotion silently disables it. That is how a mid-flight scope extension tonight reached the ledger with an empty acceptance list while the same check
+    fired correctly on another node minutes later over a single test helper. The two halves depend on each other: pass every commit, and the guard can see the scope;
+    pass the tip, and it cannot.</p>
+    <p><strong>And a third variant, in the tooling rather than in either project.</strong> On every row where a companion path was accepted with a reason, the
+    acceptance is stored and <code>scope_changed</code> stays <code>false</code>. So an auditor asking which nodes had their scope moved, by filtering the field named
+    for exactly that question, gets nothing back on precisely the rows where it moved. The fact is recorded; the field that advertises it is wrong. Filter on a
+    non-empty acceptance list instead. This is the same shape as a docstring asserting a property the framework does not provide, and as a height-only figure standing
+    in for a two-component agreement: a true-looking field carrying the wrong answer to the question an auditor would actually ask.</p>
+  </section>
 </main>
 </body>
 </html>

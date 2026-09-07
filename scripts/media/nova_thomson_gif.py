@@ -356,6 +356,12 @@ def main(argv: list[str] | None = None) -> int:
         help="also draw slices pinned to the reference current centroid",
     )
     parser.add_argument(
+        "--label",
+        default="",
+        help="appended to the figure basename so a variant coexists with the "
+        "default rather than superseding it",
+    )
+    parser.add_argument(
         "--min-area-fraction",
         type=float,
         default=None,
@@ -375,7 +381,8 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     suffix = "" if arguments.quantity == "te" else f"-{arguments.quantity}"
-    name = f"mast-{arguments.shot}-nova-thomson{suffix}"
+    label = f"-{arguments.label}" if arguments.label else ""
+    name = f"mast-{arguments.shot}-nova-thomson{suffix}{label}"
     receipt = render_thomson(
         arguments.shot,
         arguments.output / f"{name}.gif",

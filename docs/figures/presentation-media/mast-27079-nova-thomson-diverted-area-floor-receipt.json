@@ -1,0 +1,211 @@
+{
+  "achieved_seconds": 9.66,
+  "boundary_wall_gap_mm": {
+    "diverted": {
+      "count": 52,
+      "max_mm": 125.63513562098633,
+      "median_mm": 103.8848175227099
+    },
+    "limited": {
+      "count": 17,
+      "max_mm": 177.81777187779545,
+      "median_mm": 97.97332831460115
+    },
+    "note": "a limited boundary must touch its limiter, so a non-zero limited gap is a solve defect rather than a standoff; the diverted gap is expected"
+  },
+  "bytes": 2087361,
+  "conditioned_frames_drawn": 0,
+  "contact_sheet": {
+    "bytes": 424307,
+    "columns": 3,
+    "path": "docs/figures/presentation-media/mast-27079-nova-thomson-diverted-area-floor-frames.png",
+    "rows": 2,
+    "size": [
+      2875,
+      1568
+    ],
+    "tile_indices": [
+      0,
+      14,
+      27,
+      41,
+      54,
+      68
+    ],
+    "tiles": 6
+  },
+  "frame_admission": {
+    "admitted_area_ratio_range": [
+      0.7100229235968054,
+      1.1534021170633577
+    ],
+    "admitted_frame_count": 69,
+    "corpus": "unrepaired; these frames were selected, not fixed, and the limited class still fails wall contact where it is drawn",
+    "dropped": [
+      {
+        "area_ratio": 0.041845760131095144,
+        "time_s": 0.029999999329447746
+      },
+      {
+        "area_ratio": 0.33535931681622844,
+        "time_s": 0.03500000014901161
+      },
+      {
+        "area_ratio": 0.5710731332904531,
+        "time_s": 0.03999999910593033
+      },
+      {
+        "area_ratio": 0.6687260120665168,
+        "time_s": 0.12999999523162842
+      },
+      {
+        "area_ratio": 0.6231857319633505,
+        "time_s": 0.13499999046325684
+      },
+      {
+        "area_ratio": 0.5862666594918773,
+        "time_s": 0.14000000059604645
+      },
+      {
+        "area_ratio": 0.5460667042275722,
+        "time_s": 0.14499999582767487
+      },
+      {
+        "area_ratio": 0.5077384248292631,
+        "time_s": 0.14999999105930328
+      },
+      {
+        "area_ratio": 0.4763995106184187,
+        "time_s": 0.1550000011920929
+      },
+      {
+        "area_ratio": 0.43663489458582677,
+        "time_s": 0.1599999964237213
+      },
+      {
+        "area_ratio": 0.4011963192549758,
+        "time_s": 0.16499999165534973
+      },
+      {
+        "area_ratio": 0.6926059221571973,
+        "time_s": 0.22499999403953552
+      }
+    ],
+    "dropped_frame_count": 12,
+    "floor": 0.693,
+    "floor_basis": "one half, lying in the gap between the two populations rather than among the samples: diverted frames stay above about 0.69 and collapsed frames fall to 0.04",
+    "rule": "drawn boundary area at least this fraction of the reconstruction boundary area on the nearest slice",
+    "wall_contact_rejected_as_instrument": "a standoff threshold fires on the healthy population too, since a diverted boundary correctly stands about 100 mm off the wall"
+  },
+  "frame_milliseconds": 140,
+  "frames": 69,
+  "labels": {
+    "admission": "branch_guard_ok, not conditioned on the reference centroid",
+    "boundary_source": "stored lcfs polyline",
+    "cocos": 17,
+    "conditioned_frame_count": 23,
+    "conditioning_source": "27079.npz companion, aligned by time",
+    "flux_unit": "Wb",
+    "free_guarded_frame_count": 81,
+    "guarded_frame_count": 102,
+    "p_prime_source": "efm",
+    "raster": "absent; the session records nested surfaces, not a map",
+    "selected_frame_count": 81,
+    "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+    "shot": 27079,
+    "stored_frame_count": 114,
+    "surface_count": 11
+  },
+  "left_panel": "nova nested flux surfaces over the clipped hex mesh",
+  "machine": "MAST",
+  "orientation_note": "both MAST systems view the midplane, so the split is core against edge rather than vertical against horizontal",
+  "path": "docs/figures/presentation-media/mast-27079-nova-thomson-diverted-area-floor.gif",
+  "plasma_mesh": {
+    "boundary_clip": "geometric intersection with the solved boundary polygon; a rasterless session carries no flux field to cut at",
+    "clipped_cell_count_range": [
+      193,
+      455
+    ],
+    "coupling": "none; cell geometry only, no Biot build",
+    "delivered_cells": 1324,
+    "requested_cells": 1200,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vertex_count_range": [
+      4,
+      28
+    ],
+    "wall_clipped": true
+  },
+  "profile_axis": "logarithmic, fixed over the pulse",
+  "profile_limit_quantile": 0.98,
+  "profile_limits_fixed": true,
+  "pulse": "27079",
+  "quantity": "te",
+  "quantity_label": "$T_e$ [eV]",
+  "requested_seconds": 10.0,
+  "separatrix_crossing_marked": true,
+  "size": [
+    953,
+    780
+  ],
+  "strike_points_drawn": "none; outside the brief and containment unresolved",
+  "thomson_systems": [
+    {
+      "channels": 131,
+      "colour": "#3366cc",
+      "name": "core",
+      "provenance": {
+        "admission": "time inside the core system's shot window",
+        "admitted_row_count": 141,
+        "era": "ayc",
+        "group": "ayc",
+        "height_m": 0.0,
+        "height_source": "both systems view the midplane; no stored Z leaf",
+        "shot_window_s": [
+          0.004159899894148111,
+          0.5874665975570679
+        ],
+        "source": "/work/projects/imas_gpu/mast/level1/shots/27079.zarr",
+        "stored_row_count": 141,
+        "usable_sample_fraction": 0.9065562232689081
+      },
+      "rows": 141,
+      "value_limit": [
+        1.367708295583725,
+        3540.166796874992
+      ]
+    },
+    {
+      "channels": 16,
+      "colour": "#cc7722",
+      "name": "edge",
+      "provenance": {
+        "admission": "time inside the core system's shot window",
+        "admitted_row_count": 141,
+        "era": "ayc",
+        "group": "aye",
+        "height_m": 0.0,
+        "height_source": "both systems view the midplane; no stored Z leaf",
+        "shot_window_s": [
+          0.004159899894148111,
+          0.5874665975570679
+        ],
+        "source": "/work/projects/imas_gpu/mast/level1/shots/27079.zarr",
+        "stored_row_count": 282,
+        "usable_sample_fraction": 0.9521276595744681
+      },
+      "rows": 141,
+      "value_limit": [
+        0.6868682935833933,
+        4375.617093749998
+      ]
+    }
+  ],
+  "time_span_s": [
+    0.044999998062849045,
+    0.574999988079071
+  ],
+  "x_points_drawn": 132,
+  "x_points_dropped_outside_wall": 0
+}

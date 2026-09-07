@@ -67,7 +67,7 @@ POSITION_OFFSET_M = {
     "p5_lower": 0.013070,
     "p5_upper": 0.000562,
 }
-COMPENSATION_REFERENCE_A = {"21989/55": 3000.0}
+COMPENSATION_REFERENCE_A = {"21989/55": 3022.326}
 
 
 def _source_revision() -> str:

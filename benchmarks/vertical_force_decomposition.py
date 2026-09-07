@@ -539,14 +539,25 @@ def _scan_current(output: Path) -> dict[str, Any]:
 
 
 def _draw(rows: list[dict[str, Any]], scan: dict[str, Any], path: Path) -> None:
-    figure, axes = plt.subplots(1, 2, figsize=(15, 6))
-    for axis, row in zip(axes, rows, strict=True):
+    figure, axes = plt.subplots(
+        1, 3, figsize=(21, 7), gridspec_kw={"width_ratios": (1.15, 1.15, 0.8)}
+    )
+    for axis, row in zip(axes[:2], rows, strict=True):
         components = sorted(
             row["components"],
             key=lambda item: abs(item["p6_ampere_equivalent_a"]),
             reverse=True,
         )
-        labels = [item["family"] for item in components]
+        labels = [
+            (
+                f"case / {item['family']}"
+                if item["category"] == "instrumented_coil_case"
+                else f"active / {item['family']}"
+                if item["category"] == "active_circuit"
+                else item["family"]
+            )
+            for item in components
+        ]
         values = [item["p6_ampere_equivalent_a"] / 1.0e3 for item in components]
         transducer = [
             item["p6_ampere_equivalent_a_with_case_transducers"] / 1.0e3
@@ -562,7 +573,7 @@ def _draw(rows: list[dict[str, Any]], scan: dict[str, Any], path: Path) -> None:
         axis.set_title(row["identity"])
         axis.grid(axis="x", alpha=0.2)
     axes[0].legend(frameon=False)
-    scan_axis = axes[1].inset_axes([0.58, 0.61, 0.38, 0.31])
+    scan_axis = axes[2]
     protocol = scan["baseline_protocol_samples_a"]
     x = np.asarray([float(key) for key in protocol])
     y = np.asarray(list(protocol.values())) / 1.0e3
@@ -578,7 +589,7 @@ def _draw(rows: list[dict[str, Any]], scan: dict[str, Any], path: Path) -> None:
     figure.suptitle(
         "Seed-centroid radial-field decomposition by current family", y=0.98
     )
-    figure.subplots_adjust(left=0.20, right=0.98, bottom=0.13, top=0.90, wspace=0.42)
+    figure.subplots_adjust(left=0.17, right=0.98, bottom=0.13, top=0.90, wspace=0.50)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)

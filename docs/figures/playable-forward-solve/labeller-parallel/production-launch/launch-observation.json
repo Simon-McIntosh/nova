@@ -1,0 +1,42 @@
+{
+  "schema": "nova-labeller-production-launch-observation",
+  "observed_at": "2026-09-07T05:03:10+02:00",
+  "job_id": 1263830,
+  "job_state": "RUNNING",
+  "engine": "host",
+  "device_count": 2,
+  "executing_revision": "c78cf4cb9e275af1b9259dbb2abb351a863ec297",
+  "required_merge_is_ancestor": true,
+  "required_merge": "a2d3a3a7",
+  "output_root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
+  "first_completed_shots": [
+    {
+      "shot": 22555,
+      "status": "complete",
+      "written_slice_count": 83,
+      "converged_slice_count": 0,
+      "converged_fraction": 0.0,
+      "shot_wall_seconds": 672.83479629457,
+      "manifest_derived_slices_per_second": 0.12335866167608585,
+      "sequential_card_log_same_shot": null
+    },
+    {
+      "shot": 22536,
+      "status": "complete",
+      "written_slice_count": 83,
+      "converged_slice_count": 0,
+      "converged_fraction": 0.0,
+      "shot_wall_seconds": 699.3409204147756,
+      "manifest_derived_slices_per_second": 0.1186831737956548,
+      "sequential_card_log_same_shot": null
+    }
+  ],
+  "mean_manifest_derived_per_card_slices_per_second": 0.12102091773587033,
+  "job_log_line_count": 2,
+  "job_log_has_per_shot_rate": false,
+  "evidence_gate_met": false,
+  "blockers": [
+    "Both first completed shots have zero converged slices and neither appears in a sequential card-job log, so the required same-shot parity evidence is absent.",
+    "The running job log has no per-shot progress or rate record, so the required log-derived per-card rate cannot be reported."
+  ]
+}

@@ -1223,6 +1223,11 @@ class Wall(CoilDatabase):
                 f"no {self.name!r} ids attached; the vessel outline is read "
                 f"from {self.ids_path!r}"
             )
+        if len(self.ids.description_2d) != 1:
+            raise ValueError(
+                f"wall ids carries {len(self.ids.description_2d)} descriptions; "
+                "the boundary read selects exactly one"
+            )
         return self.ids.description_2d[0].vessel  # DDv4
 
     @cached_property

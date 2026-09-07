@@ -155,7 +155,13 @@ class DiiidMachineIds:
             raise ValueError("magnetics flux signals are forbidden in the description")
         if len(magnetics.ip):
             raise ValueError("plasma-current signals are forbidden in the description")
-        outline = self.ids["wall"].description_2d[0].limiter.unit[0].outline
+        wall = self.ids["wall"]
+        if len(wall.description_2d) != 1:
+            raise ValueError("expected exactly one wall description")
+        limiter = wall.description_2d[0].limiter
+        if len(limiter.unit) != 1:
+            raise ValueError("expected exactly one limiter unit")
+        outline = limiter.unit[0].outline
         ring = np.column_stack(
             (np.asarray(outline.r, dtype=float), np.asarray(outline.z, dtype=float))
         )

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T20:16:06",
+  "updated": "2026-09-07T20:57:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -635,9 +635,11 @@
         "id": "cank-thomson-c",
         "harness": "clive",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "179cab12-0f8c-46b7-a9ce-cfbb21904a8a",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "179cab12-0f8c-46b7-a9ce-cfbb21904a8a"
+        },
         "created": "2026-09-07"
       },
       {
@@ -3737,6 +3739,17 @@
       },
       {
         "id": "s19-scout-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": "d7f41dfd-aa8c-4304-b996-e603ad87f58a",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "d7f41dfd-aa8c-4304-b996-e603ad87f58a"
+        },
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-scout-c2",
         "harness": "clive",
         "role": "investigate",
         "session_id": null,
@@ -121652,6 +121665,143 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164441171079-s19-reuse-map",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "s19-reuse-map",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/reuse-map.md exists with one table row per capability (public versus private boundary read consumers, poloidal painters plus shadow-mask extraction, session schema wall group, label reader boundary fallback, compilation cache root, centroid major-radius referents, diverted census rows, axis definition referents, Thomson geometry readers in imas-ambix), each naming file:symbol in nova or imas-ambix with a fitness verdict, searched capability-shaped across both checkouts",
+          "estimated_hours": 0.4,
+          "goal": "A reuse map for the S19 labeller wave naming the existing modules, symbols, tests and receipts that serve each open node, with a one-line fitness verdict per candidate",
+          "id": "s19-reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164441171079-s19-reuse-map/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "s19-scout-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:44:45Z",
+        "completed_at": "2026-09-07T18:56:13.969Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7881,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7888,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164441171079-s19-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "d7f41dfd-aa8c-4304-b996-e603ad87f58a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1446.822,
+          "generated_tokens": 0,
+          "generation_seconds": 1446.822,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 14.1,
+          "machine_seconds": 0.0,
+          "peak_input_tokens": 143713,
+          "tokens_per_second": 0.0,
+          "wall_tokens_per_second": 0.0
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/s19-reuse-map",
+          "session_id": "d7f41dfd-aa8c-4304-b996-e603ad87f58a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T18:56:13.969Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -121964,6 +122114,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2045
+    "_version": 2049
   }
 }

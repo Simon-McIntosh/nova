@@ -1345,8 +1345,8 @@ def _compiled_slice_solver(
                 (
                     solved_reduced,
                     jacobian_active,
-                    step_count,
                     trip_active,
+                    step_count,
                     builds,
                     rejected,
                 ) = trip_body(reduced, shadow, state)

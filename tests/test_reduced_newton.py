@@ -695,6 +695,27 @@ def test_compiled_slice_matches_the_fused_host_route(machine):
     assert compiled.active_set_mask_differences == host.active_set_mask_differences
 
 
+def test_compiled_slice_replays_the_host_step_and_trip_counters(machine):
+    """The compiled trip counters match the host route on the Solov'ev fixture."""
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        active_set_steps=reduced_newton.ACTIVE_SET_STEPS,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    host = reduced_newton.solve_reduced_newton(profile.operator, seed, **common)
+    compiled = reduced_newton.solve_reduced_newton_compiled(
+        profile.operator,
+        seed,
+        **{key: value for key, value in common.items() if key != "trip_boundary"},
+    )
+    assert compiled.active_set_iterations == host.active_set_iterations
+    assert [int(value) for value in compiled.newton_steps_per_trip] == [
+        int(value) for value in host.newton_steps_per_trip
+    ]
+
+
 def test_compiled_slice_keeps_a_nonconverged_result_masked(machine):
     """A budget exhausted before convergence reports the same terminal flags."""
     profile, seed = machine

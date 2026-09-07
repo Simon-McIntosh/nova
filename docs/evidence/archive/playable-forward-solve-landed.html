@@ -1175,6 +1175,28 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     one, currently 0.26 to 0.55 in the bands where limited frames are common. The correction arrived in the same minute the repair node was dispatched, which cost two
     stopped runs and is recorded as such rather than as a failure.</p>
   </section>
+
+  <section id="the-app-does-not-reseed-the-decoder-on-an-edit">
+    <h2>The decoder degrades four frames after leaving real history, and the app re-seeds only on a base change (2026-09-07 10:30Z)</h2>
+    <p>The consumer's full-window render supersedes its earlier figures and identifies the decoder's failure precisely: decoded 24.952 against a persistence baseline
+    of 6.750 over 41 transitions, worse than the contaminated render's 2.894 over 45. Reading the frames rather than the scalar explains it. The decoded panel is
+    near-black for most of the rollout, and a black frame against a real frame whose own mean is 17.8 levels gives an error of that size. Per frame the decoded error
+    rises from 8.4 at the first transition to 21 by the fifth and then sits between 13 and 46. <strong>The decoder degrades within about four frames of leaving
+    real-frame history and does not recover.</strong> That also reconciles the earlier numbers: the six-frame seeded render's 2.156 was the best case immediately after
+    a real seed, and the contaminated render scored better than the corrected one because its distant bright seed injected mid-tone content that partially matched the
+    real frames, so contamination flattered the metric while making the picture visibly wrong. Conditioning strength and normalisation were both tested and cleared, so
+    the failure is sustained autoregressive rollout, which is a bounded problem with a known shape rather than a model that has learned nothing.</p>
+    <p><strong>A demo-planning conclusion drawn from that was inverted by a claim about this app, and reading the source rather than the docstring corrected it.</strong>
+    The claim was that the app calls the decoder's reset at every base-observation boundary, so an edit re-seeds the decoder and interactive steering is its strongest
+    regime. The session resets history on exactly two events: when <code>base_shot</code> or <code>base_slice</code> changes to a different value, and when a decoder is
+    first assigned. A steering edit changes coil currents and turning-point targets and touches neither field. So a keypress does not re-seed, history rolls
+    autoregressively across every edit within one base observation, and the base observation changes only when a person deliberately jumps to another shot or slice.</p>
+    <p>The conclusion therefore inverts. Interactive steering is not the short-horizon case; it is the degraded rollout arriving on the same schedule as an unattended
+    replay, with the person watching it degrade in real time while causing it. The per-frame curve above is a description of what someone sees after their fourth
+    keypress. The only regime the measurement does not contradict is a short burst immediately after a base change, named because it is that and not as a proposal.</p>
+    <p>Whether the app should re-seed on an edit is left open deliberately. The hook and the call site already exist, so the change is small, but re-seeding discards
+    the history the model is conditioned on and the consequence for a sequence a person is steering is the consumer's judgement rather than this project's.</p>
+  </section>
 </main>
 </body>
 </html>

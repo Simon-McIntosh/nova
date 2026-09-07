@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T12:36:02",
+  "updated": "2026-09-07T12:50:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1022,9 +1022,11 @@
         "id": "dvf-axisconfig-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "898da3a4-9bc9-4232-9b29-cc88e420000c",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "898da3a4-9bc9-4232-9b29-cc88e420000c"
+        },
         "created": "2026-09-07"
       },
       {
@@ -2915,9 +2917,11 @@
         "id": "pfs-nullguard-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd"
+        },
         "created": "2026-09-07"
       },
       {
@@ -120236,6 +120240,134 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T102049320023-pfs-wall-anchor-shadow-order",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-wall-anchor-shadow-order",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 412,
+                "cached_input_tokens": 839561,
+                "input_tokens": 839975,
+                "output_tokens": 940,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 840915,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_wall_anchor_shadow.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp and JAX_PLATFORMS=cpu and the environment python called directly, the log captured once under the run directory, the topology read accepting a per-wall-node private mask and applying it to the wall flux before the extremum is selected, the previous-iterate wall shadow already threaded into the frozen topology partition supplied as that mask, a documented decision on what the first iterate does when no previous shadow exists because a 54415-frame census puts limited cold-start frames at a median span ratio of 0.066 against 0.285 for limited warm, one test asserting a wall node marked private cannot win the anchor on a fixture where it carries the extreme flux, a second test asserting a diverted fixture is bit-identical because it never consults the wall anchor, the twelve positive-current bank rows and the Solovev certificate staying bit-identical, the report stating the expected effect on an acceptance measure defined as the ratio of the limited median to the diverted median at matched time epoch reaching one rather than either median reaching unity, because the same census shows the diverted control itself drifting from 0.70 early through 0.83 to 1.15 late so an absolute target would fail a correct fix early and pass an incorrect one late, with the currently measured matched-epoch ratios running 0.26 to 0.55 where limited frames are common, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 1.0,
+          "goal": "the wall flux extremum that anchors a limited boundary is masked by the private-wall shadow before the extremum is taken",
+          "id": "pfs-wall-anchor-shadow-order",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_wall_anchor_shadow.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-anchor-shadow-order.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-wallshadow-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T10:21:04Z",
+        "completed_at": "2026-09-07T10:49:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1694,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1694,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c73f62540b7ad3a332caf88b92d4f98f9eab3f4a",
+        "commits": [
+          "20f3a40c1dbad6057919c7b0de7944f7ac7548f0"
+        ],
+        "changed_lines": {
+          "added": 252,
+          "removed": 18,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --cpus-per-task=4 --mem=32G pytest: focused job 1264278 and positive-current plus Solovev referee job 1264282",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07b62-c301-7663-95b2-0f91888c8c87",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260907T101416931856-pfs-wall-anchor-shadow-order",
+          "root_run_id": "r-20260907T101416931856-pfs-wall-anchor-shadow-order"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-wall-anchor-shadow-order",
+          "session_id": "01a07b62-c301-7663-95b2-0f91888c8c87",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T10:49:18Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -120548,6 +120680,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2002
+    "_version": 2005
   }
 }

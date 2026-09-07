@@ -205,6 +205,7 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
     )
     ceiling = 20_000.0
     weight = 0.25
+    free_circuits = np.arange(0, current.size, 2)
     solved = solve_shape_inverse(
         machine.profile,
         target,
@@ -212,6 +213,7 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
         prescribed_current=current,
         gamma=0.0,
         picard_rounds=0,
+        free_circuits=free_circuits,
         delta_regularisation=weight,
         delta_current_scale=ceiling,
     )
@@ -228,6 +230,7 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
         prescribed_current=current,
         gamma=0.0,
         picard_rounds=0,
+        free_circuits=free_circuits,
         delta_regularisation=2.0 * weight,
         delta_current_scale=ceiling,
     )

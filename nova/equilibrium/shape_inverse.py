@@ -139,7 +139,7 @@ def _delta_current_scale(
         )
     values = np.asarray(scale, dtype=float)
     if values.ndim == 0:
-        values = np.full(circuit_count, float(values))
+        values = np.full(free_circuits.size, float(values))
     elif values.shape == (free_circuits.size,):
         values = values.copy()
     elif values.shape == (circuit_count,):

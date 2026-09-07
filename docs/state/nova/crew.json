@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T07:12:29",
+  "updated": "2026-09-07T07:14:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117316,6 +117316,137 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T044628330377-media-prior-art",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "media-prior-art",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 817,
+                "cached_input_tokens": 177918,
+                "input_tokens": 178737,
+                "output_tokens": 1339,
+                "reasoning_output_tokens": 614,
+                "total_tokens": 180076,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "da035a58-71cc-4384-a3ff-5d94b3487d03",
+            "session_id": "media-figures"
+          },
+          "done_when": "The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media/reuse-map.md names, for each of the five capabilities in the goal, either a module path with a function name and line number or the literal word absent, reaches a verdict on each of nova/graphics/plot.py, nova/frame/polyplot.py, apps/playable, apps/pulsedesign, benchmarks/diiid_poloidal_figures.py, examples/mast/equilibrium.py and the recorded view-style reports under crew/reports/nova/playable, and quotes the stdout of at least three commands it ran against those entry points",
+          "estimated_hours": 0.75,
+          "goal": "Write a reuse map of every existing nova capability that already renders animated frames, poloidal machine views, unfilled flux contours, wall-clipped hex cells, or Thomson chord geometry",
+          "id": "media-prior-art",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T044628330377-media-prior-art/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "media-prior-art",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-07T04:46:43Z",
+        "completed_at": "2026-09-07T05:02:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 946,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 946,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "cb919a06a34215c38e8e71e844bb3cad4ce2501e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python check of the done-when clauses against the reuse map",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T044628330377-media-prior-art/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T044628330377-media-prior-art/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07a30-a695-7562-9b4d-fc9b69b84c5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12458496,
+            "cached_input_tokens_cumulative": 12458496,
+            "input_tokens": 12755553,
+            "input_tokens_cumulative": 12755553,
+            "output_tokens": 29657,
+            "output_tokens_cumulative": 29657,
+            "reasoning_output_tokens": 7930,
+            "reasoning_output_tokens_cumulative": 7930
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 37587,
+          "peak_input_tokens": 25214049
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only investigate node; its whole delivery is the report under crew/reports/nova/presentation-media",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/media-figures/media-prior-art",
+          "session_id": "01a07a30-a695-7562-9b4d-fc9b69b84c5c",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T05:02:29Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -117628,6 +117759,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1971
+    "_version": 1972
   }
 }

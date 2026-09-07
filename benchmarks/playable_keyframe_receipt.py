@@ -1,9 +1,10 @@
 """Measure the playable app's keyframe cost through its own solver on the H200.
 
 Drives :class:`~apps.playable.session.PlayableSession` with
-:class:`apps.playable.production.ProductionSolver` on the MAST 22086/43
-machine through a scripted chain of twenty key presses, in one foreground
-sbatch on the reserved H200, recording per press the wall, trips, reuse flag,
+:class:`apps.playable.production.ProductionSolver` on one frozen-six MAST
+carrier (default 22086/43, selectable via ``--shot``/``--slice``) through a
+scripted chain of twenty key presses, in one foreground sbatch on the
+reserved H200, recording per press the wall, trips, reuse flag,
 the solve wall against the receipt-build wall, and for the first moved key the
 split between trace/compile, persistent-cache load and dispatch (from
 ``jax_log_compiles`` events plus a count of persistent-cache artifacts loaded).
@@ -58,7 +59,9 @@ from apps.playable.session import PlayableSession, frame_push
 from apps.playable.shape import PlasmaShape
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGET = (22086, 43)
+#: The default frozen-six carrier the receipt measures, kept so an unchanged
+#: invocation reproduces the existing 22086/43 receipt exactly.
+DEFAULT_TARGET = (22086, 43)
 DEFAULT_OUTPUT = (
     ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes.json"
 )
@@ -70,11 +73,11 @@ DEFAULT_THROUGHPUT_FIGURE = (
 )
 #: One press against each sign of the vertical bulk control, ten round trips:
 #: the chain stays near the free centroid while exercising both moved
-#: targets.  The horizontal +R centroid move is deliberately excluded: on
-#: 22086/43 it drives the solved state off the qualified magnetic axis
-#: (measured NoQualifiedAxisError on the moved key), so the vertical direction
-#: is the one the steering rows hold on this machine and the cost of a warm
-#: moved keyframe is what the receipt reads.
+#: targets.  The horizontal +R centroid move is deliberately excluded: on the
+#: 22086/43 carrier it drives the solved state off the qualified magnetic
+#: axis (measured NoQualifiedAxisError on the moved key), so the vertical
+#: direction is the one the steering rows hold on that machine and the cost
+#: of a warm moved keyframe is what the receipt reads.
 KEY_CHAIN = ("bulk_z+", "bulk_z-") * 10
 #: A compile event this fast was served by the persistent cache, not built.
 CACHE_SERVED_COMPILE_SECONDS = 0.5
@@ -236,10 +239,17 @@ def measure(
     output: Path,
     figure: Path,
     throughput_figure: Path | None = None,
+    target: tuple[int, int] = DEFAULT_TARGET,
     cache_root: Path | None = None,
     route: str = "host",
 ) -> dict[str, Any]:
-    """Drive the playable session over the MAST 22086/43 machine on the H200."""
+    """Drive the playable session over one frozen-six MAST carrier on the H200.
+
+    ``target`` is the (shot, slice) pair the keyframe chain steers; it
+    defaults to the 22086/43 carrier the receipt was born on.  The carrier a
+    run actually reached is recorded in the receipt beside the one it was
+    configured with, so a missed selection is visible rather than silent.
+    """
     if route not in ("host", "compiled"):
         raise ValueError("route must be 'host' or 'compiled'")
     import sys
@@ -261,16 +271,19 @@ def measure(
     response_cache, carrier_evidence = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
+    target = (int(target[0]), int(target[1]))
     selected = {
         (int(row["shot"]), int(row["slice_index"])): (row, qualification)
         for row, qualification in select_slices_by_shot(DECOMPOSITION_BANK)
     }
-    identity = f"{TARGET[0]}/{TARGET[1]}"
+    configured_identity = f"{target[0]}/{target[1]}"
+    reached_identity: str | None = None
 
     receipt: dict[str, Any] = {
         "artifact": "playable app keyframes on the constrained reduced route, H200",
         "route": route,
-        "identity": identity,
+        "configured_identity": configured_identity,
+        "reached_identity": reached_identity,
         "source_commit": _source_revision(),
         "runtime": {
             "python": platform.python_version(),
@@ -295,7 +308,17 @@ def measure(
 
     with _stderr_tee(compile_log):
         mark("build")
-        selected_row, qualification = selected[TARGET]
+        if target not in selected:
+            raise KeyError(
+                f"target {target[0]}/{target[1]} has no qualified row in the "
+                "frozen-six decomposition bank"
+            )
+        selected_row, qualification = selected[target]
+        reached_identity = (
+            f"{int(selected_row['shot'])}/{int(selected_row['slice_index'])}"
+        )
+        receipt["reached_identity"] = reached_identity
+        receipt_machine = f"mast-{reached_identity}"
         case, context = _mast_case_from_selection(
             SHOT_STORE, selected_row, qualification
         )
@@ -312,7 +335,7 @@ def measure(
             profile=profile,
             seed=seed,
             wall=np.asarray(profile.operator.wall.coordinate),
-            identity="mast-22086/43",
+            identity=receipt_machine,
         )
         solver = ProductionSolver(machine)
         reduced_newton.set_stage_timing(True)
@@ -454,7 +477,7 @@ def measure(
             inner_gap=0.02,
             outer_gap=0.02,
         )
-        session = PlayableSession(solver=solver, shape=command, machine="mast-22086/43")
+        session = PlayableSession(solver=solver, shape=command, machine=receipt_machine)
 
         mark("prime")
         prime = session.prime()
@@ -605,6 +628,8 @@ def main() -> None:
     )
     parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument("--route", choices=("host", "compiled"), default="host")
+    parser.add_argument("--shot", type=int, default=DEFAULT_TARGET[0])
+    parser.add_argument("--slice", type=int, default=DEFAULT_TARGET[1])
     parser.add_argument("--prepare-only", action="store_true")
     arguments = parser.parse_args()
     if arguments.prepare_only:
@@ -617,6 +642,7 @@ def main() -> None:
             output=arguments.output,
             figure=arguments.figure,
             throughput_figure=arguments.throughput_figure,
+            target=(arguments.shot, arguments.slice),
             cache_root=arguments.cache_root,
             route=arguments.route,
         )

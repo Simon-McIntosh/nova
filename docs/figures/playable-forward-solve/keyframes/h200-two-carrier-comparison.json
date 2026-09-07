@@ -1,0 +1,47 @@
+{
+  "artifact": "two-carrier playable keyframe comparison at merged main - axis refusal is carrier-specific, not solver-wide",
+  "measured_at_commit": "fd05ce58f3c8b6c37635a23c5f3d1a4d4e0e0f0a0",
+  "measurement_date_utc": "2026-09-07T14:31:00Z",
+  "tree": "merged origin/main (sign-aware axis read fde0f1d2 + wall-anchor repair 20f3a40c) into the worktree, then parameterised --shot/--slice",
+  "question": "does the NoQualifiedAxisError refusal on the first moved key reproduce on a second positive-current frozen-six carrier?",
+  "carriers": {
+    "22086/43": {
+      "choice": "the original demo carrier; re-run at merged main as a controlled baseline",
+      "prime": {
+        "wall_s": 129.4,
+        "trips": 4,
+        "second_x_point_finite": true
+      },
+      "first_moved_key": "bulk_z+ -> NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component (reproduced at merged main)",
+      "outcome": "refusal reproduces"
+    },
+    "21978/35": {
+      "choice": "second positive-current carrier; picked from the demo-carrier side job (46/72 converged warm frames, the highest of the six) and as imas-ambix's recommended demo re-lock (converges without the centroid row)",
+      "prime": {
+        "wall_s": 132.1,
+        "trips": 3,
+        "second_x_point_finite": true
+      },
+      "first_moved_key": {
+        "key": "bulk_z+",
+        "outcome": "STEERS",
+        "wall_s": 294.2,
+        "trips": 3,
+        "second_x_point_finite": true,
+        "solve_wall_s": 18.66
+      },
+      "second_moved_key": "bulk_z- -> ValueError: the measured boundary must have nonzero box spans (shape_inverse.py:342 _deform_boundary_polygon)",
+      "outcome": "refusal does NOT reproduce; a different shape-inverse steering defect stops the chain on the second moved key"
+    }
+  },
+  "conclusion": {
+    "axis_admission_refusal": "carrier-specific, not solver-wide - 22086/43 refuses, 21978/35 steers its first moved key",
+    "app_can_complete_a_chain": "NO on either carrier at current main: 22086/43 dies on the first moved key (axis admission), 21978/35 dies on the second moved key (shape-inverse boundary-box degeneracy); two independent defects",
+    "warm_median_worst_wall": "not quotable: neither carrier completes a warm keyframe chain, so no median/worst warm keyframe wall exists to set beside 0.536 s",
+    "carrier_swap": "a swap to 21978/35 unblocks the axis-admission refusal but not a full steering chain - the demo can complete at most one moved keyframe on the recommended carrier"
+  },
+  "logs": {
+    "22086/43_merged": "run dir h200-22086-43.job.out + logs/h200-22086-43.sbatch.log (job 1264426)",
+    "21978/35_merged": "run dir h200-21978-35.job.out + logs/h200-21978-35.sbatch.log (job 1264400)"
+  }
+}

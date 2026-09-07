@@ -1,0 +1,231 @@
+{
+  "artifact": "playable app keyframes on the constrained reduced route, H200",
+  "route": "host",
+  "configured_identity": "22086/43",
+  "reached_identity": "22086/43",
+  "source_commit": "fd05ce58f3e6337bc2ab62527aab54d5d1218697",
+  "runtime": {
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1264426",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "evidence_inputs": {
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005763883702456951,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-app-demo-readiness/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.028069 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "persistent_compilation_cache": {
+      "selection": "explicit_per_recipe",
+      "root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T084423959219-pfs-app-demo-readiness/jax-cache",
+      "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T084423959219-pfs-app-demo-readiness/jax-cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "version_key": "runtime-0745ecebea4cb264e054",
+      "runtime_identity": {
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_enable_x64": true,
+          "jax_default_matmul_precision": null,
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "process_index": 0,
+            "id": 0
+          }
+        ]
+      },
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "minimum_compile_seconds": 1.0,
+      "maximum_bytes": 8589934592
+    },
+    "key_chain": [
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-",
+      "bulk_z+",
+      "bulk_z-"
+    ]
+  },
+  "presses": [
+    {
+      "index": 0,
+      "press": null,
+      "key": "prime",
+      "wall": 129.4111468726769,
+      "trips": 4,
+      "reused": false,
+      "solve_wall": 19.511262711137533,
+      "receipt_wall": 30.374725463800132,
+      "channel_wall": 0.0003430992364883423,
+      "frame_assembly_wall": 1.3460712702944875,
+      "second_x_point_finite": true
+    }
+  ],
+  "first_moved": null,
+  "prime": {
+    "wall": 129.4111468726769,
+    "trips": 4,
+    "reused": false,
+    "solve_wall": 19.511262711137533,
+    "receipt_wall": 30.374725463800132,
+    "channel_wall": 0.0003430992364883423,
+    "frame_assembly_wall": 1.3460712702944875,
+    "second_x_point_finite": true,
+    "stages": {
+      "convert": 0.6960173966363072,
+      "shadow": 0.1767131621018052,
+      "external": 0.18902110867202282,
+      "bind": 0.15354516729712486,
+      "gather": 2.313964068889618e-05,
+      "trip0:start": 18.15032309666276,
+      "trip0:boundary": 4.646461457014084e-05,
+      "trip1:start": 0.0497411759570241,
+      "trip1:boundary": 1.7931684851646423e-05,
+      "trip2:start": 0.04749824106693268,
+      "trip2:boundary": 1.3014301657676697e-05,
+      "trip3:start": 0.047594486735761166,
+      "trip3:boundary": 4.8218294978141785e-05,
+      "trips": 5.9732235968112946e-05,
+      "records": 7.266644388437271e-05
+    },
+    "trip_census": {
+      "trips": 4,
+      "jacobian_builds": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "jacobian_wall": [
+        1.704111859202385,
+        0.0007972344756126404,
+        0.0006169909611344337,
+        0.000464477576315403
+      ],
+      "newton_wall": [
+        1.357843853533268,
+        0.0035536279901862144,
+        0.0,
+        0.0
+      ],
+      "boundary_wall": [
+        15.088217510841787,
+        0.04533983953297138,
+        0.046064093708992004,
+        0.04645184427499771
+      ],
+      "trip_wall": [
+        18.150328047573566,
+        0.04974373243749142,
+        0.04749929066747427,
+        0.04759542550891638
+      ],
+      "newton_steps": [
+        12,
+        1,
+        0,
+        0
+      ],
+      "map_evaluations": [
+        23,
+        2,
+        1,
+        1
+      ]
+    },
+    "receipt_stages": {
+      "receipt_total": 30146.224,
+      "integral_state": 114.286,
+      "raster": 7144.294,
+      "separatrix": 6566.333,
+      "labelled": 19245.913,
+      "lcfs": 16622.886,
+      "strike": 640.098,
+      "secondary": 1979.479
+    },
+    "seed_centroid_m": [
+      0.7781594025789569,
+      0.002607436439218966
+    ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "first_drawn_is_cold_on_every_shot": true,
+  "first_drawn_is_weakest_on_every_shot": true,
+  "question": "does the cold condition sit at the start of a drawn sequence or beside it, and is the first frame drawn representative of its pulse",
+  "shots": [
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        43,
+        50,
+        53,
+        66,
+        71
+      ],
+      "drawn_frame_count": 81,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.007475384245282197,
+      "first_drawn_span_wb": 0.0011699758831691942,
+      "first_drawn_stored_index": 4,
+      "first_drawn_time_s": 0.029999999329447746,
+      "median_span_wb": 0.1565104675264793,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 27079,
+      "stored_frame_count": 114
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        27,
+        43
+      ],
+      "drawn_frame_count": 43,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.14386026455605136,
+      "first_drawn_span_wb": 0.02773616628689579,
+      "first_drawn_stored_index": 1,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.19279935548908383,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 21978,
+      "stored_frame_count": 70
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1
+      ],
+      "drawn_frame_count": 36,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.1464303458767166,
+      "first_drawn_span_wb": 0.028064681109608913,
+      "first_drawn_stored_index": 1,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.1916589142884172,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 21983,
+      "stored_frame_count": 69
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        28
+      ],
+      "drawn_frame_count": 33,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.14882353490399133,
+      "first_drawn_span_wb": 0.02650755461144988,
+      "first_drawn_stored_index": 0,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.17811399674487216,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 21985,
+      "stored_frame_count": 67
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        26,
+        27
+      ],
+      "drawn_frame_count": 33,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.13914447590936216,
+      "first_drawn_span_wb": 0.023599065361767257,
+      "first_drawn_stored_index": 0,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.1696011660365126,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 21986,
+      "stored_frame_count": 61
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        37,
+        42
+      ],
+      "drawn_frame_count": 42,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.12686515091911768,
+      "first_drawn_span_wb": 0.026765874436752102,
+      "first_drawn_stored_index": 0,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.21097893505692958,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 21989,
+      "stored_frame_count": 73
+    },
+    {
+      "cold_ranks_in_drawn_sequence": [
+        1,
+        37
+      ],
+      "drawn_frame_count": 43,
+      "first_drawn_is_cold": true,
+      "first_drawn_is_limited": true,
+      "first_drawn_span_as_fraction_of_median": 0.13449993366741247,
+      "first_drawn_span_wb": 0.02732769578777583,
+      "first_drawn_stored_index": 1,
+      "first_drawn_time_s": 0.02499999850988388,
+      "median_span_wb": 0.20317999453703048,
+      "rank_of_first_drawn_by_span": 1,
+      "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+      "shot": 22086,
+      "stored_frame_count": 57
+    }
+  ],
+  "worst_first_drawn_fraction_of_median": 0.007475384245282197
+}

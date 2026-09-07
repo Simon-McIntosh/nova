@@ -230,9 +230,20 @@ def _circular_internal_geometry():
     return radius, height, psi, geometry
 
 
-def _receipt_for_geometry_assembly(radius, height, psi, geometry):
-    """Return a typed receipt with lightweight solved-state carriers."""
-    boundary = np.column_stack((geometry.surface_r[-1], geometry.surface_z[-1]))
+def _receipt_for_geometry_assembly(radius, height, psi, geometry, *, lcfs="surface"):
+    """Return a typed receipt with lightweight solved-state carriers.
+
+    ``lcfs`` selects the raster-derived boundary polyline: the string
+    "surface" (default) uses the fixture's outer traced surface, an array
+    supplies an explicit polyline, and ``None`` leaves the raster separatrix
+    and its derived LCFS absent.
+    """
+    if lcfs is None:
+        boundary = np.empty((0, 2))
+    elif isinstance(lcfs, str):
+        boundary = np.column_stack((geometry.surface_r[-1], geometry.surface_z[-1]))
+    else:
+        boundary = np.asarray(lcfs, dtype=float)
     raster = SimpleNamespace(
         radius=radius,
         height=height,
@@ -563,6 +574,124 @@ def test_real_rasterless_corpus_session_decodes() -> None:
         restored[-1].coil_current,
         dataset["coil_current"].isel(time=-1).values,
     )
+
+
+def test_rasterless_solovev_session_fills_lcfs_from_the_outer_surface(
+    machine, tmp_path
+) -> None:
+    """A rasterless session carries a closed LCFS from the outer flux surface.
+
+    The frame is assembled from a receipt with no raster separatrix and no
+    derived LCFS: the polyline comes from the outermost traced flux surface,
+    closed by repeating the first vertex, and the rasterless session
+    round-trips that polyline.
+    """
+    profile, seed, _conductor_current = machine
+    radial_count = profile.lattice.radius.size
+    vertical_count = profile.lattice.height.size
+    psi = np.asarray(seed[: radial_count * vertical_count]).reshape(
+        radial_count, vertical_count
+    )
+    axis_flux = float(np.asarray(seed).max())
+    boundary_flux = axis_flux - SEED_SPAN
+    flux_span = axis_flux - boundary_flux
+    geometry = FluxSurfaceGeometry.internal_geometry(
+        profile.lattice,
+        np.asarray(psi),
+        source_field_function(profile.source, flux_span),
+        axis=(AXIS_RADIUS, 0.0),
+        boundary_flux=boundary_flux,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
+    receipt = _receipt_for_geometry_assembly(
+        np.asarray(profile.lattice.radius),
+        np.asarray(profile.lattice.height),
+        psi,
+        geometry,
+        lcfs=None,
+    )
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
+    frame = assemble_frame(
+        receipt,
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[0.8, 0.0], [1.2, 0.0]]),
+        ),
+        carrier_identity="solovev-fixture",
+        applied_current=np.zeros(CONDUCTORS),
+        p_prime_psi_norm=profile_psi_norm,
+        p_prime=np.asarray(profile.source.core.p_prime(profile_psi_norm)),
+        ff_prime_psi_norm=profile_psi_norm,
+        ff_prime=np.asarray(profile.source.core.ff_prime(profile_psi_norm)),
+        p_prime_source="efm",
+        reference_centroid_z=0.0,
+        compensating_current=np.empty(0),
+        internal_geometry=geometry,
+    )
+
+    outer_r = np.asarray(geometry.surface_r)[-1]
+    outer_z = np.asarray(geometry.surface_z)[-1]
+    assert np.all(np.isfinite(outer_r))
+    assert frame.lcfs_r.size == outer_r.size + 1  # surface plus the repeat point
+    assert frame.lcfs_r.size == frame.lcfs_z.size
+    assert int(frame.n_boundary_coords) == frame.lcfs_r.size  # vertex count
+    np.testing.assert_allclose(frame.lcfs_r[: outer_r.size], outer_r, atol=1e-12)
+    np.testing.assert_allclose(frame.lcfs_z[: outer_z.size], outer_z, atol=1e-12)
+    assert frame.lcfs_r[0] == frame.lcfs_r[-1]  # closed ring
+    assert frame.lcfs_z[0] == frame.lcfs_z[-1]
+    assert bool(frame.finite_mask[5])  # LCFS present
+
+    # the rasterless session carries the filled closed polyline on read back
+    write_session(
+        (frame,),
+        filename="rasterless-solovev-lcfs",
+        dirname=str(tmp_path),
+        include_raster=False,
+    )
+    restored = frames_from_session(
+        read_session(filename="rasterless-solovev-lcfs", dirname=str(tmp_path))
+    )[0]
+    np.testing.assert_array_equal(restored.lcfs_r, frame.lcfs_r)
+    np.testing.assert_array_equal(restored.lcfs_z, frame.lcfs_z)
+    assert int(restored.n_boundary_coords) == frame.lcfs_r.size
+
+
+def test_rastered_frame_keeps_its_raster_derived_polyline() -> None:
+    """A rastered session keeps the raster-derived LCFS, never the fallback."""
+    radius, height, psi, geometry = _circular_internal_geometry()
+    # a distinct raster-derived boundary: a smaller ring, not the outer surface
+    custom = np.column_stack(
+        (
+            0.9 * np.asarray(geometry.surface_r)[-1],
+            0.9 * np.asarray(geometry.surface_z)[-1],
+        )
+    )
+    receipt = _receipt_for_geometry_assembly(radius, height, psi, geometry, lcfs=custom)
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
+    frame = assemble_frame(
+        receipt,
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[2.5, 0.0], [3.5, 0.0]]),
+        ),
+        carrier_identity="circular-map",
+        applied_current=np.asarray([0.0]),
+        p_prime_psi_norm=profile_psi_norm,
+        p_prime=profile_psi_norm,
+        ff_prime_psi_norm=profile_psi_norm,
+        ff_prime=-profile_psi_norm,
+        p_prime_source="efm",
+        reference_centroid_z=0.05,
+        compensating_current=np.empty(0),
+        internal_geometry=geometry,
+    )
+    np.testing.assert_array_equal(frame.lcfs_r, custom[:, 0])
+    np.testing.assert_array_equal(frame.lcfs_z, custom[:, 1])
+    assert int(frame.n_boundary_coords) == custom.shape[0]
 
 
 def test_masked_components_stay_masked_never_imputed() -> None:

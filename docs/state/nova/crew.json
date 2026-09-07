@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T18:42:50",
+  "updated": "2026-09-07T18:57:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -527,6 +527,15 @@
         "created": "2026-08-26"
       },
       {
+        "id": "cank-bound-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "cank-bound-s",
         "harness": "codex",
         "role": "implement",
@@ -1050,6 +1059,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "dvf-gate-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "dvf-residual",
         "harness": "codex",
         "role": "implement",
@@ -1451,6 +1469,15 @@
           "gpt-5.6-sol": "01a06171-2897-7631-a1f0-9fedcf2f32d1"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "gaa-evidence-c",
+        "harness": "clive",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "gate-packet",
@@ -2998,6 +3025,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-laneabort-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-limitedfix-s",
         "harness": "codex",
         "role": "implement",
@@ -3662,6 +3698,42 @@
         "created": "2026-09-07"
       },
       {
+        "id": "s19-score-c1",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c2",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c3",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c4",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "s19-scout-c",
         "harness": "clive",
         "role": "investigate",
@@ -3716,6 +3788,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-02"
+      },
+      {
+        "id": "scr-casecurrent-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "scr-conditioning-x",
@@ -121735,6 +121816,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2034
+    "_version": 2043
   }
 }

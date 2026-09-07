@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T12:20:17",
+  "updated": "2026-09-07T12:50:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1022,9 +1022,11 @@
         "id": "dvf-axisconfig-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "898da3a4-9bc9-4232-9b29-cc88e420000c",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "898da3a4-9bc9-4232-9b29-cc88e420000c"
+        },
         "created": "2026-09-07"
       },
       {
@@ -2915,9 +2917,11 @@
         "id": "pfs-nullguard-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd"
+        },
         "created": "2026-09-07"
       },
       {
@@ -120048,6 +120052,322 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T051312338252-scr-case-current-repair",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-case-current-repair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1776,
+                "cached_input_tokens": 874248,
+                "input_tokens": 876056,
+                "output_tokens": 140,
+                "reasoning_output_tokens": 93,
+                "total_tokens": 876196,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "JSON receipts under docs/figures/solver-convergence-regression/vertical-mode/case-current-repair/ record for both rows the free production solve (residual, termination, trips, terminal centroid against the seed) and the compensating P6 current at the five elimination heights 0.0389 to 0.1189 m, with the fitted-current baseline beside each; one figure; every solve on all_debug through srun or sbatch with declared waits (TMPDIR=/tmp, environment python called directly) or, if a solve provably needs the H200, a declared-wait job at 4 cores per card; the report states the minimum compensation under measured case currents against the 2.58 kA fitted baseline and one paragraph for section 4 on whether the bank row converges freely",
+          "estimated_hours": 1.5,
+          "goal": "The 21986/46 bank row rebuilt with the eight instrumented coil-case group currents replaced by their exact-time transducer readings and the other 93 circuits unchanged, solved free from the bank seed and walked through the five-height elimination scan, with 21989/55 under the same substitution as the control, to show whether the row converges freely with measured case currents",
+          "id": "scr-case-current-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/vertical_force_decomposition.py",
+            "docs/figures/solver-convergence-regression/vertical-mode/case-current-repair/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/case-current-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-force-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T05:13:23Z",
+        "completed_at": "2026-09-07T10:34:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 19296,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "e608877415eb736532d4fa6b150ba69db7be1ab9",
+        "commits": [
+          "39b23a5a3c1bbfc90e7a9dab88cb411364152588",
+          "c270afe0c61e1d6ec4c6da18e3a835f7760d17d3",
+          "e1cd4b87fe816f241cb4b37b6a58f338eb4ba885",
+          "16ec4d096c7a43181795a8f8d643db3d2463e0eb"
+        ],
+        "changed_lines": {
+          "added": 1291,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "receipt audit plus PNG visual audit plus ruff and py_compile on the driver; all_debug lint lane",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1500544,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1784034,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 11172,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2143
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 946,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 648,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "becb93999f72c21397f178b9b31faf79404a12c8ca8cbadf2f1e69ff84aa8a08",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T044628330377-media-prior-art/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260907T044628330377-media-prior-art --gate <verdict>",
+              "node": "media-prior-art",
+              "phase": "starting",
+              "plan": "efit-baseline-demonstration",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T044628330377-media-prior-art",
+              "session": "media-figures",
+              "terminal_age_seconds": 701,
+              "terminal_at": "2026-09-07T05:01:35Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/media-figures/media-prior-art"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 13315,
+          "peak_input_tokens": 3284578
+        },
+        "follow_on_paths": [
+          "165.129",
+          "21989/55",
+          "fitted/measured",
+          "21986/46."
+        ],
+        "dispute_count": 0,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair",
+          "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T10:34:59Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T102049320023-pfs-wall-anchor-shadow-order",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-wall-anchor-shadow-order",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 412,
+                "cached_input_tokens": 839561,
+                "input_tokens": 839975,
+                "output_tokens": 940,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 840915,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_wall_anchor_shadow.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp and JAX_PLATFORMS=cpu and the environment python called directly, the log captured once under the run directory, the topology read accepting a per-wall-node private mask and applying it to the wall flux before the extremum is selected, the previous-iterate wall shadow already threaded into the frozen topology partition supplied as that mask, a documented decision on what the first iterate does when no previous shadow exists because a 54415-frame census puts limited cold-start frames at a median span ratio of 0.066 against 0.285 for limited warm, one test asserting a wall node marked private cannot win the anchor on a fixture where it carries the extreme flux, a second test asserting a diverted fixture is bit-identical because it never consults the wall anchor, the twelve positive-current bank rows and the Solovev certificate staying bit-identical, the report stating the expected effect on an acceptance measure defined as the ratio of the limited median to the diverted median at matched time epoch reaching one rather than either median reaching unity, because the same census shows the diverted control itself drifting from 0.70 early through 0.83 to 1.15 late so an absolute target would fail a correct fix early and pass an incorrect one late, with the currently measured matched-epoch ratios running 0.26 to 0.55 where limited frames are common, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 1.0,
+          "goal": "the wall flux extremum that anchors a limited boundary is masked by the private-wall shadow before the extremum is taken",
+          "id": "pfs-wall-anchor-shadow-order",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_wall_anchor_shadow.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-anchor-shadow-order.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-wallshadow-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T10:21:04Z",
+        "completed_at": "2026-09-07T10:49:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1694,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1694,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c73f62540b7ad3a332caf88b92d4f98f9eab3f4a",
+        "commits": [
+          "20f3a40c1dbad6057919c7b0de7944f7ac7548f0"
+        ],
+        "changed_lines": {
+          "added": 252,
+          "removed": 18,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --cpus-per-task=4 --mem=32G pytest: focused job 1264278 and positive-current plus Solovev referee job 1264282",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T102049320023-pfs-wall-anchor-shadow-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07b62-c301-7663-95b2-0f91888c8c87",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260907T101416931856-pfs-wall-anchor-shadow-order",
+          "root_run_id": "r-20260907T101416931856-pfs-wall-anchor-shadow-order"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-wall-anchor-shadow-order",
+          "session_id": "01a07b62-c301-7663-95b2-0f91888c8c87",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T10:49:18Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -120360,6 +120680,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2001
+    "_version": 2005
   }
 }

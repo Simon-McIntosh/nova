@@ -1,0 +1,934 @@
+{
+  "rows": [
+    {
+      "identity": "21986/46",
+      "seed_centroid": {
+        "r_m": 0.7995247864306984,
+        "z_m": 0.09889428493417936
+      },
+      "free_production_solve": {
+        "fitted_current_baseline": {
+          "terminal_residual": 0.0013465497226240197,
+          "converged": false,
+          "termination_code": 10,
+          "active_set_trips": 5,
+          "terminal_centroid": {
+            "r_m": 0.8015331449721788,
+            "z_m": 0.0700436667382244
+          },
+          "terminal_centroid_minus_seed_m": {
+            "r_m": 0.002008358541480404,
+            "z_m": -0.028850618195954955
+          },
+          "resolved_defaults": {
+            "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+            "policy": {
+              "route": "newton_krylov",
+              "newton_steps": 10,
+              "gmres_iterations": 30,
+              "warmup": 0,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "active_set_steps": 16,
+              "kernel_tolerance": 1e-08,
+              "qualification_tolerance": 1e-10,
+              "current_pin": true,
+              "settled_exit": true,
+              "own_mask_acceptance": true,
+              "continuation": true,
+              "best_iterate_retention": true,
+              "stagnation_stop": true,
+              "exact_kernels": true,
+              "cached_machine": true,
+              "compilation_cache": true
+            },
+            "deviations": {},
+            "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+          }
+        },
+        "measured_case_current": {
+          "terminal_residual": 0.0026533160844530073,
+          "converged": false,
+          "termination_code": 10,
+          "active_set_trips": 12,
+          "terminal_centroid": {
+            "r_m": 0.8019057658798987,
+            "z_m": 0.06516300093564083
+          },
+          "terminal_centroid_minus_seed_m": {
+            "r_m": 0.002380979449200349,
+            "z_m": -0.03373128399853853
+          },
+          "resolved_defaults": {
+            "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+            "policy": {
+              "route": "newton_krylov",
+              "newton_steps": 10,
+              "gmres_iterations": 30,
+              "warmup": 0,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "active_set_steps": 16,
+              "kernel_tolerance": 1e-08,
+              "qualification_tolerance": 1e-10,
+              "current_pin": true,
+              "settled_exit": true,
+              "own_mask_acceptance": true,
+              "continuation": true,
+              "best_iterate_retention": true,
+              "stagnation_stop": true,
+              "exact_kernels": true,
+              "cached_machine": true,
+              "compilation_cache": true
+            },
+            "deviations": {},
+            "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+          }
+        }
+      },
+      "elimination_scan": [
+        {
+          "target_centroid_z_m": 0.03889428493417936,
+          "fitted_current_baseline": {
+            "terminal_residual": 1.4205054601863802e-12,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8007954308095466,
+              "z_m": 0.038894284934208274
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.0012706443788482735,
+              "z_m": -0.05999999999997108
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -2730.069875194986,
+            "constraint_qualified": true
+          },
+          "measured_case_current": {
+            "terminal_residual": 1.5067892805468314e-10,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8008353177665323,
+              "z_m": 0.03889428493722652
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.00131053133583392,
+              "z_m": -0.05999999999695284
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -5383.026979623597,
+            "constraint_qualified": true
+          }
+        },
+        {
+          "target_centroid_z_m": 0.05889428493417936,
+          "fitted_current_baseline": {
+            "terminal_residual": 7.925833112193606e-09,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8012388089516876,
+              "z_m": 0.05889428603946672
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.001714022520989289,
+              "z_m": -0.03999999889471264
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -2580.836214398898,
+            "constraint_qualified": true
+          },
+          "measured_case_current": {
+            "terminal_residual": 1.7204884621283732e-09,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8011130637044261,
+              "z_m": 0.05889428540907793
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.0015882772737277895,
+              "z_m": -0.03999999952510143
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -5274.514453332766,
+            "constraint_qualified": true
+          }
+        },
+        {
+          "target_centroid_z_m": 0.07889428493417935,
+          "fitted_current_baseline": {
+            "terminal_residual": 5.034035344936123e-10,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8004698485888248,
+              "z_m": 0.0788942850123637
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.0009450621581263974,
+              "z_m": -0.019999999921815656
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -2885.200304000039,
+            "constraint_qualified": true
+          },
+          "measured_case_current": {
+            "terminal_residual": 8.824602472340851e-10,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.8003514538500321,
+              "z_m": 0.07889428515018232
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": 0.0008266674193337931,
+              "z_m": -0.01999999978399704
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -5530.6154311712435,
+            "constraint_qualified": true
+          }
+        },
+        {
+          "target_centroid_z_m": 0.09889428493417936,
+          "fitted_current_baseline": {
+            "terminal_residual": 9.216672433796642e-09,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.7993401286654059,
+              "z_m": 0.09889428874969339
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": -0.0001846577652924175,
+              "z_m": 3.815514029725797e-09
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -4103.220272082491,
+            "constraint_qualified": true
+          },
+          "measured_case_current": {
+            "terminal_residual": 2.622966666773455e-13,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.7991633149509024,
+              "z_m": 0.09889428493417532
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": -0.0003614714797959273,
+              "z_m": -4.038436252074007e-15
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -6825.146967859099,
+            "constraint_qualified": true
+          }
+        },
+        {
+          "target_centroid_z_m": 0.11889428493417936,
+          "fitted_current_baseline": {
+            "terminal_residual": 2.4996547360840047e-11,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.7974957412025772,
+              "z_m": 0.11889428493679703
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": -0.0020290452281211957,
+              "z_m": 0.020000000002617674
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -5764.244035078885,
+            "constraint_qualified": true
+          },
+          "measured_case_current": {
+            "terminal_residual": 4.399982857106041e-11,
+            "converged": true,
+            "termination_code": 1,
+            "active_set_trips": 1,
+            "terminal_centroid": {
+              "r_m": 0.7973885891743684,
+              "z_m": 0.118894284932321
+            },
+            "terminal_centroid_minus_seed_m": {
+              "r_m": -0.0021361972563299636,
+              "z_m": 0.019999999998141643
+            },
+            "resolved_defaults": {
+              "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+              "policy": {
+                "route": "newton_krylov",
+                "newton_steps": 10,
+                "gmres_iterations": 30,
+                "warmup": 0,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "active_set_steps": 16,
+                "kernel_tolerance": 1e-08,
+                "qualification_tolerance": 1e-10,
+                "current_pin": true,
+                "settled_exit": true,
+                "own_mask_acceptance": true,
+                "continuation": true,
+                "best_iterate_retention": true,
+                "stagnation_stop": true,
+                "exact_kernels": true,
+                "cached_machine": true,
+                "compilation_cache": true
+              },
+              "deviations": {},
+              "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+            },
+            "compensating_p6_current_a": -8415.919151073702,
+            "constraint_qualified": true
+          }
+        }
+      ],
+      "case_current_replacement": {
+        "source": "nearest finite amc sample at the EFIT slice time",
+        "fitted_current_digest_sha256": "bd12a021909920a5983fce5ba306ec565678c075db7b689fa439d5d14f77f5dd",
+        "replacement_current_digest_sha256": "b449e0a1540654994e4af50aa03ef0a0c843a26866703388f4729296f6308cd1",
+        "stored_circuit_count": 101,
+        "replaced_case_circuit_count": 8,
+        "unchanged_circuit_count": 93,
+        "groups": [
+          {
+            "family": "p2_lower",
+            "stored_circuit": 15,
+            "fitted_current_a": 4588.04052734375,
+            "transducer_current_a": 4397.953033447266,
+            "delta_current_a": -190.08749389648438,
+            "transducer": {
+              "channel": "p2l_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": 4397.953033447266
+            }
+          },
+          {
+            "family": "p2_upper",
+            "stored_circuit": 14,
+            "fitted_current_a": 154.8817901611328,
+            "transducer_current_a": -375.3070831298828,
+            "delta_current_a": -530.1888732910156,
+            "transducer": {
+              "channel": "p2u_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": -375.3070831298828
+            }
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 17,
+            "fitted_current_a": 3784.600830078125,
+            "transducer_current_a": 3421.4186668395996,
+            "delta_current_a": -363.1821632385254,
+            "transducer": {
+              "channel": "p3l_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": 3421.4186668395996
+            }
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 16,
+            "fitted_current_a": -4888.0849609375,
+            "transducer_current_a": -2988.1908893585205,
+            "delta_current_a": 1899.8940715789795,
+            "transducer": {
+              "channel": "p3u_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": -2988.1908893585205
+            }
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 19,
+            "fitted_current_a": 670.3997802734375,
+            "transducer_current_a": 1026.458740234375,
+            "delta_current_a": 356.0589599609375,
+            "transducer": {
+              "channel": "p4l_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": 1026.458740234375
+            }
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 18,
+            "fitted_current_a": -1079.6217041015625,
+            "transducer_current_a": 564.75830078125,
+            "delta_current_a": 1644.3800048828125,
+            "transducer": {
+              "channel": "p4u_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": 564.75830078125
+            }
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 21,
+            "fitted_current_a": 2521.9462890625,
+            "transducer_current_a": 936.3021850585938,
+            "delta_current_a": -1585.6441040039062,
+            "transducer": {
+              "channel": "p5l_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": 936.3021850585938
+            }
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 20,
+            "fitted_current_a": -3131.72705078125,
+            "transducer_current_a": -2754.9209594726562,
+            "delta_current_a": 376.80609130859375,
+            "transducer": {
+              "channel": "p5u_case_current",
+              "time_s": 0.25,
+              "sample_time_s": 0.2499999701976776,
+              "sample_time_offset_s": -2.9802322387695312e-08,
+              "selection": "nearest finite amc sample to the EFIT slice time",
+              "current_a": -2754.9209594726562
+            }
+          }
+        ]
+      },
+      "policy": {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": 101,
+        "active_circuit_count": 13,
+        "passive_or_vessel_circuit_count": 88,
+        "section_kernel_evaluations": 938,
+        "section_kernel_evaluations_this_shot": 0,
+        "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+        "passive_registry_maximum_separation_m": 0.0,
+        "response_shape": [
+          1126,
+          101
+        ],
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": 6.661338147750939e-16,
+        "stored_field_closure_rms_wb": 1.4747787786880548e-16,
+        "all_currents_prescribed": true,
+        "response_matrix_reused": true,
+        "response_input_digests": {
+          "algorithm": "sha256",
+          "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "inputs": {
+            "gridr": {
+              "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "gridz": {
+              "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "limiterr": {
+              "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "limiterz": {
+              "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "fcoil_n": {
+              "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+              "dtype": "<f4",
+              "shape": [
+                101
+              ]
+            },
+            "fcoil_circ": {
+              "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+              "dtype": "<f8",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_r": {
+              "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_z": {
+              "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_width": {
+              "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_height": {
+              "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang1": {
+              "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang2": {
+              "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_turns": {
+              "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_xmult": {
+              "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "resolved_response_targets": {
+              "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+              "dtype": "<f8",
+              "shape": [
+                1126,
+                2
+              ]
+            }
+          }
+        },
+        "active_mapping_recomputed_for_shot": true,
+        "active_mapping": [
+          {
+            "family": "p2_inner_lower",
+            "stored_circuit": 4,
+            "centroid_separation_m": 3.020663818271642e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 44597.9375,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 44597.7593976371
+          },
+          {
+            "family": "p2_inner_upper",
+            "stored_circuit": 2,
+            "centroid_separation_m": 4.610138552976278e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 44451.26953125,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 44451.092014607275
+          },
+          {
+            "family": "p2_outer_lower",
+            "stored_circuit": 5,
+            "centroid_separation_m": 3.794706373301994e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 29847.888671875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 29847.888671875
+          },
+          {
+            "family": "p2_outer_upper",
+            "stored_circuit": 3,
+            "centroid_separation_m": 3.882122250270243e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 29459.822265625,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 29459.822265625
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 7,
+            "centroid_separation_m": 1.2310483904636694e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 0.4602978527545929,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 0.4602978527545929
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 6,
+            "centroid_separation_m": 1.1378064254653142e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 28.47551155090332,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 28.47551155090332
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 9,
+            "centroid_separation_m": 0.002284428762164253,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -174814.9375,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -174815.0905405518
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 8,
+            "centroid_separation_m": 0.003039636783399228,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -175149.75,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -175149.90333366115
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 11,
+            "centroid_separation_m": 0.0022829440191137885,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -126059.828125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -126059.93848322186
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 10,
+            "centroid_separation_m": 0.0022872695201792835,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -126193.3828125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -126193.49328764141
+          },
+          {
+            "family": "p6_lower",
+            "stored_circuit": 13,
+            "centroid_separation_m": 5.527338696549878e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -7496.02001953125,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -7496.02001953125
+          },
+          {
+            "family": "p6_upper",
+            "stored_circuit": 12,
+            "centroid_separation_m": 1.4493967305635352e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 5772.97607421875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 5772.97607421875
+          },
+          {
+            "family": "sol",
+            "stored_circuit": 1,
+            "centroid_separation_m": 2.5307005105576235e-06,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -34637.86328125,
+            "filament_turn_multiplier_sum": 328.0,
+            "effective_drive_a_turn": -11361219.15625
+          }
+        ]
+      },
+      "carrier_evidence": {
+        "loaded_from_persisted_carrier": true,
+        "carrier": {
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "stored_circuit_count": 101,
+          "frozen_reference_count": 6,
+          "warm_load_seconds": 0.005841799080371857,
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "size_bytes": 645864
+        },
+        "named_cache_only_check": {
+          "command": [
+            "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+            "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair/benchmarks/mast_response_carrier_warm.py",
+            "check",
+            "--carrier",
+            "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "--receipt",
+            "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+          ],
+          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.023756 direct_builders=0 verdict=PASS",
+          "direct_green_operator_builder_entries": 0,
+          "passes": true
+        }
+      },
+      "minimum_measured_case_compensation_a": -5274.514453332766
+    }
+  ]
+}

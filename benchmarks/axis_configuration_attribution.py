@@ -575,8 +575,9 @@ def run(
             mesh_points=None,
             tolerance=FIXED_POINT_CRITERION,
             case_state_seed=False,
-            description="labeller reproduction: carrier operator, continuation"
-            + "writer tolerance",
+            label="labeller configuration (carrier operator, continuation, 1e-8)",
+            factor="none",
+            description="labeller reproduction: carrier operator, continuation",
         ),
         "P": dict(
             shot=SHOT,
@@ -585,6 +586,8 @@ def run(
             mesh_points=None,
             tolerance=FIXED_POINT_CRITERION,
             case_state_seed=False,
+            label="parity configuration (21978-native operator, continuation, 1e-8)",
+            factor="none",
             description="parity reproduction: 21978-native operator, continuation",
         ),
         "G": dict(
@@ -594,6 +597,8 @@ def run(
             mesh_points=FINE_GRID_POINTS,
             tolerance=FIXED_POINT_CRITERION,
             case_state_seed=False,
+            label="grid extent and resolution arm (carrier anchor on a finer mesh)",
+            factor="grid_extent_and_resolution",
             description="grid factor: carrier anchor on a finer solve mesh",
         ),
         "S": dict(
@@ -603,6 +608,8 @@ def run(
             mesh_points=None,
             tolerance=FIXED_POINT_CRITERION,
             case_state_seed=True,
+            label="seed policy arm (explicit case-state reconstruction seed)",
+            factor="seed_policy",
             description="seed factor: explicit case-state reconstruction seed",
         ),
         "R": dict(
@@ -612,6 +619,8 @@ def run(
             mesh_points=None,
             tolerance=TIGHT_TOLERANCE,
             case_state_seed=False,
+            label="route and residual tolerance arm (tight 1e-12 finish)",
+            factor="route_with_residual_tolerance",
             description="route factor: carrier operator with the tight residual finish",
         ),
         "W": dict(
@@ -621,6 +630,8 @@ def run(
             mesh_points=None,
             tolerance=FIXED_POINT_CRITERION,
             case_state_seed=True,
+            label="parity configuration with case-state seed",
+            factor="none",
             description="full parity configuration: native operator, case-state seed",
         ),
     }
@@ -640,12 +651,49 @@ def run(
         )
         _draw_figure(payload, output_figure)
 
+    def build_payload(rows: list[dict[str, Any]]) -> dict[str, Any]:
+        """Return the receipt payload, labelling every arm by its factor."""
+        labelled = []
+        for arm in rows:
+            spec = specs[arm["arm"]]
+            labelled.append({**arm, "label": spec["label"], "factor": spec["factor"]})
+        return {
+            "artifact": (
+                "single-factor attribution of the magnetic-axis position on one "
+                "MAST slice"
+            ),
+            "driver_sha256": _sha256(Path(__file__)),
+            "shot": SHOT,
+            "slice_index": row,
+            "time_s": selected_time,
+            "efit_axis_rz_m": list(efit_axis),
+            "banked_nova_results_rz_m": {
+                "labeller_configuration": list(BANKED["labeller_configuration"]),
+                "wide_grid_parity_route": list(BANKED["wide_grid_parity_route"]),
+            },
+            "factors_varied": [
+                "grid_extent_and_resolution",
+                "seed_policy",
+                "route_with_residual_tolerance",
+            ],
+            "mesh": mesh_overview,
+            "evidence_inputs": {
+                "shot_store": str(SHOT_STORE / f"{SHOT}.zarr"),
+                "response_carrier": carrier_evidence,
+            },
+            "arms": labelled,
+            "complete": len(labelled) == 6,
+        }
+
     prior: list[dict[str, Any]] = []
     if output_json.is_file():
         try:
             prior = json.loads(output_json.read_text()).get("arms", [])
         except json.JSONDecodeError:
             prior = []
+    if not selected:
+        write_payload(build_payload(prior))
+        return {"arms": prior, "complete": len(prior) == 6}
     arms = [arm for arm in prior if arm["arm"] not in selected]
     for name in selected:
         spec = specs[name]
@@ -674,34 +722,7 @@ def run(
             f"{arm['axis_rz_m']}, residual {arm['final_residual']:.4g}",
             flush=True,
         )
-        payload = {
-            "artifact": (
-                "single-factor attribution of the magnetic-axis position on one "
-                "MAST slice"
-            ),
-            "driver_sha256": _sha256(Path(__file__)),
-            "shot": SHOT,
-            "slice_index": row,
-            "time_s": selected_time,
-            "efit_axis_rz_m": list(efit_axis),
-            "banked_nova_results_rz_m": {
-                "labeller_configuration": list(BANKED["labeller_configuration"]),
-                "wide_grid_parity_route": list(BANKED["wide_grid_parity_route"]),
-            },
-            "factors_varied": [
-                "grid_extent_and_resolution",
-                "seed_policy",
-                "route_with_residual_tolerance",
-            ],
-            "mesh": mesh_overview,
-            "evidence_inputs": {
-                "shot_store": str(SHOT_STORE / f"{SHOT}.zarr"),
-                "response_carrier": carrier_evidence,
-            },
-            "arms": arms,
-            "complete": len(arms) == 6,
-        }
-        write_payload(payload)
+        write_payload(build_payload(arms))
     print(
         f"PASS: {len(arms)} arms run on 21978/{row} at {selected_time:.4f} s; "
         f"axis offsets from EFIT: "
@@ -721,11 +742,12 @@ def main() -> None:
     parser.add_argument(
         "--arms",
         type=str,
-        default="L,P,G,S,R,W",
-        help="comma-separated arms to run (default all six)",
+        default="L,P,S,R,W,G",
+        help="comma-separated arms to run (default all six; empty relabels)",
     )
     args = parser.parse_args()
-    run(args.output_json, args.output_figure, tuple(args.arms.split(",")))
+    names = tuple(name for name in args.arms.split(",") if name)
+    run(args.output_json, args.output_figure, names)
 
 
 if __name__ == "__main__":

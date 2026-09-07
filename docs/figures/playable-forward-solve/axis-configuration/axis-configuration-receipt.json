@@ -24,7 +24,9 @@
       "converged": true,
       "description": "labeller reproduction: carrier operator, continuationwriter tolerance",
       "diverted": true,
+      "factor": "none",
       "final_residual": 5.210962151777584e-09,
+      "label": "labeller configuration (carrier operator, continuation, 1e-8)",
       "offset_from_efit_cm": -4.114549017430891,
       "route": "reduced_newton",
       "seed_policy": "previous-terminal continuation",
@@ -497,7 +499,9 @@
       "converged": true,
       "description": "parity reproduction: 21978-native operator, continuation",
       "diverted": true,
+      "factor": "none",
       "final_residual": 3.6286614624717224e-09,
+      "label": "parity configuration (21978-native operator, continuation, 1e-8)",
       "offset_from_efit_cm": 0.018492677443127103,
       "route": "reduced_newton",
       "seed_policy": "previous-terminal continuation",
@@ -970,7 +974,9 @@
       "converged": true,
       "description": "seed factor: explicit case-state reconstruction seed",
       "diverted": true,
+      "factor": "seed_policy",
       "final_residual": 5.914766166213979e-09,
+      "label": "seed policy arm (explicit case-state reconstruction seed)",
       "offset_from_efit_cm": -4.114548105214055,
       "route": "reduced_newton",
       "seed_policy": "explicit case-state reconstruction",
@@ -1019,7 +1025,9 @@
       "converged": true,
       "description": "route factor: carrier operator with the tight residual finish",
       "diverted": true,
+      "factor": "route_with_residual_tolerance",
       "final_residual": 4.453607623054105e-13,
+      "label": "route and residual tolerance arm (tight 1e-12 finish)",
       "offset_from_efit_cm": -4.11454812833788,
       "route": "reduced_newton",
       "seed_policy": "previous-terminal continuation",
@@ -1492,7 +1500,9 @@
       "converged": true,
       "description": "full parity configuration: native operator, case-state seed",
       "diverted": true,
+      "factor": "none",
       "final_residual": 3.628661676172187e-09,
+      "label": "parity configuration with case-state seed",
       "offset_from_efit_cm": 0.018492677443227024,
       "route": "reduced_newton",
       "seed_policy": "explicit case-state reconstruction",
@@ -1530,7 +1540,7 @@
     ]
   },
   "complete": false,
-  "driver_sha256": "e45b2190b6687efca507a475edd054cf4e4f0078b3432306e066be24efd4adf5",
+  "driver_sha256": "ba4a503d962e710f531ae267de96d0bc963de0132b329abb8c1250113a80200d",
   "efit_axis_rz_m": [
     0.9059291481971741,
     0.0004827221855521202
@@ -1550,13 +1560,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.008460361510515213
+        "warm_load_seconds": 0.006082604173570871
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-axis-configuration-attribution/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/nova/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -1565,7 +1575,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.026213 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021558 direct_builders=0 verdict=PASS"
       }
     },
     "shot_store": "/work/projects/imas_gpu/mast/level1/shots/21978.zarr"

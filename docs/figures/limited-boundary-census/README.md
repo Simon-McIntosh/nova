@@ -72,11 +72,40 @@ against, so the emitter refuses to overwrite an existing array file and exits
 nonzero rather than continuing. Relabelled output is written to a new session
 root for the same reason.
 
+## What the banked root can still answer
+
+The label reader now takes the stored `lcfs_r`/`lcfs_z` polyline as the sole
+boundary authority and refuses a frame without one, rather than substituting the
+outermost nested surface. The corpus as first written has no stored polyline on
+most shots — 27079 carries a zero-length vertex dimension — so **the banked root
+is no longer readable for a boundary**, by design.
+
+What survives and what does not:
+
+| record | still reproducible |
+|---|---|
+| `limited-class-census.npz`, 871 shots | yes — it reads flux surfaces, not the boundary |
+| `repaired-class-census.npz` and everything on the relabelled root | yes — that root stores the polyline |
+| `sequence-start-condition.json` | yes — taken on the relabelled root |
+| `boundary-contact-27079.json`, the 142.91 mm pre-repair figure | **no** |
+
+That last row matters, so the provenance is recorded here rather than inferred
+later. The 142.91 mm figure was measured on the outermost nested surface at
+normalised flux one, through the fallback the reader no longer offers. It
+remains a valid measurement of the same curve: where the two roots overlap, the
+relabelled root stored polyline agrees with that nested surface to 1e-12 over
+all 64 shared vertices, differing only by a closing vertex. So the before and
+after contact figures compare like with like — but the "before" number cannot be
+recomputed through the current reader, and anyone re-deriving it must read the
+nested surfaces deliberately rather than expect the producer to run.
+
 ## Producers
 
 Each takes a session root and writes its own provenance, so one implementation
 reads every corpus — a second reader of the same schema would make its own first
-divergence look like a repair effect.
+divergence look like a repair effect. The three that read a boundary require a
+root that stores the polyline; the census reads flux surfaces and runs against
+either.
 
 ```bash
 scripts/media/limited_class_census.py    --session <root> --output <json>

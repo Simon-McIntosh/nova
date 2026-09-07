@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T05:17:10",
+  "updated": "2026-09-07T05:49:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3515,6 +3515,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-05"
+      },
+      {
+        "id": "scr-force-t",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "scr-fwd-test-repair-x",
@@ -116877,6 +116886,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1963
+    "_version": 1964
   }
 }

@@ -557,7 +557,6 @@ def _child(
         env=environment,
         capture_output=True,
         text=True,
-        timeout=1_800,
         check=False,
     )
     if completed.returncode:
@@ -628,9 +627,11 @@ def _run(output: Path, report: Path) -> dict[str, Any]:
     if "SLURM_JOB_ID" not in os.environ:
         raise RuntimeError("a SLURM allocation is required")
     tokens = _visible_device_tokens(max(DEVICE_COUNTS))
-    print("REFERENCE starting scalar compiled route", flush=True)
+    reference_started = time.perf_counter()
+    print("REFERENCE child starting scalar compiled route", flush=True)
     reference = _child("reference", None, tokens[:1])
-    print("REFERENCE complete", flush=True)
+    reference_wall = time.perf_counter() - reference_started
+    print(f"REFERENCE child finished wall_seconds={reference_wall:.6f}", flush=True)
     receipt: dict[str, Any] = {
         "artifact": "batched forward labeller throughput",
         "status": "working",
@@ -638,6 +639,7 @@ def _run(output: Path, report: Path) -> dict[str, Any]:
         "slurm_job_id": os.environ["SLURM_JOB_ID"],
         "corpus_shot_count": CORPUS_SHOT_COUNT,
         "corpus_slice_count": reference["slice_count"],
+        "reference_wall_seconds": reference_wall,
         "sampling": {
             "method": "admitted-row quartiles",
             "quartile_positions": QUARTILE_COUNT,

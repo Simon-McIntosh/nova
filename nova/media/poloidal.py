@@ -266,10 +266,20 @@ def draw_nulls(
     polygon inclusion rather than a bounding box, because a box admits the
     divertor corners where these points cluster.
 
-    Strike points are deliberately EXEMPT. A strike point is a
-    wall-intersection quantity that lies ON the boundary by definition, and
-    the stored limiter is a 36-point outline of a finer real structure, so
-    containment is the wrong test for it and would drop legitimate points.
+    Strike points are deliberately EXEMPT, and this is measured rather than
+    argued. A strike point lies ON the boundary by definition, and every
+    out-of-polygon strike point across three labelled MAST shots -- 60 of 208
+    on 21858, 48 of 204 on 27079, 15 of 92 on 22086 -- sits at 0.000 mm from
+    the limiter ring, median and maximum. Strict inclusion simply returns
+    false at a degenerate position, so containment would drop clean points;
+    the right test for a strike point is proximity within a tolerance. The
+    contrast is what makes the x-point filter safe: those sit 17 to 32 mm
+    outside with a maximum of 292 mm, which no boundary tolerance explains.
+
+    Subdivision does not change this. The operator's wall is 36 nodes at
+    ``nwall=1`` and 72 at ``nwall=2`` over the IDENTICAL R span, so a finer
+    setting densifies sampling along the same outline without adding
+    structural detail; there is no finer polygon to test against.
 
     Returns the drawn and dropped counts so a caller can record them: a
     figure that silently discards a fifth of a shot's nulls should say so.

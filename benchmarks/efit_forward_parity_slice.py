@@ -24,6 +24,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import time
 from typing import Any
 
 import jax
@@ -85,6 +86,9 @@ DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 CURRENT_CONSTRAINED_OUTPUT = Path(
     "docs/figures/current-constrained-forward-solve/mast-constrained"
 )
+FROZEN_PARTITION_OUTPUT = Path(
+    "docs/figures/millisecond-converged-solve/frozen-partition"
+)
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
@@ -137,6 +141,7 @@ ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
 DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
 EXTENDED_PROMOTION_BUDGETS = (50, 100)
 POWER_ITERATIONS = 40
+FROZEN_PARTITION_SHOTS = (21985, 21986, 21989, 22086)
 
 
 @dataclass
@@ -175,6 +180,11 @@ class DeclaredAnchorOperator(ForwardFluxOperator):
         current = jnp.where(self.declared_support, density * self.area, 0.0)
         zero = jnp.zeros_like(current)
         return CellCurrentMoments(current, zero, zero)
+
+    def _current_moments_on_partition(self, psi, partition) -> CellCurrentMoments:
+        """Preserve the declared source coordinate during frozen revaluation."""
+        del partition
+        return self.cell_current_moments(psi)
 
 
 def _absolute(value: float) -> float:
@@ -3427,20 +3437,82 @@ def _passive_inclusive_solve(
     *,
     newton_budget: int = NEWTON_STEPS,
     target_current: float | None = None,
+    freeze_partition: bool | None = None,
 ) -> tuple[dict[str, Any], np.ndarray, Any]:
     """Run the reference-seeded diverted branch and retain its full outcome."""
-    branch = profile.solve_branch(
-        jnp.asarray(case["state"]),
-        TopologyClass.DIVERTED,
-        route="newton_krylov",
-        target_current=target_current,
-        tolerance=FIXED_POINT_CRITERION,
-        newton_steps=newton_budget,
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
-    )
+    counters = {"map_evaluations": 0, "topology_reads": 0, "trip_times": []}
+    operator = profile.operator
+    original_factory = operator.flux_map_with_shadow
+    original_read = operator._fixed_design_read
+    original_trip_reporter = fixed_point._print_active_set_trip
+    started = time.perf_counter()
+
+    def count_read(*args, **kwargs):
+        jax.debug.callback(
+            lambda: counters.__setitem__(
+                "topology_reads", counters["topology_reads"] + 1
+            ),
+            ordered=True,
+        )
+        return original_read(*args, **kwargs)
+
+    def instrumented_factory(*args, **kwargs):
+        mapped = original_factory(*args, **kwargs)
+        if freeze_partition is False:
+            for name in (
+                "_read_frozen_partition",
+                "_map_frozen_partition",
+                "_frozen_partition_shadow",
+            ):
+                if hasattr(mapped, name):
+                    delattr(mapped, name)
+
+        def counted_map(state, shadow):
+            jax.debug.callback(
+                lambda: counters.__setitem__(
+                    "map_evaluations", counters["map_evaluations"] + 1
+                ),
+                ordered=True,
+            )
+            return mapped(state, shadow)
+
+        for name in (
+            "_read_frozen_partition",
+            "_map_frozen_partition",
+            "_frozen_partition_shadow",
+        ):
+            if hasattr(mapped, name):
+                setattr(counted_map, name, getattr(mapped, name))
+        return counted_map
+
+    def record_trip(active, trip_index, *_values):
+        if bool(active):
+            counters["trip_times"].append(time.perf_counter())
+        del trip_index
+
+    if freeze_partition is not None:
+        operator._fixed_design_read = count_read
+        operator.flux_map_with_shadow = instrumented_factory
+        fixed_point._print_active_set_trip = record_trip
+    try:
+        branch = profile.solve_branch(
+            jnp.asarray(case["state"]),
+            TopologyClass.DIVERTED,
+            route="newton_krylov",
+            target_current=target_current,
+            tolerance=FIXED_POINT_CRITERION,
+            newton_steps=newton_budget,
+            gmres_iterations=GMRES_ITERATIONS,
+            warmup=WARMUP_SWEEPS,
+            relaxation=RELAXATION,
+            step_cap=STEP_CAP,
+            stream_active_set=freeze_partition is not None,
+        )
+    finally:
+        operator.flux_map_with_shadow = original_factory
+        operator._fixed_design_read = original_read
+        fixed_point._print_active_set_trip = original_trip_reporter
+    solve_wall = time.perf_counter() - started
     equilibrium = branch.equilibrium
     trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
     requested = int(branch.requested_class)
@@ -3524,6 +3596,26 @@ def _passive_inclusive_solve(
             else "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
         ),
     }
+    if freeze_partition is not None:
+        trip_times = np.asarray(counters["trip_times"], dtype=np.float64)
+        boundaries = np.r_[started, trip_times, started + solve_wall]
+        trip_walls = np.diff(boundaries).tolist()
+        record["frozen_partition_measurement"] = {
+            "hooks_attached": bool(freeze_partition),
+            "topology_reads": counters["topology_reads"],
+            "map_evaluations": counters["map_evaluations"],
+            "trips": len(trip_walls),
+            "trip_wall_seconds": trip_walls,
+            "mean_trip_wall_seconds": (
+                float(np.mean(trip_walls)) if trip_walls else None
+            ),
+            "whole_solve_wall_seconds": solve_wall,
+            "terminal_residual": float(branch.residual),
+            "termination_reason": int(
+                branch.equilibrium.fixed_point.termination_reason
+            ),
+            "converged": converged,
+        }
     return record, trace, branch
 
 
@@ -3901,16 +3993,28 @@ def _selected_frozen_slices(
     return filtered
 
 
-def _load_persisted_response_cache() -> tuple[dict[str, Any], dict[str, Any]]:
+def _resolve_checkout_path(checkout_root: Path, path: Path) -> Path:
+    """Resolve one authored input or output path against the checkout root."""
+    return path if path.is_absolute() else checkout_root / path
+
+
+def _load_persisted_response_cache(
+    checkout_root: Path | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load the frozen response through its existing fail-closed carrier check."""
     from benchmarks import mast_response_carrier_warm as response_carrier
     from benchmarks.label_seed_residual_field import (
         _persisted_response_cache as load_response_cache,
     )
 
+    root = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
     return load_response_cache(
         response_carrier.DEFAULT_CARRIER,
-        response_carrier.DEFAULT_RECEIPT,
+        _resolve_checkout_path(root, response_carrier.DEFAULT_RECEIPT),
     )
 
 
@@ -3925,9 +4029,13 @@ def _execution_environment() -> dict[str, Any]:
     }
 
 
-def _source_revision() -> str:
+def _source_revision(checkout_root: Path | None = None) -> str:
     """Return the repository revision that supplied this benchmark process."""
-    repository = Path(__file__).resolve().parents[1]
+    repository = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
     completed = subprocess.run(
         ["git", "-C", str(repository), "rev-parse", "HEAD"],
         check=True,
@@ -4209,6 +4317,224 @@ def run_current_constrained(
     return receipt
 
 
+def run_frozen_partition_comparison(
+    store: Path,
+    bank: Path,
+    output: Path = FROZEN_PARTITION_OUTPUT,
+    shots: tuple[int, ...] = FROZEN_PARTITION_SHOTS,
+    *,
+    prepare_only: bool = False,
+    checkout_root: Path | None = None,
+    cache_root: Path | None = None,
+) -> dict[str, Any]:
+    """Measure paired public-route solves with and without frozen partitions."""
+    configure_dtypes()
+    root = (
+        Path(__file__).resolve().parents[1]
+        if checkout_root is None
+        else checkout_root.resolve()
+    )
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    selected = _selected_frozen_slices(bank, shots)
+    response_cache, carrier_evidence = _load_persisted_response_cache(root)
+    output.mkdir(parents=True, exist_ok=True)
+    receipt_path = output / "frozen-partition-savings.json"
+    receipt = {
+        "receipt": "paired public-route frozen-partition revaluation",
+        "status": "running",
+        "backend": _execution_environment(),
+        "source_revision": _source_revision(root),
+        "compilation_cache": compilation_cache.receipt(),
+        "execution_contract": {
+            "entry_point": "ForwardProfile.solve_branch",
+            "route": "newton_krylov",
+            "paired_arms_in_one_job": True,
+            "arm_order_per_row": ["without_hooks", "frozen_partition"],
+            "first_solve_of_each_arm_carries_compilation": True,
+            "row_selection": list(shots),
+            "terminal_residual_change_limit": 1.0e-10,
+        },
+        "response_carrier": carrier_evidence,
+        "progress": {
+            "completed_rows": 0,
+            "requested_rows": len(selected),
+        },
+        "per_row": [],
+    }
+
+    def write_checkpoint() -> None:
+        temporary_path = receipt_path.with_suffix(receipt_path.suffix + ".tmp")
+        temporary_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+        temporary_path.replace(receipt_path)
+
+    def run_arm(
+        passive_case: dict[str, Any],
+        context: dict[str, Any],
+        profile: ForwardProfile,
+        *,
+        freeze_partition: bool,
+    ) -> dict[str, Any]:
+        compile_bearing, _compile_trace, _compile_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=freeze_partition,
+        )
+        measured, _measured_trace, _measured_branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=freeze_partition,
+        )
+        compile_bearing_measurement = compile_bearing["frozen_partition_measurement"]
+        measurement = measured["frozen_partition_measurement"]
+        first_solve_wall = compile_bearing_measurement["whole_solve_wall_seconds"]
+        solve_wall = measurement["whole_solve_wall_seconds"]
+        measurement["first_solve_with_compile_wall_seconds"] = first_solve_wall
+        measurement["solve_wall_seconds"] = solve_wall
+        measurement["compile_wall_seconds"] = max(first_solve_wall - solve_wall, 0.0)
+        measurement["compile_wall_definition"] = (
+            "first solve wall minus immediately repeated solve wall"
+        )
+        return measurement
+
+    if not prepare_only:
+        write_checkpoint()
+    for selected_row, qualification in selected:
+        mast_case, context = _mast_case_from_selection(
+            store, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            mast_case, context, response_cache
+        )
+        if prepare_only:
+            mapped = profile.operator.flux_map_with_shadow()
+            if not all(
+                callable(getattr(mapped, name, None))
+                for name in (
+                    "_read_frozen_partition",
+                    "_map_frozen_partition",
+                    "_frozen_partition_shadow",
+                )
+            ):
+                raise RuntimeError("the bank-row operator did not attach frozen hooks")
+            continue
+        baseline_measurement = run_arm(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=False,
+        )
+        frozen_measurement = run_arm(
+            passive_case,
+            context,
+            profile,
+            freeze_partition=True,
+        )
+        residual_delta = abs(
+            baseline_measurement["terminal_residual"]
+            - frozen_measurement["terminal_residual"]
+        )
+        converged_flag_preserved = (
+            baseline_measurement["converged"] == frozen_measurement["converged"]
+        )
+        semantic_guard_passed = converged_flag_preserved and residual_delta <= 1.0e-10
+        reference = mast_case["reference"]
+        receipt["per_row"].append(
+            {
+                "shot": reference["shot"],
+                "slice_index": reference["slice_index"],
+                "baseline_without_hooks": baseline_measurement,
+                "frozen_partition_hooks": frozen_measurement,
+                "saving_seconds": (
+                    baseline_measurement["whole_solve_wall_seconds"]
+                    - frozen_measurement["whole_solve_wall_seconds"]
+                ),
+                "saving_fraction": (
+                    1.0
+                    - frozen_measurement["whole_solve_wall_seconds"]
+                    / baseline_measurement["whole_solve_wall_seconds"]
+                ),
+                "semantic_guard": {
+                    "converged_flag_preserved": converged_flag_preserved,
+                    "terminal_residual_delta": residual_delta,
+                    "terminal_residual_change_limit": 1.0e-10,
+                    "passed": semantic_guard_passed,
+                },
+                "prescribed_current_policy": policy,
+            }
+        )
+        receipt["progress"]["completed_rows"] = len(receipt["per_row"])
+        if not semantic_guard_passed:
+            receipt["status"] = "failed"
+        write_checkpoint()
+        if not semantic_guard_passed:
+            raise RuntimeError("frozen partition changed the terminal solve result")
+    if prepare_only:
+        output.mkdir(parents=True, exist_ok=True)
+        receipt = {
+            "receipt": "bank-row frozen-partition prepare-only pass",
+            "backend": _execution_environment(),
+            "source_revision": _source_revision(root),
+            "row_selection": list(shots),
+            "hooks_attached_on_every_row": True,
+        }
+        (output / "prepare-only.json").write_text(
+            json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        )
+        return receipt
+    figure, axes = plt.subplots(1, 2, figsize=(10.0, 4.4), constrained_layout=True)
+    paired_rows = receipt["per_row"]
+    labels = [f"{row['shot']} / {row['slice_index']}" for row in paired_rows]
+    baseline_walls = [
+        row["baseline_without_hooks"]["whole_solve_wall_seconds"] for row in paired_rows
+    ]
+    frozen_walls = [
+        row["frozen_partition_hooks"]["whole_solve_wall_seconds"] for row in paired_rows
+    ]
+    axes[0].bar(
+        np.arange(len(labels)) - 0.2, baseline_walls, 0.4, label="without hooks"
+    )
+    axes[0].bar(
+        np.arange(len(labels)) + 0.2, frozen_walls, 0.4, label="frozen partition"
+    )
+    axes[0].set_ylabel("Whole-solve wall [s]")
+    axes[0].set_xticks(np.arange(len(labels)), labels, rotation=35, ha="right")
+    axes[0].legend(fontsize=8)
+    axes[0].grid(axis="y", alpha=0.25)
+    axes[1].bar(
+        np.arange(len(labels)),
+        [row["saving_seconds"] for row in paired_rows],
+        color="C2",
+    )
+    axes[1].set_ylabel("Saving [s]")
+    axes[1].set_xticks(np.arange(len(labels)), labels, rotation=35, ha="right")
+    axes[1].grid(axis="y", alpha=0.25)
+    figure_path = output / "frozen-partition-savings.png"
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
+    plt.close(figure)
+    receipt["status"] = "complete"
+    receipt["aggregate"] = {
+        "row_count": len(paired_rows),
+        "total_saving_seconds": float(
+            sum(row["saving_seconds"] for row in paired_rows)
+        ),
+        "mean_saving_fraction": float(
+            np.mean([row["saving_fraction"] for row in paired_rows])
+        ),
+        "terminal_semantics_preserved": True,
+    }
+    receipt["figure"] = str(figure_path)
+    receipt["figure_src"] = _figure_src(figure_path)
+    write_checkpoint()
+    return receipt
+
+
 def run(
     store: Path,
     bank: Path,
@@ -4440,6 +4766,16 @@ def run(
 def main(argv: list[str] | None = None) -> None:
     """Parse paths, score the frozen references and print the verdict."""
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--checkout-root",
+        type=Path,
+        help="resolve every relative input and output path from this checkout",
+    )
+    parser.add_argument(
+        "--cache-root",
+        type=Path,
+        help="use this parent for the persistent JAX compilation cache",
+    )
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path)
@@ -4449,20 +4785,68 @@ def main(argv: list[str] | None = None) -> None:
         help="diagnostically replay the reference-seeded absolute-source route",
     )
     parser.add_argument(
+        "--frozen-partition-comparison",
+        action="store_true",
+        help="pair the four bank rows with and without frozen revaluation",
+    )
+    parser.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="build the selected comparison rows without running solves",
+    )
+    parser.add_argument(
         "--shot",
         action="append",
         type=int,
         help="run only the named shot from the frozen reference cohort",
     )
     arguments = parser.parse_args(argv)
+    checkout_root = (
+        Path.cwd().resolve()
+        if arguments.checkout_root is None
+        else arguments.checkout_root.resolve()
+    )
+    store = _resolve_checkout_path(checkout_root, arguments.store)
+    bank = _resolve_checkout_path(checkout_root, arguments.bank)
+    requested_output = (
+        None
+        if arguments.output is None
+        else _resolve_checkout_path(checkout_root, arguments.output)
+    )
     shots = tuple(arguments.shot) if arguments.shot else None
+    if arguments.frozen_partition_comparison:
+        receipt = run_frozen_partition_comparison(
+            store,
+            bank,
+            requested_output
+            or _resolve_checkout_path(checkout_root, FROZEN_PARTITION_OUTPUT),
+            shots or FROZEN_PARTITION_SHOTS,
+            prepare_only=arguments.prepare_only,
+            checkout_root=checkout_root,
+            cache_root=arguments.cache_root,
+        )
+        if arguments.prepare_only:
+            print(
+                "FROZEN_PARTITION_PREPARE "
+                f"rows={len(receipt['row_selection'])} "
+                f"hooks={receipt['hooks_attached_on_every_row']}"
+            )
+            return
+        print(
+            "FROZEN_PARTITION_COMPARISON "
+            f"rows={receipt['aggregate']['row_count']} "
+            f"saving_s={receipt['aggregate']['total_saving_seconds']:.6g}"
+        )
+        return
     if arguments.absolute_source_replay:
-        output = arguments.output or DEFAULT_OUTPUT
+        output = requested_output or _resolve_checkout_path(
+            checkout_root, DEFAULT_OUTPUT
+        )
         try:
-            receipt = run(arguments.store, arguments.bank, output, shots)
+            receipt = run(store, bank, output, shots)
         except Exception as error:
             _write_absolute_source_failure_receipt(
-                arguments.bank,
+                bank,
                 output,
                 shots,
                 error,
@@ -4477,10 +4861,10 @@ def main(argv: list[str] | None = None) -> None:
             f"verdict={aggregate['verdict']}"
         )
         return
-    output = arguments.output or CURRENT_CONSTRAINED_OUTPUT
-    receipt = run_current_constrained(
-        arguments.store, arguments.bank, output, shots=shots
+    output = requested_output or _resolve_checkout_path(
+        checkout_root, CURRENT_CONSTRAINED_OUTPUT
     )
+    receipt = run_current_constrained(store, bank, output, shots=shots)
     aggregate = receipt["aggregate"]
     print(
         "CURRENT_CONSTRAINED_FROZEN_SIX "

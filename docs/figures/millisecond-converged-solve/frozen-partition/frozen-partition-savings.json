@@ -1,0 +1,1419 @@
+{
+  "receipt": "paired public-route frozen-partition revaluation",
+  "status": "complete",
+  "backend": {
+    "jax_backend": "gpu",
+    "device_kinds": [
+      "NVIDIA H200 NVL"
+    ],
+    "device_count": 1,
+    "slurm_job_id": "1263489"
+  },
+  "source_revision": "58b5a2ebe44733ea67bf1c40af14c08778dc858e",
+  "compilation_cache": {
+    "selection": "explicit_per_recipe",
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/frozen-partition",
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/frozen-partition/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "version_key": "runtime-0745ecebea4cb264e054",
+    "runtime_identity": {
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0",
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_enable_x64": true,
+        "jax_default_matmul_precision": null,
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "platform": "gpu",
+          "kind": "NVIDIA H200 NVL",
+          "process_index": 0,
+          "id": 0
+        }
+      ]
+    },
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "minimum_compile_seconds": 1.0,
+    "maximum_bytes": 8589934592
+  },
+  "execution_contract": {
+    "entry_point": "ForwardProfile.solve_branch",
+    "route": "newton_krylov",
+    "paired_arms_in_one_job": true,
+    "arm_order_per_row": [
+      "without_hooks",
+      "frozen_partition"
+    ],
+    "first_solve_of_each_arm_carries_compilation": true,
+    "row_selection": [
+      21985,
+      21986,
+      21989,
+      22086
+    ],
+    "terminal_residual_change_limit": 1e-10
+  },
+  "response_carrier": {
+    "loaded_from_persisted_carrier": true,
+    "carrier": {
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "stored_circuit_count": 101,
+      "frozen_reference_count": 6,
+      "warm_load_seconds": 0.005483484826982021,
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "size_bytes": 645864
+    },
+    "named_cache_only_check": {
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks/benchmarks/mast_response_carrier_warm.py",
+        "check",
+        "--carrier",
+        "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "--receipt",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks/docs/figures/plateau-input-attribution/mast-response-carrier.json"
+      ],
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.027163 direct_builders=0 verdict=PASS",
+      "direct_green_operator_builder_entries": 0,
+      "passes": true
+    }
+  },
+  "progress": {
+    "completed_rows": 4,
+    "requested_rows": 4
+  },
+  "per_row": [
+    {
+      "shot": 21985,
+      "slice_index": 51,
+      "baseline_without_hooks": {
+        "hooks_attached": false,
+        "topology_reads": 1065,
+        "map_evaluations": 1798,
+        "trips": 17,
+        "trip_wall_seconds": [
+          114.49450332857668,
+          148.77680175099522,
+          0.19092622119933367,
+          0.19000796880573034,
+          3.7499971501529217,
+          3.7504540607333183,
+          4.006147276610136,
+          3.75188828445971,
+          3.752628124319017,
+          3.7529264464974403,
+          3.7498855851590633,
+          3.7492375588044524,
+          3.7512944135814905,
+          3.7515394184738398,
+          3.7430637814104557,
+          3.751032669097185,
+          0.8381519233807921
+        ],
+        "mean_trip_wall_seconds": 18.22061682130922,
+        "whole_solve_wall_seconds": 309.7504859622568,
+        "terminal_residual": 0.00223671886952567,
+        "termination_reason": 8,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 340.70081135071814,
+        "solve_wall_seconds": 309.7504859622568,
+        "compile_wall_seconds": 30.95032538846135,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "frozen_partition_hooks": {
+        "hooks_attached": true,
+        "topology_reads": 19,
+        "map_evaluations": 0,
+        "trips": 17,
+        "trip_wall_seconds": [
+          4.26923231408,
+          10.055003355257213,
+          0.10510304942727089,
+          0.10477221850305796,
+          0.10470655281096697,
+          0.1048006247729063,
+          0.10787484794855118,
+          0.10444497503340244,
+          0.10441104974597692,
+          0.10455536656081676,
+          0.10418021772056818,
+          0.1041942099109292,
+          0.10426136758178473,
+          0.1066625164821744,
+          0.1044452078640461,
+          0.10457784123718739,
+          0.436075103469193
+        ],
+        "mean_trip_wall_seconds": 0.9546647540238851,
+        "whole_solve_wall_seconds": 16.229300818406045,
+        "terminal_residual": 0.00223671886952567,
+        "termination_reason": 8,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 15.767502670176327,
+        "solve_wall_seconds": 16.229300818406045,
+        "compile_wall_seconds": 0.0,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "saving_seconds": 293.52118514385074,
+      "saving_fraction": 0.9476052450152295,
+      "semantic_guard": {
+        "converged_flag_preserved": true,
+        "terminal_residual_delta": 0.0,
+        "terminal_residual_change_limit": 1e-10,
+        "passed": true
+      },
+      "prescribed_current_policy": {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": 101,
+        "active_circuit_count": 13,
+        "passive_or_vessel_circuit_count": 88,
+        "section_kernel_evaluations": 938,
+        "section_kernel_evaluations_this_shot": 0,
+        "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+        "passive_registry_maximum_separation_m": 0.0,
+        "response_shape": [
+          1126,
+          101
+        ],
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": 8.881784197001252e-16,
+        "stored_field_closure_rms_wb": 1.6191982219094938e-16,
+        "all_currents_prescribed": true,
+        "response_matrix_reused": true,
+        "response_input_digests": {
+          "algorithm": "sha256",
+          "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "inputs": {
+            "gridr": {
+              "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "gridz": {
+              "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "limiterr": {
+              "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "limiterz": {
+              "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "fcoil_n": {
+              "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+              "dtype": "<f4",
+              "shape": [
+                101
+              ]
+            },
+            "fcoil_circ": {
+              "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+              "dtype": "<f8",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_r": {
+              "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_z": {
+              "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_width": {
+              "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_height": {
+              "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang1": {
+              "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang2": {
+              "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_turns": {
+              "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_xmult": {
+              "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "resolved_response_targets": {
+              "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+              "dtype": "<f8",
+              "shape": [
+                1126,
+                2
+              ]
+            }
+          }
+        },
+        "active_mapping_recomputed_for_shot": true,
+        "active_mapping": [
+          {
+            "family": "p2_inner_lower",
+            "stored_circuit": 4,
+            "centroid_separation_m": 3.020663818271642e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 46440.1640625,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 46439.97860318469
+          },
+          {
+            "family": "p2_inner_upper",
+            "stored_circuit": 2,
+            "centroid_separation_m": 4.610138552976278e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 46534.78125,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 46534.59541282989
+          },
+          {
+            "family": "p2_outer_lower",
+            "stored_circuit": 5,
+            "centroid_separation_m": 3.794706373301994e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 30965.73828125,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 30965.73828125
+          },
+          {
+            "family": "p2_outer_upper",
+            "stored_circuit": 3,
+            "centroid_separation_m": 3.882122250270243e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 30812.666015625,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 30812.666015625
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 7,
+            "centroid_separation_m": 1.2310483904636694e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 2.3242006301879883,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 2.3242006301879883
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 6,
+            "centroid_separation_m": 1.1378064254653142e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -12.723005294799805,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -12.723005294799805
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 9,
+            "centroid_separation_m": 0.002284428762164253,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -204031.578125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -204031.75674306176
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 8,
+            "centroid_separation_m": 0.003039636783399228,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -204217.171875,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -204217.35065553855
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 11,
+            "centroid_separation_m": 0.0022829440191137885,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -151151.125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -151151.2573242276
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 10,
+            "centroid_separation_m": 0.0022872695201792835,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -151391.390625,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -151391.5231595665
+          },
+          {
+            "family": "p6_lower",
+            "stored_circuit": 13,
+            "centroid_separation_m": 5.527338696549878e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 1191.72412109375,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 1191.72412109375
+          },
+          {
+            "family": "p6_upper",
+            "stored_circuit": 12,
+            "centroid_separation_m": 1.4493967305635352e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -2071.07421875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -2071.07421875
+          },
+          {
+            "family": "sol",
+            "stored_circuit": 1,
+            "centroid_separation_m": 2.5307005105576235e-06,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -34771.375,
+            "filament_turn_multiplier_sum": 328.0,
+            "effective_drive_a_turn": -11405011.0
+          }
+        ]
+      }
+    },
+    {
+      "shot": 21986,
+      "slice_index": 46,
+      "baseline_without_hooks": {
+        "hooks_attached": false,
+        "topology_reads": 1618,
+        "map_evaluations": 2427,
+        "trips": 17,
+        "trip_wall_seconds": [
+          113.36923912167549,
+          151.2275638822466,
+          0.19183009769767523,
+          3.78259395994246,
+          3.781566026620567,
+          3.7808276498690248,
+          3.7822691053152084,
+          3.777757083065808,
+          4.041550489142537,
+          3.7832193467766047,
+          0.2288474990054965,
+          6.603722262196243,
+          5.14645638037473,
+          9.548266739584506,
+          10.35685766581446,
+          11.152727616019547,
+          0.47488046530634165
+        ],
+        "mean_trip_wall_seconds": 19.707657375920782,
+        "whole_solve_wall_seconds": 335.0301753906533,
+        "terminal_residual": 0.0014020990830787864,
+        "termination_reason": 8,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 334.64531560614705,
+        "solve_wall_seconds": 335.0301753906533,
+        "compile_wall_seconds": 0.0,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "frozen_partition_hooks": {
+        "hooks_attached": true,
+        "topology_reads": 19,
+        "map_evaluations": 0,
+        "trips": 17,
+        "trip_wall_seconds": [
+          4.045329199172556,
+          9.616236153058708,
+          0.10387338418513536,
+          0.10387377813458443,
+          0.10385332256555557,
+          0.10359036549925804,
+          0.10373443365097046,
+          0.10403254814445972,
+          0.10541935451328754,
+          0.10355323273688555,
+          0.13876537419855595,
+          0.12410909309983253,
+          0.14040750451385975,
+          0.18776684068143368,
+          0.18042523693293333,
+          0.1913523282855749,
+          0.43642546981573105
+        ],
+        "mean_trip_wall_seconds": 0.9348675070111366,
+        "whole_solve_wall_seconds": 15.892747619189322,
+        "terminal_residual": 0.0014020990830787864,
+        "termination_reason": 8,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 16.434255226515234,
+        "solve_wall_seconds": 15.892747619189322,
+        "compile_wall_seconds": 0.5415076073259115,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "saving_seconds": 319.137427771464,
+      "saving_fraction": 0.9525632352349814,
+      "semantic_guard": {
+        "converged_flag_preserved": true,
+        "terminal_residual_delta": 0.0,
+        "terminal_residual_change_limit": 1e-10,
+        "passed": true
+      },
+      "prescribed_current_policy": {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": 101,
+        "active_circuit_count": 13,
+        "passive_or_vessel_circuit_count": 88,
+        "section_kernel_evaluations": 938,
+        "section_kernel_evaluations_this_shot": 0,
+        "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+        "passive_registry_maximum_separation_m": 0.0,
+        "response_shape": [
+          1126,
+          101
+        ],
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": 6.661338147750939e-16,
+        "stored_field_closure_rms_wb": 1.4704441200980323e-16,
+        "all_currents_prescribed": true,
+        "response_matrix_reused": true,
+        "response_input_digests": {
+          "algorithm": "sha256",
+          "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "inputs": {
+            "gridr": {
+              "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "gridz": {
+              "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "limiterr": {
+              "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "limiterz": {
+              "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "fcoil_n": {
+              "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+              "dtype": "<f4",
+              "shape": [
+                101
+              ]
+            },
+            "fcoil_circ": {
+              "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+              "dtype": "<f8",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_r": {
+              "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_z": {
+              "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_width": {
+              "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_height": {
+              "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang1": {
+              "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang2": {
+              "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_turns": {
+              "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_xmult": {
+              "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "resolved_response_targets": {
+              "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+              "dtype": "<f8",
+              "shape": [
+                1126,
+                2
+              ]
+            }
+          }
+        },
+        "active_mapping_recomputed_for_shot": true,
+        "active_mapping": [
+          {
+            "family": "p2_inner_lower",
+            "stored_circuit": 4,
+            "centroid_separation_m": 3.020663818271642e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 44597.9375,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 44597.7593976371
+          },
+          {
+            "family": "p2_inner_upper",
+            "stored_circuit": 2,
+            "centroid_separation_m": 4.610138552976278e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 44451.26953125,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 44451.092014607275
+          },
+          {
+            "family": "p2_outer_lower",
+            "stored_circuit": 5,
+            "centroid_separation_m": 3.794706373301994e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 29847.888671875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 29847.888671875
+          },
+          {
+            "family": "p2_outer_upper",
+            "stored_circuit": 3,
+            "centroid_separation_m": 3.882122250270243e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 29459.822265625,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 29459.822265625
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 7,
+            "centroid_separation_m": 1.2310483904636694e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 0.4602978527545929,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 0.4602978527545929
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 6,
+            "centroid_separation_m": 1.1378064254653142e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 28.47551155090332,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 28.47551155090332
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 9,
+            "centroid_separation_m": 0.002284428762164253,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -174814.9375,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -174815.0905405518
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 8,
+            "centroid_separation_m": 0.003039636783399228,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -175149.75,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -175149.90333366115
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 11,
+            "centroid_separation_m": 0.0022829440191137885,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -126059.828125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -126059.93848322186
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 10,
+            "centroid_separation_m": 0.0022872695201792835,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -126193.3828125,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -126193.49328764141
+          },
+          {
+            "family": "p6_lower",
+            "stored_circuit": 13,
+            "centroid_separation_m": 5.527338696549878e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -7496.02001953125,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -7496.02001953125
+          },
+          {
+            "family": "p6_upper",
+            "stored_circuit": 12,
+            "centroid_separation_m": 1.4493967305635352e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 5772.97607421875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 5772.97607421875
+          },
+          {
+            "family": "sol",
+            "stored_circuit": 1,
+            "centroid_separation_m": 2.5307005105576235e-06,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -34637.86328125,
+            "filament_turn_multiplier_sum": 328.0,
+            "effective_drive_a_turn": -11361219.15625
+          }
+        ]
+      }
+    },
+    {
+      "shot": 21989,
+      "slice_index": 55,
+      "baseline_without_hooks": {
+        "hooks_attached": false,
+        "topology_reads": 15,
+        "map_evaluations": 454,
+        "trips": 5,
+        "trip_wall_seconds": [
+          121.34963493142277,
+          163.97550993412733,
+          0.2071935562416911,
+          0.2046370366588235,
+          0.5153699768707156
+        ],
+        "mean_trip_wall_seconds": 57.25046908706427,
+        "whole_solve_wall_seconds": 286.25234543532133,
+        "terminal_residual": 0.003826884829000921,
+        "termination_reason": 7,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 581.272069551982,
+        "solve_wall_seconds": 286.25234543532133,
+        "compile_wall_seconds": 295.01972411666065,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "frozen_partition_hooks": {
+        "hooks_attached": true,
+        "topology_reads": 7,
+        "map_evaluations": 0,
+        "trips": 5,
+        "trip_wall_seconds": [
+          5.093552424572408,
+          10.70249869208783,
+          0.1134136188775301,
+          0.1081590699031949,
+          0.4459658060222864
+        ],
+        "mean_trip_wall_seconds": 3.29271792229265,
+        "whole_solve_wall_seconds": 16.46358961146325,
+        "terminal_residual": 0.003826884829000921,
+        "termination_reason": 7,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 52.47856929246336,
+        "solve_wall_seconds": 16.46358961146325,
+        "compile_wall_seconds": 36.01497968100011,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "saving_seconds": 269.7887558238581,
+      "saving_fraction": 0.9424857477187617,
+      "semantic_guard": {
+        "converged_flag_preserved": true,
+        "terminal_residual_delta": 0.0,
+        "terminal_residual_change_limit": 1e-10,
+        "passed": true
+      },
+      "prescribed_current_policy": {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": 101,
+        "active_circuit_count": 13,
+        "passive_or_vessel_circuit_count": 88,
+        "section_kernel_evaluations": 938,
+        "section_kernel_evaluations_this_shot": 0,
+        "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+        "passive_registry_maximum_separation_m": 0.0,
+        "response_shape": [
+          1126,
+          101
+        ],
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": 8.881784197001252e-16,
+        "stored_field_closure_rms_wb": 1.603196358255976e-16,
+        "all_currents_prescribed": true,
+        "response_matrix_reused": true,
+        "response_input_digests": {
+          "algorithm": "sha256",
+          "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "inputs": {
+            "gridr": {
+              "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "gridz": {
+              "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "limiterr": {
+              "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "limiterz": {
+              "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "fcoil_n": {
+              "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+              "dtype": "<f4",
+              "shape": [
+                101
+              ]
+            },
+            "fcoil_circ": {
+              "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+              "dtype": "<f8",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_r": {
+              "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_z": {
+              "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_width": {
+              "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_height": {
+              "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang1": {
+              "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang2": {
+              "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_turns": {
+              "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_xmult": {
+              "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "resolved_response_targets": {
+              "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+              "dtype": "<f8",
+              "shape": [
+                1126,
+                2
+              ]
+            }
+          }
+        },
+        "active_mapping_recomputed_for_shot": true,
+        "active_mapping": [
+          {
+            "family": "p2_inner_lower",
+            "stored_circuit": 4,
+            "centroid_separation_m": 3.020663818271642e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 58962.8984375,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 58962.66296850471
+          },
+          {
+            "family": "p2_inner_upper",
+            "stored_circuit": 2,
+            "centroid_separation_m": 4.610138552976278e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 59075.87890625,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 59075.64298606594
+          },
+          {
+            "family": "p2_outer_lower",
+            "stored_circuit": 5,
+            "centroid_separation_m": 3.794706373301994e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 39200.06640625,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 39200.06640625
+          },
+          {
+            "family": "p2_outer_upper",
+            "stored_circuit": 3,
+            "centroid_separation_m": 3.882122250270243e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 39241.23046875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 39241.23046875
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 7,
+            "centroid_separation_m": 1.2310483904636694e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 22.283422470092773,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 22.283422470092773
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 6,
+            "centroid_separation_m": 1.1378064254653142e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 37.11402130126953,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 37.11402130126953
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 9,
+            "centroid_separation_m": 0.002284428762164253,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -204365.109375,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -204365.28828504944
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 8,
+            "centroid_separation_m": 0.003039636783399228,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -204589.375,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -204589.55410638126
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 11,
+            "centroid_separation_m": 0.0022829440191137885,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -149904.0,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -149904.13123244047
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 10,
+            "centroid_separation_m": 0.0022872695201792835,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -150089.890625,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -150090.02202017716
+          },
+          {
+            "family": "p6_lower",
+            "stored_circuit": 13,
+            "centroid_separation_m": 5.527338696549878e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 1982.6396484375,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 1982.6396484375
+          },
+          {
+            "family": "p6_upper",
+            "stored_circuit": 12,
+            "centroid_separation_m": 1.4493967305635352e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -2813.853271484375,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -2813.853271484375
+          },
+          {
+            "family": "sol",
+            "stored_circuit": 1,
+            "centroid_separation_m": 2.5307005105576235e-06,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -35280.921875,
+            "filament_turn_multiplier_sum": 328.0,
+            "effective_drive_a_turn": -11572142.375
+          }
+        ]
+      }
+    },
+    {
+      "shot": 22086,
+      "slice_index": 43,
+      "baseline_without_hooks": {
+        "hooks_attached": false,
+        "topology_reads": 24,
+        "map_evaluations": 784,
+        "trips": 8,
+        "trip_wall_seconds": [
+          130.6913203848526,
+          167.44049683772027,
+          0.20658015832304955,
+          0.20583175588399172,
+          0.20497127529233694,
+          0.2044127844274044,
+          0.20309767685830593,
+          0.504094417206943
+        ],
+        "mean_trip_wall_seconds": 37.45760066132061,
+        "whole_solve_wall_seconds": 299.6608052905649,
+        "terminal_residual": 0.0008808917467655528,
+        "termination_reason": 7,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 855.5440091434866,
+        "solve_wall_seconds": 299.6608052905649,
+        "compile_wall_seconds": 555.8832038529217,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "frozen_partition_hooks": {
+        "hooks_attached": true,
+        "topology_reads": 10,
+        "map_evaluations": 0,
+        "trips": 8,
+        "trip_wall_seconds": [
+          5.702957489527762,
+          11.838397263549268,
+          0.11163026932626963,
+          0.11224996484816074,
+          0.11089859716594219,
+          0.11064231861382723,
+          0.10993454046547413,
+          0.48135157208889723
+        ],
+        "mean_trip_wall_seconds": 2.3222577519482,
+        "whole_solve_wall_seconds": 18.5780620155856,
+        "terminal_residual": 0.0008808917467655528,
+        "termination_reason": 7,
+        "converged": false,
+        "first_solve_with_compile_wall_seconds": 59.046411513350904,
+        "solve_wall_seconds": 18.5780620155856,
+        "compile_wall_seconds": 40.4683494977653,
+        "compile_wall_definition": "first solve wall minus immediately repeated solve wall"
+      },
+      "saving_seconds": 281.0827432749793,
+      "saving_fraction": 0.9380030298004056,
+      "semantic_guard": {
+        "converged_flag_preserved": true,
+        "terminal_residual_delta": 0.0,
+        "terminal_residual_change_limit": 1e-10,
+        "passed": true
+      },
+      "prescribed_current_policy": {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": 101,
+        "active_circuit_count": 13,
+        "passive_or_vessel_circuit_count": 88,
+        "section_kernel_evaluations": 938,
+        "section_kernel_evaluations_this_shot": 0,
+        "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+        "passive_registry_maximum_separation_m": 0.0,
+        "response_shape": [
+          1126,
+          101
+        ],
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": 8.881784197001252e-16,
+        "stored_field_closure_rms_wb": 1.4749858092671266e-16,
+        "all_currents_prescribed": true,
+        "response_matrix_reused": true,
+        "response_input_digests": {
+          "algorithm": "sha256",
+          "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "inputs": {
+            "gridr": {
+              "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "gridz": {
+              "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+              "dtype": "<f4",
+              "shape": [
+                65
+              ]
+            },
+            "limiterr": {
+              "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "limiterz": {
+              "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+              "dtype": "<f4",
+              "shape": [
+                37
+              ]
+            },
+            "fcoil_n": {
+              "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+              "dtype": "<f4",
+              "shape": [
+                101
+              ]
+            },
+            "fcoil_circ": {
+              "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+              "dtype": "<f8",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_r": {
+              "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_z": {
+              "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_width": {
+              "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_height": {
+              "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang1": {
+              "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_ang2": {
+              "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_turns": {
+              "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "fcoil_xmult": {
+              "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+              "dtype": "<f4",
+              "shape": [
+                938
+              ]
+            },
+            "resolved_response_targets": {
+              "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+              "dtype": "<f8",
+              "shape": [
+                1126,
+                2
+              ]
+            }
+          }
+        },
+        "active_mapping_recomputed_for_shot": true,
+        "active_mapping": [
+          {
+            "family": "p2_inner_lower",
+            "stored_circuit": 4,
+            "centroid_separation_m": 3.020663818271642e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 50319.8671875,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 50319.66623454681
+          },
+          {
+            "family": "p2_inner_upper",
+            "stored_circuit": 2,
+            "centroid_separation_m": 4.610138552976278e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 50267.71875,
+            "filament_turn_multiplier_sum": 0.9999960064888,
+            "effective_drive_a_turn": 50267.518005302176
+          },
+          {
+            "family": "p2_outer_lower",
+            "stored_circuit": 5,
+            "centroid_separation_m": 3.794706373301994e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 33416.35546875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 33416.35546875
+          },
+          {
+            "family": "p2_outer_upper",
+            "stored_circuit": 3,
+            "centroid_separation_m": 3.882122250270243e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 33341.1796875,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 33341.1796875
+          },
+          {
+            "family": "p3_lower",
+            "stored_circuit": 7,
+            "centroid_separation_m": 1.2310483904636694e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 46.641414642333984,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 46.641414642333984
+          },
+          {
+            "family": "p3_upper",
+            "stored_circuit": 6,
+            "centroid_separation_m": 1.1378064254653142e-07,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 29.57099151611328,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 29.57099151611328
+          },
+          {
+            "family": "p4_lower",
+            "stored_circuit": 9,
+            "centroid_separation_m": 0.002284428762164253,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -185195.171875,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -185195.33400285762
+          },
+          {
+            "family": "p4_upper",
+            "stored_circuit": 8,
+            "centroid_separation_m": 0.003039636783399228,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -185433.671875,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -185433.83421165083
+          },
+          {
+            "family": "p5_lower",
+            "stored_circuit": 11,
+            "centroid_separation_m": 0.0022829440191137885,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -138175.46875,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -138175.5897147773
+          },
+          {
+            "family": "p5_upper",
+            "stored_circuit": 10,
+            "centroid_separation_m": 0.0022872695201792835,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -138156.90625,
+            "filament_turn_multiplier_sum": 1.0000008754432201,
+            "effective_drive_a_turn": -138157.0271985269
+          },
+          {
+            "family": "p6_lower",
+            "stored_circuit": 13,
+            "centroid_separation_m": 5.527338696549878e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": 926.8552856445312,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": 926.8552856445312
+          },
+          {
+            "family": "p6_upper",
+            "stored_circuit": 12,
+            "centroid_separation_m": 1.4493967305635352e-08,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -554.8970947265625,
+            "filament_turn_multiplier_sum": 1.0,
+            "effective_drive_a_turn": -554.8970947265625
+          },
+          {
+            "family": "sol",
+            "stored_circuit": 1,
+            "centroid_separation_m": 2.5307005105576235e-06,
+            "current_field": "efm/fcoil_c",
+            "raw_current_a": -25381.810546875,
+            "filament_turn_multiplier_sum": 328.0,
+            "effective_drive_a_turn": -8325233.859375
+          }
+        ]
+      }
+    }
+  ],
+  "aggregate": {
+    "row_count": 4,
+    "total_saving_seconds": 1163.530112014152,
+    "mean_saving_fraction": 0.9451643144423445,
+    "terminal_semantics_preserved": true
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-frozen-partition-hooks/docs/figures/millisecond-converged-solve/frozen-partition/frozen-partition-savings.png",
+  "figure_src": "/nova/figures/millisecond-converged-solve/frozen-partition/frozen-partition-savings.png"
+}

@@ -925,6 +925,21 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     rerun carrier is the measure the writer pass-through node owes, and until it exists the honest statement is that the repair recovers an unknown share of the
     unconverged third.</p>
   </section>
+
+  <section id="what-completing-the-corpus-would-cost">
+    <h2>Completing the corpus needs the batched engine or it does not happen: 317 hours against 11 (2026-09-07 08:55Z)</h2>
+    <p>7,984 shots on the ranked walk, 912 complete, 7,105 remaining at a mean 81.9 written slices a shot, so about 582,000 slices to write. Against that:</p>
+    <table>
+      <thead><tr><th>Writer</th><th>Slices a second</th><th>Remaining corpus</th></tr></thead>
+      <tbody>
+        <tr><td>Parallel scheduler as it runs now, one card</td><td>0.51</td><td>317 h</td></tr>
+        <tr><td>Sequential writer, one card, measured</td><td>1.10</td><td>147 h</td></tr>
+        <tr><td>Batched engine wired, host pool of eight, projected</td><td>about 15</td><td>about 11 h</td></tr>
+      </tbody>
+    </table>
+    <p>This retires a decision that looked live an hour ago. The scheduler being 2.2 times slower than the writer it replaced is real and recorded, but swapping back halves a figure that is thirty times too large, so it is a rounding error rather than a remedy and the churn is not worth it. <strong>The batched engine is the only path to a complete corpus</strong>, and until it converges an arm the corpus does not complete on any horizon that matters. The projected 15 slices a second is the host-assembly ceiling from the measured per-slice decomposition, not an engine figure, so it is what the pool can absorb rather than what a card can supply; it is a projection and is labelled as one.</p>
+    <p><strong>The question this raises is whether corpus completion is on the critical path at all.</strong> The clean training core already written is 663 shots and 44,293 converged slices, and the consumer has been sizing against it. If that suffices for the prototype, then the labels are delivered, the engine work is an efficiency project for later scale rather than a blocker, and the effort now sitting on it is misallocated against the demo. If the prototype needs the full walk, nothing else on this plan matters until the engine converges. That is a lead question and not a coordinator one, and it is asked rather than assumed.</p>
+  </section>
 </main>
 </body>
 </html>

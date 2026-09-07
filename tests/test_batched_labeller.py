@@ -201,9 +201,11 @@ def test_masked_conditioning_keeps_the_augmented_multiplier(machine_fixture):  #
         requested_class=np.asarray([requested_class, requested_class]),
         reference_centroid=np.stack((observed, observed + np.asarray([0.0, 1.0]))),
         centroid_target=np.asarray([[observed[1]], [observed[1] + 1.0e-3]]),
+        active=np.asarray([False, True]),
     )
 
     np.testing.assert_array_equal(np.asarray(result.conditioned), [False, True])
+    np.testing.assert_array_equal(np.asarray(result.state[0]), np.asarray(seed))
     assert np.asarray(result.state).shape == batch.shape
 
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T16:45:41",
+  "updated": "2026-09-07T18:42:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -621,6 +621,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-06"
+      },
+      {
+        "id": "cank-thomson-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "cank-thomson-scout",
@@ -1282,6 +1291,15 @@
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a076d0-e9ba-7b42-bd44-f0d2264c9d55"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "fsa-latency-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "fsa-raster-receipt",
@@ -2041,6 +2059,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "msc-refresh-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "msc-remainder-x",
         "harness": "codex",
         "role": "implement",
@@ -2066,6 +2093,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-atlas-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "nia-attribution-x4",
@@ -2095,6 +2131,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b36-3718-7c90-8766-702c3aa635e6"
         },
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-banking-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "nia-candidate2-gate-x",
@@ -2713,6 +2758,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-axisdef-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-batch-l",
         "harness": "codex",
         "role": "implement",
@@ -2733,6 +2787,24 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-boundary-x",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-cache-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-census-s",
         "harness": "codex",
         "role": "implement",
@@ -2741,6 +2813,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07a6f-357c-7cb2-8adf-a6c719315ed3"
         },
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-centroid-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-07"
       },
       {
@@ -2783,6 +2864,15 @@
         "sessions": {
           "{\"alias\":\"spark5.3\",\"backend\":\"codex-spark\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.3-codex-spark\",\"sandbox\":\"worktree-full\"}": "01a07957-4963-7d10-a633-02dd6691fba6"
         },
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-drift-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-07"
       },
       {
@@ -2831,6 +2921,15 @@
         "id": "pfs-hygiene-s",
         "harness": "codex",
         "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-imasreads-c",
+        "harness": "clive",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -2888,6 +2987,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "b40829e6-bcf4-449d-a868-228782223615"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "pfs-labelreader-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-limitedfix-s",
@@ -3018,6 +3126,15 @@
         "created": "2026-09-06"
       },
       {
+        "id": "pfs-reversed-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-review-x",
         "harness": "claude-opus",
         "role": "review",
@@ -3038,6 +3155,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07755-4489-78e2-9857-3fe2a82a16fc"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-schema-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-scout-s",
@@ -3525,6 +3651,24 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "s19-hygiene-c",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "s19-scout-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "saddle-partition",
@@ -121139,6 +121283,146 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T114500137260-pfs-limited-class-default",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-limited-class-default",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1203,
+                "cached_input_tokens": 254520,
+                "input_tokens": 255725,
+                "output_tokens": 1218,
+                "reasoning_output_tokens": 273,
+                "total_tokens": 256943,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "the twelve positive-current bank rows and the Solovev certificate are bit-identical and a pinned diverted read is unchanged, and a relabel of shot 27079 into a new root raises the enclosed-area ratio against the reconstruction on its first three drawn frames from the measured 0.042, 0.335 and 0.571, with the per-frame ratios and the frame count printed in the receipt",
+          "estimated_hours": 1.5,
+          "goal": "A cold first iterate defaults to the limited topology class and transitions out when the branch permits, so the wall anchor is gated before the boundary is chosen",
+          "id": "pfs-limited-class-default",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/pfs-limited-class-default/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_equilibrium_topology.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/limited-class-default.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-limitedfix-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T11:45:09Z",
+        "completed_at": "2026-09-07T15:03:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11897,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "658d37d5d95d3b328562789538d4c32f0f5ac94f",
+        "commits": [
+          "9c27b34a4f03fb3a2223802ce8cc25c5f8489d5e",
+          "f1cfb15730a1dc3c224ac55799db70c457ae9c39"
+        ],
+        "changed_lines": {
+          "added": 214,
+          "removed": 35,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/pfs-limited-class-default/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07baf-bdc4-7a20-9c36-308b9ecebd5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 617600,
+            "cached_input_tokens_cumulative": 617600,
+            "input_tokens": 670729,
+            "input_tokens_cumulative": 670729,
+            "output_tokens": 5893,
+            "output_tokens_cumulative": 5893,
+            "reasoning_output_tokens": 1284,
+            "reasoning_output_tokens_cumulative": 1284
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 7177,
+          "peak_input_tokens": 1288329
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "resume_waiver": {
+          "session_id": "01a07baf-bdc4-7a20-9c36-308b9ecebd5c",
+          "source": "pointer",
+          "reason": "The repair is refused by the lead's standard (no boundary moved) and the handoff forbids a fourth repair from this line of attack; the successor is the boundary-routing measurement node on a fresh base, so this session has nothing left to resume; its worktree and commits are preserved"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-limited-class-default",
+          "session_id": "01a07baf-bdc4-7a20-9c36-308b9ecebd5c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T15:03:26Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -121451,6 +121735,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2017
+    "_version": 2034
   }
 }

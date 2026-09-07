@@ -1374,6 +1374,23 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     before the corpus relabel writes it at scale; that generalisation is the subject of the multi-unit limiter plan and is sequenced ahead of
     the relabel rather than after it.</p>
   </section>
+  <section id="the-diverted-drift-follows-the-solenoid-current-not-time">
+    <h2>The diverted control's drift follows the solenoid current, not time (2026-09-07 20:57Z)</h2>
+    <p>Nodes <code>pfs-diverted-drift</code> and <code>pfs-diverted-drift-report</code> (the first died on the text-only lane after producing
+    its regression, receipt and two figures, rescued as commit <code>b28142c7</code> and merged; the second wrote the report from that receipt
+    without re-running anything). The census rows were regressed against per-slice quantities rather than time: over 44,006 diverted rows,
+    43,011 finite and 38,022 warm, the solenoid current is the only candidate that explains more of the span-ratio variation than time does,
+    with R<sup>2</sup> 0.497 against time's 0.351 and a correlation of &minus;0.83, unchanged in ranking on the warm-only population; adding time
+    to a model that already carries the solenoid current gains of order 1e-6. Plasma current, X-point distance from the axis and elongation
+    improve a model that already contains time but none beats time alone, and profile peaking adds nothing. The earliest band, 0 to 50 ms, has
+    n = 41 (33 warm, 8 cold) and is reported separately rather than leaned on. Grid geometry in the receipt: 1,089 nodes, radial step
+    0.0606 m, vertical step 0.125 m. So the monotonic drift the healthy control showed all evening is a dependence on a quantity that ramps
+    through a discharge, which rules out the cheap explanations (a scale error, a missing filter, the limited-branch mechanism) and names the
+    next question: how the solenoid's flux enters the diverted boundary span, whether through the X-point region's external field, the saddle
+    position relative to the grid's refined region, or the profile interpolation. Diagnosis only. Report at
+    <code>~/.config/reckon/crew/reports/nova/playable/diverted-drift.md</code>; receipt and figures under
+    <code>docs/figures/playable-forward-solve/diverted-drift/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

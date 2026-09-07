@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T22:48:58",
+  "updated": "2026-09-07T23:01:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2921,9 +2921,11 @@
         "id": "pfs-drift-c2",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07da1-e5df-75f2-9197-2e84b0dfdfc7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07da1-e5df-75f2-9197-2e84b0dfdfc7"
+        },
         "created": "2026-09-07"
       },
       {
@@ -3327,6 +3329,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07651-0e99-74d3-ab83-0ff183df55c3"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-solenoid-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-strike-c",
@@ -122873,6 +122884,138 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T204905372156-pfs-diverted-drift-report",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-diverted-drift-report",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 965,
+                "cached_input_tokens": 635878,
+                "input_tokens": 636875,
+                "output_tokens": 2582,
+                "reasoning_output_tokens": 910,
+                "total_tokens": 639457,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/diverted-drift.md exists and states, from docs/figures/playable-forward-solve/diverted-drift/diverted-drift-receipt.json at the worktree base (keys n_diverted_rows, n_finite_rows, grid_uniformity, primary, warm, banded, earliest_band, candidate_statistics), for each candidate quantity its fit statistic against the diverted span ratio beside the fit against time, which if any explains the drift better than time or plainly that none do, the earliest band separately with its n, and the receipt's frame counts; the manifest cites the base commit b28142c7e02a1228d8225cf83d105e74075f444a as the delivered code and figures; no PNG is read, no analysis is re-run, no source file is changed",
+          "estimated_hours": 0.4,
+          "goal": "The diverted-drift diagnosis report written from the receipt a previous worker already computed, with the regression script and figures already committed at the worktree base",
+          "id": "pfs-diverted-drift-report",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T204905372156-pfs-diverted-drift-report/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/diverted-drift.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-drift-c2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T20:49:16Z",
+        "completed_at": "2026-09-07T20:57:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 522,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 522,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "b28142c7e02a1228d8225cf83d105e74075f444a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "receipt-to-report content check: jq assertions on the receipt keys, counts, bands and verdict; rg for every candidate row in the primary, warm and candidate-statistics tables; clean tree",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T204905372156-pfs-diverted-drift-report/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T204905372156-pfs-diverted-drift-report/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07da1-e5df-75f2-9197-2e84b0dfdfc7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1785600,
+            "cached_input_tokens_cumulative": 1785600,
+            "input_tokens": 1896906,
+            "input_tokens_cumulative": 1896906,
+            "output_tokens": 14100,
+            "output_tokens_cumulative": 14100,
+            "reasoning_output_tokens": 5489,
+            "reasoning_output_tokens_cumulative": 5489
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19589,
+          "peak_input_tokens": 3682506
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260907T165125721303-pfs-diverted-drift",
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only node: the regression script, receipt and figures are the rescue commit b28142c7 of the dead predecessor, merged alongside",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-diverted-drift-report",
+          "session_id": "01a07da1-e5df-75f2-9197-2e84b0dfdfc7",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T20:57:58Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -123185,6 +123328,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2065
+    "_version": 2068
   }
 }

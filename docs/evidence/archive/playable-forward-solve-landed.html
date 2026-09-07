@@ -787,7 +787,11 @@
   </section>
 
   <section id="axis-admission-refuses-the-efit-map-at-flat-top">
-    <h2>The axis admission refuses EFIT's own reconstruction flux on most flat-top slices of four of six carriers (2026-09-07 08:25Z)</h2>
+    <h2>Superseded: the axis admission refuses EFIT's own reconstruction flux on most flat-top slices of four of six carriers (2026-09-07 08:25Z)</h2>
+    <p><strong>This section's mechanism and its headline are both wrong and are retracted; the section below,
+    <a href="#the-achieved-centroid-read-drops-the-requested-class">the achieved centroid read drops the requested class</a>, replaces it.</strong> The per-shot counts
+    in the table are correct as counts of aborted rows. Everything said here about what the rule was looking at, and the claim that the free solve fails more often than
+    it converges, is not.</p>
     <p>The 119 wrongly excluded rows of the frozen six all carry one message from one site, no qualified magnetic-axis candidate with a resolved component. Those are
     ordinary positive-current shots, outside the reversed-current block, and 113 of the 119 fall inside the flat-top span against about 50 free-converged rows in the
     same span. The per-shot split, failures against free-converged rows inside flat top, is a map of where the forward solve is weakest on the shots the corpus ships
@@ -819,6 +823,39 @@
     additionally requires convergence, so 113 and 163 bound the change in that gate's denominator rather than measure it. Direction is safe, magnitude is open.</p>
     <p>This wants its own solver node and is held on one sequencing constraint: the axis admission rule is being edited by the reversed-current polarity node, so no
     second worker enters that file until it lands.</p>
+  </section>
+
+  <section id="the-achieved-centroid-read-drops-the-requested-class">
+    <h2>The achieved-centroid read drops the requested class, so a converged slice aborts on its own flux (2026-09-07 08:35Z)</h2>
+    <p>This supersedes the two readings above it, both mine. The consumer read the per-row fields that discriminate and they falsify both: on all 119 aborted rows of the
+    six carriers the EFIT-derived target centroid is <em>present</em>, so no target derivation failed; nova's own achieved centroid is <em>absent</em> on every one; and
+    <code>free_converged</code> is true on 117 of 119. So the order is: the free solve converges, the EFIT target is derived without trouble, reading nova's own achieved
+    centroid from nova's own converged flux raises, and the slice aborts. The warm-start seeding chain I traced is real code and is not what these rows exercise.</p>
+    <p><strong>The mechanism, established in the source.</strong> The writer reads the achieved centroid through
+    <code>ForwardProfile.current_moment_observation</code>, which takes no <code>requested_class</code> parameter at all and therefore forwards <code>None</code> to
+    <code>_integral_state</code>, whose own default is <code>None</code>. A topology read with no requested class must find its boundary emergently, which is strictly
+    harder than being told the class. The free solve, by contrast, ran with an explicit per-slice <code>requested_class</code>. So the same converged flux is read twice
+    under two different admission regimes, and the second one refuses. That is an API asymmetry between a solve and its own diagnostic read, not a solver defect, and
+    nothing in it involves EFIT. The repair is correspondingly cheap and has two halves: give
+    <code>current_moment_observation</code> a <code>requested_class</code> it forwards, and have the writer pass the class it solved with.</p>
+    <p><strong>What the corrected partition says about the solve, which is the opposite of what I reported.</strong> Of the 372 free-converged rows across the six
+    carriers: 237 have the branch guard true with a recorded centroid error, median 1.08 cm and max 4.74; 16 have the guard false, median 5.76 cm and max 12.04; and 119
+    are the aborted rows with no centroid error at all. So where the read succeeds, nova's current centroid agrees with EFIT's to about a centimetre and 94 per cent are
+    inside the five-centimetre guard. <strong>The solve is putting the plasma in the right place.</strong> The claim that the free solve fails more often than it
+    converges at flat top was an artefact of reading an abort as a solve failure.</p>
+    <p><strong>And this sharpens the axis disagreement into an internal inconsistency.</strong> On the same guard-passed rows the fidelity gate measures nova's magnetic
+    axis against EFIT's at a median 4.56 cm while nova's current centroid matches EFIT's to 1.08 cm. A genuine 4.6 cm displacement of the plasma would move the centroid
+    with the axis, and it does not, so one of the two axis quantities is not the O-point it claims to be. The consumer's signed diagnostic distinguishes the cases by
+    scoring both axes against nova's own current centroid as a third referent: nova's axis sitting on nova's centroid while EFIT's axis sits several centimetres from
+    EFIT's would mean nova reports a current moment as a magnetic axis, and both axes sitting a similar distance from their own centroids in different directions would
+    mean a resolution difference in the O-point search.</p>
+    <p>Two retractions from the consumer belong here too, because they were load-bearing for figures recorded earlier: the fidelity gate's denominator does not rise at
+    all, since every one of the 119 rows carries <code>converged</code> false and the gate correctly excluded them, so the earlier at-least-doubles claim is withdrawn;
+    and an earlier 1.18 cm centroid figure had silently skipped rows with no recorded error, reintroducing the selection it was meant to remove. The three-cell
+    partition above is the honest version.</p>
+    <p>The reading habit this cost twice in one hour: when a record carries fields that would discriminate between two mechanisms, read those fields before reasoning
+    from control flow. Both of my wrong readings were traced correctly through the code and aimed at rows that code never handled, and in each case three per-row fields
+    settled it immediately.</p>
   </section>
 </main>
 </body>

@@ -610,6 +610,23 @@
     at the conservative 0.94 slices a second a card, tranche 11 (12 hours) covers 2,003 shots and 76 percent of the corpus camera frames; 144 shots have
     no efm time base and are recorded excluded. The completion receipt is written when the shards finish.</p>
   </section>
+
+  <section id="single-job-rate-and-queue">
+    <h2>The single-job labeller rate and the core-bound queue (2026-09-07, coordinator measurements)</h2>
+    <p><strong>Rate.</strong> The seven-worker single scheduler job <code>1263838</code> (two H200 cards, host-route engine) labelled 875 slices in 901 s over
+    03:42Z to 03:57Z: 0.971 slices a second aggregate, 0.49 per card, against 0.723 with the launcher default of three pool workers and about 1.0 per card for the
+    two sequential card writers it replaced. Per-shot walls ran 1.5 to 4.7 s per slice with about two cores busy, and GPU utilisation sampled inside the job read
+    zero on both cards. The assembly pool is no longer the limit: the host route is latency bound (one to three trips of about 46 ms compiled work plus about
+    100 ms device synchronisation per solve, the rest host work), so the single-job shape labels at half the two-writer rate until the batched vmapped engine
+    replaces the host route (followup f-pfs-042).</p>
+    <p><strong>Queue.</strong> After the DSv4 serve dropped from four cards to two at 04:00Z on the lead's instruction, jobs still queued for two reasons: the
+    pending set was the coordinator's and nova-dd's own user holds (released 03:59Z), and once released the binding resource is the reservation's 30 cores, not
+    its 8 GPUs (serve 8, ambix flux-decoder-train 4 with a 10 h limit, nova-dd frozen-partition 8 and diiid-displacement 8 with 2 h and 1 h 15 min limits,
+    router 2), leaving three GPUs idle with no core free. The batched-engine receipt <code>1263849</code> (8 cores, 3 GPUs; its first attempt <code>1263773</code>
+    failed in 3 min on a receipt-reference guard fixed at <code>c4e54746</code>) and the labeller relaunch <code>1263846</code> (4 cores, 1 GPU) pend until those
+    measurement jobs end near 05:18Z and 06:03Z. Rule for H200 measurement briefs from here: request four cores per GPU, not eight, so a single-card job never
+    blocks two others.</p>
+  </section>
 </main>
 </body>
 </html>

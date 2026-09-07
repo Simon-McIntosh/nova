@@ -627,6 +627,17 @@
     measurement jobs end near 05:18Z and 06:03Z. Rule for H200 measurement briefs from here: request four cores per GPU, not eight, so a single-card job never
     blocks two others.</p>
   </section>
+
+  <section id="demo-carrier-side-job">
+    <h2>The six frozen-carrier shots labelled by a side job (2026-09-07 05:50Z, coordinator action)</h2>
+    <p>imas-ambix-1d needs sessions for the frozen-carrier shots 21978, 21983, 21985, 21986, 21989 and 22086 (the live demo carrier is one of them; their
+    real-versus-decoded video, physics-fidelity and counterfactual gates read them), and the frame-count ranking puts all six near the tail of the 7,979-shot
+    walk. Rather than reorder the running scheduler, the coordinator submitted <code>1263887</code>: one H200 card, 4 cores, the sequential writer
+    <code>scripts/labeller_batch/shard.py</code> over the list <code>.cards/demo-carriers.txt</code> in the corpus root, same layout, pins and conditioning as
+    every other shot; the scheduler walk skips shots that already have a session, so the two writers cannot collide. Camera facts from imas-ambix for the
+    re-lock: five of the six carry 512x512 rbb over 0.085 to about 0.38 s; 22086 is 128x172 and so the worst carrier for anything a person watches despite
+    converging best.</p>
+  </section>
 </main>
 </body>
 </html>

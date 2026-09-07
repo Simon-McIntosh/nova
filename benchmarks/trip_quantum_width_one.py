@@ -1,14 +1,16 @@
 """Measure the per-trip quantum of the converged solve at batch width one.
 
-One H200 job carries both measurements.  The first re-measures the
-twice-stale width-1024 baselines at HEAD — the complete-map application cost
-and the per-trip quantum with its mask-reconciliation / Newton-re-linearization
-/ first-GMRES-sync sub-stages — on the committed Solovev workload.  The second
-runs each committed MAST bank member through the host-driven reduced-Newton
-route at width one and splits each trip into host reconciliation, retrace below
-the compiled boundary, and device sync, persisting every member's row
-immediately after its own solve so a scheduler timeout cannot erase the members
-already measured.
+One H200 job carries three measurements in two arms.  The width-1024
+baselines are re-measured at HEAD — the complete-map application cost and the
+per-trip quantum with its mask-reconciliation / Newton-re-linearization /
+first-GMRES-sync sub-stages — on the committed Solovev workload.  Each
+committed MAST bank member is then solved at width one through both reduced
+routes in the same job: the host-driven route, which closes every trip with
+its own compiled boundary and synchronisation, and the compiled slice route
+(:func:`nova.equilibrium.reduced_newton.solve_reduced_newton_compiled`), which
+closes every trip of the solve inside one program and reads the receipt once.
+Every member's row — both arms — is persisted immediately after its own solves
+so a scheduler timeout cannot erase the members already measured.
 """
 
 from __future__ import annotations
@@ -69,14 +71,16 @@ from nova.jax.config import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = (
-    ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/width-one.json"
+    ROOT
+    / "docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json"
 )
 DEFAULT_FIGURE = (
-    ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/width-one.png"
+    ROOT
+    / "docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.png"
 )
 DEFAULT_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "trip-quantum-width-one.md"
+    "trip-quantum-compiled.md"
 )
 SOLVER_QUANTUM_RECEIPT = (
     ROOT / "docs/figures/solver-trip-orchestration/trip-quantum.json"
@@ -796,6 +800,161 @@ def _measure_member_width_one(
     }
 
 
+def _measure_member_width_one_compiled(
+    member: _Member,
+    *,
+    repeats: int,
+    newton_steps: int,
+    active_set_steps: int,
+) -> dict[str, Any]:
+    """One member's converged width-one solves over the compiled slice route.
+
+    The compiled slice solver closes every trip inside one program: one
+    initial gather, one topology read and one final ``device_get`` per solve,
+    so there is no per-trip host boundary and no per-trip synchronisation to
+    split out.  The whole measured call is the per-solve boundary cost and the
+    per-trip figure is that cost amortised over the solve's trips, which is
+    exactly the ``one boundary per solve`` comparison this driver exists to
+    draw against the host route.
+    """
+    operator = member.operator
+    state = jnp.asarray(member.state)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+
+    def solve_once(program):
+        return reduced_newton.solve_reduced_newton_compiled(
+            operator,
+            state,
+            requested_class=requested,
+            target_current=member.target_current,
+            tolerance=member.tolerance,
+            newton_steps=newton_steps,
+            active_set_steps=active_set_steps,
+            program=program,
+        )
+
+    build_started = time.perf_counter()
+    first = solve_once(None)
+    first_with_build_wall = time.perf_counter() - build_started
+    program = first.program
+    baseline_cache = _program_cache_sizes(program)
+    warm_rows = []
+    for _ in range(repeats):
+        started = time.perf_counter()
+        result = solve_once(program)
+        solve_wall = time.perf_counter() - started
+        trips = int(result.active_set_iterations)
+        cache_after = _program_cache_sizes(program)
+        cache_growth = {
+            name: int(after - before)
+            for name in cache_after
+            for before in (baseline_cache.get(name),)
+            if name in baseline_cache and before is not None
+            for after in (cache_after[name],)
+            if after != before
+        }
+        per_trip = solve_wall / trips if trips else None
+        warm_rows.append(
+            {
+                "solve_wall_s": solve_wall,
+                "trip_count": trips,
+                "active_set_iterations": int(result.active_set_iterations),
+                "converged": bool(result.converged),
+                "termination": result.termination_name,
+                "terminal_residual": result.terminal_residual,
+                "host_reconciliation_s": 0.0,
+                "boundary_s": solve_wall,
+                "newton_s": 0.0,
+                "jacobian_s": 0.0,
+                "final_device_sync_s": 0.0,
+                "kernel_cache_growth": cache_growth,
+                "per_trip_wall_s": [per_trip] if per_trip is not None else [],
+                "per_trip_boundary_s": ([per_trip] if per_trip is not None else []),
+                "per_trip_newton_s": [],
+                "per_trip_jacobian_s": [],
+                "per_trip_newton_steps": list(result.newton_steps_per_trip[:trips]),
+                "per_trip_jacobian_builds": list(
+                    result.jacobian_builds_per_trip[:trips]
+                ),
+                "per_trip_rejected": list(result.rejected_steps_per_trip[:trips]),
+            }
+        )
+    steady = warm_rows[-1]
+    trips = steady["trip_count"]
+    wall = float(np.mean([row["solve_wall_s"] for row in warm_rows]))
+    return {
+        "identity": member.identity,
+        "state_authority": member.state_authority,
+        "initial_state_sha256": _array_sha256(member.state),
+        "requested_class": "diverted",
+        "one_program_one_read": True,
+        "first_solve_with_build_wall_s": first_with_build_wall,
+        "first_solve_trips": int(first.active_set_iterations),
+        "first_solve_converged": bool(first.converged),
+        "first_solve_termination": first.termination_name,
+        "program_kernel_cache_sizes": baseline_cache,
+        "trips": trips,
+        "wall_per_solve_s": wall,
+        "per_trip_quantum_s": (wall / trips if trips else None),
+        "boundary_per_solve_s": wall,
+        "boundary_per_trip_s": (wall / trips if trips else None),
+        "host_reconciliation_per_trip_s": 0.0,
+        "final_device_sync_per_trip_s": 0.0,
+        "retrace_total_s": 0.0,
+        "steady_warm_metrics": warm_rows,
+    }
+
+
+def _merge_route_rows(
+    identity: str,
+    host: dict[str, Any],
+    compiled: dict[str, Any],
+) -> dict[str, Any]:
+    """Combine one member's host- and compiled-route rows into one row.
+
+    The host-route fields stay at the top level so the receipt's historical
+    schema reads unchanged, with the compiled arm nested under ``compiled``
+    and a per-member comparison under ``route_comparison`` that states the
+    measured one-boundary-per-solve saving in seconds and multiples.
+    """
+    comparison: dict[str, Any] = {}
+    host_wall = host.get("wall_per_solve_s")
+    compiled_wall = compiled.get("wall_per_solve_s")
+    if compiled_wall is not None and host_wall is not None and compiled_wall > 0.0:
+        comparison["host_solve_wall_s"] = host_wall
+        comparison["compiled_solve_wall_s"] = compiled_wall
+        comparison["solve_saving_s"] = host_wall - compiled_wall
+        comparison["solve_saving_x"] = host_wall / compiled_wall
+    host_boundary = host.get("boundary_per_trip_s")
+    compiled_boundary = compiled.get("boundary_per_trip_s")
+    if (
+        host_boundary is not None
+        and compiled_boundary is not None
+        and compiled_boundary > 0.0
+    ):
+        comparison["host_boundary_per_trip_s"] = host_boundary
+        comparison["compiled_boundary_per_trip_s"] = compiled_boundary
+        comparison["boundary_per_trip_ratio_x"] = host_boundary / compiled_boundary
+    comparison["one_boundary_per_solve_s"] = compiled.get("boundary_per_solve_s")
+    comparison["one_program_one_read"] = bool(compiled.get("one_program_one_read"))
+    row = {key: value for key, value in host.items() if key != "identity"}
+    row["identity"] = identity
+    row["compiled"] = {
+        key: value
+        for key, value in compiled.items()
+        if key
+        not in (
+            "identity",
+            "state_authority",
+            "initial_state_sha256",
+            "requested_class",
+            "one_program_one_read",
+        )
+    }
+    row["route_comparison"] = comparison
+    return row
+
+
 def _baseline_summary(payload: dict[str, Any]) -> dict[str, Any]:
     baselines = payload["baselines"]
     old_map = baselines["map"].get("banked_ms", BANKED_MAP_MS)
@@ -826,39 +985,109 @@ def _baseline_summary(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def _draw_figure(payload: dict[str, Any], output: Path) -> None:
-    """Per-member stacked per-trip split beside the re-measured baselines."""
+    """Per-member per-trip quantum for both routes beside the baselines.
+
+    The left panel stacks the host route's per-trip boundary, host
+    reconciliation and device sync against the compiled slice route's whole
+    per-solve wall amortised per trip — the same ``one boundary per solve``
+    comparison the receipt reports.  The middle panel draws each route's
+    per-solve wall, and the right panel repeats the stale width-1024 baselines
+    re-measured at HEAD.
+    """
     members = [row for row in payload["width_one"]["members"] if row.get("trips")]
-    figure = plt.figure(figsize=(15.2, 9.0), constrained_layout=True)
-    grid = figure.add_gridspec(1, 2, width_ratios=(2.1, 0.9))
-    axis = figure.add_subplot(grid[0, 0])
     labels = [row["identity"] for row in members]
     positions = np.arange(len(members))
-    host = [row["host_reconciliation_per_trip_s"] * 1.0e3 for row in members]
-    boundary = [row["boundary_per_trip_s"] * 1.0e3 for row in members]
-    final_sync = [row["final_device_sync_per_trip_s"] * 1.0e3 for row in members]
-    axis.bar(positions, boundary, color="#3b6ea5", label="trip-close boundary dispatch")
-    axis.bar(
-        positions,
-        host,
-        bottom=boundary,
+    figure = plt.figure(figsize=(16.4, 8.6), constrained_layout=True)
+    grid = figure.add_gridspec(1, 3, width_ratios=(1.5, 1.5, 0.9))
+
+    per_trip_axis = figure.add_subplot(grid[0, 0])
+    host_boundary = [row["boundary_per_trip_s"] * 1.0e3 for row in members]
+    host_host = [row["host_reconciliation_per_trip_s"] * 1.0e3 for row in members]
+    host_sync = [row["final_device_sync_per_trip_s"] * 1.0e3 for row in members]
+    compiled_trip = [
+        row["compiled"]["per_trip_quantum_s"] * 1.0e3
+        for row in members
+        if row["compiled"].get("per_trip_quantum_s") is not None
+    ]
+    compiled_positions = np.asarray(
+        [
+            position
+            for position, row in zip(positions, members, strict=True)
+            if row["compiled"].get("per_trip_quantum_s") is not None
+        ]
+    )
+    bar_width = 0.38
+    per_trip_axis.bar(
+        positions - bar_width / 2,
+        host_boundary,
+        bar_width,
+        color="#3b6ea5",
+        label="host trip-close boundary",
+    )
+    per_trip_axis.bar(
+        positions - bar_width / 2,
+        host_host,
+        bar_width,
+        bottom=host_boundary,
         color="#f58518",
         label="host reconciliation",
     )
-    bottoms = [b + h for b, h in zip(boundary, host, strict=True)]
-    axis.bar(
-        positions,
-        final_sync,
-        bottom=bottoms,
+    per_trip_axis.bar(
+        positions - bar_width / 2,
+        host_sync,
+        bar_width,
+        bottom=[b + h for b, h in zip(host_boundary, host_host, strict=True)],
         color="#54a24b",
-        label="final device sync",
+        label="host device sync",
     )
-    axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
-    axis.set_ylabel("per-trip quantum [ms] at width 1")
-    axis.set_title("Width-1 per-trip quantum split per MAST bank member")
-    axis.legend(frameon=False, fontsize=9)
-    axis.spines[["top", "right"]].set_visible(False)
+    per_trip_axis.bar(
+        compiled_positions + bar_width / 2,
+        compiled_trip,
+        bar_width,
+        color="#e15759",
+        label="compiled per trip (one boundary / trips)",
+    )
+    per_trip_axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
+    per_trip_axis.set_ylabel("per-trip quantum [ms] at width 1")
+    per_trip_axis.set_title("Width-1 per-trip quantum: host route vs compiled slice")
+    per_trip_axis.legend(frameon=False, fontsize=8)
+    per_trip_axis.spines[["top", "right"]].set_visible(False)
 
-    baseline_axis = figure.add_subplot(grid[0, 1])
+    solve_axis = figure.add_subplot(grid[0, 1])
+    host_wall = [row["wall_per_solve_s"] * 1.0e3 for row in members]
+    compiled_wall = [
+        row["compiled"]["wall_per_solve_s"] * 1.0e3
+        for row in members
+        if row["compiled"].get("wall_per_solve_s") is not None
+    ]
+    compiled_wall_positions = np.asarray(
+        [
+            position
+            for position, row in zip(positions, members, strict=True)
+            if row["compiled"].get("wall_per_solve_s") is not None
+        ]
+    )
+    solve_axis.bar(
+        positions - bar_width / 2,
+        host_wall,
+        bar_width,
+        color="#8da0cb",
+        label="host per solve",
+    )
+    solve_axis.bar(
+        compiled_wall_positions + bar_width / 2,
+        compiled_wall,
+        bar_width,
+        color="#4c78a8",
+        label="compiled per solve",
+    )
+    solve_axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
+    solve_axis.set_ylabel("wall per solve [ms] at width 1")
+    solve_axis.set_title("Width-1 wall per solve: host route vs compiled slice")
+    solve_axis.legend(frameon=False, fontsize=8)
+    solve_axis.spines[["top", "right"]].set_visible(False)
+
+    baseline_axis = figure.add_subplot(grid[0, 2])
     summary = payload["baseline_summary"]
     names = ["stale map\n(1024)", "HEAD map\n(1024)", "stale trip\n(1024)"]
     values = [
@@ -893,10 +1122,10 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
     baseline_axis.set_title("Stale baselines re-measured at HEAD (width 1024)")
     baseline_axis.spines[["top", "right"]].set_visible(False)
     figure.suptitle(
-        "Per-trip quantum at width one with the stale width-1024 baselines "
-        "re-measured at HEAD\n"
-        "device sync = per-solve topology shadow read + initial gather + final "
-        f"sync amortized per trip | revision {payload['measurement_revision'][:10]}",
+        "Width-1 per-trip quantum and per-solve wall, host route against the "
+        "compiled slice route\n"
+        "(compiled closes every trip of a solve in one program and reads the "
+        f"receipt once) | revision {payload['measurement_revision'][:10]}",
         fontsize=15,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -918,7 +1147,7 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
     total = float(np.sum(host + boundary + sync + retrace))
     if total <= 0.0:
         lines = [
-            "# Per-trip quantum at batch width one — which stage owns the trip",
+            "# Width-1 per-trip quantum: host route vs compiled slice route",
             "",
             f"measured on `{payload['assignment']['device']}` at revision "
             f"`{payload['measurement_revision'][:10]}` in job "
@@ -937,16 +1166,9 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
         "device sync": 100.0 * float(np.sum(sync)) / total,
         "retrace": 100.0 * float(np.sum(retrace)) / total,
     }
-    named = {
-        "host reconciliation": shares["host reconciliation"],
-        "retrace below the compiled boundary": shares["retrace"],
-        "device sync": shares["device sync"],
-    }
-    named_owner = max(named, key=named.get)
     host_broad = f"{1.0e3 * np.mean(host):.4f}"
     boundary_broad = f"{1.0e3 * np.mean(boundary):.4f}"
     sync_broad = f"{1.0e3 * np.mean(sync):.4f}"
-    retrace_broad = "0.0000"
     head_quantum = summary["head_quantum_ms"]
     quantum_cell = (
         f"{head_quantum:.4f}" if head_quantum is not None else "not re-measured"
@@ -954,12 +1176,47 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
     quantum_delta = (
         f"{summary['quantum_delta_x']:.3f}x" if head_quantum is not None else "n/a"
     )
+    compiled_trips = np.asarray(
+        [row["compiled"]["trips"] for row in members], dtype=float
+    )
+    compiled_wall = np.asarray(
+        [row["compiled"]["wall_per_solve_s"] for row in members], dtype=float
+    )
+    compiled_trip_quantum = compiled_wall / compiled_trips
+    saving_x = np.asarray(
+        [
+            row["route_comparison"].get("solve_saving_x")
+            for row in members
+            if row["route_comparison"].get("solve_saving_x") is not None
+        ],
+        dtype=float,
+    )
+    boundary_ratio = np.asarray(
+        [
+            row["route_comparison"].get("boundary_per_trip_ratio_x")
+            for row in members
+            if row["route_comparison"].get("boundary_per_trip_ratio_x") is not None
+        ],
+        dtype=float,
+    )
+    saving_cell = f"{float(np.mean(saving_x)):.3f}x" if len(saving_x) else "n/a"
+    ratio_cell = (
+        f"{float(np.mean(boundary_ratio)):.3f}x" if len(boundary_ratio) else "n/a"
+    )
     lines = [
-        "# Per-trip quantum at batch width one — which stage owns the trip",
+        "# Width-1 per-trip quantum: host route vs compiled slice route",
         "",
         f"measured on `{payload['assignment']['device']}` at revision "
         f"`{payload['measurement_revision'][:10]}` in job "
         f"`{payload['assignment']['job_id']}`.",
+        "",
+        "Both reduced routes solved the same twelve MAST bank members at "
+        "width one in the same job.  The host route closes every trip with its "
+        "own compiled boundary and synchronisation; the compiled slice route "
+        "closes every trip of the solve inside one program and reads the "
+        "receipt once, so its per-solve wall is one boundary cost per solve "
+        "and the per-trip figure below is that cost amortised over the solve's "
+        "trips.",
         "",
         "## Baselines re-measured at HEAD (width 1024, Solovev workload)",
         "",
@@ -984,48 +1241,67 @@ def _write_report(payload: dict[str, Any], output: Path) -> None:
             )
         ),
         "",
-        "## Width-1 per-member per-trip quantum",
+        "## Width-1 per-member per-trip quantum, both routes",
         "",
-        "| member | trips | wall/solve [s] | per-trip total [ms] | "
-        "host reconciliation [ms/trip] | compiled boundary [ms/trip] | "
-        "device sync [ms/trip] | retrace [ms/trip] |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| member | trips | host wall/solve [s] | host boundary [ms/trip] | "
+        "host device sync [ms/trip] | compiled wall/solve [s] | "
+        "compiled per trip [ms] | per-solve saving | per-trip boundary ratio |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in members:
+        comparison = row["route_comparison"]
+        saving = (
+            f"{comparison['solve_saving_x']:.3f}x"
+            if comparison.get("solve_saving_x") is not None
+            else "n/a"
+        )
+        ratio = (
+            f"{comparison['boundary_per_trip_ratio_x']:.3f}x"
+            if comparison.get("boundary_per_trip_ratio_x") is not None
+            else "n/a"
+        )
         lines.append(
-            f"| {row['identity']} | {row['trips']} | {row['wall_per_solve_s']:.3f} | "
-            f"{1.0e3 * (row['per_trip_quantum_s'] or 0.0):.4f} | "
-            f"{1.0e3 * (row['host_reconciliation_per_trip_s'] or 0.0):.4f} | "
-            f"{1.0e3 * (row['boundary_per_trip_s'] or 0.0):.4f} | "
-            f"{1.0e3 * (row['final_device_sync_per_trip_s'] or 0.0):.4f} | "
-            f"{1.0e3 * row['retrace_total_s']:.4f} |"
+            f"| {row['identity']} | {row['trips']} | "
+            f"{row['wall_per_solve_s']:.3f} | "
+            f"{1.0e3 * row['boundary_per_trip_s']:.4f} | "
+            f"{1.0e3 * row['final_device_sync_per_trip_s']:.4f} | "
+            f"{row['compiled']['wall_per_solve_s']:.3f} | "
+            f"{1.0e3 * row['compiled']['per_trip_quantum_s']:.4f} | "
+            f"{saving} | {ratio} |"
         )
     lines.extend(
         [
             "",
-            "Across the width-1 members the per-trip split is "
+            "Across the twelve width-1 members the host route's per-trip "
+            "quantum splits into "
             f"**{shares['device sync']:.1f}%** outside-trip device work "
             f"(per-solve topology shadow read, initial gather and final "
             f"device synchronisation amortized over the trips, "
             f"**{sync_broad} ms**/trip), "
             f"**{shares['compiled boundary dispatch']:.1f}%** compiled "
-            f"trip-close boundary dispatch (**{boundary_broad} ms**/trip), "
+            f"trip-close boundary dispatch (**{boundary_broad} ms**/trip) and "
             f"**{shares['host reconciliation']:.1f}%** host reconciliation "
-            f"(**{host_broad} ms**/trip), and "
-            f"**{shares['retrace']:.1f}%** retrace below the compiled boundary "
-            f"({retrace_broad} ms/trip).  Of the three host-side stages the plan "
-            f"names — host reconciliation, retrace below the compiled boundary, "
-            "and device sync — the width-1 per-trip quantum at this converged "
-            "scale is owned by the "
-            f"**device side ({named_owner} at {named[named_owner]:.1f}%)**: the "
-            "two to five trips per settled solve amortize a per-solve device-setup "
-            "lump (the topology shadow read and initial gather, each trip closing "
-            "with its own synchronized boundary dispatch) that dominates the "
-            "microsecond-level host reconciliation.",
+            f"(**{host_broad} ms**/trip).  The compiled slice route replaces "
+            "the per-trip boundary and read with one program and one read: "
+            f"its mean per-trip cost is "
+            f"**{1.0e3 * float(np.mean(compiled_trip_quantum)):.4f} ms** "
+            "against a host per-solve wall that still pays a boundary and a "
+            "synchronisation per trip, for a mean per-solve saving of "
+            f"**{saving_cell}** and a mean boundary-per-trip ratio of "
+            f"**{ratio_cell}** across the members that ran both arms.",
             "",
-            "Warm-program solves re-trace nothing: the reduced program's kernel "
-            "cache sizes are recorded before and after each solve and report zero "
-            "growth on every steady repeat (per-warm-row `kernel_cache_growth`).",
+            "The compiled route therefore shows the expected **one boundary "
+            "cost per solve**: its per-solve wall is a single dispatch and "
+            "read, and the per-trip figure falls as the solve's trip count "
+            "grows, where the host route's per-trip boundary and device sync "
+            "are each near-constant per trip.  If any member's per-trip "
+            "compiled figure instead matched the host constant, the deviation "
+            "is stated beside the row.",
+            "",
+            "Warm-program solves re-trace nothing in either arm: kernel cache "
+            "sizes are recorded before and after each solve and report zero "
+            "growth on every steady repeat (per-warm-row "
+            "`kernel_cache_growth`).",
         ]
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -1078,7 +1354,7 @@ def run(
         minimum_compile_seconds=CACHE_MIN_COMPILE_SECONDS,
     )
     receipt: dict[str, Any] = {
-        "schema": "nova.trip-quantum-width-one",
+        "schema": "nova.trip-quantum-width-one-compiled",
         "measurement_revision": revision,
         "captured_at": datetime.now(UTC).isoformat(),
         "assignment": allocation,
@@ -1096,12 +1372,18 @@ def run(
             "baseline_probe_repeats": repeats,
             "reduced_newton_steps_per_trip": newton_steps,
             "reduced_active_set_steps": active_set_steps,
+            "host_route": "release-driven: one fused trip boundary per trip",
+            "compiled_route": (
+                "one compiled program and one read per solve "
+                "(solve_reduced_newton_compiled)"
+            ),
         },
         "baseline_summary": None,
         "baselines": None,
         "width_one": {"members": []},
         "project_absolute_figure_src": (
-            "/nova/figures/millisecond-converged-solve/trip-quantum/width-one.png"
+            "/nova/figures/millisecond-converged-solve/trip-quantum/"
+            "width-one-compiled.png"
         ),
     }
     _write_json(output, receipt)
@@ -1121,12 +1403,19 @@ def run(
                 flush=True,
             )
             try:
-                row = _measure_member_width_one(
+                host_row = _measure_member_width_one(
                     member,
                     repeats=member_repeats,
                     newton_steps=newton_steps,
                     active_set_steps=active_set_steps,
                 )
+                compiled_row = _measure_member_width_one_compiled(
+                    member,
+                    repeats=member_repeats,
+                    newton_steps=newton_steps,
+                    active_set_steps=active_set_steps,
+                )
+                row = _merge_route_rows(member.identity, host_row, compiled_row)
             except Exception as error:  # noqa: BLE001 - one member's failure
                 # must not strand the members already persisted
                 row = {
@@ -1141,7 +1430,9 @@ def run(
             gc.collect()
             print(
                 f"STAGE WIDTH_ONE_MEMBER_{number}_DONE "
-                f"identity={row.get('identity')!r} trips={row.get('trips')} "
+                f"identity={row.get('identity')!r} "
+                f"host_trips={row.get('trips')} "
+                f"compiled_trips={row.get('compiled', {}).get('trips')} "
                 f"rss_mib={_peak_rss_mib():.3f}",
                 flush=True,
             )

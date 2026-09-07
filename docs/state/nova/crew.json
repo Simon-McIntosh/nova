@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T10:59:33",
+  "updated": "2026-09-07T11:14:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -119300,6 +119300,354 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T083417033076-pfs-scheduler-throughput-log",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-scheduler-throughput-log",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2377,
+                "cached_input_tokens": 510023,
+                "input_tokens": 512402,
+                "output_tokens": 734,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 513136,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_parallel.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, one flushed log line per completed shot naming the shot with its written and converged counts, its wall, its slices a second and its seconds a slice, a cumulative line every ten shots naming shots done, slices written, elapsed wall, aggregate and per-device slices a second and host pool occupancy, a throughput block in each per-shot manifest carrying those figures plus the accumulated engine wall and the accumulated host-assembly wall as separate named fields, tests asserting the manifest block fields and one parsed log line on the synthetic root, the running production job 1263846 left untouched because its worker pool already imported these modules, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.5,
+          "goal": "the scheduler job log and each shot manifest report per-shot and cumulative throughput with the engine and host-assembly split",
+          "id": "pfs-scheduler-throughput-log",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083417033076-pfs-scheduler-throughput-log/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "scripts/labeller_parallel/driver.py",
+            "scripts/labeller_parallel/scheduler.py",
+            "tests/test_labeller_parallel.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/scheduler-throughput-log.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-455a78fa6d3eb0df92c3",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T08:34:37Z",
+        "completed_at": "2026-09-07T09:04:14.006Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1767,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1777,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "851a3310d7e00bec171a22ffd5629b5eb2421fee",
+        "commits": [
+          "6a8bdedfa3df7d3edcc1879f639057eb09aed45c"
+        ],
+        "changed_lines": {
+          "added": 327,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_labeller_parallel.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083417033076-pfs-scheduler-throughput-log/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083417033076-pfs-scheduler-throughput-log/manifest.md",
+        "scope_changed": false,
+        "session_id": "9a633b3f-b8ed-4c9e-a06d-fe5f300d1f5d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6089202,
+            "input_tokens_cumulative": 6089202,
+            "output_tokens": 50973,
+            "output_tokens_cumulative": 50973,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1773.353,
+          "generated_tokens": 50973,
+          "generation_seconds": 918.181,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 15.0,
+          "machine_seconds": 855.172,
+          "peak_input_tokens": 152916,
+          "tokens_per_second": 55.52,
+          "wall_tokens_per_second": 28.74
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-scheduler-throughput-log",
+          "session_id": "9a633b3f-b8ed-4c9e-a06d-fe5f300d1f5d",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T09:04:14.006Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T062135453410-pfs-sign-aware-axis-read",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-sign-aware-axis-read",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 501,
+                "cached_input_tokens": 946186,
+                "input_tokens": 946691,
+                "output_tokens": 35,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 946726,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "A new Solovev fixture with reversed plasma current asserts the same axis position and terminal residual as the positive case up to sign; the seven referee tests, tests/test_forward_operator_axes.py and the hex-reference tests stay green and bit-identical on positive-current rows, all run through sbatch on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=32G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, environment python called directly, declared waits, split across jobs as needed under the hour cap); then scripts/labeller_batch/shard.py relabels shots 22475, 22550 and 22626 into a scratch root on one H200 card (4 cores, declared wait) and the report gives their converged fractions against the zero baseline and the per-slice first failure",
+          "estimated_hours": 2.5,
+          "goal": "A sign-aware magnetic-axis and saddle read in the forward solve so a reversed-plasma-current seed admits its axis (a flux minimum) and qualifies by the sign-flipped inequalities, with every positive-current receipt bit-identical",
+          "id": "pfs-sign-aware-axis-read",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062135453410-pfs-sign-aware-axis-read/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_reversed_current_axis.py",
+            "docs/figures/playable-forward-solve/reversed-current/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/sign-aware-axis-read.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-signaxis-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T06:21:59Z",
+        "completed_at": "2026-09-07T09:07:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9954,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "439a3c9f0428ad199897846e52b4b03cf3705738",
+        "commits": [
+          "749816ae211b1226bb664decc03d5dcf811e79c1"
+        ],
+        "changed_lines": {
+          "added": 14,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug referee job 1264121 pytest EFIT referee plus twelve positive-current bank rows",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062135453410-pfs-sign-aware-axis-read/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062135453410-pfs-sign-aware-axis-read/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07a87-e2fb-76d2-bb7c-565104c5412e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11277440,
+            "cached_input_tokens_cumulative": 11277440,
+            "input_tokens": 11826507,
+            "input_tokens_cumulative": 11826507,
+            "output_tokens": 34868,
+            "output_tokens_cumulative": 34868,
+            "reasoning_output_tokens": 9669,
+            "reasoning_output_tokens_cumulative": 9669
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3116,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3142,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 44537,
+          "peak_input_tokens": 23103947
+        },
+        "follow_on_paths": [
+          "Physics/solver"
+        ],
+        "dispute_count": 0,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-sign-aware-axis-read",
+          "session_id": "01a07a87-e2fb-76d2-bb7c-565104c5412e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T09:07:53Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -119612,6 +119960,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1994
+    "_version": 1996
   }
 }

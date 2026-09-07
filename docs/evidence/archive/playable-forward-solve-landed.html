@@ -974,6 +974,75 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     radial check is running consumer-side, instructed to report an absence as its verdict if EFIT publishes no current-centroid major radius rather than substituting
     the magnetic axis for it.</p>
   </section>
+
+  <section id="the-corpus-is-heterogeneous-in-revision-but-uniform-in-defect">
+    <h2>Forty-two writer revisions in the corpus, and every one of them pre-dates tonight's three fixes (2026-09-07 09:22Z)</h2>
+    <p>Each shot manifest stamps the checkout revision it was written at, and the 923 complete shots carry <strong>42 distinct revisions</strong>, the largest single
+    group being 297 shots and the running job's being 660cbd7c on 94 and counting. That heterogeneity is a standing caveat for anyone comparing frame channels across
+    the corpus: two shots may have been written by materially different code.</p>
+    <p>It is also, for the three defects fixed tonight, not a complication at all. None of tonight's fix commits appears in any manifest, so the empty LCFS, the
+    mislabelled conditioned flag and the uncontained second X-point slot are present uniformly across all 923 shots. There is therefore no revision boundary to reason
+    about <em>within</em> the corpus for these three; the only boundary is the writer relaunch, and it has not happened. A consumer partitioning its data for these
+    defects needs one cut, not forty-two.</p>
+    <p>The running job was also checked for the hazard that made this worth measuring. Three of tonight's merges went into modules the live writer imported at launch,
+    and its assembly pool is created once with no per-child task ceiling, so its children hold the launch revision and a replacement child would be the only way new
+    code could enter mid-run. Its six most recent shots all stamp 660cbd7c, so no mixing has occurred, and the revision stamp is the instrument that would show it if
+    a worker were ever replaced.</p>
+  </section>
+
+  <section id="the-centroid-major-radius-is-systematically-inboard">
+    <h2>Nova's current-centroid major radius is inboard of EFIT's on 51 of 51 slices, in the component nothing has ever checked (2026-09-07 09:35Z)</h2>
+    <p>The radial check the consumer ran after the Z-only premise was withdrawn returns both outcomes at once, and EFIT does publish a current-centroid major radius on
+    all six carriers, so nothing was substituted for it.</p>
+    <p><strong>The Shafranov reading holds, in the component it was guessed to hold in.</strong> Both centroid-to-axis distances are overwhelmingly radial: the centroid
+    sits 13.25 cm inboard of nova's axis and 14.16 cm inboard of EFIT's, against vertical components of 0.08 and 1.33 cm, and the axis is outboard of the centroid in
+    both codes, which is the correct Shafranov sign. So the positive control stands and is no longer provisional: both quantities behave like magnetic axes rather than
+    like moments, and the residual 4.56 cm axis disagreement is about O-point location in a quantity both codes compute correctly in kind.</p>
+    <p><strong>And nova's centroid major radius is systematically wrong.</strong> It is inboard of EFIT's on every one of the 51 evidence slices, median 5.62 cm, mean
+    6.06, standard deviation 3.14, with per-shot medians from 2.68 cm on 21978 to 8.67 cm on 21986. Zero of 51 outboard is a systematic sign rather than scatter. This
+    is the fourth defect tonight in one family and the family is now worth naming: <strong>where a pair exists and only one member is validated, the unvalidated member
+    is wrong.</strong> The primary saddle selector applied wall containment and the secondary did not, so the second slot held out-of-vessel nulls. The solve read the
+    topology with a requested class and its own diagnostic read did not, so a third of converged slices aborted. The writer guarded the centroid height and never
+    compared the centroid major radius, so the major radius drifted 5.6 cm inboard unnoticed. Three independent instances in one night, each found by a different route,
+    none by the tests.</p>
+    <p><strong>A hypothesis that would make two of them one cause, with its test.</strong> The centroid comes from the same moment observation that runs the
+    unconstrained topology read. If its domain mask is the emergent boundary where the solve used the requested class, the moment integral is taken over the wrong
+    support and the centroid is displaced systematically, which is the observed shape. The test falls out of the repair already in flight: supply the class and see
+    whether the centroid major radius moves toward EFIT's on real slices where the emergent and requested classes differ. Note this does not contradict that repair's
+    own gate, which asserts a bit-identical centroid when the class is supplied to a flux that already reads cleanly without one; that pins the argument as
+    non-perturbing when the two classes agree, and the 5.6 cm question is what happens when they do not. The two measurements are different and both are wanted.</p>
+    <p>What this does not disturb: the axis result, because the axis offset was measured against EFIT's axis directly rather than through any centroid; and it does not
+    rescue the withdrawn prediction that nova reports a moment as an axis, since a 5.6 cm centroid offset cannot make a 13.25 cm axis-to-centroid distance a
+    coincidence.</p>
+  </section>
+
+  <section id="two-opposite-ledger-defects-a-naive-count-conflates">
+    <h2>Auditing the crew ledger against its own manifests: 62 incomplete rows, 124 suspect manifest hashes, and a flag that lies (2026-09-07 09:58Z)</h2>
+    <p>Prompted by finding one of my own promotions incomplete, and using an audit query the consumer supplied, every ledger row whose manifest records forty-character
+    commit hashes was compared against the row's own commit list. 720 rows checked:</p>
+    <table>
+      <thead><tr><th>Class</th><th>Rows</th><th>Which record is wrong</th></tr></thead>
+      <tbody>
+        <tr><td>Ledger list equals the manifest's</td><td>534</td><td>neither</td></tr>
+        <tr><td>Ledger list is a strict subset of the manifest's</td><td>62</td><td>the ledger, incomplete at promotion</td></tr>
+        <tr><td>They disagree without being a subset</td><td>124</td><td>probably the manifest, the known confabulated-SHA trap</td></tr>
+      </tbody>
+    </table>
+    <p><strong>A naive mismatch count returns 186 and conflates two opposite defects.</strong> The 62 are promotions that passed a tip commit where a node had landed
+    several, so the ledger under-records what the node did; the worst is a node with 31 commits recorded as one, and the reversed-current axis node tonight is in this
+    class at 8 recorded as 1. The 124 are rows where a worker's manifest quoted a hash the coordinator correctly declined to use, promoting the verified head instead,
+    so there the <em>ledger</em> is right and the manifest is the defective record. Reporting the single number would have sent someone to fix the wrong side on two
+    thirds of the hits, which is why the split is the finding rather than the total.</p>
+    <p>The practical consequence of the 62, and why it matters beyond tidiness: the out-of-scope boundary check runs against the commits the promotion presents, so an
+    incomplete promotion silently disables it. That is how a mid-flight scope extension tonight reached the ledger with an empty acceptance list while the same check
+    fired correctly on another node minutes later over a single test helper. The two halves depend on each other: pass every commit, and the guard can see the scope;
+    pass the tip, and it cannot.</p>
+    <p><strong>And a third variant, in the tooling rather than in either project.</strong> On every row where a companion path was accepted with a reason, the
+    acceptance is stored and <code>scope_changed</code> stays <code>false</code>. So an auditor asking which nodes had their scope moved, by filtering the field named
+    for exactly that question, gets nothing back on precisely the rows where it moved. The fact is recorded; the field that advertises it is wrong. Filter on a
+    non-empty acceptance list instead. This is the same shape as a docstring asserting a property the framework does not provide, and as a height-only figure standing
+    in for a two-component agreement: a true-looking field carrying the wrong answer to the question an auditor would actually ask.</p>
+  </section>
 </main>
 </body>
 </html>

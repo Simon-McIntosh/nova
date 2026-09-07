@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T11:14:41",
+  "updated": "2026-09-07T11:44:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -119648,6 +119648,168 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T083935936204-pfs-moment-read-carries-the-class",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-moment-read-carries-the-class",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1055,
+                "cached_input_tokens": 521176,
+                "input_tokens": 522233,
+                "output_tokens": 1694,
+                "reasoning_output_tokens": 900,
+                "total_tokens": 523927,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_forward_moment_class.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, current_moment_observation taking a requested_class it forwards to _integral_state, one test asserting that a flux whose unconstrained read raises a no-qualified-axis error returns a finite centroid when the class the solve used is supplied, a second test asserting a flux that reads cleanly without a class returns a bit-identical centroid when the class is supplied so the argument changes admission rather than the moment, the report naming every sibling method on that surface that was checked with its verdict including current_moment_map, the writers left untouched because scripts/labeller_batch/shard.py and scripts/labeller_parallel/scheduler.py are held by two other live nodes and the pass-through is its own successor node, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "every ForwardProfile method that reads or derives from a solved flux accepts and forwards the requested class the solve used",
+          "id": "pfs-moment-read-carries-the-class",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083935936204-pfs-moment-read-carries-the-class/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_forward_moment_class.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/moment-read-carries-the-class.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-nullguard-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T08:39:57Z",
+        "completed_at": "2026-09-07T09:41:44.547Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3698,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3707,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a320125bba90f6bfe74b1bd835f2e9b3d9638d34",
+        "commits": [
+          "a460a7ff7788b58d7479ffb0e2fad7ce4269ddd0"
+        ],
+        "changed_lines": {
+          "added": 287,
+          "removed": 24,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_forward_moment_class.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083935936204-pfs-moment-read-carries-the-class/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T083935936204-pfs-moment-read-carries-the-class/manifest.md",
+        "scope_changed": false,
+        "session_id": "c69394a8-91a5-47c4-9230-c6c4745eb1a2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 12878722,
+            "input_tokens_cumulative": 12878722,
+            "output_tokens": 71397,
+            "output_tokens_cumulative": 71397,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3702.133,
+          "generated_tokens": 71397,
+          "generation_seconds": 2338.121,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 20.2,
+          "machine_seconds": 1364.012,
+          "peak_input_tokens": 205451,
+          "tokens_per_second": 30.54,
+          "wall_tokens_per_second": 19.29
+        },
+        "follow_on_paths": [
+          "shard.py",
+          "/",
+          "scheduler.py",
+          "119/372",
+          "tests/test_observation_kernels.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "scope_acceptances": [
+          {
+            "path": "tests/test_observation_kernels.py",
+            "reason": "a one-line stub signature update: the fake operator read in a test helper gained the new optional requested_class argument, reviewed and no assertion or test logic changed"
+          }
+        ],
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-moment-read-carries-the-class",
+          "session_id": "c69394a8-91a5-47c4-9230-c6c4745eb1a2",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T09:41:44.547Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -119960,6 +120122,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1996
+    "_version": 1997
   }
 }

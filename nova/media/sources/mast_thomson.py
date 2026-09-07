@@ -1,10 +1,25 @@
 """Read MAST Thomson scattering profiles from the level-1 shot store.
 
-Two systems view the same midplane chord: ``ayc`` is the core string (131
-scattering volumes spanning most of the minor radius) and ``aye`` the edge
-string (16 volumes clustered outboard). Both measure along R at Z of about
-zero, so MAST offers no vertical-versus-horizontal sightline split -- the
-distinction a figure can draw here is core against edge.
+MAST published its Thomson data through two DISJOINT eras, and a reader that
+knows only the later one cannot open most of the archive. Measured across
+1712 shots sampled every tenth through the level-1 store: ``atm`` alone on 615
+of them, up to shot 22822; ``ayc`` with ``aye`` on 374 and ``ayc`` alone on
+101, from shot 23138; and ``atm`` co-occurring with ``ayc`` or ``aye`` on
+exactly NONE. So the era is a property of the shot, not a set of optional
+groups, and an early shot has a core string with no edge companion at all.
+
+``atm`` is the earlier core system: 36 scattering volumes whose ``radius`` is
+stored once per channel, so its geometry is already fixed. ``ayc`` is the
+later core string at 131 volumes with a per-time radius, and ``aye`` the edge
+string at 16 volumes clustered outboard -- optional even within its own era.
+
+Every system measures along R at Z of about zero, so MAST offers no
+vertical-versus-horizontal sightline split; the distinction a figure can draw
+is core against edge, and on an ``atm`` shot there is only core. The stored
+group code is preserved in each string's provenance because the systems are
+not interchangeable -- ``ayc`` covers core and edge together where ``atm``
+covers the core alone -- and a consumer needing that distinction should read
+the code rather than the role name.
 
 Three properties of the stored arrays are handled at the read, because each
 one silently corrupts a figure otherwise:
@@ -35,8 +50,12 @@ import numpy as np
 
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 
-#: Store group and its stored radius leaf, per Thomson system.
-_SYSTEMS = (("core", "ayc", "radius"), ("edge", "aye", "r"))
+#: Core systems in era order, with the radius leaf each stores. The first
+#: one present decides the shot's era; they never co-occur.
+_CORE_SYSTEMS = (("atm", "radius"), ("ayc", "radius"))
+
+#: Edge systems, which exist only in the later era and are optional there.
+_EDGE_SYSTEMS = (("aye", "r"),)
 
 #: MAST Thomson views the midplane; neither group stores a vertical position.
 _MIDPLANE_HEIGHT = 0.0
@@ -71,9 +90,21 @@ class ThomsonString:
         return self.temperature[row], self.density[row]
 
     def finite(self, time: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return the radius, temperature and density of the usable channels."""
+        """Return the radius, temperature and density of the usable channels.
+
+        A channel is usable only when its POSITION is finite as well as its
+        measurement. Both eras carry a channel whose stored radius is
+        non-finite while its temperature is valid -- one of 36 on ``atm``, one
+        of 131 on ``ayc`` -- and filtering on the measurement alone returns a
+        NaN abscissa that matplotlib drops silently while any scale or fit
+        computed from it inherits the gap.
+        """
         temperature, density = self.at(time)
-        usable = np.isfinite(temperature) & (temperature > 0.0)
+        usable = (
+            np.isfinite(temperature)
+            & (temperature > 0.0)
+            & np.isfinite(self.positions[:, 0])
+        )
         return self.positions[usable, 0], temperature[usable], density[usable]
 
 
@@ -145,10 +176,12 @@ def read_string(
 def read_thomson(
     shot: int, store: Path | str = SHOT_STORE
 ) -> tuple[ThomsonString, ...]:
-    """Return the core and edge Thomson strings of one MAST shot.
+    """Return the Thomson strings of one MAST shot, whichever era it is from.
 
-    A system absent from the store is omitted rather than returned empty, so a
-    caller sees the systems that exist instead of a string with no channels.
+    The first core system present decides the era; an absent edge system is
+    omitted rather than returned empty, so a caller sees the systems that
+    exist instead of a string with no channels. An early shot therefore
+    returns one string and a later one may return two.
     """
     import zarr
 
@@ -156,15 +189,25 @@ def read_thomson(
     if not source.is_dir():
         raise FileNotFoundError(f"no MAST level-1 shot store at {source}")
     root = zarr.open_group(str(source), mode="r")
-    if "ayc" not in root:
-        raise ValueError(f"MAST {shot} carries no core Thomson group")
-    window = _shot_window(root["ayc"])
+    core = next(
+        ((key, leaf) for key, leaf in _CORE_SYSTEMS if key in root),
+        None,
+    )
+    if core is None:
+        present = sorted(name for name, _ in root.groups())
+        raise ValueError(
+            f"MAST {shot} carries no core Thomson group: expected one of "
+            f"{[key for key, _ in _CORE_SYSTEMS]}, found {present[:12]}"
+        )
+    window = _shot_window(root[core[0]])
+    systems = [("core", *core)] + [
+        ("edge", key, leaf) for key, leaf in _EDGE_SYSTEMS if key in root
+    ]
     strings = []
-    for name, key, radius_leaf in _SYSTEMS:
-        if key not in root:
-            continue
+    for name, key, radius_leaf in systems:
         string = read_string(root[key], name, radius_leaf, window)
         string.provenance["group"] = key
+        string.provenance["era"] = "atm" if core[0] == "atm" else "ayc"
         string.provenance["source"] = str(source)
         string.provenance["shot_window_s"] = list(window)
         strings.append(string)

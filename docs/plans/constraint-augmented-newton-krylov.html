@@ -22,8 +22,8 @@
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="36">
+<meta name="plan-modified" content="2026-09-08">
+<meta name="plan-version" content="37">
 <meta name="plan-impl" content="0.35">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -308,6 +308,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260907T165624217254-cank-thomson-scout" data-who="cank-thomson-c" data-when="2026-09-07T19:41:24.838Z">
     <div class="r-comment-body"><p>Thomson scout gathered a 588 KB inventory over the five DIII-D gate shots and the DD 4.1.1 dictionary but died twice on the local lane before writing its report (a synthetic stop at 4.5M cumulative input tokens, then a server_error on resume); redispatched as cank-thomson-scout-2 on a fresh member reading the inventory from disk</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260907T194452794739-cank-thomson-scout-2" data-who="cank-thomson-c2" data-when="2026-09-07T22:14:53.472Z">
+    <div class="r-comment-body"><p>Second Thomson report-writing scout died on the local lane without writing the report; the 588 KB inventory JSON is intact in the first scout&#x27;s run directory; the node moves to the codex lane with a brief that extracts from the JSON by script rather than loading it</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

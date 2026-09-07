@@ -1307,6 +1307,21 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     Artifacts in the worktree under <code>docs/figures/playable-forward-solve/boundary-routing/</code> (row-aligned drawn-boundary table,
     anchor receipts, two relabelled sessions) and the report at <code>~/.config/reckon/crew/reports/nova/playable/boundary-routing.md</code>.</p>
   </section>
+  <section id="position-selected-wall-reads-refuse-ambiguous-containers">
+    <h2>The three unguarded position-selected wall reads now refuse ambiguous containers (2026-09-07 18:59Z)</h2>
+    <p>Node <code>pfs-imas-position-reads</code> (local lane, spec exact; commit <code>7cb3b0fe</code>, merged at <code>44868fac</code>).
+    The audit of <code>description_2d[0]</code>, <code>unit[0]</code> and <code>time_slice[0]</code> across <code>nova/imas/</code> confirmed
+    the distribution the followup named: the count guard existed in exactly one function, and three reads selected by position on an axis nothing
+    checked. Each of the three now raises rather than warning and proceeding: the MAST chain factory's wall grid checks both the description and
+    the limiter-unit axis, the DIII-D machine-ids wall read checks both axes four hundred lines above the guard it already carried, and the
+    machine-agnostic vessel accessor checks the description axis (its unit axis is iterated by the contour, not position-selected). The writer in
+    the MAST geometry authoring path is recorded as a correct false positive, since it resizes the containers to one before indexing.</p>
+    <p>Exposure count: three sites were passing only because nothing checked; live mis-selection count zero, because MAST's wall IDS carries one
+    description and one limiter unit, so the ambiguity was hypothetical rather than live and every absolute wall distance quoted on either side
+    of the seam stands on the polygon it was measured against. Gate: the twenty-four existing chain-factory, machine and DIII-D machine-ids tests
+    unchanged and green, six new synthetic two-description and two-unit refusal tests green, the eight DIII-D description tests green; naming
+    checks clean on the added lines. Report at <code>~/.config/reckon/crew/reports/nova/playable/imas-position-reads.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

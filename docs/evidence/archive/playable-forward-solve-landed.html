@@ -857,6 +857,29 @@
     from control flow. Both of my wrong readings were traced correctly through the code and aimed at rows that code never handled, and in each case three per-row fields
     settled it immediately.</p>
   </section>
+
+  <section id="the-masked-conditioning-branches-differ-by-one-element">
+    <h2>The batched engine's failure is a one-element shape mismatch between its conditioning branches, and the pre-registration is refuted (2026-09-07 08:33Z)</h2>
+    <p>The CPU diagnosis has the traceback the receipt could not keep, and it refutes the hypothesis registered against it. The exception is not a dropped requested
+    class or target current. It is:</p>
+    <pre>TypeError: cond branches must have equal output types but they differ.
+true_fun is conditioned at nova/equilibrium/batched_labeller.py:574
+false_fun is &lt;lambda&gt; at nova/equilibrium/batched_labeller.py:612
+The output of true_fun at path [0][1] has type float64[666] but the corresponding
+output of false_fun has type float64[665], so the shapes do not match.</pre>
+    <p>So the masked conditioning is built as a <code>jax.lax.cond</code> whose two branches return state of different length: the conditioned branch carries one extra
+    element, which is the constraint multiplier the centroid row introduces, and the free branch does not. <code>lax.cond</code> requires identical output types, so the
+    program fails at trace time on every step, in every arm, at every batch size and device count. That is the whole explanation for nine arms of zero converged slices
+    and for rates that scaled beautifully while solving nothing: the timing measured a trace-time failure, which is why it was linear in batch.</p>
+    <p><strong>The stated falsifier fired, so the two defects are unrelated.</strong> The registration said that a traceback naming anything other than a missing class
+    or target current would leave the centroid abort and the engine failure as two independent defects, and it names a shape mismatch. The requested-class asymmetry
+    behind the aborted rows stands on its own source evidence and is unaffected; the one-root-cause hypothesis is withdrawn.</p>
+    <p>The repair has a shape the name already implies. Masked conditioning means the conditioning row is always structurally present and masked off when unused, not
+    structurally absent in one branch: the free branch must carry the multiplier slot with a zero or masked value so both branches agree, rather than the conditioned
+    branch growing the state. A fix that instead trims the conditioned branch would remove the row the conditioning exists to impose. The parity contract is unchanged
+    and remains the acceptance measure: one converging arm whose converged fraction matches the sequential reference of 38 of 48 with 7 inside the guard, proved on CPU
+    before any card is requested.</p>
+  </section>
 </main>
 </body>
 </html>

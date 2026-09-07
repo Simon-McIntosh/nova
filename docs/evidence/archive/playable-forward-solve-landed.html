@@ -1093,6 +1093,34 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     mechanism predicts the defect is worst when the solenoid is strongest and the plasma weakest, which is precisely the early phase where the consumer measured its
     dR structure before 0.21 s; if the centre-column test confirms, that becomes one cause rather than two findings.</p>
   </section>
+
+  <section id="the-shadow-is-computed-after-the-boundary-it-should-gate">
+    <h2>The private-wall shadow exists, is per-node, and is computed from the read that already chose the boundary (2026-09-07 10:20Z)</h2>
+    <p>Investigated on the lead's instruction to establish the mechanism before assuming a fix, the lead's suspicion being that the winning roof node sits inside the
+    divertor box and should have been shadowed. It should have been, the machinery to shadow it exists, and the reason it did not is an ordering rather than a missing
+    filter.</p>
+    <p><strong>What exists.</strong> <code>wall_height_shadow_mask</code> in <code>nova/equilibrium/connectivity_boundary.py</code> returns a per-wall-node private
+    exclusion built from the qualified saddles with a hysteresis band, and it consumes a <code>private_wall_node_mask</code> that the connectivity read derives from
+    the flood fill, with connectivity-proven common wall nodes always participating. That is precisely the mechanism the lead described, and a roof node beyond the
+    X-point is exactly what it is built to exclude.</p>
+    <p><strong>Why it does not gate the anchor.</strong> In <code>_frozen_topology_partition</code> the order is: complete the topology read, which selects the
+    boundary, and then call <code>_residual_shadow_components_from_read(physical, masks, topology, previous_shadow)</code>, which takes the finished read's axis height
+    and primary X-point as <em>inputs</em> to build the shadow. So the shadow is downstream of the selection it would have to constrain. Its name says what it is for:
+    it is a <em>residual</em> shadow, excluding shadowed wall nodes from the residual equations, and nothing carries it back to the anchor. Confirmed at the two ends:
+    <code>_fixed_design_read(physical, requested_class)</code> accepts no shadow argument, and all four call sites of the wall reader are
+    <code>self.wall(psi_wall, polarity)</code> with no mask, so the wall extremum is a global argmax over every node including those the same machinery is about to
+    mark private.</p>
+    <p><strong>What this changes about the repair, and it is the reason the lead's instruction was right.</strong> The fix is not a new reachability filter of the kind
+    proposed earlier, and it is not a test naming the centre column or the roof. The per-node exclusion already exists and is already correct in intent; it is simply
+    not supplied at the point of selection. And the plumbing to supply it is present: <code>previous_shadow</code> is already threaded into
+    <code>_frozen_topology_partition</code>, so the previous iterate's wall shadow is in scope at the moment the read is made, with a hysteresis band designed for
+    exactly this carry. So the candidate repair is to pass that shadow into the read and mask the wall flux before the extremum is taken, which is a wiring change
+    within existing machinery rather than a new rule, and it inherits the hysteresis that stops a boundary flickering between anchors across iterates.</p>
+    <p>Two things this does not settle and must not be assumed. Whether masking the anchor is sufficient to recover the frames, since the current evidence says the
+    solve carried roughly four per cent of the reference plasma current and it is not yet established whether that is a cause or a consequence of the anchor. And what
+    the first iterate does, when no previous shadow exists, which is the case that produced the worst frame: a cold start has nothing to carry, so the ordering problem
+    is real there even after the wiring, and the answer may be to iterate the read once rather than to accept its first anchor.</p>
+  </section>
 </main>
 </body>
 </html>

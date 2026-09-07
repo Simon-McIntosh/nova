@@ -1,43 +1,43 @@
 {
   "schema": "nova-forward-labeller-completion",
   "root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
-  "expected_shots": 327,
-  "manifest_count": 327,
-  "completed_shots": 324,
+  "expected_shots": 361,
+  "manifest_count": 361,
+  "completed_shots": 358,
   "failed_shots": 3,
-  "completion_fraction": 0.9908256880733946,
-  "slices": 27326,
-  "admitted_slices": 27326,
-  "excluded_slices": 1682,
-  "converged_slices": 18014,
-  "unconverged_slices": 9312,
-  "qualified_slices": 3071,
-  "converged_fraction": 0.6592256459049989,
-  "qualified_fraction": 0.11238381029056577,
-  "branch_guard_evaluated_slices": 23509,
-  "branch_guard_agreement_slices": 18748,
-  "branch_guard_agreement_fraction": 0.7974818154749245,
-  "free_guard_agreement_slices": 18624,
-  "free_guard_agreement_fraction": 0.7922072397805096,
-  "conditioned_slices": 11881,
-  "conditioned_guard_evaluated_slices": 7880,
-  "conditioned_guard_agreement_slices": 7750,
-  "conditioned_guard_agreement_fraction": 0.983502538071066,
-  "exception_slices": 8415,
-  "current_centroid_slices": 23325,
-  "companion_shots": 324,
-  "companion_slices": 27326,
+  "completion_fraction": 0.9916897506925207,
+  "slices": 29875,
+  "admitted_slices": 29875,
+  "excluded_slices": 1820,
+  "converged_slices": 19649,
+  "unconverged_slices": 10226,
+  "qualified_slices": 3395,
+  "converged_fraction": 0.6577071129707113,
+  "qualified_fraction": 0.11364016736401673,
+  "branch_guard_evaluated_slices": 25711,
+  "branch_guard_agreement_slices": 20451,
+  "branch_guard_agreement_fraction": 0.7954183034498853,
+  "free_guard_agreement_slices": 20443,
+  "free_guard_agreement_fraction": 0.7951071525806075,
+  "conditioned_slices": 12890,
+  "conditioned_guard_evaluated_slices": 8482,
+  "conditioned_guard_agreement_slices": 8334,
+  "conditioned_guard_agreement_fraction": 0.9825512850742749,
+  "exception_slices": 9247,
+  "current_centroid_slices": 25467,
+  "companion_shots": 358,
+  "companion_slices": 29875,
   "companion_completion_fraction": 1.0,
   "flux_function_grid_points": [
     65
   ],
-  "slices_per_second_per_card": 1.0764618735420088,
+  "slices_per_second_per_card": 1.0831982382448253,
   "warm_rate_definition": "admitted slices in shots after the setup and compilation-bearing first shot of each shard, divided by their summed per-slice wall time",
-  "warm_shots": 319,
-  "warm_slices": 26903,
-  "warm_wall_seconds": 16897.860227207653,
-  "warm_slices_per_second_per_card": 1.5920950722910365,
-  "gpu_hours": 7.051392847365285,
+  "warm_shots": 353,
+  "warm_slices": 29452,
+  "warm_wall_seconds": 18377.541659411974,
+  "warm_slices_per_second_per_card": 1.602608256633514,
+  "gpu_hours": 7.661211787565198,
   "nova_revisions": [
     "00d983ad6db8b4d904cd5bc1e722b137296f557f",
     "0173f4e6720216e5077844d5bc0213d544d741ed",
@@ -53,8 +53,10 @@
     "7cb0977d93cf3101c9ae24be6d94a151ddb535ca",
     "7fce2f87cc994e56aff8395f5e11206be64a546a",
     "80a8512744748cbcec9903cbae37d9c75cd91860",
+    "90573c75adc17e30f71e5abcb864927b29173db3",
     "931126f31511e1d1b73ce1cae4ceed7948acf27f",
     "a9923f037dcd531df13c7a05ce4faeb1e3cdaf03",
+    "afa5642b90eee2e3c2edb3c4de7df28c8c250f5a",
     "b2a37a7aad0a8e4bd7fca468fdb929a772d6e56c",
     "b780497fdbac6b85fdfea7343ac8a047a8988241",
     "b9aac8c8919fc1210121b5353be92e9a5b6981ff",
@@ -77,63 +79,63 @@
       "bins": [
         {
           "decile": 0,
-          "slices": 2862,
-          "conditioned": 1016,
-          "fraction": 0.3549965059399022
+          "slices": 3138,
+          "conditioned": 1142,
+          "fraction": 0.36392606755895474
         },
         {
           "decile": 1,
-          "slices": 2730,
-          "conditioned": 712,
-          "fraction": 0.2608058608058608
+          "slices": 2990,
+          "conditioned": 771,
+          "fraction": 0.25785953177257526
         },
         {
           "decile": 2,
-          "slices": 2739,
-          "conditioned": 702,
-          "fraction": 0.25629791894852133
+          "slices": 2991,
+          "conditioned": 757,
+          "fraction": 0.25309261116683385
         },
         {
           "decile": 3,
-          "slices": 2659,
-          "conditioned": 693,
-          "fraction": 0.2606242948476871
+          "slices": 2913,
+          "conditioned": 762,
+          "fraction": 0.2615859938208033
         },
         {
           "decile": 4,
-          "slices": 2728,
-          "conditioned": 1288,
-          "fraction": 0.47214076246334313
+          "slices": 2984,
+          "conditioned": 1381,
+          "fraction": 0.4628016085790885
         },
         {
           "decile": 5,
-          "slices": 2668,
-          "conditioned": 1246,
-          "fraction": 0.46701649175412296
+          "slices": 2913,
+          "conditioned": 1363,
+          "fraction": 0.46790250600755234
         },
         {
           "decile": 6,
-          "slices": 2688,
-          "conditioned": 1418,
-          "fraction": 0.5275297619047619
+          "slices": 2940,
+          "conditioned": 1513,
+          "fraction": 0.5146258503401361
         },
         {
           "decile": 7,
-          "slices": 2712,
-          "conditioned": 1539,
-          "fraction": 0.5674778761061947
+          "slices": 2954,
+          "conditioned": 1640,
+          "fraction": 0.5551794177386594
         },
         {
           "decile": 8,
-          "slices": 2696,
-          "conditioned": 1487,
-          "fraction": 0.5515578635014837
+          "slices": 2942,
+          "conditioned": 1623,
+          "fraction": 0.5516655336505778
         },
         {
           "decile": 9,
-          "slices": 2844,
-          "conditioned": 1780,
-          "fraction": 0.6258790436005626
+          "slices": 3110,
+          "conditioned": 1938,
+          "fraction": 0.6231511254019293
         }
       ]
     },
@@ -142,69 +144,69 @@
       "bins": [
         {
           "bin_ms": 0,
-          "slices": 3471,
-          "conditioned": 1080,
-          "fraction": 0.3111495246326707
+          "slices": 3842,
+          "conditioned": 1224,
+          "fraction": 0.3185840707964602
         },
         {
           "bin_ms": 50,
-          "slices": 3226,
-          "conditioned": 757,
-          "fraction": 0.23465592064476132
+          "slices": 3562,
+          "conditioned": 829,
+          "fraction": 0.23273441886580573
         },
         {
           "bin_ms": 100,
-          "slices": 3211,
-          "conditioned": 807,
-          "fraction": 0.25132357521021487
+          "slices": 3547,
+          "conditioned": 896,
+          "fraction": 0.25260783760924727
         },
         {
           "bin_ms": 150,
-          "slices": 3186,
-          "conditioned": 1212,
-          "fraction": 0.3804143126177024
+          "slices": 3517,
+          "conditioned": 1329,
+          "fraction": 0.37787887404037535
         },
         {
           "bin_ms": 200,
-          "slices": 3152,
-          "conditioned": 1520,
-          "fraction": 0.48223350253807107
+          "slices": 3477,
+          "conditioned": 1648,
+          "fraction": 0.47397181478285877
         },
         {
           "bin_ms": 250,
-          "slices": 2961,
-          "conditioned": 1544,
-          "fraction": 0.5214454576156704
+          "slices": 3257,
+          "conditioned": 1683,
+          "fraction": 0.5167331900521953
         },
         {
           "bin_ms": 300,
-          "slices": 3040,
-          "conditioned": 1839,
-          "fraction": 0.6049342105263158
+          "slices": 3307,
+          "conditioned": 1999,
+          "fraction": 0.6044753553069248
         },
         {
           "bin_ms": 350,
-          "slices": 2255,
-          "conditioned": 1336,
-          "fraction": 0.5924611973392461
+          "slices": 2433,
+          "conditioned": 1443,
+          "fraction": 0.593094944512947
         },
         {
           "bin_ms": 400,
-          "slices": 1463,
-          "conditioned": 925,
-          "fraction": 0.6322624743677375
+          "slices": 1543,
+          "conditioned": 969,
+          "fraction": 0.62799740764744
         },
         {
           "bin_ms": 450,
-          "slices": 763,
-          "conditioned": 453,
-          "fraction": 0.5937090432503277
+          "slices": 783,
+          "conditioned": 461,
+          "fraction": 0.5887611749680716
         },
         {
           "bin_ms": 500,
-          "slices": 415,
-          "conditioned": 280,
-          "fraction": 0.6746987951807228
+          "slices": 424,
+          "conditioned": 281,
+          "fraction": 0.6627358490566038
         },
         {
           "bin_ms": 550,
@@ -227,7 +229,7 @@
       ]
     },
     "shot_coverage": {
-      "companion_shots": 324,
+      "companion_shots": 358,
       "classed_shots": 0
     }
   },
@@ -236,16 +238,47 @@
     "classes": {},
     "reason": "the session frames carry no decodable topology-class field and the manifest slice records carry no requested_class, so the split cannot be structured by topology class under this layout"
   },
-  "pin_displacement_mm": {
-    "definition": "1000 * (conditioned_centroid_error_m - free_centroid_error_m) over written slices with both finite",
+  "pin_correction_mm": {
+    "definition": "signed pin correction = 1000 * (conditioned_centroid_error_m - free_centroid_error_m), mm, over written slices with both errors finite; each centroid error is achieved Z minus target, so the correction is the signed vertical relocation of the current centroid the pin produced",
+    "sign_convention": "positive means the conditioned centroid sits above (higher Z than) the free centroid",
     "unit": "mm",
     "overall": {
-      "count": 7735,
-      "median": -7.73020938329525,
-      "p90": 100.76212126953119,
+      "count": 8325,
+      "median": -8.081344517266485,
+      "p90": 99.0383422012718,
       "maximum": 615.2804456915928
     },
     "by_topology_class": {}
+  },
+  "free_error_mm": {
+    "definition": "signed free centroid error = 1000 * free_centroid_error_m, mm, over written slices with finite free error; positive is the free centroid above the target",
+    "unit": "mm",
+    "distribution": {
+      "count": 25711,
+      "median": 1.9311714140877487,
+      "p90": 59.70645234663424,
+      "maximum": 856.9510158500299
+    }
+  },
+  "conditioned_error_mm": {
+    "definition": "signed conditioned centroid error = 1000 * conditioned_centroid_error_m, mm, over written slices with finite conditioned error; positive is the conditioned centroid above the target",
+    "unit": "mm",
+    "distribution": {
+      "count": 8482,
+      "median": 5.6066262743570405e-12,
+      "p90": 1.7335353545353034e-05,
+      "maximum": 655.2894860506058
+    }
+  },
+  "absolute_error_reduction_mm": {
+    "definition": "1000 * (|free_centroid_error_m| - |conditioned_centroid_error_m|), mm, over written slices with both errors finite; positive means conditioning reduced the absolute centroid error",
+    "unit": "mm",
+    "distribution": {
+      "count": 8325,
+      "median": 57.40167884042664,
+      "p90": 171.8964492027968,
+      "maximum": 613.700120126912
+    }
   },
   "pin_displacement_crosstab": {
     "definition": "pin displacement class (conditioned_centroid_error_m minus free_centroid_error_m, mm) against converged and conditioned_branch_guard_ok, over written slices with both errors finite; the manifest fields are joined to the npz by row",
@@ -257,72 +290,72 @@
     ],
     "overall": {
       "below_-50_mm": {
-        "slices": 2630,
-        "converged": 1807,
-        "conditioned_branch_guard_ok": 2587,
-        "converged_and_conditioned_guard_ok": 1807
+        "slices": 2827,
+        "converged": 1927,
+        "conditioned_branch_guard_ok": 2779,
+        "converged_and_conditioned_guard_ok": 1927
       },
       "-50_to_0_mm": {
-        "slices": 1650,
-        "converged": 1184,
-        "conditioned_branch_guard_ok": 1616,
-        "converged_and_conditioned_guard_ok": 1184
+        "slices": 1811,
+        "converged": 1293,
+        "conditioned_branch_guard_ok": 1773,
+        "converged_and_conditioned_guard_ok": 1293
       },
       "0_to_+50_mm": {
-        "slices": 1481,
-        "converged": 988,
-        "conditioned_branch_guard_ok": 1456,
-        "converged_and_conditioned_guard_ok": 988
+        "slices": 1594,
+        "converged": 1056,
+        "conditioned_branch_guard_ok": 1565,
+        "converged_and_conditioned_guard_ok": 1056
       },
       "above_+50_mm": {
-        "slices": 1974,
-        "converged": 1491,
-        "conditioned_branch_guard_ok": 1950,
-        "converged_and_conditioned_guard_ok": 1491
+        "slices": 2093,
+        "converged": 1578,
+        "conditioned_branch_guard_ok": 2065,
+        "converged_and_conditioned_guard_ok": 1578
       }
     },
     "by_decile": {
       "0": {
         "below_-50_mm": {
-          "slices": 35,
+          "slices": 38,
           "converged": 4,
-          "conditioned_branch_guard_ok": 32,
+          "conditioned_branch_guard_ok": 35,
           "converged_and_conditioned_guard_ok": 4
         },
         "-50_to_0_mm": {
-          "slices": 107,
-          "converged": 0,
-          "conditioned_branch_guard_ok": 99,
-          "converged_and_conditioned_guard_ok": 0
+          "slices": 132,
+          "converged": 2,
+          "conditioned_branch_guard_ok": 122,
+          "converged_and_conditioned_guard_ok": 2
         },
         "0_to_+50_mm": {
-          "slices": 191,
+          "slices": 210,
           "converged": 2,
-          "conditioned_branch_guard_ok": 177,
+          "conditioned_branch_guard_ok": 195,
           "converged_and_conditioned_guard_ok": 2
         },
         "above_+50_mm": {
-          "slices": 17,
+          "slices": 18,
           "converged": 3,
-          "conditioned_branch_guard_ok": 15,
+          "conditioned_branch_guard_ok": 16,
           "converged_and_conditioned_guard_ok": 3
         }
       },
       "1": {
         "below_-50_mm": {
-          "slices": 302,
-          "converged": 148,
-          "conditioned_branch_guard_ok": 299,
-          "converged_and_conditioned_guard_ok": 148
+          "slices": 314,
+          "converged": 152,
+          "conditioned_branch_guard_ok": 311,
+          "converged_and_conditioned_guard_ok": 152
         },
         "-50_to_0_mm": {
-          "slices": 13,
+          "slices": 14,
           "converged": 0,
           "conditioned_branch_guard_ok": 5,
           "converged_and_conditioned_guard_ok": 0
         },
         "0_to_+50_mm": {
-          "slices": 11,
+          "slices": 12,
           "converged": 0,
           "conditioned_branch_guard_ok": 0,
           "converged_and_conditioned_guard_ok": 0
@@ -336,10 +369,10 @@
       },
       "2": {
         "below_-50_mm": {
-          "slices": 313,
-          "converged": 179,
-          "conditioned_branch_guard_ok": 300,
-          "converged_and_conditioned_guard_ok": 179
+          "slices": 336,
+          "converged": 189,
+          "conditioned_branch_guard_ok": 321,
+          "converged_and_conditioned_guard_ok": 189
         },
         "-50_to_0_mm": {
           "slices": 17,
@@ -362,189 +395,234 @@
       },
       "3": {
         "below_-50_mm": {
-          "slices": 191,
-          "converged": 106,
-          "conditioned_branch_guard_ok": 184,
-          "converged_and_conditioned_guard_ok": 106
+          "slices": 214,
+          "converged": 116,
+          "conditioned_branch_guard_ok": 207,
+          "converged_and_conditioned_guard_ok": 116
         },
         "-50_to_0_mm": {
-          "slices": 42,
-          "converged": 21,
-          "conditioned_branch_guard_ok": 37,
-          "converged_and_conditioned_guard_ok": 21
+          "slices": 48,
+          "converged": 23,
+          "conditioned_branch_guard_ok": 42,
+          "converged_and_conditioned_guard_ok": 23
         },
         "0_to_+50_mm": {
-          "slices": 36,
+          "slices": 37,
           "converged": 29,
           "conditioned_branch_guard_ok": 36,
           "converged_and_conditioned_guard_ok": 29
         },
         "above_+50_mm": {
-          "slices": 213,
-          "converged": 147,
-          "conditioned_branch_guard_ok": 212,
-          "converged_and_conditioned_guard_ok": 147
+          "slices": 225,
+          "converged": 158,
+          "conditioned_branch_guard_ok": 223,
+          "converged_and_conditioned_guard_ok": 158
         }
       },
       "4": {
         "below_-50_mm": {
-          "slices": 332,
-          "converged": 252,
-          "conditioned_branch_guard_ok": 330,
-          "converged_and_conditioned_guard_ok": 252
+          "slices": 353,
+          "converged": 266,
+          "conditioned_branch_guard_ok": 351,
+          "converged_and_conditioned_guard_ok": 266
         },
         "-50_to_0_mm": {
-          "slices": 139,
-          "converged": 101,
-          "conditioned_branch_guard_ok": 134,
-          "converged_and_conditioned_guard_ok": 101
+          "slices": 147,
+          "converged": 108,
+          "conditioned_branch_guard_ok": 142,
+          "converged_and_conditioned_guard_ok": 108
         },
         "0_to_+50_mm": {
-          "slices": 106,
-          "converged": 84,
-          "conditioned_branch_guard_ok": 106,
-          "converged_and_conditioned_guard_ok": 84
+          "slices": 113,
+          "converged": 91,
+          "conditioned_branch_guard_ok": 113,
+          "converged_and_conditioned_guard_ok": 91
         },
         "above_+50_mm": {
-          "slices": 429,
-          "converged": 354,
-          "conditioned_branch_guard_ok": 424,
-          "converged_and_conditioned_guard_ok": 354
+          "slices": 454,
+          "converged": 373,
+          "conditioned_branch_guard_ok": 448,
+          "converged_and_conditioned_guard_ok": 373
         }
       },
       "5": {
         "below_-50_mm": {
-          "slices": 318,
-          "converged": 246,
-          "conditioned_branch_guard_ok": 316,
-          "converged_and_conditioned_guard_ok": 246
+          "slices": 344,
+          "converged": 266,
+          "conditioned_branch_guard_ok": 342,
+          "converged_and_conditioned_guard_ok": 266
         },
         "-50_to_0_mm": {
-          "slices": 185,
-          "converged": 155,
-          "conditioned_branch_guard_ok": 185,
-          "converged_and_conditioned_guard_ok": 155
+          "slices": 201,
+          "converged": 168,
+          "conditioned_branch_guard_ok": 201,
+          "converged_and_conditioned_guard_ok": 168
         },
         "0_to_+50_mm": {
-          "slices": 113,
-          "converged": 92,
-          "conditioned_branch_guard_ok": 113,
-          "converged_and_conditioned_guard_ok": 92
+          "slices": 127,
+          "converged": 100,
+          "conditioned_branch_guard_ok": 126,
+          "converged_and_conditioned_guard_ok": 100
         },
         "above_+50_mm": {
-          "slices": 282,
-          "converged": 218,
-          "conditioned_branch_guard_ok": 275,
-          "converged_and_conditioned_guard_ok": 218
+          "slices": 305,
+          "converged": 234,
+          "conditioned_branch_guard_ok": 298,
+          "converged_and_conditioned_guard_ok": 234
         }
       },
       "6": {
         "below_-50_mm": {
-          "slices": 278,
-          "converged": 226,
-          "conditioned_branch_guard_ok": 277,
-          "converged_and_conditioned_guard_ok": 226
+          "slices": 293,
+          "converged": 238,
+          "conditioned_branch_guard_ok": 292,
+          "converged_and_conditioned_guard_ok": 238
         },
         "-50_to_0_mm": {
-          "slices": 254,
-          "converged": 205,
-          "conditioned_branch_guard_ok": 254,
-          "converged_and_conditioned_guard_ok": 205
+          "slices": 276,
+          "converged": 223,
+          "conditioned_branch_guard_ok": 276,
+          "converged_and_conditioned_guard_ok": 223
         },
         "0_to_+50_mm": {
-          "slices": 170,
-          "converged": 148,
-          "conditioned_branch_guard_ok": 170,
-          "converged_and_conditioned_guard_ok": 148
+          "slices": 180,
+          "converged": 157,
+          "conditioned_branch_guard_ok": 180,
+          "converged_and_conditioned_guard_ok": 157
         },
         "above_+50_mm": {
-          "slices": 304,
-          "converged": 250,
-          "conditioned_branch_guard_ok": 301,
-          "converged_and_conditioned_guard_ok": 250
+          "slices": 316,
+          "converged": 261,
+          "conditioned_branch_guard_ok": 313,
+          "converged_and_conditioned_guard_ok": 261
         }
       },
       "7": {
         "below_-50_mm": {
-          "slices": 275,
-          "converged": 218,
-          "conditioned_branch_guard_ok": 274,
-          "converged_and_conditioned_guard_ok": 218
+          "slices": 286,
+          "converged": 224,
+          "conditioned_branch_guard_ok": 285,
+          "converged_and_conditioned_guard_ok": 224
         },
         "-50_to_0_mm": {
-          "slices": 301,
-          "converged": 240,
-          "conditioned_branch_guard_ok": 301,
-          "converged_and_conditioned_guard_ok": 240
+          "slices": 328,
+          "converged": 264,
+          "conditioned_branch_guard_ok": 328,
+          "converged_and_conditioned_guard_ok": 264
         },
         "0_to_+50_mm": {
-          "slices": 239,
-          "converged": 186,
-          "conditioned_branch_guard_ok": 239,
-          "converged_and_conditioned_guard_ok": 186
+          "slices": 252,
+          "converged": 195,
+          "conditioned_branch_guard_ok": 252,
+          "converged_and_conditioned_guard_ok": 195
         },
         "above_+50_mm": {
-          "slices": 263,
-          "converged": 212,
-          "conditioned_branch_guard_ok": 262,
-          "converged_and_conditioned_guard_ok": 212
+          "slices": 281,
+          "converged": 223,
+          "conditioned_branch_guard_ok": 279,
+          "converged_and_conditioned_guard_ok": 223
         }
       },
       "8": {
         "below_-50_mm": {
-          "slices": 265,
-          "converged": 203,
-          "conditioned_branch_guard_ok": 259,
-          "converged_and_conditioned_guard_ok": 203
+          "slices": 289,
+          "converged": 220,
+          "conditioned_branch_guard_ok": 283,
+          "converged_and_conditioned_guard_ok": 220
         },
         "-50_to_0_mm": {
-          "slices": 281,
-          "converged": 229,
-          "conditioned_branch_guard_ok": 281,
-          "converged_and_conditioned_guard_ok": 229
+          "slices": 309,
+          "converged": 252,
+          "conditioned_branch_guard_ok": 309,
+          "converged_and_conditioned_guard_ok": 252
         },
         "0_to_+50_mm": {
-          "slices": 277,
-          "converged": 218,
-          "conditioned_branch_guard_ok": 277,
-          "converged_and_conditioned_guard_ok": 218
+          "slices": 305,
+          "converged": 239,
+          "conditioned_branch_guard_ok": 305,
+          "converged_and_conditioned_guard_ok": 239
         },
         "above_+50_mm": {
-          "slices": 180,
-          "converged": 136,
-          "conditioned_branch_guard_ok": 180,
-          "converged_and_conditioned_guard_ok": 136
+          "slices": 197,
+          "converged": 147,
+          "conditioned_branch_guard_ok": 197,
+          "converged_and_conditioned_guard_ok": 147
         }
       },
       "9": {
         "below_-50_mm": {
-          "slices": 321,
-          "converged": 225,
-          "conditioned_branch_guard_ok": 316,
-          "converged_and_conditioned_guard_ok": 225
+          "slices": 360,
+          "converged": 252,
+          "conditioned_branch_guard_ok": 352,
+          "converged_and_conditioned_guard_ok": 252
         },
         "-50_to_0_mm": {
-          "slices": 311,
-          "converged": 232,
-          "conditioned_branch_guard_ok": 311,
-          "converged_and_conditioned_guard_ok": 232
+          "slices": 339,
+          "converged": 252,
+          "conditioned_branch_guard_ok": 339,
+          "converged_and_conditioned_guard_ok": 252
         },
         "0_to_+50_mm": {
-          "slices": 328,
-          "converged": 226,
-          "conditioned_branch_guard_ok": 328,
-          "converged_and_conditioned_guard_ok": 226
+          "slices": 348,
+          "converged": 240,
+          "conditioned_branch_guard_ok": 348,
+          "converged_and_conditioned_guard_ok": 240
         },
         "above_+50_mm": {
-          "slices": 219,
-          "converged": 140,
-          "conditioned_branch_guard_ok": 217,
-          "converged_and_conditioned_guard_ok": 140
+          "slices": 230,
+          "converged": 148,
+          "conditioned_branch_guard_ok": 227,
+          "converged_and_conditioned_guard_ok": 148
         }
       }
     }
   },
   "shots": [
+    {
+      "shot": 15231,
+      "admitted_slices": 92,
+      "excluded_slices": 3,
+      "converged_slices": 73,
+      "unconverged_slices": 19,
+      "qualified_slices": 6,
+      "unqualified_slices": 86,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 67,
+        "slice_exception": 19
+      },
+      "branch_guard_agreement_slices": 73,
+      "free_guard_evaluated_slices": 91,
+      "free_guard_agreement_slices": 88,
+      "free_slices": 80,
+      "conditioned_slices": 12,
+      "conditioned_guard_evaluated_slices": 12,
+      "conditioned_guard_agreement_slices": 12,
+      "exception_slices": 19,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 92,
+          "median": -1.3456413936375191,
+          "p90": 6.7819998318474966,
+          "maximum": 18.45690301439301
+        },
+        "absolute": {
+          "count": 92,
+          "median": 3.559087154219495,
+          "p90": 28.912875305238128,
+          "maximum": 37.43123119750404
+        }
+      },
+      "slice_wall_seconds": 37.79737933818251,
+      "mean_slice_wall_seconds": 0.41084107976285333,
+      "slices_per_second_per_card": 2.434031184459992,
+      "warm_rate_eligible": true
+    },
     {
       "shot": 16181,
       "admitted_slices": 80,
@@ -815,6 +893,51 @@
       "slice_wall_seconds": 40.11372335348278,
       "mean_slice_wall_seconds": 0.6798936161607251,
       "slices_per_second_per_card": 1.4708183401498545,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 16208,
+      "admitted_slices": 71,
+      "excluded_slices": 3,
+      "converged_slices": 62,
+      "unconverged_slices": 9,
+      "qualified_slices": 7,
+      "unqualified_slices": 64,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 55,
+        "slice_exception": 9
+      },
+      "branch_guard_agreement_slices": 62,
+      "free_guard_evaluated_slices": 68,
+      "free_guard_agreement_slices": 64,
+      "free_slices": 57,
+      "conditioned_slices": 14,
+      "conditioned_guard_evaluated_slices": 11,
+      "conditioned_guard_agreement_slices": 11,
+      "exception_slices": 9,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 68,
+          "median": 3.1281466379855978,
+          "p90": 26.58912289291049,
+          "maximum": 36.49828326822884
+        },
+        "absolute": {
+          "count": 68,
+          "median": 7.102958317342708,
+          "p90": 27.90104571897524,
+          "maximum": 36.49828326822884
+        }
+      },
+      "slice_wall_seconds": 31.560622042044997,
+      "mean_slice_wall_seconds": 0.4445158034090845,
+      "slices_per_second_per_card": 2.2496388032344212,
       "warm_rate_eligible": true
     },
     {
@@ -1321,6 +1444,52 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 17658,
+      "admitted_slices": 63,
+      "excluded_slices": 3,
+      "converged_slices": 52,
+      "unconverged_slices": 11,
+      "qualified_slices": 8,
+      "unqualified_slices": 55,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 44,
+        "slice_exception": 9
+      },
+      "branch_guard_agreement_slices": 54,
+      "free_guard_evaluated_slices": 58,
+      "free_guard_agreement_slices": 48,
+      "free_slices": 43,
+      "conditioned_slices": 20,
+      "conditioned_guard_evaluated_slices": 16,
+      "conditioned_guard_agreement_slices": 16,
+      "exception_slices": 9,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 59,
+          "median": 1.930340998157476e-06,
+          "p90": 29.61271641077058,
+          "maximum": 44.55340775879983
+        },
+        "absolute": {
+          "count": 59,
+          "median": 17.04728580993415,
+          "p90": 36.23185290806967,
+          "maximum": 45.630878350545466
+        }
+      },
+      "slice_wall_seconds": 33.814874299801886,
+      "mean_slice_wall_seconds": 0.5367440365047919,
+      "slices_per_second_per_card": 1.8630854410826274,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 17677,
       "admitted_slices": 78,
       "excluded_slices": 2,
@@ -1455,6 +1624,51 @@
       "slice_wall_seconds": 31.80652796011418,
       "mean_slice_wall_seconds": 0.4240870394681891,
       "slices_per_second_per_card": 2.3580065103003705,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 17832,
+      "admitted_slices": 74,
+      "excluded_slices": 4,
+      "converged_slices": 61,
+      "unconverged_slices": 13,
+      "qualified_slices": 17,
+      "unqualified_slices": 57,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 44,
+        "slice_exception": 13
+      },
+      "branch_guard_agreement_slices": 61,
+      "free_guard_evaluated_slices": 66,
+      "free_guard_agreement_slices": 66,
+      "free_slices": 64,
+      "conditioned_slices": 10,
+      "conditioned_guard_evaluated_slices": 3,
+      "conditioned_guard_agreement_slices": 3,
+      "exception_slices": 13,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 67,
+          "median": -5.1492110467239005,
+          "p90": 11.78673254614328,
+          "maximum": 35.41207095060197
+        },
+        "absolute": {
+          "count": 67,
+          "median": 8.50600926233049,
+          "p90": 24.758763505088133,
+          "maximum": 35.41207095060197
+        }
+      },
+      "slice_wall_seconds": 30.141210534609854,
+      "mean_slice_wall_seconds": 0.40731365587310614,
+      "slices_per_second_per_card": 2.4551104181774313,
       "warm_rate_eligible": true
     },
     {
@@ -2413,6 +2627,51 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 18356,
+      "admitted_slices": 73,
+      "excluded_slices": 4,
+      "converged_slices": 40,
+      "unconverged_slices": 33,
+      "qualified_slices": 6,
+      "unqualified_slices": 67,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 34,
+        "slice_exception": 33
+      },
+      "branch_guard_agreement_slices": 40,
+      "free_guard_evaluated_slices": 72,
+      "free_guard_agreement_slices": 64,
+      "free_slices": 56,
+      "conditioned_slices": 17,
+      "conditioned_guard_evaluated_slices": 16,
+      "conditioned_guard_agreement_slices": 16,
+      "exception_slices": 33,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 72,
+          "median": 0.3604113374135981,
+          "p90": 34.992183645417505,
+          "maximum": 45.557899176467465
+        },
+        "absolute": {
+          "count": 72,
+          "median": 10.530120422457845,
+          "p90": 35.53139694705759,
+          "maximum": 45.557899176467465
+        }
+      },
+      "slice_wall_seconds": 36.42891525570303,
+      "mean_slice_wall_seconds": 0.4990262363794936,
+      "slices_per_second_per_card": 2.003902655008968,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 18358,
       "admitted_slices": 85,
       "excluded_slices": 4,
@@ -2459,6 +2718,51 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 18359,
+      "admitted_slices": 78,
+      "excluded_slices": 4,
+      "converged_slices": 60,
+      "unconverged_slices": 18,
+      "qualified_slices": 10,
+      "unqualified_slices": 68,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 50,
+        "slice_exception": 18
+      },
+      "branch_guard_agreement_slices": 60,
+      "free_guard_evaluated_slices": 76,
+      "free_guard_agreement_slices": 64,
+      "free_slices": 58,
+      "conditioned_slices": 20,
+      "conditioned_guard_evaluated_slices": 17,
+      "conditioned_guard_agreement_slices": 17,
+      "exception_slices": 18,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 75,
+          "median": 4.011116796225929,
+          "p90": 25.31890381145183,
+          "maximum": 36.944393634377946
+        },
+        "absolute": {
+          "count": 75,
+          "median": 7.894851254759394,
+          "p90": 28.36408167986962,
+          "maximum": 49.594357683467436
+        }
+      },
+      "slice_wall_seconds": 39.27305287308991,
+      "mean_slice_wall_seconds": 0.5035006778601271,
+      "slices_per_second_per_card": 1.9860946448969845,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 18361,
       "admitted_slices": 75,
       "excluded_slices": 2,
@@ -2502,6 +2806,52 @@
       "slice_wall_seconds": 35.387799988500774,
       "mean_slice_wall_seconds": 0.4718373331800103,
       "slices_per_second_per_card": 2.1193744743773606,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 18363,
+      "admitted_slices": 91,
+      "excluded_slices": 2,
+      "converged_slices": 73,
+      "unconverged_slices": 18,
+      "qualified_slices": 7,
+      "unqualified_slices": 84,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 66,
+        "slice_exception": 17
+      },
+      "branch_guard_agreement_slices": 74,
+      "free_guard_evaluated_slices": 90,
+      "free_guard_agreement_slices": 85,
+      "free_slices": 79,
+      "conditioned_slices": 12,
+      "conditioned_guard_evaluated_slices": 9,
+      "conditioned_guard_agreement_slices": 9,
+      "exception_slices": 17,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 88,
+          "median": -1.3977988404508856,
+          "p90": 20.690164473410153,
+          "maximum": 39.199449622907075
+        },
+        "absolute": {
+          "count": 88,
+          "median": 12.875632763605308,
+          "p90": 29.166348193692087,
+          "maximum": 40.040816764414906
+        }
+      },
+      "slice_wall_seconds": 38.92899634223431,
+      "mean_slice_wall_seconds": 0.4277911685959815,
+      "slices_per_second_per_card": 2.3375891636146173,
       "warm_rate_eligible": true
     },
     {
@@ -2686,6 +3036,51 @@
       "slice_wall_seconds": 39.345385442487895,
       "mean_slice_wall_seconds": 0.47404078846370956,
       "slices_per_second_per_card": 2.109523113487428,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 18592,
+      "admitted_slices": 57,
+      "excluded_slices": 5,
+      "converged_slices": 28,
+      "unconverged_slices": 29,
+      "qualified_slices": 3,
+      "unqualified_slices": 54,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 25,
+        "slice_exception": 29
+      },
+      "branch_guard_agreement_slices": 28,
+      "free_guard_evaluated_slices": 56,
+      "free_guard_agreement_slices": 49,
+      "free_slices": 41,
+      "conditioned_slices": 16,
+      "conditioned_guard_evaluated_slices": 15,
+      "conditioned_guard_agreement_slices": 15,
+      "exception_slices": 29,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 56,
+          "median": 0.4164073461611513,
+          "p90": 34.65806493597615,
+          "maximum": 45.514458131960424
+        },
+        "absolute": {
+          "count": 56,
+          "median": 10.190784473837635,
+          "p90": 35.07760101228723,
+          "maximum": 45.514458131960424
+        }
+      },
+      "slice_wall_seconds": 30.5185939790681,
+      "mean_slice_wall_seconds": 0.5354139294573351,
+      "slices_per_second_per_card": 1.8677138284645354,
       "warm_rate_eligible": true
     },
     {
@@ -3462,6 +3857,98 @@
       "slice_wall_seconds": 25.012207210995257,
       "mean_slice_wall_seconds": 0.4034226969515364,
       "slices_per_second_per_card": 2.478789635676178,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 18741,
+      "admitted_slices": 109,
+      "excluded_slices": 4,
+      "converged_slices": 82,
+      "unconverged_slices": 27,
+      "qualified_slices": 13,
+      "unqualified_slices": 96,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 8,
+        "residual_above_qualification_tolerance": 69,
+        "slice_exception": 19
+      },
+      "branch_guard_agreement_slices": 90,
+      "free_guard_evaluated_slices": 106,
+      "free_guard_agreement_slices": 81,
+      "free_slices": 64,
+      "conditioned_slices": 45,
+      "conditioned_guard_evaluated_slices": 42,
+      "conditioned_guard_agreement_slices": 42,
+      "exception_slices": 19,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 106,
+          "median": -1.3290984285374563e-07,
+          "p90": 23.458493684031524,
+          "maximum": 46.7648091021932
+        },
+        "absolute": {
+          "count": 106,
+          "median": 5.789255657843437,
+          "p90": 33.19879513943969,
+          "maximum": 48.34468965657565
+        }
+      },
+      "slice_wall_seconds": 66.6576471393928,
+      "mean_slice_wall_seconds": 0.6115380471503926,
+      "slices_per_second_per_card": 1.6352212338377612,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 18747,
+      "admitted_slices": 75,
+      "excluded_slices": 4,
+      "converged_slices": 41,
+      "unconverged_slices": 34,
+      "qualified_slices": 10,
+      "unqualified_slices": 65,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 17,
+        "residual_above_qualification_tolerance": 31,
+        "slice_exception": 17
+      },
+      "branch_guard_agreement_slices": 56,
+      "free_guard_evaluated_slices": 74,
+      "free_guard_agreement_slices": 26,
+      "free_slices": 9,
+      "conditioned_slices": 66,
+      "conditioned_guard_evaluated_slices": 64,
+      "conditioned_guard_agreement_slices": 61,
+      "exception_slices": 17,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 73,
+          "median": 1.7124875406615558e-06,
+          "p90": 28.307724796274886,
+          "maximum": 69.00628195948578
+        },
+        "absolute": {
+          "count": 73,
+          "median": 5.919265383402816e-06,
+          "p90": 30.95518051088947,
+          "maximum": 69.00628195948578
+        }
+      },
+      "slice_wall_seconds": 72.84378365520388,
+      "mean_slice_wall_seconds": 0.9712504487360517,
+      "slices_per_second_per_card": 1.0296005539059074,
       "warm_rate_eligible": true
     },
     {
@@ -5388,6 +5875,51 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 22120,
+      "admitted_slices": 56,
+      "excluded_slices": 1,
+      "converged_slices": 35,
+      "unconverged_slices": 21,
+      "qualified_slices": 13,
+      "unqualified_slices": 43,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 22,
+        "slice_exception": 21
+      },
+      "branch_guard_agreement_slices": 35,
+      "free_guard_evaluated_slices": 42,
+      "free_guard_agreement_slices": 42,
+      "free_slices": 39,
+      "conditioned_slices": 17,
+      "conditioned_guard_evaluated_slices": 6,
+      "conditioned_guard_agreement_slices": 6,
+      "exception_slices": 21,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 45,
+          "median": -0.663291043906237,
+          "p90": 6.704679250430176,
+          "maximum": 11.384872388097271
+        },
+        "absolute": {
+          "count": 45,
+          "median": 6.524578381245862,
+          "p90": 19.683836409529153,
+          "maximum": 33.76244747638316
+        }
+      },
+      "slice_wall_seconds": 30.226134004071355,
+      "mean_slice_wall_seconds": 0.5397523929298457,
+      "slices_per_second_per_card": 1.8527013739983087,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 22123,
       "admitted_slices": 69,
       "excluded_slices": 4,
@@ -6715,6 +7247,138 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 22583,
+      "admitted_slices": 78,
+      "excluded_slices": 1,
+      "converged_slices": 0,
+      "unconverged_slices": 78,
+      "qualified_slices": 0,
+      "unqualified_slices": 78,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "slice_exception": 78
+      },
+      "branch_guard_agreement_slices": 0,
+      "free_guard_evaluated_slices": 18,
+      "free_guard_agreement_slices": 0,
+      "free_slices": 0,
+      "conditioned_slices": 78,
+      "conditioned_guard_evaluated_slices": 1,
+      "conditioned_guard_agreement_slices": 0,
+      "exception_slices": 78,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 1,
+          "median": -104.47251870663072,
+          "p90": -104.47251870663072,
+          "maximum": -104.47251870663072
+        },
+        "absolute": {
+          "count": 1,
+          "median": 104.47251870663072,
+          "p90": 104.47251870663072,
+          "maximum": 104.47251870663072
+        }
+      },
+      "slice_wall_seconds": 61.115188027732074,
+      "mean_slice_wall_seconds": 0.7835280516375907,
+      "slices_per_second_per_card": 1.276278491765519,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22585,
+      "admitted_slices": 76,
+      "excluded_slices": 2,
+      "converged_slices": 0,
+      "unconverged_slices": 76,
+      "qualified_slices": 0,
+      "unqualified_slices": 76,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "slice_exception": 76
+      },
+      "branch_guard_agreement_slices": 0,
+      "free_guard_evaluated_slices": 19,
+      "free_guard_agreement_slices": 0,
+      "free_slices": 0,
+      "conditioned_slices": 76,
+      "conditioned_guard_evaluated_slices": 1,
+      "conditioned_guard_agreement_slices": 0,
+      "exception_slices": 76,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 1,
+          "median": -64.24933344371264,
+          "p90": -64.24933344371264,
+          "maximum": -64.24933344371264
+        },
+        "absolute": {
+          "count": 1,
+          "median": 64.24933344371264,
+          "p90": 64.24933344371264,
+          "maximum": 64.24933344371264
+        }
+      },
+      "slice_wall_seconds": 63.4436710216105,
+      "mean_slice_wall_seconds": 0.8347851450211907,
+      "slices_per_second_per_card": 1.1979130270395688,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22591,
+      "admitted_slices": 77,
+      "excluded_slices": 2,
+      "converged_slices": 0,
+      "unconverged_slices": 77,
+      "qualified_slices": 0,
+      "unqualified_slices": 77,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "slice_exception": 77
+      },
+      "branch_guard_agreement_slices": 0,
+      "free_guard_evaluated_slices": 10,
+      "free_guard_agreement_slices": 0,
+      "free_slices": 0,
+      "conditioned_slices": 77,
+      "conditioned_guard_evaluated_slices": 0,
+      "conditioned_guard_agreement_slices": 0,
+      "exception_slices": 77,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 0,
+          "median": null,
+          "p90": null,
+          "maximum": null
+        },
+        "absolute": {
+          "count": 0,
+          "median": null,
+          "p90": null,
+          "maximum": null
+        }
+      },
+      "slice_wall_seconds": 57.950123105198145,
+      "mean_slice_wall_seconds": 0.7525990013662097,
+      "slices_per_second_per_card": 1.328728842563806,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 22606,
       "admitted_slices": 114,
       "excluded_slices": 5,
@@ -7155,6 +7819,96 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 22626,
+      "admitted_slices": 91,
+      "excluded_slices": 4,
+      "converged_slices": 0,
+      "unconverged_slices": 91,
+      "qualified_slices": 0,
+      "unqualified_slices": 91,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "slice_exception": 91
+      },
+      "branch_guard_agreement_slices": 0,
+      "free_guard_evaluated_slices": 13,
+      "free_guard_agreement_slices": 10,
+      "free_slices": 9,
+      "conditioned_slices": 82,
+      "conditioned_guard_evaluated_slices": 3,
+      "conditioned_guard_agreement_slices": 1,
+      "exception_slices": 91,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 12,
+          "median": -21.190070767237977,
+          "p90": -15.18188463817969,
+          "maximum": -7.849847613828557
+        },
+        "absolute": {
+          "count": 12,
+          "median": 21.190070767237977,
+          "p90": 48.2832764389925,
+          "maximum": 86.34772177845313
+        }
+      },
+      "slice_wall_seconds": 70.79585601948202,
+      "mean_slice_wall_seconds": 0.7779764397745277,
+      "slices_per_second_per_card": 1.2853859691301435,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22630,
+      "admitted_slices": 60,
+      "excluded_slices": 1,
+      "converged_slices": 42,
+      "unconverged_slices": 18,
+      "qualified_slices": 10,
+      "unqualified_slices": 50,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 32,
+        "slice_exception": 16
+      },
+      "branch_guard_agreement_slices": 43,
+      "free_guard_evaluated_slices": 57,
+      "free_guard_agreement_slices": 43,
+      "free_slices": 35,
+      "conditioned_slices": 25,
+      "conditioned_guard_evaluated_slices": 22,
+      "conditioned_guard_agreement_slices": 19,
+      "exception_slices": 16,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 57,
+          "median": 0.00010478415081276171,
+          "p90": 40.96917443537572,
+          "maximum": 61.129545150593955
+        },
+        "absolute": {
+          "count": 57,
+          "median": 22.055556727172913,
+          "p90": 47.453093584949194,
+          "maximum": 61.129545150593955
+        }
+      },
+      "slice_wall_seconds": 35.23389190714806,
+      "mean_slice_wall_seconds": 0.587231531785801,
+      "slices_per_second_per_card": 1.7029058316384151,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 22634,
       "admitted_slices": 61,
       "excluded_slices": 1,
@@ -7245,6 +7999,52 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 22650,
+      "admitted_slices": 59,
+      "excluded_slices": 2,
+      "converged_slices": 51,
+      "unconverged_slices": 8,
+      "qualified_slices": 8,
+      "unqualified_slices": 51,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 4,
+        "residual_above_qualification_tolerance": 43,
+        "slice_exception": 4
+      },
+      "branch_guard_agreement_slices": 52,
+      "free_guard_evaluated_slices": 59,
+      "free_guard_agreement_slices": 46,
+      "free_slices": 39,
+      "conditioned_slices": 20,
+      "conditioned_guard_evaluated_slices": 19,
+      "conditioned_guard_agreement_slices": 15,
+      "exception_slices": 4,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 58,
+          "median": 2.613942408050639,
+          "p90": 27.468906637262204,
+          "maximum": 68.73157751044864
+        },
+        "absolute": {
+          "count": 58,
+          "median": 13.217289263724282,
+          "p90": 34.143046253024494,
+          "maximum": 171.41067884600866
+        }
+      },
+      "slice_wall_seconds": 34.1326338397339,
+      "mean_slice_wall_seconds": 0.5785192176226085,
+      "slices_per_second_per_card": 1.7285510481560884,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 22651,
       "admitted_slices": 73,
       "excluded_slices": 3,
@@ -7288,6 +8088,98 @@
       "slice_wall_seconds": 46.30074225272983,
       "mean_slice_wall_seconds": 0.6342567431880799,
       "slices_per_second_per_card": 1.5766485902436265,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22652,
+      "admitted_slices": 61,
+      "excluded_slices": 4,
+      "converged_slices": 53,
+      "unconverged_slices": 8,
+      "qualified_slices": 6,
+      "unqualified_slices": 55,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 3,
+        "residual_above_qualification_tolerance": 47,
+        "slice_exception": 5
+      },
+      "branch_guard_agreement_slices": 56,
+      "free_guard_evaluated_slices": 61,
+      "free_guard_agreement_slices": 54,
+      "free_slices": 49,
+      "conditioned_slices": 12,
+      "conditioned_guard_evaluated_slices": 11,
+      "conditioned_guard_agreement_slices": 11,
+      "exception_slices": 5,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 60,
+          "median": 6.872350684112787,
+          "p90": 38.16705239679202,
+          "maximum": 41.9268719642134
+        },
+        "absolute": {
+          "count": 60,
+          "median": 13.097742543423038,
+          "p90": 38.69673786151182,
+          "maximum": 41.9268719642134
+        }
+      },
+      "slice_wall_seconds": 28.55708251800388,
+      "mean_slice_wall_seconds": 0.4681488937377685,
+      "slices_per_second_per_card": 2.1360725473809308,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22656,
+      "admitted_slices": 61,
+      "excluded_slices": 4,
+      "converged_slices": 54,
+      "unconverged_slices": 7,
+      "qualified_slices": 9,
+      "unqualified_slices": 52,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 45,
+        "slice_exception": 5
+      },
+      "branch_guard_agreement_slices": 56,
+      "free_guard_evaluated_slices": 61,
+      "free_guard_agreement_slices": 55,
+      "free_slices": 49,
+      "conditioned_slices": 12,
+      "conditioned_guard_evaluated_slices": 12,
+      "conditioned_guard_agreement_slices": 12,
+      "exception_slices": 5,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 61,
+          "median": 3.883156263553844e-06,
+          "p90": 37.58122646731491,
+          "maximum": 45.68076408975807
+        },
+        "absolute": {
+          "count": 61,
+          "median": 12.30585535041873,
+          "p90": 38.06738630429945,
+          "maximum": 45.68076408975807
+        }
+      },
+      "slice_wall_seconds": 29.64039882272482,
+      "mean_slice_wall_seconds": 0.4859081774217183,
+      "slices_per_second_per_card": 2.0580019980443813,
       "warm_rate_eligible": true
     },
     {
@@ -7425,6 +8317,98 @@
       "slice_wall_seconds": 64.73898130934685,
       "mean_slice_wall_seconds": 0.7274042843746837,
       "slices_per_second_per_card": 1.3747513198381205,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22674,
+      "admitted_slices": 63,
+      "excluded_slices": 4,
+      "converged_slices": 43,
+      "unconverged_slices": 20,
+      "qualified_slices": 5,
+      "unqualified_slices": 58,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 38,
+        "slice_exception": 19
+      },
+      "branch_guard_agreement_slices": 44,
+      "free_guard_evaluated_slices": 61,
+      "free_guard_agreement_slices": 43,
+      "free_slices": 34,
+      "conditioned_slices": 29,
+      "conditioned_guard_evaluated_slices": 27,
+      "conditioned_guard_agreement_slices": 26,
+      "exception_slices": 19,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 61,
+          "median": -1.1886591823676018e-06,
+          "p90": 2.6736369541394134,
+          "maximum": 8.999104300521727
+        },
+        "absolute": {
+          "count": 61,
+          "median": 1.0838514434663364,
+          "p90": 37.69329832368314,
+          "maximum": 141.65517535316968
+        }
+      },
+      "slice_wall_seconds": 41.33830807264894,
+      "mean_slice_wall_seconds": 0.6561636202007769,
+      "slices_per_second_per_card": 1.5240101237158103,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 22828,
+      "admitted_slices": 64,
+      "excluded_slices": 2,
+      "converged_slices": 34,
+      "unconverged_slices": 30,
+      "qualified_slices": 8,
+      "unqualified_slices": 56,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 20,
+        "residual_above_qualification_tolerance": 26,
+        "slice_exception": 10
+      },
+      "branch_guard_agreement_slices": 53,
+      "free_guard_evaluated_slices": 62,
+      "free_guard_agreement_slices": 16,
+      "free_slices": 14,
+      "conditioned_slices": 50,
+      "conditioned_guard_evaluated_slices": 45,
+      "conditioned_guard_agreement_slices": 44,
+      "exception_slices": 10,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 59,
+          "median": 7.710557192730505e-07,
+          "p90": 27.724316092858032,
+          "maximum": 94.14604612930867
+        },
+        "absolute": {
+          "count": 59,
+          "median": 0.0012768754338865484,
+          "p90": 30.14784636536474,
+          "maximum": 94.14604612930867
+        }
+      },
+      "slice_wall_seconds": 58.625104282051325,
+      "mean_slice_wall_seconds": 0.916017254407052,
+      "slices_per_second_per_card": 1.0916824930850357,
       "warm_rate_eligible": true
     },
     {
@@ -9163,6 +10147,51 @@
       "slice_wall_seconds": 39.74071171693504,
       "mean_slice_wall_seconds": 0.544393311190891,
       "slices_per_second_per_card": 1.8369072129347876,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 23852,
+      "admitted_slices": 92,
+      "excluded_slices": 5,
+      "converged_slices": 71,
+      "unconverged_slices": 21,
+      "qualified_slices": 11,
+      "unqualified_slices": 81,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 60,
+        "slice_exception": 21
+      },
+      "branch_guard_agreement_slices": 71,
+      "free_guard_evaluated_slices": 92,
+      "free_guard_agreement_slices": 86,
+      "free_slices": 72,
+      "conditioned_slices": 20,
+      "conditioned_guard_evaluated_slices": 20,
+      "conditioned_guard_agreement_slices": 20,
+      "exception_slices": 21,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 92,
+          "median": 2.480911659159639e-06,
+          "p90": 23.740233450612855,
+          "maximum": 48.23367399153652
+        },
+        "absolute": {
+          "count": 92,
+          "median": 8.38892290291631,
+          "p90": 28.558966628784546,
+          "maximum": 49.76225413024715
+        }
+      },
+      "slice_wall_seconds": 44.918265451677144,
+      "mean_slice_wall_seconds": 0.48824201577909937,
+      "slices_per_second_per_card": 2.048164573473416,
       "warm_rate_eligible": true
     },
     {
@@ -10986,6 +12015,372 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 24590,
+      "admitted_slices": 89,
+      "excluded_slices": 1,
+      "converged_slices": 75,
+      "unconverged_slices": 14,
+      "qualified_slices": 17,
+      "unqualified_slices": 72,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 58,
+        "slice_exception": 14
+      },
+      "branch_guard_agreement_slices": 75,
+      "free_guard_evaluated_slices": 87,
+      "free_guard_agreement_slices": 79,
+      "free_slices": 59,
+      "conditioned_slices": 30,
+      "conditioned_guard_evaluated_slices": 28,
+      "conditioned_guard_agreement_slices": 28,
+      "exception_slices": 14,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 87,
+          "median": -5.922154558413162e-06,
+          "p90": 10.148206068025285,
+          "maximum": 35.187670962295606
+        },
+        "absolute": {
+          "count": 87,
+          "median": 9.821274322802827,
+          "p90": 35.50717082965387,
+          "maximum": 48.59860612565883
+        }
+      },
+      "slice_wall_seconds": 52.39532639365643,
+      "mean_slice_wall_seconds": 0.5887115325129936,
+      "slices_per_second_per_card": 1.6986247844192328,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24592,
+      "admitted_slices": 72,
+      "excluded_slices": 4,
+      "converged_slices": 52,
+      "unconverged_slices": 20,
+      "qualified_slices": 17,
+      "unqualified_slices": 55,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 35,
+        "slice_exception": 19
+      },
+      "branch_guard_agreement_slices": 53,
+      "free_guard_evaluated_slices": 68,
+      "free_guard_agreement_slices": 62,
+      "free_slices": 53,
+      "conditioned_slices": 19,
+      "conditioned_guard_evaluated_slices": 10,
+      "conditioned_guard_agreement_slices": 10,
+      "exception_slices": 19,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 63,
+          "median": -5.1306181525490047e-11,
+          "p90": 25.617428807875417,
+          "maximum": 48.580566649789525
+        },
+        "absolute": {
+          "count": 63,
+          "median": 11.769229755661202,
+          "p90": 34.19597653049745,
+          "maximum": 48.580566649789525
+        }
+      },
+      "slice_wall_seconds": 36.029408518224955,
+      "mean_slice_wall_seconds": 0.5004084516420133,
+      "slices_per_second_per_card": 1.998367527004498,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24593,
+      "admitted_slices": 71,
+      "excluded_slices": 3,
+      "converged_slices": 49,
+      "unconverged_slices": 22,
+      "qualified_slices": 14,
+      "unqualified_slices": 57,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 35,
+        "slice_exception": 21
+      },
+      "branch_guard_agreement_slices": 50,
+      "free_guard_evaluated_slices": 63,
+      "free_guard_agreement_slices": 58,
+      "free_slices": 53,
+      "conditioned_slices": 18,
+      "conditioned_guard_evaluated_slices": 8,
+      "conditioned_guard_agreement_slices": 8,
+      "exception_slices": 21,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 61,
+          "median": 1.4501013757828307e-06,
+          "p90": 21.58775214228467,
+          "maximum": 49.003529112023024
+        },
+        "absolute": {
+          "count": 61,
+          "median": 6.964423914417928,
+          "p90": 28.84833973077844,
+          "maximum": 49.003529112023024
+        }
+      },
+      "slice_wall_seconds": 35.31086938176304,
+      "mean_slice_wall_seconds": 0.4973361884755358,
+      "slices_per_second_per_card": 2.010712317286339,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24598,
+      "admitted_slices": 77,
+      "excluded_slices": 4,
+      "converged_slices": 60,
+      "unconverged_slices": 17,
+      "qualified_slices": 19,
+      "unqualified_slices": 58,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 41,
+        "slice_exception": 16
+      },
+      "branch_guard_agreement_slices": 61,
+      "free_guard_evaluated_slices": 76,
+      "free_guard_agreement_slices": 74,
+      "free_slices": 65,
+      "conditioned_slices": 12,
+      "conditioned_guard_evaluated_slices": 10,
+      "conditioned_guard_agreement_slices": 10,
+      "exception_slices": 16,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 75,
+          "median": 9.954344640239476e-09,
+          "p90": 19.940046351102463,
+          "maximum": 46.90359645100316
+        },
+        "absolute": {
+          "count": 75,
+          "median": 7.108751876492892,
+          "p90": 27.7187672059176,
+          "maximum": 47.90459566097317
+        }
+      },
+      "slice_wall_seconds": 33.690621653571725,
+      "mean_slice_wall_seconds": 0.43754054095547695,
+      "slices_per_second_per_card": 2.285502499531255,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24600,
+      "admitted_slices": 77,
+      "excluded_slices": 1,
+      "converged_slices": 55,
+      "unconverged_slices": 22,
+      "qualified_slices": 19,
+      "unqualified_slices": 58,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 36,
+        "slice_exception": 20
+      },
+      "branch_guard_agreement_slices": 57,
+      "free_guard_evaluated_slices": 75,
+      "free_guard_agreement_slices": 70,
+      "free_slices": 62,
+      "conditioned_slices": 15,
+      "conditioned_guard_evaluated_slices": 12,
+      "conditioned_guard_agreement_slices": 12,
+      "exception_slices": 20,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 74,
+          "median": 4.4187240672011185e-09,
+          "p90": 22.893958906483377,
+          "maximum": 48.994109409270415
+        },
+        "absolute": {
+          "count": 74,
+          "median": 5.64396833269125,
+          "p90": 23.10297968978248,
+          "maximum": 49.22470255104877
+        }
+      },
+      "slice_wall_seconds": 35.5034676482901,
+      "mean_slice_wall_seconds": 0.4610839954323389,
+      "slices_per_second_per_card": 2.1688022353982213,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24605,
+      "admitted_slices": 79,
+      "excluded_slices": 1,
+      "converged_slices": 65,
+      "unconverged_slices": 14,
+      "qualified_slices": 15,
+      "unqualified_slices": 64,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 50,
+        "slice_exception": 14
+      },
+      "branch_guard_agreement_slices": 65,
+      "free_guard_evaluated_slices": 78,
+      "free_guard_agreement_slices": 73,
+      "free_slices": 62,
+      "conditioned_slices": 17,
+      "conditioned_guard_evaluated_slices": 15,
+      "conditioned_guard_agreement_slices": 15,
+      "exception_slices": 14,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 77,
+          "median": 2.9114208055368684,
+          "p90": 25.599050181011872,
+          "maximum": 41.265299582005525
+        },
+        "absolute": {
+          "count": 77,
+          "median": 7.789699088240692,
+          "p90": 27.899561461368382,
+          "maximum": 41.265299582005525
+        }
+      },
+      "slice_wall_seconds": 38.18133847229183,
+      "mean_slice_wall_seconds": 0.48330808192774466,
+      "slices_per_second_per_card": 2.0690736145179995,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24616,
+      "admitted_slices": 80,
+      "excluded_slices": 2,
+      "converged_slices": 57,
+      "unconverged_slices": 23,
+      "qualified_slices": 7,
+      "unqualified_slices": 73,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 50,
+        "slice_exception": 21
+      },
+      "branch_guard_agreement_slices": 59,
+      "free_guard_evaluated_slices": 80,
+      "free_guard_agreement_slices": 72,
+      "free_slices": 62,
+      "conditioned_slices": 18,
+      "conditioned_guard_evaluated_slices": 18,
+      "conditioned_guard_agreement_slices": 18,
+      "exception_slices": 21,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 80,
+          "median": 0.5306938943836137,
+          "p90": 19.377330860676587,
+          "maximum": 30.14039037429312
+        },
+        "absolute": {
+          "count": 80,
+          "median": 5.126295421141148,
+          "p90": 22.705064671512925,
+          "maximum": 44.44039276878036
+        }
+      },
+      "slice_wall_seconds": 40.76457977574319,
+      "mean_slice_wall_seconds": 0.5095572471967899,
+      "slices_per_second_per_card": 1.962488033486456,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 24618,
+      "admitted_slices": 80,
+      "excluded_slices": 2,
+      "converged_slices": 59,
+      "unconverged_slices": 21,
+      "qualified_slices": 9,
+      "unqualified_slices": 71,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 2,
+        "residual_above_qualification_tolerance": 50,
+        "slice_exception": 19
+      },
+      "branch_guard_agreement_slices": 61,
+      "free_guard_evaluated_slices": 80,
+      "free_guard_agreement_slices": 75,
+      "free_slices": 64,
+      "conditioned_slices": 16,
+      "conditioned_guard_evaluated_slices": 16,
+      "conditioned_guard_agreement_slices": 16,
+      "exception_slices": 19,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 80,
+          "median": 0.4722587149734948,
+          "p90": 17.046983615461844,
+          "maximum": 41.818913191631296
+        },
+        "absolute": {
+          "count": 80,
+          "median": 4.199509234349605,
+          "p90": 23.97573350332449,
+          "maximum": 45.90718081724817
+        }
+      },
+      "slice_wall_seconds": 38.05809167586267,
+      "mean_slice_wall_seconds": 0.4757261459482834,
+      "slices_per_second_per_card": 2.1020496950123717,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 24621,
       "admitted_slices": 94,
       "excluded_slices": 4,
@@ -12403,6 +13798,52 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 27090,
+      "admitted_slices": 92,
+      "excluded_slices": 16,
+      "converged_slices": 63,
+      "unconverged_slices": 29,
+      "qualified_slices": 15,
+      "unqualified_slices": 77,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 48,
+        "slice_exception": 28
+      },
+      "branch_guard_agreement_slices": 64,
+      "free_guard_evaluated_slices": 84,
+      "free_guard_agreement_slices": 68,
+      "free_slices": 47,
+      "conditioned_slices": 45,
+      "conditioned_guard_evaluated_slices": 36,
+      "conditioned_guard_agreement_slices": 36,
+      "exception_slices": 28,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 83,
+          "median": -3.8828544806496224e-07,
+          "p90": 11.6179685570882,
+          "maximum": 49.355478920608846
+        },
+        "absolute": {
+          "count": 83,
+          "median": 1.8288593256434778,
+          "p90": 27.34754709222839,
+          "maximum": 49.355478920608846
+        }
+      },
+      "slice_wall_seconds": 65.03273203317076,
+      "mean_slice_wall_seconds": 0.7068775220996821,
+      "slices_per_second_per_card": 1.4146722292564036,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 27096,
       "admitted_slices": 90,
       "excluded_slices": 17,
@@ -12767,6 +14208,52 @@
       "slice_wall_seconds": 51.95298875775188,
       "mean_slice_wall_seconds": 1.0823539324531641,
       "slices_per_second_per_card": 0.9239121973100718,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 27305,
+      "admitted_slices": 44,
+      "excluded_slices": 11,
+      "converged_slices": 15,
+      "unconverged_slices": 29,
+      "qualified_slices": 3,
+      "unqualified_slices": 41,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 11,
+        "residual_above_qualification_tolerance": 12,
+        "slice_exception": 18
+      },
+      "branch_guard_agreement_slices": 24,
+      "free_guard_evaluated_slices": 36,
+      "free_guard_agreement_slices": 12,
+      "free_slices": 4,
+      "conditioned_slices": 40,
+      "conditioned_guard_evaluated_slices": 33,
+      "conditioned_guard_agreement_slices": 31,
+      "exception_slices": 18,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 37,
+          "median": 1.0420381224562902e-07,
+          "p90": 10.31658180960735,
+          "maximum": 77.40302944961134
+        },
+        "absolute": {
+          "count": 37,
+          "median": 2.9157564418458293e-06,
+          "p90": 10.31658180960735,
+          "maximum": 77.40302944961134
+        }
+      },
+      "slice_wall_seconds": 40.69158344715834,
+      "mean_slice_wall_seconds": 0.924808714708144,
+      "slices_per_second_per_card": 1.0813046893871294,
       "warm_rate_eligible": true
     },
     {
@@ -14962,6 +16449,97 @@
       "warm_rate_eligible": true
     },
     {
+      "shot": 30189,
+      "admitted_slices": 86,
+      "excluded_slices": 12,
+      "converged_slices": 66,
+      "unconverged_slices": 20,
+      "qualified_slices": 19,
+      "unqualified_slices": 67,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "residual_above_qualification_tolerance": 47,
+        "slice_exception": 20
+      },
+      "branch_guard_agreement_slices": 66,
+      "free_guard_evaluated_slices": 82,
+      "free_guard_agreement_slices": 71,
+      "free_slices": 58,
+      "conditioned_slices": 28,
+      "conditioned_guard_evaluated_slices": 23,
+      "conditioned_guard_agreement_slices": 23,
+      "exception_slices": 20,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 81,
+          "median": 6.7746286011582946e-09,
+          "p90": 17.11443443541262,
+          "maximum": 35.57509479347903
+        },
+        "absolute": {
+          "count": 81,
+          "median": 4.136921031082825,
+          "p90": 19.57606927441734,
+          "maximum": 39.38761427123635
+        }
+      },
+      "slice_wall_seconds": 48.22207229863852,
+      "mean_slice_wall_seconds": 0.5607217709144015,
+      "slices_per_second_per_card": 1.7834156829139025,
+      "warm_rate_eligible": true
+    },
+    {
+      "shot": 30191,
+      "admitted_slices": 81,
+      "excluded_slices": 13,
+      "converged_slices": 64,
+      "unconverged_slices": 17,
+      "qualified_slices": 13,
+      "unqualified_slices": 68,
+      "qualification": {
+        "field": "ForwardSolveReceipt.qualified",
+        "computation": "result.converged and equilibrium.finite.passed and terminal_residual <= policy.qualification_tolerance",
+        "tolerance": 1e-10
+      },
+      "unqualified_by_reason": {
+        "not_converged": 1,
+        "residual_above_qualification_tolerance": 51,
+        "slice_exception": 16
+      },
+      "branch_guard_agreement_slices": 65,
+      "free_guard_evaluated_slices": 81,
+      "free_guard_agreement_slices": 75,
+      "free_slices": 60,
+      "conditioned_slices": 21,
+      "conditioned_guard_evaluated_slices": 21,
+      "conditioned_guard_agreement_slices": 21,
+      "exception_slices": 16,
+      "vertical_centroid_difference_mm": {
+        "definition": "1000 * (achieved_current_centroid_z - efm/current_centrd_z)",
+        "signed": {
+          "count": 81,
+          "median": 1.0581813203458523e-13,
+          "p90": 28.672960338258573,
+          "maximum": 36.422862032436
+        },
+        "absolute": {
+          "count": 81,
+          "median": 9.362849290597913,
+          "p90": 30.788821218676322,
+          "maximum": 44.888838734919595
+        }
+      },
+      "slice_wall_seconds": 41.85960837453604,
+      "mean_slice_wall_seconds": 0.516785288574519,
+      "slices_per_second_per_card": 1.935039603697625,
+      "warm_rate_eligible": true
+    },
+    {
       "shot": 30388,
       "admitted_slices": 104,
       "excluded_slices": 12,
@@ -15286,10 +16864,10 @@
   ],
   "failed": [
     {
-      "shot": 17658,
+      "shot": 22520,
       "failure": null,
       "traceback": null,
-      "manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/17658.manifest.json"
+      "manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/22520.manifest.json"
     },
     {
       "shot": 22589,
@@ -15298,10 +16876,10 @@
       "manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/22589.manifest.json"
     },
     {
-      "shot": 24590,
+      "shot": 22830,
       "failure": null,
       "traceback": null,
-      "manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24590.manifest.json"
+      "manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/22830.manifest.json"
     }
   ]
 }

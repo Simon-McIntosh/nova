@@ -314,10 +314,13 @@ def test_conditioned_by_topology_class_bins(tmp_path):
     assert classes["diverted"]["conditioned"] == 2
 
 
-def test_pin_displacement_summary_on_known_inputs(tmp_path):
+def test_pin_correction_and_signed_error_summaries_on_known_inputs(tmp_path):
     _build_root(tmp_path)
-    pin = _aggregate(tmp_path)["pin_displacement_mm"]
+    result = _aggregate(tmp_path)
+    assert "pin_displacement_mm" not in result
+    pin = result["pin_correction_mm"]
     assert pin["unit"] == "mm"
+    assert "sign_convention" in pin
     overall = pin["overall"]
     assert overall["count"] == 7
     assert overall["median"] == pytest.approx(-9.0)
@@ -333,6 +336,29 @@ def test_pin_displacement_summary_on_known_inputs(tmp_path):
     assert diverted["count"] == 3
     assert diverted["median"] == pytest.approx(-9.0)
     assert diverted["maximum"] == pytest.approx(-9.0)
+    # the signed restatement: free and conditioned error distributions and the
+    # absolute-error reduction, all on the fixture's known millimetre inputs
+    free_dist = result["free_error_mm"]["distribution"]
+    assert free_dist["count"] == 7
+    assert free_dist["median"] == pytest.approx(15.0)
+    assert free_dist["maximum"] == pytest.approx(30.0)
+    assert free_dist["p90"] == pytest.approx(
+        np.percentile([10, 20, 10, 30, 15, 5, 25], 90)
+    )
+    conditioned_dist = result["conditioned_error_mm"]["distribution"]
+    assert conditioned_dist["count"] == 7
+    assert conditioned_dist["median"] == pytest.approx(2.0)
+    assert conditioned_dist["maximum"] == pytest.approx(6.0)
+    assert conditioned_dist["p90"] == pytest.approx(
+        np.percentile([2, 4, 1, 3, 6, 1, 2], 90)
+    )
+    reduction = result["absolute_error_reduction_mm"]["distribution"]
+    assert reduction["count"] == 7
+    assert reduction["median"] == pytest.approx(9.0)
+    assert reduction["maximum"] == pytest.approx(27.0)
+    assert reduction["p90"] == pytest.approx(
+        np.percentile([8, 16, 9, 27, 9, 4, 23], 90)
+    )
 
 
 def test_per_shot_free_and_conditioned_counts(tmp_path):
@@ -444,7 +470,7 @@ def test_pin_crosstab_sums_and_manifest_join(tmp_path):
     # class counts sum to the slices with both errors finite (the pin summary
     # population), and the converged / guard-ok tallies match the manifest
     total = sum(bucket["slices"] for bucket in overall.values())
-    assert total == result["pin_displacement_mm"]["overall"]["count"]
+    assert total == result["pin_correction_mm"]["overall"]["count"]
     assert total == 7
     assert overall == _recompute_pin_crosstab(tmp_path)
     # every decile section is present and the decile buckets sum to the same

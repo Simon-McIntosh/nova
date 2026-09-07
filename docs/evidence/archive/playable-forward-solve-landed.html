@@ -1148,6 +1148,33 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     has structure, running 1.2 to 1.38 above EFIT through the mid-discharge around 420 to 490 ms and falling to 0.46 by 575 ms. If the control carries its own
     time-dependent discrepancy then every ratio quoted against it inherits that. Open observation, not a finding.</p>
   </section>
+
+  <section id="the-limited-defect-and-the-control-drift-are-corpus-wide">
+    <h2>A 54,415-frame census: the limited defect is corpus-wide and the healthy control is not healthy (2026-09-07 10:18Z)</h2>
+    <p>943 shots, 54,415 guarded frames, no unreadable sessions, two minutes on a debug partition, reading session files and the efm store with no solve.</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median span ratio</th><th>p10</th><th>p90</th><th>Fraction below 0.5</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>38,858</td><td>0.838</td><td>0.469</td><td>1.187</td><td>0.118</td></tr>
+        <tr><td>diverted, cold</td><td>5,148</td><td>0.865</td><td>0.468</td><td>1.179</td><td>0.115</td></tr>
+        <tr><td>limited, warm</td><td>9,181</td><td>0.285</td><td>0.094</td><td>0.533</td><td>0.877</td></tr>
+        <tr><td>limited, cold</td><td>1,228</td><td>0.066</td><td>0.009</td><td>0.375</td><td>0.944</td></tr>
+      </tbody>
+    </table>
+    <p>Cold starts are harmless at scale, 0.838 warm against 0.865 cold over 44,000 diverted frames. The limited class is impaired corpus-wide with 88 per cent of
+    frames below half, 844 of 943 shots contribute a limited cold start, and the interaction that rested on one frame now has 1,228 behind it. Banding by time to remove
+    the confound that limited frames live early, the defect survives time-matching at every epoch at two to four fold below its own-epoch control, so it is not the
+    early phase in disguise.</p>
+    <p><strong>And the class used as the healthy control is not healthy.</strong> Banded in time the diverted median drifts monotonically from 0.70 early through 0.83
+    to 1.15 late: about thirty per cent low early and fifteen per cent high late, corpus-wide, over tens of thousands of frames. That was carried as an incidental
+    observation an hour ago and is now a second finding with its own consequence, since every ratio quoted against a diverted baseline tonight inherits it. The
+    earliest band's control has n of 36 and should not be leaned on alone.</p>
+    <p><strong>This changed the repair's acceptance measure, which had been set wrongly.</strong> The measure was moving the limited median toward unity. Unity is the
+    wrong target because the control is not at unity, so an absolute target would fail a correct fix in the early bands where even diverted sits at 0.70, and pass an
+    incorrect one late where the control overshoots. The measure is now the ratio of the limited median to the diverted median <em>at matched time epoch</em> reaching
+    one, currently 0.26 to 0.55 in the bands where limited frames are common. The correction arrived in the same minute the repair node was dispatched, which cost two
+    stopped runs and is recorded as such rather than as a failure.</p>
+  </section>
 </main>
 </body>
 </html>

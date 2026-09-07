@@ -705,8 +705,15 @@
     it changes what the wiring node must prove: the wired scheduler has to beat <strong>0.908 s per slice on convergence-matched shots</strong>, which is the writer it
     replaced, and not merely beat the placeholder it inherits. A gate that compares the batched engine against the host-route engine would report a large win while the
     pipeline was still slower than it was this afternoon.</p>
-    <p>The sequential writer's best observed figure is better still: 0.369 s per slice as the median over 397 slices of the six frozen-carrier shots, which converge
-    well and are cheap. That is the optimistic end of the same path rather than a comparable measurement.</p>
+    <p><strong>What the engine can and cannot buy, because a field name invites the wrong reading.</strong> The <code>wall_seconds</code> the sequential writer emits on
+    each labelled slice is <code>solve_wall_seconds</code>, the solve alone, not the slice's whole cost; its median is 0.369 s over 397 slices of the six frozen-carrier
+    shots. The shot-level figure above, 0.908 s a slice, is the whole path including frame assembly and the netCDF write. So the solve is roughly two fifths of the
+    sequential writer's per-slice cost and assembly with IO is roughly three fifths. Removing the solve entirely therefore buys at most about 1.7 times on that path,
+    not the four-thousand-fold ratio between the engine's throughput and the pipeline's. That ratio is true as arithmetic and misleading as engineering: it says the
+    engine has stopped being the constraint, and nothing more. Every further gain has to come from running assembly in parallel across host workers, which is what the
+    scheduler exists to do, or from moving assembly onto the device. With assembly and IO near 0.54 s a slice, a pool of k workers caps the pipeline near k divided by
+    0.54 slices a second, so eight workers is about fifteen and eleven is about twenty, against one card's 2,327. One card is the right relaunch shape for as long as
+    assembly runs on the host.</p>
     <p>The decision taken now is to leave the running writer alone rather than swap it back. The batched engine is roughly two hours from a gated relaunch, in which
     window the difference is about 2,200 slices, and swapping the production writer twice in two hours is the churn that produced tonight's earlier rollback. The
     regression is instead folded into the relaunch as an acceptance figure.</p>

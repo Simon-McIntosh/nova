@@ -1,6 +1,25 @@
 {
   "achieved_seconds": 9.8,
   "bytes": 2624734,
+  "contact_sheet": {
+    "bytes": 504984,
+    "columns": 3,
+    "path": "docs/figures/presentation-media/mast-21978-efit-pulse-frames.png",
+    "rows": 2,
+    "size": [
+      2905,
+      1568
+    ],
+    "tile_indices": [
+      0,
+      14,
+      28,
+      41,
+      55,
+      69
+    ],
+    "tiles": 6
+  },
   "contour_levels": 24,
   "ff_prime_limit": [
     -0.06572370147705085,
@@ -18,7 +37,7 @@
     -57071.692872070256,
     459214.6176962891
   ],
-  "path": "docs/figures/presentation-media/mast_21978_efit_pulse.gif",
+  "path": "docs/figures/presentation-media/mast-21978-efit-pulse.gif",
   "profile_limit_quantile": 0.98,
   "profile_limits_fixed": true,
   "provenance": {

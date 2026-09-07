@@ -76,20 +76,84 @@ def write_gif(
     }
 
 
+def write_contact_sheet(
+    frames: Sequence[PIL.Image.Image],
+    path: str | Path,
+    columns: int = 3,
+    count: int = 6,
+    gap: int = 8,
+    background: tuple[int, int, int] = (255, 255, 255),
+) -> dict[str, object]:
+    """Tile evenly spaced frames into one still image.
+
+    An animation needs a still companion for two reasons. The figure index
+    scans only static raster and vector images, so a GIF alone is published
+    but never listed; and a talk needs a frame that can be pointed at. The
+    frames are sampled evenly across the sequence, always including the first
+    and last, so the sheet reads as the pulse rather than as its middle.
+    """
+    if not frames:
+        raise ValueError("a contact sheet needs at least one frame")
+    if columns < 1 or count < 1:
+        raise ValueError("a contact sheet needs a positive column and frame count")
+    from PIL import Image
+
+    chosen = np.unique(
+        np.linspace(0, len(frames) - 1, min(count, len(frames))).round().astype(int)
+    )
+    tiles = [frames[index] for index in chosen]
+    columns = min(columns, len(tiles))
+    rows = -(-len(tiles) // columns)
+    width, height = tiles[0].size
+    sheet = Image.new(
+        "RGB",
+        (
+            columns * width + (columns - 1) * gap,
+            rows * height + (rows - 1) * gap,
+        ),
+        background,
+    )
+    for position, tile in enumerate(tiles):
+        row, column = divmod(position, columns)
+        sheet.paste(tile, (column * (width + gap), row * (height + gap)))
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(target)
+    return {
+        "path": str(target),
+        "tiles": len(tiles),
+        "tile_indices": chosen.tolist(),
+        "columns": columns,
+        "rows": rows,
+        "size": list(sheet.size),
+        "bytes": target.stat().st_size,
+    }
+
+
 def animate(
     figure: matplotlib.figure.Figure,
     steps: Iterable[object],
     render: Callable[[object], None],
     path: str | Path,
     duration: float = 10.0,
+    contact_sheet: str | Path | None = None,
+    sheet_columns: int = 3,
+    sheet_count: int = 6,
 ) -> dict[str, object]:
     """Render every step into ``figure`` and write the result as a GIF.
 
     ``render`` draws one step and is responsible for clearing what it needs;
-    :meth:`nova.media.layout.ThreeView.clear` is the usual first call.
+    :meth:`nova.media.layout.ThreeView.clear` is the usual first call. When
+    ``contact_sheet`` is given, a still sheet of evenly spaced frames is
+    written beside the animation from the frames already in hand.
     """
     frames = []
     for step in steps:
         render(step)
         frames.append(figure_frame(figure))
-    return write_gif(frames, path, duration=duration)
+    receipt = write_gif(frames, path, duration=duration)
+    if contact_sheet is not None:
+        receipt["contact_sheet"] = write_contact_sheet(
+            frames, contact_sheet, columns=sheet_columns, count=sheet_count
+        )
+    return receipt

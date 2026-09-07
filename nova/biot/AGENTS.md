@@ -20,6 +20,45 @@ rules remain in the root `AGENTS.md`.
   source-batch cache identity. A different kernel, backend, precision, device
   eligibility, or quadrature rule must produce a different semantic key.
 
+## The device is already the default — do not build a route to reach it
+
+Measured 2026-09-07 while sizing a wide-grid MAST response build. Read this
+before writing any driver that assembles interactions, because the obvious
+conclusion from reading `nova/biot/polygon.py` alone is wrong.
+
+- **The production route runs on the device with no flag.**
+  `PolySectionPolicy()` resolves `exact_kernel="closed_form"` to
+  `backend="jax"` and `device_eligibility="axisymmetric_ring"`, `Solve` selects
+  `TiledPolySection`, and both of its `tile_evaluator` calls in
+  `polysection.py` already pass `batched=True`. `tile_evaluator` enables the
+  persistent compilation cache itself through
+  `configure_production_compilation_cache()`. So building a machine's
+  interactions through the ordinary `CoilSet` / `Machine` path is a compiled,
+  batched, cached device build already; JAX places it on a GPU whenever one is
+  visible. Nothing needs assembling, and a bespoke driver only bypasses the
+  route that is validated.
+- **`nova.biot.polygon.polygon_greens` is the host reference, not the route.**
+  It is pure numpy and always will be. Finding it host-only says nothing about
+  device availability — the device path is `tiledassembly.tile_evaluator`
+  beside it, whose fixed-shape padded trace exists precisely so the same code
+  can be `vmap`-ed and sharded.
+- **The low-level streaming helper is the one place with host defaults.**
+  `tiledassembly.assemble` defaults to `backend="numpy"` with `workers`
+  processes, and `tile_evaluator` defaults to `batched=False`. Those defaults
+  belong to a diagnostic that streams tiles into a zarr store, and reaching the
+  device there is the single flag `backend="jax"` (with `workers=1`, because the
+  device is the parallelism). Prefer `batched=True` when you do: the module's
+  own measurement is that the batched form is faster on both CPU and GPU,
+  because `scan` denies the compiler the parallelism it would find across
+  blocks. A batched tile does not respect `TilePlan.peak_bytes`, so size it
+  from a measurement rather than from the byte budget.
+- **A P100 is a usable float64 device.** Measured on the `titan` partition:
+  jax 0.11.0 drives compute capability 6.0, `default_backend()` is `gpu`, and a
+  float64 matmul sustains 3.5 TFLOP/s. When the `betelgeuse` reservation cores
+  are fully allocated, titan is the faster lane despite the older card. Treat a
+  cross-backend result as a different numerical measurement from an H200
+  receipt rather than as the same number.
+
 ## Enforce authored shape at construction
 
 - `Coil._route_authored_sections` and

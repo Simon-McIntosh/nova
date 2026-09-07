@@ -76,6 +76,7 @@ uv run --no-sync git commit -m 'type: description'
 | `nova.transport` | Coupled forward transport over the native and TORAX current-diffusion rungs, with equilibrium coupling. The forward-solve seam and coupling guidance: [`nova/transport/AGENTS.md`](nova/transport/AGENTS.md).                       |
 | `nova.frame`    | FrameSpace types for electromagnetic components                                                                                                                                                                                |
 | `nova.database` | netCDF storage, filepath management                                                                                                                                                                                            |
+| `nova.media`    | Presentation figures and animations: one imas-ink style, a three-view layout, poloidal painters, pulse-fixed trace scales, a Pillow GIF compositor, and per-archive read adapters. Publication rules below.                     |
 
 ### Data Caching
 
@@ -83,6 +84,28 @@ Nova caches expensive calculations as netCDF files. Key classes:
 
 - `nova.database.netcdf.netCDF`: xarray dataset storage with groups
 - `nova.database.filepath.FilePath`: Cross-platform path management with fsspec/appdirs
+
+### Publishing a figure so the reckon server lists it
+
+The reckon mount for nova is `~/Code/nova/docs`, so a file at
+`docs/figures/<topic>/<name>` is served at the project-absolute URL
+`/nova/figures/<topic>/<name>`. Use project-absolute `src` in authored HTML; a
+relative `src` 404s in the SPA. Both `*.png` and `*.gif` are gitignored, so
+publishing needs `git add -f`.
+
+**The Figures index counts PNG and SVG only — a GIF is served but never
+listed.** Measured 2026-09-07: the tab read `509 in nova` while
+`docs/figures` held exactly 409 PNG + 100 SVG = 509, with a GIF present on
+disk and uncounted; one added PNG took it to 510. So an animation that should
+be findable by browsing needs a still companion beside it.
+`nova.media.gif.write_contact_sheet` builds one from the frames already
+rendered, and `nova.media.gif.animate` writes it when passed `contact_sheet`.
+Name figures with hyphens to match the served convention
+(`mast-21978-efit-pulse.gif` beside `mast-21978-efit-pulse-frames.png`).
+
+Rendering many frames is heavy work: run it on a `*_debug` partition, never on
+the login node, and never point `--output` at `/run/user`, which is node-local
+tmpfs — slurmstepd then cancels the job in zero seconds with an empty log.
 
 ## Coupled Repositories
 

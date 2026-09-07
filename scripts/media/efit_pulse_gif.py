@@ -100,7 +100,12 @@ def render_pulse(
         )
 
     receipt = gif.animate(
-        view.figure, range(len(pulse)), render, path, duration=duration
+        view.figure,
+        range(len(pulse)),
+        render,
+        path,
+        duration=duration,
+        contact_sheet=Path(path).with_name(f"{Path(path).stem}-frames.png"),
     )
     receipt |= {
         "machine": pulse.machine,
@@ -149,7 +154,7 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     pulse = _read_pulse(arguments)
-    name = f"{pulse.machine.lower()}_{pulse.identifier}_efit_pulse"
+    name = f"{pulse.machine.lower()}-{pulse.identifier}-efit-pulse"
     receipt = render_pulse(
         pulse,
         arguments.output / f"{name}.gif",
@@ -158,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
         height=arguments.height,
         quantile=arguments.quantile,
     )
-    receipt_path = arguments.output / f"{name}_receipt.json"
+    receipt_path = arguments.output / f"{name}-receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True))
     print(json.dumps(receipt, indent=2, sort_keys=True))
     return 0

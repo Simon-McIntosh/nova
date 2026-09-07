@@ -1,11 +1,11 @@
 {
   "achieved_seconds": 9.72,
-  "bytes": 2396162,
+  "bytes": 2374622,
   "conditioned_frames_drawn": 0,
   "contact_sheet": {
-    "bytes": 407331,
+    "bytes": 402681,
     "columns": 3,
-    "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
+    "path": "docs/figures/presentation-media/mast-27079-nova-thomson-ne-frames.png",
     "rows": 2,
     "size": [
       2875,
@@ -43,7 +43,7 @@
   "left_panel": "nova nested flux surfaces over the clipped hex mesh",
   "machine": "MAST",
   "orientation_note": "both MAST systems view the midplane, so the split is core against edge rather than vertical against horizontal",
-  "path": "docs/figures/presentation-media/mast-27079-nova-thomson.gif",
+  "path": "docs/figures/presentation-media/mast-27079-nova-thomson-ne.gif",
   "plasma_mesh": {
     "boundary_clip": "geometric intersection with the solved boundary polygon; a rasterless session carries no flux field to cut at",
     "clipped_cell_count_range": [
@@ -65,8 +65,8 @@
   "profile_limit_quantile": 0.98,
   "profile_limits_fixed": true,
   "pulse": "27079",
-  "quantity": "te",
-  "quantity_label": "$T_e$ [eV]",
+  "quantity": "ne",
+  "quantity_label": "$n_e$ [m$^{-3}$]",
   "requested_seconds": 10.0,
   "separatrix_crossing_marked": true,
   "size": [
@@ -96,8 +96,8 @@
       },
       "rows": 141,
       "value_limit": [
-        1.367708295583725,
-        3540.166796874992
+        2.2512966153168496e+17,
+        5.500401387988497e+19
       ]
     },
     {
@@ -121,8 +121,8 @@
       },
       "rows": 141,
       "value_limit": [
-        0.6868682935833933,
-        4375.617093749998
+        1.7794781971050662e+17,
+        2.5597296101470224e+19
       ]
     }
   ],

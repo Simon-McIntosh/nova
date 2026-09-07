@@ -1,4 +1,10 @@
 {
+  "axis_caveat": "the axis is an O-point search on a discretised map, not a measured position, and it is configuration dependent: the labeller's solve of this same slice puts the axis at R 0.86478 m, 4.39 cm from EFIT and 5.32 cm from this solve, so a single shot's axis offset is not a property of nova",
+  "axis_offset_cm": [
+    0.018492516285117944,
+    1.8207859922647351
+  ],
+  "axis_offset_magnitude_cm": 1.8208798979575869,
   "boundary_source_nova": "raster_flux.separatrix",
   "boundary_source_reference": "efm/lcfs",
   "carrier": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media/mast-21978-wide-solve.npz",
@@ -37,12 +43,20 @@
   "levels_from": "the EFIT reference map, shared with the nova map",
   "maximum_absolute_difference_wb": 0.02125204999879038,
   "maximum_difference_fraction_of_span": 0.0541267999002938,
+  "nova_axis_rz_m": [
+    0.9061140733600253,
+    0.01869058210819947
+  ],
   "nova_boundary_drawn_as": "contour of the nova map at the boundary flux level; the solve's separatrix vertex list carries open legs and is not a polyline",
   "nulls": {
     "strike_points_drawn": 0,
     "x_points_drawn": 2,
     "x_points_dropped_outside_wall": 0
   },
+  "reference_axis_rz_m": [
+    0.9059291481971741,
+    0.0004827221855521202
+  ],
   "reference_grid_span_rz_m": [
     0.05999999865889549,
     2.0,

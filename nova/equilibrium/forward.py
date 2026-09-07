@@ -809,12 +809,15 @@ class ForwardProfile:
         current=None,
         target_current=None,
         prescribed_current=None,
+        *,
+        requested_class=None,
     ) -> ForwardEquilibrium:
         """Return the full receipt of one flux map without iterating it.
 
         ``fixed_point`` reports the residual of the supplied map alone, so a
         caller can qualify an externally produced flux map through the same
-        contract a solve returns.
+        contract a solve returns. ``requested_class`` is forwarded to the
+        receipt read so the achieved read reproduces the solve's admission.
         """
         residual = jnp.max(
             jnp.abs(
@@ -835,12 +838,15 @@ class ForwardProfile:
         return self._receipt(
             jnp.asarray(flux),
             history,
+            requested_class=requested_class,
             target_current=target_current,
             current=current,
             prescribed_current=prescribed_current,
         )
 
-    def integral_observation(self, flux, target_current=None) -> IntegralObservation:
+    def integral_observation(
+        self, flux, target_current=None, *, requested_class=None
+    ) -> IntegralObservation:
         """Return the integral observations of one flux map.
 
         This is the differentiable moment map: it reads the topology, applies
@@ -848,7 +854,9 @@ class ForwardProfile:
         in the way, so ``jacfwd`` through it costs one observation.
         """
         _current, support_integrals, _masks, topology, _amplitude = (
-            self._integral_state(flux, target_current=target_current)
+            self._integral_state(
+                flux, requested_class=requested_class, target_current=target_current
+            )
         )
         return observe_moments(support_integrals, topology.flux_span)
 
@@ -859,6 +867,8 @@ class ForwardProfile:
         electron_temperature,
         electron_density,
         chord_coordinates,
+        *,
+        requested_class=None,
         **options,
     ) -> ThomsonSignals:
         """Compose a solved flux map with the deterministic Thomson kernel."""
@@ -866,7 +876,7 @@ class ForwardProfile:
             raise TypeError("Thomson observations require a structured FluxLattice")
         state = jnp.asarray(flux)
         grid_flux = state[: self.lattice.node_count].reshape(self.lattice.shape)
-        _masks, topology = self.operator.read(state)
+        _masks, topology = self.operator.read(state, requested_class)
         return synthesize_thomson(
             self.lattice.radius,
             self.lattice.height,
@@ -887,6 +897,8 @@ class ForwardProfile:
         electron_temperature,
         electron_density,
         chord_coordinates,
+        *,
+        requested_class=None,
         **options,
     ) -> jax.Array:
         """Return Thomson temperature and density on one fixed output axis."""
@@ -896,6 +908,7 @@ class ForwardProfile:
             electron_temperature,
             electron_density,
             chord_coordinates,
+            requested_class=requested_class,
             **options,
         )
         return jnp.concatenate(
@@ -912,6 +925,8 @@ class ForwardProfile:
         electron_temperature,
         electron_density,
         chord_coordinates,
+        *,
+        requested_class=None,
         **options,
     ) -> jax.Array:
         """Differentiate the public Thomson map with respect to solved flux."""
@@ -922,6 +937,7 @@ class ForwardProfile:
                 electron_temperature,
                 electron_density,
                 chord_coordinates,
+                requested_class=requested_class,
                 **options,
             )
         )(jnp.asarray(flux))
@@ -931,11 +947,18 @@ class ForwardProfile:
         flux,
         *,
         support: MomentIntegralSupport,
+        requested_class=None,
         target_current=None,
     ) -> CurrentMomentObservation:
-        """Return net current and centroid on one explicitly declared support."""
+        """Return net current and centroid on one explicitly declared support.
+
+        ``requested_class`` reproduces the admission decision of the solve
+        that produced ``flux``: a diagnostic read that is told the class the
+        solve ran with admits the same converged flux that an unconstrained
+        emergent read may refuse.
+        """
         current, _integrals, masks, _topology, _amplitude = self._integral_state(
-            flux, target_current=target_current
+            flux, requested_class=requested_class, target_current=target_current
         )
         return observe_current_moments(
             current.cell_current,
@@ -949,11 +972,15 @@ class ForwardProfile:
         flux,
         *,
         support: MomentIntegralSupport,
+        requested_class=None,
         target_current=None,
     ) -> jax.Array:
         """Return current amplitude and centroid on one fixed output axis."""
         return self.current_moment_observation(
-            flux, support=support, target_current=target_current
+            flux,
+            support=support,
+            requested_class=requested_class,
+            target_current=target_current,
         ).stack()
 
     def current_moment_jacobian(
@@ -961,17 +988,26 @@ class ForwardProfile:
         flux,
         *,
         support: MomentIntegralSupport,
+        requested_class=None,
         target_current=None,
     ) -> jax.Array:
         """Differentiate the support-declared current-moment map over flux."""
         return jax.jacfwd(
             lambda state: self.current_moment_map(
-                state, support=support, target_current=target_current
+                state,
+                support=support,
+                requested_class=requested_class,
+                target_current=target_current,
             )
         )(jnp.asarray(flux))
 
     def constraint_residual(
-        self, flux, pins: ConstraintPinSet, target_current=None
+        self,
+        flux,
+        pins: ConstraintPinSet,
+        target_current=None,
+        *,
+        requested_class=None,
     ) -> jax.Array:
         """Return interval-scaled deterministic residuals for trusted pins.
 
@@ -988,7 +1024,7 @@ class ForwardProfile:
         residuals = []
         if pins.isoflux:
             grid_flux = state[: self.lattice.node_count].reshape(self.lattice.shape)
-            _masks, topology = self.operator.read(state)
+            _masks, topology = self.operator.read(state, requested_class)
             for pin in pins.isoflux:
                 coordinates = jnp.asarray(
                     (pin.first_coordinate, pin.second_coordinate), dtype=state.dtype
@@ -1008,34 +1044,60 @@ class ForwardProfile:
         for pin in pins.moments:
             if pin.support not in observations:
                 observations[pin.support] = self.current_moment_observation(
-                    state, support=pin.support, target_current=target_current
+                    state,
+                    support=pin.support,
+                    requested_class=requested_class,
+                    target_current=target_current,
                 )
             observed = observations[pin.support].value(pin.name)
             residuals.append((observed - pin.target) / pin.uncertainty.absolute)
         return jnp.stack(residuals)
 
     def constraint_jacobian(
-        self, flux, pins: ConstraintPinSet, target_current=None
+        self,
+        flux,
+        pins: ConstraintPinSet,
+        target_current=None,
+        *,
+        requested_class=None,
     ) -> jax.Array:
         """Differentiate trusted-pin residuals with respect to solved flux."""
         return jax.jacfwd(
-            lambda state: self.constraint_residual(state, pins, target_current)
+            lambda state: self.constraint_residual(
+                state, pins, target_current, requested_class=requested_class
+            )
         )(jnp.asarray(flux))
 
     def constraints_satisfied(
-        self, flux, pins: ConstraintPinSet, target_current=None
+        self,
+        flux,
+        pins: ConstraintPinSet,
+        target_current=None,
+        *,
+        requested_class=None,
     ) -> jax.Array:
         """Return whether every trusted pin lies inside its stated interval."""
-        residual = self.constraint_residual(flux, pins, target_current)
+        residual = self.constraint_residual(
+            flux, pins, target_current, requested_class=requested_class
+        )
         return jnp.all(jnp.isfinite(residual)) & jnp.all(jnp.abs(residual) <= 1.0)
 
     def _require_constraints(
-        self, flux, pins: ConstraintPinSet | None, target_current=None
+        self,
+        flux,
+        pins: ConstraintPinSet | None,
+        target_current=None,
+        *,
+        requested_class=None,
     ) -> None:
         """Refuse a candidate root outside any supplied trusted interval."""
         if pins is None:
             return
-        residual = np.asarray(self.constraint_residual(flux, pins, target_current))
+        residual = np.asarray(
+            self.constraint_residual(
+                flux, pins, target_current, requested_class=requested_class
+            )
+        )
         if not np.all(np.isfinite(residual)) or np.any(np.abs(residual) > 1.0):
             worst = float(np.nanmax(np.abs(residual)))
             raise ConstraintViolationError(
@@ -2452,17 +2514,25 @@ class ForwardProfile:
             in_axes=(0, current_axis, target_axis),
         )(initial_flux, current, target_current)
 
-    def moment_residual(self, flux, targets: MomentTargets) -> jax.Array:
+    def moment_residual(
+        self, flux, targets: MomentTargets, *, requested_class=None
+    ) -> jax.Array:
         """Return the scale-normalised integral-observation residuals."""
-        return moment_residual(self.integral_observation(flux), targets)
+        return moment_residual(
+            self.integral_observation(flux, requested_class=requested_class), targets
+        )
 
-    def moment_jacobian(self, flux, targets: MomentTargets) -> jax.Array:
+    def moment_jacobian(
+        self, flux, targets: MomentTargets, *, requested_class=None
+    ) -> jax.Array:
         """Return the derivative of the moment residuals with respect to flux.
 
         The map is differentiated at a converged flux, so the Jacobian is the
         observation operator a conditioning or reconstruction caller needs;
         this class never applies it to a profile itself.
         """
-        return jax.jacfwd(lambda state: self.moment_residual(state, targets))(
-            jnp.asarray(flux)
-        )
+        return jax.jacfwd(
+            lambda state: self.moment_residual(
+                state, targets, requested_class=requested_class
+            )
+        )(jnp.asarray(flux))

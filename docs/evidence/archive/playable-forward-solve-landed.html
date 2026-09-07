@@ -901,6 +901,302 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     necessary rather than conservative, and the consumer's split, carrying them for the demo while barring them from referee-scored evidence, is the correct one. Any
     future use of this corpus that scores nova against EFIT must apply that exclusion, and the per-slice conditioned flag is what makes it enforceable on the data.</p>
   </section>
+
+  <section id="corpus-quality-at-911-shots">
+    <h2>Corpus quality at 911 complete shots (2026-09-07 08:48Z, from the shot manifests)</h2>
+    <table>
+      <thead><tr><th>Population</th><th>Shots</th><th>Slices written</th><th>Converged</th><th>Fraction</th></tr></thead>
+      <tbody>
+        <tr><td>All complete shots</td><td>911</td><td>74,725</td><td>50,286</td><td>0.673</td></tr>
+        <tr><td>Excluding the reversed-current block</td><td>840</td><td>68,664</td><td>50,282</td><td>0.732</td></tr>
+        <tr><td>Shots at or above 0.6 converged</td><td>663</td><td>56,421</td><td>44,293</td><td>0.785</td></tr>
+        <tr><td>Shots from 0.2 to 0.6</td><td>175</td><td>12,212</td><td>5,989</td><td>0.490</td></tr>
+        <tr><td>Zero-converged shots</td><td>72</td><td>6,061</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>Seventy-one of the 72 zero-converged shots are the reversed-current block 22475 to 22626, which is campaign sign rather than a writer fault and is excluded from
+    cohorts until the polarity repair lands; they are 8.1 per cent of written slices. The one remaining zero shot and the single shot below 0.2 are unexplained and too
+    small to chase. <strong>The clean training core is the 663 shots at or above 0.6 converged, carrying 44,293 converged slices.</strong> That is the figure a consumer
+    should size against, not the 911.</p>
+    <p><strong>What the class-argument repair could add, stated as an unknown rather than an estimate.</strong> An aborted slice records converged false, so every row
+    lost to the unconstrained achieved-centroid read sits inside the 24,439 unconverged written slices here. On the six frozen carriers 119 of 372 free-converged rows
+    aborted that way, 32 per cent, but those six are measured and the corpus-wide rate is not: extrapolating their rate to the whole corpus gives a free-converged count
+    exceeding the written count, which is impossible, so the six are worse than typical and no corpus figure can be inferred from them. The before-and-after count on a
+    rerun carrier is the measure the writer pass-through node owes, and until it exists the honest statement is that the repair recovers an unknown share of the
+    unconverged third.</p>
+  </section>
+
+  <section id="what-completing-the-corpus-would-cost">
+    <h2>Completing the corpus needs the batched engine or it does not happen: 317 hours against 11 (2026-09-07 08:55Z)</h2>
+    <p>7,984 shots on the ranked walk, 912 complete, 7,105 remaining at a mean 81.9 written slices a shot, so about 582,000 slices to write. Against that:</p>
+    <table>
+      <thead><tr><th>Writer</th><th>Slices a second</th><th>Remaining corpus</th></tr></thead>
+      <tbody>
+        <tr><td>Parallel scheduler as it runs now, one card</td><td>0.51</td><td>317 h</td></tr>
+        <tr><td>Sequential writer, one card, measured</td><td>1.10</td><td>147 h</td></tr>
+        <tr><td>Batched engine wired, host pool of eight, projected</td><td>about 15</td><td>about 11 h</td></tr>
+      </tbody>
+    </table>
+    <p>This retires a decision that looked live an hour ago. The scheduler being 2.2 times slower than the writer it replaced is real and recorded, but swapping back halves a figure that is thirty times too large, so it is a rounding error rather than a remedy and the churn is not worth it. <strong>The batched engine is the only path to a complete corpus</strong>, and until it converges an arm the corpus does not complete on any horizon that matters. The projected 15 slices a second is the host-assembly ceiling from the measured per-slice decomposition, not an engine figure, so it is what the pool can absorb rather than what a card can supply; it is a projection and is labelled as one.</p>
+    <p><strong>The question this raises is whether corpus completion is on the critical path at all.</strong> The clean training core already written is 663 shots and 44,293 converged slices, and the consumer has been sizing against it. If that suffices for the prototype, then the labels are delivered, the engine work is an efficiency project for later scale rather than a blocker, and the effort now sitting on it is misallocated against the demo. If the prototype needs the full walk, nothing else on this plan matters until the engine converges. That is a lead question and not a coordinator one, and it is asked rather than assumed.</p>
+  </section>
+
+  <section id="the-axis-offset-is-configuration-dependent">
+    <h2>Two nova solves of one slice disagree by more than either disagrees with EFIT (2026-09-07 09:00Z)</h2>
+    <p>The decisive datum on the axis question, contributed by the media session from an overlay rather than from a search for it. Shot 21978, efm row 36, t = 0.195 s,
+    the same currents in every case:</p>
+    <table>
+      <thead><tr><th>Source</th><th>Axis R (m)</th><th>Axis Z (m)</th><th>Offset from EFIT</th></tr></thead>
+      <tbody>
+        <tr><td>EFIT</td><td>0.90593</td><td>+0.00048</td><td>reference</td></tr>
+        <tr><td>Nova, wide-grid parity route</td><td>0.90611</td><td>+0.01869</td><td>1.82 cm, essentially all in Z; R agrees to 0.18 mm</td></tr>
+        <tr><td>Nova, labeller configuration</td><td>0.86478</td><td>&minus;0.01485</td><td>4.39 cm, 4.1 cm of it inboard in R</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The two nova solves differ from each other by 5.32 cm on the same shot, the same slice and the same currents.</strong> The same currents cannot displace
+    the plasma differently in two solves, so this is not a physics disagreement between nova and EFIT and it is not a displaced plasma. It is a configuration-dependent
+    O-point resolution inside nova, and the aggregate finding that nova sits inboard of EFIT on 72.55 per cent of slices is a property of the labeller configuration
+    rather than of nova. One configuration reaches EFIT's major radius to a fifth of a millimetre.</p>
+    <p>Three factors differ between the two and none is yet attributed: grid extent and resolution (150 by 350 over R 0.02 to 2.20 against the frozen-six carrier grid),
+    seed policy (an explicit case-state seed against the labeller's), and route with its residual tolerance (the parity reduced-Newton finishing at 1.6e-12 with the
+    current pin on, against what the sequential writer drives). Node pfs-axis-configuration-attribution varies exactly one at a time on this slice and reports the
+    resolved axis with the selected candidate's minimum and maximum curvature, which is the readout that would show a flat extremum making the subgrid fit
+    ill-conditioned.</p>
+    <p>Two leads die with this. The consumer's time structure in dR, a median &minus;4.04 cm before 0.21 s against +0.44 cm after, is recorded as a discarded lead
+    rather than a finding: time and shot were already confounded at that split, and if the offset moves with configuration at fixed slice it may be tracking the
+    labeller's seeding across the shot rather than anything physical. And the reading that this is a definition mismatch between two quantities is gone, because one
+    nova configuration matches EFIT's axis almost exactly.</p>
+    <p><strong>A premise both sessions had been propagating all night is also withdrawn here.</strong> Every centroid agreement figure in this record is a
+    <em>Z-component</em> figure. The writer takes its target as the EFIT current centroid height alone, its error is that one scalar difference, and its branch guard is
+    the absolute value of that one component; there is no major-radius comparison anywhere in either writer, and the conditioning target is the height too. So "the
+    centroid agrees with EFIT to 1.08 cm" means agrees in height, and nova's centroid major radius has never been compared with anything although the sessions carry it.
+    A Z-only bound cannot constrain a two-component distance, which retires an inference that EFIT's axis sits 14.46 cm from its own centroid give or take 1.08. The
+    radial check is running consumer-side, instructed to report an absence as its verdict if EFIT publishes no current-centroid major radius rather than substituting
+    the magnetic axis for it.</p>
+  </section>
+
+  <section id="the-corpus-is-heterogeneous-in-revision-but-uniform-in-defect">
+    <h2>Forty-two writer revisions in the corpus, and every one of them pre-dates tonight's three fixes (2026-09-07 09:22Z)</h2>
+    <p>Each shot manifest stamps the checkout revision it was written at, and the 923 complete shots carry <strong>42 distinct revisions</strong>, the largest single
+    group being 297 shots and the running job's being 660cbd7c on 94 and counting. That heterogeneity is a standing caveat for anyone comparing frame channels across
+    the corpus: two shots may have been written by materially different code.</p>
+    <p>It is also, for the three defects fixed tonight, not a complication at all. None of tonight's fix commits appears in any manifest, so the empty LCFS, the
+    mislabelled conditioned flag and the uncontained second X-point slot are present uniformly across all 923 shots. There is therefore no revision boundary to reason
+    about <em>within</em> the corpus for these three; the only boundary is the writer relaunch, and it has not happened. A consumer partitioning its data for these
+    defects needs one cut, not forty-two.</p>
+    <p>The running job was also checked for the hazard that made this worth measuring. Three of tonight's merges went into modules the live writer imported at launch,
+    and its assembly pool is created once with no per-child task ceiling, so its children hold the launch revision and a replacement child would be the only way new
+    code could enter mid-run. Its six most recent shots all stamp 660cbd7c, so no mixing has occurred, and the revision stamp is the instrument that would show it if
+    a worker were ever replaced.</p>
+  </section>
+
+  <section id="the-centroid-major-radius-is-systematically-inboard">
+    <h2>Nova's current-centroid major radius is inboard of EFIT's on 51 of 51 slices, in the component nothing has ever checked (2026-09-07 09:35Z)</h2>
+    <p>The radial check the consumer ran after the Z-only premise was withdrawn returns both outcomes at once, and EFIT does publish a current-centroid major radius on
+    all six carriers, so nothing was substituted for it.</p>
+    <p><strong>The Shafranov reading holds, in the component it was guessed to hold in.</strong> Both centroid-to-axis distances are overwhelmingly radial: the centroid
+    sits 13.25 cm inboard of nova's axis and 14.16 cm inboard of EFIT's, against vertical components of 0.08 and 1.33 cm, and the axis is outboard of the centroid in
+    both codes, which is the correct Shafranov sign. So the positive control stands and is no longer provisional: both quantities behave like magnetic axes rather than
+    like moments, and the residual 4.56 cm axis disagreement is about O-point location in a quantity both codes compute correctly in kind.</p>
+    <p><strong>And nova's centroid major radius is systematically wrong.</strong> It is inboard of EFIT's on every one of the 51 evidence slices, median 5.62 cm, mean
+    6.06, standard deviation 3.14, with per-shot medians from 2.68 cm on 21978 to 8.67 cm on 21986. Zero of 51 outboard is a systematic sign rather than scatter. This
+    is the fourth defect tonight in one family and the family is now worth naming: <strong>where a pair exists and only one member is validated, the unvalidated member
+    is wrong.</strong> The primary saddle selector applied wall containment and the secondary did not, so the second slot held out-of-vessel nulls. The solve read the
+    topology with a requested class and its own diagnostic read did not, so a third of converged slices aborted. The writer guarded the centroid height and never
+    compared the centroid major radius, so the major radius drifted 5.6 cm inboard unnoticed. Three independent instances in one night, each found by a different route,
+    none by the tests.</p>
+    <p><strong>A hypothesis that would make two of them one cause, with its test.</strong> The centroid comes from the same moment observation that runs the
+    unconstrained topology read. If its domain mask is the emergent boundary where the solve used the requested class, the moment integral is taken over the wrong
+    support and the centroid is displaced systematically, which is the observed shape. The test falls out of the repair already in flight: supply the class and see
+    whether the centroid major radius moves toward EFIT's on real slices where the emergent and requested classes differ. Note this does not contradict that repair's
+    own gate, which asserts a bit-identical centroid when the class is supplied to a flux that already reads cleanly without one; that pins the argument as
+    non-perturbing when the two classes agree, and the 5.6 cm question is what happens when they do not. The two measurements are different and both are wanted.</p>
+    <p>What this does not disturb: the axis result, because the axis offset was measured against EFIT's axis directly rather than through any centroid; and it does not
+    rescue the withdrawn prediction that nova reports a moment as an axis, since a 5.6 cm centroid offset cannot make a 13.25 cm axis-to-centroid distance a
+    coincidence.</p>
+  </section>
+
+  <section id="two-opposite-ledger-defects-a-naive-count-conflates">
+    <h2>Auditing the crew ledger against its own manifests: 62 incomplete rows, 124 suspect manifest hashes, and a flag that lies (2026-09-07 09:58Z)</h2>
+    <p>Prompted by finding one of my own promotions incomplete, and using an audit query the consumer supplied, every ledger row whose manifest records forty-character
+    commit hashes was compared against the row's own commit list. 720 rows checked:</p>
+    <table>
+      <thead><tr><th>Class</th><th>Rows</th><th>Which record is wrong</th></tr></thead>
+      <tbody>
+        <tr><td>Ledger list equals the manifest's</td><td>534</td><td>neither</td></tr>
+        <tr><td>Ledger list is a strict subset of the manifest's</td><td>62</td><td>the ledger, incomplete at promotion</td></tr>
+        <tr><td>They disagree without being a subset</td><td>124</td><td>probably the manifest, the known confabulated-SHA trap</td></tr>
+      </tbody>
+    </table>
+    <p><strong>A naive mismatch count returns 186 and conflates two opposite defects.</strong> The 62 are promotions that passed a tip commit where a node had landed
+    several, so the ledger under-records what the node did; the worst is a node with 31 commits recorded as one, and the reversed-current axis node tonight is in this
+    class at 8 recorded as 1. The 124 are rows where a worker's manifest quoted a hash the coordinator correctly declined to use, promoting the verified head instead,
+    so there the <em>ledger</em> is right and the manifest is the defective record. Reporting the single number would have sent someone to fix the wrong side on two
+    thirds of the hits, which is why the split is the finding rather than the total.</p>
+    <p>The practical consequence of the 62, and why it matters beyond tidiness: the out-of-scope boundary check runs against the commits the promotion presents, so an
+    incomplete promotion silently disables it. That is how a mid-flight scope extension tonight reached the ledger with an empty acceptance list while the same check
+    fired correctly on another node minutes later over a single test helper. The two halves depend on each other: pass every commit, and the guard can see the scope;
+    pass the tip, and it cannot.</p>
+    <p><strong>And a third variant, in the tooling rather than in either project.</strong> On every row where a companion path was accepted with a reason, the
+    acceptance is stored and <code>scope_changed</code> stays <code>false</code>. So an auditor asking which nodes had their scope moved, by filtering the field named
+    for exactly that question, gets nothing back on precisely the rows where it moved. The fact is recorded; the field that advertises it is wrong. Filter on a
+    non-empty acceptance list instead. This is the same shape as a docstring asserting a property the framework does not provide, and as a height-only figure standing
+    in for a two-component agreement: a true-looking field carrying the wrong answer to the question an auditor would actually ask.</p>
+  </section>
+
+  <section id="the-pinned-limited-boundary-has-no-reachability-filter">
+    <h2>The limited branch sources its boundary flux from an unfiltered wall maximum, and the centre column can win it (2026-09-07 10:05Z)</h2>
+    <p>Found by the media session because the lead saw a floating plasma in a published figure and asked whether it was a plot artefact. It is not: the figure renders a
+    wrong boundary faithfully, and the defect is confined to the limited branch. Measured on 27079's 81 guard-ok unconditioned label frames, split by the session's own
+    diverted flag, axis-to-boundary flux span against EFIT's on the same slices, and boundary distance to the 36-vertex limiter:</p>
+    <table>
+      <thead><tr><th>Class</th><th>n</th><th>Nova span</th><th>EFIT span</th><th>Ratio</th><th>Boundary to limiter, nova</th><th>EFIT</th></tr></thead>
+      <tbody>
+        <tr><td>diverted</td><td>53</td><td>396.09 mWb</td><td>381.76</td><td>1.086</td><td>median 103.7 mm</td><td>40&ndash;80 mm standoff</td></tr>
+        <tr><td>limited</td><td>28</td><td>91.10 mWb</td><td>227.08</td><td>0.399</td><td>median 142.9 mm, max 391.6</td><td>1.0&ndash;1.1 mm, contact</td></tr>
+      </tbody>
+    </table>
+    <p>The worst frame, at 30 ms, has its eleven nested surface fluxes spanning 0.3056 to 0.3045 Wb, an entire axis-to-boundary interval of 1.1 mWb, a boundary area of
+    0.0318 m<sup>2</sup> against EFIT's 0.759, and surface areas growing linearly from zero, so it is a self-similar family of tiny contours around the axis rather
+    than a tracer stopping short. <code>branch_guard_ok</code> is true on every one of these frames: the solve reports success.</p>
+    <p><strong>Mechanism candidate, from reading three functions, which revises the reporter's saddle-search guess rather than confirming it.</strong> With a class
+    requested, the read calls a pinned selector returning the x-point anchor for diverted and the wall anchor for limited, so the source is right in shape. The wall
+    anchor is the extremum of the polarity-signed flux over the wall nodes, which for positive current is the maximum of psi on the wall, and that is the correct
+    definition of a limiter contact. But the wall polygon spans R 0.195 to 1.900 and therefore includes the centre column, which is a conductor. Early in a shot the
+    solenoid is strongest and the plasma current weakest, so psi on the inboard wall can exceed psi at the outboard contact and approach the axis value. The selector
+    takes a global maximum with no test that the winning node is on the plasma-facing side, and <strong>the pinned path applies no filter at all</strong>. Every
+    measured number follows: a span collapsing toward zero, a contour family near the axis, the area factor, the standoff from a wall EFIT touches, and a guard that
+    passes because nothing in it compares the boundary to the limiter. So does the class signature, since diverted frames take the x-point anchor.</p>
+    <p><strong>The pattern again, fifth instance.</strong> The emergent boundary path carries a private-flux shadow rule that excludes wall contacts lying beyond the
+    x-point band, on the reasoning that such a contact sits in a null's shadow and cannot bind the plasma. The pinned path, which is the one the labeller uses, has no
+    equivalent. One member of a pair filtered, the other not.</p>
+    <p><strong>Tested against EFIT's own map within the hour, which confirms the direction, refutes the culprit and leaves the magnitude open.</strong> Evaluating
+    EFIT's psirz bicubically at the 36 limiter nodes on 27079 and taking the argmax of total flux: at 30 ms the global wall maximum is 0.2955 Wb against a published
+    boundary of 0.2793 and an axis of 0.3834, so a selector taking that maximum places the boundary 16 mWb inboard of where it belongs, a shrink, which is the
+    mechanism's load-bearing half and is confirmed. The culprit is not: the winning node is the <em>upper roof</em> at R 0.565, Z 1.728 at every early time, migrating
+    to the lower roof and reaching an inboard corner only at 355 ms, by which time the plasma is diverted and the anchor unused. So the missing test is reachability in
+    general &mdash; a remote wall point 1.7 m above a midplane plasma cannot bind it &mdash; and a filter written against the centre column would have been the wrong
+    filter in the right class. The private-flux shadow rule on the emergent path is presumably what already excludes these.</p>
+    <p><strong>The magnitude is unexplained and no account should stand yet.</strong> Sixteen mWb of a 104 mWb span is a 15 per cent shrink; the frame collapses by 99
+    per cent to a 1.17 mWb span. Two candidates, and the first has a counter-argument. Self-consistent amplification, where a boundary too close to the axis shrinks
+    the plasma, weakens its own contribution and moves the wall flux again, would explain both the size and why the guard passes, since each iterate is
+    self-consistent. But the writer prescribes the measured coil currents and pins the absolute reference plasma current, so the coil field at the wall is fixed and a
+    collapsing plasma's own wall contribution tends to a filament's, bounding the wall maximum; and a pinned current squeezed into a shrinking area raises its density
+    and deepens the axis, which grows the span rather than collapsing it. The mechanism has to survive both pins to be the account. The second candidate needs no
+    solve: the writer carries a warm start from the previous slice and carries it whenever that slice finished cleanly, which these frames did because the guard
+    passed, so a collapsed frame is a legitimate warm start for the next and the collapse can propagate and deepen along the run. Its test is whether the failing
+    frames are contiguous and whether the shrink grows monotonically; a first limited frame already at 99 per cent rules propagation out.</p>
+    <p>The decisive test remains nova's own map rather than EFIT's, since the two solutions genuinely differ there: at 30 ms nova's axis sits at R 0.658 against an
+    EFIT plasma centred near 0.9. Print the node the selector actually chose, on nova's map, on that frame.</p>
+    <p>Two consequences, both worse than an outline error. A compressed flux span means psi_norm is compressed, so the 26 TORAX faces with their p_prime and ff_prime
+    sit on a wrong abscissa in those frames, corrupting the profile coordinate itself, and anything trained or scored on limited-phase labels inherits it. And the
+    mechanism predicts the defect is worst when the solenoid is strongest and the plasma weakest, which is precisely the early phase where the consumer measured its
+    dR structure before 0.21 s; if the centre-column test confirms, that becomes one cause rather than two findings.</p>
+  </section>
+
+  <section id="the-shadow-is-computed-after-the-boundary-it-should-gate">
+    <h2>The private-wall shadow exists, is per-node, and is computed from the read that already chose the boundary (2026-09-07 10:20Z)</h2>
+    <p>Investigated on the lead's instruction to establish the mechanism before assuming a fix, the lead's suspicion being that the winning roof node sits inside the
+    divertor box and should have been shadowed. It should have been, the machinery to shadow it exists, and the reason it did not is an ordering rather than a missing
+    filter.</p>
+    <p><strong>What exists.</strong> <code>wall_height_shadow_mask</code> in <code>nova/equilibrium/connectivity_boundary.py</code> returns a per-wall-node private
+    exclusion built from the qualified saddles with a hysteresis band, and it consumes a <code>private_wall_node_mask</code> that the connectivity read derives from
+    the flood fill, with connectivity-proven common wall nodes always participating. That is precisely the mechanism the lead described, and a roof node beyond the
+    X-point is exactly what it is built to exclude.</p>
+    <p><strong>Why it does not gate the anchor.</strong> In <code>_frozen_topology_partition</code> the order is: complete the topology read, which selects the
+    boundary, and then call <code>_residual_shadow_components_from_read(physical, masks, topology, previous_shadow)</code>, which takes the finished read's axis height
+    and primary X-point as <em>inputs</em> to build the shadow. So the shadow is downstream of the selection it would have to constrain. Its name says what it is for:
+    it is a <em>residual</em> shadow, excluding shadowed wall nodes from the residual equations, and nothing carries it back to the anchor. Confirmed at the two ends:
+    <code>_fixed_design_read(physical, requested_class)</code> accepts no shadow argument, and all four call sites of the wall reader are
+    <code>self.wall(psi_wall, polarity)</code> with no mask, so the wall extremum is a global argmax over every node including those the same machinery is about to
+    mark private.</p>
+    <p><strong>What this changes about the repair, and it is the reason the lead's instruction was right.</strong> The fix is not a new reachability filter of the kind
+    proposed earlier, and it is not a test naming the centre column or the roof. The per-node exclusion already exists and is already correct in intent; it is simply
+    not supplied at the point of selection. And the plumbing to supply it is present: <code>previous_shadow</code> is already threaded into
+    <code>_frozen_topology_partition</code>, so the previous iterate's wall shadow is in scope at the moment the read is made, with a hysteresis band designed for
+    exactly this carry. So the candidate repair is to pass that shadow into the read and mask the wall flux before the extremum is taken, which is a wiring change
+    within existing machinery rather than a new rule, and it inherits the hysteresis that stops a boundary flickering between anchors across iterates.</p>
+    <p>Two things this does not settle and must not be assumed. Whether masking the anchor is sufficient to recover the frames, since the current evidence says the
+    solve carried roughly four per cent of the reference plasma current and it is not yet established whether that is a cause or a consequence of the anchor. And what
+    the first iterate does, when no previous shadow exists, which is the case that produced the worst frame: a cold start has nothing to carry, so the ordering problem
+    is real there even after the wiring, and the answer may be to iterate the read once rather than to accept its first anchor.</p>
+  </section>
+
+  <section id="the-limited-class-is-impaired-from-a-good-seed-too">
+    <h2>A 2x2 on class against start condition: the solid finding is that limited frames are impaired even warm (2026-09-07 10:32Z)</h2>
+    <p>Span ratio, nova against EFIT, on 27079, crossing the topology class with whether the frame inherited a converged predecessor:</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median</th><th>Min</th><th>Max</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>67</td><td>0.979</td><td>0.364</td><td>1.380</td></tr>
+        <tr><td>diverted, cold</td><td>7</td><td>1.086</td><td>0.510</td><td>1.311</td></tr>
+        <tr><td>limited, warm</td><td>27</td><td>0.410</td><td>0.105</td><td>0.588</td></tr>
+        <tr><td>limited, cold</td><td>1</td><td>0.011</td><td>&mdash;</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p>A cold start is harmless on its own, 1.086 against 0.979 over 7 and 67 frames, which is what the account requires since a diverted frame never consults the wall
+    anchor. <strong>The solid finding is that the limited class is impaired even warm, 0.410 against 0.979 over 27 and 67 frames</strong>, so the anchor is wrong even
+    from a good seed. The limited cold cell collapses a further 37-fold, and rests on one frame.</p>
+    <p><strong>This corrects the coordinator's mechanism for the interaction.</strong> The claim was that a cold first iterate lacks a shadow to inherit while later
+    frames have one. That is wrong on its own evidence: the shadow is never applied to the anchor in any case, so inheriting it changes nothing there, and the warm-cold
+    axis cannot be a shadow effect. It is a seed effect. A cold limited frame seeds from the reconstruction flux rather than a converged predecessor, and the anchor
+    chosen from the worse seed lands worse still. The prediction was right in outcome and wrong in mechanism.</p>
+    <p><strong>The acceptance measure for the repair follows from the marginals rather than from the mechanism.</strong> Masking the anchor must recover the 27 warm
+    limited frames and not merely the single catastrophic one. If the limited median moves from 0.41 toward unity the account is confirmed; if 30 ms is fixed and the
+    class stays at 0.41, there is a second defect in that branch and the ordering was only its tail.</p>
+    <p>One observation carried unlabelled because it sits in the class being used as the healthy control: the diverted ratio is not a median near unity with scatter but
+    has structure, running 1.2 to 1.38 above EFIT through the mid-discharge around 420 to 490 ms and falling to 0.46 by 575 ms. If the control carries its own
+    time-dependent discrepancy then every ratio quoted against it inherits that. Open observation, not a finding.</p>
+  </section>
+
+  <section id="the-limited-defect-and-the-control-drift-are-corpus-wide">
+    <h2>A 54,415-frame census: the limited defect is corpus-wide and the healthy control is not healthy (2026-09-07 10:18Z)</h2>
+    <p>943 shots, 54,415 guarded frames, no unreadable sessions, two minutes on a debug partition, reading session files and the efm store with no solve.</p>
+    <table>
+      <thead><tr><th>Class and start</th><th>n</th><th>Median span ratio</th><th>p10</th><th>p90</th><th>Fraction below 0.5</th></tr></thead>
+      <tbody>
+        <tr><td>diverted, warm</td><td>38,858</td><td>0.838</td><td>0.469</td><td>1.187</td><td>0.118</td></tr>
+        <tr><td>diverted, cold</td><td>5,148</td><td>0.865</td><td>0.468</td><td>1.179</td><td>0.115</td></tr>
+        <tr><td>limited, warm</td><td>9,181</td><td>0.285</td><td>0.094</td><td>0.533</td><td>0.877</td></tr>
+        <tr><td>limited, cold</td><td>1,228</td><td>0.066</td><td>0.009</td><td>0.375</td><td>0.944</td></tr>
+      </tbody>
+    </table>
+    <p>Cold starts are harmless at scale, 0.838 warm against 0.865 cold over 44,000 diverted frames. The limited class is impaired corpus-wide with 88 per cent of
+    frames below half, 844 of 943 shots contribute a limited cold start, and the interaction that rested on one frame now has 1,228 behind it. Banding by time to remove
+    the confound that limited frames live early, the defect survives time-matching at every epoch at two to four fold below its own-epoch control, so it is not the
+    early phase in disguise.</p>
+    <p><strong>And the class used as the healthy control is not healthy.</strong> Banded in time the diverted median drifts monotonically from 0.70 early through 0.83
+    to 1.15 late: about thirty per cent low early and fifteen per cent high late, corpus-wide, over tens of thousands of frames. That was carried as an incidental
+    observation an hour ago and is now a second finding with its own consequence, since every ratio quoted against a diverted baseline tonight inherits it. The
+    earliest band's control has n of 36 and should not be leaned on alone.</p>
+    <p><strong>This changed the repair's acceptance measure, which had been set wrongly.</strong> The measure was moving the limited median toward unity. Unity is the
+    wrong target because the control is not at unity, so an absolute target would fail a correct fix in the early bands where even diverted sits at 0.70, and pass an
+    incorrect one late where the control overshoots. The measure is now the ratio of the limited median to the diverted median <em>at matched time epoch</em> reaching
+    one, currently 0.26 to 0.55 in the bands where limited frames are common. The correction arrived in the same minute the repair node was dispatched, which cost two
+    stopped runs and is recorded as such rather than as a failure.</p>
+  </section>
+
+  <section id="the-app-does-not-reseed-the-decoder-on-an-edit">
+    <h2>The decoder degrades four frames after leaving real history, and the app re-seeds only on a base change (2026-09-07 10:30Z)</h2>
+    <p>The consumer's full-window render supersedes its earlier figures and identifies the decoder's failure precisely: decoded 24.952 against a persistence baseline
+    of 6.750 over 41 transitions, worse than the contaminated render's 2.894 over 45. Reading the frames rather than the scalar explains it. The decoded panel is
+    near-black for most of the rollout, and a black frame against a real frame whose own mean is 17.8 levels gives an error of that size. Per frame the decoded error
+    rises from 8.4 at the first transition to 21 by the fifth and then sits between 13 and 46. <strong>The decoder degrades within about four frames of leaving
+    real-frame history and does not recover.</strong> That also reconciles the earlier numbers: the six-frame seeded render's 2.156 was the best case immediately after
+    a real seed, and the contaminated render scored better than the corrected one because its distant bright seed injected mid-tone content that partially matched the
+    real frames, so contamination flattered the metric while making the picture visibly wrong. Conditioning strength and normalisation were both tested and cleared, so
+    the failure is sustained autoregressive rollout, which is a bounded problem with a known shape rather than a model that has learned nothing.</p>
+    <p><strong>A demo-planning conclusion drawn from that was inverted by a claim about this app, and reading the source rather than the docstring corrected it.</strong>
+    The claim was that the app calls the decoder's reset at every base-observation boundary, so an edit re-seeds the decoder and interactive steering is its strongest
+    regime. The session resets history on exactly two events: when <code>base_shot</code> or <code>base_slice</code> changes to a different value, and when a decoder is
+    first assigned. A steering edit changes coil currents and turning-point targets and touches neither field. So a keypress does not re-seed, history rolls
+    autoregressively across every edit within one base observation, and the base observation changes only when a person deliberately jumps to another shot or slice.</p>
+    <p>The conclusion therefore inverts. Interactive steering is not the short-horizon case; it is the degraded rollout arriving on the same schedule as an unattended
+    replay, with the person watching it degrade in real time while causing it. The per-frame curve above is a description of what someone sees after their fourth
+    keypress. The only regime the measurement does not contradict is a short burst immediately after a base change, named because it is that and not as a proposal.</p>
+    <p>Whether the app should re-seed on an edit is left open deliberately. The hook and the call site already exist, so the change is small, but re-seeding discards
+    the history the model is conditioned on and the consequence for a sequence a person is steering is the consumer's judgement rather than this project's.</p>
+  </section>
 </main>
 </body>
 </html>

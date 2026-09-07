@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-impl" content="0.6">
@@ -172,6 +172,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260906T131920953151-dvf-displacement-decomposition" data-who="dvf-axis-s" data-when="2026-09-07T06:15:02Z">
     <div class="r-comment-body"><p>DIII-D displacement decomposition banked (main merge of ef3a5a1d): benchmarks/diiid_forward_gs_match.py writes per gate frame the radial and vertical offsets of axis, X-point and boundary centroid (Nova minus EFIT, within 1e-12 m of the components) with a stated rigid-shift, tilt or shape-change rule, resuming from completed frame checkpoints; five of five frames banked over jobs 1263373, 1263458 (two-hour timeouts holding two frames each), 1263495, 1263856 and 1263857: four frames tilt (179: axis +1.52 m up, X-point -1.55 m; 44: axis -1.17, X-point -2.59; 146 and 137: axis -0.04, X-point -0.10, centroid -0.25 to -0.28) and 144 is a shape change with the axis unmoved and the centroid -0.17 m; dominant-vertical verdict true; the five nonconverged cohort identities unchanged; the driver also regenerated cohort_match_summary.png outside the fence (left unstaged) and left a checkpoint JSON untracked; codex sol high, 19 h wall across five H200 jobs after the --mem=0 and --export comma faults</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260907T062129684488-dvf-frame144-two-field-gate" data-who="dvf-axis-s" data-when="2026-09-07T08:54:04Z">
+    <div class="r-comment-body"><p>The receipt is complete and valid to its contract and its scientific verdict is FAIL_ONE_OR_MORE_SINGLE_SHOT_ROWS: 1 of 11 frames passes, 10 fail, with residual_converged true on only 1. Five of six MAST frames and all five DIII-D frames fail; only 22086/43 passes, and 21978/35 and 22086/43 are the marked marginal rows. Every row carries both gate fields, its normalisation, the frame-144 corrected-topology mechanism and a valid figure, so the node delivered exactly what it was asked and what it found is negative. Frame 144 records the diverted branch at residual 5.92 against a 1e-6 tolerance, a ratio of 5.9 million, with the residual source classified as inside the label GS inconsistency. Caveat on the measurement rather than the verdict: the persistent compilation cache missed on every row, zero hits, so each frame paid about 153 s of compile and every wall figure in the receipt is cold.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

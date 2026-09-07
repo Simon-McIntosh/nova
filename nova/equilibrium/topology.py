@@ -438,6 +438,54 @@ class Topology(Pytree):
         """Return wall-point flux."""
         return self.wall(psi_wall, polarity)[2]
 
+    def wall_anchor_data(
+        self,
+        psi_wall,
+        polarity,
+        requested_class=None,
+        private_wall_node_mask=None,
+    ):
+        """Return the wall extremum after excluding known private-wall nodes.
+
+        A private-wall mask is meaningful only for a pinned limited read.  An
+        emergent read retains its own saddle-height reachability rule, while a
+        pinned diverted read selects its saddle and must not change when wall
+        shadow evidence is supplied.
+
+        Masked samples receive a finite losing score before the wall extremum
+        is selected.  Keeping the operand finite preserves the fixed-shape
+        quadratic interpolation used by :class:`~nova.biot.null.Null1D` while
+        preventing a masked node from winning the discrete wall bracket.
+        """
+        wall_flux = jnp.asarray(psi_wall)
+        if private_wall_node_mask is None or requested_class is None:
+            return self.wall(wall_flux, polarity)
+        private_wall = jnp.asarray(private_wall_node_mask, dtype=bool)
+        if private_wall.shape != wall_flux.shape:
+            raise ValueError("private wall mask must carry one flag per wall node")
+        apply_mask = jnp.asarray(requested_class) == int(TopologyClass.LIMITED)
+        private_wall = private_wall & apply_mask
+        signed_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
+        eligible = ~private_wall & jnp.isfinite(signed_flux)
+        lowest = jnp.min(jnp.where(eligible, signed_flux, jnp.inf))
+        highest = jnp.max(jnp.where(eligible, signed_flux, -jnp.inf))
+        span = highest - lowest
+        scale = jnp.maximum(jnp.maximum(jnp.abs(lowest), jnp.abs(highest)), 1.0)
+        losing_step = jnp.maximum(span, jnp.finfo(wall_flux.dtype).eps * scale)
+        losing_score = jnp.where(jnp.any(eligible), lowest - losing_step, jnp.nan)
+        masked_flux = jnp.where(
+            private_wall,
+            jnp.asarray(polarity, dtype=wall_flux.dtype) * losing_score,
+            wall_flux,
+        )
+        selected = self.wall(masked_flux, polarity)
+        selected_score = jnp.asarray(polarity, dtype=wall_flux.dtype) * selected[2]
+        bounded_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * jnp.minimum(
+            selected_score, highest
+        )
+        bounded = selected.at[2].set(bounded_flux)
+        return jnp.where(jnp.any(private_wall), bounded, selected)
+
     @jax.jit
     def boundary(self, data_o, vmap_x, data_w, polarity):
         """Return boundary data structure."""
@@ -579,6 +627,7 @@ class Topology(Pytree):
         saddle=None,
         surface: TensorBSpline | None = None,
         boundary_uncertainty=0.0,
+        polarity=None,
     ):
         """Return the closed, in-material hex component containing the axis.
 
@@ -596,7 +645,16 @@ class Topology(Pytree):
         inward = _PRE_SADDLE_OFFSET_FRACTION * (
             jnp.nanmax(inside_flux) - jnp.nanmin(inside_flux)
         )
-        direction = jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
+        # The plasma-current polarity is the authoritative ordering of the
+        # axis and boundary levels.  Using their sampled values here can
+        # silently reverse the flood when a trial map has not yet preserved
+        # the seed ordering; the same sign also governs psi_mask and saddle
+        # admission below.
+        direction = (
+            jnp.where(jnp.asarray(polarity) >= 0, 1.0, -1.0)
+            if polarity is not None
+            else jnp.where(axis_flux >= boundary_flux, 1.0, -1.0)
+        )
         comparison_boundary_flux = boundary_flux + direction * boundary_uncertainty
         component_flux = comparison_boundary_flux + direction * inward
         component_flux = jnp.where(saddle_cut, component_flux, comparison_boundary_flux)
@@ -732,6 +790,7 @@ class Topology(Pytree):
                 jnp.equal(data_b[2], data_x[2]),
                 data_x[:2],
                 surface,
+                polarity=polarity,
             )
             governed_size = jnp.sum(component & inside_material)
             governed_connection = governed_size >= connection_floor
@@ -766,7 +825,14 @@ class Topology(Pytree):
         return psi_norm, ionize
 
     @jax.jit
-    def read_qualification(self, psi, polarity, inside_material, requested_class=None):
+    def read_qualification(
+        self,
+        psi,
+        polarity,
+        inside_material,
+        requested_class=None,
+        private_wall_node_mask=None,
+    ):
         """Return device topology data and magnetic-axis qualification.
 
         The same axis, X-point set and wall-limit read that :meth:`update`
@@ -806,7 +872,12 @@ class Topology(Pytree):
         else:
             vmap_o, vmap_x = self.grid(psi_grid)
             census = None
-        data_w = self.wall(psi_wall, polarity)
+        data_w = self.wall_anchor_data(
+            psi_wall,
+            polarity,
+            requested_class,
+            private_wall_node_mask,
+        )
         qualified_o = self.qualified_o_candidates(
             vmap_o,
             vmap_x,
@@ -915,6 +986,7 @@ class Topology(Pytree):
             data_x[:2],
             surface,
             boundary_uncertainty,
+            polarity=polarity,
         )
         masks = classify_domains(
             psi_norm,
@@ -943,20 +1015,40 @@ class Topology(Pytree):
         )
 
     def read_with_connectivity(
-        self, psi, polarity, inside_material, requested_class=None
+        self,
+        psi,
+        polarity,
+        inside_material,
+        requested_class=None,
+        private_wall_node_mask=None,
     ):
         """Return the host-qualified saddle-aware ``axis_component`` read."""
 
         result = self.read_qualification(
-            psi, polarity, inside_material, requested_class
+            psi,
+            polarity,
+            inside_material,
+            requested_class,
+            private_wall_node_mask,
         )
         require_qualified_axis(result.axis_admitted)
         return result.masks, result.state, result.connected
 
-    def read(self, psi, polarity, inside_material, requested_class=None):
+    def read(
+        self,
+        psi,
+        polarity,
+        inside_material,
+        requested_class=None,
+        private_wall_node_mask=None,
+    ):
         """Return the domain labels and axis/separatrix state of one flux map."""
         masks, state, _connected = self.read_with_connectivity(
-            psi, polarity, inside_material, requested_class
+            psi,
+            polarity,
+            inside_material,
+            requested_class,
+            private_wall_node_mask,
         )
         return masks, state
 

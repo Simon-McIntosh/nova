@@ -1,0 +1,169 @@
+{
+  "acceptance_measure": "the matched-epoch ratio of the limited median to the diverted median reaching one, never either median against unity",
+  "band_count": 3,
+  "bands": [
+    {
+      "band_ms": [
+        0.0,
+        50.0
+      ],
+      "diverted_control_count": 36,
+      "diverted_control_median": 0.7015359776327807,
+      "improved": false,
+      "limited_warm_after": {
+        "count": 34,
+        "median": 0.42170833511110206,
+        "quoted": true
+      },
+      "limited_warm_before": {
+        "count": 34,
+        "median": 0.42170833511110206,
+        "quoted": true
+      },
+      "matched_epoch_ratio_after": 0.6011214656931614,
+      "matched_epoch_ratio_before": 0.6011214656931614,
+      "reaches_unity_within_10_percent": false
+    },
+    {
+      "band_ms": [
+        50.0,
+        100.0
+      ],
+      "diverted_control_count": 1829,
+      "diverted_control_median": 0.7199772544076445,
+      "improved": false,
+      "limited_warm_after": {
+        "count": 64,
+        "median": 0.5699585316276347,
+        "quoted": true
+      },
+      "limited_warm_before": {
+        "count": 64,
+        "median": 0.5699585316276347,
+        "quoted": true
+      },
+      "matched_epoch_ratio_after": 0.7916340802968331,
+      "matched_epoch_ratio_before": 0.7916340802968331,
+      "reaches_unity_within_10_percent": false
+    },
+    {
+      "band_ms": [
+        100.0,
+        150.0
+      ],
+      "diverted_control_count": 5409,
+      "diverted_control_median": 0.6824360377776613,
+      "improved": false,
+      "limited_warm_after": {
+        "count": 38,
+        "median": 0.5498408067639606,
+        "quoted": true
+      },
+      "limited_warm_before": {
+        "count": 38,
+        "median": 0.5498408067639606,
+        "quoted": true
+      },
+      "matched_epoch_ratio_after": 0.8057030642087804,
+      "matched_epoch_ratio_before": 0.8057030642087804,
+      "reaches_unity_within_10_percent": false
+    }
+  ],
+  "bands_at_unity": 0,
+  "bands_improved": 0,
+  "bands_too_thin_to_quote": [
+    {
+      "band_ms": [
+        150.0,
+        200.0
+      ],
+      "diverted_control": 5819,
+      "limited_warm_after": 4,
+      "limited_warm_before": 4
+    },
+    {
+      "band_ms": [
+        200.0,
+        300.0
+      ],
+      "diverted_control": 11209,
+      "limited_warm_after": 0,
+      "limited_warm_before": 0
+    },
+    {
+      "band_ms": [
+        300.0,
+        400.0
+      ],
+      "diverted_control": 9047,
+      "limited_warm_after": 0,
+      "limited_warm_before": 0
+    },
+    {
+      "band_ms": [
+        400.0,
+        1000.0
+      ],
+      "diverted_control": 5509,
+      "limited_warm_after": 0,
+      "limited_warm_before": 0
+    }
+  ],
+  "banked_side_restricted_to_relabelled_shots": true,
+  "diverted_control_taken_corpus_wide": true,
+  "frames_compared": {
+    "after": 363,
+    "before": 363
+  },
+  "limited_cold_cell": {
+    "after_median": 0.2569604067728555,
+    "before_median": 0.2569604067728555,
+    "expected_to_move": false
+  },
+  "minimum_band_frames": 20,
+  "paired": {
+    "diverted_warm": {
+      "after_median": 0.8303832999901395,
+      "before_median": 0.8303832999901395,
+      "count": 191,
+      "fraction_improved": 0.16230366492146597,
+      "maximum_absolute_change": 1.1834977442504169e-13,
+      "median_change": 0.0
+    },
+    "frames_changing_topology_class": 0,
+    "frames_only_after": 0,
+    "frames_only_before": 0,
+    "limited_cold": {
+      "after_median": 0.2569604067728555,
+      "before_median": 0.2569604067728555,
+      "count": 7,
+      "fraction_improved": 0.0,
+      "maximum_absolute_change": 0.0,
+      "median_change": 0.0
+    },
+    "limited_warm": {
+      "after_median": 0.5091581906199958,
+      "before_median": 0.5091581906199958,
+      "count": 140,
+      "fraction_improved": 0.0,
+      "maximum_absolute_change": 0.0,
+      "median_change": 0.0
+    },
+    "matched_frame_count": 363
+  },
+  "primary_measure": "the paired per-frame change, because the same frame appears in both corpora and is therefore its own control",
+  "shot_count": 7,
+  "shots_compared": [
+    21978,
+    21983,
+    21985,
+    21986,
+    21989,
+    22086,
+    27079
+  ],
+  "unexplained": [
+    "140 limited warm frames came back with a maximum absolute change of 0.000e+00, so the relabelled corpus is the banked one to within round-off and the repair did not reach the class it targets",
+    "7 limited cold frames came back with a maximum absolute change of 0.000e+00, so the relabelled corpus is the banked one to within round-off and the repair did not reach the class it targets"
+  ]
+}

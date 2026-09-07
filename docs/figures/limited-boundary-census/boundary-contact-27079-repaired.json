@@ -1,0 +1,23 @@
+{
+  "acceptance": "the limited median must reach the reconstruction's own 1.1 mm contact; the diverted gap is a standoff and is expected",
+  "admission": "branch_guard_ok, not conditioned on the reference centroid",
+  "boundary_wall_gap_mm": {
+    "diverted": {
+      "count": 53,
+      "max_mm": 125.63513562098633,
+      "median_mm": 103.6599786469005
+    },
+    "limited": {
+      "count": 28,
+      "max_mm": 391.64270760282835,
+      "median_mm": 142.91051328586968
+    }
+  },
+  "diverted_frame_count": 53,
+  "frame_count": 81,
+  "limited_frame_count": 28,
+  "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
+  "shot": 27079,
+  "statistic_source": "nova_thomson_gif.py gap summary, the same function the figure receipt writes",
+  "wall_section_count": 37
+}

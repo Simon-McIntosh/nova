@@ -1086,13 +1086,16 @@ class ForwardFluxOperator:
         distance2 = jnp.where(jnp.isfinite(vmap_o[:, 0]), distance2, jnp.inf)
         return vmap_o[jnp.argmin(distance2), :2]
 
-    def _fixed_design_read(self, physical, requested_class=None):
+    def _fixed_design_read(
+        self, physical, requested_class=None, private_wall_node_mask=None
+    ):
         """Read topology data after admitting a centroid-nearest rescue cell."""
         initial = self._fixed_design_topology.read_qualification(
             physical,
             self.polarity,
             self.inside_material,
             requested_class,
+            private_wall_node_mask,
         )
         grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)
         vmap_o, _vmap_x = self._fixed_design_topology.grid(grid_flux)
@@ -1103,6 +1106,7 @@ class ForwardFluxOperator:
             self.polarity,
             material,
             requested_class,
+            private_wall_node_mask,
         )
         same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
         admitted = result.axis_admitted & (~initial.axis_admitted | same_axis)
@@ -1583,24 +1587,43 @@ class ForwardFluxOperator:
         """Return independent interior-flood and wall-height shadow components."""
 
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, _connected, _admitted = self._fixed_design_read(
-            physical, requested_class
-        )
+        previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
+        if previous_wall_shadow is None:
+            masks, topology, _connected, _admitted = self._fixed_design_read(
+                physical, requested_class
+            )
+        else:
+            masks, topology, _connected, _admitted = self._fixed_design_read(
+                physical,
+                requested_class,
+                private_wall_node_mask=previous_wall_shadow,
+            )
         return self._residual_shadow_components_from_read(
             physical, masks, topology, previous_shadow
         )
+
+    def _previous_wall_shadow(self, previous_shadow):
+        """Return the prior iterate's wall mask, or no mask on a cold start.
+
+        A cold start has no independently established private-wall partition,
+        so its first topology read remains unmasked rather than deriving a
+        circular mask from the boundary it is choosing.  The first promoted
+        residual shadow then supplies the wall evidence to every later read.
+        """
+        if previous_shadow is None:
+            return None
+        return jnp.asarray(previous_shadow, dtype=bool)[
+            self.grid.node_number : self.physical_node_number
+        ]
 
     def _residual_shadow_components_from_read(
         self, physical, masks, topology, previous_shadow=None
     ):
         """Build residual shadows from one already-completed topology read."""
         reading = self._carrier_shadow_read(physical, masks)
-        if previous_shadow is None:
+        previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
+        if previous_wall_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
-        else:
-            previous_wall_shadow = jnp.asarray(previous_shadow, dtype=bool)[
-                self.grid.node_number : self.physical_node_number
-            ]
         wall_shadow = wall_height_shadow_mask(
             self.wall.coordinate[:, 1],
             topology.axis[1],
@@ -1620,9 +1643,17 @@ class ForwardFluxOperator:
         if self.use_linear_moments and self.moment_geometry is None:
             raise ValueError("linear moments require moment geometry")
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, _connected, _admitted = self._fixed_design_read(
-            physical, requested_class
-        )
+        previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
+        if previous_wall_shadow is None:
+            masks, topology, _connected, _admitted = self._fixed_design_read(
+                physical, requested_class
+            )
+        else:
+            masks, topology, _connected, _admitted = self._fixed_design_read(
+                physical,
+                requested_class,
+                private_wall_node_mask=previous_wall_shadow,
+            )
         flood_shadow, wall_shadow = self._residual_shadow_components_from_read(
             physical, masks, topology, previous_shadow
         )

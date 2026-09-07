@@ -241,6 +241,58 @@ def draw_legs(
         )
 
 
+def chord_crossings(boundary: np.ndarray, height: float) -> list[float]:
+    """Return the radii where a closed boundary crosses one horizontal chord.
+
+    A Thomson string measures along a line of constant Z, so the boundary it
+    samples through is wherever the separatrix crosses that line. Marking it
+    turns "is the edge visible in this profile" into something a reader can
+    check against the poloidal panel rather than infer.
+    """
+    loop = np.asarray(boundary, dtype=float).reshape(-1, 2)
+    loop = loop[np.all(np.isfinite(loop), axis=1)]
+    if loop.shape[0] < 3:
+        return []
+    if not np.allclose(loop[0], loop[-1]):
+        loop = np.vstack((loop, loop[:1]))
+    lower, upper = loop[:-1], loop[1:]
+    # A half-open rule, because a strict product test misses a segment whose
+    # endpoint lies EXACTLY on the chord and a non-strict one counts that
+    # crossing twice. Comparing "below or on" membership counts each crossing
+    # once whether or not a vertex sits on the line -- the same degeneracy
+    # that makes strict polygon inclusion the wrong test for a point on a
+    # boundary.
+    below_lower = lower[:, 1] <= height
+    below_upper = upper[:, 1] <= height
+    straddles = below_lower != below_upper
+    if not np.any(straddles):
+        return []
+    a, b = lower[straddles], upper[straddles]
+    fraction = (height - a[:, 1]) / (b[:, 1] - a[:, 1])
+    return sorted(float(x) for x in a[:, 0] + fraction * (b[:, 0] - a[:, 0]))
+
+
+def boundary_wall_gap(boundary: np.ndarray, wall: np.ndarray) -> float:
+    """Return the closest approach of a boundary to a wall outline, in metres.
+
+    A LIMITED plasma touches its limiter, so this is near zero for one and a
+    real standoff for a diverted plasma. Reporting it turns a boundary that
+    has collapsed inward into a number rather than something a reader has to
+    notice in a picture -- measured on labelled MAST solves, limited frames
+    stood 143 mm off a wall EFIT touches at 1.1 mm, with the worst at 392 mm.
+    """
+    import shapely
+
+    loop = np.asarray(boundary, dtype=float).reshape(-1, 2)
+    loop = loop[np.all(np.isfinite(loop), axis=1)]
+    outline = np.asarray(wall, dtype=float).reshape(-1, 2)
+    outline = outline[np.all(np.isfinite(outline), axis=1)]
+    if loop.shape[0] < 2 or outline.shape[0] < 3:
+        return float("nan")
+    ring = shapely.LinearRing(outline)
+    return float(min(ring.distance(shapely.Point(point)) for point in loop))
+
+
 def draw_nulls(
     axes: matplotlib.axes.Axes,
     magnetic_axis: Sequence[float] | None = None,

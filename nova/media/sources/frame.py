@@ -77,6 +77,12 @@ class SurfaceFrame:
     p_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
     ff_prime: np.ndarray = field(default_factory=lambda: np.zeros(0))
     guarded: bool = True
+    diverted: bool | None = None
+    """Whether the solve classified this slice as diverted rather than limited.
+
+    A LIMITED boundary must touch its limiter by definition, so the class is
+    what makes a boundary-to-wall standoff checkable: the same gap is correct
+    for a diverted slice and a defect for a limited one."""
     conditioned: bool = False
     """Whether this solve was pinned to the reference's own current centroid.
 

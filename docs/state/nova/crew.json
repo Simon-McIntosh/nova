@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T13:16:47",
+  "updated": "2026-09-07T14:43:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2674,9 +2674,11 @@
         "id": "pfs-appdemo-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "4d6e7557-91f1-4523-b759-98566a2416ec",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "4d6e7557-91f1-4523-b759-98566a2416ec"
+        },
         "created": "2026-09-07"
       },
       {
@@ -2870,6 +2872,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "pfs-limitedfix-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
         "id": "pfs-loop-x",
         "harness": "clive",
         "role": "implement",
@@ -2912,6 +2923,15 @@
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07652-2a88-7911-9908-534582e47c41"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-maskfire-s",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-nullguard-c",
@@ -120509,6 +120529,280 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T112717395236-pfs-wall-shadow-firing-census",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-wall-shadow-firing-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1212,
+                "cached_input_tokens": 204649,
+                "input_tokens": 205863,
+                "output_tokens": 1153,
+                "reasoning_output_tokens": 334,
+                "total_tokens": 207016,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "benchmarks/wall_shadow_firing_census.py exits 0 under sbatch on betelgeuse and writes a per-frame JSON table covering all seven shots, in which every limited frame carries a masked-node count beside its wall-node denominator, the qualified-saddle count the predicate consumed, the eligibility branch taken on each side, plus a flag for whether the winning anchor node was masked; the report quotes the total masked-node count over all limited frames as a single number against the stated bound of zero, naming which of the two outcomes that number supports",
+          "estimated_hours": 1.0,
+          "goal": "A per-frame census of how many wall nodes the private-wall shadow mask actually excludes on the seven relabelled MAST shots, with the verdict it supports",
+          "id": "pfs-wall-shadow-firing-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/pfs-wall-shadow-firing-census/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/wall_shadow_firing_census.py",
+            "docs/figures/playable-forward-solve/wall-shadow-firing",
+            "nova/equilibrium/connectivity_boundary.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-shadow-firing-census.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-maskfire-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T11:27:27Z",
+        "completed_at": "2026-09-07T11:57:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1795,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1795,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6ad07400a52ea1348df4efab1e40e1af8f3f7f9f",
+        "commits": [
+          "63833d0bf20a978033d6fa7fdd82850a56f880dd",
+          "8bbb68e876148c28e4281a8073f93870897f605e"
+        ],
+        "changed_lines": {
+          "added": 481,
+          "removed": 26,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/wall_shadow_firing_census.py (sbatch 1264384, betelgeuse gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/wall-shadow-firing-census.sbatch.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/pfs-wall-shadow-firing-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07b9f-8875-7201-8afc-117efed8bf6d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-wall-shadow-firing-census",
+          "session_id": "01a07b9f-8875-7201-8afc-117efed8bf6d",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T11:57:22Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T094710640994-pfs-writers-pass-the-solve-class",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-writers-pass-the-solve-class",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 867,
+                "cached_input_tokens": 724769,
+                "input_tokens": 725638,
+                "output_tokens": 1188,
+                "reasoning_output_tokens": 361,
+                "total_tokens": 726826,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_parallel.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, both writers passing their per-slice requested class into the free and the conditioned achieved-centroid reads, one carrier shot rerun through the sequential writer on one H200 card under gpu_0003_grpA with 4 cores and 128 GiB reporting how many of its previously aborted rows now record a finite achieved centroid as a before and after count, the report stating whether any row that previously produced a centroid changed its value at all and treating any such change as a finding rather than as noise, the report also stating plainly how many rows still abort with the class supplied since that residue is a solver question with its own much smaller denominator, the running production job 1263846 left untouched because its worker pool already imported these modules, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "both labeller writers pass the class they solved with into every achieved-centroid read, and the recovered row count is measured on one carrier",
+          "id": "pfs-writers-pass-the-solve-class",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T094710640994-pfs-writers-pass-the-solve-class/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "scripts/labeller_batch/shard.py",
+            "scripts/labeller_parallel/scheduler.py",
+            "tests/test_labeller_parallel.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/writers-pass-the-solve-class.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-nullguard-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T09:47:28Z",
+        "completed_at": "2026-09-07T12:41:35.463Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 10428,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 10447,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "ed42821e33c9cd09959a163ce934d0b6f4a8481c",
+        "commits": [
+          "0cd03917694717b893b1aa4937bc74de94eb476d",
+          "73f6cd4504c8fa9546c4d7110db16f93694a4aed"
+        ],
+        "changed_lines": {
+          "added": 155,
+          "removed": 26,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python -m pytest -p no:cacheprovider tests/test_labeller_parallel.py (sbatch 1264422, all_debug, JAX_PLATFORMS=cpu)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T094710640994-pfs-writers-pass-the-solve-class/all_debug_test_labeller_parallel_final3.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T094710640994-pfs-writers-pass-the-solve-class/manifest.md",
+        "scope_changed": false,
+        "session_id": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 0.439,
+          "generated_tokens": 0,
+          "generation_seconds": -2996.365,
+          "machine_seconds": 2996.804,
+          "wall_tokens_per_second": 0.0
+        },
+        "follow_on_paths": [
+          "solver/admission"
+        ],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-writers-pass-the-solve-class",
+          "session_id": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T12:41:35.463Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -120821,6 +121115,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2007
+    "_version": 2012
   }
 }

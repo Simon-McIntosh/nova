@@ -1,9 +1,11 @@
 """Publish DIII-D poloidal figures in the imas-ink house style.
 
-The visual constants below were read from
+The visual constants come from :data:`nova.media.ink.DEFAULT_INK`, which is
+where they now live for every Nova figure; they were read from
 ``/home/ITER/mcintos/Code/imas-ink/imas_ink/style.py`` on 2026-08-20 and are
-copied deliberately so nova does not acquire an imas-ink dependency.  The
-rendered categories reproduce ``InkStyle``: grey open-flux contours
+reproduced there rather than imported, so Nova acquires no imas-ink
+dependency.  The rendered categories reproduce ``InkStyle``: grey open-flux
+contours
 ``#999999`` at 0.35 pt, separatrices ``#cc0000`` at 1.5 pt, walls ``#000000``
 at 1.0 pt, unfilled coil sections edged ``#888888`` at 0.4 pt, magnetic probes
 ``#888888`` at 2.5 pt, flux loops ``#666666`` at 3.0 pt, labels at 8 pt, and
@@ -30,6 +32,8 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.patches import Polygon as PolygonPatch
 
+from nova.media.ink import DEFAULT_INK
+
 
 NETCDF_SOURCE = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
 COMPETITION_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
@@ -39,30 +43,7 @@ SUBTRACTION_RECEIPT = Path(
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/poloidal")
 
 
-@dataclass(frozen=True)
-class HouseStyle:
-    """Copied subset of imas-ink ``InkStyle`` used by these figures."""
-
-    flux_color: str = "#3366cc"
-    flux_linewidth: float = 0.7
-    contour_color: str = "#999999"
-    contour_linewidth: float = 0.35
-    separatrix_color: str = "#cc0000"
-    separatrix_linewidth: float = 1.5
-    wall_color: str = "#000000"
-    wall_linewidth: float = 1.0
-    coil_edgecolor: str = "#888888"
-    coil_facecolor: str = "none"
-    coil_linewidth: float = 0.4
-    probe_color: str = "#888888"
-    probe_markersize: float = 2.5
-    flux_loop_color: str = "#666666"
-    flux_loop_markersize: float = 3.0
-    label_fontsize: float = 8.0
-    figure_dpi: int = 120
-
-
-STYLE = HouseStyle()
+STYLE = DEFAULT_INK
 
 
 @dataclass(frozen=True)

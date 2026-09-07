@@ -241,6 +241,37 @@ def draw_legs(
         )
 
 
+def chord_crossings(boundary: np.ndarray, height: float) -> list[float]:
+    """Return the radii where a closed boundary crosses one horizontal chord.
+
+    A Thomson string measures along a line of constant Z, so the boundary it
+    samples through is wherever the separatrix crosses that line. Marking it
+    turns "is the edge visible in this profile" into something a reader can
+    check against the poloidal panel rather than infer.
+    """
+    loop = np.asarray(boundary, dtype=float).reshape(-1, 2)
+    loop = loop[np.all(np.isfinite(loop), axis=1)]
+    if loop.shape[0] < 3:
+        return []
+    if not np.allclose(loop[0], loop[-1]):
+        loop = np.vstack((loop, loop[:1]))
+    lower, upper = loop[:-1], loop[1:]
+    # A half-open rule, because a strict product test misses a segment whose
+    # endpoint lies EXACTLY on the chord and a non-strict one counts that
+    # crossing twice. Comparing "below or on" membership counts each crossing
+    # once whether or not a vertex sits on the line -- the same degeneracy
+    # that makes strict polygon inclusion the wrong test for a point on a
+    # boundary.
+    below_lower = lower[:, 1] <= height
+    below_upper = upper[:, 1] <= height
+    straddles = below_lower != below_upper
+    if not np.any(straddles):
+        return []
+    a, b = lower[straddles], upper[straddles]
+    fraction = (height - a[:, 1]) / (b[:, 1] - a[:, 1])
+    return sorted(float(x) for x in a[:, 0] + fraction * (b[:, 0] - a[:, 0]))
+
+
 def draw_nulls(
     axes: matplotlib.axes.Axes,
     magnetic_axis: Sequence[float] | None = None,

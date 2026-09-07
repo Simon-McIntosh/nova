@@ -65,6 +65,9 @@ DEFAULT_OUTPUT = (
 DEFAULT_FIGURE = (
     ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes.png"
 )
+DEFAULT_THROUGHPUT_FIGURE = (
+    ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes-throughput.png"
+)
 #: One press against each sign of the vertical bulk control, ten round trips:
 #: the chain stays near the free centroid while exercising both moved
 #: targets.  The horizontal +R centroid move is deliberately excluded: on
@@ -75,6 +78,22 @@ DEFAULT_FIGURE = (
 KEY_CHAIN = ("bulk_z+", "bulk_z-") * 10
 #: A compile event this fast was served by the persistent cache, not built.
 CACHE_SERVED_COMPILE_SECONDS = 0.5
+
+
+def _second_x_point_finite(frame) -> bool:
+    """Return whether the assembled frame's second X-point slot is finite.
+
+    The frame carries the R and Z slot columns primary-first, so slot one is
+    the secondary X-point; an absent secondary is masked to NaN by the solve
+    rather than dropped, which is what a frame channel records.
+    """
+    if frame is None:
+        return False
+    x_r = np.asarray(getattr(frame, "x_point_r", None))
+    x_z = np.asarray(getattr(frame, "x_point_z", None))
+    if x_r.size < 2 or x_z.size < 2:
+        return False
+    return bool(np.all(np.isfinite(x_r[1])) and np.all(np.isfinite(x_z[1])))
 
 
 def _source_revision() -> str:
@@ -127,6 +146,34 @@ def _draw(receipt: dict[str, Any], figure: Path) -> None:
         )
     plt.xlabel("key press")
     plt.ylabel("keyframe wall / ms")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(figure, dpi=150)
+    plt.close()
+
+
+def _draw_throughput(receipt: dict[str, Any], figure: Path) -> None:
+    """Draw the keyframe rate per press beside the ten-hertz warm fence.
+
+    A warm keyframe on the hundred-millisecond budget is ten a second; the
+    figure reads the measured chain's throughput against that line.
+    """
+    presses = [press for press in receipt["presses"] if press["press"] is not None]
+    if not presses:
+        return
+    index = [press["index"] for press in presses]
+    rate = [1.0 / press["wall"] for press in presses]
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    plt.figure(figsize=(8, 4))
+    plt.bar(index, rate, color="steelblue")
+    plt.axhline(
+        10.0, color="tab:green", linestyle="--", label="10 keyframes/s warm fence"
+    )
+    plt.axhline(
+        1.0, color="tab:red", linestyle="--", label="1 keyframe/s first-moved fence"
+    )
+    plt.xlabel("key press")
+    plt.ylabel("keyframes / second")
     plt.legend()
     plt.tight_layout()
     plt.savefig(figure, dpi=150)
@@ -188,6 +235,7 @@ def measure(
     *,
     output: Path,
     figure: Path,
+    throughput_figure: Path | None = None,
     cache_root: Path | None = None,
     route: str = "host",
 ) -> dict[str, Any]:
@@ -346,7 +394,7 @@ def measure(
                     program=None,
                 )
             else:
-                result = _reduced(profile_, flux, commanded, program)
+                result = _reduced(profile_, flux, commanded)
             # Drain the solve's tail device work (constraint records, the
             # prescribed-current fold) into this stage so it does not land on
             # the next press's first array conversion.
@@ -411,6 +459,7 @@ def measure(
         mark("prime")
         prime = session.prime()
         timed_channels(session)
+        prime_frame = session.frame
         receipt["prime"] = {
             "wall": prime.wall,
             "trips": prime.trips,
@@ -418,6 +467,8 @@ def measure(
             "solve_wall": solve_walls[-1],
             "receipt_wall": receipt_walls[-1],
             "channel_wall": channel_walls[-1],
+            "frame_assembly_wall": session.frame_assembly_walls[-1],
+            "second_x_point_finite": _second_x_point_finite(prime_frame),
             "stages": _stage_durations(stage_mark_sets[-1]),
             "trip_census": trip_census[-1],
             "receipt_stages": receipt_stage_deltas(),
@@ -434,6 +485,8 @@ def measure(
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
                 "channel_wall": channel_walls[-1],
+                "frame_assembly_wall": session.frame_assembly_walls[-1],
+                "second_x_point_finite": _second_x_point_finite(prime_frame),
             }
         )
         _write(receipt, output)
@@ -455,6 +508,8 @@ def measure(
                 "solve_wall": solve_walls[-1],
                 "receipt_wall": receipt_walls[-1],
                 "channel_wall": channel_walls[-1],
+                "frame_assembly_wall": session.frame_assembly_walls[-1],
+                "second_x_point_finite": _second_x_point_finite(session.frame),
                 "stages": _stage_durations(stage_mark_sets[-1]),
                 "trip_census": trip_census[-1],
                 "receipt_stages": receipt_stage_deltas(),
@@ -506,6 +561,7 @@ def measure(
     receipt["verdict"] = {
         "presses_measured": len(receipt["presses"]) - 1,
         "median_warm_keyframe_s": float(np.median(warm)),
+        "worst_warm_keyframe_s": float(np.max(warm)),
         "mean_warm_keyframe_s": float(np.mean(warm)),
         "first_moved_keyframe_s": receipt["presses"][1]["wall"],
         "prime_wall_s": receipt["prime"]["wall"],
@@ -517,6 +573,8 @@ def measure(
     }
     _write(receipt, output)
     _draw(receipt, figure)
+    if throughput_figure is not None:
+        _draw_throughput(receipt, throughput_figure)
     return receipt
 
 
@@ -542,6 +600,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    parser.add_argument(
+        "--throughput-figure", type=Path, default=DEFAULT_THROUGHPUT_FIGURE
+    )
     parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument("--route", choices=("host", "compiled"), default="host")
     parser.add_argument("--prepare-only", action="store_true")
@@ -555,6 +616,7 @@ def main() -> None:
         measure(
             output=arguments.output,
             figure=arguments.figure,
+            throughput_figure=arguments.throughput_figure,
             cache_root=arguments.cache_root,
             route=arguments.route,
         )

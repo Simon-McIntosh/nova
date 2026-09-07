@@ -1,0 +1,41 @@
+{
+  "artifact": "playable app keyframes at current main - prime measured, moved key blocked by axis admission",
+  "identity": "22086/43",
+  "measured_at_commit": "afc56f269ddcc9e5211b2a2594fa4a3542917659",
+  "measurement_date_utc": "2026-09-07T11:37:00Z",
+  "outcome": "prime measured; no moved keyframe recorded (first moved key raises NoQualifiedAxisError in the app's own shape-inverse steering path)",
+  "jobs": {
+    "prime_and_first_moved": 1264184
+  },
+  "prime": {
+    "wall_s": 95.48015050310642,
+    "trips": 4,
+    "reused": false,
+    "solve_wall_s": 19.578939930535853,
+    "receipt_wall_s": 14.48754220828414,
+    "frame_assembly_wall_s": 1.2843786031007767,
+    "second_x_point_finite": true,
+    "seed_centroid_m": [
+      0.7781594025789568,
+      0.0026074364392189658
+    ]
+  },
+  "failure": {
+    "key": "bulk_z+",
+    "exception": "NoQualifiedAxisError",
+    "message": "no qualified magnetic-axis candidate has a resolved component",
+    "trace": [
+      "apps/playable/production.py:272 __call__ -> solve_target",
+      "apps/playable/production.py:205 solve_target -> solve_shape_inverse",
+      "nova/equilibrium/shape_inverse.py:881 profile.operator.read(state, requested_class=None)",
+      "nova/equilibrium/forward_operator.py:1228 require_qualified_axis(admitted)",
+      "nova/equilibrium/topology.py:181 require_qualified_axis"
+    ],
+    "attribution": "the documented marginal axis admission on ordinary positive-current shots of the six frozen carriers (coordinator note 08:22Z); the app's own production steering path, never before receipted in its own configuration, cannot complete a moved keyframe at current main"
+  },
+  "frame_channel_status": {
+    "second_x_point_slot": "finite on the measured prime frame (containment kept an in-vessel candidate on 22086/43 prime)",
+    "warm_keyframe_channels": "unmeasurable at current main: the first moved keyframe never solves, so no warm frame exists to compare"
+  },
+  "log": "run dir h200-keyframes.job.out and logs/h200-keyframes.sbatch.log"
+}

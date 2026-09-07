@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T01:10:30",
+  "updated": "2026-09-08T01:34:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3215,6 +3215,15 @@
       },
       {
         "id": "pfs-reversed-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-reversed-c2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -124351,6 +124360,151 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T165209580736-pfs-reversed-current-guard",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-reversed-current-guard",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "On one slice of 22475, 22550 or 22626 the report prints the free solve's achieved centroid against the EFIT target with its signed error, the residual across Newton steps, the achieved against requested topology class, whether the conditioned re-solve is entered and what it does, and the guard's sign convention under reversed current checked explicitly; it states whether the solve converges to a different equilibrium, fails to contract, or is measured wrongly by the guard; no repair is made; the solve ran on a debug partition or the reserved card",
+          "estimated_hours": 1.2,
+          "goal": "A diagnosis of why reversed-current slices fail the branch guard before convergence, on one slice of one block shot",
+          "id": "pfs-reversed-current-guard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165209580736-pfs-reversed-current-guard/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/reversed_current_guard_diagnosis.py",
+            "docs/figures/playable-forward-solve/reversed-current-guard/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-reversed-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:52:15Z",
+        "completed_at": "2026-09-07T23:32:10.649Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 23986,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 23995,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "88d40e09384fc8d7d67a56c7aaa500d1ec8bc0e0"
+        ],
+        "changed_lines": {
+          "added": 753,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165209580736-pfs-reversed-current-guard/manifest.md",
+        "scope_changed": false,
+        "session_id": "4e1931d2-7680-4395-bc5d-a8e07c8e8400",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 21549814,
+            "input_tokens_cumulative": 21549814,
+            "output_tokens": 85233,
+            "output_tokens_cumulative": 85233,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 23992.148,
+          "generated_tokens": 85233,
+          "generation_seconds": 23461.365,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 25.9,
+          "machine_seconds": 530.783,
+          "peak_input_tokens": 263584,
+          "tokens_per_second": 3.63,
+          "wall_tokens_per_second": 3.55
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-reversed-current-guard",
+          "session_id": "4e1931d2-7680-4395-bc5d-a8e07c8e8400",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T23:32:10.649Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -124663,6 +124817,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2087
+    "_version": 2089
   }
 }

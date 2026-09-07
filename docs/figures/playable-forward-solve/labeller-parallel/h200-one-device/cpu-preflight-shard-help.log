@@ -1,0 +1,29 @@
+usage: shard.py [-h] [--shots [SHOTS ...]] [--shot-list SHOT_LIST]
+                [--include-raster] [--condition-on-guard-failure]
+                [--max-slices MAX_SLICES] [--prepare-only]
+                [--enumerate-corpus] [--manifest MANIFEST]
+                [--cohort-report COHORT_REPORT] [--write-shards WRITE_SHARDS]
+                [--shard-count SHARD_COUNT] [--tranche-shards TRANCHE_SHARDS]
+                [--plan-output PLAN_OUTPUT]
+                [output_root]
+
+Write forward-solve steering sessions for one shard of MAST shots.
+
+positional arguments:
+  output_root
+
+options:
+  -h, --help            show this help message and exit
+  --shots [SHOTS ...]
+  --shot-list SHOT_LIST
+  --include-raster
+  --condition-on-guard-failure
+  --max-slices MAX_SLICES
+  --prepare-only
+  --enumerate-corpus
+  --manifest MANIFEST
+  --cohort-report COHORT_REPORT
+  --write-shards WRITE_SHARDS
+  --shard-count SHARD_COUNT
+  --tranche-shards TRANCHE_SHARDS
+  --plan-output PLAN_OUTPUT

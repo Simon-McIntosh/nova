@@ -1,0 +1,52 @@
+{
+  "job_id": 1263795,
+  "job_state": "FAILED",
+  "exit_code": "1:0",
+  "elapsed_seconds": 2877,
+  "receipt_passed": false,
+  "shot_count": 16,
+  "slice_count": 64,
+  "differing_field_count": 1399,
+  "observed_device_failure": {
+    "affected_free_solve_records": 63,
+    "exception": "JaxRuntimeError: RESOURCE_EXHAUSTED",
+    "cause": "spawned assembly interpreters inherited CUDA selection before their initializer selected CPU",
+    "scoped_repair_commit": "62ba7f21d445eb88fdf16393e32eef367f7100d1"
+  },
+  "volatile_carrier_fields": {
+    "affected_manifests": 16,
+    "fields": [
+      "carrier.carrier.warm_load_seconds",
+      "carrier.named_cache_only_check.stdout:warm_seconds"
+    ],
+    "stable_carrier_identity_differences": 0
+  },
+  "first_completed_slice_residual_differences": {
+    "shot": 24751,
+    "row": 1,
+    "manifest": {
+      "newton_steps": {
+        "reference": 24,
+        "scheduler": 1
+      },
+      "achieved_current_centroid_r": {
+        "reference": 0.7886687252966389,
+        "scheduler": 0.7886687252966388
+      },
+      "achieved_current_centroid_z": {
+        "reference": -0.00041528860032501093,
+        "scheduler": -0.00041528860032490094
+      }
+    },
+    "counter_root_cause": "the compiled slice solver receives (active, step_count) from trip_body but binds them as (step_count, trip_active)",
+    "counter_source_path": "nova/equilibrium/reduced_newton.py",
+    "counter_source_in_write_scope": false
+  },
+  "performance": {
+    "engine_slices_per_second": 0.023106762589706446,
+    "host_assembly_wall_seconds_per_slice": 0.33655797857500147,
+    "pool_slices_per_second": 2.971256257938189,
+    "frames_per_second_written": 0.02268942495129372,
+    "pool_below_engine": false
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "nova-forward-labeller-parallel-launch",
+  "job_id": 1263815,
+  "job_name": "nova-labeller-parallel",
+  "submitted_at": "2026-09-07T03:51:52+02:00",
+  "observed_at": "2026-09-07T03:52:06+02:00",
+  "observed_state": "RUNNING",
+  "partition": "betelgeuse",
+  "reservation": "gpu_0003_grpA",
+  "devices": 1,
+  "cpus_per_task": 4,
+  "memory": "128G",
+  "time_limit": "1-00:00:00",
+  "engine": "host-route",
+  "batch_per_device": 1,
+  "host_workers": 3,
+  "condition_on_guard_failure": true,
+  "output_root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
+  "log_path": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/logs/labeller-parallel-1263815.log",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-corpus-scheduler",
+  "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+  "pythonpath": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-corpus-scheduler",
+  "source_revision": "d563a2fd931c675584bb9b3bffa0b165b712aad7",
+  "main_revision_at_submission": "7c01f9c7164dc265663bbec1f3b22bfd4693578e",
+  "scheduler_merged_to_main": false,
+  "environment": {
+    "JAX_PLATFORMS": "cuda,cpu",
+    "JAX_ENABLE_COMPILATION_CACHE": "true",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+  },
+  "resumption": "shots with both a session and manifest are skipped",
+  "prior_observed_host_rate_slices_per_second_per_card": 1.0,
+  "identity": {
+    "verdict": "pass in substance",
+    "discrete_exact_slices": 64,
+    "float_within_tolerance_slices": 63,
+    "total_slices": 64,
+    "marginal_slice": {
+      "shot": 24751,
+      "row": 82
+    },
+    "excluded_field": "newton_steps"
+  }
+}

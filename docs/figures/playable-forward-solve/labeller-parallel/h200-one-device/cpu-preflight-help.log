@@ -1,0 +1,19 @@
+usage: smoke.py [-h] --output OUTPUT [--devices DEVICES]
+                [--batch-per-device BATCH_PER_DEVICE]
+                [--host-workers HOST_WORKERS] [--max-slices MAX_SLICES]
+                [--run-reference] [--replace] [--condition-on-guard-failure]
+                [--prepare-only]
+
+Compare the real corpus scheduler with the sequential shard writer.
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT
+  --devices DEVICES
+  --batch-per-device BATCH_PER_DEVICE
+  --host-workers HOST_WORKERS
+  --max-slices MAX_SLICES
+  --run-reference
+  --replace
+  --condition-on-guard-failure
+  --prepare-only

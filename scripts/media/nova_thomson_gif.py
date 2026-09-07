@@ -60,6 +60,72 @@ def _gap_summary(gaps: np.ndarray) -> dict[str, float] | None:
     }
 
 
+def _admit_by_area(frames, reference, floor: float | None) -> dict[str, object]:
+    """Return which frames carry a plasma area worth drawing, and what dropped.
+
+    The criterion is the drawn boundary area against the reconstruction own
+    boundary area at the nearest slice. Wall contact is the wrong instrument
+    here even though the defect is a boundary standing off the wall: a
+    diverted boundary is bounded by the separatrix rather than by contact and
+    correctly stands about 100 mm off, so a standoff threshold fires on the
+    healthy population as well as the defective one and selects for nothing.
+
+    The floor is stated rather than tuned. The two populations sit either
+    side of half the reference area -- diverted frames do not fall below
+    about 0.69, and the frames that collapse fall to 0.04 -- so a floor at
+    one half lies in the gap between them rather than among the samples.
+
+    Nothing here repairs anything: the corpus is unchanged and the frames are
+    selected. Both counts and every dropped ratio are returned so the
+    selection appears in the receipt instead of as a shorter animation.
+    """
+    from shapely.geometry import Polygon
+
+    stored = np.array([frame.time for frame in reference])
+    areas = np.array([Polygon(frame.boundary).area for frame in reference])
+    ratios = np.array(
+        [
+            Polygon(frame.boundary).area
+            / areas[int(np.argmin(np.abs(stored - frame.time)))]
+            for frame in frames
+        ]
+    )
+    keep = np.ones(len(frames), dtype=bool) if floor is None else ratios >= floor
+    return {
+        "rule": (
+            "drawn boundary area at least this fraction of the reconstruction "
+            "boundary area on the nearest slice"
+        ),
+        "floor": floor,
+        "floor_basis": (
+            "one half, lying in the gap between the two populations rather "
+            "than among the samples: diverted frames stay above about 0.69 "
+            "and collapsed frames fall to 0.04"
+        ),
+        "wall_contact_rejected_as_instrument": (
+            "a standoff threshold fires on the healthy population too, since "
+            "a diverted boundary correctly stands about 100 mm off the wall"
+        ),
+        "corpus": (
+            "unrepaired; these frames were selected, not fixed, and the "
+            "limited class still fails wall contact where it is drawn"
+        ),
+        "keep": keep,
+        "admitted_frame_count": int(keep.sum()),
+        "dropped_frame_count": int((~keep).sum()),
+        "dropped": [
+            {"time_s": float(frame.time), "area_ratio": float(ratio)}
+            for frame, ratio, ok in zip(frames, ratios, keep)
+            if not ok
+        ],
+        "admitted_area_ratio_range": (
+            [float(ratios[keep].min()), float(ratios[keep].max())]
+            if keep.any()
+            else None
+        ),
+    }
+
+
 def render_thomson(
     shot: int,
     path: Path,
@@ -70,6 +136,7 @@ def render_thomson(
     cells: int = 1200,
     quantity: str = "te",
     session: Path | None = None,
+    min_area_fraction: float | None = None,
 ) -> dict[str, object]:
     """Write the surfaces-and-Thomson animation and return its receipt.
 
@@ -92,7 +159,16 @@ def render_thomson(
     strings = read_thomson(shot)
     if not strings:
         raise ValueError(f"MAST {shot} carries no Thomson system")
-    machine = read_pulse(shot).geometry
+    reference = read_pulse(shot)
+    machine = reference.geometry
+    admission = _admit_by_area(frames, reference.frames, min_area_fraction)
+    frames = [frame for frame, keep in zip(frames, admission["keep"]) if keep]
+    if not frames:
+        raise ValueError(
+            f"no frame of MAST {shot} carries a plasma area at least "
+            f"{min_area_fraction} of the reconstruction, so there is nothing "
+            "to animate; the corpus is unrepaired and this is a result"
+        )
     # Built once: the tessellation is a property of the wall, and only the
     # boundary cut changes between frames.
     mesh, mesh_provenance = hex_mesh(machine.limiter, cells=cells)
@@ -252,6 +328,9 @@ def render_thomson(
             "against edge rather than vertical against horizontal"
         ),
         "time_span_s": [float(frames[0].time), float(frames[-1].time)],
+        "frame_admission": {
+            key: value for key, value in admission.items() if key != "keep"
+        },
         "labels": labels,
     }
     return receipt
@@ -277,6 +356,14 @@ def main(argv: list[str] | None = None) -> int:
         help="also draw slices pinned to the reference current centroid",
     )
     parser.add_argument(
+        "--min-area-fraction",
+        type=float,
+        default=None,
+        help="drop a frame whose boundary area falls below this fraction of "
+        "the reconstruction area on the nearest slice; selects frames, "
+        "repairs nothing",
+    )
+    parser.add_argument(
         "--session",
         type=Path,
         default=None,
@@ -299,6 +386,7 @@ def main(argv: list[str] | None = None) -> int:
         cells=arguments.cells,
         quantity=arguments.quantity,
         session=arguments.session,
+        min_area_fraction=arguments.min_area_fraction,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

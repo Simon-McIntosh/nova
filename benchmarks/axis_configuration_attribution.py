@@ -199,6 +199,11 @@ def equilibrium_from_reduced(
     )
 
 
+def _scalar(value: Any) -> float:
+    """Return one Python scalar from any 0-d or 1-d array-shaped value."""
+    return float(np.asarray(value).reshape(-1)[0])
+
+
 def _axis_census_curvature(profile: Any, state: jax.Array) -> dict[str, Any]:
     """Resolve the axis candidate on the solved map and its curvatures.
 
@@ -258,14 +263,14 @@ def _axis_census_curvature(profile: Any, state: jax.Array) -> dict[str, Any]:
     return {
         "found": True,
         "axis_rz_m": [
-            float(np.asarray(census["r"][0, selected])),
-            float(np.asarray(census["z"][0, selected])),
+            _scalar(census["r"][0, selected]),
+            _scalar(census["z"][0, selected]),
         ],
         "ntype": int(ntype[selected]),
-        "confidence": float(np.asarray(census["confidence"][0, selected])),
-        "minimum_curvature": float(np.asarray(fit["minimum_curvature"][0])),
-        "maximum_curvature": float(np.asarray(fit["maximum_curvature"][0])),
-        "candidate_count": int(np.asarray(census["candidate_count"][0])),
+        "confidence": _scalar(census["confidence"][0, selected]),
+        "minimum_curvature": _scalar(fit["minimum_curvature"][0]),
+        "maximum_curvature": _scalar(fit["maximum_curvature"][0]),
+        "candidate_count": int(np.asarray(census["candidate_count"][0]).reshape(-1)[0]),
     }
 
 
@@ -336,9 +341,7 @@ def _solve_continuation(
         wall_seconds = time.perf_counter() - started
         program = result.program
         state_values = np.asarray(result.state, dtype=np.float64)
-        converged = bool(result.converged) and bool(
-            np.all(np.isfinite(state_values))
-        )
+        converged = bool(result.converged) and bool(np.all(np.isfinite(state_values)))
         item = {
             "slice_index": row,
             "time_s": scalars["time_s"],
@@ -508,8 +511,9 @@ def _draw_figure(receipt: dict[str, Any], path: Path) -> None:
     offset_axis = axes[1]
     names = [item[0] for item in radial_offsets]
     values = [item[1] for item in radial_offsets]
+    arm_order = ("L", "P", "S", "R", "W", "G")
     colours_for = {
-        arm["arm"]: colour for arm, colour in zip(receipt["arms"], colours, strict=True)
+        arm["arm"]: colours[arm_order.index(arm["arm"])] for arm in receipt["arms"]
     }
     offset_axis.bar(
         names, values, color=[colours_for[name] for name in names], alpha=0.85

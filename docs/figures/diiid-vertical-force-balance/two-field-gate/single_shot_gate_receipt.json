@@ -1,0 +1,1463 @@
+{
+  "data": {
+    "aggregate": {
+      "all_figures_project_absolute": true,
+      "branch_persistence_evaluable_count": 0,
+      "branch_persistence_satisfied_count": 0,
+      "fail_count": 10,
+      "frame_count": 11,
+      "marginal_rows": [
+        "21978/35 pure",
+        "22086/43 pure"
+      ],
+      "pass_count": 1,
+      "residual_converged_count": 1,
+      "source_combined_convergence_count": 1,
+      "verdict": "FAIL_ONE_OR_MORE_SINGLE_SHOT_ROWS"
+    },
+    "execution": {
+      "allocation": {
+        "allocated_cpus": 4,
+        "jax_backend": "gpu",
+        "jax_devices": [
+          "cuda:0"
+        ],
+        "jax_platforms": "cuda,cpu",
+        "job_id": "1263946",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "compile_policy": "one process with the explicit versioned persistent JAX compilation cache; per-frame monitoring events distinguish hits from misses; recorded wall is per complete frame after preceding compilation state",
+      "diiid_machine_artifact_cache": "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache",
+      "driver_sha256": "e5a6b6d5b1fbcf9e0b1edb15a23484d1ffd3861c7bb672cd83e0c1fa7e542cb9",
+      "mast_response_carrier": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "observed_compile_time_saved_seconds": 96.72887717187405,
+        "observed_hits": 53,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "gpu",
+          "backend_version": "PJRT C API\ncuda 12090",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "NVIDIA H200 NVL",
+              "platform": "gpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-0745ecebea4cb264e054"
+      },
+      "reuse_map_rows": [
+        "docs/research/forward-accuracy-reuse-map.html#efit-reproduction rows 50-55"
+      ],
+      "solver_source_modified": false,
+      "source_commit": "71c605b18e3d63f539a8bd4330b9d873a8e993c9",
+      "zero_iteration_fields_sha256": "26f090510fb8c0abbc91df53270557073a1a7b3e55ec7fb851ce67c669846ebe",
+      "zero_iteration_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/job-output/zero_iteration_receipt.json",
+      "zero_iteration_receipt_sha256": "7d8cf5d005b510fe2708767f078ad73528295083ea9327b97fbe2fe9ba42122f"
+    },
+    "floors": {
+      "DIII-D": 0.0832365867,
+      "MAST": 0.0116147034
+    },
+    "measurement": "production forward solve versus EFIT label with independent label-GS floor",
+    "rows": [
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 152.79209965839982,
+        "error_at_or_below_banked_floor": true,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-21978-row-35.png",
+        "frame_identity": {
+          "label": "21978/35 pure",
+          "shot": 21978,
+          "slice_index": 35,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.1899999976158142
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.0024506488565450143,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": -0.00019803753017444206,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.0034126975233290534
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": {
+            "all_common_trip_differences_inside_float64_noise": true,
+            "first_backend_divergence": null,
+            "paired_arm": "22086/43 pure",
+            "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+            "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+            "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+          },
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.0024506488565450143,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": true,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.8739457940682769,
+          "figure": 0.414270437322557,
+          "first_solve": 1.2718502525240183,
+          "jit_compile": 134.0864717848599,
+          "mast_case_from_selection": 15.373293100856245,
+          "passive_inclusive_case": 0.7705514887347817,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 149.55456084478647,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-21983-row-35.png",
+        "frame_identity": {
+          "label": "21983/35 pure",
+          "shot": 21983,
+          "slice_index": 35,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.1899999976158142
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.005721084386852058,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": -0.00019247612750768,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.01238834636377499
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.005721084386852058,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.003329876810312271,
+          "figure": 1.5285194097086787,
+          "first_solve": 2.521151155233383,
+          "jit_compile": 130.44957884866744,
+          "mast_case_from_selection": 14.475745804607868,
+          "passive_inclusive_case": 0.5745476363226771,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 155.15403569769114,
+        "error_at_or_below_banked_floor": true,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-21985-row-51.png",
+        "frame_identity": {
+          "label": "21985/51 pure",
+          "shot": 21985,
+          "slice_index": 51,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.2750000059604645
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.003028225782766708,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.0005527329145205975,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.005796656207784831
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.003028225782766708,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.004494058899581432,
+          "figure": 0.16616353951394558,
+          "first_solve": 2.695132812485099,
+          "jit_compile": 136.00419600028545,
+          "mast_case_from_selection": 15.69587556924671,
+          "passive_inclusive_case": 0.5864719469100237,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 157.1400111792609,
+        "error_at_or_below_banked_floor": true,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-21986-row-46.png",
+        "frame_identity": {
+          "label": "21986/46 pure",
+          "shot": 21986,
+          "slice_index": 46,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.25
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.005889860956803571,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": -0.0011604143811658764,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.005900783569062761
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.005889860956803571,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.002728017047047615,
+          "figure": 0.16733264923095703,
+          "first_solve": 2.7853056751191616,
+          "jit_compile": 139.94485501479357,
+          "mast_case_from_selection": 13.629149766638875,
+          "passive_inclusive_case": 0.6090699313208461,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 160.66280999220908,
+        "error_at_or_below_banked_floor": true,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-21989-row-55.png",
+        "frame_identity": {
+          "label": "21989/55 pure",
+          "shot": 21989,
+          "slice_index": 55,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.29499998688697815
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.0036467317741717123,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.00016417399487595656,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.007151401407152059
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": null,
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.0036467317741717123,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": false,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.003822680562734604,
+          "figure": 0.17242298927158117,
+          "first_solve": 1.8178210267797112,
+          "jit_compile": 143.95058335084468,
+          "mast_case_from_selection": 14.086031407117844,
+          "passive_inclusive_case": 0.6304764542728662,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat",
+          "name": "edge-adjacent label interior",
+          "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
+        },
+        "branch_persistence": {
+          "criterion": "the direct frozen MAST branch has no cross-solve persistence policy; one static row reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": null,
+          "required_observation_count": null,
+          "satisfied": null,
+          "selected_class": "diverted",
+          "selector_reason": null
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 157.1590395020321,
+        "error_at_or_below_banked_floor": true,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/mast-22086-row-43.png",
+        "frame_identity": {
+          "label": "22086/43 pure",
+          "shot": 22086,
+          "slice_index": 43,
+          "source": "efm/psirz via benchmarks/efit_forward_parity_slice.py",
+          "time_s": 0.22999998927116394
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.011614703393987796,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0116147034
+        },
+        "machine": "MAST",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of EFIT label peak-to-peak span"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": true,
+        "persisted_response_carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.0051842620596289635
+        },
+        "residual_converged": true,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 6.029895644720964e-12,
+          "fixed_point_tolerance": 1e-08,
+          "satisfied": true
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.001477958299377581,
+          "field_unit": "fraction of EFIT label peak-to-peak span",
+          "name": "gauge-aligned solve-label RMS fraction of label span",
+          "norm": "RMS over the complete registered solve grid",
+          "value": 0.005380726489468769
+        },
+        "solver_qualification": {
+          "achieved_class": "diverted",
+          "basin_evidence": {
+            "all_common_trip_differences_inside_float64_noise": true,
+            "first_backend_divergence": null,
+            "paired_arm": "22086/43 pure",
+            "qualification": "solver-basin marginal; paired CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden",
+            "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
+            "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
+          },
+          "converged": true,
+          "finite": true,
+          "fixed_point_residual": 6.029895644720964e-12,
+          "fixed_point_tolerance": 1e-08,
+          "marginal_solver_basin": true,
+          "requested_class": "diverted",
+          "topology_consistent": true
+        },
+        "source_combined_convergence": true,
+        "stage_timings_seconds": {
+          "comparison": 0.0035185562446713448,
+          "figure": 0.16599531844258308,
+          "first_solve": 2.218339973129332,
+          "jit_compile": 138.97626359481364,
+          "mast_case_from_selection": 15.157363281585276,
+          "passive_inclusive_case": 0.6357963252812624,
+          "persisted_response_carrier_load": 0.008546417579054832,
+          "slice_selection": 0.002005169168114662
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "branch_persistence": {
+          "criterion": "requires an ordered history of independently completed solves; one static frame reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": {
+            "admissibility_criterion": "persistent_alternate",
+            "cold_start_class": "diverted",
+            "cold_start_rule": "declared_class",
+            "disappearance_criterion": "immediate_alternate",
+            "persistence_threshold": 3
+          },
+          "required_observation_count": 3,
+          "satisfied": null,
+          "selected_class": null,
+          "selector_reason": "no_valid_branch"
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 78.95137418154627,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 36,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 355.317231236957,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_00000c4a7b-frame-179.png",
+        "frame_identity": {
+          "frame": 179,
+          "label": "d3d_shot_00000c4a7b.parquet:179",
+          "shot": "d3d_shot_00000c4a7b.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3740.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of centred EFIT label RMS"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.14838593470786735,
+          "fixed_point_tolerance": 1e-06,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 1.9188735440215905,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 1.8836358240990303
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.14838593470786735,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.0076050180941820145,
+          "figure": 0.1521749636158347,
+          "frame_selection": 0.871612248942256,
+          "input_read": 0.08450714126229286,
+          "production_solve": 355.0718835964799
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "branch_persistence": {
+          "criterion": "requires an ordered history of independently completed solves; one static frame reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": {
+            "admissibility_criterion": "persistent_alternate",
+            "cold_start_class": "diverted",
+            "cold_start_rule": "declared_class",
+            "disappearance_criterion": "immediate_alternate",
+            "persistence_threshold": 3
+          },
+          "required_observation_count": 3,
+          "satisfied": null,
+          "selected_class": null,
+          "selector_reason": "no_valid_branch"
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 215.90768326073885,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_0003ff34e7-frame-44.png",
+        "frame_identity": {
+          "frame": 44,
+          "label": "d3d_shot_0003ff34e7.parquet:44",
+          "shot": "d3d_shot_0003ff34e7.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 1080.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of centred EFIT label RMS"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": false,
+          "fixed_point_residual": null,
+          "fixed_point_tolerance": 1e-06,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 1.7404711322738753,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 1.5906039932455955
+        },
+        "solver_qualification": {
+          "achieved_topology_class": null,
+          "converged": false,
+          "finite": false,
+          "fixed_point_residual": null,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.001424536108970642,
+          "figure": 0.16203378792852163,
+          "input_read": 0.14009308815002441,
+          "production_solve": 215.60312212258577
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "branch_persistence": {
+          "criterion": "requires an ordered history of independently completed solves; one static frame reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": {
+            "admissibility_criterion": "persistent_alternate",
+            "cold_start_class": "diverted",
+            "cold_start_rule": "declared_class",
+            "disappearance_criterion": "immediate_alternate",
+            "persistence_threshold": 3
+          },
+          "required_observation_count": 3,
+          "satisfied": null,
+          "selected_class": null,
+          "selector_reason": "no_valid_branch"
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.9762353664264083,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 1,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 181.3984500914812,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_001554e054-frame-144.png",
+        "frame_identity": {
+          "frame": 144,
+          "label": "d3d_shot_001554e054.parquet:144",
+          "shot": "d3d_shot_001554e054.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3240.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "mechanism_evidence": {
+          "corrected_terminal_topology_class": "diverted",
+          "diverted_branch": {
+            "achieved_class": "diverted",
+            "converged": false,
+            "residual": 5.923299520969474,
+            "residual_to_tolerance_ratio": 5923299.520969474,
+            "residual_tolerance": 1e-06,
+            "topology_consistent": true
+          },
+          "external_field_evidence": {
+            "candidate_physical_source_count": 0,
+            "frame_verdict": {
+              "classification": "inside-label-gs-inconsistency",
+              "headline": "Residual source is inside label GS inconsistency",
+              "reason": "non-GS accounting carries 99.3% of the exterior apparent current; all 24 known poloidal coils are already present"
+            },
+            "inside_label_gs_inconsistency_count": 5,
+            "missing_external_field_supported": false,
+            "source": "docs/figures/diiid-vertical-force-balance/residual-decomposition.json",
+            "source_sha256": "d16c6445cd28ab6e21f7881deaa27c7de1c73271f599a9230617b61cb6b13e18"
+          },
+          "forward_evidence": {
+            "source": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "source_sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+          },
+          "frame": 144,
+          "landmark_displacement_m": {
+            "axis": 6.042012730574555e-15,
+            "terminal_boundary_centroid": 0.16642744680418725,
+            "x_point": 7.021666937153402e-16
+          },
+          "limited_branch": {
+            "achieved_class": "limited",
+            "converged": false,
+            "residual": 0.02032419151489186,
+            "residual_to_tolerance_ratio": 20324.19151489186,
+            "residual_tolerance": 1e-06,
+            "topology_consistent": true
+          },
+          "name": "diverted_branch_residual_stall_with_landmark_retention",
+          "selected_class": null,
+          "selector_reason": "no_valid_branch",
+          "shot": "d3d_shot_001554e054.parquet",
+          "statement": "The corrected terminal read is diverted, not limited. Both requested branches miss residual tolerance and the selector therefore has no available branch; the diverted terminal axis and X-point remain at their EFIT-seeded landmarks to roundoff while the terminal-boundary centroid changes shape. The five-frame field tare names no missing physical external source."
+        },
+        "named_mechanism": "diverted_branch_residual_stall_with_landmark_retention",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of centred EFIT label RMS"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.018208502609627582,
+          "fixed_point_tolerance": 1e-06,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.12284300961195194,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 0.3959733184054209
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.018208502609627582,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.0007881792262196541,
+          "figure": 0.1544244522228837,
+          "input_read": 0.14757977426052094,
+          "production_solve": 181.0946434000507
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "branch_persistence": {
+          "criterion": "requires an ordered history of independently completed solves; one static frame reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": {
+            "admissibility_criterion": "persistent_alternate",
+            "cold_start_class": "diverted",
+            "cold_start_rule": "declared_class",
+            "disappearance_criterion": "immediate_alternate",
+            "persistence_threshold": 3
+          },
+          "required_observation_count": 3,
+          "satisfied": null,
+          "selected_class": null,
+          "selector_reason": "no_valid_branch"
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 266.9335337700322,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_002495e835-frame-146.png",
+        "frame_identity": {
+          "frame": 146,
+          "label": "d3d_shot_002495e835.parquet:146",
+          "shot": "d3d_shot_002495e835.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3180.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of centred EFIT label RMS"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.04696368424795906,
+          "fixed_point_tolerance": 1e-06,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.05094615193296477,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 0.9573057366392401
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.04696368424795906,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.0007747551426291466,
+          "figure": 0.15916010551154613,
+          "input_read": 0.16027548722922802,
+          "production_solve": 266.61230919044465
+        }
+      },
+      {
+        "band": {
+          "floor_mask": "stride-one stencil-valid source interior",
+          "interpretation": "the banked floor peaks 1.97 mm from the magnetic axis and carries 98.54% of classified L2 energy in the interior bulk",
+          "name": "core-coherent label interior",
+          "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
+        },
+        "branch_persistence": {
+          "criterion": "requires an ordered history of independently completed solves; one static frame reports no persistence verdict",
+          "evaluable": false,
+          "observation_count": 1,
+          "policy": {
+            "admissibility_criterion": "persistent_alternate",
+            "cold_start_class": "diverted",
+            "cold_start_rule": "declared_class",
+            "disappearance_criterion": "immediate_alternate",
+            "persistence_threshold": 3
+          },
+          "required_observation_count": 3,
+          "satisfied": null,
+          "selected_class": null,
+          "selector_reason": "no_valid_branch"
+        },
+        "branch_persistence_satisfied": null,
+        "compile_cache": {
+          "compile_time_saved_seconds": 0.0,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 0,
+          "status": "miss"
+        },
+        "compile_warm_wall_seconds": 156.97130370792001,
+        "error_at_or_below_banked_floor": false,
+        "figure_src": "/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_0040ca9bdc-frame-137.png",
+        "frame_identity": {
+          "frame": 137,
+          "label": "d3d_shot_0040ca9bdc.parquet:137",
+          "shot": "d3d_shot_0040ca9bdc.parquet",
+          "source": "efit_psirz via benchmarks/diiid_forward_gs_match.py",
+          "time_ms": 3000.0
+        },
+        "label_gs_inconsistency": {
+          "banked_full_precision": 0.08323658669934644,
+          "field_unit": "fraction of interior drive sup",
+          "name": "EFIT label under unchanged Nova interior operator",
+          "norm": "relative interior Grad-Shafranov sup at stride one",
+          "value": 0.0832365867
+        },
+        "machine": "DIII-D",
+        "normalisation": {
+          "cross_machine_scale_comparison_allowed": false,
+          "label_gs_inconsistency_denominator": "fraction of interior drive sup",
+          "policy": "machine-specific denominator labelled on every row",
+          "solve_against_label_denominator": "fraction of centred EFIT label RMS"
+        },
+        "pass_rule": "residual_converged and solve-against-label error at or below the machine's banked floor; branch persistence is reported independently and does not gate an isolated static solve",
+        "passes": false,
+        "residual_converged": false,
+        "residual_convergence": {
+          "criterion": "finite fixed-point residual at or below tolerance",
+          "finite": true,
+          "fixed_point_residual": 0.07253986012318267,
+          "fixed_point_tolerance": 1e-06,
+          "satisfied": false
+        },
+        "solve_against_label": {
+          "additive_gauge_wb": 0.10005167080712198,
+          "field_unit": "fraction of centred EFIT label RMS",
+          "name": "gauge-aligned solve-label RMS over label-core variation",
+          "norm": "fractional RMS on the score-blind labelled LCFS interior",
+          "value": 1.173895678399414
+        },
+        "solver_qualification": {
+          "achieved_topology_class": "diverted",
+          "converged": false,
+          "finite": true,
+          "fixed_point_residual": 0.07253986012318267,
+          "fixed_point_tolerance": 1e-06,
+          "marginal_solver_basin": false,
+          "termination": "public branch selector found no convergence-qualified diverted root"
+        },
+        "source_combined_convergence": false,
+        "stage_timings_seconds": {
+          "comparison": 0.0008498318493366241,
+          "figure": 0.15827113017439842,
+          "input_read": 0.16903521493077278,
+          "production_solve": 156.64182271808386
+        }
+      }
+    ],
+    "single_shot_gate_contract": {
+      "branch_persistence_field": "branch_persistence_satisfied",
+      "branch_persistence_is_not_a_single_shot_gate": true,
+      "frame_144_mechanism": {
+        "corrected_terminal_topology_class": "diverted",
+        "diverted_branch": {
+          "achieved_class": "diverted",
+          "converged": false,
+          "residual": 5.923299520969474,
+          "residual_to_tolerance_ratio": 5923299.520969474,
+          "residual_tolerance": 1e-06,
+          "topology_consistent": true
+        },
+        "external_field_evidence": {
+          "candidate_physical_source_count": 0,
+          "frame_verdict": {
+            "classification": "inside-label-gs-inconsistency",
+            "headline": "Residual source is inside label GS inconsistency",
+            "reason": "non-GS accounting carries 99.3% of the exterior apparent current; all 24 known poloidal coils are already present"
+          },
+          "inside_label_gs_inconsistency_count": 5,
+          "missing_external_field_supported": false,
+          "source": "docs/figures/diiid-vertical-force-balance/residual-decomposition.json",
+          "source_sha256": "d16c6445cd28ab6e21f7881deaa27c7de1c73271f599a9230617b61cb6b13e18"
+        },
+        "forward_evidence": {
+          "source": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+          "source_sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+        },
+        "frame": 144,
+        "landmark_displacement_m": {
+          "axis": 6.042012730574555e-15,
+          "terminal_boundary_centroid": 0.16642744680418725,
+          "x_point": 7.021666937153402e-16
+        },
+        "limited_branch": {
+          "achieved_class": "limited",
+          "converged": false,
+          "residual": 0.02032419151489186,
+          "residual_to_tolerance_ratio": 20324.19151489186,
+          "residual_tolerance": 1e-06,
+          "topology_consistent": true
+        },
+        "name": "diverted_branch_residual_stall_with_landmark_retention",
+        "selected_class": null,
+        "selector_reason": "no_valid_branch",
+        "shot": "d3d_shot_001554e054.parquet",
+        "statement": "The corrected terminal read is diverted, not limited. Both requested branches miss residual tolerance and the selector therefore has no available branch; the diverted terminal axis and X-point remain at their EFIT-seeded landmarks to roundoff while the terminal-boundary centroid changes shape. The five-frame field tare names no missing physical external source."
+      },
+      "normalisation": {
+        "DIII-D": "fraction of centred EFIT label RMS",
+        "MAST": "fraction of EFIT label peak-to-peak span",
+        "choice": "label_each_machine_with_its_own_denominator",
+        "cross_machine_scale_comparison_allowed": false
+      },
+      "residual_convergence_field": "residual_converged"
+    }
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": true,
+    "properties": {
+      "aggregate": {
+        "type": "object"
+      },
+      "execution": {
+        "type": "object"
+      },
+      "floors": {
+        "properties": {
+          "DIII-D": {
+            "const": 0.0832365867
+          },
+          "MAST": {
+            "const": 0.0116147034
+          }
+        },
+        "required": [
+          "DIII-D",
+          "MAST"
+        ],
+        "type": "object"
+      },
+      "measurement": {
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "additionalProperties": true,
+          "properties": {
+            "band": {
+              "type": "object"
+            },
+            "branch_persistence_satisfied": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "compile_cache": {
+              "properties": {
+                "compile_time_saved_seconds": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "hit_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "status": {
+                  "enum": [
+                    "hit",
+                    "miss"
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "hit_count",
+                "compile_time_saved_seconds"
+              ],
+              "type": "object"
+            },
+            "compile_warm_wall_seconds": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "figure_src": {
+              "pattern": "^/nova/figures/",
+              "type": "string"
+            },
+            "frame_identity": {
+              "type": "object"
+            },
+            "label_gs_inconsistency": {
+              "additionalProperties": true,
+              "properties": {
+                "field_unit": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "norm": {
+                  "type": "string"
+                },
+                "value": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "norm",
+                "field_unit"
+              ],
+              "type": "object"
+            },
+            "machine": {
+              "enum": [
+                "MAST",
+                "DIII-D"
+              ]
+            },
+            "normalisation": {
+              "type": "object"
+            },
+            "passes": {
+              "type": "boolean"
+            },
+            "residual_converged": {
+              "type": "boolean"
+            },
+            "solve_against_label": {
+              "additionalProperties": true,
+              "properties": {
+                "field_unit": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "norm": {
+                  "type": "string"
+                },
+                "value": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "norm",
+                "field_unit"
+              ],
+              "type": "object"
+            },
+            "solver_qualification": {
+              "type": "object"
+            },
+            "stage_timings_seconds": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "machine",
+            "frame_identity",
+            "band",
+            "solve_against_label",
+            "label_gs_inconsistency",
+            "solver_qualification",
+            "compile_warm_wall_seconds",
+            "stage_timings_seconds",
+            "compile_cache",
+            "passes",
+            "figure_src",
+            "residual_converged",
+            "branch_persistence_satisfied",
+            "normalisation"
+          ],
+          "type": "object"
+        },
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "measurement",
+      "execution",
+      "floors",
+      "rows",
+      "aggregate"
+    ],
+    "type": "object"
+  }
+}

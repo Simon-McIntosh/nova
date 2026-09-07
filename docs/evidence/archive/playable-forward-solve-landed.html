@@ -1322,6 +1322,29 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     unchanged and green, six new synthetic two-description and two-unit refusal tests green, the eight DIII-D description tests green; naming
     checks clean on the added lines. Report at <code>~/.config/reckon/crew/reports/nova/playable/imas-position-reads.md</code>.</p>
   </section>
+  <section id="the-limited-anchor-is-the-wrong-member-of-an-up-down-pair">
+    <h2>The limited anchor is the wrong member of an up-down pair, and the corpus route cannot see the shadow by construction (2026-09-07 19:12Z)</h2>
+    <p>Node <code>pfs-limited-anchor-diagnosis</code> (codex, same member as the routing node; commits <code>e32a824c</code>,
+    <code>4ed82c8e</code>; one measurement script, a 259-row candidate table, a strict receipt, seven panels and a full 16-frame writer replay of
+    27079, no repair). For every one of the 37 wall nodes on each of seven frames the instrument traced the boundary contour the node's flux level
+    would give, and recorded its containment inside the limiter polygon, its enclosed-area ratio against the reconstruction, and whether the public
+    and private reads selected it. On the three converged baseline frames, rows 15 to 17 at 30, 35 and 40 ms, both reads select wall node 10 at
+    R 0.5649 m, Z +1.7281 m, whose contour is fully contained and gives the collapsed ratios 0.0418, 0.3354 and 0.5711. The nearest fully contained
+    candidate is node 25 at R 0.5649 m, Z &minus;1.7281 m, the up-down mirror of the selected node, whose contour gives 0.4229, 0.7203 and 0.9915:
+    approaching one by 40 ms. So the limited boundary collapse on these frames is a wrong choice between two members of a symmetric pair on the
+    same wall segment, which is exactly the shape the null-identification plan's section 2 names: the wall-extremum comparison is made by a height
+    band rather than on the contained candidate set. On the four unconverged early frames, rows 11 to 14, the public contour does not close, no
+    candidate is fully contained (best 39 to 40 of 64 vertices at nodes 16 and 19), and both reads still select node 10; those rows are
+    measurements of an unconverged flux map and are recorded as such.</p>
+    <p>The route finding stands beside it. The corpus writer reaches the topology read through <code>scripts/labeller_batch/shard.py</code>,
+    <code>nova/equilibrium/forward.py</code> and <code>forward_operator.py</code> to <code>topology.py</code>'s wall-extremum rule, and the
+    compiled result type never persists the solver's shadow or frozen partition while the receipt builder passes only the solver state, so the
+    private wall mask is absent from every corpus receipt by construction. That is why the explicit gate fired on none of sixteen compiled
+    receipts. Two instrument failures preceded the census (the script raised on the legitimate unclosed-contour and zero-contained outcomes); the
+    coordinator ruled those legitimate rows and authorised the corrected third replay. Table and panels under
+    <code>docs/figures/playable-forward-solve/limited-anchor/</code>; report at
+    <code>~/.config/reckon/crew/reports/nova/playable/limited-anchor-diagnosis.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

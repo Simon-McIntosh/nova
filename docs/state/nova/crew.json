@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T21:02:03",
+  "updated": "2026-09-07T21:17:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -121960,6 +121960,145 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T181904209175-pfs-limited-anchor-diagnosis",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-limited-anchor-diagnosis",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 934,
+                "cached_input_tokens": 468594,
+                "input_tokens": 469560,
+                "output_tokens": 2010,
+                "reasoning_output_tokens": 372,
+                "total_tokens": 471570,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The report tabulates, for the first three drawn frames of 27079 at 30, 35 and 40 ms and for rows 11 to 14, every candidate wall anchor the limited read considers with its flux, the fraction of the resulting boundary contour's vertices inside the limiter polygon, its enclosed-area ratio against the reconstruction, and whether the contour is tangent to the wall at that node, marking the anchor each read actually selected (wall node 10 at R 0.5649 m Z 1.7281 m in the receipts) and the anchor whose contained contour comes nearest ratio one; it names the code path by file:line through which the compiled slice route reaches Topology.read_qualification's wall-extremum rule and states why the shadow-gated partition is unreachable there; one panel per tabulated frame is drawn with the existing nova/media/poloidal.py painters showing wall, contours, axis, nulls, the selected boundary and the candidate anchors, under docs/figures/playable-forward-solve/limited-anchor/ with the PNGs force-added and never read back by the worker; no repair is made and no structure is excluded by name; heavy solves run on a debug partition or the reserved card with a per-job TMPDIR and at most 4 cores",
+          "estimated_hours": 1.5,
+          "goal": "A diagnosis of the limited-anchor selection on 27079's early frames: which wall node each read selects, what containment and area ratio each candidate anchor's boundary contour has, and why the compiled writer route cannot see the shadow gate",
+          "id": "pfs-limited-anchor-diagnosis",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T181904209175-pfs-limited-anchor-diagnosis/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/limited_anchor_containment.py",
+            "docs/figures/playable-forward-solve/limited-anchor/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/limited-anchor-diagnosis.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-boundary-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T18:19:13Z",
+        "completed_at": "2026-09-07T19:14:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3306,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3306,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "11a085ee35988952bda51962d3892f88de7aa6eb",
+        "commits": [
+          "e32a824cd88b33633b92c02b9c99070f77de3072",
+          "4ed82c8efb1c7d2fcac4ec2faf0f06ad8e7c0c95"
+        ],
+        "changed_lines": {
+          "added": 8752,
+          "removed": 0,
+          "files": 13
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/limited_anchor_containment.py on the reserved H200 (attempt 3): 16 of 16 frames written, 259 candidate rows, 7 panels, receipt invariants and CSV order checks pass",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T181904209175-pfs-limited-anchor-diagnosis/h200-measurement-attempt-3.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T181904209175-pfs-limited-anchor-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07cc2-9bdd-7053-83b1-9b8293d56ffc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 11379968,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11445589,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 27331,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 7166
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 34497,
+          "peak_input_tokens": 22825557
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-limited-anchor-diagnosis",
+          "session_id": "01a07cc2-9bdd-7053-83b1-9b8293d56ffc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T19:14:19Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -122272,6 +122411,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2051
+    "_version": 2052
   }
 }

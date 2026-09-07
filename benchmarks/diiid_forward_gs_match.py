@@ -114,6 +114,13 @@ PARTIAL_RECEIPT_NAME = "forward_gs_partial_receipt.json"
 FRAME_FIGURE_NAME = "frame_flux_comparison.png"
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
 PUBLICATION_DIRECTORY = "/nova/figures/diiid-forward-onboarding/forward-gs"
+DEFAULT_DISPLACEMENT_OUTPUT = Path(
+    "docs/figures/diiid-vertical-force-balance/displacement"
+)
+DISPLACEMENT_FIGURE_NAME = "displacement_decomposition.png"
+DISPLACEMENT_PUBLICATION_DIRECTORY = (
+    "/nova/figures/diiid-vertical-force-balance/displacement"
+)
 DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/wall-topology-surface.json"
 )
@@ -167,6 +174,7 @@ REGISTERED_ACCELERATED_RELAXATION = 0.5
 REGISTERED_ACCELERATED_STEP_CAP = 10.0
 REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION = 0.02
 PSEUDO_WALL_EXPANSIONS = (0.02, 0.05)
+DISPLACEMENT_AGREEMENT_FRACTION = 0.25
 RECTANGLE_SWEEP_EXPANSIONS = (0.0, 0.01, 0.02, 0.05)
 TOPOLOGY_SURFACE_NEWTON_STEPS = 89
 TOPOLOGY_SURFACE_GMRES_ITERATIONS = 24
@@ -245,6 +253,26 @@ class MatchMetrics:
 
 
 @dataclass(frozen=True)
+class LandmarkDisplacement:
+    """Signed Nova-minus-EFIT displacement of one geometric landmark."""
+
+    efit_rz_m: tuple[float, float]
+    nova_rz_m: tuple[float, float]
+    radial_offset_m: float
+    vertical_offset_m: float
+
+
+@dataclass(frozen=True)
+class DisplacementDecomposition:
+    """Landmark offsets and their whole-plasma displacement classification."""
+
+    magnetic_axis: LandmarkDisplacement
+    x_point: LandmarkDisplacement
+    terminal_boundary_centroid: LandmarkDisplacement
+    classification: str
+
+
+@dataclass(frozen=True)
 class FrameResult:
     """One scored map and its convergence qualification."""
 
@@ -276,6 +304,7 @@ class FrameResult:
     conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
     resolved_defaults: dict[str, object] = field(default_factory=dict)
     solve_exception_class: str | None = None
+    displacement_decomposition: DisplacementDecomposition | None = None
 
 
 @dataclass(frozen=True)
@@ -1189,6 +1218,20 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
+def _terminal_boundary_geometry(
+    equilibrium: object, assembled_closed_boundary: np.ndarray
+) -> np.ndarray:
+    """Prefer the terminal receipt's traced raster separatrix for geometry."""
+
+    raster_flux = getattr(equilibrium, "raster_flux", None)
+    if raster_flux is not None:
+        vertex_count = int(np.asarray(raster_flux.separatrix_vertex_count))
+        traced = np.asarray(raster_flux.separatrix, dtype=float)[:vertex_count]
+        if len(traced) >= 3 and np.all(np.isfinite(traced)):
+            return traced
+    return np.asarray(assembled_closed_boundary, dtype=float)
+
+
 def gauge_metrics(
     labelled: np.ndarray, predicted: np.ndarray, interior: np.ndarray
 ) -> tuple[float, float, float, np.ndarray]:
@@ -1204,6 +1247,106 @@ def gauge_metrics(
     reference_rms = float(np.sqrt(np.mean((actual - np.mean(actual)) ** 2)))
     fractional_rms = float(np.sqrt(np.mean(residual**2)) / reference_rms)
     return r_squared, fractional_rms, gauge, predicted + gauge
+
+
+def _polygon_area_centroid(boundary_rz_m: np.ndarray) -> np.ndarray:
+    """Return the area centroid of a finite non-degenerate boundary polygon."""
+
+    boundary = np.asarray(boundary_rz_m, dtype=float)
+    if boundary.ndim != 2 or boundary.shape[1] != 2 or len(boundary) < 3:
+        raise ValueError("boundary centroid requires at least three R,Z vertices")
+    if not np.all(np.isfinite(boundary)):
+        raise ValueError("boundary centroid requires finite R,Z vertices")
+    radius = boundary[:, 0]
+    height = boundary[:, 1]
+    next_radius = np.roll(radius, -1)
+    next_height = np.roll(height, -1)
+    cross = radius * next_height - next_radius * height
+    twice_area = float(np.sum(cross))
+    area_scale = max(float(np.ptp(radius) * np.ptp(height)), 1.0)
+    if abs(twice_area) <= np.finfo(float).eps * area_scale:
+        raise ValueError("boundary centroid requires a non-degenerate polygon")
+    return np.asarray(
+        [
+            np.sum((radius + next_radius) * cross) / (3.0 * twice_area),
+            np.sum((height + next_height) * cross) / (3.0 * twice_area),
+        ],
+        dtype=float,
+    )
+
+
+def _landmark_displacement(
+    nova_rz_m: np.ndarray, efit_rz_m: np.ndarray
+) -> LandmarkDisplacement:
+    """Record one signed offset with Nova as the predicted terminal state."""
+
+    nova = np.asarray(nova_rz_m, dtype=float).reshape(2)
+    efit = np.asarray(efit_rz_m, dtype=float).reshape(2)
+    offset = nova - efit
+    return LandmarkDisplacement(
+        efit_rz_m=(float(efit[0]), float(efit[1])),
+        nova_rz_m=(float(nova[0]), float(nova[1])),
+        radial_offset_m=float(offset[0]),
+        vertical_offset_m=float(offset[1]),
+    )
+
+
+def _classify_displacement(
+    magnetic_axis: LandmarkDisplacement,
+    x_point: LandmarkDisplacement,
+    boundary_centroid: LandmarkDisplacement,
+) -> str:
+    """Classify vertical landmark coherence by the receipt's fixed fraction."""
+
+    vertical_offsets = np.asarray(
+        [
+            magnetic_axis.vertical_offset_m,
+            x_point.vertical_offset_m,
+            boundary_centroid.vertical_offset_m,
+        ],
+        dtype=float,
+    )
+    mean_vertical_offset = float(np.mean(vertical_offsets))
+    agreement_tolerance = DISPLACEMENT_AGREEMENT_FRACTION * abs(mean_vertical_offset)
+    if float(np.max(np.abs(vertical_offsets - mean_vertical_offset))) <= (
+        agreement_tolerance
+    ):
+        return "rigid_shift"
+    axis_vertical_offset = magnetic_axis.vertical_offset_m
+    x_point_vertical_offset = x_point.vertical_offset_m
+    if (
+        axis_vertical_offset * x_point_vertical_offset < 0.0
+        or abs(axis_vertical_offset - x_point_vertical_offset) > agreement_tolerance
+    ):
+        return "tilt"
+    return "shape_change"
+
+
+def _displacement_decomposition(
+    *,
+    nova_axis_rz_m: np.ndarray,
+    efit_axis_rz_m: np.ndarray,
+    nova_x_point_rz_m: np.ndarray,
+    efit_x_point_rz_m: np.ndarray,
+    nova_boundary_rz_m: np.ndarray,
+    efit_boundary_rz_m: np.ndarray,
+) -> DisplacementDecomposition:
+    """Measure the axis, X-point, and area-centroid offsets for one solve."""
+
+    magnetic_axis = _landmark_displacement(nova_axis_rz_m, efit_axis_rz_m)
+    x_point = _landmark_displacement(nova_x_point_rz_m, efit_x_point_rz_m)
+    boundary_centroid = _landmark_displacement(
+        _polygon_area_centroid(nova_boundary_rz_m),
+        _polygon_area_centroid(efit_boundary_rz_m),
+    )
+    return DisplacementDecomposition(
+        magnetic_axis=magnetic_axis,
+        x_point=x_point,
+        terminal_boundary_centroid=boundary_centroid,
+        classification=_classify_displacement(
+            magnetic_axis, x_point, boundary_centroid
+        ),
+    )
 
 
 def _registered_solve_request(
@@ -1422,6 +1565,9 @@ def solve_frame(
         float(topology.boundary_flux),
         np.asarray(topology.axis, dtype=float),
     )
+    predicted_terminal_boundary = _terminal_boundary_geometry(
+        equilibrium, predicted_closed_boundary
+    )
     count = int(row["efit_lcfs_n"][frame])
     labelled_closed_boundary = np.c_[
         np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
@@ -1448,6 +1594,17 @@ def solve_frame(
     axis_displacement = 1000.0 * float(
         np.linalg.norm(np.asarray(topology.axis, dtype=float) - labelled_axis)
     )
+    try:
+        displacement_decomposition = _displacement_decomposition(
+            nova_axis_rz_m=np.asarray(topology.axis, dtype=float),
+            efit_axis_rz_m=labelled_axis,
+            nova_x_point_rz_m=np.asarray(topology.x_point, dtype=float),
+            efit_x_point_rz_m=labelled_x_point,
+            nova_boundary_rz_m=predicted_terminal_boundary,
+            efit_boundary_rz_m=labelled_closed_boundary,
+        )
+    except ValueError:
+        displacement_decomposition = None
     labelled_q95 = float(corpus_q_to_nova(row["efit_q95"][frame]))
     try:
         geometry = FluxSurfaceGeometry.from_equilibrium(
@@ -1535,6 +1692,7 @@ def solve_frame(
         branch_selection=branch_selection,
         conductor_current_receipt=current_receipt,
         resolved_defaults=resolved_defaults,
+        displacement_decomposition=displacement_decomposition,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -1544,6 +1702,7 @@ def solve_frame(
         "difference": aligned - label,
         "labelled_closed_boundary": labelled_closed_boundary,
         "predicted_closed_boundary": predicted_closed_boundary,
+        "predicted_terminal_boundary": predicted_terminal_boundary,
         "predicted_open_branches": predicted_open_branches,
         "pseudo_wall": wall,
     }
@@ -1625,12 +1784,21 @@ def _solve_selected_frames(
     selected,
     baseline_expansion: float,
     on_frame_completed: Callable[[list[FrameResult]], None] | None = None,
+    *,
+    restored_results: list[FrameResult] | None = None,
 ) -> tuple[list[FrameResult], list[dict[str, Any]]]:
     """Solve declared frames while bounding each frame's compilation lifetime."""
 
-    results: list[FrameResult] = []
-    fields: list[dict[str, Any]] = []
-    for number, selected_frame in enumerate(selected, start=1):
+    results = list(restored_results or [])
+    if len(results) > len(selected):
+        raise ValueError("restored frame prefix is longer than the declared cohort")
+    fields: list[dict[str, Any]] = [
+        {"plot_unavailable_reason": "restored from frame checkpoint"}
+        for _result in results
+    ]
+    for number, selected_frame in enumerate(
+        selected[len(results) :], start=len(results) + 1
+    ):
         started = time.perf_counter()
         try:
             row = _read(
@@ -1737,6 +1905,100 @@ def _strict_json_value(value: Any) -> Any:
     if isinstance(value, list | tuple):
         return [_strict_json_value(item) for item in value]
     return value
+
+
+def _checkpoint_float(value: float | None) -> float:
+    """Restore a strict-JSON null to the non-finite value used during scoring."""
+
+    return float("nan") if value is None else float(value)
+
+
+def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
+    """Rebuild one typed result from an atomically published frame checkpoint."""
+
+    restored = dict(record)
+    metric_values = dict(restored.pop("metrics"))
+    for name in (
+        "interior_r_squared",
+        "interior_fractional_rms",
+        "additive_gauge_wb",
+        "magnetic_axis_displacement_mm",
+        "predicted_q95_nova",
+        "labelled_q95_nova",
+        "signed_relative_q95_error",
+    ):
+        metric_values[name] = _checkpoint_float(metric_values[name])
+    metric_values["boundary_comparison_failures"] = tuple(
+        metric_values["boundary_comparison_failures"]
+    )
+    restored["metrics"] = MatchMetrics(**metric_values)
+    displacement_values = restored.get("displacement_decomposition")
+    if displacement_values is not None:
+        displacement_values = dict(displacement_values)
+        for name in (
+            "magnetic_axis",
+            "x_point",
+            "terminal_boundary_centroid",
+        ):
+            landmark_values = dict(displacement_values[name])
+            landmark_values["efit_rz_m"] = tuple(landmark_values["efit_rz_m"])
+            landmark_values["nova_rz_m"] = tuple(landmark_values["nova_rz_m"])
+            displacement_values[name] = LandmarkDisplacement(**landmark_values)
+        restored["displacement_decomposition"] = DisplacementDecomposition(
+            **displacement_values
+        )
+    for name in (
+        "fixed_point_relative_residual",
+        "target_current_a",
+        "achieved_current_a",
+    ):
+        restored[name] = _checkpoint_float(restored[name])
+    restored["residual_history"] = tuple(
+        _checkpoint_float(value) for value in restored["residual_history"]
+    )
+    restored["active_set_residuals"] = tuple(restored["active_set_residuals"])
+    restored["active_set_mask_differences"] = tuple(
+        restored["active_set_mask_differences"]
+    )
+    restored["active_set_cycle_damping_activations"] = tuple(
+        restored["active_set_cycle_damping_activations"]
+    )
+    return FrameResult(**restored)
+
+
+def _restore_frame_checkpoint(
+    path: Path,
+    selected: list[SelectedFrame],
+    preregistration_hash: str,
+) -> list[FrameResult]:
+    """Restore only an identity-matched prefix of the declared frame cohort."""
+
+    if not path.exists():
+        return []
+    checkpoint = json.loads(path.read_text())
+    cohort = checkpoint.get("cohort_status", {})
+    records = checkpoint.get("frame_records", [])
+    if checkpoint.get("receipt_kind") != "partial_frame_checkpoint":
+        raise RuntimeError("frame checkpoint has the wrong receipt kind")
+    if checkpoint.get("preregistration_sha256") != preregistration_hash:
+        raise RuntimeError("frame checkpoint belongs to another preregistration")
+    if cohort.get("declared_frame_count") != len(selected):
+        raise RuntimeError("frame checkpoint has the wrong declared frame count")
+    if cohort.get("attempted_frame_count") != len(records):
+        raise RuntimeError("frame checkpoint count disagrees with its frame rows")
+    if len(records) > len(selected):
+        raise RuntimeError("frame checkpoint exceeds the declared cohort")
+    for expected, record in zip(selected, records, strict=False):
+        identity = (record.get("shot"), record.get("frame"))
+        if identity != (expected.path.name, expected.frame):
+            raise RuntimeError("frame checkpoint is not a declared-cohort prefix")
+    restored = [_frame_result_from_checkpoint(record) for record in records]
+    if restored:
+        print(
+            f"RESTORED_FRAME_PREFIX {len(restored)}/{len(selected)} from {path}",
+            flush=True,
+        )
+    return restored
 
 
 def _frame_checkpoint_receipt(
@@ -1882,6 +2144,73 @@ def _record_publication_artifacts(
     return artifacts
 
 
+def _displacement_summary(results: list[FrameResult]) -> dict[str, Any]:
+    """Summarise signed landmark offsets without dropping unavailable frames."""
+
+    available = [
+        (item, item.displacement_decomposition)
+        for item in results
+        if item.displacement_decomposition is not None
+    ]
+    axis_offsets = [
+        {
+            "shot": item.shot,
+            "frame": item.frame,
+            "radial_offset_m": displacement.magnetic_axis.radial_offset_m,
+            "vertical_offset_m": displacement.magnetic_axis.vertical_offset_m,
+        }
+        for item, displacement in available
+    ]
+    vertically_dominant_count = sum(
+        abs(row["vertical_offset_m"]) > abs(row["radial_offset_m"])
+        for row in axis_offsets
+    )
+    classification_counts = {
+        classification: sum(
+            displacement.classification == classification
+            for _item, displacement in available
+        )
+        for classification in ("rigid_shift", "tilt", "shape_change")
+    }
+    complete = len(available) == len(results)
+    return {
+        "sign_convention": (
+            "offset = Nova post-solve position minus EFIT label position; "
+            "positive radial is outward and positive vertical is upward"
+        ),
+        "boundary_centroid_definition": (
+            "area centroid of the closed terminal-boundary polygon in the R,Z plane"
+        ),
+        "classification_rule": {
+            "agreement_fraction_of_absolute_mean_vertical_offset": (
+                DISPLACEMENT_AGREEMENT_FRACTION
+            ),
+            "rigid_shift": (
+                "all three vertical offsets lie within the agreement fraction of "
+                "their absolute mean vertical offset"
+            ),
+            "tilt": (
+                "otherwise, the axis and X-point vertical offsets have opposite "
+                "signs or differ by more than the same agreement tolerance"
+            ),
+            "shape_change": "all other non-rigid displacement patterns",
+        },
+        "dominantly_vertical_rule": (
+            "a frame is axis-dominantly vertical when absolute vertical axis offset "
+            "exceeds absolute radial axis offset; the cohort verdict requires every "
+            "declared frame to be available and axis-dominantly vertical"
+        ),
+        "available_frame_count": len(available),
+        "declared_frame_count": len(results),
+        "axis_dominantly_vertical_frame_count": vertically_dominant_count,
+        "cohort_dominantly_vertical": (
+            complete and vertically_dominant_count == len(results)
+        ),
+        "axis_offsets_m": axis_offsets,
+        "classification_counts": classification_counts,
+    }
+
+
 def summarize(
     results: list[FrameResult],
     sensitivity: list[FrameResult],
@@ -1935,6 +2264,7 @@ def summarize(
                 )
             ),
         },
+        "displacement_decomposition": _displacement_summary(results),
         "convergence": {
             "criterion": results[0].convergence_criterion,
             "converged_frames": sum(item.converged for item in results),
@@ -2174,6 +2504,118 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
     for axis in axes.ravel():
         axis.set_xticks(index, labels, rotation=45, ha="right", fontsize=7)
         axis.grid(alpha=0.25)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def displacement_figure(
+    results: list[FrameResult], fields: list[dict[str, Any]], path: Path
+) -> None:
+    """Plot EFIT and Nova landmarks for every declared gate frame."""
+
+    figure, raw_axes = plt.subplots(
+        1,
+        len(results),
+        figsize=(3.7 * len(results), 4.2),
+        constrained_layout=True,
+    )
+    axes = np.atleast_1d(raw_axes)
+    landmark_styles = (
+        ("magnetic_axis", "axis", "tab:blue", "o"),
+        ("x_point", "X-point", "tab:orange", "X"),
+        ("terminal_boundary_centroid", "centroid", "tab:green", "s"),
+    )
+    for panel, (axis, result, frame) in enumerate(
+        zip(axes, results, fields, strict=True)
+    ):
+        displacement = result.displacement_decomposition
+        unavailable_reason = frame.get("plot_unavailable_reason")
+        if displacement is None:
+            reason = unavailable_reason or "terminal geometry unavailable"
+            axis.text(
+                0.5,
+                0.5,
+                f"Unavailable: {reason}",
+                ha="center",
+                va="center",
+                transform=axis.transAxes,
+            )
+            axis.set_axis_off()
+            continue
+        labelled_boundary = frame.get("labelled_closed_boundary")
+        predicted_boundary = frame.get(
+            "predicted_terminal_boundary", frame.get("predicted_closed_boundary")
+        )
+        if labelled_boundary is not None:
+            labelled_boundary = np.asarray(labelled_boundary, dtype=float)
+            axis.plot(
+                labelled_boundary[:, 0],
+                labelled_boundary[:, 1],
+                color="0.25",
+                linewidth=1.0,
+                label="EFIT boundary" if panel == 0 else None,
+            )
+        if predicted_boundary is not None:
+            predicted_boundary = np.asarray(predicted_boundary, dtype=float)
+            axis.plot(
+                predicted_boundary[:, 0],
+                predicted_boundary[:, 1],
+                color="tab:red",
+                linestyle="--",
+                linewidth=1.0,
+                label="Nova boundary" if panel == 0 else None,
+            )
+        for attribute, label, colour, marker in landmark_styles:
+            landmark = getattr(displacement, attribute)
+            efit = np.asarray(landmark.efit_rz_m, dtype=float)
+            nova = np.asarray(landmark.nova_rz_m, dtype=float)
+            axis.plot(
+                [efit[0], nova[0]],
+                [efit[1], nova[1]],
+                color=colour,
+                linewidth=0.8,
+                alpha=0.8,
+            )
+            axis.scatter(
+                *efit,
+                marker=marker,
+                s=45,
+                facecolors="none",
+                edgecolors=colour,
+                linewidths=1.2,
+                label=f"EFIT {label}" if panel == 0 else None,
+                zorder=3,
+            )
+            axis.scatter(
+                *nova,
+                marker=marker,
+                s=45,
+                color=colour,
+                label=f"Nova {label}" if panel == 0 else None,
+                zorder=3,
+            )
+        axis.set_title(
+            f"{Path(result.shot).stem[-6:]}:{result.frame}\n"
+            f"{displacement.classification.replace('_', ' ')}",
+            fontsize=9,
+        )
+        axis.text(
+            0.02,
+            0.02,
+            "axis "
+            f"ΔR={displacement.magnetic_axis.radial_offset_m:+.3f} m\n"
+            f"ΔZ={displacement.magnetic_axis.vertical_offset_m:+.3f} m",
+            transform=axis.transAxes,
+            fontsize=7,
+            va="bottom",
+            bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"},
+        )
+        axis.set_aspect("equal")
+        axis.set_xlabel("R [m]")
+        axis.grid(alpha=0.2)
+    axes[0].set_ylabel("Z [m]")
+    axes[0].legend(loc="best", fontsize=6)
+    path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
 
@@ -3758,7 +4200,10 @@ def run_margin_frame_remeasure(
 
 
 def run(
-    data: Path, output: Path, frames: int = EXECUTION_FRAME_COUNT
+    data: Path,
+    output: Path,
+    frames: int = EXECUTION_FRAME_COUNT,
+    displacement_output: Path = DEFAULT_DISPLACEMENT_OUTPUT,
 ) -> dict[str, Any]:
     """Read the immutable bar, execute the expanded cohort, and publish evidence."""
 
@@ -3779,6 +4224,9 @@ def run(
     selected = select_frames(paths, frames, affected)
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
     partial_receipt_path = output / PARTIAL_RECEIPT_NAME
+    restored_results = _restore_frame_checkpoint(
+        partial_receipt_path, selected, preregistration_hash
+    )
     results, fields = _solve_selected_frames(
         selected,
         baseline_expansion,
@@ -3788,6 +4236,7 @@ def run(
             len(selected),
             preregistration_hash,
         ),
+        restored_results=restored_results,
     )
     first = selected[0]
     first_row = _read(
@@ -3876,8 +4325,17 @@ def run(
         }
     )
     _record_publication_artifacts(receipt, output)
-    frame_figure(results, fields, output / FRAME_FIGURE_NAME)
+    if not restored_results:
+        frame_figure(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, output / COHORT_FIGURE_NAME)
+    displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
+    displacement_figure(results, fields, displacement_path)
+    receipt["result"]["displacement_decomposition"]["figure"] = {
+        "filesystem_path": str(displacement_path),
+        "publication_path": (
+            f"{DISPLACEMENT_PUBLICATION_DIRECTORY}/{DISPLACEMENT_FIGURE_NAME}"
+        ),
+    }
     receipt_path = output / RECEIPT_NAME
     receipt_path.write_text(
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
@@ -3889,6 +4347,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--displacement-output", type=Path, default=DEFAULT_DISPLACEMENT_OUTPUT
+    )
     parser.add_argument("--frames", type=int, default=EXECUTION_FRAME_COUNT)
     parser.add_argument("--preregister-only", action="store_true")
     parser.add_argument("--wall-topology-surface", action="store_true")
@@ -3986,7 +4447,12 @@ def main() -> None:
     print(f"PREREGISTRATION_VERIFIED {path} {preregistration_hash}", flush=True)
     if arguments.preregister_only:
         return
-    receipt = run(arguments.data, arguments.output, arguments.frames)
+    receipt = run(
+        arguments.data,
+        arguments.output,
+        arguments.frames,
+        arguments.displacement_output,
+    )
     headline = dict(receipt["result"])
     headline.pop("frame_records", None)
     print(json.dumps(headline, indent=2, sort_keys=True))

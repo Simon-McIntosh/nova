@@ -114,18 +114,18 @@
     },
     "source": "extract_flux_functions(label) p-prime and FF-prime plus the shipped nineteen poloidal-conductor currents; zero fitted coefficients"
   },
-  "preregistration_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/forward_gs_preregistration.json",
+  "preregistration_path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json",
   "publication_artifacts": {
     "cohort_match_summary": {
-      "filesystem_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/cohort_match_summary.png",
+      "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png"
     },
     "poloidal_frame_comparison": {
-      "filesystem_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/frame_flux_comparison.png",
+      "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png"
     },
     "strict_forward_match_receipt": {
-      "filesystem_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/forward_gs_receipt.json",
+      "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json"
     }
   },
@@ -158,9 +158,65 @@
         }
       ]
     },
+    "displacement_decomposition": {
+      "available_frame_count": 5,
+      "axis_dominantly_vertical_frame_count": 5,
+      "axis_offsets_m": [
+        {
+          "frame": 179,
+          "radial_offset_m": -0.47302850588109124,
+          "shot": "d3d_shot_00000c4a7b.parquet",
+          "vertical_offset_m": 1.5191411727444861
+        },
+        {
+          "frame": 44,
+          "radial_offset_m": -0.03024593022892752,
+          "shot": "d3d_shot_0003ff34e7.parquet",
+          "vertical_offset_m": -1.1655272146341684
+        },
+        {
+          "frame": 144,
+          "radial_offset_m": 2.6645352591003757e-15,
+          "shot": "d3d_shot_001554e054.parquet",
+          "vertical_offset_m": 5.422745585903499e-15
+        },
+        {
+          "frame": 146,
+          "radial_offset_m": 0.007027679016177402,
+          "shot": "d3d_shot_002495e835.parquet",
+          "vertical_offset_m": -0.0355221737145752
+        },
+        {
+          "frame": 137,
+          "radial_offset_m": 0.014071876870926925,
+          "shot": "d3d_shot_0040ca9bdc.parquet",
+          "vertical_offset_m": -0.037129187465815186
+        }
+      ],
+      "boundary_centroid_definition": "area centroid of the closed terminal-boundary polygon in the R,Z plane",
+      "classification_counts": {
+        "rigid_shift": 0,
+        "shape_change": 1,
+        "tilt": 4
+      },
+      "classification_rule": {
+        "agreement_fraction_of_absolute_mean_vertical_offset": 0.25,
+        "rigid_shift": "all three vertical offsets lie within the agreement fraction of their absolute mean vertical offset",
+        "shape_change": "all other non-rigid displacement patterns",
+        "tilt": "otherwise, the axis and X-point vertical offsets have opposite signs or differ by more than the same agreement tolerance"
+      },
+      "cohort_dominantly_vertical": true,
+      "declared_frame_count": 5,
+      "dominantly_vertical_rule": "a frame is axis-dominantly vertical when absolute vertical axis offset exceeds absolute radial axis offset; the cohort verdict requires every declared frame to be available and axis-dominantly vertical",
+      "figure": {
+        "filesystem_path": "docs/figures/diiid-vertical-force-balance/displacement/displacement_decomposition.png",
+        "publication_path": "/nova/figures/diiid-vertical-force-balance/displacement/displacement_decomposition.png"
+      },
+      "sign_convention": "offset = Nova post-solve position minus EFIT label position; positive radial is outward and positive vertical is upward"
+    },
     "frame_records": [
       {
-        "achieved_current_a": 1279650.100708008,
+        "achieved_current_a": 1279650.1007080078,
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
@@ -169,53 +225,26 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
+          1
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 7,
         "active_set_mask_differences": [
-          39,
-          25,
-          17,
-          8,
+          19,
+          20,
+          23,
+          18,
+          110,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         "active_set_residuals": [
-          0.302088601874675,
-          0.28564102864166524,
-          0.25775839505153775,
-          0.20544794378829398,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494
+          0.24216350915882487,
+          0.20976482613661546,
+          0.2662134881134871,
+          0.21367898049281614,
+          5.201158740818371e-05,
+          4.989445417570715e-05,
+          4.989445417570715e-05
         ],
         "branch_selection": {
           "admissibility": {
@@ -233,7 +262,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "diverted",
-              "residual": 0.04485116727666494,
+              "residual": 4.989445417570715e-05,
               "topology_consistent": true
             },
             "limited": {
@@ -242,7 +271,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "limited",
-              "residual": 0.00943636958749307,
+              "residual": 0.008899994049774443,
               "topology_consistent": false
             }
           },
@@ -273,8 +302,8 @@
           "previous_class": null,
           "reason": "no_valid_branch",
           "residuals": {
-            "diverted": 0.04485116727666494,
-            "limited": 0.00943636958749307
+            "diverted": 4.989445417570715e-05,
+            "limited": 0.008899994049774443
           },
           "selected_class": null,
           "selection_cohort": {
@@ -782,23 +811,62 @@
         },
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-06 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+        "displacement_decomposition": {
+          "classification": "tilt",
+          "magnetic_axis": {
+            "efit_rz_m": [
+              1.7736438512802124,
+              -0.030925704166293144
+            ],
+            "nova_rz_m": [
+              1.3006153453991212,
+              1.488215468578193
+            ],
+            "radial_offset_m": -0.47302850588109124,
+            "vertical_offset_m": 1.5191411727444861
+          },
+          "terminal_boundary_centroid": {
+            "efit_rz_m": [
+              1.6646792193446458,
+              0.010418564434722435
+            ],
+            "nova_rz_m": [
+              1.539309240814268,
+              0.14292194492083946
+            ],
+            "radial_offset_m": -0.1253699785303779,
+            "vertical_offset_m": 0.132503380486117
+          },
+          "x_point": {
+            "efit_rz_m": [
+              1.2828316688537598,
+              1.0984303951263428
+            ],
+            "nova_rz_m": [
+              1.1960562499078975,
+              -0.4564313391683738
+            ],
+            "radial_offset_m": -0.08677541894586227,
+            "vertical_offset_m": -1.5548617342947166
+          }
+        },
         "finite": true,
-        "fixed_point_relative_residual": 0.04485116727666494,
+        "fixed_point_relative_residual": 4.989445417570715e-05,
         "frame": 179,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 32,
         "metrics": {
-          "additive_gauge_wb": 2.0183935898820367,
+          "additive_gauge_wb": 1.759337626958511,
           "boundary_comparison_failures": [
             "missing_predicted_closed_boundary"
           ],
           "closed_boundary_symmetric_rms_distance_m": null,
           "closed_boundary_symmetric_sup_distance_m": null,
-          "interior_fractional_rms": 2.17825082586761,
-          "interior_r_squared": -3.7447766603929242,
+          "interior_fractional_rms": 2.1293492447569977,
+          "interior_r_squared": -3.534128206147196,
           "labelled_q95_nova": -3.184129238128662,
-          "magnetic_axis_displacement_mm": 1285.2496134717987,
-          "polished_saddle_to_nearest_efit_x_m": 2.662789919955731,
+          "magnetic_axis_displacement_mm": 1591.083237955697,
+          "polished_saddle_to_nearest_efit_x_m": 1.557281280342722,
           "predicted_q95_nova": null,
           "signed_relative_q95_error": null,
           "topology_class_agreement": true
@@ -807,64 +875,94 @@
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.04485116727666494,
-          0.5892354580717961,
-          0.2767377751344715,
-          0.1849201296972806,
-          0.45885447721095113,
-          0.29052310049754443,
-          0.2044909736204218,
-          0.5683164103425037,
-          0.32728063633753796,
-          0.31068766445217927,
-          0.31068766445217927,
-          0.2962778170248013,
-          0.2962778170248013,
-          0.28137356819827214,
-          0.28137356819827214,
-          0.26813860558051444,
-          0.26813860558051444,
-          0.25728435216063905,
-          0.25728435216063905,
-          0.24586823350032222,
-          0.24586823350032222,
-          0.2402583842291415,
-          0.2402583842291415,
-          0.2359492898165893,
-          0.2359492898165893,
-          0.22889979052153142,
-          0.22889979052153142,
-          0.22831896768580467,
-          0.22831896768580467,
-          0.22857895107590864,
-          0.22857895107590864,
-          0.21980619763398587,
-          0.21980619763398587,
-          0.21771481120332564,
-          0.21771481120332564,
-          0.21623096944250977,
-          0.21623096944250977,
-          0.212885512947254,
-          0.212885512947254,
-          0.20998989199027332,
-          0.20998989199027332,
-          0.20745786528942683,
-          0.20745786528942683,
-          0.2066632247634328,
-          0.2066632247634328,
-          0.20564502252570033,
-          0.20564502252570033,
-          0.2047192701326562,
-          0.2047192701326562,
-          0.20366126706459756,
-          0.20366126706459756,
-          0.20288935021439725,
-          0.20288935021439725,
-          0.20201423873026114,
-          0.20201423873026114,
-          0.20112709012448368
+          4.989445417570715e-05,
+          0.0005454619287135364,
+          0.0002851997420306824,
+          0.00013734538549221972,
+          6.568422240638732e-05,
+          0.0005145465771598714,
+          0.0002998079168057597,
+          0.00014403913852831536,
+          6.86836172212025e-05,
+          5.151472537068755e-05,
+          5.151472537068755e-05,
+          4.507568391950179e-05,
+          4.507568391950179e-05,
+          3.409108101156516e-05,
+          3.409108101156516e-05,
+          3.3805328986647724e-05,
+          3.380532898672268e-05,
+          3.352193174410541e-05,
+          3.352193174410541e-05,
+          3.338140079996164e-05,
+          3.338140079996164e-05,
+          3.331142486953362e-05,
+          3.331142486953362e-05,
+          3.327650899503696e-05,
+          3.327650899503696e-05,
+          3.325906904375659e-05,
+          3.325906904375659e-05,
+          3.3250353560082716e-05,
+          3.3250353560082716e-05,
+          3.297160219767358e-05,
+          3.297160219767358e-05,
+          3.2971330864200864e-05,
+          3.2971330864200864e-05,
+          3.297078820160307e-05,
+          3.297078820160308e-05,
+          3.296970289402297e-05,
+          3.296970289402297e-05,
+          3.2967532349024764e-05,
+          3.2967532349024764e-05,
+          3.296536194420115e-05,
+          3.296536194420115e-05,
+          3.296481937800151e-05,
+          3.296481937800151e-05,
+          3.2964548099324314e-05,
+          3.2964548099324314e-05,
+          3.296441246107263e-05,
+          3.296441246107263e-05,
+          3.296434464224664e-05,
+          3.296434464224664e-05,
+          3.296431073290859e-05,
+          3.296431073290859e-05,
+          3.2964308613560906e-05,
+          3.296430861356091e-05,
+          3.296430755384959e-05,
+          3.296430755384959e-05,
+          3.2940678239531317e-05
         ],
         "residual_tolerance": 1e-06,
+        "resolved_defaults": {
+          "compilation_cache_directory": null,
+          "deviations": {
+            "gmres_iterations": 24,
+            "newton_steps": 24,
+            "qualification_tolerance": 1e-06,
+            "warmup": 8
+          },
+          "nova_version": "0.11.0.post2424+g555c503b.d20260823",
+          "policy": {
+            "active_set_steps": 16,
+            "best_iterate_retention": true,
+            "cached_machine": true,
+            "compilation_cache": true,
+            "continuation": true,
+            "current_pin": true,
+            "exact_kernels": true,
+            "gmres_iterations": 24,
+            "kernel_tolerance": 1e-08,
+            "newton_steps": 24,
+            "own_mask_acceptance": true,
+            "qualification_tolerance": 1e-06,
+            "relaxation": 0.5,
+            "route": "newton_krylov",
+            "settled_exit": true,
+            "stagnation_stop": true,
+            "step_cap": 10.0,
+            "warmup": 8
+          }
+        },
         "seed_identity_detected": false,
         "shot": "d3d_shot_00000c4a7b.parquet",
         "solve_exception_class": null,
@@ -879,56 +977,20 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 4,
         "active_set_mask_differences": [
-          7,
-          7,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          35,
+          25,
+          20,
           0
         ],
         "active_set_residuals": [
-          0.13073069179864788,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782
+          0.365932510549418,
+          0.2521133903735512,
+          0.33475275435237756,
+          0.33475275435237756
         ],
         "branch_selection": {
           "admissibility": {
@@ -946,7 +1008,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "diverted",
-              "residual": 0.08117000452284782,
+              "residual": 0.33475275435237756,
               "topology_consistent": true
             },
             "limited": {
@@ -955,7 +1017,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "limited",
-              "residual": 0.016427655764040358,
+              "residual": 0.01635393451620278,
               "topology_consistent": false
             }
           },
@@ -986,8 +1048,8 @@
           "previous_class": null,
           "reason": "no_valid_branch",
           "residuals": {
-            "diverted": 0.08117000452284782,
-            "limited": 0.016427655764040358
+            "diverted": 0.33475275435237756,
+            "limited": 0.01635393451620278
           },
           "selected_class": null,
           "selection_cohort": {
@@ -1495,87 +1557,103 @@
         },
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-06 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+        "displacement_decomposition": {
+          "classification": "tilt",
+          "magnetic_axis": {
+            "efit_rz_m": [
+              1.7179585695266724,
+              -0.050308577716350555
+            ],
+            "nova_rz_m": [
+              1.6877126392977448,
+              -1.215835792350519
+            ],
+            "radial_offset_m": -0.03024593022892752,
+            "vertical_offset_m": -1.1655272146341684
+          },
+          "terminal_boundary_centroid": {
+            "efit_rz_m": [
+              1.6464052704818284,
+              -0.013660959964702343
+            ],
+            "nova_rz_m": [
+              1.5872431298682963,
+              -1.2028155495656114
+            ],
+            "radial_offset_m": -0.05916214061353209,
+            "vertical_offset_m": -1.189154589600909
+          },
+          "x_point": {
+            "efit_rz_m": [
+              1.2949720621109009,
+              1.138399600982666
+            ],
+            "nova_rz_m": [
+              1.0007138738495198,
+              -1.450736630588382
+            ],
+            "radial_offset_m": -0.29425818826138106,
+            "vertical_offset_m": -2.589136231571048
+          }
+        },
         "finite": true,
-        "fixed_point_relative_residual": 0.08117000452284782,
+        "fixed_point_relative_residual": 0.33475275435237756,
         "frame": 44,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 32,
         "metrics": {
-          "additive_gauge_wb": 0.277141295115974,
-          "boundary_comparison_failures": [],
-          "closed_boundary_symmetric_rms_distance_m": 0.2773139596087406,
-          "closed_boundary_symmetric_sup_distance_m": 0.7919072387146301,
-          "interior_fractional_rms": 1.1392908890723954,
-          "interior_r_squared": -0.2979837299233694,
+          "additive_gauge_wb": 1.5365894419421164,
+          "boundary_comparison_failures": [
+            "missing_predicted_closed_boundary"
+          ],
+          "closed_boundary_symmetric_rms_distance_m": null,
+          "closed_boundary_symmetric_sup_distance_m": null,
+          "interior_fractional_rms": 2.389541422675503,
+          "interior_r_squared": -4.709908210682067,
           "labelled_q95_nova": -4.6921916007995605,
-          "magnetic_axis_displacement_mm": 286.0301089852325,
-          "polished_saddle_to_nearest_efit_x_m": 2.6705442256105663,
-          "predicted_q95_nova": -3.856094173884959,
-          "signed_relative_q95_error": 0.17818910608256674,
+          "magnetic_axis_displacement_mm": 1165.919596004929,
+          "polished_saddle_to_nearest_efit_x_m": 2.6058039655723904,
+          "predicted_q95_nova": null,
+          "signed_relative_q95_error": null,
           "topology_class_agreement": true
         },
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.08117000452284782,
-          0.09861837131762483,
-          0.3856537728288897,
-          0.2099953707402089,
-          0.12429490520259837,
-          0.14074789544475644,
-          0.1506734119851859,
-          0.15217367693188172,
-          0.1460675988366803,
-          0.1451027049779897,
-          0.1451027049779897,
-          0.14702101683288804,
-          0.14702101683288804,
-          0.1441069730602245,
-          0.1441069730602245,
-          0.14561707565798943,
-          0.14561707565798943,
-          0.14885765921095237,
-          0.14885765921095237,
-          0.1484683143954443,
-          0.1484683143954443,
-          0.14841844531855625,
-          0.14841844531855625,
-          0.14893683465526023,
-          0.14893683465526023,
-          0.12323584624730591,
-          0.12323584624730591,
-          0.12390016524379181,
-          0.12390016524379181,
-          0.12195980960229924,
-          0.12195980960229924,
-          0.12093659937302133,
-          0.12093659937302133,
-          0.11755374724714808,
-          0.11755374724714808,
-          0.11522002743678363,
-          0.11522002743678363,
-          0.11369802453449472,
-          0.11369802453449472,
-          0.11422487536116822,
-          0.11422487536116822,
-          0.11420815851604879,
-          0.11420815851604879,
-          0.11420815851604879,
-          0.11420815851604879,
-          0.11389461202026045,
-          0.11389461202026045,
-          0.11387507973521227,
-          0.11387507973521227,
-          0.11387019766087217,
-          0.11387019766087217,
-          0.11386775674741831,
-          0.11386775674741831,
-          0.11386775674741831,
-          0.11386775674741831,
-          0.11386768047083119
+          0.33475275435237756
         ],
         "residual_tolerance": 1e-06,
+        "resolved_defaults": {
+          "compilation_cache_directory": null,
+          "deviations": {
+            "gmres_iterations": 24,
+            "newton_steps": 24,
+            "qualification_tolerance": 1e-06,
+            "warmup": 8
+          },
+          "nova_version": "0.11.0.post2424+g555c503b.d20260823",
+          "policy": {
+            "active_set_steps": 16,
+            "best_iterate_retention": true,
+            "cached_machine": true,
+            "compilation_cache": true,
+            "continuation": true,
+            "current_pin": true,
+            "exact_kernels": true,
+            "gmres_iterations": 24,
+            "kernel_tolerance": 1e-08,
+            "newton_steps": 24,
+            "own_mask_acceptance": true,
+            "qualification_tolerance": 1e-06,
+            "relaxation": 0.5,
+            "route": "newton_krylov",
+            "settled_exit": true,
+            "stagnation_stop": true,
+            "step_cap": 10.0,
+            "warmup": 8
+          }
+        },
         "seed_identity_detected": false,
         "shot": "d3d_shot_0003ff34e7.parquet",
         "solve_exception_class": null,
@@ -1585,61 +1663,16 @@
       },
       {
         "achieved_current_a": 988842.2265648842,
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 1,
         "active_set_mask_differences": [
-          0,
-          0,
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         "active_set_residuals": [
-          0.100301572466295,
-          0.09701585439082655,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041
+          5.923299520969474
         ],
         "branch_selection": {
           "admissibility": {
@@ -1652,13 +1685,13 @@
           },
           "branches": {
             "diverted": {
-              "achieved_class": "limited",
+              "achieved_class": "diverted",
               "converged": false,
               "finite": true,
               "iterations": 32,
               "requested_class": "diverted",
-              "residual": 0.08696589356667041,
-              "topology_consistent": false
+              "residual": 5.923299520969474,
+              "topology_consistent": true
             },
             "limited": {
               "achieved_class": "limited",
@@ -1666,7 +1699,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "limited",
-              "residual": 0.019043318807791376,
+              "residual": 0.02032419151489186,
               "topology_consistent": true
             }
           },
@@ -1697,8 +1730,8 @@
           "previous_class": null,
           "reason": "no_valid_branch",
           "residuals": {
-            "diverted": 0.08696589356667041,
-            "limited": 0.019043318807791376
+            "diverted": 5.923299520969474,
+            "limited": 0.02032419151489186
           },
           "selected_class": null,
           "selection_cohort": {
@@ -2206,34 +2239,103 @@
         },
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-06 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+        "displacement_decomposition": {
+          "classification": "shape_change",
+          "magnetic_axis": {
+            "efit_rz_m": [
+              1.7594630718231201,
+              0.013277635909616947
+            ],
+            "nova_rz_m": [
+              1.7594630718231228,
+              0.01327763590962237
+            ],
+            "radial_offset_m": 2.6645352591003757e-15,
+            "vertical_offset_m": 5.422745585903499e-15
+          },
+          "terminal_boundary_centroid": {
+            "efit_rz_m": [
+              1.6418220883517265,
+              -0.011712676850950931
+            ],
+            "nova_rz_m": [
+              1.6483156843685183,
+              -0.17801339320698856
+            ],
+            "radial_offset_m": 0.0064935960167917806,
+            "vertical_offset_m": -0.16630071635603763
+          },
+          "x_point": {
+            "efit_rz_m": [
+              1.3818272352218628,
+              -1.060546636581421
+            ],
+            "nova_rz_m": [
+              1.3818272352218621,
+              -1.0605466365814207
+            ],
+            "radial_offset_m": -6.661338147750939e-16,
+            "vertical_offset_m": 2.220446049250313e-16
+          }
+        },
         "finite": true,
-        "fixed_point_relative_residual": 0.08696589356667041,
+        "fixed_point_relative_residual": 5.923299520969474,
         "frame": 144,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 32,
         "metrics": {
-          "additive_gauge_wb": 0.2939814273724449,
+          "additive_gauge_wb": 0.30258350256324246,
           "boundary_comparison_failures": [
             "missing_predicted_closed_boundary"
           ],
           "closed_boundary_symmetric_rms_distance_m": null,
           "closed_boundary_symmetric_sup_distance_m": null,
-          "interior_fractional_rms": 1.857333133034226,
-          "interior_r_squared": -2.449686367066734,
+          "interior_fractional_rms": 0.6824999852817112,
+          "interior_r_squared": 0.534193770090464,
           "labelled_q95_nova": -4.669349670410156,
-          "magnetic_axis_displacement_mm": 438.452489415544,
-          "polished_saddle_to_nearest_efit_x_m": 0.12305940928740373,
-          "predicted_q95_nova": 2.0693383267557475,
-          "signed_relative_q95_error": 1.4431748472103563,
-          "topology_class_agreement": false
+          "magnetic_axis_displacement_mm": 6.042012730574555e-12,
+          "polished_saddle_to_nearest_efit_x_m": 7.021666937153402e-16,
+          "predicted_q95_nova": 4.648649656169815,
+          "signed_relative_q95_error": 1.9955668314216182,
+          "topology_class_agreement": true
         },
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.08696589356667041
+          5.923299520969474
         ],
         "residual_tolerance": 1e-06,
+        "resolved_defaults": {
+          "compilation_cache_directory": null,
+          "deviations": {
+            "gmres_iterations": 24,
+            "newton_steps": 24,
+            "qualification_tolerance": 1e-06,
+            "warmup": 8
+          },
+          "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+          "policy": {
+            "active_set_steps": 16,
+            "best_iterate_retention": true,
+            "cached_machine": true,
+            "compilation_cache": true,
+            "continuation": true,
+            "current_pin": true,
+            "exact_kernels": true,
+            "gmres_iterations": 24,
+            "kernel_tolerance": 1e-08,
+            "newton_steps": 24,
+            "own_mask_acceptance": true,
+            "qualification_tolerance": 1e-06,
+            "relaxation": 0.5,
+            "route": "newton_krylov",
+            "settled_exit": true,
+            "stagnation_stop": true,
+            "step_cap": 10.0,
+            "warmup": 8
+          }
+        },
         "seed_identity_detected": false,
         "shot": "d3d_shot_001554e054.parquet",
         "solve_exception_class": null,
@@ -2246,58 +2348,16 @@
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          26,
-          28,
-          9,
-          10,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          11,
           0
         ],
         "active_set_residuals": [
-          0.1231314508461497,
-          0.36889393661427317,
-          0.07306892969038942,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435
+          2.3708844897213868,
+          2.3708844897213877
         ],
         "branch_selection": {
           "admissibility": {
@@ -2315,7 +2375,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "diverted",
-              "residual": 0.058516982970557435,
+              "residual": 2.3708844897213877,
               "topology_consistent": true
             },
             "limited": {
@@ -2324,7 +2384,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "limited",
-              "residual": 0.004776027425549057,
+              "residual": 0.004609957511522432,
               "topology_consistent": false
             }
           },
@@ -2355,8 +2415,8 @@
           "previous_class": null,
           "reason": "no_valid_branch",
           "residuals": {
-            "diverted": 0.058516982970557435,
-            "limited": 0.004776027425549057
+            "diverted": 2.3708844897213877,
+            "limited": 0.004609957511522432
           },
           "selected_class": null,
           "selection_cohort": {
@@ -2864,34 +2924,103 @@
         },
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-06 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+        "displacement_decomposition": {
+          "classification": "tilt",
+          "magnetic_axis": {
+            "efit_rz_m": [
+              1.718023657798767,
+              -0.001327185658738017
+            ],
+            "nova_rz_m": [
+              1.7250513368149445,
+              -0.03684935937331322
+            ],
+            "radial_offset_m": 0.007027679016177402,
+            "vertical_offset_m": -0.0355221737145752
+          },
+          "terminal_boundary_centroid": {
+            "efit_rz_m": [
+              1.6166399787622057,
+              -0.03797591200860915
+            ],
+            "nova_rz_m": [
+              1.5605433153822648,
+              -0.2850954053767099
+            ],
+            "radial_offset_m": -0.0560966633799409,
+            "vertical_offset_m": -0.24711949336810077
+          },
+          "x_point": {
+            "efit_rz_m": [
+              1.2929953336715698,
+              -1.1911089420318604
+            ],
+            "nova_rz_m": [
+              1.2290003805729715,
+              -1.2897631401149423
+            ],
+            "radial_offset_m": -0.06399495309859837,
+            "vertical_offset_m": -0.09865419808308196
+          }
+        },
         "finite": true,
-        "fixed_point_relative_residual": 0.058516982970557435,
+        "fixed_point_relative_residual": 2.3708844897213877,
         "frame": 146,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 32,
         "metrics": {
-          "additive_gauge_wb": 0.11516773179834079,
-          "boundary_comparison_failures": [],
-          "closed_boundary_symmetric_rms_distance_m": 0.30493057032909693,
-          "closed_boundary_symmetric_sup_distance_m": 0.7465332406400491,
-          "interior_fractional_rms": 1.53529257532426,
-          "interior_r_squared": -1.3571232918457983,
+          "additive_gauge_wb": 0.21434206235682549,
+          "boundary_comparison_failures": [
+            "missing_predicted_closed_boundary"
+          ],
+          "closed_boundary_symmetric_rms_distance_m": null,
+          "closed_boundary_symmetric_sup_distance_m": null,
+          "interior_fractional_rms": 0.48938925959006574,
+          "interior_r_squared": 0.7604981525978873,
           "labelled_q95_nova": -3.4771714210510254,
-          "magnetic_axis_displacement_mm": 375.5045726893921,
-          "polished_saddle_to_nearest_efit_x_m": 0.2090152193774459,
-          "predicted_q95_nova": -2.139025279388059,
-          "signed_relative_q95_error": 0.38483755317950136,
+          "magnetic_axis_displacement_mm": 36.21067657145994,
+          "polished_saddle_to_nearest_efit_x_m": 0.11759253726962343,
+          "predicted_q95_nova": -3.5392612867749937,
+          "signed_relative_q95_error": -0.017856429323004384,
           "topology_class_agreement": true
         },
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.05851698297055791,
-          0.07034560131412651,
-          0.07356514758902924
+          2.370884489721388
         ],
         "residual_tolerance": 1e-06,
+        "resolved_defaults": {
+          "compilation_cache_directory": null,
+          "deviations": {
+            "gmres_iterations": 24,
+            "newton_steps": 24,
+            "qualification_tolerance": 1e-06,
+            "warmup": 8
+          },
+          "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+          "policy": {
+            "active_set_steps": 16,
+            "best_iterate_retention": true,
+            "cached_machine": true,
+            "compilation_cache": true,
+            "continuation": true,
+            "current_pin": true,
+            "exact_kernels": true,
+            "gmres_iterations": 24,
+            "kernel_tolerance": 1e-08,
+            "newton_steps": 24,
+            "own_mask_acceptance": true,
+            "qualification_tolerance": 1e-06,
+            "relaxation": 0.5,
+            "route": "newton_krylov",
+            "settled_exit": true,
+            "stagnation_stop": true,
+            "step_cap": 10.0,
+            "warmup": 8
+          }
+        },
         "seed_identity_detected": false,
         "shot": "d3d_shot_002495e835.parquet",
         "solve_exception_class": null,
@@ -2900,62 +3029,20 @@
         "time_ms": 3180.0
       },
       {
-        "achieved_current_a": 1629095.3674316409,
+        "achieved_current_a": 1629095.3674316406,
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          7,
-          5,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          9,
           0
         ],
         "active_set_residuals": [
-          0.10245593954041957,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785
+          2.4111694552122946,
+          2.411169455212294
         ],
         "branch_selection": {
           "admissibility": {
@@ -2973,7 +3060,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "diverted",
-              "residual": 0.047568328864646785,
+              "residual": 2.411169455212294,
               "topology_consistent": true
             },
             "limited": {
@@ -2982,7 +3069,7 @@
               "finite": true,
               "iterations": 32,
               "requested_class": "limited",
-              "residual": 0.01030176827828357,
+              "residual": 0.010302247527315253,
               "topology_consistent": false
             }
           },
@@ -3013,8 +3100,8 @@
           "previous_class": null,
           "reason": "no_valid_branch",
           "residuals": {
-            "diverted": 0.047568328864646785,
-            "limited": 0.01030176827828357
+            "diverted": 2.411169455212294,
+            "limited": 0.010302247527315253
           },
           "selected_class": null,
           "selection_cohort": {
@@ -3522,87 +3609,103 @@
         },
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-06 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+        "displacement_decomposition": {
+          "classification": "tilt",
+          "magnetic_axis": {
+            "efit_rz_m": [
+              1.7231301069259644,
+              0.001690587610937655
+            ],
+            "nova_rz_m": [
+              1.7372019837968913,
+              -0.03543859985487753
+            ],
+            "radial_offset_m": 0.014071876870926925,
+            "vertical_offset_m": -0.037129187465815186
+          },
+          "terminal_boundary_centroid": {
+            "efit_rz_m": [
+              1.6148654928508075,
+              -0.03388594494120285
+            ],
+            "nova_rz_m": [
+              1.576360923955114,
+              -0.30943801508765467
+            ],
+            "radial_offset_m": -0.038504568895693536,
+            "vertical_offset_m": -0.27555207014645183
+          },
+          "x_point": {
+            "efit_rz_m": [
+              1.2897911071777344,
+              -1.1884135007858276
+            ],
+            "nova_rz_m": [
+              1.2249726017836453,
+              -1.290376448232279
+            ],
+            "radial_offset_m": -0.06481850539408907,
+            "vertical_offset_m": -0.1019629474464514
+          }
+        },
         "finite": true,
-        "fixed_point_relative_residual": 0.047568328864646785,
+        "fixed_point_relative_residual": 2.411169455212294,
         "frame": 137,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 32,
         "metrics": {
-          "additive_gauge_wb": -0.04134113431598284,
-          "boundary_comparison_failures": [],
-          "closed_boundary_symmetric_rms_distance_m": 0.2552234937404297,
-          "closed_boundary_symmetric_sup_distance_m": 0.6365220854294175,
-          "interior_fractional_rms": 1.3481151667782239,
-          "interior_r_squared": -0.817414502897478,
+          "additive_gauge_wb": 0.18770789921746567,
+          "boundary_comparison_failures": [
+            "missing_predicted_closed_boundary"
+          ],
+          "closed_boundary_symmetric_rms_distance_m": null,
+          "closed_boundary_symmetric_sup_distance_m": null,
+          "interior_fractional_rms": 0.5168652687146056,
+          "interior_r_squared": 0.7328502939965786,
           "labelled_q95_nova": -3.5147154331207275,
-          "magnetic_axis_displacement_mm": 311.5689270610047,
-          "polished_saddle_to_nearest_efit_x_m": 0.44444604629445467,
-          "predicted_q95_nova": -1.9339563979970016,
-          "signed_relative_q95_error": 0.4497544865873152,
+          "magnetic_axis_displacement_mm": 39.706350632388464,
+          "polished_saddle_to_nearest_efit_x_m": 0.12082169214793907,
+          "predicted_q95_nova": -3.4823853684796555,
+          "signed_relative_q95_error": 0.009198487119728508,
           "topology_class_agreement": true
         },
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.047568328864646785,
-          0.05709380748760497,
-          0.058412797869491474,
-          0.07487372434337143,
-          0.07914317921625255,
-          0.10493281884297127,
-          0.12204389200602818,
-          0.12631274437490927,
-          0.13634929622201342,
-          0.1360093718317341,
-          0.1360093718317341,
-          0.13593027844965705,
-          0.13593027844965705,
-          0.13593027844965705,
-          0.13593027844965705,
-          0.13593027844965705,
-          0.13593027844965705,
-          0.13592599578560574,
-          0.13592599578560574,
-          0.13592385477230035,
-          0.13592385477230035,
-          0.13592278434531962,
-          0.13592278434531962,
-          0.13592224915174597,
-          0.13592224915174597,
-          0.13592198155993876,
-          0.13592198155993876,
-          0.1359218477652793,
-          0.1359218477652793,
-          0.13592183940314678,
-          0.13592183940314678,
-          0.13592183522208184,
-          0.13592183522208184,
-          0.13592183469944877,
-          0.13592183469944877,
-          0.13118801961115473,
-          0.13118801961115473,
-          0.13524583040594193,
-          0.13524583040594193,
-          0.13569718949076706,
-          0.13569718949076706,
-          0.13569718913872142,
-          0.13569718913872142,
-          0.13569718843463008,
-          0.13569718843463008,
-          0.1356971870264472,
-          0.1356971870264472,
-          0.1356971842100814,
-          0.1356971842100814,
-          0.1356971785773503,
-          0.1356971785773503,
-          0.1356971673118894,
-          0.1356971673118894,
-          0.13569714478097245,
-          0.13569714478097245,
-          0.13569709971915792
+          2.411169455212294
         ],
         "residual_tolerance": 1e-06,
+        "resolved_defaults": {
+          "compilation_cache_directory": null,
+          "deviations": {
+            "gmres_iterations": 24,
+            "newton_steps": 24,
+            "qualification_tolerance": 1e-06,
+            "warmup": 8
+          },
+          "nova_version": "0.11.0.post4348+ga267a3c5.d20260906",
+          "policy": {
+            "active_set_steps": 16,
+            "best_iterate_retention": true,
+            "cached_machine": true,
+            "compilation_cache": true,
+            "continuation": true,
+            "current_pin": true,
+            "exact_kernels": true,
+            "gmres_iterations": 24,
+            "kernel_tolerance": 1e-08,
+            "newton_steps": 24,
+            "own_mask_acceptance": true,
+            "qualification_tolerance": 1e-06,
+            "relaxation": 0.5,
+            "route": "newton_krylov",
+            "settled_exit": true,
+            "stagnation_stop": true,
+            "step_cap": 10.0,
+            "warmup": 8
+          }
+        },
         "seed_identity_detected": false,
         "shot": "d3d_shot_0040ca9bdc.parquet",
         "solve_exception_class": null,
@@ -3618,46 +3721,46 @@
     },
     "metrics": {
       "closed_boundary_symmetric_rms_distance_m": {
-        "maximum": 0.30493057032909693,
-        "mean": 0.27915600789275574,
-        "median": 0.2773139596087406,
-        "minimum": 0.2552234937404297
+        "maximum": null,
+        "mean": null,
+        "median": null,
+        "minimum": null
       },
       "closed_boundary_symmetric_sup_distance_m": {
-        "maximum": 0.7919072387146301,
-        "mean": 0.7249875215946989,
-        "median": 0.7465332406400491,
-        "minimum": 0.6365220854294175
+        "maximum": null,
+        "mean": null,
+        "median": null,
+        "minimum": null
       },
       "interior_fractional_rms": {
-        "maximum": 2.17825082586761,
-        "mean": 1.611656518015343,
-        "median": 1.53529257532426,
-        "minimum": 1.1392908890723954
+        "maximum": 2.389541422675503,
+        "mean": 1.2415290362037767,
+        "median": 0.6824999852817112,
+        "minimum": 0.48938925959006574
       },
       "interior_r_squared": {
-        "maximum": -0.2979837299233694,
-        "mean": -1.7333969104252607,
-        "median": -1.3571232918457983,
-        "minimum": -3.7447766603929242
+        "maximum": 0.7604981525978873,
+        "mean": -1.2432988400288667,
+        "median": 0.534193770090464,
+        "minimum": -4.709908210682067
       },
       "magnetic_axis_displacement_mm": {
-        "maximum": 1285.2496134717987,
-        "mean": 539.3611423245944,
-        "median": 375.5045726893921,
-        "minimum": 286.0301089852325
+        "maximum": 1591.083237955697,
+        "mean": 566.583972232896,
+        "median": 39.706350632388464,
+        "minimum": 6.042012730574555e-12
       },
       "polished_saddle_to_nearest_efit_x_m": {
-        "maximum": 2.6705442256105663,
-        "mean": 1.2219709641051204,
-        "median": 0.44444604629445467,
-        "minimum": 0.12305940928740373
+        "maximum": 2.6058039655723904,
+        "mean": 0.8802998950665353,
+        "median": 0.12082169214793907,
+        "minimum": 7.021666937153402e-16
       },
       "signed_relative_q95_error": {
-        "maximum": 1.4431748472103563,
-        "mean": 0.6139889982649349,
-        "median": 0.41729601988340825,
-        "minimum": 0.17818910608256674
+        "maximum": 1.9955668314216182,
+        "mean": 0.6623029630727808,
+        "median": 0.009198487119728508,
+        "minimum": -0.017856429323004384
       }
     },
     "passed": false,
@@ -3671,60 +3774,33 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
+          1
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 7,
         "active_set_mask_differences": [
-          39,
-          25,
-          17,
-          8,
+          19,
+          20,
+          23,
+          18,
+          110,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         "active_set_residuals": [
-          0.302088601874675,
-          0.28564102864166524,
-          0.25775839505153775,
-          0.20544794378829398,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494,
-          0.04485116727666494
+          0.24216350915882487,
+          0.20976482613661546,
+          0.2662134881134871,
+          0.21367898049281614,
+          5.201158740818371e-05,
+          4.989445417570715e-05,
+          4.989445417570715e-05
         ],
         "boundary_comparison_failures": [
           "missing_predicted_closed_boundary"
         ],
         "converged": false,
         "frame": 179,
-        "interior_r_squared": -3.7447766603929242,
+        "interior_r_squared": -3.534128206147196,
         "iterations": 32,
         "shot": "d3d_shot_00000c4a7b.parquet",
         "solve_exception_class": null,
@@ -3738,61 +3814,27 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 4,
         "active_set_mask_differences": [
-          7,
-          7,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          35,
+          25,
+          20,
           0
         ],
         "active_set_residuals": [
-          0.13073069179864788,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782,
-          0.08117000452284782
+          0.365932510549418,
+          0.2521133903735512,
+          0.33475275435237756,
+          0.33475275435237756
         ],
-        "boundary_comparison_failures": [],
+        "boundary_comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "frame": 44,
-        "interior_r_squared": -0.2979837299233694,
+        "interior_r_squared": -4.709908210682067,
         "iterations": 32,
         "shot": "d3d_shot_0003ff34e7.parquet",
         "solve_exception_class": null,
@@ -3801,136 +3843,51 @@
         "verdict": "FAIL"
       },
       {
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 1,
         "active_set_mask_differences": [
-          0,
-          0,
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         "active_set_residuals": [
-          0.100301572466295,
-          0.09701585439082655,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041,
-          0.08696589356667041
+          5.923299520969474
         ],
         "boundary_comparison_failures": [
           "missing_predicted_closed_boundary"
         ],
         "converged": false,
         "frame": 144,
-        "interior_r_squared": -2.449686367066734,
+        "interior_r_squared": 0.534193770090464,
         "iterations": 32,
         "shot": "d3d_shot_001554e054.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
-        "topology_class_agreement": false,
+        "topology_class_agreement": true,
         "verdict": "FAIL"
       },
       {
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          26,
-          28,
-          9,
-          10,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          11,
           0
         ],
         "active_set_residuals": [
-          0.1231314508461497,
-          0.36889393661427317,
-          0.07306892969038942,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435,
-          0.058516982970557435
+          2.3708844897213868,
+          2.3708844897213877
         ],
-        "boundary_comparison_failures": [],
+        "boundary_comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "frame": 146,
-        "interior_r_squared": -1.3571232918457983,
+        "interior_r_squared": 0.7604981525978873,
         "iterations": 32,
         "shot": "d3d_shot_002495e835.parquet",
         "solve_exception_class": null,
@@ -3942,63 +3899,23 @@
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
-        "active_set_iterations": 16,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          7,
-          5,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          9,
           0
         ],
         "active_set_residuals": [
-          0.10245593954041957,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785,
-          0.047568328864646785
+          2.4111694552122946,
+          2.411169455212294
         ],
-        "boundary_comparison_failures": [],
+        "boundary_comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "frame": 137,
-        "interior_r_squared": -0.817414502897478,
+        "interior_r_squared": 0.7328502939965786,
         "iterations": 32,
         "shot": "d3d_shot_0040ca9bdc.parquet",
         "solve_exception_class": null,
@@ -4009,7 +3926,7 @@
     ],
     "preregistration_sha256": "bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5",
     "pseudo_wall": {
-      "maximum_absolute_r_squared_move": 0.3495361342434835,
+      "maximum_absolute_r_squared_move": 4.6186867130870723e-07,
       "sensitivity": [
         {
           "active_set_cycle_damping_activations": [
@@ -4019,57 +3936,30 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
+            1
           ],
-          "active_set_iterations": 16,
+          "active_set_iterations": 7,
           "active_set_mask_differences": [
-            39,
-            25,
-            17,
-            8,
+            19,
+            20,
+            23,
+            18,
+            110,
             1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "active_set_residuals": [
-            0.302088601874675,
-            0.28564102864166524,
-            0.25775839505153775,
-            0.20544794378829398,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494,
-            0.04485116727666494
+            0.24216350915882487,
+            0.20976482613661546,
+            0.2662134881134871,
+            0.21367898049281614,
+            5.201158740818371e-05,
+            4.989445417570715e-05,
+            4.989445417570715e-05
           ],
           "converged": false,
-          "fixed_point_relative_residual": 0.04485116727666494,
-          "interior_r_squared": -3.7447766603929242,
+          "fixed_point_relative_residual": 4.989445417570715e-05,
+          "interior_r_squared": -3.534128206147196,
           "pseudo_wall_expansion": 0.02,
           "r_squared_change_from_baseline": 0.0
         },
@@ -4081,59 +3971,32 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
+            1
           ],
-          "active_set_iterations": 16,
+          "active_set_iterations": 7,
           "active_set_mask_differences": [
-            64,
-            53,
             22,
-            8,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
+            27,
+            24,
+            13,
+            112,
+            1,
             0
           ],
           "active_set_residuals": [
-            0.34625877278886846,
-            0.31759474249166963,
-            0.22814204161324242,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474,
-            0.12423551104506474
+            0.3285910862588586,
+            0.2490292782793308,
+            0.25743580243850367,
+            0.2322809059298586,
+            5.0977555208317394e-05,
+            4.971667222896116e-05,
+            4.971667222896116e-05
           ],
           "converged": false,
-          "fixed_point_relative_residual": 0.12423551104506474,
-          "interior_r_squared": -3.3952405261494407,
+          "fixed_point_relative_residual": 4.971667222896116e-05,
+          "interior_r_squared": -3.534127744278525,
           "pseudo_wall_expansion": 0.05,
-          "r_squared_change_from_baseline": 0.3495361342434835
+          "r_squared_change_from_baseline": 4.6186867130870723e-07
         }
       ],
       "statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent"
@@ -4141,8 +4004,8 @@
     "registered_median_interior_r_squared_bar": 0.90155
   },
   "tree_stamp": {
-    "benchmark_sha256": "3fdab4736efee529d48e952997034f3b76c1bb186a1021853e0f3c0566c7979e",
-    "git_head": "4a42139d49d58a8dc451bfbbf06963e9d2b9e0ea",
+    "benchmark_sha256": "bac5cced434f7048c457537c9805427d29f279196d0ec26f88c38c34b27a223c",
+    "git_head": "2a1384517a3e209f11bbf469f527840c179dfa92",
     "worktree_status": []
   }
 }

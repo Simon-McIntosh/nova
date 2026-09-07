@@ -1,0 +1,45 @@
+{
+  "displacement_decomposition": {
+    "classification": "tilt",
+    "magnetic_axis": {
+      "efit_rz_m": [
+        1.7179585695266724,
+        -0.050308577716350555
+      ],
+      "nova_rz_m": [
+        1.6877126392977448,
+        -1.215835792350519
+      ],
+      "radial_offset_m": -0.03024593022892752,
+      "vertical_offset_m": -1.1655272146341684
+    },
+    "terminal_boundary_centroid": {
+      "efit_rz_m": [
+        1.6464052704818284,
+        -0.013660959964702343
+      ],
+      "nova_rz_m": [
+        1.5872431298682963,
+        -1.2028155495656114
+      ],
+      "radial_offset_m": -0.05916214061353209,
+      "vertical_offset_m": -1.189154589600909
+    },
+    "x_point": {
+      "efit_rz_m": [
+        1.2949720621109009,
+        1.138399600982666
+      ],
+      "nova_rz_m": [
+        1.0007138738495198,
+        -1.450736630588382
+      ],
+      "radial_offset_m": -0.29425818826138106,
+      "vertical_offset_m": -2.589136231571048
+    }
+  },
+  "frame": 44,
+  "measurement": "terminal raster separatrix landmark enrichment",
+  "pseudo_wall_expansion": 0.02,
+  "shot": "d3d_shot_0003ff34e7.parquet"
+}

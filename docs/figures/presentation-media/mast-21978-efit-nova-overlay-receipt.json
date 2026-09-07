@@ -1,0 +1,62 @@
+{
+  "boundary_source_nova": "raster_flux.separatrix",
+  "boundary_source_reference": "efm/lcfs",
+  "carrier": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media/mast-21978-wide-solve.npz",
+  "carrier_sha256": {
+    "limiter_interior_mask_rz": "f3b489f25fe69b05142395cc80e36884d8e3797ebbd4ee30471f9bade5a7cc54",
+    "magnetic_axis_rz_m": "0edadc0b63bbf7a2cb4960ba3b238b72ffd668443f1a5274e57108aa787ae13f",
+    "radial_m": "6e97a420f2cace1907b544a763b021f6c2b0c2e03bc046a705b7e33b978a8e1c",
+    "solved_boundary_rz_m": "cee427eeaaabb3308dccea2ec782a51791fea271ead7e1a3be3ad330062d740f",
+    "stored_efit_flux_wb_rz": "5e738c93e401a8128936617d62f673b1933eb7b53af06197f16faa309d9986c7",
+    "total_poloidal_flux_wb_rz": "ff9d8f0b4dc7655f49a4ae8bf8b9512299dc2b2038d6bcc4af84ccfa14eb8e4c",
+    "vertical_m": "85a82fa8f76aa4eaaef21301a8a332e12a1055f66faaae596961fc9baee876ba",
+    "x_points_rz_m": "9b6f799dd99183622267cd28e39a92cf653507beaf583df7608e48aeb68cc1f1"
+  },
+  "coil_sections_enclosed": 938,
+  "comparison_masked_to_reference_grid": true,
+  "contour_levels": 28,
+  "figure": "docs/figures/presentation-media/mast-21978-efit-nova-overlay.png",
+  "flux_span_axis_to_boundary_wb": 0.3926345181673122,
+  "grid_radial_span_m": [
+    0.02,
+    2.2
+  ],
+  "grid_shape_zr": [
+    350,
+    150
+  ],
+  "grid_vertical_span_m": [
+    -2.6,
+    2.6
+  ],
+  "interior_point_count": 23582,
+  "level_span_wb": [
+    -1.0578874799597897,
+    0.3172033025524524
+  ],
+  "levels_from": "the EFIT reference map, shared with the nova map",
+  "maximum_absolute_difference_wb": 0.02125204999879038,
+  "maximum_difference_fraction_of_span": 0.0541267999002938,
+  "nova_boundary_drawn_as": "contour of the nova map at the boundary flux level; the solve's separatrix vertex list carries open legs and is not a polyline",
+  "nulls": {
+    "strike_points_drawn": 0,
+    "x_points_drawn": 2,
+    "x_points_dropped_outside_wall": 0
+  },
+  "reference_grid_span_rz_m": [
+    0.05999999865889549,
+    2.0,
+    -2.0,
+    2.0
+  ],
+  "regauged": false,
+  "rms_difference_wb": 0.0075753235675339045,
+  "shot": 21978,
+  "solve": {
+    "conditioned": false,
+    "converged": true,
+    "qualified": true,
+    "terminal_residual": 1.613304901405875e-12
+  },
+  "time_s": 0.19499999284744263
+}

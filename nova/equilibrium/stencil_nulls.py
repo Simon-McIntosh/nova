@@ -1888,48 +1888,75 @@ def xpoint_candidates(
     return selected
 
 
-def magnetic_axis_subgrid(psi, rg, zg, inside_limiter, region=None, noise_sigma=None):
-    """Return the deepest resolved rectangular extremum as the magnetic axis."""
+def magnetic_axis_subgrid(
+    psi,
+    rg,
+    zg,
+    inside_limiter,
+    region=None,
+    noise_sigma=None,
+    polarity=None,
+):
+    """Return the resolved magnetic axis on a rectangular grid.
+
+    With no ``polarity`` this keeps the historical highest-confidence
+    extremum selection.  When the plasma-current polarity is supplied, the
+    selected extremum is constrained to the corresponding flux orientation:
+    positive current selects a maximum and negative current selects a
+    minimum.  The latter is required for reversed-current equilibria, whose
+    magnetic axis is a flux minimum even though both orientations have the
+    same positive winding index.
+    """
     psi = _explicit_float_array(psi)
     rg = _explicit_float_array(rg)
     zg = _explicit_float_array(zg)
     mask = jnp.asarray(inside_limiter, dtype=bool)
     if region is not None:
         mask &= jnp.asarray(region) > 0.5
+    candidate_slots = 1 if polarity is None else 8
     result = _scalar_result(
         critical_point_candidates_batch(
             jax.lax.stop_gradient(psi)[None],
             rg,
             zg,
             inside_limiter,
-            k_slots=1,
+            k_slots=candidate_slots,
             extra_mask=mask[None],
             material_dilate=0,
             target_index=1,
             noise_sigma=noise_sigma,
         )
     )
+    if polarity is None:
+        selected = 0
+        found = result["resolved"][0]
+    else:
+        expected_type = jnp.where(
+            jnp.asarray(polarity) >= 0, jnp.asarray(1.0), jnp.asarray(-1.0)
+        )
+        oriented = result["resolved"] & (result["ntype"] == expected_type)
+        selected = jnp.argmax(oriented)
+        found = jnp.any(oriented)
     refined = _refine_selected_vertices(
         psi,
         rg,
         zg,
-        result["fit_center_row"],
-        result["fit_center_column"],
+        result["fit_center_row"][selected : selected + 1],
+        result["fit_center_column"][selected : selected + 1],
     )
-    found = result["resolved"][0]
     return {
         "r": jnp.where(found, refined[0][0], jnp.nan),
         "z": jnp.where(found, refined[1][0], jnp.nan),
         "psi": jnp.where(found, refined[2][0], jnp.nan),
         "ntype": jnp.where(found, refined[3][0], jnp.nan),
         "found": found,
-        "present": result["present"][0],
-        "state": result["state"][0],
-        "confidence": result["confidence"][0],
+        "present": result["present"][selected],
+        "state": result["state"][selected],
+        "confidence": result["confidence"][selected],
         "candidate_count": result["candidate_count"],
         "overflow": result["overflow"],
         "discarded_score_upper_bound": result["discarded_score_upper_bound"],
-        "native_signed_index": result["native_signed_index"][0],
-        "source_cell": result["source_cell"][0],
-        "position_sigma_cell": result["position_sigma_cell"][0],
+        "native_signed_index": result["native_signed_index"][selected],
+        "source_cell": result["source_cell"][selected],
+        "position_sigma_cell": result["position_sigma_cell"][selected],
     }

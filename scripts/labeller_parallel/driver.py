@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 import traceback
@@ -37,6 +38,29 @@ def _is_written(output_root: Path, shot: int) -> bool:
     return (output_root / f"{shot}.nc").is_file() and (
         output_root / f"{shot}.manifest.json"
     ).is_file()
+
+
+def _default_host_workers() -> int:
+    """Return the default host-assembly worker pool size.
+
+    The pool defaults to the allocated cores minus one: SLURM_CPUS_PER_TASK
+    minus one when the scheduler sets it, the logical CPU count minus one
+    otherwise, floored at one worker.
+    """
+    if "SLURM_CPUS_PER_TASK" in os.environ:
+        return max(1, int(os.environ["SLURM_CPUS_PER_TASK"]) - 1)
+    return max(1, int(os.cpu_count() or 1) - 1)
+
+
+def resolve_host_workers(requested: int | None) -> int:
+    """Return the host-assembly worker pool size for a run.
+
+    A positive explicit request wins; otherwise the pool defaults to the
+    machine's allocated cores minus one.
+    """
+    if requested is not None:
+        return requested
+    return _default_host_workers()
 
 
 def _load_ranked_shots(
@@ -134,7 +158,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--engine", choices=("host", "compiled"), default="host")
     parser.add_argument("--devices", type=int, default=1)
     parser.add_argument("--batch-per-device", type=int, default=1)
-    parser.add_argument("--host-workers", type=int, default=3)
+    parser.add_argument("--host-workers", type=int)
     parser.add_argument("--max-shots", type=int)
     parser.add_argument("--include-raster", action="store_true")
     parser.add_argument("--condition-on-guard-failure", action="store_true")
@@ -143,10 +167,13 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     arguments = _parser().parse_args(argv)
-    if min(arguments.devices, arguments.batch_per_device, arguments.host_workers) < 1:
+    host_workers = resolve_host_workers(arguments.host_workers)
+    arguments.host_workers = host_workers
+    if min(arguments.devices, arguments.batch_per_device, host_workers) < 1:
         raise ValueError("device, batch and host worker counts must be positive")
     if arguments.max_shots is not None and arguments.max_shots < 1:
         raise ValueError("--max-shots must be positive")
+    print(f"host_workers={host_workers}", flush=True)
     receipt = run_corpus(arguments)
     print(json.dumps(receipt, sort_keys=True), flush=True)
     return 1 if receipt["failed_shot_count"] else 0

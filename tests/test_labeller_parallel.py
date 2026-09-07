@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import os
 from types import SimpleNamespace
 
 import numpy as np
@@ -12,7 +13,7 @@ from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.topology import TopologyClass
 from scripts.labeller_batch import shard
 from scripts.labeller_batch.shard import LabellerPrograms, PreparedLabeller
-from scripts.labeller_parallel import scheduler
+from scripts.labeller_parallel import driver, scheduler
 
 
 def _without_elapsed(record: dict[str, object]) -> dict[str, object]:
@@ -146,3 +147,20 @@ def test_host_route_matches_shard_slice_record_on_solovev(monkeypatch, tmp_path)
     assert expected["conditioned"] is True
     assert assembled.record["conditioned"] is True
     assert _without_elapsed(assembled.record) == _without_elapsed(expected)
+
+
+def test_host_worker_default_tracks_the_allocation(monkeypatch):
+    monkeypatch.setenv("SLURM_CPUS_PER_TASK", "8")
+    assert driver._default_host_workers() == 7
+
+
+def test_host_worker_default_falls_back_to_cpu_count(monkeypatch):
+    monkeypatch.delenv("SLURM_CPUS_PER_TASK", raising=False)
+    monkeypatch.setattr(os, "cpu_count", lambda: 12)
+    assert driver._default_host_workers() == 11
+
+
+def test_explicit_host_workers_overrides_the_default(monkeypatch):
+    monkeypatch.setenv("SLURM_CPUS_PER_TASK", "8")
+    assert driver.resolve_host_workers(4) == 4
+    assert driver.resolve_host_workers(None) == 7

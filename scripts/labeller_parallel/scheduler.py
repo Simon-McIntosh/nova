@@ -11,6 +11,7 @@ from concurrent.futures import (
     wait,
 )
 from dataclasses import dataclass, field, replace
+import json
 import multiprocessing
 import os
 from pathlib import Path
@@ -809,6 +810,58 @@ class _Slot:
         return replace(item, initial_state=self.warm_state)
 
 
+THROUGHPUT_LOG_NAME = "scheduler-throughput.log"
+
+
+def _shot_log_entry(
+    shot: int,
+    written: int,
+    converged: int,
+    wall_seconds: float,
+) -> dict[str, float | int]:
+    """Assemble the per-shot job-log entry as a parseable JSON object."""
+    return {
+        "event": "shot_complete",
+        "shot": shot,
+        "written_slice_count": written,
+        "converged_slice_count": converged,
+        "wall_seconds": wall_seconds,
+        "slices_per_second": written / wall_seconds if wall_seconds else 0.0,
+        "seconds_per_slice": wall_seconds / written if written else 0.0,
+    }
+
+
+def _cumulative_log_entry(
+    *,
+    written_shots: int,
+    written_slices: int,
+    elapsed_wall_seconds: float,
+    device_count: int,
+    host_pool_occupancy: float,
+) -> dict[str, float | int]:
+    """Assemble the every-ten-shots job-log entry as a parseable JSON object."""
+    aggregate = written_slices / elapsed_wall_seconds if elapsed_wall_seconds else 0.0
+    return {
+        "event": "cumulative",
+        "written_shots": written_shots,
+        "written_slices": written_slices,
+        "wall_seconds": elapsed_wall_seconds,
+        "aggregate_slices_per_second": aggregate,
+        "per_device_slices_per_second": aggregate / device_count,
+        "host_pool_occupancy": host_pool_occupancy,
+    }
+
+
+def _write_throughput_line(log_path: Path, entry: dict[str, Any]) -> None:
+    """Append one flushed JSON line to the log file and the job stream."""
+    line = json.dumps(entry, sort_keys=True)
+    print(line, flush=True)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
+        handle.flush()
+
+
 def _shot_manifest(
     prepared: PreparedLabeller,
     output_root: Path,
@@ -820,6 +873,7 @@ def _shot_manifest(
     setup_wall_seconds: float,
     shot_wall_seconds: float,
     source_identity: SourceIdentity,
+    throughput: dict[str, float | int],
 ) -> dict[str, Any]:
     ordered = sorted(assembled, key=lambda item: item.row)
     template = next((item.frame for item in ordered if item.frame is not None), None)
@@ -901,6 +955,31 @@ def _shot_manifest(
         "include_raster": include_raster,
         "setup_wall_seconds": setup_wall_seconds,
         "shot_wall_seconds": shot_wall_seconds,
+        "throughput": {
+            "written_slice_count": len(ordered),
+            "converged_slice_count": converged,
+            "wall_seconds": shot_wall_seconds,
+            "slices_per_second": (
+                len(ordered) / shot_wall_seconds if shot_wall_seconds else 0.0
+            ),
+            "seconds_per_slice": (
+                shot_wall_seconds / len(ordered) if len(ordered) else 0.0
+            ),
+            "written_shots": throughput["written_shots"],
+            "written_slices": throughput["written_slices"],
+            "elapsed_wall_seconds": throughput["elapsed_wall_seconds"],
+            "aggregate_slices_per_second": throughput[
+                "aggregate_slices_per_second"
+            ],
+            "per_device_slices_per_second": throughput[
+                "per_device_slices_per_second"
+            ],
+            "host_pool_occupancy": throughput["host_pool_occupancy"],
+            "engine_wall_seconds": throughput["engine_wall_seconds"],
+            "host_assembly_wall_seconds": throughput[
+                "host_assembly_wall_seconds"
+            ],
+        },
         "slice_count": len(rows),
         "admitted_slice_count": len(ordered),
         "written_slice_count": len(ordered),
@@ -998,6 +1077,7 @@ class CorpusScheduler:
         engine_slices = written = written_shots = 0
         started = time.perf_counter()
         setup_unassigned = prepared.setup_wall_seconds
+        log_path = output_root / THROUGHPUT_LOG_NAME
 
         def refill(index: int) -> None:
             nonlocal skipped
@@ -1027,7 +1107,22 @@ class CorpusScheduler:
             slot.index += 1
             slot.awaiting = None
             if slot.done:
-                _shot_manifest(
+                shot_wall = time.perf_counter() - shot_started.pop(slot.work.shot)
+                written_shots += 1
+                elapsed = time.perf_counter() - started
+                aggregate = written / elapsed if elapsed else 0.0
+                occupancy = min(1.0, len(futures) / max(1, self.host_workers))
+                throughput = {
+                    "written_shots": written_shots,
+                    "written_slices": written,
+                    "elapsed_wall_seconds": elapsed,
+                    "aggregate_slices_per_second": aggregate,
+                    "per_device_slices_per_second": aggregate / self.device_count,
+                    "host_pool_occupancy": occupancy,
+                    "engine_wall_seconds": engine_wall,
+                    "host_assembly_wall_seconds": assembly_wall,
+                }
+                manifest = _shot_manifest(
                     prepared,
                     output_root,
                     slot.work,
@@ -1035,12 +1130,31 @@ class CorpusScheduler:
                     include_raster=self.include_raster,
                     condition_on_guard_failure=self.condition_on_guard_failure,
                     setup_wall_seconds=setup_unassigned,
-                    shot_wall_seconds=time.perf_counter()
-                    - shot_started.pop(slot.work.shot),
+                    shot_wall_seconds=shot_wall,
                     source_identity=source_identity,
+                    throughput=throughput,
                 )
                 setup_unassigned = 0.0
-                written_shots += 1
+                _write_throughput_line(
+                    log_path,
+                    _shot_log_entry(
+                        manifest["shot"],
+                        manifest["written_slice_count"],
+                        manifest["converged_slice_count"],
+                        shot_wall,
+                    ),
+                )
+                if written_shots % 10 == 0:
+                    _write_throughput_line(
+                        log_path,
+                        _cumulative_log_entry(
+                            written_shots=written_shots,
+                            written_slices=written,
+                            elapsed_wall_seconds=elapsed,
+                            device_count=self.device_count,
+                            host_pool_occupancy=occupancy,
+                        ),
+                    )
                 refill(index)
 
         for index in range(self.capacity):

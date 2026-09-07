@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 import os
 from types import SimpleNamespace
 
@@ -371,3 +372,211 @@ def test_failure_after_conditioned_solve_begins_stays_conditioned(
         )
         assert "conditioning_skipped" not in record
         assert record["conditioned_converged"] is None
+
+
+# --------------------------------------------------------------------------
+# scheduler throughput log and per-shot manifest throughput block
+# --------------------------------------------------------------------------
+
+
+class _StubEngine:
+    """Synchronous engine stub returning one fabricated solved slice per row."""
+
+    name = "stub-engine"
+
+    def step(self, batch: scheduler.EngineBatch) -> scheduler.EngineResult:
+        solved = []
+        for index in range(batch.active.shape[0]):
+            if batch.active[index]:
+                record = {
+                    "row": int(batch.row[index]),
+                    "time": float(batch.time[index]),
+                    "conditioned": True,
+                    "conditioning_target_source": "efm/current_centrd_z",
+                    "free_branch_guard_ok": True,
+                    "conditioned_branch_guard_ok": True,
+                    "free_centroid_error_m": 0.0,
+                    "conditioned_centroid_error_m": 0.0,
+                    "excluded": False,
+                    "converged": True,
+                    "qualified": True,
+                    "trips": 1,
+                    "wall_seconds": 0.01,
+                }
+                solved.append(
+                    scheduler.SolvedSlice(
+                        result=None,
+                        applied_current=np.zeros(scheduler.CURRENT_SIZE),
+                        record=record,
+                    )
+                )
+            else:
+                solved.append(None)
+        width = int(batch.active.shape[0])
+        return scheduler.EngineResult(
+            state=np.zeros((width, scheduler.STATE_SIZE)),
+            converged=np.ones(width, dtype=bool),
+            termination=np.zeros(width, dtype=np.int32),
+            trips=np.ones(width, dtype=np.int32),
+            terminal_residual=np.zeros(width),
+            centroid=np.zeros((width, 2)),
+            conditioned=np.ones(width, dtype=bool),
+            solved=tuple(solved),
+        )
+
+
+def _noop_initializer(*_args, **_kwargs) -> None:
+    """Return a no-op spawn initializer that skips the real labeller build."""
+
+
+def _stub_assembler(request: scheduler.AssemblyRequest) -> scheduler.AssembledSlice:
+    """Return a fabricated assembled slice carrying the solved record."""
+    item = request.item
+    return scheduler.AssembledSlice(
+        shot=item.shot,
+        row=item.row,
+        time=item.time,
+        frame=SimpleNamespace(branch_guard_ok=True),
+        record=dict(request.solved.record),
+        context={
+            "current": np.zeros(scheduler.CURRENT_SIZE),
+            "p_prime_psi_norm": item.p_prime_psi_norm,
+            "p_prime": item.p_prime,
+            "ff_prime_psi_norm": item.ff_prime_psi_norm,
+            "ff_prime": item.ff_prime,
+        },
+        final_ok=True,
+        state=np.zeros(scheduler.STATE_SIZE),
+        assembly_wall_seconds=0.001,
+    )
+
+
+def _one_slice_shot(fixture: SimpleNamespace, *, shot: int) -> scheduler.ShotInput:
+    """Build a scheduled shot carrying a single fabricated slice."""
+    item = scheduler.SliceInput(
+        shot=shot,
+        row=0,
+        time=0.25,
+        initial_state=fixture.seed,
+        prescribed_current=fixture.current,
+        target_current=fixture.target_current,
+        requested_class=fixture.requested_class,
+        centroid_target_z=fixture.target_centroid_z,
+        p_prime_psi_norm=np.asarray(fixture.group["psi_norm"]),
+        p_prime=np.asarray(fixture.group["pprime"])[0],
+        ff_prime_psi_norm=np.asarray(fixture.group["psi_norm"]),
+        ff_prime=np.asarray(fixture.group["ffprime"])[0],
+    )
+    return scheduler.ShotInput(shot=shot, slices=(item,), excluded_records=())
+
+
+def test_shot_log_entry_carries_per_shot_rates():
+    entry = scheduler._shot_log_entry(7, written=4, converged=3, wall_seconds=2.0)
+    assert entry == {
+        "event": "shot_complete",
+        "shot": 7,
+        "written_slice_count": 4,
+        "converged_slice_count": 3,
+        "wall_seconds": 2.0,
+        "slices_per_second": 2.0,
+        "seconds_per_slice": 0.5,
+    }
+
+
+def test_cumulative_log_entry_carries_aggregate_and_per_device_rates():
+    entry = scheduler._cumulative_log_entry(
+        written_shots=10,
+        written_slices=40,
+        elapsed_wall_seconds=10.0,
+        device_count=2,
+        host_pool_occupancy=0.5,
+    )
+    assert entry == {
+        "event": "cumulative",
+        "written_shots": 10,
+        "written_slices": 40,
+        "wall_seconds": 10.0,
+        "aggregate_slices_per_second": 4.0,
+        "per_device_slices_per_second": 2.0,
+        "host_pool_occupancy": 0.5,
+    }
+
+
+def test_corpus_run_reports_throughput_on_the_synthetic_root(
+    monkeypatch, tmp_path
+):
+    """One scheduler run writes a parseable job log and manifest blocks.
+
+    Both land on the synthetic output root: each shot manifest carries the
+    throughput block with the accumulated engine and host-assembly walls split,
+    and the log gains one flushed line per completed shot plus a cumulative
+    line on every tenth shot.
+    """
+    fixture = _solovev_fixture(tmp_path)
+    monkeypatch.setattr(
+        scheduler, "_initialize_assembly_worker", _noop_initializer
+    )
+    monkeypatch.setattr(
+        scheduler, "_write_session_file", lambda *_args, **_kwargs: None
+    )
+    monkeypatch.setattr(
+        scheduler, "_write_diagnostics", lambda *_args, **_kwargs: None
+    )
+    output_root = tmp_path / "output"
+    corpus = scheduler.CorpusScheduler(
+        engine=_StubEngine(),
+        device_count=1,
+        batch_per_device=1,
+        host_workers=1,
+        assembler=_stub_assembler,
+    )
+    work = [_one_slice_shot(fixture, shot=shot) for shot in range(1, 13)]
+    corpus.run(
+        iter(work),
+        output_root,
+        prepared=fixture.prepared,
+        source_identity=scheduler.SourceIdentity(
+            nova_revision="rev",
+            nova_equilibrium_tree="eq",
+            labeller_batch_tree="batch",
+        ),
+    )
+    log_path = output_root / scheduler.THROUGHPUT_LOG_NAME
+    lines = [
+        json.loads(line)
+        for line in log_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(lines) == 12 + 1  # one per shot plus one cumulative at shot ten
+    first = lines[0]
+    assert first["event"] == "shot_complete"
+    assert first["shot"] == 1
+    assert first["written_slice_count"] == 1
+    assert first["converged_slice_count"] == 1
+    assert first["wall_seconds"] >= 0.0
+    assert first["slices_per_second"] > 0.0
+    assert first["seconds_per_slice"] > 0.0
+    cumulative = [line for line in lines if line["event"] == "cumulative"]
+    assert len(cumulative) == 1
+    entry = cumulative[0]
+    assert entry["written_shots"] == 10
+    assert entry["written_slices"] == 10
+    assert entry["wall_seconds"] >= 0.0
+    assert entry["aggregate_slices_per_second"] > 0.0
+    assert entry["per_device_slices_per_second"] > 0.0
+    assert 0.0 <= entry["host_pool_occupancy"] <= 1.0
+    for shot in range(1, 13):
+        manifest = json.loads(
+            (output_root / f"{shot}.manifest.json").read_text(encoding="utf-8")
+        )
+        block = manifest["throughput"]
+        assert block["written_slice_count"] == 1
+        assert block["converged_slice_count"] == 1
+        assert block["wall_seconds"] == manifest["shot_wall_seconds"]
+        assert block["written_shots"] == shot
+        assert block["written_slices"] == shot
+        assert block["elapsed_wall_seconds"] >= 0.0
+        assert block["aggregate_slices_per_second"] > 0.0
+        assert block["per_device_slices_per_second"] > 0.0
+        assert 0.0 <= block["host_pool_occupancy"] <= 1.0
+        assert block["engine_wall_seconds"] >= 0.0
+        assert block["host_assembly_wall_seconds"] > 0.0

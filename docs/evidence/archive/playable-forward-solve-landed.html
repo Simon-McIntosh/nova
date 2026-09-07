@@ -740,6 +740,51 @@
     slices-a-second figure for an arm whose converged count is zero, because a throughput number from a failing path is worse than no number &mdash; it reads as success
     in a log, in a notification, and in a report headline.</p>
   </section>
+
+  <section id="consumer-fidelity-gate-against-the-efit-referee">
+    <h2>Consumer-measured fidelity against the EFIT referee: the axis misses a 2 cm bound on essentially every slice (2026-09-07, imas-ambix gate)</h2>
+    <p>Measured and reported by the imas-ambix session, recorded here with its definitions because it measures nova's forward solve rather than the labelling. Boundary
+    metric: nova's outermost nested flux surface, the <code>flux_surface</code> index 10 at psi_norm 1.0, ray-cast to radii at eight fixed poloidal angles 2&pi;k/8
+    counter-clockwise from the outboard midplane about the magnetic axis, scored as the RMS of the radius differences in centimetres against the referee's eight LCFS
+    radii. Axis metric: Euclidean distance between nova's magnetic axis and the referee's. Referee: EFIT <code>efm</code> read through the consumer's own label reader,
+    evaluator-only by its firewall. Flat top: interpolated absolute efm plasma current at or above 80 per cent of the shot peak, 0.175 to 0.365 s on these shots. Bound
+    2.0 cm on each metric, passing at 90 per cent of flat-top slices.</p>
+    <table>
+      <thead><tr><th>Metric</th><th>Within 2 cm</th><th>Median</th><th>p90</th><th>Max</th></tr></thead>
+      <tbody>
+        <tr><td>Magnetic axis distance</td><td>3 of 51</td><td>4.56 cm</td><td>5.75 cm</td><td>6.24 cm</td></tr>
+        <tr><td>Boundary radius RMS</td><td>24 of 51</td><td>3.83 cm</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>Both together</td><td>3 of 51</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p>Per-shot boundary medians reach 1.73 cm on 21989 and 1.90 cm on 22086, so the boundary is inside the bound on the better shots and the aggregate is dragged by the
+    others. Two caveats travel with the numbers. The denominator rises to about 70 once the wrongly excluded conditioned rows below are admitted as free evidence, and
+    the consumer is re-scoring; the direction is unaffected because the axis misses the bound on essentially every slice either way.</p>
+    <p><strong>This is not yet attributable to solve fidelity, and the distinction is the next measurement rather than a caveat to note and forget.</strong> A
+    near-uniform 4 to 6 cm axis offset sitting beside a boundary that is often inside the bound is the signature of a definition difference between nova's magnetic axis
+    and the referee's, not of a solve that has the plasma in the wrong place: a genuine fidelity gap would move the boundary with the axis. The consumer is reporting the
+    signed R and Z components, which settles it, since a definition difference shows as a consistent offset in one component and a fidelity gap does not. The session
+    carries <code>current_centroid</code> and <code>reference_centroid_z</code> as alternative referents to score against. Until the signed components are in, the honest
+    statement is that nova and EFIT disagree by 4 to 6 cm about where the axis is, with the cause open.</p>
+  </section>
+
+  <section id="conditioned-trips-separates-the-two-conditioning-failures">
+    <h2>Zero conditioned trips is the clean discriminator the guard flag is not (2026-09-07, imas-ambix measurement)</h2>
+    <p>The pre-relaunch writers recorded <code>conditioned</code> true on entry to the conditioning block and assigned the branch guard only on the success path, so
+    <code>conditioned_guard_evaluated</code> false means only that the block raised somewhere: it is the union of a centroid-target derivation failure, where the
+    constrained solver was never entered, and a genuine solve failure. That union is why the guard flag cannot be used to recover the wrongly excluded rows, and the
+    per-slice <code>conditioning_exception</code> message was the fallback suggested.</p>
+    <p>The consumer found a better discriminator in the same records and measured that it partitions cleanly. Across the 160 conditioned rows of the six frozen-carrier
+    sessions there are exactly two populations and no mixture: 119 rows carry the single exception string <code>NoQualifiedAxisError: no qualified magnetic-axis
+    candidate has a resolved component</code>, which greps to one site at <code>nova/equilibrium/topology.py:182</code>, and every one of those has
+    <code>conditioned_trips</code> zero with <code>conditioned_converged</code> null; the other 41 carry no exception, one to four trips, and a set
+    <code>conditioned_converged</code>. Zero trips means the constrained Newton never took a step, which excludes the genuine case outright, because a solver that ran
+    and failed records at least one trip. So the predicate is <code>conditioned</code> and an exception present and <code>conditioned_trips</code> zero, and those 119
+    rows are free solves that no EFIT centroid scalar ever reached. It is forward-compatible: the corrected writer's <code>conditioning_skipped</code> field produces the
+    same partition.</p>
+    <p>Worth keeping as a reading habit rather than only as a fact about these sessions: a flag that records <em>whether a value was computed</em> aggregates every
+    reason it was not, while a counter that records <em>how far a procedure got</em> distinguishes them. The counter was already in the records and nobody had asked it.</p>
+  </section>
 </main>
 </body>
 </html>

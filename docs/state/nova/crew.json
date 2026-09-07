@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T08:18:16",
+  "updated": "2026-09-07T08:21:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3000,6 +3000,15 @@
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07840-447f-7d43-9a85-d55f5f91e979"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-signaxis-l",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "pfs-slice-l",
@@ -118547,6 +118556,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1981
+    "_version": 1982
   }
 }

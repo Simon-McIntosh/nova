@@ -162,12 +162,21 @@ def render_overlay(
         linewidth=style.separatrix_linewidth,
         zorder=style.zorder_separatrix,
     )
+    # The reference axis as well as the solved one: the panel marks an axis, so
+    # it should show the disagreement rather than only one of the two.
+    pol.draw_nulls(
+        view.poloidal,
+        magnetic_axis=reference.magnetic_axis,
+        style=style.variant(axis_color=REFERENCE_COLOR),
+        contain=machine.limiter,
+    )
     nulls = pol.draw_nulls(
         view.poloidal,
         magnetic_axis=axis,
         x_points=x_points,
         contain=machine.limiter,
     )
+    axis_offset = 100.0 * (axis - reference.magnetic_axis)
 
     difference = np.where(within, nova_flux - efit_flux, np.nan)
     midplane = int(np.argmin(np.abs(vertical)))
@@ -197,7 +206,9 @@ def render_overlay(
         f"MAST {shot}   t = {1e3 * time:.0f} ms\n"
         f"free solve, residual {float(solved['solve']['terminal_residual']):.1e}\n"
         f"max |$\\Delta$| = {1e3 * np.max(np.abs(interior)):.1f} mWb "
-        f"({100 * np.max(np.abs(interior)) / span:.1f}% of span)",
+        f"({100 * np.max(np.abs(interior)) / span:.1f}% of span)\n"
+        f"axis $\\Delta R$ = {axis_offset[0]:+.2f} cm, "
+        f"$\\Delta Z$ = {axis_offset[1]:+.2f} cm",
     )
 
     output.mkdir(parents=True, exist_ok=True)
@@ -235,6 +246,17 @@ def render_overlay(
         "boundary_source_nova": solved["topology"]["boundary_source"],
         "boundary_source_reference": "efm/lcfs",
         "nulls": nulls,
+        "axis_offset_cm": [float(axis_offset[0]), float(axis_offset[1])],
+        "axis_offset_magnitude_cm": float(np.hypot(*axis_offset)),
+        "reference_axis_rz_m": [float(v) for v in reference.magnetic_axis],
+        "nova_axis_rz_m": [float(v) for v in axis],
+        "axis_caveat": (
+            "the axis is an O-point search on a discretised map, not a measured "
+            "position, and it is configuration dependent: the labeller's solve of "
+            "this same slice puts the axis at R 0.86478 m, 4.39 cm from EFIT and "
+            "5.32 cm from this solve, so a single shot's axis offset is not a "
+            "property of nova"
+        ),
         "carrier": str(solve),
         "carrier_sha256": solved.get("array_sha256"),
     }

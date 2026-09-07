@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T10:09:49",
+  "updated": "2026-09-07T10:13:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118749,6 +118749,192 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T061144108541-media-wide-solve",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "media-wide-solve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1032,
+                "cached_input_tokens": 448762,
+                "input_tokens": 449796,
+                "output_tokens": 276,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 450072,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "da035a58-71cc-4384-a3ff-5d94b3487d03",
+            "session_id": "media-figures"
+          },
+          "done_when": "The artifact named by the receipt at /home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media/wide-solve-receipt.json holds Nova total poloidal flux in Wb on a 150 by 350 grid spanning R 0.02 to 2.20 and Z minus 2.60 to plus 2.60 for shot 21978 at the slice whose time is nearest 195 ms, together with that solve's boundary polyline, magnetic axis and X-points, and the receipt records the solve converged residual, the resolved PolySectionPolicy backend and device placement showing the build ran on a GPU, the wall seconds and partition of every submitted job, and the maximum absolute difference in Wb between Nova's map and the stored EFIT map interpolated onto the same grid at points inside the limiter",
+          "estimated_hours": 1.5,
+          "goal": "Persist Nova's total poloidal flux and solved boundary for MAST 21978 on the wide media grid, built through an ordinary wide-grid CoilSet machine and forward solve rather than a hand-driven tile assembly",
+          "id": "media-wide-solve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T061144108541-media-wide-solve/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "media-wide-solve",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T06:12:02Z",
+        "completed_at": "2026-09-07T08:11:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7197,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "e18b6317d3a766667152ad22baf609f6cbf7efd0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "independent recomputation of the receipt's comparison from the stored arrays, cross-checked against the published figure's own receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/nova-media-logs/wide-solve-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T061144108541-media-wide-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07a7e-c55a-7950-b765-e73138bf27cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 880384,
+            "cached_input_tokens_cumulative": 880384,
+            "input_tokens": 891818,
+            "input_tokens_cumulative": 891818,
+            "output_tokens": 3683,
+            "output_tokens_cumulative": 3683,
+            "reasoning_output_tokens": 1497,
+            "reasoning_output_tokens_cumulative": 1497
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2523,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 2550,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 5180,
+          "peak_input_tokens": 1772202
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 7,
+        "attempt_kind": "resume",
+        "no_commit": "the delivery is the wide-solve carrier and its receipt under crew/reports/nova/presentation-media; the figure consuming them landed separately at 75f395f3",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/media-figures/media-wide-solve",
+          "session_id": "01a07a7e-c55a-7950-b765-e73138bf27cc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T08:11:59Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -119061,6 +119247,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1989
+    "_version": 1990
   }
 }

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -355,6 +355,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260907T052619743704-media-device-route" data-who="media-device-route" data-when="2026-09-07T06:03:21Z">
     <div class="r-comment-body"><p>Wide-grid MAST 21978 fitted-circuit flux response built on one titan P100 through tile_evaluator (batched float64 quadrature, one compile, 24 min): 52500 targets over R 0.02-2.20 by Z +-2.60, (52500,101) Wb/A, agreeing with polygon_greens to 5.5e-16 Wb/A on 256 random targets</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260907T061144108541-media-wide-solve" data-who="media-wide-solve" data-when="2026-09-07T08:11:59Z">
+    <div class="r-comment-body"><p>Nova total poloidal flux for MAST 21978 at 195 ms on a 150 by 350 grid over R 0.02-2.20 and Z +-2.60, from a free unconditioned solve at residual 1.6e-12 through an ordinary CoilSet grid solve on one titan P100 in 35 min. Agreement with EFIT over 23582 limiter-interior points: max 21.3 mWb, RMS 7.6 mWb against a 393 mWb span</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

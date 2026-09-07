@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T09:47:25",
+  "updated": "2026-09-07T10:37:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118617,6 +118617,476 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T072301404554-pfs-seed-admission-outcome",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-seed-admission-outcome",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 727,
+                "cached_input_tokens": 255144,
+                "input_tokens": 255873,
+                "output_tokens": 849,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 256722,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_labeller_parallel.py plus tests/test_labeller_receipt.py exit 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, new tests asserting that a slice whose centroid-target derivation raises NoQualifiedAxisError records the new skipped outcome carrying its reason with conditioned false, that a failure raised after the constrained solve begins still records conditioned true with conditioned_converged false, that scripts/labeller_batch/receipt.py counts both columns over a synthetic root, the production corpus job 1263846 left untouched because its worker pool already imported these modules, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.75,
+          "goal": "both labeller writers record a seed axis-admission failure as its own per-slice outcome rather than as a conditioned-solve failure, with the receipt column that counts it",
+          "id": "pfs-seed-admission-outcome",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "scripts/labeller_batch/shard.py",
+            "scripts/labeller_parallel/scheduler.py",
+            "scripts/labeller_batch/receipt.py",
+            "tests/test_labeller_parallel.py",
+            "tests/test_labeller_receipt.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/seed-admission-outcome.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-455a78fa6d3eb0df92c3",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T07:23:14Z",
+        "completed_at": "2026-09-07T08:07:49.262Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2667,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2675,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "3a9fa104b1b0e2924a9c0b6b0eb9dbd7cea6797e",
+        "commits": [
+          "60ef5a933e0914f5230572b6d479f7da32e5920f"
+        ],
+        "changed_lines": {
+          "added": 359,
+          "removed": 53,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_labeller_parallel.py tests/test_labeller_receipt.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/gate-all_debug-pass.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T072301404554-pfs-seed-admission-outcome/manifest.md",
+        "scope_changed": false,
+        "session_id": "b3e96ddd-35fd-4505-b85f-217ac1651ab9",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [
+          "nova/equilibrium/batched_labeller.py",
+          "BatchedLabeller.solve",
+          "try/except",
+          "shard.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-seed-admission-outcome",
+          "session_id": "b3e96ddd-35fd-4505-b85f-217ac1651ab9",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T08:07:49.262Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T061144108541-media-wide-solve",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "media-wide-solve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1032,
+                "cached_input_tokens": 448762,
+                "input_tokens": 449796,
+                "output_tokens": 276,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 450072,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "da035a58-71cc-4384-a3ff-5d94b3487d03",
+            "session_id": "media-figures"
+          },
+          "done_when": "The artifact named by the receipt at /home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media/wide-solve-receipt.json holds Nova total poloidal flux in Wb on a 150 by 350 grid spanning R 0.02 to 2.20 and Z minus 2.60 to plus 2.60 for shot 21978 at the slice whose time is nearest 195 ms, together with that solve's boundary polyline, magnetic axis and X-points, and the receipt records the solve converged residual, the resolved PolySectionPolicy backend and device placement showing the build ran on a GPU, the wall seconds and partition of every submitted job, and the maximum absolute difference in Wb between Nova's map and the stored EFIT map interpolated onto the same grid at points inside the limiter",
+          "estimated_hours": 1.5,
+          "goal": "Persist Nova's total poloidal flux and solved boundary for MAST 21978 on the wide media grid, built through an ordinary wide-grid CoilSet machine and forward solve rather than a hand-driven tile assembly",
+          "id": "media-wide-solve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T061144108541-media-wide-solve/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/presentation-media"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "media-wide-solve",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T06:12:02Z",
+        "completed_at": "2026-09-07T08:11:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7197,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "e18b6317d3a766667152ad22baf609f6cbf7efd0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "independent recomputation of the receipt's comparison from the stored arrays, cross-checked against the published figure's own receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/nova-media-logs/wide-solve-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T061144108541-media-wide-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07a7e-c55a-7950-b765-e73138bf27cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 880384,
+            "cached_input_tokens_cumulative": 880384,
+            "input_tokens": 891818,
+            "input_tokens_cumulative": 891818,
+            "output_tokens": 3683,
+            "output_tokens_cumulative": 3683,
+            "reasoning_output_tokens": 1497,
+            "reasoning_output_tokens_cumulative": 1497
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2523,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 2550,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 5180,
+          "peak_input_tokens": 1772202
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 7,
+        "attempt_kind": "resume",
+        "no_commit": "the delivery is the wide-solve carrier and its receipt under crew/reports/nova/presentation-media; the figure consuming them landed separately at 75f395f3",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/media-figures/media-wide-solve",
+          "session_id": "01a07a7e-c55a-7950-b765-e73138bf27cc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T08:11:59Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T074737321114-pfs-secondary-null-containment",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-secondary-null-containment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 606,
+                "cached_input_tokens": 338048,
+                "input_tokens": 338656,
+                "output_tokens": 714,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 339370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_forward_secondary_null.py exits 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G with TMPDIR=/tmp, JAX_PLATFORMS=cpu, the environment python at /home/ITER/mcintos/Code/nova/.venv/bin/python called directly, the log captured once under the run directory, a test asserting the slot is NaN on a fixture whose highest-scoring distinct saddle lies outside the limiter, a second test asserting a diverted fixture keeps its in-vessel second null unchanged to 1e-12, ForwardSolve._secondary_x_point qualifying candidates with _points_inside_polygon from nova/equilibrium/connectivity_boundary.py against self.operator.topology.wall.coordinate alongside the existing finite plus distinct conditions, strike points left untouched because a strike point lies on the boundary, the production corpus job 1263846 left running because its worker pool already imported this module, the stated time budget read as a soft estimate rather than a stop rule",
+          "estimated_hours": 0.5,
+          "goal": "the secondary x-point slot excludes saddles outside the wall polygon before ranking, returning NaN when nothing inside qualifies",
+          "id": "pfs-secondary-null-containment",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_forward_secondary_null.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/secondary-null-containment.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-nullguard-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T07:48:04Z",
+        "completed_at": "2026-09-07T08:35:10.466Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2817,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2826,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "1dbc0522b18b9107e30db8a6de3e40451e52b2e7",
+        "commits": [
+          "397d6c76c09aef3917eddd096895d0dac9b5640d"
+        ],
+        "changed_lines": {
+          "added": 233,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_forward_secondary_null.py -v",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T074737321114-pfs-secondary-null-containment/manifest.md",
+        "scope_changed": false,
+        "session_id": "b3ff31f1-8c83-4bfe-970e-292b6ae87a76",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 18423759,
+            "input_tokens_cumulative": 18423759,
+            "output_tokens": 82216,
+            "output_tokens_cumulative": 82216,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2822.072,
+          "generated_tokens": 82216,
+          "generation_seconds": 1625.287,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 21.5,
+          "machine_seconds": 1196.785,
+          "peak_input_tokens": 218928,
+          "tokens_per_second": 50.59,
+          "wall_tokens_per_second": 29.13
+        },
+        "follow_on_paths": [
+          "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-secondary-null-containment",
+          "session_id": "b3ff31f1-8c83-4bfe-970e-292b6ae87a76",
+          "session_source": "stream",
+          "retained_at": "2026-09-07T08:35:10.466Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -118929,6 +119399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1988
+    "_version": 1991
   }
 }

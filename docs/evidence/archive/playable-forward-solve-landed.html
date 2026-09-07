@@ -643,6 +643,15 @@
     demo carrier to 21978/35 because the app's keyframe route (constrained reduced Newton with an empty constraint set, no centroid row) converges it as is and its
     camera sits within six percent of 21989's; keep 22086/43 as the receipted physics fallback; do not add the centroid row to the app's forward for the demo. The
     served-carrier swap in the app (seeded from 21978's persisted state) is the nova node that follows the lead's decision.</p>
+    <p><strong>The 21978 recommendation was withdrawn the same hour, and 22086/43 stands.</strong> imas-ambix-1d found that five of the frozen six are members of its 718-shot
+    camera-topology labeller cohort (21978, 21983 and 21985 train, 21989 validation, 21986 a clean same-campaign test), and that cohort's decoder-overlap audit fixes the
+    demo decoder's allowed shot universe as the label corpus minus all 718. A decoder trained on 21978 or 21989 would therefore share shots with the judge that scores it
+    and void the counterfactual gate. Only 22086 of the six sits outside the cohort, which is also why five of the six never appeared in the 7,979-shot ranked walk while
+    22086 did (card 1, line 675): the walk is the corpus minus that cohort. So the demo carrier stays 22086/43, exactly the carrier the app already seeds and receipts,
+    there is no served-carrier swap node, and no lead decision is pending. The cost is picture resolution, 128x172 at 20 microseconds against 512x512 at 667
+    microseconds, which the consumer mitigates by pairing the camera panel with the label cartoon rather than by swapping shots. The side job still paid: 21978 and 21989
+    gave the domain-shift measurement (decoded mean absolute error 87 and 102 against persistence 12 and 8.5) showing a corpus-trained decoder does not transfer to an
+    unseen camera, and 22086's own session, 46 of 60 converged, is the demo carrier's label set.</p>
   </section>
 </main>
 </body>

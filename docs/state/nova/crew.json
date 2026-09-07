@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T08:35:34",
+  "updated": "2026-09-07T09:17:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118246,6 +118246,357 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T062626310774-pfs-lcfs-from-outer-surface",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-lcfs-from-outer-surface",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1447,
+                "cached_input_tokens": 954398,
+                "input_tokens": 955877,
+                "output_tokens": 67,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 955944,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_steering_frames.py gains a test writing a rasterless Solovev session through session_dataset and asserting a non-empty closed LCFS whose vertices equal the outermost flux surface within 1e-12 and whose n_boundary_coords equals the vertex count, plus an assertion that a rastered session keeps its raster-derived polyline; the file passes with exit 0 through srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G (TMPDIR=/tmp, JAX_PLATFORMS=cpu, environment python called directly) with the log under the run directory; scripts/labeller_batch/shard.py is not edited",
+          "estimated_hours": 0.75,
+          "goal": "assemble_frame in nova/equilibrium/steering_frames.py fills lcfs_r, lcfs_z and n_boundary_coords from the traced psi_norm 1.0 flux surface whenever no raster separatrix exists, leaving rastered sessions unchanged",
+          "id": "pfs-lcfs-from-outer-surface",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062626310774-pfs-lcfs-from-outer-surface/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/lcfs-from-outer-surface.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-receipt-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T06:26:37Z",
+        "completed_at": "2026-09-07T07:09:06.219Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2503,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2549,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a3dbd8f911a27ed1bf0ba47e1b64d0cc11ad8772",
+        "commits": [
+          "9759bc1938445fe82f91db9cb03a0fd421ff36a3"
+        ],
+        "changed_lines": {
+          "added": 190,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "failed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/test_steering_frames.py -v",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062626310774-pfs-lcfs-from-outer-surface/test_steering_frames.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T062626310774-pfs-lcfs-from-outer-surface/manifest.md",
+        "scope_changed": false,
+        "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1364758,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 2409,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"H200 job 1263872 is pending on scheduler priority under betelgeuse reservation gpu_0003_grpA (one H200; four CPU cores; 128 GiB). It has not started and writes case-current-repair-h200.log when allocated; resume this worker rather than redispatching.\"",
+              "elapsed_seconds": 986,
+              "external_wait": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3400,
+              "log_fresh": false,
+              "manifest_commits": [
+                "39b23a5a; changed_paths: [\"benchmarks/vertical_force_decomposition.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "2e5afc059692d82642d7cf45aaf3723370a1817363888be9e45f6cae71ff5c8c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T051312338252-scr-case-current-repair/manifest.md; resolve the blocker before resuming the run",
+              "node": "scr-case-current-repair",
+              "phase": "starting",
+              "plan": "solver-convergence-regression",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260907T051312338252-scr-case-current-repair",
+              "session": "s19-batched",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260907T051312338252-scr-case-current-repair",
+                "session_id": "01a079fd-edc9-7041-84b6-4c740846716c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3426,
+              "terminal_at": "2026-09-07T05:29:23Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/scr-case-current-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 139.53,
+          "generated_tokens": 2409,
+          "generation_seconds": 139.473,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 45.3,
+          "machine_seconds": 0.057,
+          "peak_input_tokens": 460422,
+          "tokens_per_second": 17.27,
+          "wall_tokens_per_second": 17.27
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-lcfs-from-outer-surface",
+          "session_id": "309b90dd-6599-4bf0-a879-5e0b09f436c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T07:09:06.219Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T045104259961-pfs-shape-regularisation",
+        "plan": "playable-forward-solve",
+        "section": "\u00a72",
+        "node": "pfs-shape-regularisation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 303,
+                "cached_input_tokens": 843541,
+                "input_tokens": 843848,
+                "output_tokens": 34,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 843882,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "26845ee9-b1f7-4dd9-87f5-1e5a202834d4",
+            "session_id": "s19-batched"
+          },
+          "done_when": "tests/test_shape_inverse.py stays green including the exact null invariant (turning-point drift below 1e-9 m, every circuit change below 1 kA on the null command) through srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=32G (TMPDIR=/tmp, JAX_PLATFORMS=cpu, environment python called directly); the three command receipts rerun as sbatch all_debug jobs with declared waits, each written under docs/figures/playable-forward-solve/shape-inverse/ as it lands; the report gives the closure-versus-current curve per command, names the chosen weight, states the closure it buys within the 20 kA ceiling, and says whether the H200 arm (closure above 80 percent on exercised rows within the ceiling) is admitted",
+          "estimated_hours": 2.5,
+          "goal": "A Tikhonov term on the circuit deltas in solve_shape_inverse, weighted per circuit by its rated current or a caller-stated ceiling so the penalty is dimensionless, with a CPU sweep of the weight over the null, 20 mm upper-point and 5 percent elongation commands reporting closure fraction of exercised rows against maximum circuit change as a curve and the weight at which every circuit change stays below 20 kA",
+          "id": "pfs-shape-regularisation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045104259961-pfs-shape-regularisation/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/shape_inverse.py",
+            "benchmarks/playable_shape_inverse_receipt.py",
+            "tests/test_shape_inverse.py",
+            "docs/figures/playable-forward-solve/shape-inverse/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/shape-regularisation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-shape-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-07T04:51:42Z",
+        "completed_at": "2026-09-07T07:12:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8473,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "86b90082b54cc6221125e3fe7215e4cfb2bf0e88",
+        "commits": [
+          "1f210b19dc955721e0b54a278f573a56cff57fba",
+          "b8fb44f4dbdba8cbeac47dff6900783e12b0edd6",
+          "2b29ee1deb18f3c361f151b4597ca32eba6b5bff",
+          "8a5952d53df80889fdf493b97e1cdcf033b472e1",
+          "78cf809c7d661aa9cabf188d5c9f4cf1243add5c",
+          "bb41f6469dae9d88c67c2efe6da46fb869604f01"
+        ],
+        "changed_lines": {
+          "added": 8029,
+          "removed": 9096,
+          "files": 7
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=32G pytest tests/test_shape_inverse.py -vv",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045104259961-pfs-shape-regularisation/shape-regularisation-tests-linear-weight.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T045104259961-pfs-shape-regularisation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07840-447f-7d43-9a85-d55f5f91e979",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7434368,
+            "cached_input_tokens_cumulative": 30505344,
+            "input_tokens": 7416401,
+            "input_tokens_cumulative": 30721057,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 54360,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 9565
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 63925,
+          "peak_input_tokens": 61226401
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260906T213639161827-pfs-shape-null-invariant",
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-shape-regularisation",
+          "session_id": "01a07840-447f-7d43-9a85-d55f5f91e979",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T07:12:55Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -118558,6 +118909,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1983
+    "_version": 1985
   }
 }

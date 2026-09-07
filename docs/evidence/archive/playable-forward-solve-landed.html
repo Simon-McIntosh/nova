@@ -654,8 +654,11 @@
     unseen camera, and 22086's own session, 46 of 60 converged, is the demo carrier's label set.</p>
     <p><strong>Where the cohort is defined.</strong> The authority for the 718-shot camera-topology cohort lives in imas-ambix at main:
     <code>imas_ambix/worldmodel/camera_topology_labeller.py</code> carries the cohort report and split reader, and that project's plan section on the cohort, with its landed
-    evidence record, states the four partitions (472 train, 58 validation, 87 clean same-campaign test, 101 held-out campaign test). The shot ids themselves are being
-    packaged into that repository as data so the list stops living only in a crew report on this workstation; when that lands the citation here becomes the packaged file.
+    evidence record, states the four partitions (472 train, 58 validation, 87 clean same-campaign test, 101 held-out campaign test). The shot ids are now packaged in that repository as
+    <code>imas_ambix/worldmodel/data/labeller_cohort.json</code> at commit <code>c63f8a5</code>, carrying provenance and the four partitions with their shot ids and frame
+    counts: train 472 shots and 1,163,812 frames, validation 58 and 125,930, clean test 87 and 240,281, campaign test 101 and 107,880, 718 distinct in union. The
+    accessor reads that file as the authority and a test asserts the packaged ids equal those parsed from the census report, so the artifact is checkable against its
+    source rather than merely asserting agreement.
     The rule nova needs from it is one line: the ranked corpus walk this labeller consumes is the unified camera manifest minus that cohort, so a shot absent from the walk
     is a cohort member rather than a tail-ranked shot.</p>
   </section>

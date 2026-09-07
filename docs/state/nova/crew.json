@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T21:17:03",
+  "updated": "2026-09-07T21:44:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -640,6 +640,15 @@
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "179cab12-0f8c-46b7-a9ce-cfbb21904a8a"
         },
+        "created": "2026-09-07"
+      },
+      {
+        "id": "cank-thomson-c2",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-07"
       },
       {
@@ -4618,6 +4627,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a0393f-cc5a-7852-89ab-ea49a36244e7"
         }
+      },
+      {
+        "id": "wall-units-scout-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-07"
       },
       {
         "id": "warm-neighbour",
@@ -122099,6 +122117,143 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T165624217254-cank-thomson-scout",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-thomson-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3331,
+                "cached_input_tokens": 380915,
+                "input_tokens": 384278,
+                "output_tokens": 1309,
+                "reasoning_output_tokens": 991,
+                "total_tokens": 385587,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md lists channel positions and chord geometry, the quantities per channel, the time base, how the edge is marked or must be derived, units and convention, and whether a DD4 thomson_scattering IDS exists in imas-ambix, each with file:line in the imas-ambix checkout at /home/ITER/mcintos/Code/imas-ambix, and proposes the typed crossing-point contract",
+          "estimated_hours": 0.5,
+          "goal": "An inventory of what the DIII-D competition dataset carries for Thomson scattering through the imas-ambix reader, with the typed crossing-point contract Nova would consume in COCOS 17",
+          "id": "cank-thomson-scout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165624217254-cank-thomson-scout/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "cank-thomson-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:56:30Z",
+        "completed_at": "2026-09-07T19:41:24.838Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9826,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9894,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165624217254-cank-thomson-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "179cab12-0f8c-46b7-a9ce-cfbb21904a8a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4758.636,
+          "generated_tokens": 0,
+          "generation_seconds": 4758.636,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 15.3,
+          "machine_seconds": 0.0,
+          "peak_input_tokens": 155579,
+          "tokens_per_second": 0.0,
+          "wall_tokens_per_second": 0.0
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/cank-thomson-scout",
+          "session_id": "179cab12-0f8c-46b7-a9ce-cfbb21904a8a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-07T19:41:24.838Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -122411,6 +122566,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2052
+    "_version": 2055
   }
 }

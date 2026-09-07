@@ -546,6 +546,7 @@ class BatchedLabeller:
             has_rows=False,
         )
         conditioned_solver = None
+        initial_unknown = None
         if augmentation is not None:
             initial_unknown = jnp.concatenate(
                 tuple(

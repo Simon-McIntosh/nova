@@ -462,3 +462,44 @@ def test_both_thomson_eras_are_served_from_the_level_one_store():
         radius, temperature, _ = string.finite(0.15)
         assert radius.size and np.all(np.isfinite(radius))
         assert np.all(temperature > 0.0)
+
+
+def test_draw_nulls_drops_an_x_point_outside_the_wall():
+    """A null outside the vessel is finite, so finiteness alone lets it draw."""
+    angle = np.linspace(0.0, 2.0 * np.pi, 40)
+    wall = np.column_stack((1.0 + 0.5 * np.cos(angle), 0.8 * np.sin(angle)))
+    view = three_view(extent=(0.0, 2.0, -1.5, 1.5))
+    inside_point = np.array([1.0, -0.4])
+    outside_point = np.array([0.30, 0.0])
+    tally = draw_nulls(
+        view.poloidal,
+        x_points=np.vstack((inside_point, outside_point)),
+        contain=wall,
+    )
+    assert tally["x_points_drawn"] == 1
+    assert tally["x_points_dropped_outside_wall"] == 1
+    drawn = np.concatenate([line.get_xydata() for line in view.poloidal.lines])
+    assert not np.any(np.all(np.isclose(drawn, outside_point), axis=1))
+
+
+def test_draw_nulls_without_containment_draws_every_finite_point():
+    """Containment is opt-in, so the count says what was actually drawn."""
+    view = three_view(extent=(0.0, 2.0, -1.5, 1.5))
+    tally = draw_nulls(
+        view.poloidal, x_points=np.array([[1.0, 0.0], [0.30, 0.0]])
+    )
+    assert tally["x_points_drawn"] == 2
+    assert tally["x_points_dropped_outside_wall"] == 0
+
+
+def test_strike_points_are_exempt_from_containment():
+    """A strike point lies ON the wall, so containment is the wrong test."""
+    angle = np.linspace(0.0, 2.0 * np.pi, 40)
+    wall = np.column_stack((1.0 + 0.5 * np.cos(angle), 0.8 * np.sin(angle)))
+    view = three_view(extent=(0.0, 2.0, -1.5, 1.5))
+    tally = draw_nulls(
+        view.poloidal,
+        strike_points=np.array([[0.30, 0.0], [1.9, 0.0]]),
+        contain=wall,
+    )
+    assert tally["strike_points_drawn"] == 2

@@ -90,6 +90,7 @@ def render_thomson(
         )
 
     view = three_view(extent=machine.bounds(), height=height, style=style)
+    nulls: list[dict[str, int]] = []
 
     def render(index: int) -> None:
         frame = frames[index]
@@ -100,11 +101,17 @@ def render_thomson(
         pol.draw_wall(view.poloidal, *machine.limiter.T)
         pol.draw_legs(view.poloidal, frame.legs)
         pol.draw_boundary(view.poloidal, *frame.boundary.T)
-        pol.draw_nulls(
-            view.poloidal,
-            magnetic_axis=frame.magnetic_axis,
-            x_points=frame.x_points,
-            strike_points=frame.strike_points,
+        # Strike points are not drawn: the brief asks for the O-point and the
+        # X-points, and a strike point's containment against a 36-point
+        # limiter is unresolved, so drawing one would put an unsettled
+        # quantity on the slide.
+        nulls.append(
+            pol.draw_nulls(
+                view.poloidal,
+                magnetic_axis=frame.magnetic_axis,
+                x_points=frame.x_points,
+                contain=machine.limiter,
+            )
         )
         pol.draw_thomson(view.poloidal, positions, group, chords=False)
         for axes, string in zip((view.upper, view.lower), strings):
@@ -153,6 +160,11 @@ def render_thomson(
             ],
         },
         "conditioned_frames_drawn": sum(1 for f in frames if f.conditioned),
+        "x_points_drawn": sum(item["x_points_drawn"] for item in nulls),
+        "x_points_dropped_outside_wall": sum(
+            item["x_points_dropped_outside_wall"] for item in nulls
+        ),
+        "strike_points_drawn": "none; outside the brief and containment unresolved",
         "profile_limits_fixed": True,
         "profile_limit_quantile": quantile,
         "temperature_axis": "logarithmic, fixed over the pulse",

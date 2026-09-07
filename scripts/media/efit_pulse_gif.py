@@ -59,6 +59,7 @@ def render_pulse(
     style = DEFAULT_INK
     level_array = pulse_levels(pulse, levels)
     view = three_view(extent=pulse.extent(), height=height, style=style)
+    nulls: list[dict[str, int]] = []
     scale_p = tr.TraceScale.over(
         [frame.psi_norm for frame in pulse.frames],
         [frame.p_prime for frame in pulse.frames],
@@ -79,10 +80,13 @@ def render_pulse(
         pol.draw_coils(view.poloidal, pulse.geometry.coils)
         pol.draw_wall(view.poloidal, *pulse.geometry.limiter.T)
         pol.draw_boundary(view.poloidal, *frame.boundary.T)
-        pol.draw_nulls(
-            view.poloidal,
-            magnetic_axis=frame.magnetic_axis,
-            x_points=frame.x_points,
+        nulls.append(
+            pol.draw_nulls(
+                view.poloidal,
+                magnetic_axis=frame.magnetic_axis,
+                x_points=frame.x_points,
+                contain=pulse.geometry.limiter,
+            )
         )
         tr.draw_trace(view.upper, frame.psi_norm, frame.p_prime)
         scale_p.apply(view.upper)
@@ -113,6 +117,10 @@ def render_pulse(
         "contour_levels": len(level_array),
         "level_span_wb": [float(level_array[0]), float(level_array[-1])],
         "levels_shared_across_frames": True,
+        "x_points_drawn": sum(item["x_points_drawn"] for item in nulls),
+        "x_points_dropped_outside_wall": sum(
+            item["x_points_dropped_outside_wall"] for item in nulls
+        ),
         "profile_limits_fixed": True,
         "profile_limit_quantile": quantile,
         "p_prime_limit": list(scale_p.y_limit),

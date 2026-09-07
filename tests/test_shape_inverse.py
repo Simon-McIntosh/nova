@@ -190,6 +190,57 @@ def test_current_step_cap_is_relative_to_each_seed_circuit():
     assert limited
 
 
+def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
+    machine, seed_target
+):
+    """A delta penalty applies to fractions of each caller-stated ceiling."""
+    current = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    points = np.asarray(seed_target.flux_points).copy()
+    points[1, 1] += 0.02
+    target = replace(
+        seed_target,
+        flux_points=points,
+        radial_field_points=points[[0, 2]],
+        vertical_field_points=points[[1, 3]],
+    )
+    ceiling = 20_000.0
+    weight = 0.25
+    solved = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        gamma=0.0,
+        picard_rounds=0,
+        delta_regularisation=weight,
+        delta_current_scale=ceiling,
+    )
+
+    matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
+    scale = np.full(solved.free_circuits.size, ceiling)
+    scaled_delta = solved.delta / scale
+    augmented = np.vstack((matrix * scale, weight * np.eye(scale.size)))
+    rhs = np.concatenate(
+        (solved.right_hand_side * solved.row_weight, np.zeros(scale.size))
+    )
+    normal_residual = augmented.T @ (augmented @ scaled_delta - rhs)
+
+    assert solved.delta_regularisation == weight
+    np.testing.assert_allclose(solved.delta_current_scale, scale)
+    assert np.linalg.norm(normal_residual) < 1.0e-10 * np.sqrt(augmented.shape[0])
+
+
+def test_dimensionless_delta_regularisation_requires_a_scale(machine, seed_target):
+    """A nonzero dimensionless penalty cannot silently use seed currents."""
+    with pytest.raises(ValueError, match="delta_current_scale"):
+        solve_shape_inverse(
+            machine.profile,
+            seed_target,
+            machine.seed,
+            delta_regularisation=1.0,
+        )
+
+
 @pytest.mark.parametrize("parameter", ("bulk_r", "bulk_z"))
 def test_bulk_motion_translates_all_four_turning_points_rigidly(seed_target, parameter):
     """Bulk controls move the bounding box without deforming it."""

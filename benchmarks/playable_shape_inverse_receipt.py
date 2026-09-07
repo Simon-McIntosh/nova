@@ -53,6 +53,17 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/playable-forward-solve/shape-inverse"
 NEGATIVE_CONTROL = "all-prescribed-negative-control.json"
 CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
 FORWARD_GAMMA_FACTOR = 1.0e-12
+DELTA_CURRENT_CEILING_A = 20_000.0
+DELTA_REGULARISATION_WEIGHTS = (
+    0.0,
+    1.0e-4,
+    1.0e-3,
+    1.0e-2,
+    1.0e-1,
+    1.0,
+    10.0,
+    100.0,
+)
 COMMAND_NAMES = (
     "null-resolve",
     "upper-point-plus-20mm",
@@ -245,6 +256,101 @@ def _linear_closure(
             strict=True,
         )
     ]
+
+
+def _row_floor_table(inverse) -> list[dict[str, Any]]:
+    """Attach each commanded row change to the scale used to weight it."""
+    return [
+        {
+            **row,
+            "absolute_commanded_change": abs(row["right_hand_side"]),
+            "commanded_change_to_consistency_floor": (
+                abs(row["right_hand_side"]) / max(row["consistency_floor"], 1.0e-15)
+            ),
+            "commanded_change_exceeds_consistency_floor": bool(
+                abs(row["right_hand_side"]) > row["consistency_floor"]
+            ),
+        }
+        for row in _linear_closure(inverse, inverse.consistency_floor)
+    ]
+
+
+def _delta_regularisation_sweep(
+    machine: ForwardMachine,
+    previous,
+    target,
+    *,
+    gamma_factor: float,
+) -> tuple[dict[str, Any], Any]:
+    """Sweep dimensionless delta penalties and retain the ceiling choice."""
+    profile = machine.profile
+    seed = np.asarray(profile.operator.prescribed_current_field.current)
+    free = machine.drivable_circuits
+    entries: list[dict[str, Any]] = []
+    selected_inverse = None
+    ceiling_weight = None
+    for weight in DELTA_REGULARISATION_WEIGHTS:
+        inverse = solve_shape_inverse(
+            profile,
+            target,
+            previous.flux,
+            prescribed_current=seed,
+            free_circuits=free,
+            gamma=gamma_factor,
+            delta_regularisation=weight,
+            delta_current_scale=DELTA_CURRENT_CEILING_A,
+        )
+        rows = _linear_closure(inverse, inverse.consistency_floor)
+        exercised = [
+            row
+            for row in rows
+            if abs(row["right_hand_side"]) > row["consistency_floor"]
+        ]
+        closed = [row for row in exercised if row["closes_at_least_eighty_percent"]]
+        maximum_change = float(np.max(np.abs(inverse.delta)))
+        within_ceiling = maximum_change <= DELTA_CURRENT_CEILING_A
+        entry = {
+            "delta_regularisation_weight": weight,
+            "dimensionless_penalty": "sum((delta_current_a / scale_a)**2)",
+            "current_scale_a": DELTA_CURRENT_CEILING_A,
+            "exercised_row_count": len(exercised),
+            "closed_exercised_row_count": len(closed),
+            "closure_fraction_exercised_rows": (
+                float(len(closed) / len(exercised)) if exercised else 1.0
+            ),
+            "every_exercised_row_closes_at_least_eighty_percent": bool(
+                all(row["closes_at_least_eighty_percent"] for row in exercised)
+            ),
+            "maximum_absolute_current_change_a": maximum_change,
+            "within_twenty_ka_ceiling": within_ceiling,
+            "h200_admitted": bool(
+                within_ceiling
+                and all(row["closes_at_least_eighty_percent"] for row in exercised)
+            ),
+        }
+        entries.append(entry)
+        if selected_inverse is None and within_ceiling:
+            selected_inverse = inverse
+            ceiling_weight = weight
+    if selected_inverse is None:
+        selected_inverse = inverse
+        selection = "strongest_swept_weight_without_ceiling_compliance"
+    else:
+        selection = "smallest_weight_with_twenty_ka_compliance"
+    return (
+        {
+            "weight_curve": entries,
+            "delta_current_scale_a": DELTA_CURRENT_CEILING_A,
+            "minimum_weight_with_every_circuit_below_twenty_ka": ceiling_weight,
+            "selected_delta_regularisation_weight": (
+                ceiling_weight
+                if ceiling_weight is not None
+                else DELTA_REGULARISATION_WEIGHTS[-1]
+            ),
+            "selection": selection,
+        },
+        selected_inverse,
+    )
 
 
 def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
@@ -620,7 +726,9 @@ def _arm_receipt(
     null_points: np.ndarray,
     circuit_names: dict[int, str],
     gamma_factor: float,
+    delta_regularisation_weight: float,
     row_floor_table: list[dict[str, Any]],
+    delta_regularisation_sweep: dict[str, Any],
     directory: Path,
     runtime: dict[str, Any],
 ) -> tuple[dict[str, Any], object]:
@@ -639,6 +747,8 @@ def _arm_receipt(
         gamma=gamma_factor,
         current_step_fraction=solver.current_step_fraction,
         current_step_reference=solver.reference_current,
+        delta_regularisation=delta_regularisation_weight,
+        delta_current_scale=DELTA_CURRENT_CEILING_A,
     )
     inverse_wall = perf_counter() - inverse_started
     solver.prescribed_current = inverse.currents
@@ -650,6 +760,9 @@ def _arm_receipt(
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "gamma_factor_per_ampere": gamma_factor,
+        "delta_regularisation_weight": delta_regularisation_weight,
+        "delta_current_scale_a": DELTA_CURRENT_CEILING_A,
+        "delta_regularisation_sweep": delta_regularisation_sweep,
         "prescribed_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(inverse.currents)
@@ -734,6 +847,8 @@ def _arm_receipt(
             inverse.response[:, inverse.free_circuits] @ inverse.uncapped_delta
         ).tolist(),
         "linear_row_right_hand_side": inverse.right_hand_side.tolist(),
+        "delta_regularisation_weight": inverse.delta_regularisation,
+        "delta_current_scale_a": inverse.delta_current_scale.tolist(),
         "row_consistency_floor": inverse.consistency_floor.tolist(),
         "row_weight": inverse.row_weight.tolist(),
         "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
@@ -780,6 +895,7 @@ def _arm_receipt(
             "placement_picard_rounds": 3,
             "nonlinear_forward_solves": 1,
         },
+        "delta_regularisation_sweep": delta_regularisation_sweep,
         "total_wall_s": round_receipt["wall_s"],
         "total_trips": int(trips),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
@@ -794,6 +910,9 @@ def _null_receipt(
     machine: ForwardMachine,
     previous,
     circuit_names: dict[int, str],
+    *,
+    delta_regularisation_weight: float,
+    delta_regularisation_sweep: dict[str, Any],
 ) -> tuple[dict[str, Any], object]:
     """Run the seed-frame null command and return its one-solve baseline."""
     solver = ProductionSolver(machine)
@@ -805,6 +924,8 @@ def _null_receipt(
         previous.flux,
         prescribed_current=solver.prescribed_current,
         free_circuits=machine.drivable_circuits,
+        delta_regularisation=delta_regularisation_weight,
+        delta_current_scale=DELTA_CURRENT_CEILING_A,
     )
     solver.prescribed_current = inverse.currents
     started = perf_counter()
@@ -835,6 +956,9 @@ def _null_receipt(
             for index, delta in enumerate(current_change)
         },
         "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
+        "delta_regularisation_weight": inverse.delta_regularisation,
+        "delta_current_scale_a": inverse.delta_current_scale.tolist(),
+        "delta_regularisation_sweep": delta_regularisation_sweep,
         "linear_row_closure": _linear_closure(inverse, inverse.consistency_floor),
         "target_point_rows": _boundary_point_rows(
             inverse, machine.profile, equilibrium.flux
@@ -994,50 +1118,16 @@ def measure(
         _write(directory / "pulse-design-inverse-diagnostic.json", payload)
         print("INVERSE-DIAGNOSTIC " + json.dumps(payload), flush=True)
         return payload
-    consistency_path = directory / CONSISTENCY_DIAGNOSTIC
-    consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
-    command_evidence = {
-        item["command"]: next(
-            row
-            for row in item["gamma_sweep"]
-            if row["gamma_factor_per_ampere"] == FORWARD_GAMMA_FACTOR
-        )
-        for item in consistency["check_3_command_gamma_sweep"]["commands"]
-    }
-    gamma_by_command = dict.fromkeys(command_evidence, FORWARD_GAMMA_FACTOR)
-    maximum_change_a = 20_000.0
-    for name, evidence in command_evidence.items():
-        measured = evidence["placement_result"]["maximum_absolute_current_change_a"]
-        if measured > maximum_change_a:
-            raise ValueError(
-                f"{name} requests {measured:.6g} A, above the hardware ceiling"
-            )
-    row_floor_by_command = {
-        name: [
-            {
-                **row,
-                "absolute_commanded_change": abs(row["right_hand_side"]),
-                "commanded_change_to_consistency_floor": (
-                    abs(row["right_hand_side"]) / max(row["consistency_floor"], 1.0e-15)
-                ),
-                "commanded_change_exceeds_consistency_floor": bool(
-                    abs(row["right_hand_side"]) > row["consistency_floor"]
-                ),
-            }
-            for row in evidence["placement_result"]["linear_row_closure"]
-        ]
-        for name, evidence in command_evidence.items()
-    }
     definitions = (
         (
             "upper-point-plus-20mm",
             _upper_point_target(previous_target),
-            float(gamma_by_command["upper-point-plus-20mm"]),
+            FORWARD_GAMMA_FACTOR,
         ),
         (
             "elongation-plus-5pct",
             _elongation_target(previous_target),
-            float(gamma_by_command["elongation-plus-5pct"]),
+            FORWARD_GAMMA_FACTOR,
         ),
     )
     runtime = {
@@ -1053,13 +1143,16 @@ def measure(
         },
         "carrier": carrier_evidence,
         "policy": policy,
-        "inverse_gamma_factor_by_command": gamma_by_command,
-        "hardware_current_ceiling_a": maximum_change_a,
-        "gamma_selection": (
-            "fixed weak damping after interpreting row closure against each "
-            "row's measured consistency floor"
-        ),
-        "cpu_consistency_source_commit": consistency["source_commit"],
+        "inverse_gamma_factor_by_command": {
+            name: gamma_factor for name, _target, gamma_factor in definitions
+        },
+        "hardware_current_ceiling_a": DELTA_CURRENT_CEILING_A,
+        "delta_regularisation": {
+            "term": "weight**2 * sum((delta_current_a / scale_a)**2)",
+            "scale": "caller-stated 20 kA per active circuit",
+            "weights": DELTA_REGULARISATION_WEIGHTS,
+            "selection": "smallest weight with every circuit under 20 kA",
+        },
         "active_circuits": [
             {
                 "index": index,
@@ -1074,7 +1167,22 @@ def measure(
         },
     }
     if command in {None, "null-resolve"}:
-        null_arm, null_equilibrium = _null_receipt(machine, prime, circuit_names)
+        null_target = achieved_target(profile, prime.flux)
+        null_sweep, _null_inverse = _delta_regularisation_sweep(
+            machine,
+            prime,
+            null_target,
+            gamma_factor=FORWARD_GAMMA_FACTOR,
+        )
+        null_arm, null_equilibrium = _null_receipt(
+            machine,
+            prime,
+            circuit_names,
+            delta_regularisation_weight=float(
+                null_sweep["selected_delta_regularisation_weight"]
+            ),
+            delta_regularisation_sweep=null_sweep,
+        )
         null_points = _points(achieved_target(profile, null_equilibrium.flux))
         null_arm["runtime"] = runtime
         _write_command_receipt(directory / "null-resolve.json", null_arm)
@@ -1097,6 +1205,12 @@ def measure(
     )
     arms = []
     for name, target, gamma_factor in selected_definitions:
+        delta_sweep, selected_inverse = _delta_regularisation_sweep(
+            machine,
+            prime,
+            target,
+            gamma_factor=gamma_factor,
+        )
         arm, _achieved = _arm_receipt(
             name,
             machine,
@@ -1105,7 +1219,9 @@ def measure(
             null_points,
             circuit_names,
             gamma_factor,
-            row_floor_by_command[name],
+            float(delta_sweep["selected_delta_regularisation_weight"]),
+            _row_floor_table(selected_inverse),
+            delta_sweep,
             directory,
             runtime,
         )

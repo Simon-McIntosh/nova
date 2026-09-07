@@ -85,6 +85,8 @@ class ShapeInverseResult:
     row_kinds: tuple[str, ...]
     plasma_current: float
     gamma: float
+    delta_regularisation: float
+    delta_current_scale: np.ndarray
     field_weight: float
     singular_values: np.ndarray
     numerical_rank: int
@@ -118,6 +120,38 @@ def _cap_current_delta(
     limit = fraction * np.abs(reference)
     capped = np.clip(update, -limit, limit)
     return capped, bool(np.any(capped != update))
+
+
+def _delta_current_scale(
+    scale,
+    circuit_count: int,
+    free_circuits: np.ndarray,
+    regularisation: float,
+) -> np.ndarray:
+    """Return positive free-circuit scales for dimensionless delta penalties."""
+    if not np.isfinite(regularisation) or regularisation < 0.0:
+        raise ValueError("delta_regularisation must be finite and non-negative")
+    if regularisation == 0.0:
+        return np.ones(free_circuits.size)
+    if scale is None:
+        raise ValueError(
+            "delta_current_scale is required when delta_regularisation is non-zero"
+        )
+    values = np.asarray(scale, dtype=float)
+    if values.ndim == 0:
+        values = np.full(circuit_count, float(values))
+    elif values.shape == (free_circuits.size,):
+        values = values.copy()
+    elif values.shape == (circuit_count,):
+        values = values[free_circuits]
+    else:
+        raise ValueError(
+            "delta_current_scale must be a scalar, one value per circuit, "
+            "or one value per free circuit"
+        )
+    if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
+        raise ValueError("delta_current_scale values must be finite and positive")
+    return values
 
 
 def reference_point(profile: ForwardProfile, flux) -> np.ndarray:
@@ -728,6 +762,8 @@ def solve_shape_inverse(
     picard_rounds: int = PICARD_ROUNDS,
     current_step_fraction: float | None = None,
     current_step_reference=None,
+    delta_regularisation: float = 0.0,
+    delta_current_scale=None,
 ) -> ShapeInverseResult:
     """Solve seed-anchored free-circuit changes with plasma-placement rounds.
 
@@ -737,7 +773,10 @@ def solve_shape_inverse(
     same seed rather than accumulating changes from the prior round. Between
     solves one forward-map evaluation re-evaluates the plasma profile inside
     the boundary produced by those currents. No nonlinear equilibrium solve
-    is run here.
+    is run here. When ``delta_regularisation`` is non-zero, its Tikhonov term
+    is applied to each delta divided by ``delta_current_scale``. The scale is
+    therefore a rated-current vector or caller-stated current ceiling, and
+    the penalty is dimensionless.
     """
     if picard_rounds < 0:
         raise ValueError("picard_rounds must be non-negative")
@@ -761,6 +800,12 @@ def solve_shape_inverse(
         free = np.unique(np.asarray(free_circuits, dtype=int))
     if free.size == 0:
         raise ValueError("the shape-inverse step needs at least one free circuit")
+    delta_scale = _delta_current_scale(
+        delta_current_scale,
+        field.circuit_count,
+        free,
+        delta_regularisation,
+    )
     if current_step_reference is None:
         step_reference = initial_current
     else:
@@ -864,7 +909,19 @@ def solve_shape_inverse(
         weighted_rhs = right_hand_side * row_weight
         ip = plasma_current(profile, state, target_current=target_current)
         regularisation = gamma * abs(ip)
-        solved_delta = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
+        if delta_regularisation == 0.0:
+            solved_delta = MoorePenrose(weighted, gamma=regularisation) / weighted_rhs
+        else:
+            scaled_response = weighted * delta_scale[np.newaxis, :]
+            penalty_rows = np.vstack(
+                (
+                    regularisation * np.diag(delta_scale),
+                    delta_regularisation * np.eye(free.size),
+                )
+            )
+            scaled_design = np.vstack((scaled_response, penalty_rows))
+            scaled_rhs = np.concatenate((weighted_rhs, np.zeros(penalty_rows.shape[0])))
+            solved_delta = delta_scale * (MoorePenrose(scaled_design) / scaled_rhs)
         applied_round_delta, limited = _cap_current_delta(
             solved_delta,
             step_reference[free],
@@ -902,6 +959,8 @@ def solve_shape_inverse(
         row_kinds=row_kinds,
         plasma_current=float(ip),
         gamma=float(regularisation),
+        delta_regularisation=float(delta_regularisation),
+        delta_current_scale=delta_scale,
         field_weight=field_weight,
         singular_values=singular_values,
         numerical_rank=numerical_rank,

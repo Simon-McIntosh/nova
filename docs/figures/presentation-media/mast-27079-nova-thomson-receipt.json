@@ -1,9 +1,9 @@
 {
   "achieved_seconds": 9.72,
-  "bytes": 2027937,
+  "bytes": 2289592,
   "conditioned_frames_drawn": 0,
   "contact_sheet": {
-    "bytes": 339922,
+    "bytes": 406976,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
@@ -40,10 +40,27 @@
     "stored_frame_count": 114,
     "surface_count": 11
   },
-  "left_panel": "nova nested flux surfaces, rasterless",
+  "left_panel": "nova nested flux surfaces over the clipped hex mesh",
   "machine": "MAST",
   "orientation_note": "both MAST systems view the midplane, so the split is core against edge rather than vertical against horizontal",
   "path": "docs/figures/presentation-media/mast-27079-nova-thomson.gif",
+  "plasma_mesh": {
+    "boundary_clip": "geometric intersection with the solved boundary polygon; a rasterless session carries no flux field to cut at",
+    "clipped_cell_count_range": [
+      15,
+      455
+    ],
+    "coupling": "none; cell geometry only, no Biot build",
+    "delivered_cells": 1324,
+    "requested_cells": 1200,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vertex_count_range": [
+      4,
+      28
+    ],
+    "wall_clipped": true
+  },
   "profile_limit_quantile": 0.98,
   "profile_limits_fixed": true,
   "pulse": "27079",

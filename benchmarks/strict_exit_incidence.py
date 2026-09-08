@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 import gc
 import hashlib
+from importlib.util import module_from_spec, spec_from_file_location
 import json
 import math
 import os
 from pathlib import Path
 import re
+import resource
 import socket
 import subprocess
 import threading
@@ -56,6 +58,7 @@ from benchmarks.efit_forward_parity_slice import (
     NEWTON_STEPS,
     RELAXATION,
     STEP_CAP,
+    TOTAL_FLUX_FACTOR,
     WARMUP_SWEEPS,
     _mast_case_from_selection,
     _passive_inclusive_case,
@@ -64,6 +67,10 @@ from benchmarks.efit_forward_parity_slice import (
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium.fixed_point import FixedPointTerminationReason
 from nova.equilibrium.forward import SaddleSeedGeometry
+from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.forward_operator import stack_forward_operators
+from nova.equilibrium.solve_request import ForwardSolveMemberData, SampledFluxFunction
+from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.jax.config import (
@@ -78,6 +85,10 @@ DEFAULT_JSON = (
     ROOT / "docs/figures/millisecond-converged-solve/strict-exit-incidence.json"
 )
 DEFAULT_PNG = DEFAULT_JSON.with_suffix(".png")
+DEFAULT_BATCHED_JSON = (
+    ROOT / "docs/figures/batched-operator-boundary/exit-incidence/"
+    "strict-exit-incidence.json"
+)
 MAST_BANK = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json"
 )
@@ -88,11 +99,7 @@ SETTLEMENT_CENSUS = (
     ROOT / "docs/figures/solver-trip-orchestration/settlement-histogram.json"
 )
 BANK_REVISION_ROUTE = ROOT / "benchmarks/bank_revision_reproduction.py"
-DEFAULT_MAST_STATE_CACHE = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20260901T143942750055-sto-mast-bank-telemetry-relaunch/"
-    "logs/exact-operand-cache.npz"
-)
+DEFAULT_MAST_STATE_CACHE = ROOT / "logs/exact-operand-cache.npz"
 DEFAULT_DIIID_MACHINE_CACHE = Path(
     "/run/user/39486/reckon-artifact-repaired-ring-cache"
 )
@@ -175,7 +182,7 @@ def _require_revision() -> str:
     return revision
 
 
-def _require_gpu_allocation() -> dict[str, Any]:
+def _require_gpu_allocation(expected_cpu_count: int = 1) -> dict[str, Any]:
     job_id = os.environ.get("SLURM_JOB_ID")
     if not job_id:
         raise RuntimeError("measurement requires a SLURM allocation")
@@ -183,8 +190,10 @@ def _require_gpu_allocation() -> dict[str, Any]:
         raise RuntimeError("measurement requires the betelgeuse partition")
     if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
         raise RuntimeError("measurement requires reservation gpu_0003_grpA")
-    if int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) != 1:
-        raise RuntimeError("measurement requires exactly one allocated CPU")
+    if int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) != expected_cpu_count:
+        raise RuntimeError(
+            f"measurement requires exactly {expected_cpu_count} allocated CPU(s)"
+        )
     if os.environ.get("TMPDIR") != "/tmp":
         raise RuntimeError("measurement requires TMPDIR=/tmp")
     if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
@@ -221,6 +230,50 @@ def _require_gpu_allocation() -> dict[str, Any]:
     }
 
 
+def _require_cpu_self_check() -> dict[str, Any]:
+    """Validate the CPU-allocation proof before a GPU measurement is submitted."""
+    job_id = os.environ.get("SLURM_JOB_ID")
+    if not job_id:
+        raise RuntimeError("the CPU self-check requires a SLURM allocation")
+    if os.environ.get("SLURM_JOB_PARTITION") != "all_debug":
+        raise RuntimeError("the CPU self-check requires the all_debug partition")
+    if int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) != 4:
+        raise RuntimeError("the CPU self-check requires exactly four allocated CPUs")
+    requested_memory_mib = int(os.environ.get("SLURM_MEM_PER_NODE", "0"))
+    if requested_memory_mib != 64 * 1024:
+        raise RuntimeError(
+            "the CPU self-check requires exactly 64 GiB of node memory, received "
+            f"{requested_memory_mib} MiB"
+        )
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("the CPU self-check requires TMPDIR=/tmp")
+    if os.environ.get("JAX_PLATFORMS") != "cpu":
+        raise RuntimeError("the CPU self-check requires JAX_PLATFORMS=cpu")
+    devices = jax.devices()
+    if len(devices) != 1 or devices[0].platform != "cpu":
+        raise RuntimeError(
+            f"the CPU self-check requires one CPU device, received {devices}"
+        )
+    return {
+        "job_id": int(job_id),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
+        "node": socket.gethostname(),
+        "host": socket.gethostname(),
+        "partition": os.environ["SLURM_JOB_PARTITION"],
+        "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "cpu_count": int(os.environ["SLURM_CPUS_PER_TASK"]),
+        "gpu_count": 0,
+        "device": devices[0].device_kind,
+        "jax_platforms": ["cpu"],
+        "tmpdir": os.environ["TMPDIR"],
+        "requested_time_limit": os.environ.get("SLURM_TIMELIMIT"),
+        "requested_memory_mib": requested_memory_mib,
+        "attempt": 0,
+        "prior_job_id": None,
+        "execution_mode": "slurm_cpu_self_check",
+    }
+
+
 def _mast_cache_rows(path: Path) -> tuple[dict[tuple[str, str], dict[str, Any]], dict]:
     with np.load(path, allow_pickle=False) as stored:
         metadata = json.loads(str(stored["metadata"].item()))
@@ -238,6 +291,92 @@ def _mast_cache_rows(path: Path) -> tuple[dict[tuple[str, str], dict[str, Any]],
     if len(rows) != 12:
         raise RuntimeError("the MAST operand cache contains duplicate arm identities")
     return rows, metadata
+
+
+def _compare_mast_cache_to_bank(
+    cached: dict[tuple[str, str], dict[str, Any]], bank_rows: list[dict[str, Any]]
+) -> list[str]:
+    """Return exact JSON-scalar mismatches in cached and bank solve identities."""
+
+    bank = {(str(row["identity"]), str(row["arm"])): row for row in bank_rows}
+    mismatches = []
+    for key in sorted(set(cached) - set(bank)):
+        mismatches.append(f"cache-only member {key[0]} {key[1]}")
+    for key in sorted(set(bank) - set(cached)):
+        mismatches.append(f"bank-only member {key[0]} {key[1]}")
+    for key in sorted(set(cached) & set(bank)):
+        cached_row = cached[key]["metadata"]
+        bank_row = bank[key]
+        for field in ("shot", "slice_index", "arm", "terminal_residual"):
+            cached_value = cached_row.get(field)
+            bank_value = bank_row.get(field)
+            if cached_value != bank_value:
+                mismatches.append(
+                    f"{key[0]} {key[1]} {field}: "
+                    f"cache={cached_value!r}, bank={bank_value!r}"
+                )
+    return mismatches
+
+
+def regenerate_mast_state_cache(state_cache: Path) -> dict[str, Any]:
+    """Regenerate exact MAST operands with the established cache producer."""
+
+    producer_path = (
+        ROOT / "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
+    )
+    specification = spec_from_file_location(
+        "mast_operand_cache_producer", producer_path
+    )
+    if specification is None or specification.loader is None:
+        raise RuntimeError(
+            f"could not load MAST operand cache producer at {producer_path}"
+        )
+    producer = module_from_spec(specification)
+    specification.loader.exec_module(producer)
+    original_cache_path = producer.CACHE_PATH
+    producer.CACHE_PATH = state_cache
+    try:
+        configure_dtypes()
+        configure_persistent_compilation_cache(
+            default_persistent_compilation_cache_root()
+        )
+        response, carrier = _persisted_response_cache(
+            response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
+        )
+        producer._build_operand_cache(response, carrier)
+    finally:
+        producer.CACHE_PATH = original_cache_path
+
+    cached, metadata = _mast_cache_rows(state_cache)
+    bank_rows = _read_json(MAST_BANK).get("rows", [])
+    mismatches = _compare_mast_cache_to_bank(cached, bank_rows)
+    if mismatches:
+        raise RuntimeError(
+            "regenerated MAST operand cache does not match the current bank: "
+            + "; ".join(mismatches)
+        )
+    result = {
+        "status": "mast_operand_cache_regenerated",
+        "bank": {
+            "path": str(MAST_BANK.relative_to(ROOT)),
+            "sha256": _sha256(MAST_BANK),
+        },
+        "cache": {
+            "path": str(state_cache),
+            "sha256": _sha256(state_cache),
+            "arm_count": len(cached),
+            "authority": {
+                key: metadata.get(key)
+                for key in (
+                    "schema_revision",
+                    "response_carrier_semantic_identity",
+                    "selection_source_commit",
+                )
+            },
+        },
+    }
+    print(json.dumps(result, indent=2, sort_keys=True), flush=True)
+    return result
 
 
 def _state_from_cached_grid(
@@ -274,12 +413,37 @@ def _state_from_cached_grid(
     )
 
 
-def _build_mast_members(state_cache: Path) -> tuple[list[Member], dict[str, Any]]:
+def _mast_source_with_sampled_profiles(
+    source: ForwardSource, group: Any, row: int
+) -> ForwardSource:
+    """Carry one extracted MAST profile entirely as dynamic array leaves."""
+    psi_norm = np.asarray(group["psi_norm"], dtype=np.float64)
+    if psi_norm.shape != (65,) or not np.array_equal(
+        psi_norm, np.linspace(0.0, 1.0, 65)
+    ):
+        raise ValueError("efm/psi_norm is not the declared uniform 65-point base")
+    p_prime = -np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    ff_prime = -np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    return replace(
+        source,
+        core=DomainProfile(
+            p_prime=SampledFluxFunction(psi_norm, p_prime),
+            ff_prime=SampledFluxFunction(psi_norm, ff_prime),
+        ),
+    )
+
+
+def _build_mast_members(
+    state_cache: Path, *, member_count: int = 12
+) -> tuple[list[Member], dict[str, Any]]:
     bank = _read_json(MAST_BANK)
     rows = bank.get("rows")
     if not isinstance(rows, list) or len(rows) != 12:
         raise RuntimeError("the MAST bank must carry twelve arms")
     cached, cache_metadata = _mast_cache_rows(state_cache)
+    mismatches = _compare_mast_cache_to_bank(cached, rows)
+    if mismatches:
+        raise RuntimeError("MAST cache disagrees with bank: " + "; ".join(mismatches))
     response, carrier = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
@@ -294,18 +458,12 @@ def _build_mast_members(state_cache: Path) -> tuple[list[Member], dict[str, Any]
     }
     profiles: dict[str, tuple[Any, Any, float]] = {}
     members = []
-    for number, bank_row in enumerate(rows, start=1):
+    if not 1 <= member_count <= len(rows):
+        raise ValueError(f"MAST member count must be in [1, {len(rows)}]")
+    for number, bank_row in enumerate(rows[:member_count], start=1):
         identity = str(bank_row["identity"])
         arm = str(bank_row["arm"])
         key = (identity, arm)
-        if key not in cached:
-            raise RuntimeError(f"MAST cache omits {identity} {arm}")
-        cached_row = cached[key]["metadata"]
-        for field in ("shot", "slice_index", "arm", "terminal_residual"):
-            if cached_row.get(field) != bank_row.get(field):
-                raise RuntimeError(
-                    f"MAST cache disagrees with bank at {identity} {arm} {field}"
-                )
         if identity not in profiles:
             selected_row, qualification = selected[identity]
             case, context = _mast_case_from_selection(
@@ -314,6 +472,15 @@ def _build_mast_members(state_cache: Path) -> tuple[list[Member], dict[str, Any]
             passive, profile, policy = _passive_inclusive_case(case, context, response)
             if int(policy["section_kernel_evaluations_this_shot"]) != 0:
                 raise RuntimeError("MAST profile entered a direct response builder")
+            source = _mast_source_with_sampled_profiles(
+                profile.operator.source, context["group"], context["row"]
+            )
+            operator = replace(
+                profile.operator,
+                source=source,
+                prescribed_current_field=profile.operator.prescribed_field,
+            )
+            profile = replace(profile, operator=operator)
             target = abs(float(passive["reference"]["plasma_current_a"]))
             profiles[identity] = (profile, passive["state"], target)
             print(
@@ -375,17 +542,62 @@ def _build_mast_members(state_cache: Path) -> tuple[list[Member], dict[str, Any]
             ),
         },
         "rebuilt_profile_count": len(profiles),
+        "profile_representation": (
+            "six distinct 65-point MAST profile pairs carried as dynamic array leaves"
+        ),
         "member_count": len(members),
     }
 
 
-def _build_diiid_members(machine_cache: Path) -> tuple[list[Member], dict[str, Any]]:
+def _diiid_machine_artifact_evidence(
+    machine_cache: Path, surface_receipts: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Record the governed artifact behind cached or transported coordinates."""
+    artifact_digest = DEFAULT_MACHINE_ARTIFACT_DIGEST.removeprefix("sha256:")
+    manifest = machine_cache / "sha256" / artifact_digest / "manifest.json"
+    evidence = {
+        "cache": str(machine_cache),
+        "digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
+    }
+    if manifest.is_file():
+        evidence["manifest_sha256"] = _sha256(manifest)
+        return evidence
+    if surface_receipts and all(
+        receipt.get("coordinate_transport") for receipt in surface_receipts
+    ):
+        coordinate_digests = {
+            str(receipt["wall_coordinate_sha256"]) for receipt in surface_receipts
+        }
+        if len(coordinate_digests) != 1:
+            raise RuntimeError("DIII-D members consumed different transported walls")
+        evidence.update(
+            {
+                "manifest_sha256": artifact_digest,
+                "coordinate_transport": (
+                    "digest-qualified wall coordinates supplied to the compute node"
+                ),
+                "wall_coordinate_sha256": coordinate_digests.pop(),
+            }
+        )
+        return evidence
+    raise FileNotFoundError(
+        "DIII-D machine artifact manifest is unavailable and the members did not "
+        "consume the verified coordinate transport"
+    )
+
+
+def _build_diiid_members(
+    machine_cache: Path, *, member_count: int = 5
+) -> tuple[list[Member], dict[str, Any]]:
     bank = _read_json(DIIID_BANK)
     rows = bank.get("result", {}).get("frame_records")
     if not isinstance(rows, list) or len(rows) != 5:
         raise RuntimeError("the DIII-D bank must carry five frame records")
     members = []
-    for number, bank_row in enumerate(rows, start=1):
+    surface_receipts = []
+    if not 1 <= member_count <= len(rows):
+        raise ValueError(f"DIII-D member count must be in [1, {len(rows)}]")
+    for number, bank_row in enumerate(rows[:member_count], start=1):
         shot = str(bank_row["shot"])
         frame = int(bank_row["frame"])
         row = _wall_topology_row(DIIID_DATA / shot)
@@ -396,6 +608,7 @@ def _build_diiid_members(machine_cache: Path) -> tuple[list[Member], dict[str, A
             machine_artifact_cache=machine_cache,
             machine_artifact_digest=DEFAULT_MACHINE_ARTIFACT_DIGEST,
         )
+        surface_receipts.append(built.surface_receipt)
         time_ms = float(row["efit_times"][frame])
         machine = dataset_machine_description(row, source_row=str(row["_source_path"]))
         shipped = shipped_current_at(
@@ -450,22 +663,14 @@ def _build_diiid_members(machine_cache: Path) -> tuple[list[Member], dict[str, A
             f"rss_mib={_PeakRssSampler._current_mib():.3f}",
             flush=True,
         )
-    manifest = (
-        machine_cache
-        / "sha256"
-        / DEFAULT_MACHINE_ARTIFACT_DIGEST.removeprefix("sha256:")
-        / "manifest.json"
-    )
     return members, {
         "bank": {
             "path": str(DIIID_BANK.relative_to(ROOT)),
             "sha256": _sha256(DIIID_BANK),
         },
-        "machine_artifact": {
-            "cache": str(machine_cache),
-            "digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
-            "manifest_sha256": _sha256(manifest),
-        },
+        "machine_artifact": _diiid_machine_artifact_evidence(
+            machine_cache, surface_receipts
+        ),
         "corpus_root": str(DIIID_DATA),
         "member_count": len(members),
     }
@@ -511,6 +716,75 @@ class _PeakRssSampler:
             "final_rss_mib": self.samples_mib[-1],
             "sample_count": len(self.samples_mib),
         }
+
+
+def _resource_stage(name: str) -> dict[str, Any]:
+    """Record the process RSS and its lifetime high-water mark at one stage."""
+    stage = {
+        "stage": name,
+        "current_rss_mib": _PeakRssSampler._current_mib(),
+        "resource_peak_rss_mib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        / 1024.0,
+        "resource_peak_scope": "process lifetime through this stage",
+    }
+    print(
+        "STAGE "
+        f"{name} current_rss_mib={stage['current_rss_mib']:.3f} "
+        f"resource_peak_rss_mib={stage['resource_peak_rss_mib']:.3f}",
+        flush=True,
+    )
+    return stage
+
+
+def _stack_member_data(members: list[Member]) -> ForwardSolveMemberData:
+    """Stack every traced member operand along the program's leading axis."""
+    return jax.tree_util.tree_map(
+        lambda *values: jnp.stack(values),
+        *[
+            ForwardSolveMemberData(
+                seed_state=member.state,
+                target_current=jnp.asarray(member.target_current),
+                current=member.current,
+            )
+            for member in members
+        ],
+    )
+
+
+def _batch_member_solver(lattice, options: dict[str, Any], tolerance: float):
+    """Return the one-member solve that receives only traced batch leaves."""
+
+    def solve(operator, data: ForwardSolveMemberData, settlement_enabled):
+        profile = ForwardProfile(operator=operator, lattice=lattice)
+        return profile.solve(
+            data.seed_state,
+            route="newton_krylov",
+            current=data.current,
+            target_current=data.target_current,
+            prescribed_current=data.prescribed_current,
+            convergence_tolerance=tolerance,
+            stop_on_active_set_settlement=settlement_enabled,
+            **options,
+        )
+
+    return solve
+
+
+def _select_member(result: Any, index: int) -> Any:
+    """Take one member from a vectorized equilibrium receipt."""
+    return jax.tree_util.tree_map(
+        lambda value: value[index] if getattr(value, "ndim", 0) > 0 else value,
+        result,
+    )
+
+
+def _batch_member_result(result: Any, index: int, *, stacked: bool) -> Any:
+    """Select a member from either the stacked or sequential execution route."""
+    return _select_member(result, index) if stacked else result[index]
+
+
+def _batch_stage_count(stages: list[dict[str, Any]], name: str) -> None:
+    stages.append(_resource_stage(name))
 
 
 def _compiled_member(member: Member) -> tuple[Callable, jax.Array, float]:
@@ -1009,6 +1283,168 @@ def harvest_partial(
     return payload
 
 
+def _measure_batched_machine(
+    members: list[Member],
+    *,
+    name: str,
+) -> dict[str, Any]:
+    """Compile one checked member program and run its paired exit passes."""
+    if not members:
+        raise ValueError("a batched machine measurement needs at least one member")
+    options = members[0].options
+    tolerance = members[0].tolerance
+    if any(member.options != options for member in members):
+        raise RuntimeError(f"{name} members do not share one solve option set")
+    if any(member.tolerance != tolerance for member in members):
+        raise RuntimeError(f"{name} members do not share one solve tolerance")
+
+    batch = stack_forward_operators(member.profile.operator for member in members)
+    member_data = _stack_member_data(members)
+    stages: list[dict[str, Any]] = []
+    _batch_stage_count(stages, f"{name}_BATCH_READY")
+    geometry_digests = [operator.geometry_identity for operator in batch.operators]
+    solver = _batch_member_solver(members[0].profile.lattice, options, tolerance)
+    flags = {
+        "without_exit": jnp.zeros(batch.width, dtype=bool),
+        "with_exit": jnp.ones(batch.width, dtype=bool),
+    }
+
+    compile_count = 0
+    if batch.stacked is not None:
+
+        def batched_solve(operator, data, settlement):
+            return jax.vmap(solver)(operator, data, settlement)
+
+        _batch_stage_count(stages, f"{name}_BATCH_COMPILE_START")
+        started = time.perf_counter()
+        compiled = (
+            jax.jit(batched_solve)
+            .lower(batch.stacked, member_data, flags["without_exit"])
+            .compile()
+        )
+        compile_seconds = time.perf_counter() - started
+        compile_count = 1
+        _batch_stage_count(stages, f"{name}_BATCH_COMPILE_DONE")
+
+        arm_results = {}
+        arm_timings = {}
+        for arm_name, settlement in flags.items():
+            _batch_stage_count(stages, f"{name}_{arm_name.upper()}_START")
+            started = time.perf_counter_ns()
+            result = compiled(batch.stacked, member_data, settlement)
+            _block(result)
+            elapsed_ms = (time.perf_counter_ns() - started) / 1.0e6
+            arm_results[arm_name] = result
+            arm_timings[arm_name] = elapsed_ms
+            _batch_stage_count(stages, f"{name}_{arm_name.upper()}_DONE")
+    else:
+        compile_seconds = None
+        arm_results = {}
+        arm_timings = {}
+        for arm_name, settlement in flags.items():
+            _batch_stage_count(stages, f"{name}_{arm_name.upper()}_START")
+            started = time.perf_counter_ns()
+            result = batch.map(solver, member_data, settlement)
+            jax.block_until_ready(result)
+            arm_results[arm_name] = result
+            arm_timings[arm_name] = (time.perf_counter_ns() - started) / 1.0e6
+            compile_count += len(batch.geometry_groups)
+            _batch_stage_count(stages, f"{name}_{arm_name.upper()}_DONE")
+
+    rows = []
+    for index, member in enumerate(members):
+        without_exit = _batch_member_result(
+            arm_results["without_exit"], index, stacked=batch.stacked is not None
+        )
+        with_exit = _batch_member_result(
+            arm_results["with_exit"], index, stacked=batch.stacked is not None
+        )
+        control = _arm_row(without_exit)
+        exited = _arm_row(with_exit)
+        fired = exited["termination"] == _termination_name(SETTLED_REASON)
+        bit_identical = (
+            control["terminal_state_sha256"] == exited["terminal_state_sha256"]
+            if fired
+            else None
+        )
+        if fired and not bit_identical:
+            raise RuntimeError(
+                f"strict exit changed terminal state bits for {member.identity}"
+            )
+        rows.append(
+            {
+                "identity": member.identity,
+                "state_authority": member.state_authority,
+                "initial_state_sha256": _array_sha256(member.state),
+                "strict_qualification_firing_trip": (
+                    exited["executed_trips"] if fired else None
+                ),
+                "strict_qualification": "fired" if fired else "never",
+                "without_exit": {
+                    **control,
+                    "batch_elapsed_ms": arm_timings["without_exit"],
+                    "batched_ms_per_member": arm_timings["without_exit"] / batch.width,
+                },
+                "with_exit": {
+                    **exited,
+                    "batch_elapsed_ms": arm_timings["with_exit"],
+                    "batched_ms_per_member": arm_timings["with_exit"] / batch.width,
+                },
+                "terminal_state_bit_identical_where_exit_fired": bit_identical,
+            }
+        )
+
+    _batch_stage_count(stages, f"{name}_BATCH_COMPLETE")
+    del member_data, arm_results
+    if batch.stacked is not None:
+        del compiled
+    gc.collect()
+    jax.clear_caches()
+    gc.collect()
+    _batch_stage_count(stages, f"{name}_BATCH_RELEASED")
+    return {
+        "execution_contract": {
+            "width": batch.width,
+            "declared_member_count": len(members),
+            "same_arguments_for_exit_passes": True,
+            "settlement_flag_is_member_runtime_argument": True,
+            "arm_order": ["without_exit", "with_exit"],
+            "geometry_identical": batch.geometry_identical,
+            "geometry_groups": [list(group) for group in batch.geometry_groups],
+            "geometry_digests": geometry_digests,
+            "execution_route": (
+                "one_stacked_vmap_program"
+                if batch.stacked is not None
+                else "sequential_jitted_geometry_fallback"
+            ),
+            "compile_count_per_pass": compile_count,
+            "compiled_once": compile_count == 1,
+        },
+        "compile_seconds": compile_seconds,
+        "stage_host_memory": stages,
+        "members": rows,
+        "summary": {
+            "declared_members": len(rows),
+            "strict_exit_fired_members": sum(
+                row["strict_qualification"] == "fired" for row in rows
+            ),
+            "strict_exit_never_members": sum(
+                row["strict_qualification"] == "never" for row in rows
+            ),
+            "bit_identical_fired_members": sum(
+                row["terminal_state_bit_identical_where_exit_fired"] is True
+                for row in rows
+            ),
+            "batched_ms_per_member": {
+                arm: arm_timings[arm] / batch.width for arm in arm_timings
+            },
+            "peak_host_rss_mib": max(
+                stage["resource_peak_rss_mib"] for stage in stages
+            ),
+        },
+    }
+
+
 def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str, Any]:
     rows = []
     for member_number, member in enumerate(members, start=1):
@@ -1226,6 +1662,8 @@ def preflight(mast_state_cache: Path, diiid_machine_cache: Path) -> dict[str, An
     mast_rows = mast.get("rows", [])
     diiid_rows = diiid.get("result", {}).get("frame_records", [])
     cached, metadata = _mast_cache_rows(mast_state_cache)
+    cache_mismatches = _compare_mast_cache_to_bank(cached, mast_rows)
+    cache_matches_current_bank = not cache_mismatches
     manifest = (
         diiid_machine_cache
         / "sha256"
@@ -1237,6 +1675,12 @@ def preflight(mast_state_cache: Path, diiid_machine_cache: Path) -> dict[str, An
         "source_revision": revision,
         "mast_members": len(mast_rows),
         "mast_cache_members": len(cached),
+        "mast_cache_matches_current_bank": cache_matches_current_bank,
+        "mast_cache_bank_rule": (
+            "exact equality of JSON-decoded shot, slice_index, arm, and "
+            "terminal_residual scalars for an identical member-key set"
+        ),
+        "mast_cache_bank_mismatches": cache_mismatches,
         "mast_cache_authority": {
             key: metadata.get(key)
             for key in (
@@ -1251,12 +1695,224 @@ def preflight(mast_state_cache: Path, diiid_machine_cache: Path) -> dict[str, An
         "census_projection_ms_per_slice": CENSUS_PROJECTION_MS_PER_SLICE,
         "census_sha256": _sha256(SETTLEMENT_CENSUS),
     }
-    if len(mast_rows) != 12 or len(cached) != 12 or len(diiid_rows) != 5:
+    if (
+        len(mast_rows) != 12
+        or len(cached) != 12
+        or len(diiid_rows) != 5
+        or not cache_matches_current_bank
+    ):
         raise RuntimeError(f"bank cardinality preflight failed: {result}")
     if not manifest.is_file():
         raise RuntimeError(f"DIII-D machine artifact is unavailable at {manifest}")
     print(json.dumps(result, indent=2, sort_keys=True), flush=True)
     return result
+
+
+def _banked_sequential_comparison() -> dict[str, Any]:
+    """Read, without rewriting, the prior width-one banked timing receipt."""
+    receipt = _read_json(DEFAULT_JSON)
+    machines = receipt["machines"]
+    comparison = {}
+    for name in ("MAST", "DIII-D"):
+        summary = machines[name]["summary"]
+        timing = summary["timing"]
+        comparison[name] = {
+            "receipt_path": str(DEFAULT_JSON.relative_to(ROOT)),
+            "measurement_state": receipt["measurement_state"],
+            "paired_timing_member_count": summary["harvested_paired_timing_members"],
+            "without_exit_mean_ms": timing["without_exit_ms"]["mean"],
+            "with_exit_mean_ms": timing["with_exit_ms"]["mean"],
+        }
+    return comparison
+
+
+def _write_batched_report(
+    report_path: Path,
+    payload: dict[str, Any],
+) -> None:
+    """Write the compact machine comparison required by the batch receipt."""
+    lines = [
+        "# Strict-exit batch incidence",
+        "",
+        "| Machine | Width | Route | Compile count/pass | Compile seconds | "
+        "Batched disabled ms/member | Banked width-1 disabled ms/member | "
+        "Batched enabled ms/member | Banked width-1 enabled ms/member | "
+        "Peak host RSS MiB | Under 16 GiB |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+    ]
+    for name in ("MAST", "DIII-D"):
+        machine = payload["machines"][name]
+        contract = machine["execution_contract"]
+        summary = machine["summary"]
+        baseline = payload["sequential_width_one_comparison"][name]
+        lines.append(
+            "| {name} | {width} | {route} | {compiles} | {compile_seconds} | "
+            "{without:.6f} | {sequential_without:.6f} | {with_exit:.6f} | "
+            "{sequential_with:.6f} | {peak:.3f} | {under_memory} |".format(
+                name=name,
+                width=contract["width"],
+                route=contract["execution_route"],
+                compiles=contract["compile_count_per_pass"],
+                compile_seconds=(
+                    "not one program"
+                    if machine["compile_seconds"] is None
+                    else f"{machine['compile_seconds']:.6f}"
+                ),
+                without=summary["batched_ms_per_member"]["without_exit"],
+                sequential_without=baseline["without_exit_mean_ms"],
+                with_exit=summary["batched_ms_per_member"]["with_exit"],
+                sequential_with=baseline["with_exit_mean_ms"],
+                peak=summary["peak_host_rss_mib"],
+                under_memory=summary["peak_host_rss_mib"] < 16 * 1024,
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "The sequential values are the banked width-1 receipt means. "
+            "DIII-D's banked receipt was partial, so its paired timing count is "
+            "retained in the JSON receipt and should not be interpreted as all five "
+            "members.",
+            "",
+            "The JSON receipt records every member's strict firing trip, each stage's "
+            "`resource.getrusage` host-RSS high-water mark, and geometry digests when "
+            "the batch cannot take the one-program route.",
+        ]
+    )
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def run_batched(
+    output_json: Path,
+    mast_state_cache: Path,
+    diiid_machine_cache: Path,
+    report_path: Path | None,
+    *,
+    self_check: bool = False,
+) -> dict[str, Any]:
+    """Measure the real banks, or their allocation-free two-member CPU proof."""
+    total_started = time.perf_counter()
+    revision = _require_revision()
+    configure_dtypes()
+    allocation = (
+        _require_cpu_self_check()
+        if self_check
+        else _require_gpu_allocation(expected_cpu_count=8)
+    )
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    input_stages: list[dict[str, Any]] = []
+    _batch_stage_count(input_stages, "INPUT_BUILD_START")
+    mast_started = time.perf_counter()
+    mast_members, mast_inputs = _build_mast_members(
+        mast_state_cache, member_count=2 if self_check else 12
+    )
+    mast_build_seconds = time.perf_counter() - mast_started
+    _batch_stage_count(input_stages, "MAST_INPUT_BUILD_DONE")
+    mast_result = _measure_batched_machine(mast_members, name="MAST")
+    del mast_members
+    gc.collect()
+    _batch_stage_count(input_stages, "MAST_INPUT_RELEASED")
+
+    diiid_started = time.perf_counter()
+    diiid_members, diiid_inputs = _build_diiid_members(
+        diiid_machine_cache, member_count=2 if self_check else 5
+    )
+    diiid_build_seconds = time.perf_counter() - diiid_started
+    _batch_stage_count(input_stages, "DIIID_INPUT_BUILD_DONE")
+    diiid_result = _measure_batched_machine(diiid_members, name="DIIID")
+    del diiid_members
+    gc.collect()
+    _batch_stage_count(input_stages, "DIIID_INPUT_RELEASED")
+    machines = {"MAST": mast_result, "DIII-D": diiid_result}
+    peak_rss_mib = max(
+        *[stage["resource_peak_rss_mib"] for stage in input_stages],
+        *[machine["summary"]["peak_host_rss_mib"] for machine in machines.values()],
+    )
+    payload = {
+        "schema": "nova.strict-exit-incidence/2",
+        "measurement_state": "complete",
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "source": {
+            "revision": revision,
+            "required_ancestor": REQUIRED_ANCESTOR,
+            "driver": str(Path(__file__).relative_to(ROOT)),
+            "driver_sha256": _sha256(Path(__file__)),
+            "solver_source_modified": False,
+        },
+        "execution": {
+            **allocation,
+            "elapsed_seconds": time.perf_counter() - total_started,
+            "exit_marker": 0,
+            "persistent_compilation_cache": cache.receipt(),
+            "input_build_seconds": {
+                "MAST": mast_build_seconds,
+                "DIII-D": diiid_build_seconds,
+            },
+        },
+        "configuration": {
+            "trip_limit": TRIP_LIMIT,
+            "program_widths": {
+                "MAST": len(mast_result["members"]),
+                "DIII-D": len(diiid_result["members"]),
+            },
+            "real_bank_widths": {"MAST": 12, "DIII-D": 5},
+            "self_check": self_check,
+            "paired_control": (
+                "each machine program receives the same stacked member arguments "
+                "for one exit-disabled and one exit-enabled runtime-flag pass"
+            ),
+            "strict_exit_definition": (
+                "zero mask difference, own-mask acceptance, zero accepted Newton "
+                "promotions, and bit-identical retained incoming state"
+            ),
+            "host_memory_limit_mib": 16 * 1024,
+            "host_memory_peak_mib": peak_rss_mib,
+            "host_memory_under_limit": peak_rss_mib < 16 * 1024,
+            "host_memory_stages": input_stages,
+        },
+        "evidence_inputs": {
+            "MAST": mast_inputs,
+            "DIII-D": diiid_inputs,
+            "sequential_width_one_receipt": {
+                "path": str(DEFAULT_JSON.relative_to(ROOT)),
+                "sha256": _sha256(DEFAULT_JSON),
+            },
+        },
+        "machines": machines,
+        "sequential_width_one_comparison": _banked_sequential_comparison(),
+        "observations": {
+            "mast_compiled_once": machines["MAST"]["execution_contract"][
+                "compiled_once"
+            ],
+            "batch_compile_count_per_pass": {
+                name: machine["execution_contract"]["compile_count_per_pass"]
+                for name, machine in machines.items()
+            },
+            "geometry_fallbacks": {
+                name: {
+                    "fallback": not machine["execution_contract"]["geometry_identical"],
+                    "geometry_digests": machine["execution_contract"][
+                        "geometry_digests"
+                    ],
+                }
+                for name, machine in machines.items()
+            },
+        },
+    }
+    payload["execution"]["elapsed_seconds"] = time.perf_counter() - total_started
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    if report_path is not None:
+        _write_batched_report(report_path, payload)
+    print(f"BATCHED_RECEIPT_WRITTEN={output_json}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
+    return payload
 
 
 def run(
@@ -1425,6 +2081,11 @@ def run(
     return payload
 
 
+def _validate_arguments(*, batched: bool, self_check: bool) -> None:
+    if self_check and not batched:
+        raise ValueError("--self-check requires --batched")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", type=Path, default=DEFAULT_JSON)
@@ -1437,10 +2098,18 @@ def main() -> None:
     )
     parser.add_argument("--repeats", type=int, default=0)
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--regenerate-mast-state-cache", action="store_true")
     parser.add_argument("--harvest-log", type=Path)
+    parser.add_argument("--batched", action="store_true")
+    parser.add_argument("--self-check", action="store_true")
+    parser.add_argument("--report", type=Path)
     arguments = parser.parse_args()
     if arguments.repeats < 0:
         raise ValueError("additional timing repetitions cannot be negative")
+    _validate_arguments(batched=arguments.batched, self_check=arguments.self_check)
+    if arguments.regenerate_mast_state_cache:
+        regenerate_mast_state_cache(arguments.mast_state_cache.resolve())
+        return
     if arguments.preflight:
         preflight(
             arguments.mast_state_cache.resolve(),
@@ -1452,6 +2121,18 @@ def main() -> None:
             arguments.harvest_log.resolve(),
             arguments.json.resolve(),
             arguments.png.resolve(),
+        )
+        return
+    if arguments.batched:
+        output_json = (
+            DEFAULT_BATCHED_JSON if arguments.json == DEFAULT_JSON else arguments.json
+        )
+        run_batched(
+            output_json.resolve(),
+            arguments.mast_state_cache.resolve(),
+            arguments.diiid_machine_cache.resolve(),
+            None if arguments.report is None else arguments.report.resolve(),
+            self_check=arguments.self_check,
         )
         return
     run(

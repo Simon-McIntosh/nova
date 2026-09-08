@@ -502,7 +502,8 @@
       }
     }
   },
-  "measurement_state": "complete",
+  "measurement_state": "superseded",
+  "supersession_reason": "job 1266904 measures the pre-repair sampled-profile state; the MAST pure-member terminal hash subsequently moved from 69309c0b to 8edbf1d1",
   "observations": {
     "batch_compile_count_per_pass": {
       "DIII-D": 1,

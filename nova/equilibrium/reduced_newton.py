@@ -1310,7 +1310,11 @@ def _drive_trips(
             reason = FixedPointTerminationReason.CONVERGED
             break
         if difference == 0:
-            reason = FixedPointTerminationReason.ACTIVE_SET_SETTLED
+            reason = (
+                FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED
+                if census["rejected"] and not census["steps"]
+                else FixedPointTerminationReason.ACTIVE_SET_SETTLED
+            )
             break
 
     return {

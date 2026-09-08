@@ -133,6 +133,21 @@ RESIDUAL_DECOMPOSITION_RECEIPT = Path(
     "docs/figures/diiid-vertical-force-balance/residual-decomposition.json"
 )
 SINGLE_SHOT_GATE_FRAME_COUNT = 11
+_BANKED_READ_FIELDS = frozenset(
+    {
+        "nova_axis_flux_wb",
+        "nova_axis_rz_m",
+        "nova_x_point_rz_m",
+        "o_candidate_count",
+        "o_second_best_flux_margin_wb",
+        "read_exception_text",
+        "read_status",
+        "reference_axis_rz_m",
+        "reference_x_points_rz_m",
+        "x_candidate_count",
+        "x_second_best_flux_margin_wb",
+    }
+)
 DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/wall-topology-surface.json"
 )
@@ -4566,6 +4581,22 @@ def prepare_single_shot_gate() -> dict[str, Any]:
     }
 
 
+def _require_banked_reads(rows: list[dict[str, Any]]) -> None:
+    """Reject a gate whose per-row topology reads were dropped."""
+
+    missing_banked_reads = [
+        row["frame_identity"]["label"]
+        for row in rows
+        if not isinstance(row.get("banked_read"), dict)
+        or _BANKED_READ_FIELDS.difference(row["banked_read"])
+    ]
+    if missing_banked_reads:
+        raise RuntimeError(
+            "the executed single-shot gate did not preserve banked reads for: "
+            + ", ".join(missing_banked_reads)
+        )
+
+
 def _split_single_shot_gate_fields(
     receipt: dict[str, Any], preparation: dict[str, Any]
 ) -> dict[str, Any]:
@@ -4577,6 +4608,7 @@ def _split_single_shot_gate_fields(
     rows = data["rows"]
     if len(rows) != SINGLE_SHOT_GATE_FRAME_COUNT:
         raise RuntimeError("the executed single-shot gate did not retain eleven rows")
+    _require_banked_reads(rows)
     forward_receipt = json.loads(BANKED_PSEUDO_WALL_RECEIPT.read_text())
     banked_diiid = {
         (record["shot"], record["frame"]): record

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T12:39:44",
+  "updated": "2026-09-08T12:56:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -134277,6 +134277,167 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T100442431282-bob-operator-identity-semantic",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-operator-identity-semantic",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3495,
+                "cached_input_tokens": 786009,
+                "input_tokens": 789506,
+                "output_tokens": 1362,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 790868,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "In nova/equilibrium/forward_operator.py, _CallableLayout.flatten and _SourceLayout.flatten no longer put id(function) in the identity: a callable that is not itself a pytree is identified by what it computes (its code object identity together with its closure cell values and defaults, or an equivalent derivation you can defend in the docstring), so two operators built independently from equivalent profiles share one identity while two built from genuinely different profiles do not; the docstring states the rule in mechanism terms. Two tests pin both directions and the second is the one that must fail if the rule is wrong: two ForwardFluxOperator instances built from the same DIII-D bank members (the pair whose geometry digest is 1a91f6e0, reproduced through the same route the strict-exit driver uses in benchmarks/strict_exit_incidence.py) stack through stack_forward_operators into one program; and two operators whose profile callables compute different values do NOT share an identity and take the sequential fallback rather than being stacked into one program, asserted by the fallback being taken and not merely by the identities differing. The width-twelve MAST batch identity landed at 879a33ee is unchanged and its no-member-constant and bit-identity test still passes; tests/test_batched_operator_boundary.py and tests/test_default_wiring.py green as fresh-process lanes of at most six tests on all_debug with --mem=64G, logs captured once; report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operator-identity.md. No tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 1.5,
+          "goal": "Operator pytree identity is semantic rather than an object address, so two equivalent operators batch and two genuinely different ones do not",
+          "id": "bob-operator-identity-semantic",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T100442431282-bob-operator-identity-semantic/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_batched_operator_boundary.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operator-identity.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-identity-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T10:04:55Z",
+        "completed_at": "2026-09-08T10:54:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2947,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2947,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "da8a73f2e103e11449029435b9c356f0283f9e51",
+        "commits": [
+          "6e95973044b2ad00221640744d0b73fe43659f53",
+          "b1375f22344be2fed73f8d2f6a190ad085adcad6"
+        ],
+        "changed_lines": {
+          "added": 245,
+          "removed": 20,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug tests/test_batched_operator_boundary.py at b1375f22 (5 passed in 444 s, exit 0); tests/test_default_wiring.py 69 passed across twelve fresh lanes of at most six tests; ruff check and format",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operator-identity.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T100442431282-bob-operator-identity-semantic/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0807a-55e5-7b12-9877-7df4733dde0f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5368192,
+            "cached_input_tokens_cumulative": 5368192,
+            "input_tokens": 5390654,
+            "input_tokens_cumulative": 5390654,
+            "output_tokens": 11057,
+            "output_tokens_cumulative": 11057,
+            "reasoning_output_tokens": 2319,
+            "reasoning_output_tokens_cumulative": 2319
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:54:02Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 31.0,
+              "resets_at": 1789439332,
+              "observed_at": "2026-09-08T10:54:02Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5368192,
+          "cumulative_input_tokens": 10758846,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 13376
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operator-identity-semantic",
+          "session_id": "01a0807a-55e5-7b12-9877-7df4733dde0f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T10:54:02Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -134589,6 +134750,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2225
+    "_version": 2226
   }
 }

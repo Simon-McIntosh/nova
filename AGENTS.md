@@ -262,7 +262,34 @@ Marker policy: `slow` marks the curated heavy numerical and integration tests—
 
 Use the default CPU lane for fast tests and for bit-identity contracts that pin
 CPU x64 arithmetic. Pin it explicitly with `JAX_PLATFORMS=cpu`; an implicit
-backend change is a different numerical measurement. Run a test file through
+backend change is a different numerical measurement.
+
+**Call `configure_dtypes()` before constructing any array, and assert the flag
+rather than trusting it.** Extended precision is enabled lazily by
+`nova.jax.config.configure_dtypes`, which the executable paths call on the way
+in. A test or measurement script that builds arrays before reaching one of those
+call sites gets single precision silently, and it fails in two ways that look
+different. Either the whole run is single precision, which announces itself only
+as a truncation warning buried in the log; or — the dangerous one — the fixture's
+coefficients are captured in single precision while the solver then resolves its
+own working precision to double and returns double states *derived from them*.
+In that second case both compared operands really are `float64`, so a dtype
+assertion passes while the values carry a relative error near `2**-20`.
+
+Measured 2026-09-08: two allocations lost to the first form, and a conditioning
+comparison off by `9.5e-7` for a whole sprint to the second. Deliberate single
+precision was falsified as the cause by measurement — an explicitly `float32`
+map terminates somewhere else again — so the fault is construction *order*.
+
+```python
+from nova.jax.config import Precision, configure_dtypes
+configure_dtypes()                      # BEFORE any jnp array is built
+assert jax.config.jax_enable_x64 is True
+```
+
+Pass `precision=Precision.DOUBLE` explicitly where a solver takes it, make
+fixture dtypes explicit rather than inferred, and never widen a tolerance to
+absorb the difference: a `1e-6` slack hides this everywhere else it occurs. Run a test file through
 the H200 lane when its measured CPU wall exceeds ten minutes. The launcher uses
 one reserved H200, records the selected JAX platforms in the log header, and
 reuses the persistent compilation cache:

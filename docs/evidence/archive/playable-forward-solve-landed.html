@@ -1541,6 +1541,12 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 <figure><img src="/nova/figures/playable-forward-solve/centroid-attribution/centroid-radius-attribution.png" alt="Per-row centroid offset under the three candidates and the two anchors on the seven failing rows"><figcaption>Offset per row under class, support and weighting, and under the frozen and slice-native anchors.</figcaption></figure>
 <p>Receipt: <code>docs/figures/playable-forward-solve/centroid-attribution/centroid-radius-attribution.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/playable/centroid-radius-attribution.md</code>.</p>
 </section>
+<section id="the-sprint-adds-four-failures-to-the-suite"><h2>The sprint adds four failures to the suite (2026-09-08 08:03Z)</h2>
+<p>Node <code>s19-hygiene-remainder</code> (local lane, test role; no commit), completing the hygiene audit that had left 58 test files unmeasured.</p>
+<p><strong>Measure.</strong> The 58 files ran at main <code>9b975552</code> in eight debug-partition lanes, the worst lane 2 minutes 14 seconds, with every failure re-run focused and at its base revision. Whole-suite added failures: prefix 0 plus remainder 4. Two are in the compilation-cache location tests, which still assert the retired per-job node-local default after the cache root moved to the shared user-and-host directory; the landing that moved it ran no gate over that file. Two are in the EFIT-parity default-route tests, where an eight-element geometric array mismatches at 9.5e-7 relative with the shape of a float32 value read where a float64 is asserted, since the measurements were bound to the checkout root. Pre-existing failures are carried unchanged and one base failure is absent at head.</p>
+<p><strong>Lesson.</strong> A node's focused gate is derived from its diff, so a landing that changes a contract other tests encode passes its own gate and fails theirs; the merged-head census is the only place that shows it, and it must run within the sprint that made the change.</p>
+<p>Report: <code>~/.config/reckon/crew/reports/nova/s19-labeller/hygiene-remainder.md</code>; logs under <code>hygiene-remainder-logs/</code>.</p>
+</section>
 </main>
 </body>
 </html>

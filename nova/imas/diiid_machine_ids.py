@@ -403,7 +403,6 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
         raise ValueError("expected exactly one wall description")
     source_wall = wall_ids.description_2d[0]
     source_units = wall_units_from_ids(wall_ids)
-    source_limiter = source_wall.limiter.unit[0]
     source_contour = source_units[0].vertices
     repaired_contour, limiter_repair = repair_limiter_ring(source_contour)
     wall_units = (
@@ -521,7 +520,22 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
             "type": _primitive_record(
                 source_wall.type, ("index", "name", "description")
             ),
-            "limiter": _primitive_record(source_limiter, ("name", "identifier")),
+            "units": tuple(
+                _primitive_record(
+                    unit,
+                    tuple(
+                        name
+                        for name in (
+                            "name",
+                            "description",
+                            "identifier",
+                            "component_type",
+                        )
+                        if hasattr(unit, name)
+                    ),
+                )
+                for unit in source_wall.limiter.unit
+            ),
         },
         active_coils=tuple(active_records),
         probes=tuple(probes),
@@ -554,15 +568,27 @@ def _author_wall(
     target.description_2d.resize(1)
     description = target.description_2d[0]
     _write_record(description.type, source.wall["type"])
-    description.limiter.unit.resize(1)
-    limiter = description.limiter.unit[0]
-    _write_record(limiter, source.wall["limiter"])
-    contour = source.machine.contour
-    if contour is None:
-        raise ValueError("source machine has no limiter contour")
-    limiter.outline.r = contour.r
-    limiter.outline.z = contour.z
+    write_wall_units(description, source.wall_units, source.wall["units"])
     return target
+
+
+def write_wall_units(
+    description: Any,
+    units: tuple[WallUnit, ...],
+    records: tuple[Mapping[str, Any], ...] = (),
+) -> None:
+    """Write every limiter unit and its detached metadata without reordering."""
+
+    if records and len(records) != len(units):
+        raise ValueError("wall unit metadata count differs from geometry count")
+    description.limiter.unit.resize(len(units))
+    for index, (unit, target) in enumerate(
+        zip(units, description.limiter.unit, strict=True)
+    ):
+        record = records[index] if records else {"name": unit.name}
+        _write_record(target, record)
+        target.outline.r = unit.r.tolist()
+        target.outline.z = unit.z.tolist()
 
 
 def _author_pf_active(

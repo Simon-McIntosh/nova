@@ -1245,6 +1245,12 @@ class Wall(CoilDatabase):
     def units(self) -> tuple[WallUnit, ...]:
         """Return every limiter unit without concatenating their outlines."""
 
+        if self.ids is None:
+            self.locate_datastore()
+            raise ValueError(
+                f"no {self.name!r} ids attached; limiter units are read "
+                f"from {self.ids_path!r}"
+            )
         return wall_units_from_ids(self.ids)
 
     @cached_property

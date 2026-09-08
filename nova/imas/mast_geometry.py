@@ -17,6 +17,8 @@ from typing import Any, Mapping
 
 import imas
 import numpy as np
+
+from nova.equilibrium.wall_mask import WallUnit
 import shapely
 
 from nova.catalog.mast_geometry import (
@@ -187,14 +189,27 @@ def _author_wall(factory: imas.IDSFactory, geometry: Mapping[str, Any]) -> Any:
     ids.description_2d.resize(1)
     description = ids.description_2d[0]
     description.type.index = 1
-    description.limiter.unit.resize(1)
-    limiter = description.limiter.unit[0]
-    limiter.name = "MAST limiter"
-    points = np.asarray(geometry["limiter"], dtype=float)
-    if not np.array_equal(points[0], points[-1]):
-        points = np.vstack([points, points[0]])
-    limiter.outline.r = points[:, 0].tolist()
-    limiter.outline.z = points[:, 1].tolist()
+    stored_units = geometry.get("limiter_units")
+    if stored_units is None:
+        points = np.asarray(geometry["limiter"], dtype=float)
+        if not np.array_equal(points[0], points[-1]):
+            points = np.vstack([points, points[0]])
+        units = (
+            WallUnit(
+                r=points[:, 0],
+                z=points[:, 1],
+                kind="vessel",
+                closed=True,
+                name="MAST limiter",
+            ),
+        )
+    else:
+        units = tuple(stored_units)
+    description.limiter.unit.resize(len(units))
+    for source, limiter in zip(units, description.limiter.unit, strict=True):
+        limiter.name = source.name
+        limiter.outline.r = source.r.tolist()
+        limiter.outline.z = source.z.tolist()
     return ids
 
 

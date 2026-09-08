@@ -787,7 +787,7 @@ def _wall_records(first_shot: int, last_shot: int) -> list[EvidenceRecord]:
 
     return [
         EvidenceRecord(
-            path="wall/description_2d/limiter/unit/outline",
+            path="wall/description_2d/limiter/unit[0]/outline",
             evidence=FieldEvidence.MEASURED,
             first_shot=first_shot,
             last_shot=last_shot,

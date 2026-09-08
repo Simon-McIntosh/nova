@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T05:09:59",
+  "updated": "2026-09-08T05:12:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2910,6 +2910,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-centroid-c2",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-contract-rev",
@@ -126182,6 +126191,152 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164955915689-pfs-centroid-radius-validation",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-centroid-radius-validation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "tests/test_current_centroid_radius.py asserts the centroid major radius against the EFIT value on the twelve bank rows with a tolerance derived from the grid spacing and stated in the test; a receipt under docs/figures/playable-forward-solve/centroid-radius/ records the measured distribution (median, mean, standard deviation, per-shot medians, inboard fraction) on the bank rows and a carrier sample; the report states pass or fail per row and the tolerance was not set from the observed miss; heavy solves ran on a debug partition or the reserved card",
+          "estimated_hours": 1.2,
+          "goal": "A validation of Nova's current-centroid major radius against EFIT's current_centrd_r on the twelve bank rows and a sample across the six carriers, with the tolerance argued from grid spacing",
+          "id": "pfs-centroid-radius-validation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164955915689-pfs-centroid-radius-validation/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_current_centroid_radius.py",
+            "benchmarks/centroid_radius_validation.py",
+            "docs/figures/playable-forward-solve/centroid-radius/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/centroid-radius-validation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-centroid-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:50:02Z",
+        "completed_at": "2026-09-08T03:10:17.894Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 37206,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 37215,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "4afca8efd487af52ae24e53f1dd0ed1ffd5d43b8"
+        ],
+        "changed_lines": {
+          "added": 672,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164955915689-pfs-centroid-radius-validation/manifest.md",
+        "scope_changed": false,
+        "session_id": "3cc43692-ee75-4388-bd5d-97342d0c8699",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 29257545,
+            "input_tokens_cumulative": 29257545,
+            "output_tokens": 147858,
+            "output_tokens_cumulative": 147858,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 37212.84,
+          "generated_tokens": 147858,
+          "generation_seconds": 36953.212,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 29.7,
+          "machine_seconds": 259.628,
+          "peak_input_tokens": 301704,
+          "tokens_per_second": 4.0,
+          "wall_tokens_per_second": 3.97
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-centroid-radius-validation",
+          "session_id": "3cc43692-ee75-4388-bd5d-97342d0c8699",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T03:10:17.894Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -126494,6 +126649,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2115
+    "_version": 2117
   }
 }

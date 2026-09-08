@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T13:23:26",
+  "updated": "2026-09-08T13:27:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149,9 +149,11 @@
         "id": "bob-batch4-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a080aa-6e78-7f11-8a0d-97c82c048d7a",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a080aa-6e78-7f11-8a0d-97c82c048d7a"
+        },
         "created": "2026-09-08"
       },
       {
@@ -135101,6 +135103,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2232
+    "_version": 2233
   }
 }

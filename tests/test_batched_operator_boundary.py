@@ -40,6 +40,9 @@ OPERAND_CARRIER = Path(
     "logs/exact-operand-cache.npz"
 )
 WIDTH = 12
+DIIID_MACHINE_ARTIFACT_CACHE = Path(
+    "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache"
+)
 
 
 @dataclass
@@ -209,6 +212,68 @@ def _one_forward_iteration(operator, data):
     return mapped + jnp.asarray(data.target_current) * jnp.asarray(1.0e-30)
 
 
+def _operator_with_source(
+    template: _ReferenceAnchoredOperator, source: ForwardSource
+) -> _ReferenceAnchoredOperator:
+    """Keep one member's host geometry while replacing only its source profile."""
+    return _ReferenceAnchoredOperator(
+        grid=template.grid,
+        wall=template.wall,
+        source=source,
+        external_current=template.external_current,
+        area=template.area,
+        polarity=template.polarity,
+        inside_material=template.inside_material,
+        use_linear_moments=False,
+        prescribed_current_field=template.prescribed_current_field,
+        declared_axis_flux=template.declared_axis_flux,
+        declared_boundary_flux=template.declared_boundary_flux,
+        declared_support=template.declared_support,
+    )
+
+
+def _static_profile(scale: float) -> ForwardSource:
+    """Build an address-independent pair of static profile closures."""
+
+    def pressure(normalized_flux):
+        return jnp.asarray(scale) * jnp.asarray(normalized_flux)
+
+    def diamagnetic(normalized_flux):
+        return jnp.asarray(scale) * (1.0 - jnp.asarray(normalized_flux))
+
+    return ForwardSource(
+        core=DomainProfile(p_prime=pressure, ff_prime=diamagnetic),
+        boundary_pressure=0.0,
+        boundary_field_function=0.0,
+    )
+
+
+def _rebuilt_diiid_source(template: ForwardFluxOperator) -> ForwardSource:
+    """Rebuild one strict-exit profile from the factory's bound bank arrays."""
+    from benchmarks.diiid_forward_gs_match import _profile_function
+
+    def rebuild(function):
+        cells = dict(
+            zip(function.__code__.co_freevars, function.__closure__, strict=True)
+        )
+        return _profile_function(
+            cells["grid"].cell_contents, cells["samples"].cell_contents
+        )
+
+    source = template.source
+    return ForwardSource(
+        core=DomainProfile(
+            p_prime=rebuild(source.core.p_prime),
+            ff_prime=rebuild(source.core.ff_prime),
+        ),
+        boundary_pressure=source.boundary_pressure,
+        boundary_field_function=source.boundary_field_function,
+        common_sol=source.common_sol,
+        private_flux=source.private_flux,
+        normalisation=source.normalisation,
+    )
+
+
 def test_operator_pytree_contains_member_arrays_but_no_geometry_arrays():
     configure_dtypes()
     operators, _member_data = _carrier_batch()
@@ -226,6 +291,52 @@ def test_operator_pytree_contains_member_arrays_but_no_geometry_arrays():
     scalar_values = [float(value) for value in leaves if value.shape == ()]
     assert float(operator.source.boundary_pressure) in scalar_values
     assert float(operator.source.boundary_field_function) in scalar_values
+
+
+@pytest.mark.slow
+def test_equivalent_diiid_bank_operators_stack_into_one_program():
+    """The strict-exit DIII-D construction admits its equivalent pair to vmap."""
+    from benchmarks.strict_exit_incidence import _build_diiid_members
+
+    configure_dtypes()
+    members, _inputs = _build_diiid_members(DIIID_MACHINE_ARTIFACT_CACHE)
+    original = members[0].profile.operator
+    rebuilt = _operator_with_source(original, _rebuilt_diiid_source(original))
+    assert original.geometry_identity == rebuilt.geometry_identity
+    assert original.geometry_identity.startswith("1a91f6e0")
+    checked = stack_forward_operators((original, rebuilt))
+
+    assert checked.geometry_identical
+    assert checked.stacked is not None
+
+    def profile_value(operator):
+        return operator.source.core.p_prime(jnp.asarray(0.5))
+
+    program = jax.jit(jax.vmap(profile_value)).lower(checked.stacked).compile()
+    result = jax.block_until_ready(program(checked.stacked))
+    assert result.shape == (2,)
+
+
+def test_different_static_profile_callables_take_sequential_fallback():
+    configure_dtypes()
+    operators, _member_data = _carrier_batch()
+    first = operators[0]
+    left = _operator_with_source(first, _static_profile(1.0))
+    right = _operator_with_source(first, _static_profile(2.0))
+    checked = stack_forward_operators((left, right))
+
+    assert left.geometry_identity == right.geometry_identity
+    assert not checked.geometry_identical
+    assert checked.stacked is None
+
+    def profile_value(operator, normalized_flux):
+        return operator.source.core.p_prime(normalized_flux)
+
+    result = checked.map(profile_value, jnp.asarray((0.25, 0.25)))
+    assert isinstance(result, tuple)
+    np.testing.assert_array_equal(
+        np.asarray(jnp.stack(result)), np.asarray((0.25, 0.5))
+    )
 
 
 def test_geometry_mismatch_selects_sequential_compiled_fallback():

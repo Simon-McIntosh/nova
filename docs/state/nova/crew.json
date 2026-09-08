@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T11:14:37",
+  "updated": "2026-09-08T11:55:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -134,6 +134,15 @@
         "sessions": {
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08047-eae3-7810-958d-e762d3eea052"
         },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-batch3-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-08"
       },
       {
@@ -1134,6 +1143,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a06aec-7864-7533-8be7-a9a9d174af98"
         },
         "created": "2026-09-04"
+      },
+      {
+        "id": "dvf-cocos-t",
+        "harness": "codex-terra",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "dvf-gate-c",
@@ -2222,6 +2240,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "mulw-paint-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "mulw-readers-c",
         "harness": "clive",
         "role": "implement",
@@ -2230,6 +2257,15 @@
         "sessions": {
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fc0-8bdf-7a71-bdae-1bb239656347"
         },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "mulw-ref-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-08"
       },
       {
@@ -3098,9 +3134,11 @@
         "id": "pfs-cnk-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0803b-5839-79b3-b76e-2d0cc0524925",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0803b-5839-79b3-b76e-2d0cc0524925"
+        },
         "created": "2026-09-08"
       },
       {
@@ -3301,6 +3339,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "3311fc95-b80a-48d4-bcc4-5bc4a0cc8387"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-labfig-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-laneabort-c",
@@ -132910,6 +132957,656 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T090938589494-bob-exit-incidence-batch-2",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-exit-incidence-batch-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2950,
+                "cached_input_tokens": 794939,
+                "input_tokens": 797921,
+                "output_tokens": 4559,
+                "reasoning_output_tokens": 1551,
+                "total_tokens": 802480,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "From the worktree at 178d35db, whose logs/exact-operand-cache.npz passes the driver's --preflight against the current bank, run the batched mode of benchmarks/strict_exit_incidence.py as ONE sbatch on betelgeuse under gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache enabled through the same call the sequential driver uses, invoking /home/ITER/mcintos/Code/nova/.venv/bin/python directly; the receipt under docs/figures/batched-operator-boundary/exit-incidence/ records, per program (MAST width 12, DIII-D width 5) and per pass (strict exit enabled, disabled), compile seconds and compile count, peak host RSS per stage from resource.getrusage with the 16 GB verdict, per-member firing trip, and milliseconds per member beside the sequential width-1 figure read from docs/figures/millisecond-converged-solve/strict-exit-incidence.json; if a member falls back to the sequential route because geometry digests differ, the receipt names the digests; while the job runs, write the manifest with status waiting and all five wait fields (wait_condition naming the job, wait_probe as a JSON argv array printing only the state via sacct with the job number and -n -X -o State, wait_terminal as the JSON array of COMPLETED, FAILED, CANCELLED, TIMEOUT, OUT_OF_MEMORY and NODE_FAIL, wait_started_at unquoted UTC ISO, resume_brief) and end your turn; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md states batched against sequential milliseconds per member per machine and the memory figure in one table; no PNG read back; no tolerance from observed values; every uv command on the login node carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 1.5,
+          "goal": "The strict-exit incidence measurement on the real MAST and DIII-D bank mixes as one width-12 and one width-5 batched program on the H200, compiled once under 16 GB host memory, with batched milliseconds per member beside the banked sequential width-1 figure",
+          "id": "bob-exit-incidence-batch-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T090938589494-bob-exit-incidence-batch-2/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "docs/figures/batched-operator-boundary/exit-incidence/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-batch2-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T09:09:51Z",
+        "completed_at": "2026-09-08T09:45:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2140,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2140,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "178d35dbab0761dd33a9908bc2c65edc228258da",
+        "commits": [
+          "77b12a4ecc78753a15738e0411d270c2048ceb5e"
+        ],
+        "changed_lines": {
+          "added": 36,
+          "removed": 32,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "default-cache preflight at 77b12a4e (12 MAST, 5 DIII-D, zero mismatches); JAX_PLATFORMS=cpu no-solve member-build smoke over all twelve arms; H200 jobs 1265255 and 1265353 both FAILED",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch-2/docs/figures/batched-operator-boundary/exit-incidence/batch-1265353.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T090938589494-bob-exit-incidence-batch-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08047-eae3-7810-958d-e762d3eea052",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1647744,
+            "cached_input_tokens_cumulative": 1647744,
+            "input_tokens": 1666613,
+            "input_tokens_cumulative": 1666613,
+            "output_tokens": 9516,
+            "output_tokens_cumulative": 9516,
+            "reasoning_output_tokens": 1852,
+            "reasoning_output_tokens_cumulative": 1852
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T09:45:31Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 27.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T09:45:31Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 1647744,
+          "cumulative_input_tokens": 3314357,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 11368
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260908T081643013970-bob-operand-cache-regeneration",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch-2",
+          "session_id": "01a08047-eae3-7810-958d-e762d3eea052",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T09:45:31Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a08047-eae3-7810-958d-e762d3eea052",
+          "source": "pointer",
+          "reason": "the worker reached the two-failure stop correctly; the remedy is a differently shaped node (CPU end-to-end proof before any allocation), not a continuation of this one"
+        },
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T093126518146-mulw-session-wall-reference",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a74",
+        "node": "mulw-session-wall-reference",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1210,
+                "cached_input_tokens": 725854,
+                "input_tokens": 727066,
+                "output_tokens": 1682,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 728748,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "nova/equilibrium/steering_frames.py writes a wall reference group and no wall coordinates: the machine identifier, the description source (IDS path or persisted artifact path), its content digest, the DD version it was read at, the unit count and per unit the vertex count, closure flag and kind, written once per session using the WallUnit collection landed at 5b025c5f; the containment receipt (labelled points outside the wall, X-points by inclusion in the occupiable region, strike points by exact segment membership through the recorded segment and parameter landed at a3f9ac45) is computed at write time against the referenced description so the session still reports its own containment, and count_labelled_outside_wall keeps its current results on the existing fixtures; a rasterless Solovev session round-trips the reference with its digest and unit table; a consumer test dereferences the MAST artifact from the reference through the machine readers and reproduces the operator's wall vertices to 1e-12; a legacy session carrying the copied ring reads as a reference to one closed vessel unit of unknown source with a flag set, and a test pins that reading; the fast steering-frame lane stays green on all_debug with the log captured once; wall_r and wall_z are removed from the schema in the same change, with the schema table and module docstring updated; no PNG read back; no tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.5,
+          "goal": "The session carries a reference to the machine wall description rather than a copy of its coordinates, in one schema move that also carries the multi-unit shape",
+          "id": "mulw-session-wall-reference",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093126518146-mulw-session-wall-reference/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py",
+            "tests/test_session_wall_reference.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/session-wall-reference.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "mulw-ref-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T09:31:42Z",
+        "completed_at": "2026-09-08T09:48:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1018,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1018,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d0f03c7a5ae57c3c791b5a771e4035dcd027fb75",
+        "commits": [
+          "a505f8cbc08e40afb6607a79d42913ca95d77c80",
+          "0fe96e5bc379f731daef3441e73e80414e610ba1"
+        ],
+        "changed_lines": {
+          "added": 502,
+          "removed": 127,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug fast lane on tests/test_steering_frames.py and tests/test_session_wall_reference.py (18 passed, 1 skipped for the unmounted artifact, 1 slow deselected); local persisted-MAST dereference and legacy-subgroup regression each 1 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/session-wall-reference.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093126518146-mulw-session-wall-reference/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0805b-ec52-7de2-984e-b8bb74d500b6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9702912,
+            "cached_input_tokens_cumulative": 9702912,
+            "input_tokens": 9938155,
+            "input_tokens_cumulative": 9938155,
+            "output_tokens": 36498,
+            "output_tokens_cumulative": 36498,
+            "reasoning_output_tokens": 11999,
+            "reasoning_output_tokens_cumulative": 11999
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T09:48:40Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 27.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T09:48:40Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 9702912,
+          "cumulative_input_tokens": 19641067,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 48497
+        },
+        "follow_on_paths": [
+          "tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mulw-session-wall-reference",
+          "session_id": "01a0805b-ec52-7de2-984e-b8bb74d500b6",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T09:48:40Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T093857842794-dvf-cocos-resolution",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "dvf-cocos-resolution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 813,
+                "cached_input_tokens": 736132,
+                "input_tokens": 736947,
+                "output_tokens": 3288,
+                "reasoning_output_tokens": 1408,
+                "total_tokens": 740235,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Read the plan's own section 5 through the reckon plan tools rather than working from any restatement, then report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid-vertical-force-balance/cocos-resolution.md: for each DIII-D quantity the forward match consumes (poloidal flux, plasma current, toroidal field, p prime and ff prime, the boundary and axis flux) the COCOS sign tuple it is stored with and the evidence for that reading (the file and line that writes or documents it, or the measured sign relation between two stored quantities on one gate frame, stated as the numbers); every consumer in this repository that reads those quantities with its file and line; whether imas-ambix translates them before nova sees them, answered by reading the ambix source at ~/Code/imas-ambix rather than by inference, with the file and line that does or does not; and the one-line verdict on whether nova's forward route is consuming DIII-D data in COCOS 17 or in the stored convention, with the consequence for the five gate frames named. Read-only: change no repository file; the report is the deliverable. State any question the evidence cannot settle rather than inferring it. Every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.0,
+          "goal": "The DIII-D COCOS resolved: the sign tuple each stored quantity carries, every consumer that reads it, and whether the translation already happens upstream",
+          "id": "dvf-cocos-resolution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093857842794-dvf-cocos-resolution/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid-vertical-force-balance/cocos-resolution.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "dvf-cocos-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-08T09:39:12Z",
+        "completed_at": "2026-09-08T09:46:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 449,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 449,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d0f03c7a5ae57c3c791b5a771e4035dcd027fb75",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only source and receipt audit at nova d0f03c7a and the ambix main checkout, against the prior five-frame COCOS measurement receipts",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid-vertical-force-balance/cocos-resolution.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093857842794-dvf-cocos-resolution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08062-ca4d-7e22-ac3c-de1d81b9ca9c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4637696,
+            "cached_input_tokens_cumulative": 4637696,
+            "input_tokens": 4867181,
+            "input_tokens_cumulative": 4867181,
+            "output_tokens": 19173,
+            "output_tokens_cumulative": 19173,
+            "reasoning_output_tokens": 6219,
+            "reasoning_output_tokens_cumulative": 6219
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T09:46:41Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 27.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T09:46:41Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4637696,
+          "cumulative_input_tokens": 9504877,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 25392
+        },
+        "follow_on_paths": [
+          "quantity-aware/fail-closed;",
+          "same-shot/frame-identified",
+          "p-prime/FF-prime"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "investigate role; the audit report is the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-cocos-resolution",
+          "session_id": "01a08062-ca4d-7e22-ac3c-de1d81b9ca9c",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T09:46:41Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T094018702518-mulw-painters-draw-units",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a75",
+        "node": "mulw-painters-draw-units",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 813,
+                "cached_input_tokens": 736132,
+                "input_tokens": 736947,
+                "output_tokens": 3288,
+                "reasoning_output_tokens": 1408,
+                "total_tokens": 740235,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Read the plan's own section 5 through the reckon plan tools rather than any restatement, and consume the typed unit collection landed at 5b025c5f (WallUnit, pack_wall_units, build_wall_mask in nova/equilibrium/wall_mask.py; Wall.units and Wall.segments in nova/imas/machine.py) rather than re-deriving geometry: nova/media/poloidal.py draws every unit as its own polyline with its own closure and distinguishes an open structure from a closed one visually, and its null filtering evaluates containment against the same occupiable model the solver uses; apps/pulsedesign/poloidal_view.py stops forcibly closing the wall outline and stops hiding markers against one ring; nova/media/sources/frame.py and nova/media/sources/plasma_mesh.py carry the unit collection rather than one array, keeping the single-closed-ring machines byte-identical; a committed PNG under docs/figures/multi-unit-limiter-wall/ shows the synthetic two-unit fixture and the JT-60SA five-unit description drawn with unit-faithful closure, rendered on a debug partition with a per-job TMPDIR and never read back; the media tests stay green in the default lane with the log captured once; no tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.0,
+          "goal": "Painters, the pulse-design app and the media sources draw a wall as its units, so a picture and the solve never disagree about what is inside",
+          "id": "mulw-painters-draw-units",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T094018702518-mulw-painters-draw-units/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/media/poloidal.py",
+            "nova/media/sources/frame.py",
+            "nova/media/sources/plasma_mesh.py",
+            "apps/pulsedesign/poloidal_view.py",
+            "docs/figures/multi-unit-limiter-wall/",
+            "tests/test_poloidal.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/painters-draw-units.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "mulw-paint-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T09:40:33Z",
+        "completed_at": "2026-09-08T09:51:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 663,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 663,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d0f03c7a5ae57c3c791b5a771e4035dcd027fb75",
+        "commits": [
+          "2116d329d941b100a26b53a2da62115b323f7f3b",
+          "f09658d8e830ecfc6f4fa46b0c93c6a1d1e1098d",
+          "7fe2faee600ff2e12e2ed54af52deeb2219a883d"
+        ],
+        "changed_lines": {
+          "added": 263,
+          "removed": 54,
+          "files": 6
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT main venv PYTHONPATH worktree uv run --no-sync pytest -p no:cacheprovider tests/test_poloidal.py tests/test_media.py (50 passed) and tests/test_poloidal_view.py (16 passed); ruff check on the five edited paths",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/painters-draw-units.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T094018702518-mulw-painters-draw-units/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08064-06f5-7c53-befa-e734cb7ec2fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5712128,
+            "cached_input_tokens_cumulative": 5712128,
+            "input_tokens": 5879855,
+            "input_tokens_cumulative": 5879855,
+            "output_tokens": 24026,
+            "output_tokens_cumulative": 24026,
+            "reasoning_output_tokens": 8290,
+            "reasoning_output_tokens_cumulative": 8290
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T09:51:36Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 27.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T09:51:36Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5712128,
+          "cumulative_input_tokens": 11591983,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32316
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mulw-painters-draw-units",
+          "session_id": "01a08064-06f5-7c53-befa-e734cb7ec2fa",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T09:51:36Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -133222,6 +133919,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2208
+    "_version": 2218
   }
 }

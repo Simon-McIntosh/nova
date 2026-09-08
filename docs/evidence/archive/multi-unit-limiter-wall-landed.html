@@ -27,6 +27,18 @@
 <p><strong>Open for the lead.</strong> The kind rule reads a closed unit named blade, tile, plate or shield as material, so such a structure is excluded from the occupiable region by its name; whether closure alone should decide is the plan's open question.</p>
 <p>Report: <code>~/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md</code>.</p>
 </section>
+<section id="the-session-names-the-wall-it-used"><h2>The session names the wall it used (2026-09-08 09:48Z)</h2>
+<p>Node <code>mulw-session-wall-reference</code> (codex-terra, spec guided; commits <code>a505f8cb</code>, <code>0fe96e5b</code>, merged at <code>b91f8f57</code>). Lead direction: wall geometry is campaign-stable machine description and does not belong in every session file.</p>
+<p><strong>Result.</strong> A session writes a reference and no coordinates: the machine identifier, the description source and its kind, a content digest, the data-dictionary version it was read at, and one row per limiter unit giving vertex count, closure and kind. The units are held in memory only long enough to compute the write-time containment receipt, so a session still reports its own labelled points, its X-points by occupiable inclusion and its strike points by exact segment membership, while a consumer dereferences the geometry through the machine readers and checks it against the digest.</p>
+<p><strong>Measure.</strong> A rasterless Solov'ev session round-trips the reference with its digest and unit table; the persisted MAST artifact dereferences from the reference and reproduces the operator's wall vertices; a legacy session carrying the copied ring reads as one closed vessel unit of unknown machine, source and version with that fact flagged, pinned by a test. Eighteen tests pass on the fast lane, with the artifact test skipping where the compute node does not mount it.</p>
+<p><strong>Consequence.</strong> This is the single schema move the corpus relabel was waiting on, and it lands together with the multi-unit shape rather than after it, so the schema moves once.</p>
+</section>
+<section id="a-wall-is-drawn-as-its-units"><h2>A wall is drawn as its units (2026-09-08 09:55Z)</h2>
+<p>Node <code>mulw-painters-draw-units</code> (codex-luna, spec guided; commits <code>2116d329</code>, <code>f09658d8</code>, <code>7fe2faee</code>, merged at <code>6a53ed93</code>).</p>
+<p><strong>Result.</strong> The poloidal painter draws every unit as its own polyline with its own closure, dashes an open structure so it cannot be mistaken for a closed one, and never invents a join between units. Null filtering in the painter and marker containment in the pulse-design view both evaluate against the same vessel-minus-material occupiable model the solver uses, so a picture and the solve cannot disagree about what is inside the wall. The media sources carry the unit collection, and mesh cells exclude material units.</p>
+<p><strong>Measure.</strong> The committed figure shows the synthetic two-unit fixture and the JT-60SA five-unit description with unit-faithful closure; fifty poloidal and media tests pass, sixteen pulse-design view tests pass, and the single-closed-ring machines are unchanged.</p>
+<figure><img src="/nova/figures/multi-unit-limiter-wall/wall-units.png" alt="A synthetic vessel with an open blade and the five-unit JT-60SA wall drawn as separate polylines"><figcaption>Two-unit fixture and the JT-60SA five-unit wall: each unit closed or open as the description says, with no invented ring.</figcaption></figure>
+</section>
 </main>
 </body>
 </html>

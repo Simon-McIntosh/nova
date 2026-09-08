@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T12:56:45",
+  "updated": "2026-09-08T13:00:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -138,6 +138,15 @@
       },
       {
         "id": "bob-batch3-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-batch4-t",
         "harness": "codex-terra",
         "role": "implement",
         "session_id": null,
@@ -134438,6 +134447,159 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T101202819364-nia-certificate-bracket-closure",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-certificate-bracket-closure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1969,
+                "cached_input_tokens": 797443,
+                "input_tokens": 799414,
+                "output_tokens": 2519,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 801933,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Continue the method of nia-certificate-drift-attribution exactly (its report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift-attribution.md carries the archive layout, the labelled backport of the ba16dd82 receipt guard and every lane log): fresh-process all_debug lanes, --cpus-per-task=4 --mem=64G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cpu, JAX_ENABLE_COMPILATION_CACHE=0, git archives, every affected row labelled mixed-code. Binary-search bracket one over the five commits a3fa8b9b, 9165374a, 385ea608, 799f4354 and 4f2668b6 to name the single commit that changes the diverted -110 oracle target current from 811121.7219596488 A to 803878.8489638115 A; binary-search bracket two over the nine commits between 9b17d333, where diverted -300 terminates finite, and d41f771b, where it raises CurrentNormalisationError with a NaN amplitude, to name the single commit that introduces it. At most ten probes in total. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket-closure.md names both commits with their subjects and the measured values either side of each, and for bracket one states from the named commit's own diff WHY the target moved, meaning which cells or which wall support the solve now admits that it did not before, so the sprint can judge whether the new target is intended physics (the certificate is re-based at head with the change attributed) or an unintended narrowing (it is a repair); state that judgement as a recommendation with the evidence, not as a decision. Change no source file. If a bracket cannot be closed within the probe cap, report the narrowest reached. Every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.5,
+          "goal": "The commit that changed the exact oracle target and the commit that introduced the reduced diverted NaN each named, with the reason the target moved read from the diff",
+          "id": "nia-certificate-bracket-closure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T101202819364-nia-certificate-bracket-closure/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket-closure.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "nia-bracket-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T10:12:16Z",
+        "completed_at": "2026-09-08T10:57:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2687,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2687,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2587c9ccc152d203e22d59f0b1902a63a10c6566",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six fresh-process all_debug certificate probes over git archives with the receipt guard backported and every row labelled mixed-code, --cpus-per-task=4 --mem=64G, JAX_PLATFORMS=cpu, compilation cache disabled",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket-closure.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T101202819364-nia-certificate-bracket-closure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08081-0e51-7650-a175-ee4dd7399f46",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19265024,
+            "cached_input_tokens_cumulative": 19265024,
+            "input_tokens": 19568121,
+            "input_tokens_cumulative": 19568121,
+            "output_tokens": 59265,
+            "output_tokens_cumulative": 59265,
+            "reasoning_output_tokens": 19773,
+            "reasoning_output_tokens_cumulative": 19773
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:57:03Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 31.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T10:57:03Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 19265024,
+          "cumulative_input_tokens": 38833145,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 79038
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "test role; the attribution report and its lane logs are the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-certificate-bracket-closure",
+          "session_id": "01a08081-0e51-7650-a175-ee4dd7399f46",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T10:57:03Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -134750,6 +134912,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2226
+    "_version": 2228
   }
 }

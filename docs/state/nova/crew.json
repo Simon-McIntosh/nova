@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T15:52:54",
+  "updated": "2026-09-08T15:59:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -135836,6 +135836,164 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T133715745399-bob-batch-fixture-varies-profiles",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-batch-fixture-varies-profiles",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4554,
+                "cached_input_tokens": 175519,
+                "input_tokens": 180075,
+                "output_tokens": 1654,
+                "reasoning_output_tokens": 508,
+                "total_tokens": 181729,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The width-twelve MAST batch test passed while profile tables were still part of static operator identity, because that fixture's twelve members share only six profile objects, so the fixture could not observe the property it was asserting. The lead's rule is that a plasma profile is a variable like a coil current: every slice carries its own. Rewrite the fixture so every quantity section 1 names as member data genuinely differs across members, meaning distinct p prime and ff prime tables per member, distinct coupling blocks, distinct prescribed responses, distinct boundary and axis flux anchors, distinct target current, distinct seed state. The test then asserts what it always claimed: the jitted solve traces with no member-specific constant in the HLO, one compiled program serves the batch, per-member results are bit-identical to the width-one solves. Include one member whose HOST GEOMETRY differs from the rest, and assert that the batch declines to stack that member and takes the sequential route, so the fixture proves both directions and the admission rule has a case it must refuse. If varying profiles across the twelve MAST members is not possible from the bank because the bank genuinely holds six profiles for twelve rows, build the varying members synthetically and say so plainly, keeping the real-bank case as a separate assertion, because the contract property and the bank measurement are different claims that should not share one fixture. Run every gate on a debug partition with --time=00:59:00 and JAX_PLATFORMS=cpu, never on the login node. Call sbatch or srun exactly once in a turn: if you have already launched in this turn never launch again whatever the shell returned.",
+          "estimated_hours": 2.0,
+          "goal": "A batch fixture in which every quantity the contract calls member data genuinely differs across members",
+          "id": "bob-batch-fixture-varies-profiles",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/fixture-varies-profiles.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "tests/test_batched_operator_boundary.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "bob-fixvary-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T13:37:27Z",
+        "completed_at": "2026-09-08T13:52:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 920,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 920,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ad443cab8350216bb660a5c90a8bf568878d8e63",
+        "commits": [
+          "fac06dbd8e517f6147106efe9ea42ddcf8c640af"
+        ],
+        "changed_lines": {
+          "added": 76,
+          "removed": 15,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu srun --partition=sirius_debug --time=00:59:00 --cpus-per-task=4 --mem=32G /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_batched_operator_boundary.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T133715745399-bob-batch-fixture-varies-profiles/logs/fixture-varies-profiles-direct-python.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/fixture-varies-profiles.md",
+        "scope_changed": false,
+        "session_id": "01a0813c-e8ea-7071-b706-01939600432a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1917184,
+            "cached_input_tokens_cumulative": 1917184,
+            "input_tokens": 2052356,
+            "input_tokens_cumulative": 2052356,
+            "output_tokens": 5465,
+            "output_tokens_cumulative": 5465,
+            "reasoning_output_tokens": 1334,
+            "reasoning_output_tokens_cumulative": 1334
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T13:52:47Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 38.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T13:52:47Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 1917184,
+          "cumulative_input_tokens": 3969540,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 6799
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-batch-fixture-varies-profiles",
+          "session_id": "01a0813c-e8ea-7071-b706-01939600432a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T13:52:47Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -136148,6 +136306,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2256
+    "_version": 2257
   }
 }

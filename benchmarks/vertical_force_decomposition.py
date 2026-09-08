@@ -1026,6 +1026,10 @@ def _case_current_repair_row(
                 "measured_case_current": measured_result,
             }
         )
+    fitted_values = [
+        sample["fitted_current_baseline"]["compensating_p6_current_a"]
+        for sample in scan
+    ]
     measured_values = [
         sample["measured_case_current"]["compensating_p6_current_a"] for sample in scan
     ]
@@ -1037,6 +1041,7 @@ def _case_current_repair_row(
         "case_current_replacement": replacement_evidence,
         "policy": policy,
         "carrier_evidence": carrier_evidence,
+        "minimum_fitted_current_compensation_a": min(fitted_values, key=abs),
         "minimum_measured_case_compensation_a": min(measured_values, key=abs),
         "receipt_parts": completed_parts,
     }, {
@@ -1160,6 +1165,22 @@ def measure_case_current_repair(
         "rows": rows,
     }
     repaired = next(row for row in rows if row["identity"] == "21986/46")
+    subject = next(row for row in rows if row["identity"] == "21989/55")
+    fitted_minimum = min(
+        (
+            sample["fitted_current_baseline"]["compensating_p6_current_a"]
+            for sample in subject["elimination_scan"]
+        ),
+        key=abs,
+    )
+    measured_minimum = subject["minimum_measured_case_compensation_a"]
+    compensation_effect = (
+        "removes"
+        if measured_minimum == 0.0
+        else "reduces"
+        if abs(measured_minimum) < abs(fitted_minimum)
+        else "increases"
+    )
     receipt["verdict"] = {
         "minimum_measured_case_compensation_21986_46_a": repaired[
             "minimum_measured_case_compensation_a"
@@ -1170,6 +1191,11 @@ def measure_case_current_repair(
         "free_measured_case_converged_21989_55": next(
             row for row in rows if row["identity"] == "21989/55"
         )["free_production_solve"]["measured_case_current"]["converged"],
+        "minimum_fitted_current_compensation_21989_55_a": fitted_minimum,
+        "minimum_measured_case_compensation_21989_55_a": measured_minimum,
+        "measured_to_fitted_compensation_ratio_21989_55": abs(measured_minimum)
+        / abs(fitted_minimum),
+        "case_current_substitution_effect_21989_55": compensation_effect,
     }
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     _draw_case_current_repair(rows, output / "case-current-repair.png")

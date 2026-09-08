@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:52:09",
+  "updated": "2026-09-08T11:09:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3084,6 +3084,15 @@
         "created": "2026-09-08"
       },
       {
+        "id": "pfs-cnk-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-contract-rev",
         "harness": "clive",
         "role": "review",
@@ -4621,15 +4630,6 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
-      },
-      {
-        "id": "session-455a78fa6d3eb0df92c3",
-        "harness": "clive",
-        "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-07"
       },
       {
         "id": "shadow-haiku-1",
@@ -132733,6 +132733,172 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T081643013970-bob-operand-cache-regeneration",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-operand-cache-regeneration",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5520,
+                "cached_input_tokens": 721614,
+                "input_tokens": 727136,
+                "output_tokens": 3234,
+                "reasoning_output_tokens": 109,
+                "total_tokens": 730370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Starting from the worktree at dc936be7 (which carries the batched mode and its launcher), find the producer of logs/exact-operand-cache.npz by the cache schema the driver's --preflight checks (do not write a second producer; if the driver resolves the cache from the main checkout root rather than the worktree, report that path and stop without writing outside the worktree), regenerate the twelve MAST arms from the current bank (sha256 58a5d895) on the H200 as one sbatch on betelgeuse under gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache and /home/ITER/mcintos/Code/nova/.venv/bin/python invoked directly, into the worktree's logs/exact-operand-cache.npz; the driver's --preflight then reports all twelve arms current against the bank; the receipt under docs/figures/batched-operator-boundary/exit-incidence/ records the cache identity beside the bank identity so the next staleness is visible; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operand-cache-regeneration.md states the regeneration wall per arm; the batched measurement itself is the next node and is not run here; while a SLURM job runs, write the manifest with status waiting and all five wait fields: wait_condition (one line naming the job), wait_probe as a JSON argv array that prints only the state (sacct with the job number and the flags -n -X -o State), wait_terminal as the JSON array of COMPLETED, FAILED, CANCELLED, TIMEOUT, OUT_OF_MEMORY and NODE_FAIL, wait_started_at as an unquoted UTC ISO stamp, and resume_brief, then end your turn; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 1.5,
+          "goal": "The twelve-arm MAST exact operand cache regenerated from the current bank so the batched strict-exit incidence measurement can run",
+          "id": "bob-operand-cache-regeneration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081643013970-bob-operand-cache-regeneration/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "logs/exact-operand-cache.npz",
+            "docs/figures/batched-operator-boundary/exit-incidence/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operand-cache-regeneration.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-cache-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:16:57Z",
+        "completed_at": "2026-09-08T09:06:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2983,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2983,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dc936be7b792fa40e86536f02e2d7c0ef0356187",
+        "commits": [
+          "b12334c3b4451435667be075afe19397b5391056",
+          "80acad9ab6876ac9175cef44e6c9890d1895761f",
+          "5c3fdb5bd469cc5c4093c438ae602c89f297627d",
+          "178d35dbab0761dd33a9908bc2c65edc228258da"
+        ],
+        "changed_lines": {
+          "added": 299,
+          "removed": 1,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH worktree JAX_PLATFORMS=cpu .venv python benchmarks/strict_exit_incidence.py --preflight --mast-state-cache logs/exact-operand-cache.npz (12 of 12 current-bank match); strict artifact validator; ruff; H200 job 1265131 retained as rejected evidence",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081643013970-bob-operand-cache-regeneration/operand-cache-1265131.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081643013970-bob-operand-cache-regeneration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08017-7ad3-7ae3-85f9-8e8af38d4585",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4695936,
+            "cached_input_tokens_cumulative": 4695936,
+            "input_tokens": 4874707,
+            "input_tokens_cumulative": 4874707,
+            "output_tokens": 22546,
+            "output_tokens_cumulative": 22546,
+            "reasoning_output_tokens": 6997,
+            "reasoning_output_tokens_cumulative": 6997
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T09:06:40Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 24.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T09:06:40Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4695936,
+          "cumulative_input_tokens": 9570643,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 29543
+        },
+        "follow_on_paths": [
+          "logs/exact-operand-cache.npz."
+        ],
+        "predecessor_run": "r-20260908T072650548440-bob-exit-incidence-batch",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operand-cache-regeneration",
+          "session_id": "01a08017-7ad3-7ae3-85f9-8e8af38d4585",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T09:06:40Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -133045,6 +133211,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2203
+    "_version": 2206
   }
 }

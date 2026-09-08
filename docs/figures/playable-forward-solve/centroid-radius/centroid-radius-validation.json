@@ -1,0 +1,181 @@
+{
+  "receipt": "current-centroid major radius validation against EFIT",
+  "source": {
+    "revision": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+    "python": "3.14.2"
+  },
+  "corpus": {
+    "root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29",
+    "shots": [
+      21978,
+      21983,
+      21985,
+      21986,
+      21989,
+      22086
+    ],
+    "bank_rows": [
+      1,
+      6,
+      12,
+      18,
+      24,
+      30,
+      36,
+      43,
+      45,
+      50,
+      54,
+      57
+    ]
+  },
+  "tolerance": {
+    "floor_m": 0.030312500020954758,
+    "radial_step_m": 0.060625000041909516,
+    "argument": "the solved centroid is a cell-current-weighted mean of lattice cell centres; representing each cell's current at its centre displaces the moment by at most half a cell, so the discretisation floor is dr/2 of the labeller's lattice, never fitted to the observed miss"
+  },
+  "bank_rows": [
+    {
+      "row": 1,
+      "measured": false,
+      "reason": "no solved centroid"
+    },
+    {
+      "row": 6,
+      "measured": true,
+      "nova_centroid_r_m": 0.6829185983595577,
+      "efit_centroid_r_m": 0.6693282127380371,
+      "delta_cm": 1.3590385621520595,
+      "pass": true
+    },
+    {
+      "row": 12,
+      "measured": true,
+      "nova_centroid_r_m": 0.6941621890230208,
+      "efit_centroid_r_m": 0.7301784753799438,
+      "delta_cm": -3.6016286356923,
+      "pass": false
+    },
+    {
+      "row": 18,
+      "measured": true,
+      "nova_centroid_r_m": 0.7044184938122656,
+      "efit_centroid_r_m": 0.7815418839454651,
+      "delta_cm": -7.712339013319946,
+      "pass": false
+    },
+    {
+      "row": 24,
+      "measured": true,
+      "nova_centroid_r_m": 0.7095124568273006,
+      "efit_centroid_r_m": 0.795543372631073,
+      "delta_cm": -8.603091580377242,
+      "pass": false
+    },
+    {
+      "row": 30,
+      "measured": true,
+      "nova_centroid_r_m": 0.7149096782051404,
+      "efit_centroid_r_m": 0.8029686212539673,
+      "delta_cm": -8.805894304882688,
+      "pass": false
+    },
+    {
+      "row": 36,
+      "measured": true,
+      "nova_centroid_r_m": 0.716088037690739,
+      "efit_centroid_r_m": 0.8136305212974548,
+      "delta_cm": -9.75424836067158,
+      "pass": false
+    },
+    {
+      "row": 43,
+      "measured": true,
+      "nova_centroid_r_m": 0.7768314697583227,
+      "efit_centroid_r_m": 0.8181217908859253,
+      "delta_cm": -4.129032112760256,
+      "pass": false
+    },
+    {
+      "row": 45,
+      "measured": true,
+      "nova_centroid_r_m": 0.781344155542059,
+      "efit_centroid_r_m": 0.824302613735199,
+      "delta_cm": -4.295845819313993,
+      "pass": false
+    },
+    {
+      "row": 50,
+      "measured": false,
+      "reason": "no solved centroid"
+    },
+    {
+      "row": 54,
+      "measured": false,
+      "reason": "no solved centroid"
+    },
+    {
+      "row": 57,
+      "measured": false,
+      "reason": "no solved centroid"
+    }
+  ],
+  "bank_distribution": {
+    "count": 8,
+    "median_cm": -6.004092416316969,
+    "mean_cm": -5.6928801581082435,
+    "std_cm": 3.4862825754104114,
+    "inboard_fraction": 0.875
+  },
+  "carrier_distribution": {
+    "count": 278,
+    "median_cm": -5.607638879880716,
+    "mean_cm": -3.9427959711633593,
+    "std_cm": 5.637509671804188,
+    "inboard_fraction": 0.7877697841726619
+  },
+  "carrier_per_shot": {
+    "21978": {
+      "count": 48,
+      "median_cm": -2.7012223735133234,
+      "mean_cm": -3.2249437186224204,
+      "std_cm": 5.189961211155423,
+      "inboard_fraction": 0.7708333333333334
+    },
+    "21983": {
+      "count": 45,
+      "median_cm": -3.7599715765075703,
+      "mean_cm": -2.6001190391130775,
+      "std_cm": 6.316159515589037,
+      "inboard_fraction": 0.6666666666666666
+    },
+    "21985": {
+      "count": 45,
+      "median_cm": -5.594340085021432,
+      "mean_cm": -2.842670348045449,
+      "std_cm": 6.687065543260259,
+      "inboard_fraction": 0.7111111111111111
+    },
+    "21986": {
+      "count": 44,
+      "median_cm": -6.961011240989362,
+      "mean_cm": -4.167551523533873,
+      "std_cm": 5.206548619425586,
+      "inboard_fraction": 0.7727272727272727
+    },
+    "21989": {
+      "count": 48,
+      "median_cm": -6.488937974639558,
+      "mean_cm": -5.32493872892594,
+      "std_cm": 5.006851196362315,
+      "inboard_fraction": 0.8958333333333334
+    },
+    "22086": {
+      "count": 48,
+      "median_cm": -5.939361303117741,
+      "mean_cm": -5.362606938405597,
+      "std_cm": 4.536459280041263,
+      "inboard_fraction": 0.8958333333333334
+    }
+  }
+}

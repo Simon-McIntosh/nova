@@ -27,11 +27,6 @@ from tests.test_reduced_newton import machine as machine_fixture  # noqa: F401
 
 STATE_RTOL = 1.0e-12
 STATE_ATOL = 1.0e-14
-FIGURE_PATH = (
-    Path(__file__).parents[1]
-    / "docs/figures/playable-forward-solve/batched-labeller/terminal-state-parity.png"
-)
-
 configure_persistent_compilation_cache(default_forward_compilation_cache_root())
 
 
@@ -51,7 +46,7 @@ def _offer_prescribed_currents(profile) -> np.ndarray:
     return np.zeros(response.shape[1])
 
 
-def _write_state_parity_figure(actual, reference) -> float:
+def _write_state_parity_figure(actual, reference, figure_path: Path) -> float:
     """Plot elementwise relative differences and return their maximum."""
     actual = np.asarray(actual)
     reference = np.asarray(reference)
@@ -69,12 +64,15 @@ def _write_state_parity_figure(actual, reference) -> float:
     axis.set_ylabel("absolute relative difference")
     axis.set_title(f"Maximum relative difference: {maximum:.6e}")
     axis.legend(loc="upper right")
-    FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(FIGURE_PATH, dpi=180)
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=180)
     return maximum
 
 
-def test_two_elements_match_compiled_route_and_padded_batch(machine_fixture):  # noqa: F811
+def test_two_elements_match_compiled_route_and_padded_batch(
+    machine_fixture,  # noqa: F811
+    tmp_path,
+):
     """Identical slices remain identical when sharded and when padded."""
     profile, seed = machine_fixture
     batch = np.stack((np.asarray(seed), np.asarray(seed)))
@@ -92,7 +90,7 @@ def test_two_elements_match_compiled_route_and_padded_batch(machine_fixture):  #
         np.asarray(reference.state), np.asarray(result.state).shape
     )
     maximum_relative_difference = _write_state_parity_figure(
-        result.state, reference_state
+        result.state, reference_state, tmp_path / "terminal-state-parity.png"
     )
     assert maximum_relative_difference <= STATE_RTOL
     np.testing.assert_allclose(

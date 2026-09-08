@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T07:21:42",
+  "updated": "2026-09-08T07:44:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2219,9 +2219,11 @@
         "id": "nia-banking-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "3df17653-092c-4589-8c5c-28ca9066d71f",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "3df17653-092c-4589-8c5c-28ca9066d71f"
+        },
         "created": "2026-09-07"
       },
       {
@@ -2416,6 +2418,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":492288}": "ba09963f-29be-431a-badb-a77e53934ffd"
         },
         "created": "2026-09-05"
+      },
+      {
+        "id": "nia-except-h",
+        "harness": "claude-haiku",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "nia-gate-x",
@@ -4469,6 +4480,33 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "shadow-haiku-1",
+        "harness": "claude-haiku",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "shadow-haiku-2",
+        "harness": "claude-haiku",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "shadow-haiku-3",
+        "harness": "claude-haiku",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "shadow-luna-1",
@@ -127949,6 +127987,457 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T165537745800-fsa-coil-edit-latency",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-coil-edit-latency",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7190,
+                "cached_input_tokens": 373725,
+                "input_tokens": 380917,
+                "output_tokens": 3023,
+                "reasoning_output_tokens": 2482,
+                "total_tokens": 383940,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "benchmarks/coil_edit_latency.py runs on the H200 over a twenty-point sweep of one position coil with the persistent compilation cache on and a per-job TMPDIR; the receipt under docs/figures/forward-solve-api/coil-edit-latency/ states the measured per-edit wall, cache hits after the first edit, and convergence with trip counts on every sweep point or names the failing points",
+          "estimated_hours": 1.0,
+          "goal": "The coil-edit latency receipt on 22086/43 mixed with P4 or P5 edits through the compiled slice route and the once-built raster target",
+          "id": "fsa-coil-edit-latency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165537745800-fsa-coil-edit-latency/manifest.md",
+          "plan": "forward-solve-api",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/coil_edit_latency.py",
+            "docs/figures/forward-solve-api/coil-edit-latency/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/forward-solve-api/coil-edit-latency.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "fsa-latency-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:55:44Z",
+        "completed_at": "2026-09-08T05:32:32.091Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 45370,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 45408,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "e9c37aea8d5dc2b4b1e0939218cfe9b73bd5609d",
+          "a767da78f04bb3382fc372b2804f389fa8ad56d0",
+          "878758b05827ec63faa034ce5e2f7c2978287da7"
+        ],
+        "changed_lines": {
+          "added": 1385,
+          "removed": 211,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1264724 running benchmarks/coil_edit_latency.py with the persistent compilation cache and per-job TMPDIR; CPU smoke checkcase, probe, diag, diag2, diag3 on all_debug all EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165537745800-fsa-coil-edit-latency/logs/cpu-smoke.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165537745800-fsa-coil-edit-latency/manifest.md",
+        "scope_changed": false,
+        "session_id": "0f95e353-12c4-417a-b29f-810f6f2252d9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 35551248,
+            "input_tokens_cumulative": 35551248,
+            "output_tokens": 137174,
+            "output_tokens_cumulative": 137174,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260902T151655477529-fsa-coil-edit-latency",
+          "root_run_id": "r-20260902T151655477529-fsa-coil-edit-latency"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 45404.885,
+          "generated_tokens": 137174,
+          "generation_seconds": 42807.45,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 32.0,
+          "machine_seconds": 2597.435,
+          "peak_input_tokens": 325095,
+          "tokens_per_second": 3.2,
+          "wall_tokens_per_second": 3.02
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/reduced_newton.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 3,
+        "attempt_kind": "redispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/fsa-coil-edit-latency",
+          "session_id": "0f95e353-12c4-417a-b29f-810f6f2252d9",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:32:32.091Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T043921811368-bob-operator-boundary",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-operator-boundary",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1790,
+                "cached_input_tokens": 936042,
+                "input_tokens": 937864,
+                "output_tokens": 2343,
+                "reasoning_output_tokens": 158,
+                "total_tokens": 940207,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Every array the forward operator holds is classified in the report as host geometry (lattice coordinates, connectivity axes, wall nodes, cell polygons, hex stencil, material mask, mesh steps: NumPy, identical across members, never traced) or member data (coupling blocks, responses, profile tables, boundary and axis flux anchors, target current, seed state: stacked along a leading member axis, traced), the operator becomes a pytree with static geometry leaves and dynamic member leaves, the host-side reads (_structured_grid_axes, RectilinearMesh.radial_step, the mesh-step scalars) take geometry only, a batch-construction assertion proves geometry identity across members and falls back to sequential per-member solves sharing one compiled program where it does not hold; a unit test constructs a width-12 heterogeneous MAST batch from the persisted carrier and shows the jitted solve traces with no member-specific constant in the HLO and per-member results bit-identical to the width-1 solves; the seven referee tests and the default-wiring test stay green; compile is measured on a debug partition or one card and host memory stays under 16 GB; every deliverable committed as it lands and the manifest written before any long output",
+          "estimated_hours": 3.0,
+          "goal": "The forward operator as a pytree whose host-geometry leaves are static and whose member-data leaves are dynamic, proven by a width-12 heterogeneous MAST batch that traces with no member-specific constant and matches width-1 results bit for bit",
+          "id": "bob-operator-boundary",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043921811368-bob-operator-boundary/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/stencil_mesh.py",
+            "nova/equilibrium/solve_request.py",
+            "tests/test_batched_operator_boundary.py",
+            "docs/figures/batched-operator-boundary/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/operator-boundary.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-boundary-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T04:39:35Z",
+        "completed_at": "2026-09-08T05:33:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3236,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3236,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6fce8753af842d6a7eecf635a9b277157a3e9e18",
+        "commits": [
+          "879a33ee99ef67bf3ef598eebb0c2ccfa1add615"
+        ],
+        "changed_lines": {
+          "added": 933,
+          "removed": 28,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun sirius_debug pytest tests/test_batched_operator_boundary.py (width-12 node alone, then the two remaining nodes) plus seven referee node ids and tests/test_default_wiring.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043921811368-bob-operator-boundary/logs/remaining-boundary-referee-wiring.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043921811368-bob-operator-boundary/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07f50-7bf1-7123-9a35-8783b459b170",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2495104,
+            "cached_input_tokens_cumulative": 2495104,
+            "input_tokens": 2588386,
+            "input_tokens_cumulative": 2588386,
+            "output_tokens": 17109,
+            "output_tokens_cumulative": 17109,
+            "reasoning_output_tokens": 2850,
+            "reasoning_output_tokens_cumulative": 2850
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19959,
+          "peak_input_tokens": 5083490
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operator-boundary",
+          "session_id": "01a07f50-7bf1-7123-9a35-8783b459b170",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T05:33:31Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T165253379121-msc-adaptive-refresh",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-adaptive-refresh",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "nova/equilibrium/reduced_newton.py exposes the refresh threshold as a solve parameter; a CPU test proves threshold one reproduces the refusal-only policy bit-identically and that the synthetic CPU machine needs close to the production twelve-step budget rather than twenty-four; an H200 receipt on the same four bank rows records steps per trip, Jacobian builds per trip, warm step wall, whole-trip wall and terminal residual before and after under docs/figures/millisecond-converged-solve/adaptive-refresh/; tests/test_reduced_newton_constraints.py and the compiled-route tests of tests/test_reduced_newton.py green with a per-job TMPDIR",
+          "estimated_hours": 2.0,
+          "goal": "An adaptive Jacobian refresh policy in the reduced Newton trip keyed on the contraction factor of the last accepted step, with the refusal-only policy recoverable at threshold one",
+          "id": "msc-adaptive-refresh",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165253379121-msc-adaptive-refresh/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py",
+            "tests/test_reduced_newton_constraints.py",
+            "benchmarks/reduced_newton_rows.py",
+            "docs/figures/millisecond-converged-solve/adaptive-refresh/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/adaptive-refresh.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-refresh-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:53:00Z",
+        "completed_at": "2026-09-08T05:40:00.767Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 45992,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 46020,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "6487b4874de774da896f1b007a6d9408e7e25c53",
+          "4e7a2965711fe94ad27f91cee30f8611a533dd1a"
+        ],
+        "changed_lines": {
+          "added": 6281,
+          "removed": 11,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165253379121-msc-adaptive-refresh/manifest.md",
+        "scope_changed": false,
+        "session_id": "3e131fdf-cd96-47b4-b556-a413d8b71129",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 35619061,
+            "input_tokens_cumulative": 35619061,
+            "output_tokens": 148607,
+            "output_tokens_cumulative": 148607,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 46017.414,
+          "generated_tokens": 150291,
+          "generation_seconds": 43510.938,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 34.1,
+          "machine_seconds": 2506.476,
+          "peak_input_tokens": 346482,
+          "tokens_per_second": 3.45,
+          "wall_tokens_per_second": 3.27
+        },
+        "follow_on_paths": [
+          "fixed_point.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh",
+          "session_id": "3e131fdf-cd96-47b4-b556-a413d8b71129",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:40:00.767Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -128261,6 +128750,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2141
+    "_version": 2149
   }
 }

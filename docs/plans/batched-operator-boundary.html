@@ -22,8 +22,8 @@
 <title>Batched operator boundary | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-09-08">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -45,6 +45,11 @@
     <div class="r-fu-body">Classify the operator's arrays and make geometry static and member data dynamic (§1), then rerun the strict-exit incidence batch and the EFIT gate with the compilation cache hitting (§2). Waits on the request contract from forward-solve-api.</div>
     <pre class="r-fu-prompt">/reckon-ship batched-operator-boundary</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260908T043921811368-bob-operator-boundary" data-who="bob-boundary-s" data-when="2026-09-08T05:33:31Z">
+    <div class="r-comment-body"><p>Operator geometry and member data separated (codex sol, one resume after a two-fix stop, merged into main): ForwardFluxOperator and subclasses are pytrees with host-only geometry and traced member leaves; SampledFluxFunction and ForwardSolveMemberData carry profile tables, seed, target and currents as leaves; ForwardOperatorBatch stacks one geometry digest for vmap and falls back to sequential jitted calls across digests. Gates on sirius_debug: width-12 persisted MAST HLO/no-member-constant and width-1 bit identity 1/1 in 26 s; two remaining boundary nodes, seven referee nodes and the default-wiring file 80/80 in 80 s; ruff clean. Merged-head verification across the forward-operator and forward-solve test files is dispatched as its own test node.</p></div>
+</div>
 </section>
 </main>
 </body>

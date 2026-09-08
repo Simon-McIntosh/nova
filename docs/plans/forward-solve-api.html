@@ -23,8 +23,8 @@
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="39">
+<meta name="plan-modified" content="2026-09-08">
+<meta name="plan-version" content="40">
 <meta name="plan-impl" content="0.55">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -149,6 +149,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260906T130706783090-fsa-raster-flux-target-receipt" data-who="fsa-raster-x" data-when="2026-09-07T05:10:15.187Z">
     <div class="r-comment-body"><p>once-built raster FluxTarget receipt on the H200 (job 1263699, benchmarks/raster_flux_target_receipt.py, receipt docs/figures/forward-solve-api/raster-receipt/raster-target-receipt.json): ten coil edits on 22086/43 cost 0.19 ms median and 0.24 ms worst per edit with the target built once against 11.4 s per edit rebuilding it, raster flux bitwise identical between arms; the seam is the operator itself, which already holds the target from construction (forward_operator.py ForwardFluxOperator, built at forward.py:474), so no new holder is needed; local lane deepseek-v4-flash, 18 h wall with two failed H200 jobs and a 6 h hold behind the corpus before the pass</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260907T165537745800-fsa-coil-edit-latency" data-who="fsa-latency-c" data-when="2026-09-08T05:32:32.091Z">
+    <div class="r-comment-body"><p>Coil-edit latency measured and receipted (clive, merged into main): 20 warm two-percent P4-upper edits through the compiled slice route on the H200, median 30119 ms per edit against the sub-100 ms interactive target, 0 persistent-cache hits after the first edit because reduced_newton._bind_dynamic_arguments bakes the edited prescribed current into the StableHLO as a constant (digests differ across currents, repeat for one), 10 of 20 edits converged with failing points named and trip counts 1 to 4. Negative result for the interactive gate, delivered as a complete receipt with two figures; the repair (thread the prescribed current as a traced kernel argument) belongs to msc-adaptive-refresh, after which this driver reruns unchanged. Worker also flagged a shared editable-install repoint by a concurrent node.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T123306247283-fsa-solve-budget-drift-inventory" data-who="fsa-budget-audit" data-when="2026-09-04T12:50:46Z">
     <div class="r-comment-body"><p>737 pinned solver-control sites (4 in nova/, 300 in benchmarks/, 14 in docs/figures producers, 419 in tests): 12 distinct Newton budgets and 14 distinct GMRES budgets in active paths, three conflicting would-be authorities (ForwardProfile newton_steps 4, the kernel's GMRES 8 with warmup 8, PerturbedSeedPolicy 10 and 30), the MAST bank produced at Newton 12, GMRES 12, warmup 0; single-source recommendation for a ForwardSolveRequest/Policy and a fail-closed default-wiring test</p></div>

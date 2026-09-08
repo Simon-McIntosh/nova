@@ -1,0 +1,82 @@
+{
+  "render_source_revision": "7cc2e06f518bdd0a7b8806983470f972659df4ec",
+  "render_source_status": "held-unmerged",
+  "certificate": [],
+  "clipped_cells": [
+    {
+      "boundary_cut_cells": 8,
+      "max_centroid_separation_m": 0.0,
+      "max_current_relative_error": 0.0,
+      "mesh_provenance": {
+        "coupling": "none; cell geometry only, no Biot build",
+        "delivered_cells": 136,
+        "requested_cells": 110,
+        "source": "nova.frame.firstwall.PlasmaGrid.insert",
+        "turn": "hex",
+        "vertex_count_range": [
+          6,
+          17
+        ],
+        "wall_clipped": true,
+        "wall_unit_count": 1
+      },
+      "path": "docs/figures/null-identification-authority/gs-contour-evidence/clipped-cells-110.png",
+      "polygon_chord_vs_traced_curve": {
+        "absolute_area_difference_m2": 0.03724619433014991,
+        "cells": [
+          {
+            "absolute_area_difference_m2": 0.0007034810880794089,
+            "cell_area_fraction": 0.12399139295082677,
+            "cell_index": 4
+          },
+          {
+            "absolute_area_difference_m2": 0.00016377658259331514,
+            "cell_area_fraction": 0.010090411396137589,
+            "cell_index": 18
+          },
+          {
+            "absolute_area_difference_m2": 0.0019665861087480477,
+            "cell_area_fraction": 0.11342371849447241,
+            "cell_index": 19
+          },
+          {
+            "absolute_area_difference_m2": 0.01694246275236766,
+            "cell_area_fraction": 0.9771639885379829,
+            "cell_index": 20
+          },
+          {
+            "absolute_area_difference_m2": 0.006626625071751171,
+            "cell_area_fraction": 0.38219351462072815,
+            "cell_index": 21
+          },
+          {
+            "absolute_area_difference_m2": 0.007946751554935915,
+            "cell_area_fraction": 0.45833238997420384,
+            "cell_index": 22
+          },
+          {
+            "absolute_area_difference_m2": 0.0006022879840236557,
+            "cell_area_fraction": 0.03473722429372379,
+            "cell_index": 24
+          },
+          {
+            "absolute_area_difference_m2": 0.002294223187650736,
+            "cell_area_fraction": 0.1733300615158369,
+            "cell_index": 25
+          }
+        ],
+        "comparable_to_certificate_residual_band": true,
+        "cut_cell_area_fraction": 0.3057158886527822,
+        "maximum_cell_area_fraction": 0.9771639885379829
+      },
+      "project_src": "/nova/figures/null-identification-authority/gs-contour-evidence/clipped-cells-110.png",
+      "requested_cells": -110,
+      "solve_seconds": 109.18555077165365,
+      "terminal_residual": 0.021636666445981268,
+      "topology_trial_refusals": 256
+    }
+  ],
+  "jax_enable_x64": true,
+  "jax_platform": "cpu",
+  "renderer_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence/docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+}

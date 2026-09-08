@@ -4754,6 +4754,9 @@ def run_single_shot_gate(
 
     from benchmarks import efit_reproduction_gate as reproduction
 
+    configure_dtypes()
+    if not bool(jax.config.x64_enabled):
+        raise RuntimeError("the single-shot gate requires JAX x64 arithmetic")
     preparation = prepare_single_shot_gate()
     if prepare_only:
         return preparation
@@ -4768,6 +4771,7 @@ def run_single_shot_gate(
         reproduction.DEFAULT_MAST_RESPONSE_CARRIER,
         reproduction.DEFAULT_DIIID_MACHINE_ARTIFACT_CACHE,
     )
+    receipt["data"]["execution"]["jax_x64_enabled"] = True
     receipt = _split_single_shot_gate_fields(receipt, preparation)
     _atomic_write_strict_json(receipt_path, receipt)
     return receipt

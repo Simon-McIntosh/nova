@@ -304,16 +304,10 @@ def _static_profile(scale: float) -> ForwardSource:
 
 
 def _rebuilt_diiid_source(template: ForwardFluxOperator) -> ForwardSource:
-    """Rebuild one strict-exit profile from the factory's bound bank arrays."""
-    from benchmarks.diiid_forward_gs_match import _profile_function
+    """Rebuild one strict-exit source from its sampled profile tables."""
 
-    def rebuild(function):
-        cells = dict(
-            zip(function.__code__.co_freevars, function.__closure__, strict=True)
-        )
-        return _profile_function(
-            cells["grid"].cell_contents, cells["samples"].cell_contents
-        )
+    def rebuild(profile: SampledFluxFunction) -> SampledFluxFunction:
+        return SampledFluxFunction(profile.coordinate, profile.values)
 
     source = template.source
     return ForwardSource(
@@ -367,6 +361,7 @@ def test_equivalent_diiid_bank_operators_stack_into_one_program():
     from benchmarks.strict_exit_incidence import _build_diiid_members
 
     configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
     members, _inputs = _build_diiid_members(DIIID_MACHINE_ARTIFACT_CACHE)
     original = members[0].profile.operator
     rebuilt = _operator_with_source(original, _rebuilt_diiid_source(original))

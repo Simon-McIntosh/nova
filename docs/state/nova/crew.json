@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T08:55:18",
+  "updated": "2026-09-08T09:03:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -130217,6 +130217,174 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T000926277153-pfs-strike-point-intersection",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-strike-point-intersection",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1060,
+                "cached_input_tokens": 732296,
+                "input_tokens": 733388,
+                "output_tokens": 576,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 733964,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "nova/equilibrium/forward.py _strike_points returns, per side of the X-point, the point where the boundary level curve crosses a wall segment (fixed-shape under jit, found from the sign change of wall psi_norm minus one between adjacent wall nodes and solved exactly on that segment) with the segment index and along-segment parameter carried on the labelled flux and into the session schema; the frame's divertor-leg tracer in nova/equilibrium/steering_frames.py clips each leg at that same point; the containment receipt tests a strike point by exact membership of its recorded segment rather than by distance and STRIKE_WALL_TOLERANCE_M is removed; a test on the Solovev fixture asserts psi_norm at each strike point equals one to 1e-10 and the point lies on its recorded segment to 1e-12, and a test asserts a strike point never coincides with a wall vertex unless the level curve passes through it; existing steering-frame and forward tests unchanged and green in the default lane; no tolerance is set from observed values",
+          "estimated_hours": 1.5,
+          "goal": "Strike points computed as the exact intersection of the boundary level curve with the wall segment it crosses, with the wall segment index and parameter recorded, replacing the nearest-wall-vertex selection and the proximity tolerance",
+          "id": "pfs-strike-point-intersection",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T000926277153-pfs-strike-point-intersection/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py",
+            "tests/test_strike_points.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-point-intersection.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-strike-c",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T00:09:38Z",
+        "completed_at": "2026-09-08T06:40:59.051Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 23329,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 23481,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "64979ad2f2d074ca9b29bc9249a9d1406e23406e",
+        "commits": [
+          "fb2a243b475c6c3dfdfedf1361069ee06b36da62",
+          "2d35937e03d143a974f5ce69ab998c3ad0e1fbbd",
+          "4402b617c35a42fd85d01006154c22a075e1dbb8"
+        ],
+        "changed_lines": {
+          "added": 280,
+          "removed": 77,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug uv run --no-sync pytest -p no:cacheprovider -m 'not slow' tests/test_strike_points.py tests/test_steering_frames.py; ruff check and format",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T000926277153-pfs-strike-point-intersection/strike-points-correction-default-lane.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T000926277153-pfs-strike-point-intersection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fbf-a99b-7161-98a8-e4f505e4f671",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2231936,
+            "cached_input_tokens_cumulative": 2231936,
+            "input_tokens": 2428003,
+            "input_tokens_cumulative": 2428003,
+            "output_tokens": 7170,
+            "output_tokens_cumulative": 7170,
+            "reasoning_output_tokens": 1783,
+            "reasoning_output_tokens_cumulative": 1783
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-08T06:41:01Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "six and a half hours on the local lane with a 122-line uncommitted diff and the worker still orienting; the node holds nova/equilibrium/forward.py and steering_frames.py on which four staged nodes wait, and the lead has directed less local dispatch while the contract is settled",
+              "session": "fresh",
+              "to_backend": "codex-terra",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260908T000926277153-pfs-strike-point-intersection"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2231936,
+          "cumulative_input_tokens": 4659939,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 8953
+        },
+        "follow_on_paths": [
+          "tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field:"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-strike-point-intersection",
+          "session_id": "01a07fbf-a99b-7161-98a8-e4f505e4f671",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T06:40:59.051Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -130529,6 +130697,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2171
+    "_version": 2172
   }
 }

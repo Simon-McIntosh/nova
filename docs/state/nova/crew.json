@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T03:14:07",
+  "updated": "2026-09-08T04:19:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3857,9 +3857,11 @@
         "id": "s19-score-c6",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "59729783-12ed-43d3-bd0b-9a79c5df4650",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "59729783-12ed-43d3-bd0b-9a79c5df4650"
+        },
         "created": "2026-09-07"
       },
       {
@@ -124980,6 +124982,149 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T213052568113-score-nia-contained-anchor-corpus-route",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "score-nia-contained-anchor-corpus-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1504,
+                "cached_input_tokens": 680631,
+                "input_tokens": 682167,
+                "output_tokens": 2153,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 684320,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-contained-anchor-corpus-route.md lists each requirement (mechanism stated with file:line; opt-in limited to the corpus writer; bank rows, Solovev certificate and pinned diverted read bit-identical with referees and hex green; fresh 27079 relabel with rows 15 to 17 pairwise against the baseline, containment, drawn-of-written, selected-node change count and the count of receipts taking the route; the refusal recorded and written ungated rather than raised; the one-ULP tie test asserting identity and containment not bit identity; reduced_newton.py untouched; fresh base with no merge of main; commits held unmerged with status blocked; four cores or fewer with a per-job TMPDIR) as one row each with pass or fail and the cited evidence from the worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-contained-anchor-corpus-route, the report ~/.config/reckon/crew/reports/nova/null-identification/contained-anchor-corpus-route.md and the logs under ~/.config/reckon/crew/runs/r-20260907T192027007481-nia-contained-anchor-corpus-route/; a verdict on whether git show --stat of the seven commits daa0cec7 to f074cd5e matches the declared write paths; and a one-line overall score with the count of failing rows",
+          "estimated_hours": 0.4,
+          "goal": "A conformance score of the held nia-contained-anchor-corpus-route prototype against its node brief, the coordinator's two resume rulings and the 2026-09-07 15:00Z session handoff",
+          "id": "score-nia-contained-anchor-corpus-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T213052568113-score-nia-contained-anchor-corpus-route/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-contained-anchor-corpus-route.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19-score-c6",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T21:31:03Z",
+        "completed_at": "2026-09-08T02:17:02.117Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 16905,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 17159,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "fe37623e1c8f3eba3216b47007eb1a5595d592ac",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "conformance report with one row per requirement including the two resume rulings, the git show --stat verdict over the seven held commits, and the out-of-scope follow-on handling",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-contained-anchor-corpus-route.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T213052568113-score-nia-contained-anchor-corpus-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "59729783-12ed-43d3-bd0b-9a79c5df4650",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6912848,
+            "input_tokens_cumulative": 6912848,
+            "output_tokens": 37560,
+            "output_tokens_cumulative": 37560,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 17155.849,
+          "generated_tokens": 37560,
+          "generation_seconds": 17079.783,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 17.8,
+          "machine_seconds": 76.066,
+          "peak_input_tokens": 180712,
+          "tokens_per_second": 2.2,
+          "wall_tokens_per_second": 2.19
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "review-only node; its deliverable is the scoring report",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/score-nia-contained-anchor-corpus-route",
+          "session_id": "59729783-12ed-43d3-bd0b-9a79c5df4650",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T02:17:02.117Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -125292,6 +125437,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2096
+    "_version": 2098
   }
 }

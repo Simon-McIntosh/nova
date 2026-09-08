@@ -144,7 +144,7 @@ def test_sampled_profiles_at_exact_width_one_mast_solve_points(monkeypatch):
             record["different_point_occurrences"] == 0
             for record in comparisons.values()
         ),
-        "persistent_compilation_cache": cache_receipt,
+        "persistent_compilation_cache": cache_receipt.receipt(),
     }
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)

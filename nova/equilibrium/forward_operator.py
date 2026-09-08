@@ -32,6 +32,7 @@ from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
 import hashlib
+import types
 from typing import NamedTuple
 
 import jax
@@ -898,9 +899,110 @@ def _digest_static_value(
     digest.update(repr(value).encode("utf-8"))
 
 
+def _digest_callable_value(
+    digest: hashlib._Hash, name: str, value, seen: set[int]
+) -> None:
+    """Digest a closure value without admitting an object address as semantics."""
+    if value is None or isinstance(value, str | bytes | int | float | bool):
+        digest.update(f"{name}:{value!r}".encode("utf-8"))
+        return
+    if isinstance(value, np.generic):
+        _digest_callable_value(digest, name, value.item(), seen)
+        return
+    if hasattr(value, "dtype") and hasattr(value, "shape"):
+        _digest_array(digest, name, value)
+        return
+    if isinstance(value, type):
+        digest.update(
+            f"{name}:type:{value.__module__}.{value.__qualname__}".encode("utf-8")
+        )
+        return
+    identity = id(value)
+    if identity in seen:
+        digest.update(f"{name}:cycle".encode("utf-8"))
+        return
+    seen.add(identity)
+    if isinstance(value, dict):
+        digest.update(f"{name}:dict".encode("utf-8"))
+        for key in sorted(value, key=repr):
+            _digest_callable_value(digest, f"{name}.key", key, seen)
+            _digest_callable_value(digest, f"{name}[{key!r}]", value[key], seen)
+        return
+    if isinstance(value, tuple | list):
+        digest.update(f"{name}:{type(value).__qualname__}".encode("utf-8"))
+        for index, item in enumerate(value):
+            _digest_callable_value(digest, f"{name}[{index}]", item, seen)
+        return
+    if isinstance(value, frozenset | set):
+        digest.update(f"{name}:{type(value).__qualname__}".encode("utf-8"))
+        for item in sorted(value, key=repr):
+            _digest_callable_value(digest, f"{name}.member", item, seen)
+        return
+    if isinstance(value, types.CodeType):
+        digest.update(f"{name}:code".encode("utf-8"))
+        digest.update(value.co_code)
+        for constant in value.co_consts:
+            _digest_callable_value(digest, f"{name}.constant", constant, seen)
+        digest.update(repr(value.co_names).encode("utf-8"))
+        digest.update(repr(value.co_freevars).encode("utf-8"))
+        return
+    if isinstance(value, types.FunctionType | types.MethodType):
+        digest.update(_callable_semantic_identity(value).encode("ascii"))
+        return
+    if hasattr(value, "__dict__"):
+        digest.update(
+            f"{name}:{type(value).__module__}.{type(value).__qualname__}".encode(
+                "utf-8"
+            )
+        )
+        for key, item in sorted(vars(value).items()):
+            _digest_callable_value(digest, f"{name}.{key}", item, seen)
+        return
+    raise TypeError(
+        "static profile callable closes over a value without a semantic "
+        f"representation: {type(value).__module__}.{type(value).__qualname__}"
+    )
+
+
+def _callable_semantic_identity(function: Callable) -> str:
+    """Return a content identity for a static callable and its bound values."""
+    digest = hashlib.sha256()
+    digest.update(
+        f"{type(function).__module__}.{type(function).__qualname__}".encode("utf-8")
+    )
+    code = getattr(function, "__code__", None)
+    if code is None:
+        code = getattr(getattr(function, "__call__", None), "__code__", None)
+    if code is None:
+        raise TypeError(
+            "static profile callable must expose executable Python code for "
+            "semantic batching"
+        )
+    _digest_callable_value(digest, "code", code, set())
+    seen: set[int] = set()
+    _digest_callable_value(
+        digest, "defaults", getattr(function, "__defaults__", ()) or (), seen
+    )
+    _digest_callable_value(
+        digest, "kwdefaults", getattr(function, "__kwdefaults__", {}) or {}, seen
+    )
+    closure = getattr(function, "__closure__", ()) or ()
+    for index, cell in enumerate(closure):
+        _digest_callable_value(digest, f"closure[{index}]", cell.cell_contents, seen)
+    return digest.hexdigest()
+
+
 @dataclass(frozen=True, eq=False)
 class _CallableLayout:
-    """Static callable structure plus the positions of its dynamic arrays."""
+    """Static callable structure plus the positions of its dynamic arrays.
+
+    A callable without pytree leaves is static to JAX, but static does not
+    mean that its Python address is part of the operator.  Its identity is a
+    digest of the executable code and the values bound through defaults and
+    closure cells.  Independently built closures with the same code and bound
+    profile tables can therefore share one program, while a changed table or
+    default changes the identity and keeps the members on separate programs.
+    """
 
     identity: str
     tree: object | None = field(default=None, compare=False, repr=False)
@@ -922,10 +1024,7 @@ class _CallableLayout:
                 f"{tree}"
             )
             return cls(identity=identity, tree=tree), tuple(leaves)
-        identity = (
-            f"static:{type(function).__module__}.{type(function).__qualname__}:"
-            f"{id(function)}"
-        )
+        identity = f"static:{_callable_semantic_identity(function)}"
         return cls(identity=identity, static=function), ()
 
     def rebuild(self, leaves: tuple[object, ...]) -> Callable:
@@ -1060,10 +1159,11 @@ class _OperatorPytreeAux:
 class ForwardOperatorBatch:
     """A checked collection of forward operators and its execution route.
 
-    Operators with one geometry identity are stacked as a pytree for ``vmap``.
-    If identities differ, :meth:`map` runs the members sequentially through one
-    jitted callable; members sharing an identity reuse that callable's compiled
-    program while genuinely different geometries compile independently.
+    Operators with one batching identity are stacked as a pytree for ``vmap``.
+    That identity combines host geometry with static source semantics.  If
+    either differs, :meth:`map` runs the members sequentially through one jitted
+    callable; members sharing an identity reuse that callable's compiled program
+    while genuinely different operators compile independently.
     """
 
     operators: tuple[ForwardFluxOperator, ...]
@@ -1077,7 +1177,7 @@ class ForwardOperatorBatch:
             raise TypeError("operator batch members must be ForwardFluxOperator values")
         groups: dict[str, list[int]] = {}
         for index, operator in enumerate(self.operators):
-            groups.setdefault(operator.geometry_identity, []).append(index)
+            groups.setdefault(operator._batch_identity(), []).append(index)
         object.__setattr__(
             self, "geometry_groups", tuple(tuple(group) for group in groups.values())
         )
@@ -1090,7 +1190,7 @@ class ForwardOperatorBatch:
 
     @property
     def geometry_identical(self) -> bool:
-        """Return whether all members share exactly one host geometry."""
+        """Return whether all members share one stackable batching identity."""
         return len(self.geometry_groups) == 1
 
     @property
@@ -1359,8 +1459,21 @@ class ForwardFluxOperator:
 
     @property
     def geometry_identity(self) -> str:
-        """Return the exact identity used to admit a stacked member batch."""
+        """Return the digest of host geometry independent of member data."""
         return self._compute_geometry_identity()
+
+    def _batch_identity(self, source_layout: _SourceLayout | None = None) -> str:
+        """Return the host-and-static identity required for pytree stacking."""
+        if source_layout is None:
+            source_layout, _ = _SourceLayout.flatten(self.source)
+        return ":".join(
+            (
+                self.geometry_identity,
+                source_layout.identity,
+                f"prescribed={self.prescribed_field is not None}",
+                f"sample={self.sample is not None}",
+            )
+        )
 
     def tree_flatten(self):
         """Separate dynamic member arrays from immutable host geometry."""
@@ -1381,14 +1494,7 @@ class ForwardFluxOperator:
         prescribed = self.prescribed_field is not None
         sample = self.sample is not None
         geometry_identity = self.geometry_identity
-        identity = ":".join(
-            (
-                geometry_identity,
-                source_layout.identity,
-                f"prescribed={prescribed}",
-                f"sample={sample}",
-            )
-        )
+        identity = self._batch_identity(source_layout)
         aux = _OperatorPytreeAux(
             identity=identity,
             geometry_identity=geometry_identity,

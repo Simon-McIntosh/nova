@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T04:28:10",
+  "updated": "2026-09-08T04:46:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2157,9 +2157,11 @@
         "id": "nia-atlas-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e"
+        },
         "created": "2026-09-07"
       },
       {
@@ -3876,6 +3878,15 @@
       },
       {
         "id": "s19-score-c7",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "s19-score-c8",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -125428,6 +125439,157 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164554588285-nia-convergence-atlas",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-convergence-atlas",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "docs/evidence/poloidal-convergence-atlas.html carries reckon-type=evidence and plan-evidence-for=null-identification-authority, passes reckon audit-doc with no ERROR, embeds with project-absolute src at least eight PNG panels covering two machines by two classes by two current levels plus one non-converging frame, one collapsed-boundary frame, one centre-column-anchor frame and one reversed-current-block frame, each captioned with shot, row, time and revision; the manifest states the panel count and the measured per-frame render cost; rendering ran on a debug partition or the reserved card with a per-job TMPDIR and the worker never read an image file",
+          "estimated_hours": 3.0,
+          "goal": "The poloidal convergence atlas evidence document: a panel grid over MAST and DIII-D, limited and diverted, low and high current, each panel drawing flux contours, wall, axis, every qualified X-point with out-of-vessel ones distinguished, the chosen boundary and the shadowed wall segments",
+          "id": "nia-convergence-atlas",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164554588285-nia-convergence-atlas/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/evidence/poloidal-convergence-atlas.html",
+            "docs/figures/null-identification-authority/convergence-atlas/",
+            "benchmarks/poloidal_convergence_atlas.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/convergence-atlas.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-atlas-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:46:00Z",
+        "completed_at": "2026-09-08T02:42:35.296Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 35786,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 35795,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "5e71cef778ad1e4d049fefba77c6b873eae67e95"
+        ],
+        "changed_lines": {
+          "added": 1366,
+          "removed": 0,
+          "files": 20
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc docs/evidence/poloidal-convergence-atlas.html (no ERROR) with 17 project-absolute panels present on disk; ruff clean on benchmarks/poloidal_convergence_atlas.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164554588285-nia-convergence-atlas/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164554588285-nia-convergence-atlas/manifest.md",
+        "scope_changed": false,
+        "session_id": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 37062191,
+            "input_tokens_cumulative": 37062191,
+            "output_tokens": 125479,
+            "output_tokens_cumulative": 125479,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 35791.934,
+          "generated_tokens": 125479,
+          "generation_seconds": 35472.583,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 32.0,
+          "machine_seconds": 319.351,
+          "peak_input_tokens": 325659,
+          "tokens_per_second": 3.54,
+          "wall_tokens_per_second": 3.51
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-convergence-atlas",
+          "session_id": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T02:42:35.296Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -125740,6 +125902,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2103
+    "_version": 2106
   }
 }

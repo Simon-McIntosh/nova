@@ -610,6 +610,23 @@
     vacuous now that the reading is revision-independent.</p>
   </section>
 
+  <section id="the-poloidal-convergence-atlas">
+    <h2>The poloidal convergence atlas: seventeen panels, eleven of twelve MAST arms not converged (2026-09-08 02:31Z)</h2>
+    <p>Node <code>nia-convergence-atlas</code> (local lane, spec guided; commit <code>5e71cef7</code>, merged). The lead's first
+    non-scalar instrument on this sprint: <a href="/nova/evidence/poloidal-convergence-atlas">the atlas</a> draws every committed frame of
+    the MAST twelve-row bank and the five DIII-D gate frames as one poloidal scene each, with the full-map flux contours, the governed
+    wall, the magnetic axis, every qualified X-point with out-of-vessel members drawn as hollow squares rather than dropped, the chosen
+    boundary beside the EFIT reference surface, and the shadowed wall segments, captioned with shot, row, time, current, class, residual,
+    qualification and the rendering revision. What it shows at a glance: at the banked revision only 22086/43 mixed converges; the other
+    eleven MAST arms end on an exhausted iteration budget or an active-set cycle at residuals 5e-4 to 6e-3, and 21983/35 carries its
+    recognised wall anchor on the lower centre column at R 0.28 m, Z &minus;1.64 m. The DIII-D panels draw the EFIT psirz raster because the
+    committed operands persist nulls and geometry but no Nova flux field, and four of the five demo reads returned no closed boundary.
+    Two frames the lead asked for have no committed flux anywhere and are the atlas supplement: the limited-class collapse of 27079 (whose
+    per-frame panels the anchor census drew separately under the playable plan's figures) and a reversed-current-block slice, both of
+    which need a solve that persists a flux raster. One deliberate deviation from the painters is stated in the document: the shared null
+    painter's containment filter drops out-of-vessel candidates, so the atlas keeps its own null painter that shows them. Figures under
+    <code>docs/figures/null-identification-authority/convergence-atlas/</code> with a JSON receipt.</p>
+  </section>
 </main>
 </body>
 </html>

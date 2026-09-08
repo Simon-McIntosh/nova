@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T19:09:04",
+  "updated": "2026-09-08T22:17:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -115,6 +115,15 @@
         "created": "2026-08-12"
       },
       {
+        "id": "biot-singularity-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "bob-batch-t",
         "harness": "codex-terra",
         "role": "implement",
@@ -226,9 +235,11 @@
         "id": "bob-rebuild-fix-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a081ff-660e-75c2-86fa-6352175da04b",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a081ff-660e-75c2-86fa-6352175da04b"
+        },
         "created": "2026-09-08"
       },
       {
@@ -1630,6 +1641,17 @@
         "created": "2026-09-04"
       },
       {
+        "id": "gaa-affine-roundtrip-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": "01a0825d-0589-72d1-9b16-07b6876ab86d",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0825d-0589-72d1-9b16-07b6876ab86d"
+        },
+        "created": "2026-09-08"
+      },
+      {
         "id": "gaa-evidence",
         "harness": "codex",
         "role": "implement",
@@ -2588,6 +2610,15 @@
         "created": "2026-09-08"
       },
       {
+        "id": "nia-clipcost-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-clipmeas-t",
         "harness": "codex-terra",
         "role": "implement",
@@ -2695,6 +2726,17 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b3f-bba0-7420-b129-69217491fd4e"
         },
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-gs-contour-doc-t",
+        "harness": "codex-terra",
+        "role": "documentation",
+        "session_id": "01a08282-d2e8-7460-8c4e-cb249c935d17",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08282-d2e8-7460-8c4e-cb249c935d17"
+        },
+        "created": "2026-09-08"
       },
       {
         "id": "nia-h200-lane-x",
@@ -2836,6 +2878,17 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-04"
+      },
+      {
+        "id": "nia-poloidal-evidence-t",
+        "harness": "codex-terra",
+        "role": "documentation",
+        "session_id": "01a08258-2a2f-7a30-a19b-a4181e2688b1",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08258-2a2f-7a30-a19b-a4181e2688b1"
+        },
+        "created": "2026-09-08"
       },
       {
         "id": "nia-producer-fix-x",
@@ -138039,6 +138092,791 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T133506641505-msc-compiled-slice-dispatch",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-compiled-slice-dispatch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1976,
+                "cached_input_tokens": 173543,
+                "input_tokens": 175521,
+                "output_tokens": 2713,
+                "reasoning_output_tokens": 1213,
+                "total_tokens": 178234,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Two defects in one file, both released now that the adaptive Jacobian refresh landed at 6487b487. FIRST, solve_reduced_newton_compiled in nova/equilibrium/reduced_newton.py builds a new jitted closure on every invocation, so a caller solving one slice at a time pays a trace per slice, which means the one-boundary-per-solve saving reaches only callers that hold the program themselves. Make the compiled program a cached object keyed by the static shape plus policy so repeated calls dispatch without re-tracing. SECOND, _bind_dynamic_arguments partially applies the conductor external carrying the edited prescribed current onto the kernels, so the current is baked into the StableHLO as a constant: the measured digests were d7e66d9d at 1.0x, e6ce36d1 at 0.8x, 979c005d at 1.2x, repeating for a repeated current, so every coil edit recompiles at a median of 30 s while the persistent cache never hits after the first edit. Make the prescribed current, plus any other per-edit external, a traced kernel argument. Prove all of it. The per-call wall after the first must equal the dispatch wall the trip-quantum receipt measured. The StableHLO digest must be equal across two different prescribed currents. The persistent compilation cache must hit on the second edit. The compiled route must stay bit-identical to the host route on the twelve bank members. The one-boundary-per-solve trip quantum must be preserved. Land it as two commits in the one file so the two mechanisms stay separable. Note before you gate: tests/test_reduced_newton.py is known to abort inside the JAX compilation cache on all_debug after six passing tests, seen on jobs 1263812, 1263828, 1263836, so if you meet that abort report it as the known lane fault rather than as your regression, gating the rest of the file. Run every gate on a debug partition with --time=00:59:00, JAX_PLATFORMS=cpu, TMPDIR set per job, never on the login node. Call sbatch or srun exactly once in a turn: if you have already launched in this turn never launch again whatever the shell returned.",
+          "estimated_hours": 2.5,
+          "goal": "A compiled slice route that dispatches without re-tracing across repeated calls with the prescribed current carried as a traced argument",
+          "id": "msc-compiled-slice-dispatch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/compiled-slice-dispatch.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "msc-slicecall-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T13:35:19Z",
+        "completed_at": "2026-09-08T17:10:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 12903,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "ad443cab8350216bb660a5c90a8bf568878d8e63",
+        "commits": [
+          "0974986425fd1cdb9608ed136f537a5470cd9a25",
+          "9b4a2413442c36be7746a89f5dcbc6a0f505d2f3",
+          "9b40a5cdb1beec1f96558b042e8d24e6f7049be1",
+          "14a0c691a83b7bb251fa22bf6aebabbc5269ae98",
+          "98a86ac3187ad8a9ca2cd6b8700fbddcb68f946a"
+        ],
+        "changed_lines": {
+          "added": 547,
+          "removed": 109,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug job 1267197: twelve-bank ULP census, restated as relative difference for state fields and absolute difference for residual fields",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/compiled-slice-dispatch.md",
+        "scope_changed": false,
+        "session_id": "01a0813a-f3bc-7202-b260-e8fb40b5a540",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2162688,
+            "cached_input_tokens_cumulative": 2162688,
+            "input_tokens": 2198899,
+            "input_tokens_cumulative": 2198899,
+            "output_tokens": 18427,
+            "output_tokens_cumulative": 18427,
+            "reasoning_output_tokens": 4574,
+            "reasoning_output_tokens_cumulative": 4574
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T17:10:22Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 49.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T17:10:22Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2162688,
+          "cumulative_input_tokens": 4361587,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23001
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 14,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-compiled-slice-dispatch",
+          "session_id": "01a0813a-f3bc-7202-b260-e8fb40b5a540",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T17:10:22Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T170941301088-bob-rebuild-fixture-sampled-profiles",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-rebuild-fixture-sampled-profiles",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 467,
+                "cached_input_tokens": 723958,
+                "input_tokens": 724427,
+                "output_tokens": 1519,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 725946,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "One regression, already attributed, and the repair is small. The merged-head integration found tests/test_batched_operator_boundary.py::test_equivalent_diiid_bank_operators_stack_into_one_program failing at the merged head and absent from the baseline, whose failure set was empty. The cause is commit 62562397: the DIII-D p prime and ff prime are no longer closure callables but sampled flux function leaves, while the rebuild fixture still introspects a closure through the code object at about line 312, reading co_freevars and the closure cells. It therefore raises an attribute error on the new callable before it ever reaches the geometry-stack assertion the test exists for. Make the rebuild fixture handle the sampled representation. Do not restore closures to satisfy the fixture: routing profiles through the sampled representation is deliberate and is what makes a profile member data rather than static operator identity, which is this plan whole point. Do not weaken or delete the geometry-stack assertion either, because that assertion is the thing the test is for and it has never actually run against the new representation. If the fixture needs a profile identity, take it from the representation itself rather than from closure internals. VERIFY THE ASSERTION ACTUALLY RUNS. Once the introspection is fixed the test will reach its real assertion for the first time on these inputs, and it may then fail on substance rather than plumbing. If that happens say so clearly and report what the assertion measured, because a genuine stacking failure on DIII-D operators would be a finding about the contract rather than the fixture and must not be tidied away in a repair aimed at plumbing. Report which of the two outcomes you got. Gate on the whole file in one fresh process on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, allowing for the 472.18 seconds it took at the merged head. Export TMPDIR=/tmp both before submitting and inside the payload. Call configure_dtypes before building any array and assert the extended-precision flag rather than trusting it, because arrays built before that call are captured in single precision while the solver returns double states derived from them, so a dtype assertion can pass on contaminated values. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running any payload from a file. Give each job its own log filename carrying its job id. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T17:15:00Z.",
+          "estimated_hours": 1.0,
+          "goal": "The DIII-D bank operator stacking test green again against profiles that are no longer closures",
+          "id": "bob-rebuild-fixture-sampled-profiles",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/rebuild-fixture-sampled.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "tests/test_batched_operator_boundary.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "bob-rebuild-fix-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T17:09:53Z",
+        "completed_at": "2026-09-08T17:24:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 858,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 858,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "af3041508eca267a1e2cd6bc21f882007298313a",
+        "commits": [
+          "7f8871ce09d6d6a186578f601261c9fec8e65495"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 9,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1267214: whole-file pytest on tests/test_batched_operator_boundary.py, CPU platform pinned, extended precision asserted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/test-batched-operator-boundary-gate-1267214.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/rebuild-fixture-sampled.md",
+        "scope_changed": false,
+        "session_id": "01a081ff-660e-75c2-86fa-6352175da04b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 369280,
+            "cached_input_tokens_cumulative": 369280,
+            "input_tokens": 496009,
+            "input_tokens_cumulative": 496009,
+            "output_tokens": 3444,
+            "output_tokens_cumulative": 3444,
+            "reasoning_output_tokens": 1261,
+            "reasoning_output_tokens_cumulative": 1261
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T17:24:11Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 49.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T17:24:11Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 369280,
+          "cumulative_input_tokens": 865289,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 4705
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-rebuild-fixture-sampled-profiles",
+          "session_id": "01a081ff-660e-75c2-86fa-6352175da04b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T17:24:11Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T184641095479-nia-poloidal-mechanism-evidence",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-poloidal-mechanism-evidence",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1590,
+                "cached_input_tokens": 767781,
+                "input_tokens": 769373,
+                "output_tokens": 2738,
+                "reasoning_output_tokens": 246,
+                "total_tokens": 772111,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The lead asked for this directly and gave the reason: much of today went into last-bit arithmetic, and errors are often higher up, so visual evidence is what unblocks the work. Produce docs/evidence/poloidal-mechanism-evidence.html with reckon-type evidence and plan-evidence-for null-identification-authority, plus figures under docs/figures/null-identification-authority/mechanism-evidence/. REUSE THE PAINTERS, DO NOT WRITE PLOTTING. nova/media/poloidal.py already provides draw_wall, draw_coils, draw_plasma_cells, draw_flux_contours, draw_boundary, draw_surfaces, draw_legs, draw_nulls and contour_levels; nova/media/layout.py provides poloidal_view and three_view; nova/media/ink.py carries the style; nova/media/sources holds the archive adapters including mast_efit, diiid_efit, plasma_mesh, nova_labels and frame. Two rules stated in that module docstring must be honoured: contours are LINES and never fills, and when two maps are compared the level array is the SHARED quantity passed in explicitly rather than derived per panel, because independent colour scaling hides the disagreement the figure exists to show. Pass the wall polygon as the contain argument to draw_nulls; its docstring explains why finiteness alone is not enough, since a null outside the vessel is finite and draws a plausible cross against the wall. THE CASES, in priority order, and say plainly which you could not render and why. FIRST the six Solovev certificate rungs banked today on the H200, weak-rotation-reactor-static at -110, -300, -500 and -1000 and moderate-rotation-conventional-static at -110 and -300, with receipts and per-rung figures under the crew report tree at triage/rebank-certificate-and-bank/artifacts/job-1267132. These are the exact-oracle cases and every one reports converged false with terminal residuals from 0.0012 to 0.0125. Draw the solved flux and the analytic flux as line contours on shared levels, mark the critical points and the boundary, and draw the machine geometry. SECOND the boundary-cut cells on the diverted -110 and -342 rungs, eight and twenty of them, where the clipped moments were just proven to reproduce the inside current and centroid; draw the mesh cells the boundary passes through and mark both centroids per cell so the clip is visible. THIRD the cold-start first iterate on -110 that has no qualified axis and produced 256 refusals under strict rejection: draw that iterate flux with every stationary-point candidate marked and the wall containment shown, so a reader can see whether an O-point is genuinely absent or merely rejected. A SPECIFIC OBSERVATION TO TEST RATHER THAN ASSUME. In the existing per-rung error figures the psi, gradient and hessian errors are NOT uniformly distributed: they concentrate in a bright cluster at the OUTBOARD MIDPLANE, around R 7.5 and Z between zero and plus one half on the weak-rotation case, while most of the interior is dark, and on the -500 rung the psi panel appears to carry only that outboard cluster at all. Establish where the error actually lives, quantify it as a fraction of the domain, and state whether it coincides with the boundary contact, a limiter touch, the flux normalisation anchor or none of these. If the concentration is real it is a structural error at one place rather than distributed noise, which is a different and far more tractable problem than anything measured today. EVERY FIGURE NEEDS A CAPTION THAT SAYS WHAT WOULD BE WRONG, not merely what is drawn: name the mechanism it shows and what a reader should look for that would indicate a defect. A figure whose caption only describes the axes is not evidence. Include one legend panel defining every marker once, and follow the marker vocabulary docs/evidence/poloidal-convergence-atlas.html already uses so the two read together: solid triangle for the magnetic axis, filled cross for the admitted saddle, hollow circles for other qualified X-points inside the wall, hollow squares for qualified X-points outside it. Link to that atlas rather than redrawing the twelve-row MAST bank it already covers. MECHANICS. Figures are PNG under docs/figures/null-identification-authority/mechanism-evidence/ referenced with project-absolute src beginning /nova/figures/, because a relative src returns not-found in the server. PNG is gitignored so publishing needs git add -f. NEVER read a PNG or any image back after writing it. Rendering is heavy: run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, never the login node, and never point an output path at /run/user which is node-local to the login node. Export TMPDIR=/tmp both before submitting and inside the payload. Call configure_dtypes before building any array and assert the extended-precision flag, because arrays built before that call are captured in single precision while the solver returns double states derived from them. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the renderer from a file. Give each job its own log filename carrying its job id and persist each figure as it lands. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T18:00:00Z.",
+          "estimated_hours": 3.0,
+          "goal": "An evidence document of poloidal line-contour maps carrying critical points, boundaries and wall geometry for the cases this sprint has been reasoning about",
+          "id": "nia-poloidal-mechanism-evidence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/poloidal-mechanism-evidence.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/poloidal-mechanism-evidence.html",
+            "docs/figures/null-identification-authority/mechanism-evidence"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "nia-poloidal-evidence-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T18:46:50Z",
+        "completed_at": "2026-09-08T19:44:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3461,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3461,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+        "commits": [
+          "4d6e7ce0c5b5a95eb3302a00d004c4948ac97e4b",
+          "4a11cd6e297a5b3cad3e64c135156a6ae18e33ea",
+          "01e0bc8d91d4bcefbc117473f0f1a7f62d5ad1c3",
+          "0a10da20e320f5a1e1b771868d788705a2556578",
+          "9621d1c56b742e1397b3c9e47235b459ad9acd4b",
+          "a47795a1b11b997447c55ae9253a765e7866d64e"
+        ],
+        "changed_lines": {
+          "added": 1212,
+          "removed": 0,
+          "files": 9
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug rendering jobs for the six-rung certificate panels; job 1267260 cancelled at 25:31 with three of six rows landed",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/poloidal-mechanism-evidence.md",
+        "scope_changed": false,
+        "session_id": "01a08258-2a2f-7a30-a19b-a4181e2688b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8054400,
+            "cached_input_tokens_cumulative": 8054400,
+            "input_tokens": 8355898,
+            "input_tokens_cumulative": 8355898,
+            "output_tokens": 21304,
+            "output_tokens_cumulative": 21304,
+            "reasoning_output_tokens": 7252,
+            "reasoning_output_tokens_cumulative": 7252
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T19:44:31Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 52.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T19:44:31Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 101,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The clipped physical moments meet every current; centroid and net-current comparison; and the first-iterate regression is repaired; but the exact-oracle residual gate degrades on both required rungs under strict trial rejection. Resolving how iteration continues without consuming an unqualified axis is a lead-level design choice; carrying the prior qualified axis/support is explicitly unsafe and was not reintroduced.",
+              "elapsed_seconds": 3401,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4529,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+                "b23764dc5f41b060e746f3f7cde536599931ec01",
+                "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+                "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+                "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+                "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+                "7cc2e06f518bdd0a7b8806983470f972659df4ec]; changed_paths: [nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/source.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/forward.py",
+                "tests/test_forward_moment_class.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "fa8690b01a0e4dda781a4ac2eeb2e036993602481c3269f279aed2c87094039b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md; resolve the blocker before resuming the run",
+              "node": "nia-clipped-moment-repair",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+                "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 4689,
+              "terminal_at": "2026-09-08T17:28:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 8054400,
+          "cumulative_input_tokens": 16410298,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 28556
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence",
+          "session_id": "01a08258-2a2f-7a30-a19b-a4181e2688b1",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T19:44:31Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a08258-2a2f-7a30-a19b-a4181e2688b1",
+          "source": "pointer",
+          "reason": "Superseded by nia-forward-gs-contour-evidence on the lead's instruction to redispatch with the corrected brief and a new document name; this node has no remaining work to resume."
+        },
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T185201202084-gaa-affine-flux-function-roundtrip",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "gaa-affine-flux-function-roundtrip",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 715,
+                "cached_input_tokens": 774314,
+                "input_tokens": 775031,
+                "output_tokens": 3547,
+                "reasoning_output_tokens": 1312,
+                "total_tokens": 778578,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The lead asks for a check that is stronger than anything measured today because its answer is known in advance. benchmarks/efit_affine_extraction.py recovers flux-function profiles from a stored poloidal-flux map by converting to total flux, applying the conservation operator so Amperes law reads mu0 times j_phi equals minus delta-star of Phi over two pi R, and exposing the two coefficients of R times j_phi equals R squared times p prime plus ff prime over mu0 in fixed normalised-flux bins. That route is what we apply to SOURCE EFIT DATA, where the true flux functions are unknown and any error is invisible. Apply it instead to a case where the truth IS known: our own forward solve on prescribed profiles. THE ROUND TRIP. Prescribe p prime and ff prime, forward solve to a flux map, then run that map through the SAME affine extraction the EFIT route uses, and compare the recovered profiles against the prescribed ones bin by bin. Use the Solovev cases first because their flux functions are closed form, so the comparison is against analytic truth rather than against another computation: take the weak-rotation-reactor-static and moderate-rotation-conventional-static cases and, if a resolution sweep fits, more than one cell count so the trend with resolution is visible. Report per bin the prescribed value, the recovered value, the absolute and relative difference, and the count of bins compared, for p prime and ff prime separately. Give the sup and root-mean-square over bins, and say plainly whether the recovery is EXACT, meaning at the arithmetic floor, or merely close. JUDGE IT AGAINST A FLOOR YOU MEASURE RATHER THAN AGAINST ZERO. benchmarks/efit_analytic_roundtrip_floor.py already measures the Green and delta-star composition on a closed-form analytic equilibrium with no stored map and no interpolation in the path, which is the error the operator composition contributes before any extraction. Report the affine recovery error beside that floor. If the recovery error equals the floor then the affine route is exact and adds nothing, which is the answer the lead is asking for. If it exceeds the floor, the excess is the extraction routes own error and you must say where it enters: the total-flux conversion, the conservation operator applied to a solved rather than analytic map, the normalised-flux binning, or the least-squares separation of the two coefficients. Name which, with the measurement that distinguishes it. WHY THIS MATTERS BEYOND THE NUMBER, and state it in the report: if the affine route cannot recover our own flux functions from our own map, then every profile extracted from EFIT source data by that route carries the same unmeasured error, and every downstream comparison that treats those profiles as truth inherits it. That would be an error high up the stack rather than in the last bits, which is precisely what the lead suspects. ONE CONFOUND TO EXCLUDE EXPLICITLY. The six Solovev rungs banked today all report converged FALSE with terminal residuals between 0.0012 and 0.0125, so the flux map you extract from is not a converged solution of the equations whose profiles you prescribed. Establish whether the recovery error tracks that residual: if it does, the extraction may be faithful and the solve is what is wrong; if the recovery error is much larger than the residual can explain, the extraction is implicated independently. Report both quantities side by side per case so a reader can see which. Persist a strict JSON receipt with every bin, and write a short report naming the verdict in its first paragraph. Change no solver source. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, exporting TMPDIR=/tmp both before submitting and inside the payload, never a path under /run/user. Call configure_dtypes before building any array and assert the extended-precision flag, because arrays built before that call are captured in single precision while the solver returns double states derived from them, so a dtype assertion can pass on contaminated values and this measurement is about exactness. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the payload from a file. Give each job its own log filename carrying its job id and persist each case as it lands. Never read a PNG back. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T19:00:00Z.",
+          "estimated_hours": 2.5,
+          "goal": "Whether the affine extraction route recovers our own prescribed flux functions exactly from our own forward GS solution",
+          "id": "gaa-affine-flux-function-roundtrip",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "gaa-affine-roundtrip-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T18:52:09Z",
+        "completed_at": "2026-09-08T19:11:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1169,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1169,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1267249 analytic composition floor and 1267259 affine recovery over two cases, three lattices and 24 bins, x64 asserted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267259.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+        "scope_changed": false,
+        "session_id": "01a0825d-0589-72d1-9b16-07b6876ab86d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2700800,
+            "cached_input_tokens_cumulative": 2700800,
+            "input_tokens": 3064661,
+            "input_tokens_cumulative": 3064661,
+            "output_tokens": 19996,
+            "output_tokens_cumulative": 19996,
+            "reasoning_output_tokens": 5728,
+            "reasoning_output_tokens_cumulative": 5728
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T19:11:38Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 50.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T19:11:38Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 101,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The clipped physical moments meet every current; centroid and net-current comparison; and the first-iterate regression is repaired; but the exact-oracle residual gate degrades on both required rungs under strict trial rejection. Resolving how iteration continues without consuming an unqualified axis is a lead-level design choice; carrying the prior qualified axis/support is explicitly unsafe and was not reintroduced.",
+              "elapsed_seconds": 3401,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4849,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+                "b23764dc5f41b060e746f3f7cde536599931ec01",
+                "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+                "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+                "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+                "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+                "7cc2e06f518bdd0a7b8806983470f972659df4ec]; changed_paths: [nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/source.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/forward.py",
+                "tests/test_forward_moment_class.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "fa8690b01a0e4dda781a4ac2eeb2e036993602481c3269f279aed2c87094039b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md; resolve the blocker before resuming the run",
+              "node": "nia-clipped-moment-repair",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+                "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 5009,
+              "terminal_at": "2026-09-08T17:28:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 2700800,
+          "cumulative_input_tokens": 5765461,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 25724
+        },
+        "follow_on_paths": [
+          "carriers/resolutions"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "measurement node: the deliverable is a report and two strict JSON receipts under the crew reports tree, and the brief forbade any source change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/gaa-affine-flux-function-roundtrip",
+          "session_id": "01a0825d-0589-72d1-9b16-07b6876ab86d",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T19:11:38Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -138351,6 +139189,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2287
+    "_version": 2300
   }
 }

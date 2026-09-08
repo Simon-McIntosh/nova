@@ -625,6 +625,13 @@
     currents do not explain this row, whose carrier stays open (followup f-scr-005). The largest single fitted terms on both rows are the P4 and P5 pairs at 11 to
     18 mT each, cancelling to within a few mT, so the residual is a small difference of large terms and sensitive to any one circuit's current or position.</p>
   </section>
+<section id="the-case-currents-carry-a-quarter-of-the-compensation"><h2>The case currents carry a quarter of the compensation (2026-09-08 11:38Z)</h2>
+<p>Node <code>scr-case-current-checkpointing</code> (codex-terra after a lane change from a dead local run; commits <code>bdcfebc2</code>, <code>6b2b5db6</code>, <code>8e17dd80</code>, <code>5e5e0d8f</code>, merged at <code>0d88ceab</code>).</p>
+<p><strong>Result.</strong> Substituting the exact-time transducer coil-case currents for the reconstruction's fitted ones on 21989/55 reduces the minimum compensating current from 1775.0 to 1313.6 amperes, a fall of 461.4 amperes or 26 percent, with the measured arm below the fitted at all five commanded heights and no zero crossing. The coil-case currents are therefore a real contributor to the vertical-force imbalance and carry about a quarter of it; the remaining three quarters is not explained by them. Both free arms remain non-converged, at residuals 7.3e-4 and 4.9e-4 after eight trips, so this compares compensation minima rather than converged solves.</p>
+<p><strong>Method, which is why the result exists at all.</strong> Each completed subsolve is written as a request-identified receipt part carrying the current digest, the result and its own wall time, and the driver resumes from the parts already on disk. Four one-hour allocations had previously produced nothing at all on this row. Three bounded allocations produced twelve parts, and the middle one timed out at 55 minutes after banking six of them and lost none.</p>
+<figure><img src="/nova/figures/solver-convergence-regression/vertical-mode/case-current-repair/case-current-repair.png" alt="Free residual and compensation against commanded height for the fitted and transducer current arms"><figcaption>Compensation against commanded height for both current arms; the transducer arm sits below the fitted arm at every height without crossing zero.</figcaption></figure>
+<p><strong>Lesson.</strong> A measurement that cannot fit its allocation is not a scheduling problem, it is a durability one. The work existed four times and was written nowhere; twelve lines deciding where the driver writes turned the fifth attempt's timeout into banked evidence.</p>
+</section>
 </main>
 </body>
 </html>

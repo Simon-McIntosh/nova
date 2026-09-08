@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T13:27:57",
+  "updated": "2026-09-08T13:38:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -134791,6 +134791,169 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T081814505429-scr-case-current-checkpointing",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "scr-case-current-checkpointing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5520,
+                "cached_input_tokens": 721614,
+                "input_tokens": 727136,
+                "output_tokens": 3234,
+                "reasoning_output_tokens": 109,
+                "total_tokens": 730370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "benchmarks/vertical_force_decomposition.py writes each completed subsolve of the case-current repair row (the fitted-current baseline, the transducer-substituted arm and each constrained height) as a receipt part file under docs/figures/solver-convergence-regression/vertical-mode/case-current-repair/ as it lands, with the request identity carried, and resumes from existing parts on the next invocation; a CPU smoke on all_debug proves the part write and the resume path on the synthetic case without solving; the row then runs on the H200 (one sbatch per allocation on betelgeuse under gpu_0003_grpA with an explicit --mem, --time=00:55:00, persistent compilation cache and per-job TMPDIR, /home/ITER/mcintos/Code/nova/.venv/bin/python directly), never two allocations in one turn, until 21989/55 is complete, each allocation's per-subsolve wall stated; the receipt banks the minimum compensating current beside the fitted-current baseline and the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/case-current-checkpointing.md states whether the transducer case-current substitution removes, reduces or increases the compensation on 21989/55, with the compile wall of the first warm allocation beside the earlier cold figure; while a SLURM job runs, write the manifest with status waiting and all five wait fields: wait_condition (one line naming the job), wait_probe as a JSON argv array that prints only the state (sacct with the job number and the flags -n -X -o State), wait_terminal as the JSON array of COMPLETED, FAILED, CANCELLED, TIMEOUT, OUT_OF_MEMORY and NODE_FAIL, wait_started_at as an unquoted UTC ISO stamp, and resume_brief, then end your turn; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.0,
+          "goal": "The case-current repair row checkpoints each completed subsolve so 21989/55 completes across bounded H200 allocations and its compensation verdict is banked",
+          "id": "scr-case-current-checkpointing",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081814505429-scr-case-current-checkpointing/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/vertical_force_decomposition.py",
+            "docs/figures/solver-convergence-regression/vertical-mode/case-current-repair/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/case-current-checkpointing.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "scr-checkpoint-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:18:27Z",
+        "completed_at": "2026-09-08T11:36:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11894,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "4d7139b31399ee09f01cd7771749ce5f9c780558",
+        "commits": [
+          "bdcfebc29e48d0e0e9c72e05cf7f27ebf905f892",
+          "6b2b5db6ac52a62d421297ba2dbb6ea7095f651f",
+          "8e17dd8098e8249fe3b66d4048ee71b4b3d4164b",
+          "5e5e0d8f1c2e929d4032d1e0c2c395540d832f13"
+        ],
+        "changed_lines": {
+          "added": 1820,
+          "removed": 43,
+          "files": 15
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1265126 proved the part write and resume without solving; H200 jobs 1265129, 1265440 (timeout, six parts banked) and 1265968 completed the twelve parts and assembled the receipt; ruff check and format",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/case-current-checkpointing.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081814505429-scr-case-current-checkpointing/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08018-da0f-7452-bb0d-2b5c01b6ed05",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2060928,
+            "cached_input_tokens_cumulative": 2060928,
+            "input_tokens": 2086585,
+            "input_tokens_cumulative": 2086585,
+            "output_tokens": 12756,
+            "output_tokens_cumulative": 12756,
+            "reasoning_output_tokens": 2206,
+            "reasoning_output_tokens_cumulative": 2206
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T11:36:41Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 33.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T11:36:41Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2060928,
+          "cumulative_input_tokens": 4147513,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 14962
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 11,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/scr-case-current-checkpointing",
+          "session_id": "01a08018-da0f-7452-bb0d-2b5c01b6ed05",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T11:36:41Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -135103,6 +135266,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2233
+    "_version": 2234
   }
 }

@@ -49,6 +49,8 @@ def hex_mesh(wall, cells: int = 1200) -> tuple[tuple[np.ndarray, ...], dict]:
     outlines = tuple(
         np.asarray(frame.boundary, dtype=float).reshape(-1, 2) for frame in frames
     )
+    if len(units) > 1:
+        outlines = clip_to_boundary(outlines, units)
     vertex_counts = np.asarray([len(item) for item in outlines])
     return outlines, {
         "requested_cells": int(cells),
@@ -95,6 +97,11 @@ def clip_to_boundary(cells: Sequence[np.ndarray], boundary) -> tuple[np.ndarray,
                 region = region.difference(shapely.Polygon(unit.vertices))
     if not region.is_valid:
         region = region.buffer(0.0)
+    open_material = [
+        shapely.LineString(unit.vertices)
+        for unit in units
+        if unit.kind == "material" and not unit.closed
+    ]
     polygons = np.asarray(
         [shapely.Polygon(np.asarray(cell, dtype=float)[:, :2]) for cell in cells],
         dtype=object,
@@ -109,6 +116,8 @@ def clip_to_boundary(cells: Sequence[np.ndarray], boundary) -> tuple[np.ndarray,
     clipped = []
     for piece in pieces:
         if piece.is_empty or piece.area <= 0.0:
+            continue
+        if any(line.intersects(piece) for line in open_material):
             continue
         for part in getattr(piece, "geoms", (piece,)):
             if part.geom_type != "Polygon" or part.is_empty:

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="null-identification-authority">
+  <meta name="plan-slug" content="null-identification-authority">
+  <meta name="plan-title" content="Forward GS contour evidence">
+  <meta name="plan-summary" content="Poloidal line-contour evidence for retained Solovev forward GS certificates, clipped hexagonal supports, and a cold-start topology refusal.">
+  <title>Forward GS contour evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan">
+  <header class="plan-hero">
+    <p class="eyebrow">Evidence · forward Grad-Shafranov contours</p>
+    <h1>Forward GS contour evidence</h1>
+    <p class="lede">The retained certificate is explicitly non-converged evidence. Every map uses unfilled poloidal-flux contours; a compared solved/reference pair receives one shared physical level array, so a mismatch cannot be hidden by independent colour scales. The wall, analytic boundary and containment-aware critical-point read stay on each frame.</p>
+  </header>
+
+  <section id="reading">
+    <h2>How to read every panel</h2>
+    <p>Blue contours are the analytic Solovev field and ochre contours are the terminal forward field, drawn at the same absolute flux levels. The red loop is the analytic separatrix and the dark vessel outline is the typed wall geometry. A solid triangle marks the magnetic axis and a filled cross an admitted saddle; containment is passed to the null painter, so a finite point outside the vessel is not allowed to impersonate an in-vessel X-point. The marker vocabulary matches the <a href="/nova/evidence/poloidal-convergence-atlas.html">poloidal convergence atlas</a>: solid triangle = magnetic axis; filled cross = admitted saddle; hollow circle = another qualified X-point inside the wall; hollow square = qualified X-point outside the wall.</p>
+    <p>A wrong answer is visible without a residual calculation: a red boundary that does not follow the terminal separatrix, a marker displaced from the corresponding reference critical region, a finite X marker against or beyond the vessel, or contour families with kinks, extra islands, or an implausible compression are each a topology or field-shape failure. A small scalar residual alone cannot exclude any of them.</p>
+  </section>
+
+  <section id="certificate">
+    <h2>Retained Solovev certificate</h2>
+    <p>The retained H200 receipt <code>job 1267132</code> gives six terminal states. It records every one as <strong>converged = false</strong>; the maps are therefore diagnostic terminal fields, not promoted accuracy evidence. The first replayed contour uses the retained terminal residual below. The remaining retained rungs are listed now so no non-converged row is silently omitted while its individual contour render completes.</p>
+    <table>
+      <thead><tr><th>case</th><th>requested cells</th><th>retained residual</th><th>converged</th></tr></thead>
+      <tbody>
+        <tr><td>weak rotation, reactor static</td><td>110</td><td>7.448e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>300</td><td>5.559e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>500</td><td>1.246e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>1000</td><td>5.401e-3</td><td>false</td></tr>
+        <tr><td>moderate rotation, conventional static</td><td>110</td><td>1.246e-2</td><td>false</td></tr>
+        <tr><td>moderate rotation, conventional static</td><td>300</td><td>8.456e-3</td><td>false</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-reduced.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 110-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 110 requested cells; retained residual 7.448e-3, not converged.</strong> The blue analytic and ochre solved fields share every physical contour level. A wrong boundary answer would put the red loop away from the terminal separatrix; a wrong critical-point answer would displace the triangle or filled cross relative to the analytic field; a wrong field answer would produce a different contour topology, unwanted islands, or compressed contours rather than merely a larger scalar residual.</figcaption>
+    </figure>
+    <p><strong>Placeholder — renders in flight:</strong> the 300-, 500- and 1000-cell weak-rotation maps and the two moderate-rotation maps will be inserted as individual shared-level panels. This heading is not a completed finding until all six are present.</p>
+  </section>
+
+  <section id="clips">
+    <h2>Boundary-cut hexagonal supports</h2>
+    <p><strong>Placeholder — render and area comparison in flight.</strong> This section will show the eight 110-rung and twenty 342-rung supports. It will draw the full hexagon only as a grey provenance outline; the coloured cell is the already-clipped polygon handed to <code>draw_plasma_cells</code>. The traced separatrix will be beside the straight atomic-edge clip so a visual reader can see that degree-fifteen Duffy quadrature integrates a first-order boundary.</p>
+  </section>
+
+  <section id="cold-start">
+    <h2>Cold-start stationary candidates</h2>
+    <p><strong>Placeholder — render in flight.</strong> This section will show the 110-cell first iterate, all stationary-point candidates and wall containment for the strict 256-refusal result. Its caption will distinguish expected cold-seed noise from a solver defect rather than treating an unqualified axis as a missing marker.</p>
+  </section>
+
+  <section id="affine">
+    <h2>Affine flux-function round trip</h2>
+    <p>The retained analytic-raster result recovers constant p-prime at binary64 noise. FF-prime is not exact: it has a uniform second-order radial-stencil bias while bin-to-bin scatter stays at roundoff. Its worst finest relative sup error is <code>8.851872538089174e-5</code> over two cases, three lattices and 24 bins with zero exclusions, below the measured operator-composition floor <code>1.1765249977300346e-3</code> of span at 67 by 103. The route has a structural limitation rather than a failed numerical claim: extraction requires a rectangular flux lattice, while the forward Solovev receipts are unstructured hex maps and are explicitly unavailable as non-tensor-product input. No hex-to-raster interpolation is being inferred here.</p>
+  </section>
+
+  <section id="provenance">
+    <h2>Provenance and limits</h2>
+    <p>Rendering uses the retained certificate parameters with CPU float64 asserted before array construction, on the <code>all_debug</code> partition. The machine-readable figure receipt is <code>docs/figures/null-identification-authority/gs-contour-evidence/contour-evidence-receipt.json</code>. The certificate residual and convergence statements come from the H200 receipt; a current replay only provides the drawable terminal field and does not relabel a non-converged row as qualified.</p>
+  </section>
+</main>
+</body>
+</html>

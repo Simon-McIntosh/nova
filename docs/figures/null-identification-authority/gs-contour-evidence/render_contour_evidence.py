@@ -45,6 +45,71 @@ def _renderer() -> Any:
     return module
 
 
+def _build_diverted_terminal(source: Any, cells: int) -> dict[str, Any]:
+    """Build the exact diverted state across receipt-shape revisions."""
+    case_name = "diverted-jump-bearing"
+    carrier_case, source_case, exact = source.certificate._case(case_name)
+    machine = source.oracle_fixture.cached_machine(
+        carrier_case,
+        cells,
+        wall_nodes=source.oracle_fixture.WALL_POINT_COUNT,
+    )
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic_state = source.certificate._exact_state(case_name, exact, coordinates)
+    empty_operator = source.oracle_fixture.forward_operator(source_case, machine)
+    exact_physical = source.oracle_fixture.exact_current_moments(
+        source_case, empty_operator, analytic_state
+    )
+    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+    exact_internal = source.oracle_fixture._internal_flux_image(
+        empty_operator, exact_coefficients
+    )
+    operator = source.oracle_fixture.forward_operator(
+        source_case, machine, analytic_state - exact_internal
+    )
+    profile = source.ForwardProfile(
+        operator,
+        source.StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=source.recovery.NEWTON_STEPS,
+    )
+    target_current, centroid, current_receipt = (
+        source.certificate._closed_form_current_target(
+            case_name, source_case, operator, exact_physical
+        )
+    )
+    seed, _requested_class, _seed_receipt = source.certificate._production_seed(
+        profile,
+        case_name,
+        source.COLD_START_TARGET_CURRENT_A,
+        centroid,
+        current_receipt,
+    )
+    request = source.certificate._certificate_solve_request(
+        profile,
+        seed,
+        target_current,
+        carrier_identity=f"contour-evidence-clip:{cells}",
+    )
+    started = source.perf_counter()
+    receipt = profile.solve(request)
+    state = np.asarray(receipt.equilibrium.flux, dtype=np.float64)
+    jax.block_until_ready(state)
+    fixed_point = receipt.equilibrium.fixed_point
+    return {
+        "machine": machine,
+        "operator": operator,
+        "state": state,
+        "target_current": float(target_current),
+        "residual": float(fixed_point.residual),
+        "refusals": int(getattr(fixed_point, "topology_trial_refusals", 0)),
+        "boundary": source.certificate._boundary(case_name, exact),
+        "wall": np.asarray(machine.wall_node, dtype=np.float64),
+        "solve_seconds": source.perf_counter() - started,
+    }
+
+
 def _read_receipt() -> dict[str, Any]:
     if not RECEIPT.exists():
         return {"certificate": [], "clipped_cells": []}
@@ -187,6 +252,9 @@ def main() -> None:
         raise RuntimeError("JAX default dtype is not float64")
     OUTPUT.mkdir(parents=True, exist_ok=True)
     source = _renderer()
+    source._build_diverted_terminal = lambda cells: _build_diverted_terminal(
+        source, cells
+    )
     if arguments.mode == "certificate":
         if arguments.case is None or arguments.cells is None:
             raise ValueError("certificate mode requires --case and --cells")

@@ -35,7 +35,7 @@ SolveRoute = Literal[
 JsonScalar = str | int | float | bool | None
 
 
-@jax.custom_batching.sequential_vmap
+@jax.custom_batching.custom_vmap
 def _evaluate_sampled_flux_function(coordinate, values, psi_norm):
     """Evaluate one member without changing scalar interpolation arithmetic."""
     grid = jnp.asarray(coordinate)
@@ -65,6 +65,24 @@ def _evaluate_sampled_flux_function(coordinate, values, psi_norm):
         interior,
         exterior,
     )
+
+
+@_evaluate_sampled_flux_function.def_vmap
+def _evaluate_sampled_flux_function_vmap(axis_size, in_batched, *arguments):
+    """Map members sequentially while admitting unbatched derivative subtraces."""
+    if not any(in_batched):
+        return _evaluate_sampled_flux_function(*arguments), False
+    mapped_arguments = tuple(
+        argument
+        if batched
+        else jnp.broadcast_to(argument, (axis_size, *jnp.shape(argument)))
+        for batched, argument in zip(in_batched, arguments, strict=True)
+    )
+    result = jax.lax.map(
+        lambda member_arguments: _evaluate_sampled_flux_function(*member_arguments),
+        mapped_arguments,
+    )
+    return result, True
 
 
 @jax.tree_util.register_pytree_node_class

@@ -1,0 +1,84 @@
+{
+  "all_points_bit_identical": true,
+  "comparison": {
+    "ff_prime": {
+      "callback_batches": 16,
+      "closure_value_sha256": "063e001a8329d915cfd83adda219a0d9b53e2431f64597698315927f508a8f4d",
+      "different_point_occurrences": 0,
+      "distinct_point_values": 3759,
+      "largest_absolute_difference": 0.0,
+      "point_occurrences": 16592,
+      "point_sha256": "2349154e0d1af67dcee28983e7a63fa636df078e539910ad20a3d0d8cc074fdc",
+      "sampled_value_sha256": "063e001a8329d915cfd83adda219a0d9b53e2431f64597698315927f508a8f4d"
+    },
+    "p_prime": {
+      "callback_batches": 17,
+      "closure_value_sha256": "34cba00989926ad5da5301c0b446529d3b52e855cfadadff4b3448f3dcab221d",
+      "different_point_occurrences": 0,
+      "distinct_point_values": 3759,
+      "largest_absolute_difference": 0.0,
+      "point_occurrences": 16849,
+      "point_sha256": "59d94fdad96ac79ff09d88eae92ae69e864614bed1c9d7899c9f0222acaa764f",
+      "sampled_value_sha256": "34cba00989926ad5da5301c0b446529d3b52e855cfadadff4b3448f3dcab221d"
+    }
+  },
+  "compile_seconds": 20.968557856976986,
+  "machine": "MAST",
+  "member": "21978/35 pure",
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "cpu",
+      "backend_version": "cpu",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "cpu",
+          "platform": "cpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-ea5c55820be3d80549fe"
+  },
+  "schema": "nova.sampled-flux-solve-point-audit/1",
+  "solve_route": "width_one_newton_krylov_without_strict_exit",
+  "terminal_state_sha256": "5844595eb764de9bd41a2965b73ee547f3ef19f9bb9896b0379504439c64f954"
+}

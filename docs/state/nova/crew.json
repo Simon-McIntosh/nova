@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T11:55:18",
+  "updated": "2026-09-08T12:04:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -176,6 +176,15 @@
         "sessions": {
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fa4-b460-7f32-a84e-1bdbaeb650ba"
         },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-identity-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-08"
       },
       {
@@ -133607,6 +133616,332 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T093256934177-pfs-batched-labeller-figure-write",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-batched-labeller-figure-write",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1210,
+                "cached_input_tokens": 725854,
+                "input_tokens": 727066,
+                "output_tokens": 1682,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 728748,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "tests/test_batched_labeller.py no longer writes docs/figures/playable-forward-solve/batched-labeller/terminal-state-parity.png during a test run: its fixture directs the receipt and figure output under tmp_path (or asserts on the receipt alone), the benchmark that owns the figure is unchanged, the test assertions are otherwise unchanged, and a run of the file leaves git status --porcelain clean for that path (show the check in the report line of the manifest); the file is green in the default lane on all_debug with the log captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/batched-labeller-figure.log; one commit with a conventional subject and body and no attribution trailer; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 0.5,
+          "goal": "tests/test_batched_labeller.py stops rewriting a tracked figure when it runs",
+          "id": "pfs-batched-labeller-figure-write",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093256934177-pfs-batched-labeller-figure-write/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_batched_labeller.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/batched-labeller-figure.log"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-labfig-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T09:33:11Z",
+        "completed_at": "2026-09-08T10:00:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1617,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1617,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d0f03c7a5ae57c3c791b5a771e4035dcd027fb75",
+        "commits": [
+          "21f897a4d2709ae4f1c49e460bbe8cde225225cf"
+        ],
+        "changed_lines": {
+          "added": 8,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug --cpus-per-task=4 --mem=32G .venv python -m pytest tests/test_batched_labeller.py -q (4 passed in 1303 s); ruff check scoped",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/batched-labeller-figure.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T093256934177-pfs-batched-labeller-figure-write/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0805d-4700-71e1-9527-aad628110a75",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6841344,
+            "cached_input_tokens_cumulative": 6841344,
+            "input_tokens": 7001860,
+            "input_tokens_cumulative": 7001860,
+            "output_tokens": 15792,
+            "output_tokens_cumulative": 15792,
+            "reasoning_output_tokens": 5217,
+            "reasoning_output_tokens_cumulative": 5217
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:00:08Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 28.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T10:00:08Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6841344,
+          "cumulative_input_tokens": 13843204,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21009
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-batched-labeller-figure-write",
+          "session_id": "01a0805d-4700-71e1-9527-aad628110a75",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T10:00:08Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T094820136929-bob-exit-incidence-batch-3",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-exit-incidence-batch-3",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1905,
+                "cached_input_tokens": 748117,
+                "input_tokens": 750024,
+                "output_tokens": 1746,
+                "reasoning_output_tokens": 204,
+                "total_tokens": 751770,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "From the worktree at 77b12a4e (two prior H200 allocations were lost to runtime defects the CPU would have shown in seconds: a cache-check inconsistency, and IndexError array is 0-dimensional but 1 were indexed inside scalar-leaf result selection): FIRST, with JAX_PLATFORMS=cpu and no allocation at all, run the complete batched path end to end at reduced width, at least two MAST members and two DIII-D members, both passes (strict exit enabled and disabled), until it writes a complete receipt carrying every field the full run must carry; fix each defect it exposes and commit the fix; add that reduced-width CPU run as a test or a --self-check mode so the path cannot regress unproven again, and state in the report which defects the CPU proof caught. ONLY AFTER that proof passes, submit ONE H200 allocation for the real widths (MAST twelve, DIII-D five) as one sbatch on betelgeuse under gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache, invoking /home/ITER/mcintos/Code/nova/.venv/bin/python directly; call sbatch exactly once in the turn and if you have already called it never call it again whatever the shell returned; park immediately with all five wait fields (wait_condition naming the job, wait_probe as a JSON argv array printing only the state via sacct with the job number and the flags -n -X -o State, wait_terminal as the JSON array of COMPLETED FAILED CANCELLED TIMEOUT OUT_OF_MEMORY NODE_FAIL, wait_started_at unquoted UTC ISO, resume_brief) and end your turn. The receipt under docs/figures/batched-operator-boundary/exit-incidence/ records per program and per pass the compile seconds and compile count, peak host RSS per stage from resource.getrusage with the verdict against 16 GB, per-member firing trip, and milliseconds per member beside the sequential width-1 figure in docs/figures/millisecond-converged-solve/strict-exit-incidence.json; a member falling back to the sequential route names its geometry digest. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md. No PNG read back; no tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.0,
+          "goal": "The batched strict-exit incidence measured at the real bank widths on one H200 allocation, with the whole path proven end to end on CPU at small width before that allocation is submitted",
+          "id": "bob-exit-incidence-batch-3",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T094820136929-bob-exit-incidence-batch-3/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "tests/test_strict_exit_incidence.py",
+            "docs/figures/batched-operator-boundary/exit-incidence/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-batch3-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T09:48:36Z",
+        "completed_at": "2026-09-08T10:01:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 786,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 786,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "77b12a4ecc78753a15738e0411d270c2048ceb5e",
+        "commits": [
+          "773c768e6330288c7a46483d1b207110d72f757b"
+        ],
+        "changed_lines": {
+          "added": 98,
+          "removed": 10,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_strict_exit_incidence.py (2 passed); allocation-free real-bank CPU self-check at width two for both machines and both passes",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T094820136929-bob-exit-incidence-batch-3/logs/cpu-self-check.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T094820136929-bob-exit-incidence-batch-3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0806b-63ab-77c0-a24c-7671719c8463",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3939072,
+            "cached_input_tokens_cumulative": 3939072,
+            "input_tokens": 4062393,
+            "input_tokens_cumulative": 4062393,
+            "output_tokens": 16604,
+            "output_tokens_cumulative": 16604,
+            "reasoning_output_tokens": 4415,
+            "reasoning_output_tokens_cumulative": 4415
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:01:42Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 28.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T10:01:42Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3939072,
+          "cumulative_input_tokens": 8001465,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21019
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/forward_operator.py"
+        ],
+        "predecessor_run": "r-20260908T090938589494-bob-exit-incidence-batch-2",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch-3",
+          "session_id": "01a0806b-63ab-77c0-a24c-7671719c8463",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T10:01:42Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0806b-63ab-77c0-a24c-7671719c8463",
+          "source": "stream",
+          "reason": "the CPU proof delivered its finding and the repair is in another file scope; the measurement redispatches from the repaired head"
+        },
+        "watch_override": null
       }
     ],
     "holds": [
@@ -133919,6 +134254,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2218
+    "_version": 2221
   }
 }

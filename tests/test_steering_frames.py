@@ -16,6 +16,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import pytest
+import xarray as xr
 from scipy.constants import mu_0
 from scipy.interpolate import RegularGridInterpolator
 
@@ -41,8 +42,10 @@ with skip_import("jax"):
     from nova.equilibrium.steering_frames import (
         COCOS,
         FINITE_MASK_COMPONENTS,
+        WALL_GROUP,
         SteeringAction,
         SteeringFrame,
+        WallReference,
         _current_centroid,
         assemble_frame,
         count_labelled_outside_wall,
@@ -50,9 +53,10 @@ with skip_import("jax"):
         policy_digest,
         read_session,
         session_dataset,
+        wall_reference_from_session,
         write_session,
     )
-    from nova.equilibrium.wall_mask import inside_polygon
+    from nova.equilibrium.wall_mask import WallUnit, inside_polygon
     from nova.jax.config import configure_dtypes
 
 
@@ -108,6 +112,26 @@ def _wall_loop(points=61):
     radius = centre + half * np.cos(angle)
     argument = np.clip((wall_flux - _solovev(radius, 0.0)) / beta, 0.0, None)
     return np.c_[radius, np.sign(np.sin(angle)) * np.sqrt(argument)], wall_flux
+
+
+def _wall_reference(wall) -> WallReference:
+    """Return a stable reference for the Solov'ev fixture's vessel unit."""
+
+    return WallReference.from_units(
+        machine="solovev",
+        source="/synthetic/solovev-machine-description",
+        source_kind="ids",
+        dd_version="test",
+        units=(
+            WallUnit(
+                r=np.asarray(wall)[:, 0],
+                z=np.asarray(wall)[:, 1],
+                kind="vessel",
+                closed=True,
+                name="solovev vessel",
+            ),
+        ),
+    )
 
 
 def _green_block(target, source, section=0.05):
@@ -665,14 +689,13 @@ def test_rasterless_solovev_session_fills_lcfs_from_the_outer_surface(
     assert int(restored.n_boundary_coords) == frame.lcfs_r.size
 
 
-def test_rasterless_solovev_session_wall_group_round_trips_closed(
+def test_rasterless_solovev_session_wall_reference_round_trips(
     machine, tmp_path
 ) -> None:
-    """The session's wall group round-trips closed against the operator wall.
+    """The rasterless session round-trips its wall reference and unit table.
 
-    The rasterless Solov'ev session carries the wall polygon as its own closed
-    group, written once per session: on read back the closed ring matches the
-    operator's own vertices to 1e-12 and closes on itself.
+    The session stores no coordinates.  Its digest, source identity and one
+    closed vessel unit bind the solve to the machine description it used.
     """
     profile, seed, _conductor_current = machine
     operator_wall = np.asarray(profile.operator.wall.coordinate, dtype=np.float64)
@@ -692,30 +715,32 @@ def test_rasterless_solovev_session_wall_group_round_trips_closed(
         )
         for index, frame in enumerate(_synthetic_session())
     )
-    expected = session_dataset(frames, include_raster=False, wall=operator_wall)
+    reference = _wall_reference(operator_wall)
+    expected = session_dataset(frames, include_raster=False, wall_reference=reference)
     write_session(
         frames,
         filename="wall-session",
         dirname=str(tmp_path),
         include_raster=False,
-        wall=operator_wall,
+        wall_reference=reference,
     )
     actual = read_session(filename="wall-session", dirname=str(tmp_path))
 
-    assert "wall_r" in actual.variables
-    assert "wall_z" in actual.variables
+    assert "wall_r" not in actual.variables
+    assert "wall_z" not in actual.variables
     assert actual.attrs["containment_reference"] == "wall"
-    assert actual.sizes["wall_vertex"] == operator_wall.shape[0] + 1  # closed ring
-    wall_r = np.asarray(actual["wall_r"].values)
-    wall_z = np.asarray(actual["wall_z"].values)
-    assert wall_r[0] == wall_r[-1]  # closed ring
-    assert wall_z[0] == wall_z[-1]
-    np.testing.assert_allclose(
-        wall_r[: operator_wall.shape[0]], operator_wall[:, 0], atol=1e-12
-    )
-    np.testing.assert_allclose(
-        wall_z[: operator_wall.shape[0]], operator_wall[:, 1], atol=1e-12
-    )
+    stored = wall_reference_from_session(actual)
+    assert stored.machine == reference.machine
+    assert stored.source == reference.source
+    assert stored.content_digest == reference.content_digest
+    assert stored.unit_vertex_count == (operator_wall.shape[0],)
+    assert stored.unit_closed == (True,)
+    assert stored.unit_kind == ("vessel",)
+    with xr.open_dataset(
+        tmp_path / "wall-session.nc", group=f"steering/{WALL_GROUP}"
+    ) as group:
+        assert set(group.variables).isdisjoint({"wall_r", "wall_z"})
+        assert int(group.sizes["wall_unit"]) == 1
     _assert_dataset_variables_bitwise(expected, actual)
 
 
@@ -756,8 +781,9 @@ def test_labelled_points_outside_wall_receipt_counts_segment_membership() -> Non
         strike_parameter=strike_parameter,
         finite_mask=np.array([True, True, False, True, True, True]),
     )
-    dataset = session_dataset((frame,), wall=operator_wall)
-    assert count_labelled_outside_wall(dataset) == 1
+    reference = _wall_reference(operator_wall)
+    dataset = session_dataset((frame,), wall_reference=reference)
+    assert count_labelled_outside_wall(dataset, reference) == 1
 
     # Positive control: moving one strike one millimetre off its segment makes
     # exactly that otherwise-valid slot count outside.
@@ -765,7 +791,9 @@ def test_labelled_points_outside_wall_receipt_counts_segment_membership() -> Non
         strike_points_r=frame.strike_points_r + np.array([1.0e-3, 0.0]),
     )
     assert (
-        count_labelled_outside_wall(session_dataset((displaced,), wall=operator_wall))
+        count_labelled_outside_wall(
+            session_dataset((displaced,), wall_reference=reference), reference
+        )
         == 2
     )
 
@@ -776,10 +804,32 @@ def test_labelled_points_outside_wall_receipt_counts_segment_membership() -> Non
     )
     assert (
         count_labelled_outside_wall(
-            session_dataset((invalid_segment,), wall=operator_wall)
+            session_dataset((invalid_segment,), wall_reference=reference), reference
         )
         == 2
     )
+
+
+def test_legacy_copied_ring_reads_as_a_flagged_unknown_reference(tmp_path) -> None:
+    """An inline historical ring is exposed as one flagged vessel reference."""
+
+    wall, _ = _wall_loop()
+    legacy = session_dataset((_synthetic_frame(0),)).assign(
+        wall_r=("wall_vertex", wall[:, 0]),
+        wall_z=("wall_vertex", wall[:, 1]),
+    )
+    legacy.to_netcdf(tmp_path / "legacy.nc", mode="w", group="steering")
+
+    restored = read_session(filename="legacy", dirname=str(tmp_path))
+    reference = wall_reference_from_session(restored)
+
+    assert "wall_r" not in restored.variables
+    assert "wall_z" not in restored.variables
+    assert reference.legacy_copied_wall
+    assert reference.machine == reference.source == reference.dd_version == "unknown"
+    assert reference.unit_vertex_count == (wall.shape[0],)
+    assert reference.unit_closed == (True,)
+    assert reference.unit_kind == ("vessel",)
 
 
 def test_frame_psi_at_the_axis_is_the_solve_axis_flux_in_wb(machine) -> None:

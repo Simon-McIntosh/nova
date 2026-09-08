@@ -482,6 +482,13 @@
     <code>docs/figures/millisecond-converged-solve/trip-quantum/</code>; report at
     <code>~/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md</code>.</p>
   </section>
+<section id="the-jacobian-refreshes-on-the-step-contraction"><h2>The Jacobian refreshes on the step contraction (2026-09-08 06:36Z)</h2>
+<p>Node <code>msc-adaptive-refresh</code> (local lane, spec guided; commits <code>6487b487</code>, <code>4e7a2965</code>, merged at <code>ff9da2c9</code>) with its gate run separately as <code>msc-adaptive-refresh-gate</code> (codex-luna, test role) after the implementing worker died waiting on its lanes.</p>
+<p><strong>Result.</strong> The reduced Newton solve takes <code>jacobian_refresh_threshold</code> (default 1.0): the dense Jacobian is rebuilt when the contraction factor of the last accepted step, the ratio of successive reduced-residual sup norms, exceeds the threshold, or when a grade ladder is refused; <code>None</code> keeps strict refusal-only. On the CPU synthetic referee the default reproduces refusal-only bit-identically and a threshold of zero converges in three steps against the chord's seven to the same fixed point.</p>
+<p><strong>Measure.</strong> The H200 four-row receipt (job 1264707): eleven fewer Newton steps across the four bank rows at four more Jacobian builds; 22086/43 goes from 12 to 6 steps at trip 0 with builds 1 to 2, 21989/55 from 6 to 3. On real rows accepted steps do grow the reduced residual (rho 1.17 to 4.15 on 22086/43), so the default threshold is genuinely adaptive there. Gate by delta on a debug partition, eight fresh-process lanes at head and at a git archive of the base: zero added failures; the one failure, a line-search test that aborts at compile on LLVM cannot-allocate-memory, is shared by both revisions.</p>
+<figure><img src="/nova/figures/millisecond-converged-solve/adaptive-refresh/four-rows.png" alt="Newton steps, Jacobian builds and residual traces for the four bank rows under refusal-only and adaptive refresh"><figcaption>The four bank rows under refusal-only and adaptive refresh: fewer steps, more builds, same floors.</figcaption></figure>
+<p><strong>Lesson.</strong> The two test files cannot run as one process on the CPU backend: XLA's compile accumulation aborts on memory on login and compute nodes alike, so the gate is fresh-process lanes of at most six tests. Receipt: <code>docs/figures/millisecond-converged-solve/adaptive-refresh/four-rows.json</code>. Reports: <code>~/.config/reckon/crew/reports/nova/millisecond/adaptive-refresh.md</code> and <code>~/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

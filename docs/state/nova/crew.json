@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T08:19:26",
+  "updated": "2026-09-08T08:36:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1110,6 +1110,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "dvf-gate-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "dvf-residual",
@@ -2890,6 +2899,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-authority-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-axisdef-c",
@@ -129586,6 +129604,455 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260908T061310598050-pfs-psi-unit-label",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-psi-unit-label",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4339,
+                "cached_input_tokens": 394296,
+                "input_tokens": 398637,
+                "output_tokens": 1167,
+                "reasoning_output_tokens": 686,
+                "total_tokens": 399804,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "shadow-r-20260907T203301948932-pfs-psi-unit-label-codex-spark"
+          },
+          "done_when": "A test on the Solovev fixture asserts the frame's psi at the axis equals the solve's axis flux in Wb; the schema variable table, the netCDF attributes and the module header of nova/equilibrium/steering_frames.py state one unit (Wb, total flux, COCOS 17) with the per-radian wording removed everywhere; tests/test_steering_frames.py green in the default lane",
+          "estimated_hours": 0.4,
+          "goal": "One psi unit label in the session schema, settled from the values under COCOS 17",
+          "id": "pfs-psi-unit-label",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061310598050-pfs-psi-unit-label/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "shadow-spark-1",
+        "backend": "codex-spark",
+        "local": false,
+        "agent": {
+          "alias": "spark5.3",
+          "backend": "codex-spark",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.3-codex-spark",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T06:13:17Z",
+        "completed_at": "2026-09-08T06:18:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 285,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 285,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d893138c54d541a8ae129e56eaaf535867c0ab57",
+        "commits": [],
+        "changed_lines": {
+          "added": 12,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=<worktree> uv run pytest tests/test_steering_frames.py (full file, slow fixture included)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061310598050-pfs-psi-unit-label/test_steering_frames.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "codex-spark shadow of pfs-psi-unit-label (primary 2e207735): minimal 8+8 lines relabelling the header, table and field registry to Wb (no netCDF attribute added) and an observed axis-flux assertion at 1e-12 placed in the slow Solovev fixture test, which fails at base before reaching it (fixed_point.converged False), reported honestly as blocked with the pre-existing failure named. Same shape as the terra shadow. No read of the landed commit. Ran uv run without --no-sync with UV_PROJECT_ENVIRONMENT at the main checkout, which repointed the shared editable install at its worktree (repaired by the coordinator). Cumulative input 3.64M tokens (3.41M cached), output 22.0k, reasoning 14.2k, about 8 min wall; spark is unpriced.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061310598050-pfs-psi-unit-label/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fa6-43a9-71f0-8b0e-8dd7e9922980",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3405952,
+            "cached_input_tokens_cumulative": 3405952,
+            "input_tokens": 3638524,
+            "input_tokens_cumulative": 3638524,
+            "output_tokens": 21977,
+            "output_tokens_cumulative": 21977,
+            "reasoning_output_tokens": 14237,
+            "reasoning_output_tokens_cumulative": 14237
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "configuration": {
+            "inherited": {
+              "effort": "high",
+              "launch": "cli",
+              "sandbox": "worktree-full",
+              "time_budget": "30m"
+            },
+            "substituted": {
+              "backend": {
+                "primary": "clive",
+                "shadow": "codex-spark",
+                "via": "backend"
+              },
+              "model": {
+                "primary": "deepseek-v4-flash",
+                "shadow": "gpt-5.3-codex-spark",
+                "via": "backend"
+              }
+            }
+          },
+          "kind": "shadow",
+          "primary_run_id": "r-20260907T203301948932-pfs-psi-unit-label"
+        },
+        "shadow_controlled": true,
+        "shadow_patch": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061310598050-pfs-psi-unit-label/shadow.patch",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3405952,
+          "cumulative_input_tokens": 7044476,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36214
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "shadow",
+        "resume_waiver": {
+          "session_id": "01a07fa6-43a9-71f0-8b0e-8dd7e9922980",
+          "source": "stream",
+          "reason": "shadow evidence run; the blocker is the pre-existing slow fixture non-convergence outside the node's write scope and the primary already landed"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T203301948932-pfs-psi-unit-label-codex-spark/pfs-psi-unit-label",
+          "session_id": "01a07fa6-43a9-71f0-8b0e-8dd7e9922980",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T06:18:02Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T061749184648-pfs-imas-position-reads",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-imas-position-reads",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2173,
+                "cached_input_tokens": 408621,
+                "input_tokens": 410826,
+                "output_tokens": 553,
+                "reasoning_output_tokens": 226,
+                "total_tokens": 411379,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "shadow-r-20260907T164832004647-pfs-imas-position-reads-codex-spark"
+          },
+          "done_when": "Each of nova/imas/mast_chain_factory.py:174, nova/imas/diiid_machine_ids.py:158 and nova/imas/machine.py:1226 carries either a count check that raises or a one-sentence justification recorded in the report; one test per added guard proves a synthetic two-unit or two-description container raises rather than selecting silently; the existing MAST and DIII-D machine-description tests are unchanged and green; the exposure count of reads that were passing only because nothing checked is stated as a number; the report states what MAST's wall IDS contains",
+          "estimated_hours": 0.8,
+          "goal": "A verdict per position-selected read in nova/imas with a loud count guard where one belongs and the MAST wall IDS contents reported",
+          "id": "pfs-imas-position-reads",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061749184648-pfs-imas-position-reads/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/imas/mast_chain_factory.py",
+            "nova/imas/diiid_machine_ids.py",
+            "nova/imas/machine.py",
+            "tests/test_imas_position_reads.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/imas-position-reads.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "shadow-spark-2",
+        "backend": "codex-spark",
+        "local": false,
+        "agent": {
+          "alias": "spark5.3",
+          "backend": "codex-spark",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.3-codex-spark",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T06:17:56Z",
+        "completed_at": "2026-09-08T06:19:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 99,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 99,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [],
+        "changed_lines": {
+          "added": 148,
+          "removed": 3,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none ran; the process ended before its gate",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061749184648-pfs-imas-position-reads/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "codex-spark shadow of pfs-imas-position-reads (primary 7cb3b0fe): the process ended after 99 seconds with the template manifest still carrying unsubstituted placeholders and status blocked, no turn.completed usage record in the stream, and 21 lines of guards across the three files plus an untracked test file left in the worktree. Stderr: no error line. Not a capability reading; a lane death on the small meter. Spark is unpriced.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061749184648-pfs-imas-position-reads/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07faa-87ea-7c02-9e28-47ba45136a2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": null,
+          "cost_usd": null,
+          "refusal": false,
+          "detail": ""
+        },
+        "lineage": {
+          "configuration": {
+            "inherited": {
+              "effort": "high",
+              "launch": "cli",
+              "sandbox": "worktree-full",
+              "time_budget": "45m"
+            },
+            "substituted": {
+              "backend": {
+                "primary": "clive",
+                "shadow": "codex-spark",
+                "via": "backend"
+              },
+              "model": {
+                "primary": "deepseek-v4-flash",
+                "shadow": "gpt-5.3-codex-spark",
+                "via": "backend"
+              }
+            }
+          },
+          "kind": "shadow",
+          "primary_run_id": "r-20260907T164832004647-pfs-imas-position-reads"
+        },
+        "shadow_controlled": true,
+        "shadow_patch": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061749184648-pfs-imas-position-reads/shadow.patch",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "shadow",
+        "no_commit": "shadow evidence; 21 uncommitted lines remain in the shadow worktree",
+        "resume_waiver": {
+          "session_id": "01a07faa-87ea-7c02-9e28-47ba45136a2c",
+          "source": "stream",
+          "reason": "shadow evidence run whose process ended after 99 seconds with a template manifest; the primary already landed and a shadow never merges"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T164832004647-pfs-imas-position-reads-codex-spark/pfs-imas-position-reads",
+          "session_id": "01a07faa-87ea-7c02-9e28-47ba45136a2c",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T06:19:35Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T054822172798-msc-adaptive-refresh-gate",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-adaptive-refresh-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3765,
+                "cached_input_tokens": 315763,
+                "input_tokens": 319530,
+                "output_tokens": 1266,
+                "reasoning_output_tokens": 285,
+                "total_tokens": 320796,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "In the worktree you are given, whose head is 4e7a2965, tests/test_reduced_newton_constraints.py runs on all_debug as fresh-process lanes of at most six tests each (one srun per lane with --mem=64G --cpus-per-task=4, TMPDIR=/tmp, JAX_PLATFORMS=cpu, UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv and PYTHONPATH set to the worktree root, uv run --no-sync pytest -p no:cacheprovider) and tests/test_reduced_newton.py runs the same way as one lane with the markexpr not slow; each lane's log is captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate-logs/; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate.md tabulates per lane the collected, passed, failed and skipped counts and the exit status; for every failure it states whether the same test also fails at base 52ca3c4e in the same lane shape, running that one lane against a git archive of the base extracted under the reports directory with PYTHONPATH pointing at it, or states plainly that the base comparison was not possible and why; a lane whose pytest collected zero tests or skipped everything on a missing-jax message is a broken lane and is re-run with the environment fixed, never reported as green; no source or test file is changed",
+          "estimated_hours": 1.0,
+          "goal": "The adaptive Jacobian refresh commits gated as fresh-process test lanes on a debug partition, with any failure attributed against the base",
+          "id": "msc-adaptive-refresh-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054822172798-msc-adaptive-refresh-gate/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate-logs/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "msc-gate-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T05:48:36Z",
+        "completed_at": "2026-09-08T06:32:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2628,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2628,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4e7a2965711fe94ad27f91cee30f8611a533dd1a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "eight srun all_debug fresh-process lanes (--mem=64G --cpus-per-task=4, TMPDIR=/tmp, JAX_PLATFORMS=cpu, UV_PROJECT_ENVIRONMENT main venv, PYTHONPATH worktree or base archive) running uv run --no-sync pytest -p no:cacheprovider on tests/test_reduced_newton_constraints.py in thirds and tests/test_reduced_newton.py -m not-slow, at 4e7a2965 and 52ca3c4e",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/adaptive-refresh-gate-logs/after-reduced-newton.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054822172798-msc-adaptive-refresh-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07f8f-aa36-7d01-98d6-7e51442e0978",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13079040,
+            "cached_input_tokens_cumulative": 13079040,
+            "input_tokens": 13316040,
+            "input_tokens_cumulative": 13316040,
+            "output_tokens": 39504,
+            "output_tokens_cumulative": 39504,
+            "reasoning_output_tokens": 13553,
+            "reasoning_output_tokens_cumulative": 13553
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13079040,
+          "cumulative_input_tokens": 26395080,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 53057
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260907T165253379121-msc-adaptive-refresh",
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "test role; the gate evidence is the deliverable and the candidate commits 6487b487 and 4e7a2965 are merged by the coordinator on its verdict",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh-gate",
+          "session_id": "01a07f8f-aa36-7d01-98d6-7e51442e0978",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T06:32:24Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -129898,6 +130365,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2161
+    "_version": 2166
   }
 }

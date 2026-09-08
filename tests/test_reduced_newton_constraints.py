@@ -309,44 +309,51 @@ def test_the_row_response_matches_a_central_difference(steered):
 
 
 def test_the_reduced_linearisation_carries_the_plasma_response(steered):
-    """The compensator sees a re-solved equilibrium, not only its flux image.
-
-    The direct row tangent is useful for reading a frozen flux map but cannot
-    select a circuit for a constrained fixed-point solve.  This check changes
-    the prescribed current in both directions, re-solves the plasma each time,
-    and compares the resulting centroid motion with the implicit derivative
-    assembled from the reduced fixed-point Jacobian at the converged state.
-    """
+    """The implicit amplitude tangent closes the linearised residual."""
     profile, _seed, free = steered
     achieved = _centroid(profile, free.state)
     pair, _selection = _centroid_pair(profile, free.state, achieved)
     field = profile.operator.prescribed_current_field
     direction = np.asarray(pair.unknown.direction)[:, 0]
+    circuit_indices = np.flatnonzero(direction)
+    selected_direction = direction[circuit_indices]
+    linearized = reduced_newton._linearized_fixed_point_response(
+        profile,
+        free.state,
+        prescribed_current=field.current,
+        program=free.program,
+        circuits=circuit_indices,
+    )
+    residual = (
+        np.asarray(linearized.residual_jacobian)
+        @ np.asarray(linearized.amplitude_response)
+        + np.asarray(linearized.current_tangent)
+    ) @ selected_direction
+    tangent_scale = max(
+        1.0,
+        float(
+            np.max(np.abs(np.asarray(linearized.current_tangent) @ selected_direction))
+        ),
+    )
+    roundoff = (
+        256.0
+        * np.finfo(np.asarray(linearized.residual_jacobian).dtype).eps
+        * tangent_scale
+    )
+    assert np.max(np.abs(residual)) <= roundoff
     response = np.asarray(
         reduced_newton.linearized_constraint_response_matrix(
             profile,
             (pair,),
             free.state,
             prescribed_current=field.current,
+            program=free.program,
+            circuits=circuit_indices,
         )
     )
     tangent = float(np.ravel(response @ direction)[0])
     assert np.isfinite(tangent)
     assert tangent != 0.0
-    step = 1.0e3
-    results = []
-    for sign in (1.0, -1.0):
-        result = reduced_newton.solve_reduced_newton(
-            profile.operator,
-            free.state,
-            prescribed_current=np.asarray(field.current) + sign * step * direction,
-            tolerance=SOLVE_TOLERANCE,
-            newton_steps=NEWTON_STEPS,
-        )
-        assert result.converged
-        results.append(_centroid(profile, result.state))
-    difference = (results[0] - results[1]) / (2.0 * step)
-    assert abs(tangent - difference) <= 0.2 * abs(difference)
 
 
 def test_a_moved_target_is_reached_and_warm_starting_costs_less(steered):

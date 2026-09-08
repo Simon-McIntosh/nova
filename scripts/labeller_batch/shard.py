@@ -892,6 +892,7 @@ def label_shot(
                             target_current=target_current,
                             prescribed_current=current,
                             circuits=sorted(circuit_names),
+                            program=free_result.program,
                         )
                     )
             except Exception as error:

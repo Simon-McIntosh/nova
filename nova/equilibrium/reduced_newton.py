@@ -1882,31 +1882,30 @@ def _row_augmentation(
     )
 
 
-def linearized_constraint_response_matrix(
+class _LinearizedFixedPointResponse(NamedTuple):
+    """Reduced tangent data carried into physical constraint observations."""
+
+    state: jax.Array
+    shadow: jax.Array
+    state_response: jax.Array
+    residual_jacobian: jax.Array
+    current_tangent: jax.Array
+    amplitude_response: jax.Array
+    circuit_indices: np.ndarray
+    circuit_count: int
+
+
+def _linearized_fixed_point_response(
     profile,
-    pairs: tuple[ConstraintPair, ...],
     flux,
     *,
     requested_class=None,
     target_current=None,
     prescribed_current=None,
-) -> jax.Array:
-    """Return row sensitivities after the reduced fixed point responds.
-
-    A circuit changes the external flux directly, but it also changes the
-    converged plasma amplitudes.  The latter is the vertical response that a
-    centroid constraint must use when selecting and scaling its compensator.
-    The reduced residual already supplies the fixed-point Jacobian, so the
-    implicit derivative is solved as ``du/dI = -F_u^-1 F_I`` with the active
-    shadow held at the converged equilibrium.
-
-    This is intentionally a local linearisation.  A topology transition is a
-    separate equilibrium branch, not a differentiable response of the branch
-    that the constrained Newton step is currently correcting.
-    """
-    pairs = tuple(pairs)
-    if not pairs:
-        raise ValueError("a linearized response needs at least one constraint pair")
+    program: ReducedProgram | None = None,
+    circuits=None,
+) -> _LinearizedFixedPointResponse:
+    """Solve the reduced residual's implicit circuit-current derivative."""
     operator = profile.operator
     field = operator.prescribed_current_field
     if field is None:
@@ -1917,31 +1916,44 @@ def linearized_constraint_response_matrix(
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
-    coordinates = reduced_coordinates(
-        operator,
-        state,
-        requested_class=requested_class,
-        target_current=target_value,
-    )
-    kernels = _reduced_kernels(
-        operator,
-        coordinates,
-        external,
-        requested_class,
-        target_value,
-    )
+    if program is None:
+        coordinates = reduced_coordinates(
+            operator,
+            state,
+            requested_class=requested_class,
+            target_current=target_value,
+        )
+        kernels = _reduced_kernels(
+            operator,
+            coordinates,
+            external,
+            requested_class,
+            target_value,
+        )
+    else:
+        if program.operator_identity != id(operator) or program.row_count != 0:
+            raise ValueError("the linearized response needs this free solve's program")
+        coordinates = program.coordinates
+        kernels = program.kernels
     reduced = kernels["initial_gather"](state)
     residual = kernels["reduced_residual"]
-    jacobian = kernels["jacobian"](reduced, shadow, state)
-    external_response = jnp.asarray(field.response)
+    residual_jacobian = kernels["jacobian"](reduced, shadow, state)
+    full_external_response = jnp.asarray(field.response)
+    circuit_indices = (
+        np.arange(full_external_response.shape[1], dtype=int)
+        if circuits is None
+        else np.unique(np.asarray(circuits, dtype=int))
+    )
+    if circuit_indices.size == 0:
+        raise ValueError("a linearized response needs at least one circuit")
+    external_response = full_external_response[:, circuit_indices]
 
     def residual_from_external(value):
         return residual(reduced, shadow, state, external_value=value)
 
     residual_external = jax.jacfwd(residual_from_external)(external)
-    amplitude_response = -jnp.linalg.solve(
-        jacobian, residual_external @ external_response
-    )
+    current_tangent = residual_external @ external_response
+    amplitude_response = -jnp.linalg.solve(residual_jacobian, current_tangent)
 
     def reconstructed(reduced_value, external_value):
         return kernels["reconstruct"](
@@ -1954,7 +1966,53 @@ def linearized_constraint_response_matrix(
         state_from_amplitudes @ amplitude_response
         + state_from_external @ external_response
     )
-    context = ConstraintContext(state, requested_class, target_value, shadow)
+    return _LinearizedFixedPointResponse(
+        state,
+        shadow,
+        state_response,
+        residual_jacobian,
+        current_tangent,
+        amplitude_response,
+        circuit_indices,
+        full_external_response.shape[1],
+    )
+
+
+def linearized_constraint_response_matrix(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+    program: ReducedProgram | None = None,
+    circuits=None,
+) -> jax.Array:
+    """Return row sensitivities after the reduced fixed point responds.
+
+    A circuit changes the external flux directly, but it also changes the
+    converged plasma amplitudes.  The latter is the vertical response that a
+    centroid constraint must use when selecting and scaling its compensator.
+    The reduced residual supplies both fixed-point tangents.  The amplitudes
+    then follow from the implicit solve ``du/dI = -F_u^-1 F_I``.
+    """
+    pairs = tuple(pairs)
+    if not pairs:
+        raise ValueError("a linearized response needs at least one constraint pair")
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    linearized = _linearized_fixed_point_response(
+        profile,
+        flux,
+        requested_class=requested_class,
+        target_current=target_value,
+        prescribed_current=prescribed_current,
+        program=program,
+        circuits=circuits,
+    )
+    context = ConstraintContext(
+        linearized.state, requested_class, target_value, linearized.shadow
+    )
     blocks = []
     for pair in pairs:
 
@@ -1965,8 +2023,14 @@ def linearized_constraint_response_matrix(
                 )
             )
 
-        observation = jax.jacfwd(observe)(state)
-        blocks.append(observation @ state_response)
+        observation = jax.jacfwd(observe)(linearized.state)
+        selected = observation @ linearized.state_response
+        block = (
+            jnp.zeros((pair.row_count, linearized.circuit_count), dtype=selected.dtype)
+            .at[:, linearized.circuit_indices]
+            .set(selected)
+        )
+        blocks.append(block)
     return jnp.concatenate(blocks, axis=0)
 
 
@@ -1979,6 +2043,7 @@ def derive_reduced_constraint_pairs(
     target_current=None,
     prescribed_current=None,
     circuits=None,
+    program: ReducedProgram | None = None,
 ) -> tuple[tuple[ConstraintPair, ...], Any]:
     """Select circuit compensators from the reduced fixed-point response."""
     pairs = tuple(pairs)
@@ -1990,6 +2055,8 @@ def derive_reduced_constraint_pairs(
             requested_class=requested_class,
             target_current=target_current,
             prescribed_current=prescribed_current,
+            program=program,
+            circuits=circuits,
         ),
         dtype=float,
     )

@@ -458,7 +458,13 @@ def test_the_public_route_carries_the_rows_into_a_receipt(steered):
 SCORE_REASSOCIATION = 1.0e-6
 #: Kernels a constrained solve drives on this machine.  Each must compile
 #: once across a sequence of moved targets that re-enters one program.
-STEERED_KERNELS = ("initial_gather", "jacobian", "direction", "grade", "boundary")
+STEERED_KERNELS = (
+    "initial_gather",
+    "jacobian",
+    "direction",
+    "step_scores",
+    "boundary",
+)
 
 
 def _cache_sizes(program):

@@ -1,0 +1,55 @@
+{
+  "allocations": [
+    {
+      "allocation": "cold (first)",
+      "compile_wall_seconds": 59.925682,
+      "converged": true,
+      "entries_after": 28,
+      "entries_before": 0,
+      "job_id": 1264688,
+      "solve_wall_seconds": 57.338677,
+      "source": "wall-cold2-1264688.log COMPILE_WALL lines"
+    },
+    {
+      "allocation": "warm (second, same node, cache not cleared)",
+      "compile_event_count": 120,
+      "compile_wall_seconds": 8.66173679754138,
+      "converged": true,
+      "entries_after": 28,
+      "entries_before": 28,
+      "job_id": 1264690,
+      "solve_wall_seconds": 7.404145879670978,
+      "source": "measure_compile_wall_warm.json"
+    }
+  ],
+  "generated_at": 1788826127.968646,
+  "node": "98dci4-clu-5137",
+  "partition": "sirius_debug",
+  "premise": {
+    "compute_node_tmp": {
+      "evidence": "filesystem_id differs from the shared home on the same node; xfs local volume (login /tmp and compute /tmp are distinct ids); TMPDIR=/tmp on every SLURM step (slurmstepd falls back from /run/user)",
+      "filesystem_id": 64772,
+      "node_local": true,
+      "path": "/tmp"
+    },
+    "conclusion": "compute-node TMPDIR is node-local: a TMPDIR-derived cache root dies with its allocation and no job banks a compile for its successor",
+    "shared_home": {
+      "evidence": "gpfs; locality probe marker written in one allocation was visible from a second allocation on the same node; /tmp markers are not visible across allocations",
+      "filesystem_id": 8840544406,
+      "path": "/home/ITER/mcintos/.local/share/nova",
+      "shared": true
+    }
+  },
+  "program": "playable Solovev carrier, production reduced route (solve_constrained_reduced_newton, prescribed currents, no rows)",
+  "reuse_outcome": {
+    "cache_entries": "0 -> 28 (cold) and 28 -> 28 (warm): every persisted program was reused, no new writes on the warm allocation",
+    "compile_wall_reduction": 0.855,
+    "residual_warm_compile": "120 ms-scale kernel events (8.66 s total) are uncached small fragments both allocations pay; the persisted program compiles are what the drop removes",
+    "solve_wall_reduction": 0.871
+  },
+  "root": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-clu-5137.iter.org",
+  "setgid_ablation": {
+    "chosen_base": "~/.cache/nova/forward-compilation-cache (not setgid)",
+    "shared_data_tree": "~/.local/share/nova is setgid-89486; gid 89486 has no NSS name anywhere; JAX eviction stats call grp.getgrgid and abort every write after the first (reproduced: 1 of N entries persisted under that tree, N of N under ~/.cache)"
+  }
+}

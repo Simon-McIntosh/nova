@@ -1,0 +1,400 @@
+{
+  "allocation": {
+    "hostname": "98dci4-clu-5137.iter.org",
+    "jax_platforms": "cpu",
+    "job_id": "1264690",
+    "node": "98dci4-clu-5137",
+    "partition": "sirius_debug",
+    "tmpdir": "/tmp"
+  },
+  "cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-clu-5137.iter.org/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+    "entries_after": 28,
+    "entries_before": 28,
+    "root": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-clu-5137.iter.org"
+  },
+  "compile": {
+    "compile_wall_seconds": 8.66173679754138,
+    "events": [
+      {
+        "wall_seconds": 0.006530012935400009
+      },
+      {
+        "wall_seconds": 0.003710024058818817
+      },
+      {
+        "wall_seconds": 0.003735903650522232
+      },
+      {
+        "wall_seconds": 0.003438275307416916
+      },
+      {
+        "wall_seconds": 0.019830001518130302
+      },
+      {
+        "wall_seconds": 0.0037685371935367584
+      },
+      {
+        "wall_seconds": 0.003855763003230095
+      },
+      {
+        "wall_seconds": 0.01556587964296341
+      },
+      {
+        "wall_seconds": 0.003573944792151451
+      },
+      {
+        "wall_seconds": 0.0038718674331903458
+      },
+      {
+        "wall_seconds": 0.0034923572093248367
+      },
+      {
+        "wall_seconds": 0.0038932152092456818
+      },
+      {
+        "wall_seconds": 0.003856772556900978
+      },
+      {
+        "wall_seconds": 0.01453704759478569
+      },
+      {
+        "wall_seconds": 0.014129316434264183
+      },
+      {
+        "wall_seconds": 0.019175643101334572
+      },
+      {
+        "wall_seconds": 0.0036181416362524033
+      },
+      {
+        "wall_seconds": 0.01892142742872238
+      },
+      {
+        "wall_seconds": 0.014682084321975708
+      },
+      {
+        "wall_seconds": 0.013461094349622726
+      },
+      {
+        "wall_seconds": 0.021727923303842545
+      },
+      {
+        "wall_seconds": 0.0035279933363199234
+      },
+      {
+        "wall_seconds": 0.003987107425928116
+      },
+      {
+        "wall_seconds": 0.016326935961842537
+      },
+      {
+        "wall_seconds": 0.003530610352754593
+      },
+      {
+        "wall_seconds": 0.016346443444490433
+      },
+      {
+        "wall_seconds": 0.014896675944328308
+      },
+      {
+        "wall_seconds": 0.02007025107741356
+      },
+      {
+        "wall_seconds": 0.0035265330225229263
+      },
+      {
+        "wall_seconds": 0.017015213146805763
+      },
+      {
+        "wall_seconds": 0.015002049505710602
+      },
+      {
+        "wall_seconds": 0.003504512831568718
+      },
+      {
+        "wall_seconds": 0.014809640124440193
+      },
+      {
+        "wall_seconds": 0.014047546312212944
+      },
+      {
+        "wall_seconds": 0.014124015346169472
+      },
+      {
+        "wall_seconds": 0.014744490385055542
+      },
+      {
+        "wall_seconds": 0.0034656915813684464
+      },
+      {
+        "wall_seconds": 0.00385940819978714
+      },
+      {
+        "wall_seconds": 0.003977755084633827
+      },
+      {
+        "wall_seconds": 0.0038884487003087997
+      },
+      {
+        "wall_seconds": 0.013292049989104271
+      },
+      {
+        "wall_seconds": 0.003534143790602684
+      },
+      {
+        "wall_seconds": 0.02129884995520115
+      },
+      {
+        "wall_seconds": 0.014316432178020477
+      },
+      {
+        "wall_seconds": 0.003598961979150772
+      },
+      {
+        "wall_seconds": 0.018087714910507202
+      },
+      {
+        "wall_seconds": 0.016369996592402458
+      },
+      {
+        "wall_seconds": 0.017316006124019623
+      },
+      {
+        "wall_seconds": 0.011911319568753242
+      },
+      {
+        "wall_seconds": 0.012629378587007523
+      },
+      {
+        "wall_seconds": 0.012402281165122986
+      },
+      {
+        "wall_seconds": 0.013847591355443
+      },
+      {
+        "wall_seconds": 0.02060127444565296
+      },
+      {
+        "wall_seconds": 0.020348289981484413
+      },
+      {
+        "wall_seconds": 0.016753768548369408
+      },
+      {
+        "wall_seconds": 0.003744160756468773
+      },
+      {
+        "wall_seconds": 0.016734829172492027
+      },
+      {
+        "wall_seconds": 0.013653520494699478
+      },
+      {
+        "wall_seconds": 0.0035273339599370956
+      },
+      {
+        "wall_seconds": 0.019580570980906487
+      },
+      {
+        "wall_seconds": 0.014593943953514099
+      },
+      {
+        "wall_seconds": 0.021016325801610947
+      },
+      {
+        "wall_seconds": 0.015126654878258705
+      },
+      {
+        "wall_seconds": 0.014775151386857033
+      },
+      {
+        "wall_seconds": 0.003664916381239891
+      },
+      {
+        "wall_seconds": 0.0035521797835826874
+      },
+      {
+        "wall_seconds": 0.003421241417527199
+      },
+      {
+        "wall_seconds": 0.0033743344247341156
+      },
+      {
+        "wall_seconds": 0.016231728717684746
+      },
+      {
+        "wall_seconds": 0.0037048421800136566
+      },
+      {
+        "wall_seconds": 0.0037152785807847977
+      },
+      {
+        "wall_seconds": 5.160308176651597
+      },
+      {
+        "wall_seconds": 0.023900050669908524
+      },
+      {
+        "wall_seconds": 2.028624799102545
+      },
+      {
+        "wall_seconds": 0.019441047683358192
+      },
+      {
+        "wall_seconds": 0.01573110930621624
+      },
+      {
+        "wall_seconds": 0.014805059880018234
+      },
+      {
+        "wall_seconds": 0.0176839679479599
+      },
+      {
+        "wall_seconds": 0.015244577080011368
+      },
+      {
+        "wall_seconds": 0.015935400500893593
+      },
+      {
+        "wall_seconds": 0.004112597554922104
+      },
+      {
+        "wall_seconds": 0.01563808135688305
+      },
+      {
+        "wall_seconds": 0.015312612056732178
+      },
+      {
+        "wall_seconds": 0.021053215488791466
+      },
+      {
+        "wall_seconds": 0.013285931199789047
+      },
+      {
+        "wall_seconds": 0.013380197808146477
+      },
+      {
+        "wall_seconds": 0.013339277356863022
+      },
+      {
+        "wall_seconds": 0.013826493173837662
+      },
+      {
+        "wall_seconds": 0.013475745916366577
+      },
+      {
+        "wall_seconds": 0.004120541736483574
+      },
+      {
+        "wall_seconds": 0.027839701622724533
+      },
+      {
+        "wall_seconds": 0.014771034941077232
+      },
+      {
+        "wall_seconds": 0.013304132968187332
+      },
+      {
+        "wall_seconds": 0.013541368767619133
+      },
+      {
+        "wall_seconds": 0.013577457517385483
+      },
+      {
+        "wall_seconds": 0.013477502390742302
+      },
+      {
+        "wall_seconds": 0.02132910117506981
+      },
+      {
+        "wall_seconds": 0.00399773009121418
+      },
+      {
+        "wall_seconds": 0.014402540400624275
+      },
+      {
+        "wall_seconds": 0.02262941747903824
+      },
+      {
+        "wall_seconds": 0.022401629015803337
+      },
+      {
+        "wall_seconds": 0.01882731355726719
+      },
+      {
+        "wall_seconds": 0.015458827838301659
+      },
+      {
+        "wall_seconds": 0.0038325414061546326
+      },
+      {
+        "wall_seconds": 0.013851767405867577
+      },
+      {
+        "wall_seconds": 0.0199134424328804
+      },
+      {
+        "wall_seconds": 0.015541624277830124
+      },
+      {
+        "wall_seconds": 0.019689487293362617
+      },
+      {
+        "wall_seconds": 0.019765447825193405
+      },
+      {
+        "wall_seconds": 0.01508479192852974
+      },
+      {
+        "wall_seconds": 0.016047490760684013
+      },
+      {
+        "wall_seconds": 0.01550358161330223
+      },
+      {
+        "wall_seconds": 0.020464934408664703
+      },
+      {
+        "wall_seconds": 0.0037901513278484344
+      },
+      {
+        "wall_seconds": 0.02002379484474659
+      },
+      {
+        "wall_seconds": 0.019393466413021088
+      },
+      {
+        "wall_seconds": 0.0037241727113723755
+      },
+      {
+        "wall_seconds": 0.01719292439520359
+      },
+      {
+        "wall_seconds": 0.012620307505130768
+      },
+      {
+        "wall_seconds": 0.0037686042487621307
+      }
+    ]
+  },
+  "generated_at": 1788823998.578651,
+  "premise": {
+    "node_local": {
+      "filesystem_id": 64772,
+      "path": "/tmp",
+      "total_bytes": 47372492800
+    },
+    "shared_home": {
+      "filesystem_id": 8840544406,
+      "path": "/home/ITER/mcintos/.local/share/nova",
+      "total_bytes": 1579087508275200
+    }
+  },
+  "solve": {
+    "active_set_iterations": 1,
+    "converged": true,
+    "terminal_residual": 4.518927886899045e-09,
+    "wall_seconds": 7.404145879670978
+  }
+}

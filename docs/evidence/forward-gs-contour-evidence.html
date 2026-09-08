@@ -69,6 +69,22 @@
     </figure>
   </section>
 
+  <section id="error-locality">
+    <h2>Where the weak-rotation error lives</h2>
+    <p><strong>The apparent outboard-midplane feature is enriched, but it is not the whole error.</strong> On the 500-cell weak-rotation row, the window R = 7.25–7.75 m and Z = 0–0.5 m contains 1.4414% of sampled nodes and 6.3256% of squared flux error, a 4.39-fold concentration over uniform support. Yet the largest-error 5.045% of nodes carry only 14.1096% of squared error, and 78.1982% of nodes are required to accumulate 90% of it. The numerical census therefore rejects the visual hypothesis that almost all error lives in one narrow outboard patch.</p>
+    <table>
+      <thead><tr><th>locality measure</th><th>result</th><th>reading</th></tr></thead>
+      <tbody>
+        <tr><td>outboard window domain / squared-error fraction</td><td>1.4414% / 6.3256%</td><td>locally enriched, not dominant</td></tr>
+        <tr><td>top 5% node support / squared-error fraction</td><td>5.0450% / 14.1096%</td><td>error remains broadly distributed</td></tr>
+        <tr><td>nodes required for 90% squared error</td><td>78.1982%</td><td>not a single structural hotspot</td></tr>
+        <tr><td>squared-error centre</td><td>R = 6.311966 m, Z ≈ 0</td><td>115.2 mm from the analytic axis</td></tr>
+        <tr><td>distance to analytic boundary / wall</td><td>1.489425 m / 1.489334 m</td><td>neither boundary contact nor limiter touch</td></tr>
+      </tbody>
+    </table>
+    <p>The characteristic cell pitch is 218.603 mm. The weighted error centre is within one pitch of the analytic magnetic axis, which is the flux-normalisation anchor, but more than six pitches from either the analytic separatrix or wall. Of the named mechanisms, the census therefore coincides with the normalisation anchor, not boundary contact or limiter touch. That is a spatial association, not proof of causation; the broad 90%-support fraction rules out describing it as an axis-only defect.</p>
+  </section>
+
   <section id="clips">
     <h2>Boundary-cut hexagonal supports</h2>
     <p><strong>Placeholder — render and area comparison in flight.</strong> This section will show the eight 110-rung and twenty 342-rung supports. It will draw the full hexagon only as a grey provenance outline; the coloured cell is the already-clipped polygon handed to <code>draw_plasma_cells</code>. The traced separatrix will be beside the straight atomic-edge clip so a visual reader can see that degree-fifteen Duffy quadrature integrates a first-order boundary.</p>

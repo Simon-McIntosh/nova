@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="null-identification-authority">
+<meta name="plan-evidence-for" content="null-identification-authority">
+<meta name="plan-title" content="Poloidal mechanism evidence">
+<meta name="plan-summary" content="Partial retained-case contour evidence: two shared-level exact-solution overlays and the preserved unqualified cold-start topology read; remaining visual rows are explicitly pending the active CPU allocation.">
+<title>Poloidal mechanism evidence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan">
+<header class="plan-hero">
+<p class="eyebrow">Evidence · poloidal mechanism · partial</p>
+<h1>Poloidal mechanism evidence</h1>
+<p class="lede">This is a durable partial evidence record, not a success claim. The retained H200 certificate says every exact-solution row is non-converged. The CPU renderer has preserved two terminal-versus-analytic shared-level contour overlays and the no-qualified-axis cold start; the remaining five requested visual products are named below with their exact current state.</p>
+</header>
+
+<section>
+<h2>Scope, retained records, and coverage</h2>
+<p>The source receipt is <code>triage/rebank-certificate-and-bank/artifacts/job-1267132</code>. It records weak-rotation reactor static terminal residuals 7.448e-3, 5.559e-3, 1.246e-3, and 5.401e-3 at 110, 300, 500, and 1000 cells, and moderate-rotation conventional static residuals 1.246e-2 and 8.456e-3 at 110 and 300 cells; all have <code>converged=false</code>. The CPU replay reproduces the first two terminal residuals without changing their classification.</p>
+<table><thead><tr><th>Requested evidence</th><th>Status</th><th>Reason if absent</th></tr></thead><tbody>
+<tr><td>Weak rotation, 110 cells</td><td>Rendered and committed</td><td>—</td></tr>
+<tr><td>Weak rotation, 300 cells</td><td>Rendered and committed</td><td>—</td></tr>
+<tr><td>Weak rotation, 500 and 1000 cells</td><td>Not yet rendered</td><td>The one bounded CPU allocation is still solving the 500-cell rung; no substitute field was drawn.</td></tr>
+<tr><td>Moderate rotation, 110 and 300 cells</td><td>Not yet rendered</td><td>They remain queued behind the higher-priority weak-rotation rows in that same allocation.</td></tr>
+<tr><td>Outboard 500-cell error locality</td><td>Not measured</td><td>It depends on the retained 500-cell terminal field; no brightness-based conclusion is stated.</td></tr>
+<tr><td>Boundary-cut cells, 110 and 342</td><td>Not yet rendered</td><td>The certificate sequence has priority and the two clip renders have not been submitted while it runs.</td></tr>
+</tbody></table>
+<p>The broader MAST and DIII-D corpus remains in the <a href="/nova/evidence/poloidal-convergence-atlas.html">poloidal convergence atlas</a>; it is linked rather than re-drawn here.</p>
+</section>
+
+<section>
+<h2>Marker grammar</h2>
+<figure>
+<img src="/nova/figures/null-identification-authority/mechanism-evidence/marker-legend.png" alt="Legend for magnetic-axis, admitted-saddle, inside-wall and outside-wall X-point, and clipped-centroid markers.">
+<figcaption><strong>Shared marker vocabulary.</strong> Solid triangle is the magnetic axis; filled cross is an admitted saddle; hollow circles and hollow squares distinguish other qualified X-points inside and outside the wall. Blue physical-centroid dots and black direct-clipped crosses must overlap when their agreement claim holds. A wrong marker side of the wall, or separated centroid marks under an agreement claim, would be evidence of a defect.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>Shared-level exact-solution overlays</h2>
+<p>Blue analytic and amber terminal fields are line contours drawn at the same absolute level vector in each comparison. The black wall is the containment polygon; red is the closed-form boundary; the thicker amber line is the solved boundary-flux level. This eliminates independent colour scaling as an explanation for apparent agreement.</p>
+<article class="figure-row">
+<figure>
+<img src="/nova/figures/null-identification-authority/mechanism-evidence/certificate-weak-rotation-reactor-static-reduced.png" alt="Shared-level analytic and solved weak-rotation reactor-static flux contours at 110 cells with wall, boundary, and topology markers.">
+<figcaption><strong>Weak rotation, 110 cells: residual 7.448e-3; not converged.</strong> The CPU replay measures a 13.35 mm axis displacement and solved boundary flux 10.395 Wb against analytic boundary flux 2.67e-9 Wb. A defect would be a coherent blue–amber split or an admitted topology marker outside the black wall; a panel made with separate levels could hide either.</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/null-identification-authority/mechanism-evidence/certificate-weak-rotation-reactor-static-300.png" alt="Shared-level analytic and solved weak-rotation reactor-static flux contours at 300 cells with wall, boundary, and topology markers.">
+<figcaption><strong>Weak rotation, 300 cells: residual 5.559e-3; not converged.</strong> The axis displacement is 30.25 mm and solved boundary flux is -7.571 Wb, while the analytic boundary flux remains 2.67e-9 Wb. The sign change beside a larger axis error is evidence against a simple monotone resolution story; it is not filtered out because the row stalled.</figcaption>
+</figure>
+</article>
+</section>
+
+<section>
+<h2>Cold-start refusal</h2>
+<figure>
+<img src="/nova/figures/null-identification-authority/mechanism-evidence/cold-start-stationary-candidates.png" alt="Preserved 110-cell diverted cold-start contours and wall with no admitted stationary-point markers.">
+<figcaption><strong>Preserved 110-cell cold start: no qualified axis.</strong> The strict-rejection receipt records 256 topology-trial refusals. This first read has <code>axis_admitted=false</code>, zero finite O and X candidates, one connected cell, and 112 profile-participating cells. A triangle in this view would mean an axis had been admitted; manufacturing one to make the normalisation continue would be the defect this panel guards against.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>Method and continuation point</h2>
+<p>The renderer runs from a file on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>, calls <code>configure_dtypes()</code> before arrays exist, asserts x64, and reuses the shared poloidal contour, wall, boundary, cell, and containment-aware null painters. The exact carriers are hex meshes, so the renderer prepares a plotting raster explicitly before passing a common absolute level array to both contour calls. Machine-readable output and source paths are kept in <code>docs/figures/null-identification-authority/mechanism-evidence/evidence-receipt.json</code>.</p>
+<p>The next action is to resume from the active allocation, commit every completed panel, then render the two clip panels and append the measured 500-cell energy support, boundary distance, limiter distance, and axis-anchor distance. Until then, the document makes no claim about where the apparent outboard error lives.</p>
+</section>
+</main>
+</body>
+</html>

@@ -69,6 +69,14 @@ def _write_receipt(payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
+def _existing_receipt() -> dict[str, Any]:
+    path = OUTPUT / "evidence-receipt.json"
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text())
+    return payload if isinstance(payload, dict) else {}
+
+
 def _extent(
     *groups: np.ndarray, padding: float = 0.08
 ) -> tuple[float, float, float, float]:
@@ -834,18 +842,21 @@ def main() -> None:
     if np.dtype(jnp.asarray(1.0).dtype) != np.dtype(np.float64):
         raise RuntimeError("JAX default dtype is not float64")
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    payload: dict[str, Any] = {
-        "renderer": str(Path(__file__).relative_to(ROOT)),
-        "jax_enable_x64": bool(jax.config.jax_enable_x64),
-        "jax_platform": jax.default_backend(),
-        "certificate_source": str(CERTIFICATE_SOURCE),
-        "clip_source": str(CLIP_SOURCE),
-        "certificate": [],
-        "clipped_cells": [],
-        "cold_start": None,
-        "error_locality": None,
-        "legend": None,
-    }
+    payload = _existing_receipt()
+    payload.update(
+        {
+            "renderer": str(Path(__file__).relative_to(ROOT)),
+            "jax_enable_x64": bool(jax.config.jax_enable_x64),
+            "jax_platform": jax.default_backend(),
+            "certificate_source": str(CERTIFICATE_SOURCE),
+            "clip_source": str(CLIP_SOURCE),
+        }
+    )
+    payload.setdefault("certificate", [])
+    payload.setdefault("clipped_cells", [])
+    payload.setdefault("cold_start", None)
+    payload.setdefault("error_locality", None)
+    payload.setdefault("legend", None)
     if arguments.mode in ("all", "certificate"):
         for case_name, requested_cells in CASES:
             record = _build_certificate_case(case_name, requested_cells)

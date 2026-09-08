@@ -29,6 +29,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
+from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 from nova.media.sources.frame import EquilibriumFrame, MachineGeometry, Pulse
 
 NETCDF_SOURCE = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
@@ -87,16 +88,22 @@ def read_geometry(entry: Any) -> MachineGeometry:
     """Return the limiter outline and every active-coil element outline."""
     wall = entry.get("wall", 0, autoconvert=False)
     active = entry.get("pf_active", 0, autoconvert=False)
-    descriptions = wall.description_2d
-    if len(descriptions) != 1 or len(descriptions[0].limiter.unit) != 1:
-        raise ValueError("expected one wall description carrying one limiter unit")
-    limiter = _outline(descriptions[0].limiter.unit[0].outline)
+    units = wall_units_from_ids(wall)
+    limiter = units[0].vertices
     coils = tuple(
         _element_outline(active.coil[coil].element[element])
         for coil in range(len(active.coil))
         for element in range(len(active.coil[coil].element))
     )
-    return MachineGeometry(limiter=limiter, coils=coils)
+    geometry = MachineGeometry(limiter=limiter, coils=coils)
+    object.__setattr__(geometry, "wall_units", units)
+    return geometry
+
+
+def read_wall_units(entry: Any) -> tuple[WallUnit, ...]:
+    """Return every typed limiter unit from the entry's wall description."""
+
+    return wall_units_from_ids(entry.get("wall", 0, autoconvert=False))
 
 
 def read_frame(equilibrium: Any, index: int) -> EquilibriumFrame:

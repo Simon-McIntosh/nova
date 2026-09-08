@@ -95,6 +95,34 @@ def test_open_line_primitive_marks_crossed_cells():
     assert raster[np.argmin(np.abs(zg - 0.4)), np.argmin(np.abs(rg - 1.4))]
 
 
+def test_open_blade_inside_vessel_is_not_occupiable():
+    rg, zg = _grid()
+    vessel_r = np.array([0.3, 1.7, 1.7, 0.3, 0.3])
+    vessel_z = np.array([-1.0, -1.0, 1.0, 1.0, -1.0])
+    blade_r = np.array([0.8, 1.2])
+    blade_z = np.array([0.0, 0.0])
+
+    mask, _ = wm.build_wall_mask(
+        rg,
+        zg,
+        [
+            wm.vessel_unit(vessel_r, vessel_z),
+            wm.material_unit(blade_r, blade_z, closed=False, name="blade"),
+        ],
+    )
+
+    blade_cell = (
+        np.argmin(np.abs(zg)),
+        np.argmin(np.abs(rg - 1.0)),
+    )
+    clear_cell = (
+        np.argmin(np.abs(zg - 0.5)),
+        np.argmin(np.abs(rg - 1.0)),
+    )
+    assert not mask[blade_cell]
+    assert mask[clear_cell]
+
+
 # --- diagnostics (warnings, never errors) -----------------------------------
 
 

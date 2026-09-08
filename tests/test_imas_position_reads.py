@@ -11,6 +11,7 @@ guard the DIII-D description author has always carried.
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from nova.imas import diiid_machine_ids, mast_chain_factory
@@ -34,11 +35,22 @@ def _wall_stub(*, descriptions: int = 1, limiter_units: int = 1) -> SimpleNamesp
     if descriptions != 1:
         wall.description_2d = [object() for _ in range(descriptions)]
     else:
-        wall.description_2d = [
+        units = [
             SimpleNamespace(
-                limiter=SimpleNamespace(unit=[object() for _ in range(limiter_units)])
+                name="vessel" if index == 0 else "blade",
+                closed=1 if index == 0 else 0,
+                outline=SimpleNamespace(
+                    r=np.array([1.0, 2.0, 2.0, 1.0, 1.0])
+                    if index == 0
+                    else np.array([1.4, 1.6]),
+                    z=np.array([-1.0, -1.0, 1.0, 1.0, -1.0])
+                    if index == 0
+                    else np.array([0.0, 0.0]),
+                ),
             )
+            for index in range(limiter_units)
         ]
+        wall.description_2d = [SimpleNamespace(limiter=SimpleNamespace(unit=units))]
     return wall
 
 
@@ -95,11 +107,16 @@ def test_mast_wall_grid_refuses_a_two_description_wall():
 
 
 @mark["imas"]
-def test_mast_wall_grid_refuses_a_two_unit_limiter():
-    """A second limiter unit must raise rather than be selected by position."""
+def test_mast_wall_grid_preserves_a_two_unit_limiter():
+    """A blade remains a separate unit and is excluded from the occupiable mask."""
 
-    with pytest.raises(ValueError, match="exactly one limiter unit"):
-        mast_chain_factory._wall_grid({"wall": _wall_stub(limiter_units=2)}, 3, 3)
+    grid = mast_chain_factory._wall_grid({"wall": _wall_stub(limiter_units=2)}, 31, 31)
+
+    assert len(grid.wall_units) == 2
+    np.testing.assert_array_equal(grid.wall_unit_offsets, [0, 5, 7])
+    centre_r = int(np.argmin(np.abs(grid.rg - 1.5)))
+    centre_z = int(np.argmin(np.abs(grid.zg)))
+    assert not grid.inside_limiter[centre_z, centre_r]
 
 
 @mark["imas"]
@@ -111,11 +128,25 @@ def test_diiid_validate_refuses_a_two_description_wall():
 
 
 @mark["imas"]
-def test_diiid_validate_refuses_a_two_unit_limiter():
-    """The validator's own wall read repeats the limiter unit count guard."""
+def test_diiid_validate_accepts_a_two_unit_limiter():
+    """The validator reads every unit while retaining first-ring provenance."""
 
-    with pytest.raises(ValueError, match="exactly one limiter unit"):
-        _diiid_bundle(_wall_stub(limiter_units=2)).validate()
+    wall = _wall_stub(limiter_units=2)
+    ring = np.column_stack(
+        (
+            wall.description_2d[0].limiter.unit[0].outline.r,
+            wall.description_2d[0].limiter.unit[0].outline.z,
+        )
+    )
+    bundle = _diiid_bundle(wall)
+    object.__setattr__(
+        bundle.limiter_repair,
+        "published_ring_sha256",
+        diiid_machine_ids._chain_sha256(ring),
+    )
+    object.__setattr__(bundle.limiter_repair, "published_vertex_count", len(ring))
+
+    bundle.validate()
 
 
 @mark["imas"]

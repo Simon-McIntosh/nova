@@ -19,6 +19,7 @@ from nova.imas.database import CoilData, Database, IdsData
 from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
+from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 
 
 if TYPE_CHECKING:
@@ -520,6 +521,7 @@ class StaticMachineDescription:
     toroidal_coil_count: int
     sightlines: tuple[DiagnosticSightline, ...]
     active_coils: tuple[MachineCoil, ...] = ()
+    wall_units: tuple[WallUnit, ...] = ()
 
     @classmethod
     def from_record(cls, record: dict) -> StaticMachineDescription:
@@ -559,6 +561,7 @@ class StaticMachineDescription:
                 for sightline in record.get("thomson_scattering", ())
             ),
             active_coils=active_coils,
+            wall_units=tuple(record.get("wall_units", ())),
         )
 
 
@@ -1239,9 +1242,27 @@ class Wall(CoilDatabase):
         return Contour(firstwall.data)
 
     @cached_property
+    def units(self) -> tuple[WallUnit, ...]:
+        """Return every limiter unit without concatenating their outlines."""
+
+        if self.ids is None:
+            self.locate_datastore()
+            raise ValueError(
+                f"no {self.name!r} ids attached; limiter units are read "
+                f"from {self.ids_path!r}"
+            )
+        return wall_units_from_ids(self.ids)
+
+    @cached_property
     def boundary(self):
-        """Return contour boundary loop."""
-        return self.contour.loop
+        """Return the sole occupiable vessel boundary for legacy consumers."""
+
+        vessels = tuple(unit for unit in self.units if unit.kind == "vessel")
+        if len(vessels) != 1:
+            raise ValueError(
+                f"wall carries {len(vessels)} vessel units; use units or segments"
+            )
+        return vessels[0].vertices
 
     def segment(self, index=0):
         """Return indexed firstwall segment."""
@@ -1255,7 +1276,7 @@ class Wall(CoilDatabase):
     @cached_property
     def segments(self):
         """Return first wall segments."""
-        return [self.segment(i) for i in range(len(self.vessel.unit))]
+        return [unit.vertices for unit in self.units]
 
     @cached_property
     def outline(self):
@@ -1267,7 +1288,10 @@ class Wall(CoilDatabase):
 
     def build(self):
         """Build plasma bound by firstwall contour."""
-        self.firstwall.insert(self.boundary)
+        self.firstwall.retain_units(self.units)
+        for unit in self.units:
+            if unit.kind == "vessel":
+                self.firstwall.insert(unit.vertices)
 
     def insert(self, data: xarray.Dataset):
         """Insert wall and divertor geometory into dataset structure."""

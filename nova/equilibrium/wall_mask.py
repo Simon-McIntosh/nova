@@ -51,6 +51,9 @@ logger = logging.getLogger("nova.equilibrium.wall_mask")
 __all__ = [
     "WallUnit",
     "WallDiagnostic",
+    "pack_wall_units",
+    "wall_unit_from_ids",
+    "wall_units_from_ids",
     "supercover_raster",
     "build_wall_mask",
     "densify_units",
@@ -120,6 +123,99 @@ class WallUnit:
             )
         if self.r.size != self.z.size:
             raise ValueError("WallUnit r and z must have equal length")
+        if self.r.size < 2:
+            raise ValueError("WallUnit must contain at least two vertices")
+        if self.kind == "vessel" and not self.closed:
+            raise ValueError("a vessel WallUnit must be closed")
+
+    @property
+    def vertices(self) -> np.ndarray:
+        """Return the unit's ordered ``(r, z)`` vertices without changing them."""
+
+        return np.column_stack((self.r, self.z))
+
+
+def pack_wall_units(
+    units: list[WallUnit] | tuple[WallUnit, ...],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return flat vertices and offsets while retaining every unit boundary.
+
+    ``offsets`` has one more entry than ``units``. Unit ``i`` occupies
+    ``vertices[offsets[i]:offsets[i + 1]]``; no closing or inter-unit edge is
+    inserted into the packed coordinates.
+    """
+
+    collection = tuple(units)
+    offsets = np.zeros(len(collection) + 1, dtype=np.int64)
+    if not collection:
+        return np.empty((0, 2), dtype=np.float64), offsets
+    offsets[1:] = np.cumsum([unit.r.size for unit in collection])
+    return np.concatenate([unit.vertices for unit in collection]), offsets
+
+
+def _ids_text(value: object) -> str:
+    """Return a stripped IDS scalar string without depending on its wrapper."""
+
+    return str(getattr(value, "value", value)).strip()
+
+
+def _ids_closed(unit: object, r: np.ndarray, z: np.ndarray) -> bool:
+    """Read an explicit closure flag, falling back to stored endpoint identity."""
+
+    for parent in (unit, getattr(unit, "outline")):
+        if not hasattr(parent, "closed"):
+            continue
+        value = getattr(parent, "closed")
+        if hasattr(value, "has_value") and not value.has_value:
+            continue
+        raw = getattr(value, "value", value)
+        try:
+            integer = int(raw)
+        except TypeError, ValueError:
+            continue
+        if integer in (0, 1):
+            return bool(integer)
+    return bool(r.size > 1 and np.array_equal([r[0], z[0]], [r[-1], z[-1]]))
+
+
+def _unit_kind(name: str, closed: bool) -> str:
+    """Classify an IDS limiter unit from closure and its descriptive name."""
+
+    material_words = ("blade", "tile", "plate", "shield")
+    if closed and not any(word in name.casefold() for word in material_words):
+        return "vessel"
+    return "material"
+
+
+def wall_unit_from_ids(unit: object, *, index: int = 0) -> WallUnit:
+    """Detach one limiter unit from an IMAS node without changing coordinates."""
+
+    outline = getattr(unit, "outline")
+    r = np.asarray(outline.r, dtype=np.float64).ravel()
+    z = np.asarray(outline.z, dtype=np.float64).ravel()
+    name = _ids_text(getattr(unit, "name", "")) or f"limiter_{index}"
+    closed = _ids_closed(unit, r, z)
+    return WallUnit(
+        r=r,
+        z=z,
+        kind=_unit_kind(name, closed),
+        closed=closed,
+        name=name,
+    )
+
+
+def wall_units_from_ids(wall: object) -> tuple[WallUnit, ...]:
+    """Read every limiter unit from the single selected wall description."""
+
+    descriptions = getattr(wall, "description_2d")
+    if len(descriptions) != 1:
+        raise ValueError("expected exactly one wall description")
+    stored = descriptions[0].limiter.unit
+    if not len(stored):
+        raise ValueError("wall description carries no limiter units")
+    return tuple(
+        wall_unit_from_ids(unit, index=index) for index, unit in enumerate(stored)
+    )
 
 
 def vessel_unit(r, z, name: str = "vessel") -> WallUnit:

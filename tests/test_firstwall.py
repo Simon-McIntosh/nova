@@ -4,6 +4,7 @@ import numpy as np
 
 from nova.frame.coilset import CoilSet
 from nova.frame.error import GridError
+from nova.equilibrium.wall_mask import WallUnit
 
 
 def test_centroid_x():
@@ -69,6 +70,33 @@ def test_plasmagrid_no_plasma():
     coilset.coil.insert(6.5, 0, 0.2, 0.8)
     with pytest.raises(GridError):
         coilset.plasmagrid.solve()
+
+
+def test_firstwall_retains_discrete_unit_identity():
+    coilset = CoilSet()
+    units = (
+        WallUnit(
+            r=[1.0, 2.0, 2.0, 1.0, 1.0],
+            z=[-1.0, -1.0, 1.0, 1.0, -1.0],
+            kind="vessel",
+            closed=True,
+            name="vessel",
+        ),
+        WallUnit(
+            r=[1.4, 1.6],
+            z=[0.0, 0.0],
+            kind="material",
+            closed=False,
+            name="blade",
+        ),
+    )
+
+    coilset.firstwall.retain_units(units)
+
+    assert coilset.firstwall.wall_units == units
+    np.testing.assert_array_equal(coilset.firstwall.wall_unit_offsets, [0, 5, 7])
+    np.testing.assert_array_equal(coilset.firstwall.wall_unit_closed, [True, False])
+    assert coilset.firstwall.wall_unit_kinds == ("vessel", "material")
 
 
 if __name__ == "__main__":

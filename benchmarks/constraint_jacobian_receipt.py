@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+from dataclasses import replace
 import json
 from pathlib import Path
 import subprocess
 from typing import Any
 
+import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,6 +40,7 @@ DIRECTIONS = ("p6_upper", "p6_upper_minus_p6_lower")
 CURRENT_STEP_CAP_A = 1_000.0
 CENTROID_TOLERANCE_M = 1.0e-3
 ACTIVE_SET_TRIPS = 8
+MULTI_TRIP_SCALE = 3.0
 BANKED_RECEIPT = (
     ROOT / "docs/figures/playable-forward-solve/compensator-jacobian/"
     "compensator-jacobian-response.json"
@@ -191,6 +194,176 @@ def _solve_row(
     }
 
 
+def _constraint_merit(
+    prepared, score_state, result, unknown, base_state, requested_class
+) -> float:
+    """Read the production augmented merit at one trip boundary."""
+    program = result.program
+    if program is None or result.compensating_unknown is None:
+        raise ValueError("constrained solve did not return its reduced program")
+    amplitudes = program.kernels["initial_gather"](score_state)
+    reduced = jnp.concatenate((amplitudes, unknown))
+    shadow = jnp.ravel(
+        jnp.asarray(
+            prepared.profile.operator.residual_shadow_mask(
+                base_state, requested_class=requested_class
+            ),
+            dtype=bool,
+        )
+    )
+    scores = program.kernels["step_scores"](reduced, shadow, base_state)
+    jax.block_until_ready(scores.merit)
+    return float(np.asarray(scores.merit))
+
+
+def _carry_pair(pair: ConstraintPair, initial_unknown) -> ConstraintPair:
+    """Carry a trip's terminal normalized unknown into the next trip."""
+    return replace(
+        pair,
+        binding=replace(pair.binding, initial_unknown=jnp.asarray(initial_unknown)),
+    )
+
+
+def _multi_trip_case(
+    prepared,
+    state: dict[str, Any],
+    pair: ConstraintPair,
+    *,
+    target: float,
+    expected_current_a: float,
+) -> dict[str, Any]:
+    """Drive one target through independently recorded capped trips."""
+    current_state = state["free"].state
+    current_unknown = jnp.asarray(pair.binding.initial_unknown)
+    initial_centroid = state["free_centroid_z_m"]
+    trip_records: list[dict[str, Any]] = []
+    merit_sequence: list[float] = []
+    program = None
+    for trip in range(ACTIVE_SET_TRIPS):
+        trip_start_centroid = _centroid(
+            prepared,
+            current_state,
+            state["target_current"],
+            state["requested_value"],
+        )
+        trip_pair = _carry_pair(pair, current_unknown)
+        result = reduced_newton.solve_constrained_reduced_newton(
+            prepared.profile,
+            current_state,
+            constraint_pairs=(trip_pair,),
+            requested_class=state["requested"],
+            target_current=state["target_current"],
+            prescribed_current=jnp.asarray(state["current"]),
+            tolerance=FIXED_POINT_CRITERION,
+            newton_steps=NEWTON_STEPS,
+            active_set_steps=1,
+            constraint_current_step_cap=CURRENT_STEP_CAP_A,
+            program=program,
+        )
+        if not merit_sequence:
+            merit_sequence.append(
+                _constraint_merit(
+                    prepared,
+                    current_state,
+                    result,
+                    current_unknown,
+                    current_state,
+                    state["requested"],
+                )
+            )
+        final_centroid = _centroid(
+            prepared,
+            result.state,
+            state["target_current"],
+            state["requested_value"],
+        )
+        record = result.constraints[0]
+        physical_unknown = float(np.asarray(record.physical_unknown)[0])
+        previous_physical_unknown = float(
+            np.asarray(pair.unknown.physical_value(current_unknown))[0]
+        )
+        applied_current = physical_unknown - previous_physical_unknown
+        command = target - trip_start_centroid
+        overshot = bool(command != 0.0 and (final_centroid - target) * command > 0.0)
+        post_merit = _constraint_merit(
+            prepared,
+            result.state,
+            result,
+            result.compensating_unknown,
+            current_state,
+            state["requested"],
+        )
+        merit_sequence.append(post_merit)
+        trip_records.append(
+            {
+                "trip": trip + 1,
+                "applied_compensating_current_a": applied_current,
+                "cumulative_compensating_current_a": physical_unknown,
+                "augmented_constraint_merit": post_merit,
+                "achieved_centroid_z_m": final_centroid,
+                "centroid_error_m": final_centroid - target,
+                "overshot": overshot,
+                "converged": bool(result.converged),
+                "termination_reason": result.termination_name,
+                "newton_steps": int(sum(result.newton_steps_per_trip)),
+            }
+        )
+        current_state = result.state
+        current_unknown = result.compensating_unknown
+        program = result.program
+        if result.converged or result.termination_name == "sufficient_decrease_refused":
+            break
+    final = trip_records[-1]
+    applied_currents = [
+        float(item["applied_compensating_current_a"]) for item in trip_records
+    ]
+    merit_decreased = all(
+        after < before
+        for before, after in zip(merit_sequence, merit_sequence[1:], strict=True)
+    )
+    total_current = float(final["cumulative_compensating_current_a"])
+    current_within_budget = (
+        0.9 * expected_current_a <= abs(total_current) <= 1.1 * expected_current_a
+    )
+    return {
+        "row": 96,
+        "target_source": (
+            f"banked plus 1 kA free response scaled linearly by {MULTI_TRIP_SCALE:g}"
+        ),
+        "circuit": "p6_upper",
+        "accepted": bool(
+            final["converged"]
+            and abs(final["centroid_error_m"]) <= CENTROID_TOLERANCE_M
+            and merit_decreased
+            and all(abs(value) <= CURRENT_STEP_CAP_A for value in applied_currents)
+            and not any(item["overshot"] for item in trip_records)
+            and current_within_budget
+            and 3 <= len(trip_records) <= 4
+        ),
+        "converged": final["converged"],
+        "termination_reason": final["termination_reason"],
+        "initial_centroid_z_m": initial_centroid,
+        "target_centroid_z_m": target,
+        "final_centroid_z_m": final["achieved_centroid_z_m"],
+        "centroid_error_m": final["centroid_error_m"],
+        "overshot": any(item["overshot"] for item in trip_records),
+        "trip_count": len(trip_records),
+        "newton_steps": sum(item["newton_steps"] for item in trip_records),
+        "newton_steps_per_trip": [item["newton_steps"] for item in trip_records],
+        "compensating_current_a": total_current,
+        "expected_free_solve_current_a": expected_current_a,
+        "current_within_ten_percent": current_within_budget,
+        "current_cap_a": CURRENT_STEP_CAP_A,
+        "merit_sequence": merit_sequence,
+        "merit_monotone_decrease": merit_decreased,
+        "trip_records": trip_records,
+        "applied_current_cap_respected": all(
+            abs(value) <= CURRENT_STEP_CAP_A for value in applied_currents
+        ),
+        "accepted_steps_overshot": any(item["overshot"] for item in trip_records),
+    }
+
+
 def _banked_cases(prepared, group, active_names, banked) -> list[dict[str, Any]]:
     """Measure the two declared P6 directions on both banked rows."""
     cases = []
@@ -289,6 +462,9 @@ def _write_csv(path: Path, cases: list[dict[str, Any]]) -> None:
         "trip_count",
         "newton_steps",
         "compensating_current_a",
+        "merit_sequence",
+        "merit_monotone_decrease",
+        "trip_records",
         "accepted",
     )
     with path.open("w", encoding="utf-8", newline="") as stream:
@@ -310,7 +486,14 @@ def _write_figure(path: Path, cases: list[dict[str, Any]]) -> None:
         else case["compensating_current_a"] / 1.0e3
         for case in cases
     ]
-    figure, axes = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
+    multi_trip = next((case for case in cases if case.get("trip_records")), None)
+    figure, axes = plt.subplots(
+        3 if multi_trip else 2,
+        1,
+        figsize=(10, 9 if multi_trip else 7),
+        sharex=not bool(multi_trip),
+    )
+    axes = np.atleast_1d(axes)
     axes[0].bar(labels, errors, color="#6f4aa8")
     axes[0].axhline(1.0, color="black", lw=0.8, ls="--")
     axes[0].axhline(-1.0, color="black", lw=0.8, ls="--")
@@ -320,6 +503,12 @@ def _write_figure(path: Path, cases: list[dict[str, Any]]) -> None:
     axes[1].axhline(-1.0, color="black", lw=0.8, ls="--")
     axes[1].set_ylabel("compensation [kA]")
     axes[1].tick_params(axis="x", labelrotation=35)
+    if multi_trip:
+        sequence = multi_trip["merit_sequence"]
+        axes[2].plot(range(len(sequence)), sequence, marker="o", color="#b35c36")
+        axes[2].set_xlabel("trip boundary (0 = initial state)")
+        axes[2].set_ylabel("augmented merit")
+        axes[2].set_xticks(range(len(sequence)))
     figure.tight_layout()
     figure.savefig(path)
     plt.close(figure)
@@ -380,6 +569,34 @@ def _write_report(path: Path, receipt: Path, figure: Path, cases) -> None:
                     accepted=_format(case["accepted"]),
                 )
             )
+            if case.get("trip_records"):
+                lines.extend(
+                    [
+                        "",
+                        "Per-trip receipt:",
+                        "",
+                        "| trip | applied compensation [A] | cumulative "
+                        "compensation [A] | "
+                        "augmented merit | achieved centroid [m] | error [mm] | "
+                        "overshot |",
+                        "|---:|---:|---:|---:|---:|---:|---|",
+                    ]
+                )
+                for trip in case["trip_records"]:
+                    lines.append(
+                        "| {trip} | {applied} | {cumulative} | {merit} | "
+                        "{centroid} | {error} | {overshot} |".format(
+                            trip=trip["trip"],
+                            applied=_format(trip["applied_compensating_current_a"]),
+                            cumulative=_format(
+                                trip["cumulative_compensating_current_a"]
+                            ),
+                            merit=_format(trip["augmented_constraint_merit"]),
+                            centroid=_format(trip["achieved_centroid_z_m"]),
+                            error=_format(1.0e3 * trip["centroid_error_m"]),
+                            overshot=_format(trip["overshot"]),
+                        )
+                    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -397,6 +614,23 @@ def measure(output: Path, report: Path) -> dict[str, Any]:
         for item in banked_payload["rows_detail"]
     }
     cases = _banked_cases(prepared, group, active_names, banked)
+    multi_state = _row_state(prepared, group, 96)
+    banked_response = banked[(96, "p6_upper")]
+    banked_centroid = float(banked_response["perturbed_solves"]["plus"]["centroid_z_m"])
+    banked_delta = banked_centroid - multi_state["free_centroid_z_m"]
+    multi_target = multi_state["free_centroid_z_m"] + MULTI_TRIP_SCALE * banked_delta
+    direction = comparison._direction(
+        active_names, "p6_upper", multi_state["current"].size
+    )
+    cases.append(
+        _multi_trip_case(
+            prepared,
+            multi_state,
+            _explicit_pair(prepared.profile, multi_target, direction),
+            target=multi_target,
+            expected_current_a=MULTI_TRIP_SCALE * CURRENT_STEP_CAP_A,
+        )
+    )
     cases.extend(_early_cases(prepared, group, active_names))
     receipt = output / "constraint-globalisation.json"
     table = output / "constraint-globalisation.csv"
@@ -408,6 +642,12 @@ def measure(output: Path, report: Path) -> dict[str, Any]:
         "current_step_cap_a": CURRENT_STEP_CAP_A,
         "centroid_tolerance_m": CENTROID_TOLERANCE_M,
         "active_set_trip_limit": ACTIVE_SET_TRIPS,
+        "multi_trip_scale": MULTI_TRIP_SCALE,
+        "multi_trip_target_method": (
+            "linear extrapolation of the banked 1 kA free centroid response; "
+            "no 3 kA or 4 kA free solve was run"
+        ),
+        "multi_trip_banked_delta_centroid_m": banked_delta,
         "banked_receipt": str(BANKED_RECEIPT.relative_to(ROOT)),
         "passed": all(case["accepted"] for case in cases),
         "cases": cases,

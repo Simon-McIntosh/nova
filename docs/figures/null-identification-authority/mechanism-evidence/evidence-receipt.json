@@ -1,0 +1,37 @@
+{
+  "certificate": [],
+  "certificate_source": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank/artifacts/job-1267132/measurement-summary.json",
+  "clip_source": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair-logs/two-rung-physical-moment-acceptance.json",
+  "clipped_cells": [],
+  "cold_start": {
+    "axis_admitted": false,
+    "connected_cell_count": 1,
+    "contour_levels_wb": [
+      -1.2778269396369464,
+      -1.2778269396369462,
+      -1.2778269396369457,
+      -1.2778269396369453,
+      -1.277826939636945,
+      -1.2778269396369448,
+      -1.2778269396369444,
+      -1.277826939636944,
+      -1.2778269396369437,
+      -1.2778269396369435,
+      -1.277826939636943,
+      -1.2778269396369426,
+      -1.2778269396369424,
+      -1.2778269396369422,
+      -1.2778269396369417
+    ],
+    "path": "docs/figures/null-identification-authority/mechanism-evidence/cold-start-stationary-candidates.png",
+    "profile_participation_cell_count": 112,
+    "project_src": "/nova/figures/null-identification-authority/mechanism-evidence/cold-start-stationary-candidates.png",
+    "raw_o_candidate_count": 0,
+    "raw_x_candidate_count": 0
+  },
+  "error_locality": null,
+  "jax_enable_x64": true,
+  "jax_platform": "cpu",
+  "legend": "/nova/figures/null-identification-authority/mechanism-evidence/marker-legend.png",
+  "renderer": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+}

@@ -1,0 +1,148 @@
+{
+  "schema": "nova-poloidal-convergence-atlas-supplement",
+  "renderer_revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+  "panel_count": 8,
+  "panels": [
+    {
+      "identity": "27079-11",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-11.png",
+      "current_ma": 0.145723046875,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 5.754179075284097e-10,
+      "requested_class": "limited",
+      "time_s": 0.009999999776482582,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.09466476179659367,
+      "axis": [
+        0.5601925729291074,
+        -0.033912302834747485
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-12",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-12.png",
+      "current_ma": 0.151849578125,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 1.0070867204895139e-09,
+      "requested_class": "limited",
+      "time_s": 0.014999999664723873,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.058386681601405144,
+      "axis": [
+        0.5498035629378606,
+        -0.02939356340759821
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-13",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-13.png",
+      "current_ma": 0.163097609375,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 9.930856576703633e-11,
+      "requested_class": "limited",
+      "time_s": 0.019999999552965164,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.05841270461678505,
+      "axis": [
+        0.5802395519269795,
+        -0.030278272673297774
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-14",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-14.png",
+      "current_ma": 0.1865944375,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 1.6365747014385845e-10,
+      "requested_class": "limited",
+      "time_s": 0.02499999850988388,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.057656485587358475,
+      "axis": [
+        0.6280003629213207,
+        -0.01787396253008786
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-15",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-15.png",
+      "current_ma": 0.2178284375,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 1.623336099988096e-09,
+      "requested_class": "limited",
+      "time_s": 0.029999999329447746,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.05770402029156685,
+      "axis": [
+        0.6575823587311788,
+        -0.010451103565198395
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-16",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-16.png",
+      "current_ma": 0.242862765625,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 1.136941060407411e-09,
+      "requested_class": "limited",
+      "time_s": 0.03500000014901161,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.05875878967344761,
+      "axis": [
+        0.6799217413516111,
+        -0.0018526631348953027
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "27079-17",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-17.png",
+      "current_ma": 0.258129953125,
+      "class": "limited",
+      "qualification": "limited solve; converged",
+      "terminal_residual": 7.336651509264504e-11,
+      "requested_class": "limited",
+      "time_s": 0.03999999910593033,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.05751758813858032,
+      "axis": [
+        0.7104105965906178,
+        0.0038515587536146582
+      ],
+      "read_exception": null
+    },
+    {
+      "identity": "22475-01",
+      "png_path": "/nova/figures/null-identification-authority/convergence-atlas/supplement/22475-01.png",
+      "current_ma": 0.16693021875,
+      "class": "diverted",
+      "qualification": "terminal state NaN (axis admission failed in the reversed-current block); drawn over the shot's seed reference flux",
+      "terminal_residual": null,
+      "requested_class": "limited",
+      "time_s": 0.009999999776482582,
+      "revision": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+      "render_seconds": 0.06314144097268581,
+      "axis": [
+        null,
+        null
+      ],
+      "read_exception": null
+    }
+  ],
+  "per_frame_render_cost": {
+    "mean_seconds": 0.06328030908480287,
+    "max_seconds": 0.09466476179659367,
+    "count": 8
+  }
+}

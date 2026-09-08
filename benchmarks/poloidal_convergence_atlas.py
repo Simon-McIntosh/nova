@@ -63,6 +63,7 @@ from matplotlib.collections import LineCollection
 from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.wall_mask import inside_polygon
+from nova.equilibrium import reduced_newton
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK
 
@@ -631,13 +632,512 @@ def run(output: Path) -> dict[str, Any]:
 def _parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=RECEIPT)
+    parser.add_argument("--supplement", action="store_true")
+    parser.add_argument("--supplement-output", type=Path)
     return parser.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = _parse_args(argv)
-    run(args.output)
+    if args.supplement:
+        target = args.supplement_output or SUPPLEMENT_OUT / "supplement-receipt.json"
+        run_supplement(target)
+    else:
+        run(args.output)
     return 0
+
+
+# ---------------------------------------------------------------------------
+# Supplement: the limited-class collapse frames and the reversed-current slice.
+# The frames below the banked MAST rows are SOLVED here (they predate the
+# committed bank operands, so no raster exists for them yet): the 27079
+# limited-class rows 11 to 17 from the limited-anchor session, and one slice
+# of the reversed-current block drawn as it terminates. Each solve persists
+# its flux raster and renders one panel in the atlas grammar.
+# ---------------------------------------------------------------------------
+
+SUPPLEMENT_OUT = (
+    ROOT / "docs/figures/null-identification-authority/convergence-atlas/supplement"
+)
+SHOT_STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
+LIMITED_ANCHOR_CSV = (
+    ROOT
+    / "docs/figures/playable-forward-solve/limited-anchor/limited-anchor-candidates.csv"
+)
+LIMITED_ANCHOR_SESSION = (
+    ROOT / "docs/figures/playable-forward-solve/limited-anchor/writer-replay"
+)
+ANCHOR_CANDIDATE_NODES = (10, 25)
+REVERSED_CANDIDATE_SHOTS = (22475, 22550, 22626)
+SUPPLEMENT_SHOT = 27079
+SUPPLEMENT_ROWS = (11, 12, 13, 14, 15, 16, 17)
+
+
+def _supplement_class_label(requested) -> str:
+    from nova.equilibrium.topology import TopologyClass
+
+    value = int(np.asarray(requested))
+    label = {
+        int(TopologyClass.LIMITED): "limited",
+        int(TopologyClass.DIVERTED): "diverted",
+    }
+    return label.get(value, f"class_{value}")
+
+
+def _supplement_nulls(steering, frame_index: int) -> dict[str, Any]:
+    """Return the writer-stored nulls and boundary for one steering frame."""
+    axis = (
+        float(steering["magnetic_axis_r"][frame_index]),
+        float(steering["magnetic_axis_z"][frame_index]),
+    )
+    x = np.stack(
+        (steering["x_point_r"][:, frame_index], steering["x_point_z"][:, frame_index]),
+        axis=1,
+    )
+    x = x[np.all(np.isfinite(x), axis=1)]
+    boundary = np.stack(
+        (steering["lcfs_r"][:, frame_index], steering["lcfs_z"][:, frame_index]), axis=1
+    )
+    boundary = boundary[np.all(np.isfinite(boundary), axis=1)]
+    diverted = bool(int(steering["diverted"][frame_index]))
+    return {"axis": axis, "x_points": x, "boundary": boundary, "diverted": diverted}
+
+
+def _supplement_session_frame(path: Path, row: int) -> dict[str, Any]:
+    """Open the writer-replay steering store and locate one row's frame."""
+    import h5py
+
+    manifest = json.loads((path.parent / "27079.manifest.json").read_text())
+    scripts = manifest.get("slices", [])
+    written = [int(s["row"]) for s in scripts if s.get("written")]
+    index = written.index(row)
+    with h5py.File(path, "r") as handle:
+        steering = handle["steering"]
+        data = {name: np.asarray(steering[name]) for name in steering.keys()}
+    return _supplement_nulls(data, index)
+
+
+def _reversed_slice_identity(programs) -> dict[str, Any]:
+    """Return the first finite reversed-current slice of the candidate shots."""
+    import zarr
+
+    for shot in REVERSED_CANDIDATE_SHOTS:
+        group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
+        rows = [
+            r for r in range(int(group["time"].shape[0])) if _finite_slice(group, r)
+        ]
+        if rows:
+            return {"shot": shot, "row": rows[0], "group": group}
+    raise RuntimeError("no finite reversed-current slice in the candidate shots")
+
+
+def _finite_slice(group, row: int) -> bool:
+    try:
+        import scripts.labeller_batch.shard as shard
+
+        return shard._slice_inputs(group, row) is not None
+    except Exception:
+        return False
+
+
+def _supplement_solve(prepared, operator, group, row) -> dict[str, Any]:
+    """Solve one row and read its topology, returning a fully persisted scene."""
+    import scripts.labeller_batch.shard as shard
+    from benchmarks.forward_labeller_throughput import _requested_class
+
+    full_r = np.asarray(group["gridr"])
+    full_z = np.asarray(group["gridz"])
+    inputs = shard._slice_inputs(group, row)
+    if inputs is None:
+        raise RuntimeError(f"row {row} has no finite reconstruction inputs")
+    seed = shard._slices_seed(group, row, full_r, full_z)
+    requested = jnp.asarray(_requested_class(group, row), dtype=jnp.int8)
+    target_current = abs(float(inputs["reference_plasma_current"]))
+    current = jnp.asarray(inputs["current"])
+    result = reduced_newton.solve_reduced_newton(
+        operator,
+        jnp.asarray(seed),
+        requested_class=requested,
+        target_current=target_current,
+        prescribed_current=current,
+        tolerance=shard.FIXED_POINT_CRITERION,
+        newton_steps=shard.NEWTON_STEPS,
+        program=None,
+        stream=False,
+    )
+    physical = jnp.asarray(result.state)[: operator.physical_node_number]
+    radius, height, shape = operator.raster_geometry()
+    psi_grid = np.asarray(physical[: operator.grid.node_number])
+    raster = np.asarray(psi_grid).reshape(int(radius.size), int(height.size)).T
+    read_exception = None
+    topology_state = None
+    try:
+        _masks, topology_state, _connected, _admitted = operator._fixed_design_read(  # noqa: SLF001
+            physical,
+            requested,
+            private_wall_node_mask=jnp.zeros(operator.wall.node_number, dtype=bool),
+        )
+    except Exception as error:  # noqa: BLE001 - a failed read is content here
+        read_exception = f"{type(error).__name__}: {error}"
+    wall = np.asarray(prepared.wall, dtype=float).reshape(-1, 2)
+    return {
+        "radius": np.asarray(radius),
+        "height": np.asarray(height),
+        "raster": raster,
+        "seed": np.asarray(seed),
+        "wall": wall,
+        "requested_class": _supplement_class_label(requested),
+        "terminal_residual": float(np.asarray(result.terminal_residual).item()),
+        "converged": bool(np.asarray(result.converged).item()),
+        "topology_state": topology_state,
+        "read_exception": read_exception,
+        "time_s": float(inputs["time"]),
+        "reference_plasma_current_ma": abs(float(inputs["reference_plasma_current"]))
+        / 1e6,
+    }
+
+
+def _persist_supplement_scene(scene: dict[str, Any], identity: str) -> None:
+    """Persist the flux raster and key read values beside the panel."""
+    np.savez_compressed(
+        SUPPLEMENT_OUT / f"{identity}-operands.npz",
+        radius=scene["radius"],
+        height=scene["height"],
+        raster=scene["raster"],
+        wall=scene["wall"],
+        axis=(
+            np.asarray(scene["topology_state"].axis)
+            if scene["topology_state"] is not None
+            else np.full(2, np.nan)
+        ),
+        x_point=(
+            np.asarray(scene["topology_state"].x_point)
+            if scene["topology_state"] is not None
+            else np.full(2, np.nan)
+        ),
+    )
+    _atomic_write(
+        SUPPLEMENT_OUT / f"{identity}-read.json",
+        {
+            "identity": identity,
+            "requested_class": scene["requested_class"],
+            "terminal_residual": (
+                None
+                if not np.isfinite(scene["terminal_residual"])
+                else float(scene["terminal_residual"])
+            ),
+            "converged": scene["converged"],
+            "read_exception": scene["read_exception"],
+            "time_s": float(scene["time_s"]),
+            "reference_plasma_current_ma": scene["reference_plasma_current_ma"],
+        },
+    )
+
+
+def _atomic_write(path: Path, payload: Any) -> None:
+    import os
+    import uuid
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    temporary.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+    os.replace(temporary, path)
+
+
+def _render_supplement_panel(
+    scene: dict[str, Any],
+    identity: str,
+    stored_nulls: dict[str, Any] | None,
+    *,
+    current_label: str,
+    class_label: str,
+    qualification: str,
+    residual: float | None,
+    revision: str,
+) -> dict[str, Any]:
+    """Draw one solved supplement row in the atlas grammar."""
+    radius = scene["radius"]
+    height = scene["height"]
+    raster = scene["raster"]
+    wall = scene["wall"]
+    read_axis = scene.get("read_axis")
+    read_x = scene.get("read_x_point")
+    read_wall = scene.get("read_wall_point")
+    figure, axes = plt.subplots(figsize=(5.4, 5.4))
+    axes.set_aspect("equal")
+    poloidal.draw_flux_contours(
+        axes,
+        radius,
+        height,
+        raster,
+        poloidal.contour_levels(raster, CONTOUR_COUNT),
+        style=DEFAULT_INK,
+        linewidth=0.5,
+    )
+    # The thin closed surface the writer stored for this frame is the chosen
+    # boundary; a limited frame's read-side boundary is the wall tangency and
+    # is not a closed loop.
+    boundary = stored_nulls["boundary"] if stored_nulls is not None else None
+    if boundary is not None and boundary.shape[0] >= 3:
+        poloidal.draw_boundary(axes, boundary[:, 0], boundary[:, 1], style=DEFAULT_INK)
+    # The candidate anchors the limited-anchor census tracks.
+    for node in ANCHOR_CANDIDATE_NODES:
+        if node < wall.shape[0]:
+            axes.plot(
+                wall[node, 0],
+                wall[node, 1],
+                marker="D",
+                markersize=7,
+                markerfacecolor="none",
+                markeredgecolor="#1f78b4",
+                markeredgewidth=1.6,
+                linestyle="none",
+                zorder=7,
+            )
+    # The topology read (axis, admitted X, wall point) where it succeeded.
+    if read_axis is not None and np.all(np.isfinite(read_axis)):
+        axes.plot(
+            float(read_axis[0]),
+            float(read_axis[1]),
+            marker=DEFAULT_INK.axis_marker,
+            markersize=DEFAULT_INK.axis_markersize,
+            color=DEFAULT_INK.axis_color,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers,
+        )
+    if read_x is not None and np.all(np.isfinite(read_x[:2])):
+        axes.plot(
+            float(read_x[0]),
+            float(read_x[1]),
+            marker="X",
+            markersize=DEFAULT_INK.xpoint_markersize + 2,
+            markerfacecolor=DEFAULT_INK.xpoint_color,
+            markeredgecolor="white",
+            markeredgewidth=0.8,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers + 1,
+        )
+    if read_wall is not None and np.all(np.isfinite(read_wall[:2])):
+        axes.plot(
+            float(read_wall[0]),
+            float(read_wall[1]),
+            marker="o",
+            markersize=6,
+            markerfacecolor="none",
+            markeredgecolor="#b35806",
+            markeredgewidth=1.4,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers,
+        )
+    poloidal.draw_wall(axes, wall[:, 0], wall[:, 1], style=DEFAULT_INK, linewidth=1.6)
+    axes.set_xlabel("R [m]")
+    axes.set_ylabel("Z [m]")
+    axes.set_xlim(float(np.min(wall[:, 0])) - 0.06, float(np.max(wall[:, 0])) + 0.06)
+    axes.set_ylim(float(np.min(wall[:, 1])) - 0.06, float(np.max(wall[:, 1])) + 0.06)
+    slug = identity.replace("/", "-").replace(" ", "-")
+    out_path = SUPPLEMENT_OUT / f"{slug}.png"
+    _render_start = time.perf_counter()
+    figure.savefig(out_path, dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(figure)
+    render_seconds = time.perf_counter() - _render_start
+    return {
+        "identity": identity,
+        "png_path": (
+            f"/nova/figures/null-identification-authority/convergence-atlas/supplement/{out_path.name}"
+        ),
+        "current_ma": float(scene["reference_plasma_current_ma"]),
+        "class": class_label,
+        "qualification": qualification,
+        "terminal_residual": (
+            None if residual is None or not np.isfinite(residual) else float(residual)
+        ),
+        "requested_class": scene["requested_class"],
+        "time_s": float(scene["time_s"]),
+        "revision": revision,
+        "render_seconds": render_seconds,
+        "axis": (
+            [(float(v) if np.isfinite(v) else None) for v in read_axis]
+            if read_axis is not None
+            else [None, None]
+        ),
+        "read_exception": scene.get("read_exception"),
+    }
+
+
+def _supplement_panel_from_persisted(
+    identity: str, steering_path: Path, revision: str
+) -> dict[str, Any]:
+    """Rebuild and re-render a supplement panel from persisted solve outputs.
+
+    The resume guard skips a row whose operands already exist; the panel dict
+    still has to reach the receipt, so this re-renders the persisted raster
+    (a few milliseconds) and recomposes the panel record from the write-back.
+    """
+    stored_operands = np.load(
+        SUPPLEMENT_OUT / f"{identity}-operands.npz", allow_pickle=False
+    )
+    read = json.loads(
+        (SUPPLEMENT_OUT / f"{identity}-read.json").read_text(encoding="utf-8")
+    )
+    scene = {
+        "radius": np.asarray(stored_operands["radius"]),
+        "height": np.asarray(stored_operands["height"]),
+        "raster": np.asarray(stored_operands["raster"]),
+        "wall": np.asarray(stored_operands["wall"]),
+        "requested_class": read["requested_class"],
+        "terminal_residual": read["terminal_residual"],
+        "converged": read["converged"],
+        "read_exception": read["read_exception"],
+        "time_s": read["time_s"],
+        "reference_plasma_current_ma": read["reference_plasma_current_ma"],
+        "read_axis": np.asarray(stored_operands["axis"]),
+        "read_x_point": np.asarray(stored_operands["x_point"]),
+        "read_wall_point": np.full(2, np.nan),
+    }
+    identity_row = int(identity.rsplit("-", 1)[1])
+    stored = _supplement_session_frame(steering_path, identity_row)
+    class_label = stored["diverted"] and "diverted" or "limited"
+    residual = read["terminal_residual"]
+    divergence = "converged" if read["converged"] else "unconverged"
+    return _render_supplement_panel(
+        scene,
+        identity,
+        stored,
+        current_label=f"{read['reference_plasma_current_ma']:.3f} MA",
+        class_label=class_label,
+        qualification=f"{read['requested_class']} solve; {divergence}",
+        residual=residual,
+        revision=revision,
+    )
+
+
+def run_supplement(output: Path) -> dict[str, Any]:
+    """Solve and render the 27079 limited-class rows plus one reversed slice."""
+    import zarr
+
+    import scripts.labeller_batch.shard as shard
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    SUPPLEMENT_OUT.mkdir(parents=True, exist_ok=True)
+    prepared = shard.prepare_labeller()
+    operator = prepared.profile.operator
+    revision = _git_revision()
+    panels = []
+    time.perf_counter()
+
+    group = zarr.open_group(str(SHOT_STORE / f"{SUPPLEMENT_SHOT}.zarr"), mode="r")[
+        "efm"
+    ]
+    steering_path = LIMITED_ANCHOR_SESSION / "27079.nc"
+    for row in SUPPLEMENT_ROWS:
+        identity = f"27079-{row:02d}"
+        operands_path = SUPPLEMENT_OUT / f"{identity}-operands.npz"
+        if operands_path.exists():
+            panels.append(
+                _supplement_panel_from_persisted(identity, steering_path, revision)
+            )
+            print("SUPPLEMENT_SKIP " + json.dumps({"identity": identity}), flush=True)
+            continue
+        scene = _supplement_solve(prepared, operator, group, row)
+        stored = _supplement_session_frame(steering_path, row)
+        topology = scene.get("topology_state")
+        scene["read_axis"] = (
+            np.asarray(topology.axis, dtype=float) if topology is not None else None
+        )
+        scene["read_x_point"] = (
+            np.asarray(topology.x_point, dtype=float) if topology is not None else None
+        )
+        scene["read_wall_point"] = (
+            np.asarray(topology.wall_point, dtype=float)
+            if topology is not None
+            else None
+        )
+        current = scene["reference_plasma_current_ma"]
+        divergence = "converged" if scene["converged"] else "unconverged"
+        class_label = stored["diverted"] and "diverted" or "limited"
+        panel = _render_supplement_panel(
+            scene,
+            identity,
+            stored,
+            current_label=f"{current:.3f} MA",
+            class_label=class_label,
+            qualification=f"{scene['requested_class']} solve; {divergence}",
+            residual=scene["terminal_residual"],
+            revision=revision,
+        )
+        _persist_supplement_scene(scene, identity)
+        panels.append(panel)
+        print(
+            "SUPPLEMENT_PANEL " + json.dumps(panel, sort_keys=True, default=str),
+            flush=True,
+        )
+
+    # One reversed-current slice, drawn as it terminates.
+    selected = _reversed_slice_identity(None)
+    rshot, rrow, rgroup = selected["shot"], selected["row"], selected["group"]
+    polarity = -1
+    if int(operator.polarity) != polarity:
+        prepared = shard._prepared_with_polarity(prepared, polarity)  # noqa: SLF001
+        operator = prepared.profile.operator
+    scene = _supplement_solve(prepared, operator, rgroup, rrow)
+    residual = scene["terminal_residual"]
+    raster_finite = int(np.isfinite(scene["raster"]).sum())
+    if raster_finite == 0:
+        # The reversed-current block terminates with an all-NaN state on the
+        # negative-polarity branch (axis admission fails for campaign-sign
+        # reasons); draw the frame over the shot's own seed reference flux and
+        # caption the NaN termination rather than fabricate one.
+        radius, height, _shape = operator.raster_geometry()
+        grid = scene["seed"][: operator.grid.node_number]
+        scene["raster"] = np.asarray(grid).reshape(int(radius.size), int(height.size)).T
+        scene["terminal_nan"] = True
+    termination = (
+        "converged" if np.isfinite(residual) and residual < 1e-6 else "unconverged"
+    )
+    if scene.get("terminal_nan"):
+        qualification = (
+            "terminal state NaN (axis admission failed in the reversed-current "
+            "block); drawn over the shot's seed reference flux"
+        )
+    else:
+        read_ok = scene["topology_state"] is not None
+        qualification = (
+            f"{termination}; read={'ok' if read_ok else 'axis admission failed'}"
+        )
+    identity = f"{rshot}-{rrow:02d}" if rrow < 100 else f"{rshot}-rev"
+    stored = {"axis": None, "x_points": None, "boundary": None, "diverted": None}
+    panel = _render_supplement_panel(
+        scene,
+        identity,
+        stored,
+        current_label=f"{abs(scene['reference_plasma_current_ma']):.3f} MA (reversed)",
+        class_label="diverted",
+        qualification=qualification,
+        residual=scene["terminal_residual"],
+        revision=revision,
+    )
+    _persist_supplement_scene(scene, identity)
+    panels.append(panel)
+    print(
+        "SUPPLEMENT_PANEL " + json.dumps(panel, sort_keys=True, default=str), flush=True
+    )
+
+    payload = {
+        "schema": "nova-poloidal-convergence-atlas-supplement",
+        "renderer_revision": revision,
+        "panel_count": len(panels),
+        "panels": panels,
+    }
+    if panels:
+        seconds = [float(panel["render_seconds"]) for panel in panels]
+        payload["per_frame_render_cost"] = {
+            "mean_seconds": float(np.mean(seconds)),
+            "max_seconds": float(np.max(seconds)),
+            "count": len(seconds),
+        }
+    _atomic_write(output, payload)
+    return payload
 
 
 if __name__ == "__main__":

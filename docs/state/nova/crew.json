@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:22:44",
+  "updated": "2026-09-08T10:27:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4199,9 +4199,11 @@
         "id": "scr-checkpoint-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08018-da0f-7452-bb0d-2b5c01b6ed05",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08018-da0f-7452-bb0d-2b5c01b6ed05"
+        },
         "created": "2026-09-08"
       },
       {
@@ -132399,6 +132401,165 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T081353569834-pfs-cache-location-tests",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-cache-location-tests",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5520,
+                "cached_input_tokens": 721614,
+                "input_tokens": 727136,
+                "output_tokens": 3234,
+                "reasoning_output_tokens": 109,
+                "total_tokens": 730370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "test_default_cache_root_is_scoped_to_user_and_host asserts that default_forward_compilation_cache_root() returns a path under the user cache directory (XDG_CACHE_HOME when set, else the home .cache directory) of the form nova/forward-compilation-cache/user-UID/host-HOSTNAME where UID is the numeric user id and HOSTNAME the machine name, exercised by pointing XDG_CACHE_HOME at tmp_path so the real cache is untouched; test_two_processes_compile_into_one_node_local_default is renamed for what it now asserts, that two processes resolve the same shared root under that directory rather than a node-local temporary runtime; the two tests pass together with the rest of the file in the default lane on the login node (they are seconds-scale) with the log captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/cache-location-tests.log; the rest of the file is unchanged; the change is one commit; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 0.5,
+          "goal": "tests/test_compilation_cache_location.py asserts the landed cache-root contract instead of the retired per-job node-local default",
+          "id": "pfs-cache-location-tests",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081353569834-pfs-cache-location-tests/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_compilation_cache_location.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/cache-location-tests.log"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-cachetests-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:14:09Z",
+        "completed_at": "2026-09-08T08:25:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 691,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 691,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "4d7139b31399ee09f01cd7771749ce5f9c780558",
+        "commits": [
+          "e9e3a34855f64bdf7061865dca76579ce7b770c4"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 9,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH; UV_PROJECT_ENVIRONMENT main venv PYTHONPATH worktree uv run --no-sync pytest tests/test_compilation_cache_location.py -q (4 passed in 11.08 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/cache-location-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081353569834-pfs-cache-location-tests/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08014-ed1b-7252-9ab1-105d79241b80",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2538112,
+            "cached_input_tokens_cumulative": 2538112,
+            "input_tokens": 2678205,
+            "input_tokens_cumulative": 2678205,
+            "output_tokens": 7463,
+            "output_tokens_cumulative": 7463,
+            "reasoning_output_tokens": 2610,
+            "reasoning_output_tokens_cumulative": 2610
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T08:25:40Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 22.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T08:25:40Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2538112,
+          "cumulative_input_tokens": 5216317,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 10073
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-cache-location-tests",
+          "session_id": "01a08014-ed1b-7252-9ab1-105d79241b80",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T08:25:40Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -132711,6 +132872,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2198
+    "_version": 2200
   }
 }

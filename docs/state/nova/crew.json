@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T08:10:43",
+  "updated": "2026-09-08T08:19:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -129,9 +129,11 @@
         "id": "bob-gate-t",
         "harness": "codex-terra",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fa4-b460-7f32-a84e-1bdbaeb650ba",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fa4-b460-7f32-a84e-1bdbaeb650ba"
+        },
         "created": "2026-09-08"
       },
       {
@@ -4538,6 +4540,24 @@
       {
         "id": "shadow-luna-2",
         "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "shadow-spark-1",
+        "harness": "codex-spark",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "shadow-spark-2",
+        "harness": "codex-spark",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -129402,6 +129422,170 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T165423864273-nia-banked-reads",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-banked-reads",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py, benchmarks/efit_reproduction_gate.py with diiid_forward_gs_match.py, and benchmarks/solovev_certificate.py write the new fields; the twelve-row bank, the eleven-frame EFIT gate and the sixteen-row Solovev certificate regenerate in one H200 job under the pre-settlement acceptance default with the persistent compilation cache on and a per-job TMPDIR, existing fields bit-identical at unchanged terminal states, the 21985/51 axes near R 0.90 m and no NoQualifiedAxisError row or the deviation stated; the report tabulates per row the axis and saddle displacement in millimetres and the candidate margins; producer unit tests green",
+          "estimated_hours": 3.0,
+          "goal": "Every row of the three receipt producers records Nova's axis and X-point positions and flux beside the reference counterpart, the admitted O and X candidate counts, the second-best flux margin and the read status with its exception text",
+          "id": "nia-banked-reads",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165423864273-nia-banked-reads/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/",
+            "benchmarks/efit_reproduction_gate.py",
+            "benchmarks/diiid_forward_gs_match.py",
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/",
+            "docs/figures/null-identification-authority/banked-reads/",
+            "tests/test_efit_topology_corroboration.py",
+            "tests/test_banked_null_reads.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/banked-reads.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-banking-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:54:31Z",
+        "completed_at": "2026-09-08T06:13:25.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 47906,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 47934,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "d5354a5a2323c912866735b6eb65595dff6d6f68",
+          "906d3f0968a6accf6cf1ecd8b806dd95e8864ecd",
+          "fae50f159699a0a36aa460e4cf22f39b74fd1b2a"
+        ],
+        "changed_lines": {
+          "added": 6538,
+          "removed": 5715,
+          "files": 20
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=<worktree> uv run --no-sync pytest tests/test_efit_topology_corroboration.py tests/test_banked_null_reads.py tests/test_diiid_forward_gs_match.py (23 passed at d5354a5a; the malformed-reference regression test added at fae50f15); H200 job 1264715 regeneration",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165423864273-nia-banked-reads/producer-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165423864273-nia-banked-reads/manifest.md",
+        "scope_changed": false,
+        "session_id": "3df17653-092c-4589-8c5c-28ca9066d71f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5340607,
+            "input_tokens_cumulative": 5340607,
+            "output_tokens": 10300,
+            "output_tokens_cumulative": 10300,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5340607,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2442.426,
+          "generated_tokens": 10300,
+          "generation_seconds": 2409.212,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 38.0,
+          "machine_seconds": 33.214,
+          "peak_input_tokens": 386608,
+          "tokens_per_second": 4.28,
+          "wall_tokens_per_second": 4.22
+        },
+        "follow_on_paths": [
+          "ForwardProfile.solve",
+          "nova/equilibrium/forward.py",
+          "root/exact"
+        ],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-banked-reads",
+          "session_id": "3df17653-092c-4589-8c5c-28ca9066d71f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T06:13:25.745Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -129714,6 +129898,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2157
+    "_version": 2161
   }
 }

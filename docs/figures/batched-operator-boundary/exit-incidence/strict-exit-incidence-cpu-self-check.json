@@ -1,0 +1,541 @@
+{
+  "configuration": {
+    "host_memory_limit_mib": 16384,
+    "host_memory_peak_mib": 6073.44921875,
+    "host_memory_stages": [
+      {
+        "current_rss_mib": 667.6796875,
+        "resource_peak_rss_mib": 667.6796875,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "INPUT_BUILD_START"
+      },
+      {
+        "current_rss_mib": 893.0,
+        "resource_peak_rss_mib": 1475.6953125,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "MAST_INPUT_BUILD_DONE"
+      },
+      {
+        "current_rss_mib": 3879.1640625,
+        "resource_peak_rss_mib": 4146.73828125,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "MAST_INPUT_RELEASED"
+      },
+      {
+        "current_rss_mib": 4455.9765625,
+        "resource_peak_rss_mib": 4497.53515625,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "DIIID_INPUT_BUILD_DONE"
+      },
+      {
+        "current_rss_mib": 5896.1484375,
+        "resource_peak_rss_mib": 6073.44921875,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "DIIID_INPUT_RELEASED"
+      }
+    ],
+    "host_memory_under_limit": true,
+    "paired_control": "each machine program receives the same stacked member arguments for one exit-disabled and one exit-enabled runtime-flag pass",
+    "program_widths": {
+      "DIII-D": 2,
+      "MAST": 2
+    },
+    "real_bank_widths": {
+      "DIII-D": 5,
+      "MAST": 12
+    },
+    "self_check": true,
+    "strict_exit_definition": "zero mask difference, own-mask acceptance, zero accepted Newton promotions, and bit-identical retained incoming state",
+    "trip_limit": 16
+  },
+  "evidence_inputs": {
+    "DIII-D": {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "corpus_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+      "machine_artifact": {
+        "cache": "/run/user/39486/reckon-artifact-repaired-ring-cache",
+        "digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+        "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+      },
+      "member_count": 2
+    },
+    "MAST": {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "bank_route": {
+        "current_pin": "absolute bank reference plasma current passed as target_current",
+        "path": "benchmarks/bank_revision_reproduction.py",
+        "profile_construction": "passive-inclusive case on the current revision with the exact persisted response carrier",
+        "sha256": "cfd674117abc756f4ad8305904d0c4e2e1056c20debbfa12f970de74f60a3a31"
+      },
+      "member_count": 2,
+      "rebuilt_profile_count": 1,
+      "response_carrier": {
+        "carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.006257717031985521
+        },
+        "loaded_from_persisted_carrier": true,
+        "named_cache_only_check": {
+          "command": [
+            "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+            "/home/ITER/mcintos/Code/nova/benchmarks/mast_response_carrier_warm.py",
+            "check",
+            "--carrier",
+            "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "--receipt",
+            "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+          ],
+          "direct_green_operator_builder_entries": 0,
+          "passes": true,
+          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019352 direct_builders=0 verdict=PASS"
+        }
+      },
+      "state_cache": {
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operand-cache-regeneration/logs/exact-operand-cache.npz",
+        "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
+      },
+      "state_cache_authority": {
+        "response_carrier_semantic_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "schema_revision": 8,
+        "selection_source_commit": "80706f89"
+      }
+    },
+    "sequential_width_one_receipt": {
+      "path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "sha256": "7eb2bb066dfc8f0f7fda66f4ebb144aae68ea171172380c8c645e3adb730a3d0"
+    }
+  },
+  "execution": {
+    "attempt": 0,
+    "cpu_count": 1,
+    "device": "cpu",
+    "elapsed_seconds": 376.7817685119808,
+    "execution_mode": "allocation_free_cpu_self_check",
+    "exit_marker": 0,
+    "gpu_count": 0,
+    "host": "98dci4-srv-1006.iter.org",
+    "input_build_seconds": {
+      "DIII-D": 115.39396444195881,
+      "MAST": 16.40630018291995
+    },
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": null,
+    "job_name": null,
+    "node": "98dci4-srv-1006.iter.org",
+    "partition": null,
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "cpu",
+        "backend_version": "cpu",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "cpu",
+            "platform": "cpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-ea5c55820be3d80549fe"
+    },
+    "prior_job_id": null,
+    "requested_memory_mib": null,
+    "requested_time_limit": null,
+    "reservation": null,
+    "tmpdir": "/run/user/39486"
+  },
+  "machines": {
+    "DIII-D": {
+      "compile_seconds": null,
+      "execution_contract": {
+        "arm_order": [
+          "without_exit",
+          "with_exit"
+        ],
+        "compile_count_per_pass": 4,
+        "compiled_once": false,
+        "declared_member_count": 2,
+        "execution_route": "sequential_jitted_geometry_fallback",
+        "geometry_digests": [
+          "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed",
+          "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed"
+        ],
+        "geometry_groups": [
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ],
+        "geometry_identical": false,
+        "same_arguments_for_exit_passes": true,
+        "settlement_flag_is_member_runtime_argument": true,
+        "width": 2
+      },
+      "members": [
+        {
+          "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+          "initial_state_sha256": "05aa45e5e56e510ce1a1e96af48418687627707c112a2f63368ce50f915decb1",
+          "state_authority": "production cold diverted seed for committed frame",
+          "strict_qualification": "fired",
+          "strict_qualification_firing_trip": 4,
+          "terminal_state_bit_identical_where_exit_fired": true,
+          "with_exit": {
+            "batch_elapsed_ms": 62096.412423,
+            "batched_ms_per_member": 31048.2062115,
+            "executed_trips": 4,
+            "no_op_trips": 12,
+            "terminal_residual": 0.2176936320990389,
+            "terminal_state_sha256": "1cc8d12b0963022efc99ded5757fc653f9e75821b77d1f6d62b58cf9c1317bb3",
+            "termination": "active_set_settled"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 79854.674255,
+            "batched_ms_per_member": 39927.3371275,
+            "executed_trips": 4,
+            "no_op_trips": 12,
+            "terminal_residual": 0.2176936320990389,
+            "terminal_state_sha256": "1cc8d12b0963022efc99ded5757fc653f9e75821b77d1f6d62b58cf9c1317bb3",
+            "termination": "active_set_stagnated"
+          }
+        },
+        {
+          "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+          "initial_state_sha256": "962bd6518b25abe8c92b647d57100013b8735c1c998acd75ac9f8e4603dd301d",
+          "state_authority": "production cold diverted seed for committed frame",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 62096.412423,
+            "batched_ms_per_member": 31048.2062115,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.31389367363778153,
+            "terminal_state_sha256": "053bac0257a22a2b9a1d3e0c222ba650c3d9794b20157e7495799deedf8c4c00",
+            "termination": "active_set_iteration_budget_exhausted"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 79854.674255,
+            "batched_ms_per_member": 39927.3371275,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.31389367363778153,
+            "terminal_state_sha256": "053bac0257a22a2b9a1d3e0c222ba650c3d9794b20157e7495799deedf8c4c00",
+            "termination": "active_set_iteration_budget_exhausted"
+          }
+        }
+      ],
+      "stage_host_memory": [
+        {
+          "current_rss_mib": 4379.015625,
+          "resource_peak_rss_mib": 4497.53515625,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_BATCH_READY"
+        },
+        {
+          "current_rss_mib": 4379.015625,
+          "resource_peak_rss_mib": 4497.53515625,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_WITHOUT_EXIT_START"
+        },
+        {
+          "current_rss_mib": 6012.1953125,
+          "resource_peak_rss_mib": 6073.44921875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_WITHOUT_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 6012.1953125,
+          "resource_peak_rss_mib": 6073.44921875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_WITH_EXIT_START"
+        },
+        {
+          "current_rss_mib": 6013.81640625,
+          "resource_peak_rss_mib": 6073.44921875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_WITH_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 6013.81640625,
+          "resource_peak_rss_mib": 6073.44921875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_BATCH_COMPLETE"
+        },
+        {
+          "current_rss_mib": 5896.1484375,
+          "resource_peak_rss_mib": 6073.44921875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_BATCH_RELEASED"
+        }
+      ],
+      "summary": {
+        "batched_ms_per_member": {
+          "with_exit": 31048.2062115,
+          "without_exit": 39927.3371275
+        },
+        "bit_identical_fired_members": 1,
+        "declared_members": 2,
+        "peak_host_rss_mib": 6073.44921875,
+        "strict_exit_fired_members": 1,
+        "strict_exit_never_members": 1
+      }
+    },
+    "MAST": {
+      "compile_seconds": 21.720296530984342,
+      "execution_contract": {
+        "arm_order": [
+          "without_exit",
+          "with_exit"
+        ],
+        "compile_count_per_pass": 1,
+        "compiled_once": true,
+        "declared_member_count": 2,
+        "execution_route": "one_stacked_vmap_program",
+        "geometry_digests": [
+          "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
+          "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399"
+        ],
+        "geometry_groups": [
+          [
+            0,
+            1
+          ]
+        ],
+        "geometry_identical": true,
+        "same_arguments_for_exit_passes": true,
+        "settlement_flag_is_member_runtime_argument": true,
+        "width": 2
+      },
+      "members": [
+        {
+          "identity": "21978/35 pure",
+          "initial_state_sha256": "49a4bb64534df249b71c9331da816720ae0e4c4d2ca0317c3a4fe07c149f69cf",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 36495.038997,
+            "batched_ms_per_member": 18247.5194985,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.8573444747968555e-16,
+            "terminal_state_sha256": "69309c0b6c2d617a1d9598df807d7f69a8343cf6944b38165c5a92e587a0ea32",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 36870.28471,
+            "batched_ms_per_member": 18435.142355,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.8573444747968555e-16,
+            "terminal_state_sha256": "69309c0b6c2d617a1d9598df807d7f69a8343cf6944b38165c5a92e587a0ea32",
+            "termination": "converged"
+          }
+        },
+        {
+          "identity": "21978/35 mixed",
+          "initial_state_sha256": "4325a639df208183fcd56a8121f2a25d17d142792be358ed11f1bf828c949878",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 36495.038997,
+            "batched_ms_per_member": 18247.5194985,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.3062952641115905e-16,
+            "terminal_state_sha256": "f7a52009e37d52c8c8cdef6df144eb12d1c0424c75de1f7c30d06cc66ec73a98",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 36870.28471,
+            "batched_ms_per_member": 18435.142355,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.3062952641115905e-16,
+            "terminal_state_sha256": "f7a52009e37d52c8c8cdef6df144eb12d1c0424c75de1f7c30d06cc66ec73a98",
+            "termination": "converged"
+          }
+        }
+      ],
+      "stage_host_memory": [
+        {
+          "current_rss_mib": 955.21484375,
+          "resource_peak_rss_mib": 1475.6953125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_READY"
+        },
+        {
+          "current_rss_mib": 958.046875,
+          "resource_peak_rss_mib": 1475.6953125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPILE_START"
+        },
+        {
+          "current_rss_mib": 3909.17578125,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPILE_DONE"
+        },
+        {
+          "current_rss_mib": 3909.17578125,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITHOUT_EXIT_START"
+        },
+        {
+          "current_rss_mib": 4125.796875,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITHOUT_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 4125.796875,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITH_EXIT_START"
+        },
+        {
+          "current_rss_mib": 4128.5390625,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITH_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 3978.13671875,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPLETE"
+        },
+        {
+          "current_rss_mib": 3944.5078125,
+          "resource_peak_rss_mib": 4146.73828125,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_RELEASED"
+        }
+      ],
+      "summary": {
+        "batched_ms_per_member": {
+          "with_exit": 18247.5194985,
+          "without_exit": 18435.142355
+        },
+        "bit_identical_fired_members": 0,
+        "declared_members": 2,
+        "peak_host_rss_mib": 4146.73828125,
+        "strict_exit_fired_members": 0,
+        "strict_exit_never_members": 2
+      }
+    }
+  },
+  "measurement_state": "complete",
+  "observations": {
+    "batch_compile_count_per_pass": {
+      "DIII-D": 4,
+      "MAST": 1
+    },
+    "geometry_fallbacks": {
+      "DIII-D": {
+        "fallback": true,
+        "geometry_digests": [
+          "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed",
+          "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed"
+        ]
+      },
+      "MAST": {
+        "fallback": false,
+        "geometry_digests": [
+          "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
+          "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399"
+        ]
+      }
+    },
+    "mast_compiled_once": true
+  },
+  "recorded_at": "2026-09-08T11:24:19.154692+00:00",
+  "schema": "nova.strict-exit-incidence/2",
+  "sequential_width_one_comparison": {
+    "DIII-D": {
+      "measurement_state": "partial_scheduler_timeout",
+      "paired_timing_member_count": 2,
+      "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "with_exit_mean_ms": 196694.746691,
+      "without_exit_mean_ms": 205113.028233
+    },
+    "MAST": {
+      "measurement_state": "partial_scheduler_timeout",
+      "paired_timing_member_count": 12,
+      "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "with_exit_mean_ms": 60188.503989,
+      "without_exit_mean_ms": 64354.927120500004
+    }
+  },
+  "source": {
+    "driver": "benchmarks/strict_exit_incidence.py",
+    "driver_sha256": "55925b19f5657300e44733581c2d821704ac01dc4b905136ebe21530556c0bf5",
+    "required_ancestor": "588578a0",
+    "revision": "2270673f9b0f5f93e7fb388f4938194fadc5bc7c",
+    "solver_source_modified": false
+  }
+}

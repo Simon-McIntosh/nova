@@ -52,8 +52,8 @@ Frame schema (session shapes carry time as the last axis; per-frame shapes
 drop the trailing ``time`` entry; ``n_r``/``n_z`` are the raster axes,
 ``n_s`` the traced separatrix capacity, ``n_b`` the LCFS capacity,
 ``n_circuits`` the driven circuit count, ``n_rows`` the registered constraint
-row count, ``n_cp`` the commanded control-point count, ``n_wall`` the wall
-polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
+row count, ``n_cp`` the commanded control-point count and ``nt`` the frame
+count).  All coordinates are COCOS 17
 ``(R, phi, Z)`` metres; ``psi`` is the total poloidal flux in Wb and
 ``psi_norm`` dimensionless.
 
@@ -111,20 +111,22 @@ polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
 | carrier_identity         | (nt,)           | str     | response carrier   |
 | nova_version             | (nt,)           | str     | package version    |
 | policy_digest            | (nt,)           | str     | policy sha256      |
-| wall_r                   | (n_wall,)       | float64 | m (closed ring)    |
-| wall_z                   | (n_wall,)       | float64 | m (closed ring)    |
+| wall_reference.machine   | scalar          | str     | machine identifier |
+| wall_reference.source    | scalar          | str     | IDS or artifact    |
+| wall_reference.unit_*    | (n_unit,)       | mixed   | unit shape table   |
 +--------------------------+-----------------+---------+--------------------+
 
-The session carries the wall polygon as its own closed group
-(:data:`WALL_GROUP`), written once per session rather than per frame and
-closed by repeating the first vertex.  It is the containment reference for
-the labelled points: the magnetic axis and the X-points are tested against it
-by ray-cast point-in-polygon inclusion, and each strike point by exact
-membership of its recorded wall segment - the point is rebuilt from the
-segment index and along-segment parameter carried on the labelled flux and
-must equal the recorded coordinates to round-off, because a strike point is
-the exact intersection of the boundary level curve with a wall segment and
-lies on the wall where ray-cast inclusion is ambiguous.
+The session carries a wall description reference as its own group
+(:data:`WALL_GROUP`), written once per session rather than per frame.  The
+reference records the machine, immutable description source and digest,
+dictionary version, and a coordinate-free table of WallUnit shapes.  It never
+copies wall coordinates.  At write time the reference's units produce the
+containment receipt: the magnetic axis and the X-points are tested against the
+occupiable region, and each strike point by exact membership of its recorded
+wall segment.  A strike is rebuilt from the segment index and along-segment
+parameter carried on the labelled flux and must equal the recorded coordinates
+to round-off, because it is the exact intersection of the boundary level curve
+with a wall segment and lies on the wall where ray-cast inclusion is ambiguous.
 :func:`count_labelled_outside_wall` returns the labeller receipt's count of
 labelled point slots judged outside it.
 """
@@ -133,6 +135,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from typing import NamedTuple, Sequence
 
 import numpy as np
@@ -142,7 +145,7 @@ from nova.database.netcdf import netCDF
 from nova.biot.contour import Contour
 from nova.equilibrium.labels import N_XPOINT_SLOTS
 from nova.equilibrium.flux_surface_geometry import PlasmaInternalGeometry
-from nova.equilibrium.wall_mask import inside_polygon
+from nova.equilibrium.wall_mask import WallUnit, inside_polygon, wall_units_from_ids
 from nova.equilibrium.solve_request import (
     ForwardSolvePolicy,
     ForwardSolveReceipt,
@@ -411,19 +414,125 @@ def _point_absent(point) -> bool:
     return not bool(np.all(np.isfinite(point)))
 
 
-def _closed_wall_loop(wall) -> np.ndarray:
-    """Return the wall as a closed R-Z ring, repeating the first vertex.
+@dataclass(frozen=True)
+class WallReference:
+    """Identity and coordinate-free shape table for one machine wall.
 
-    A wall supplied already closed is returned unchanged; an open outline is
-    closed by appending its first vertex, so the stored polygon is always a
-    closed loop regardless of how the operator published it.
+    Geometry remains in the referenced machine description.  ``units`` only
+    supplies the writer's in-memory containment calculation; it is never
+    serialized.  The persisted table contains each unit's vertex count,
+    closure and kind, while ``content_digest`` binds those coordinates and
+    semantics to the source a consumer later dereferences.
     """
-    loop = np.asarray(wall, dtype=np.float64)
-    if loop.ndim != 2 or loop.shape[1] != 2 or loop.shape[0] < 2:
-        raise ValueError("the wall must be a polygon of R-Z vertex pairs")
-    if not np.all(loop[0] == loop[-1]):
-        loop = np.vstack((loop, loop[:1]))
-    return loop
+
+    machine: str
+    source: str
+    source_kind: str
+    dd_version: str
+    units: tuple[WallUnit, ...]
+    content_digest: str
+    unit_vertex_counts: tuple[int, ...]
+    unit_closed_flags: tuple[bool, ...]
+    unit_kinds: tuple[str, ...]
+    legacy_copied_wall: bool = False
+
+    @classmethod
+    def from_units(
+        cls,
+        *,
+        machine: str,
+        source: str,
+        source_kind: str,
+        dd_version: str,
+        units: Sequence[WallUnit],
+    ) -> "WallReference":
+        """Bind one loaded WallUnit collection to its description identity."""
+
+        collection = tuple(units)
+        if not collection:
+            raise ValueError("a wall reference needs at least one WallUnit")
+        if source_kind not in {"ids", "artifact"}:
+            raise ValueError("wall source_kind must be 'ids' or 'artifact'")
+        if not all(
+            isinstance(value, str) and value for value in (machine, source, dd_version)
+        ):
+            raise ValueError(
+                "wall reference machine, source and DD version must be set"
+            )
+        return cls(
+            machine=machine,
+            source=source,
+            source_kind=source_kind,
+            dd_version=dd_version,
+            units=collection,
+            content_digest=_wall_content_digest(collection),
+            unit_vertex_counts=tuple(unit.r.size for unit in collection),
+            unit_closed_flags=tuple(unit.closed for unit in collection),
+            unit_kinds=tuple(unit.kind for unit in collection),
+        )
+
+    @property
+    def unit_vertex_count(self) -> tuple[int, ...]:
+        """Return the persisted vertex count for each WallUnit."""
+
+        return self.unit_vertex_counts
+
+    @property
+    def unit_closed(self) -> tuple[bool, ...]:
+        """Return the persisted closure flag for each WallUnit."""
+
+        return self.unit_closed_flags
+
+    @property
+    def unit_kind(self) -> tuple[str, ...]:
+        """Return the persisted kind for each WallUnit."""
+
+        return self.unit_kinds
+
+
+def _wall_content_digest(units: Sequence[WallUnit]) -> str:
+    """Return the SHA-256 digest of one typed wall collection's exact content."""
+
+    payload = [
+        {
+            "closed": unit.closed,
+            "kind": unit.kind,
+            "name": unit.name,
+            "r": [float(value).hex() for value in unit.r],
+            "z": [float(value).hex() for value in unit.z],
+        }
+        for unit in units
+    ]
+    encoded = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def _wall_segments(units: Sequence[WallUnit]) -> tuple[np.ndarray, ...]:
+    """Return the exact segment table, retaining every unit boundary."""
+
+    segments = []
+    for unit in units:
+        vertices = unit.vertices
+        if unit.closed and not np.array_equal(vertices[0], vertices[-1]):
+            vertices = np.vstack((vertices, vertices[:1]))
+        segments.extend(np.stack((vertices[:-1], vertices[1:]), axis=1))
+    return tuple(segments)
+
+
+def _inside_occupiable_region(point: np.ndarray, units: Sequence[WallUnit]) -> bool:
+    """Return whether a point is in a vessel interior and outside material."""
+
+    vessel = any(
+        bool(inside_polygon(point[0], point[1], unit.r, unit.z))
+        for unit in units
+        if unit.kind == "vessel" and unit.closed
+    )
+    material = any(
+        bool(inside_polygon(point[0], point[1], unit.r, unit.z))
+        for unit in units
+        if unit.kind == "material" and unit.closed
+    )
+    return vessel and not material
 
 
 def policy_digest(policy: ForwardSolvePolicy) -> str:
@@ -1019,7 +1128,7 @@ def session_dataset(
     *,
     time=None,
     include_raster: bool = True,
-    wall=None,
+    wall_reference: WallReference | None = None,
 ) -> xr.Dataset:
     """Return one recording session as a time-last xarray dataset.
 
@@ -1029,12 +1138,10 @@ def session_dataset(
     circuits, constraint rows, control points, mask components) are named
     axes.  ``time`` defaults to the integer frame index in seconds.
 
-    ``wall`` names the R-Z wall polygon the session was solved against, closed
-    to a loop and carried session-scoped (once per session, no time axis) as
-    the containment reference for the labelled points.  ``write_session``
-    additionally writes it into its own subgroup (:data:`WALL_GROUP`), which
-    ``read_session`` merges back, so the in-memory dataset is complete in
-    either layout.
+    ``wall_reference`` names the machine description and WallUnit collection
+    the session was solved against.  Its metadata is session-scoped and
+    coordinate-free; :func:`write_session` writes the reference table into
+    :data:`WALL_GROUP` and records the containment receipt before serialization.
     """
     frames = tuple(frames)
     if not frames:
@@ -1296,11 +1403,14 @@ def session_dataset(
         "diagnostic_only": diagnostic_only,
         "p_prime_source": p_prime_source,
     }
-    if wall is not None:
-        loop = _closed_wall_loop(wall)
-        variables["wall_r"] = ("wall_vertex", loop[:, 0])
-        variables["wall_z"] = ("wall_vertex", loop[:, 1])
+    if wall_reference is not None:
         attrs["containment_reference"] = WALL_GROUP
+        attrs["wall_reference_digest"] = wall_reference.content_digest
+        attrs["wall_reference_legacy"] = str(wall_reference.legacy_copied_wall).lower()
+        attrs["labelled_outside_wall"] = count_labelled_outside_wall(
+            xr.Dataset(variables, coords={"time": ("time", time_values)}, attrs=attrs),
+            wall_reference,
+        )
     return xr.Dataset(
         variables,
         coords={"time": ("time", time_values)},
@@ -1316,37 +1426,20 @@ def write_session(
     group: str = SESSION_GROUP,
     time=None,
     include_raster: bool = True,
-    wall=None,
+    wall_reference: WallReference | None = None,
 ) -> netCDF:
     """Record one steering session through the group-backed netCDF store.
 
-    ``wall`` is written once per session into its own closed subgroup
-    (``<group>/<WALL_GROUP>``) so the session file carries the containment
-    reference for the labelled points alongside the frame channels.
+    ``wall_reference`` is written once per session into
+    ``<group>/<WALL_GROUP>``.  The subgroup holds identity and unit-table
+    metadata only; geometry remains in the referenced machine description.
     """
     dataset = session_dataset(
         frames,
         time=time,
         include_raster=include_raster,
-        wall=wall,
+        wall_reference=wall_reference,
     )
-    wall_dataset = None
-    if wall is not None:
-        loop = _closed_wall_loop(wall)
-        wall_dataset = xr.Dataset(
-            {
-                "wall_r": ("wall_vertex", loop[:, 0]),
-                "wall_z": ("wall_vertex", loop[:, 1]),
-            },
-            attrs={
-                COCOS_ATTR: COCOS,
-                # netCDF4 attributes are string-or-numeric only, so the
-                # booleans are stored in their string form.
-                "closed": "true",
-                "containment_reference": "true",
-            },
-        )
-        dataset = dataset.drop_vars(("wall_r", "wall_z"))
     store = netCDF(
         filename=filename,
         dirname=dirname,
@@ -1354,24 +1447,110 @@ def write_session(
         data=dataset,
     )
     stored = store.store()
-    if wall_dataset is not None:
+    if wall_reference is not None:
         subgroup = store.subgroup(WALL_GROUP)
         mode = "a"
         if store.host is not None:
             with store.fsys.open(str(store.filepath), mode + "b") as file:
-                wall_dataset.to_netcdf(file, mode=mode, group=subgroup)
+                _wall_reference_dataset(wall_reference).to_netcdf(
+                    file, mode=mode, group=subgroup
+                )
         else:
-            wall_dataset.to_netcdf(str(store.filepath), mode=mode, group=subgroup)
+            _wall_reference_dataset(wall_reference).to_netcdf(
+                str(store.filepath), mode=mode, group=subgroup
+            )
     return stored
 
 
-def _read_wall_group(store: netCDF) -> dict[str, np.ndarray] | None:
-    """Return the session's wall-polygon variables, or None when absent.
+def _reference_payload(reference: WallReference) -> dict[str, object]:
+    """Return JSON-native reference metadata without the wall coordinates."""
 
-    Older sessions carry no wall subgroup; a session whose wall variables were
-    written inline (not through :func:`write_session`) already has them in the
-    main group and needs no merge.
-    """
+    return {
+        "machine": reference.machine,
+        "source": reference.source,
+        "source_kind": reference.source_kind,
+        "dd_version": reference.dd_version,
+        "content_digest": reference.content_digest,
+        "unit_vertex_counts": reference.unit_vertex_count,
+        "unit_closed_flags": reference.unit_closed,
+        "unit_kinds": reference.unit_kind,
+        "legacy_copied_wall": reference.legacy_copied_wall,
+    }
+
+
+def _wall_reference_dataset(reference: WallReference) -> xr.Dataset:
+    """Return the coordinate-free wall-reference subgroup dataset."""
+
+    return xr.Dataset(
+        {
+            "machine": ((), reference.machine),
+            "source": ((), reference.source),
+            "source_kind": ((), reference.source_kind),
+            "content_digest": ((), reference.content_digest),
+            "dd_version": ((), reference.dd_version),
+            "unit_vertex_count": (
+                "wall_unit",
+                np.asarray(reference.unit_vertex_count, dtype=np.int32),
+            ),
+            "unit_closed": (
+                "wall_unit",
+                np.asarray(reference.unit_closed, dtype=np.int8),
+            ),
+            "unit_kind": ("wall_unit", np.asarray(reference.unit_kind, dtype=str)),
+        },
+        attrs={
+            COCOS_ATTR: COCOS,
+            "legacy_copied_wall": str(reference.legacy_copied_wall).lower(),
+            "schema": "wall-reference",
+        },
+    )
+
+
+def _string_scalar(dataset: xr.Dataset, name: str) -> str:
+    """Return one scalar netCDF string value without its numpy wrapper."""
+
+    return str(np.asarray(dataset[name].values).item())
+
+
+def _reference_from_group(dataset: xr.Dataset) -> WallReference:
+    """Read one coordinate-free wall reference from its netCDF subgroup."""
+
+    required = {
+        "machine",
+        "source",
+        "source_kind",
+        "content_digest",
+        "dd_version",
+        "unit_vertex_count",
+        "unit_closed",
+        "unit_kind",
+    }
+    missing = sorted(required.difference(dataset.variables))
+    if missing:
+        raise ValueError(f"wall reference group is missing {', '.join(missing)}")
+    return WallReference(
+        machine=_string_scalar(dataset, "machine"),
+        source=_string_scalar(dataset, "source"),
+        source_kind=_string_scalar(dataset, "source_kind"),
+        dd_version=_string_scalar(dataset, "dd_version"),
+        units=(),
+        content_digest=_string_scalar(dataset, "content_digest"),
+        unit_vertex_counts=tuple(
+            int(value) for value in np.asarray(dataset["unit_vertex_count"].values)
+        ),
+        unit_closed_flags=tuple(
+            bool(value) for value in np.asarray(dataset["unit_closed"].values)
+        ),
+        unit_kinds=tuple(
+            str(value) for value in np.asarray(dataset["unit_kind"].values)
+        ),
+        legacy_copied_wall=dataset.attrs.get("legacy_copied_wall") == "true",
+    )
+
+
+def _read_wall_group(store: netCDF) -> WallReference | None:
+    """Return the current reference or convert an older copied subgroup."""
+
     subgroup = store.subgroup(WALL_GROUP)
     if subgroup is None:
         return None
@@ -1380,12 +1559,45 @@ def _read_wall_group(store: netCDF) -> dict[str, np.ndarray] | None:
             wall.load()
     except OSError, ValueError, KeyError:
         return None
-    if "wall_r" not in wall.variables or "wall_z" not in wall.variables:
+    if {"wall_r", "wall_z"}.issubset(wall.variables):
+        return _legacy_wall_reference_from_coordinates(
+            np.asarray(wall["wall_r"].values), np.asarray(wall["wall_z"].values)
+        )
+    return _reference_from_group(wall)
+
+
+def _legacy_wall_reference_from_coordinates(wall_r, wall_z) -> WallReference:
+    """Represent copied ring coordinates as the flagged unknown-source form."""
+
+    unit = WallUnit(
+        r=np.asarray(wall_r),
+        z=np.asarray(wall_z),
+        kind="vessel",
+        closed=True,
+        name="legacy copied wall",
+    )
+    return WallReference(
+        machine="unknown",
+        source="unknown",
+        source_kind="ids",
+        dd_version="unknown",
+        units=(unit,),
+        content_digest=_wall_content_digest((unit,)),
+        unit_vertex_counts=(unit.r.size,),
+        unit_closed_flags=(True,),
+        unit_kinds=("vessel",),
+        legacy_copied_wall=True,
+    )
+
+
+def _legacy_wall_reference(dataset: xr.Dataset) -> WallReference | None:
+    """Represent an inline copied ring as the flagged unknown-source legacy form."""
+
+    if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
         return None
-    return {
-        "wall_r": ("wall_vertex", np.asarray(wall["wall_r"].values)),
-        "wall_z": ("wall_vertex", np.asarray(wall["wall_z"].values)),
-    }
+    return _legacy_wall_reference_from_coordinates(
+        dataset["wall_r"].values, dataset["wall_z"].values
+    )
 
 
 def read_session(
@@ -1396,17 +1608,23 @@ def read_session(
 ) -> xr.Dataset:
     """Return one recorded session, including sessions without a raster block.
 
-    When the file carries the wall polygons in its own subgroup
-    (:data:`WALL_GROUP`), it is merged back into the returned dataset so the
-    containment reference is available to every caller of the reader.
+    A current session reads its coordinate-free wall reference from
+    :data:`WALL_GROUP`.  A legacy copied-ring session is converted to a flagged
+    unknown-source reference and its coordinate variables are removed.
     """
     store = netCDF(filename=filename, dirname=dirname, group=group)
     store.load()
     dataset = store.data
-    if "wall_r" not in dataset.variables:
-        wall_data = _read_wall_group(store)
-        if wall_data is not None:
-            dataset = dataset.assign(wall_data)
+    reference = _read_wall_group(store)
+    if reference is None:
+        reference = _legacy_wall_reference(dataset)
+    if reference is not None:
+        dataset = dataset.drop_vars(
+            [name for name in ("wall_r", "wall_z") if name in dataset.variables]
+        )
+        dataset.attrs["wall_reference"] = json.dumps(
+            _reference_payload(reference), sort_keys=True, separators=(",", ":")
+        )
     return dataset
 
 
@@ -1516,34 +1734,83 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
     return frames
 
 
+def wall_reference_from_session(dataset: xr.Dataset) -> WallReference:
+    """Return a session's persisted coordinate-free wall reference."""
+
+    try:
+        payload = json.loads(str(dataset.attrs["wall_reference"]))
+    except KeyError as error:
+        raise ValueError("the session carries no wall reference") from error
+    return WallReference(
+        machine=str(payload["machine"]),
+        source=str(payload["source"]),
+        source_kind=str(payload["source_kind"]),
+        dd_version=str(payload["dd_version"]),
+        units=(),
+        content_digest=str(payload["content_digest"]),
+        unit_vertex_counts=tuple(int(value) for value in payload["unit_vertex_counts"]),
+        unit_closed_flags=tuple(bool(value) for value in payload["unit_closed_flags"]),
+        unit_kinds=tuple(str(value) for value in payload["unit_kinds"]),
+        legacy_copied_wall=bool(payload["legacy_copied_wall"]),
+    )
+
+
+def dereference_wall(reference: WallReference) -> tuple[WallUnit, ...]:
+    """Load the referenced machine wall and prove it matches the stored table."""
+
+    if reference.legacy_copied_wall:
+        raise ValueError("a legacy copied wall has no dereferenceable source")
+    import imas
+
+    uri = reference.source
+    if not uri.startswith("imas:"):
+        uri = f"imas:hdf5?path={uri}"
+    entry = imas.DBEntry(uri, "r", dd_version=reference.dd_version)
+    try:
+        units = wall_units_from_ids(entry.get("wall", 0, lazy=False, autoconvert=False))
+    finally:
+        entry.close()
+    actual = WallReference.from_units(
+        machine=reference.machine,
+        source=reference.source,
+        source_kind=reference.source_kind,
+        dd_version=reference.dd_version,
+        units=units,
+    )
+    if (
+        actual.content_digest != reference.content_digest
+        or actual.unit_vertex_count != reference.unit_vertex_count
+        or actual.unit_closed != reference.unit_closed
+        or actual.unit_kind != reference.unit_kind
+    ):
+        raise ValueError("dereferenced wall does not match the stored reference")
+    return units
+
+
 def count_labelled_outside_wall(
     dataset: xr.Dataset,
+    reference: WallReference,
 ) -> int:
     """Return the labelled point slots judged outside the session's wall.
 
-    The wall polygon is the containment reference for the labelled points
-    (see the session schema): the magnetic axis and the X-points are tested by
-    ray-cast point-in-polygon inclusion, and each strike point by rebuilding
-    its recorded wall segment from the labelled segment index and parameter.
+    The referenced WallUnit collection is the containment reference for the
+    labelled points (see the session schema): the magnetic axis and the
+    X-points are tested against its occupiable region, and each strike point by
+    rebuilding its recorded wall segment from the labelled segment index and
+    parameter.
     A strike is accepted only when the rebuilt point equals its stored
     coordinates exactly.  An absent (NaN) slot never counts.  This is the
     count the labeller receipt records — how many labelled points fall outside
     the vessel across every frame.
     """
-    if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
-        raise ValueError(
-            "the session carries no wall polygon to test the labelled points "
-            "against (write it with write_session(..., wall=...))"
-        )
+    if not reference.units:
+        raise ValueError("containment needs the reference's loaded WallUnit collection")
     if (
         "strike_segment" not in dataset.variables
         or "strike_parameter" not in dataset.variables
     ):
         raise ValueError("the session carries no recorded strike crossing geometry")
-    wall_r = np.asarray(dataset["wall_r"].values)
-    wall_z = np.asarray(dataset["wall_z"].values)
-    wall_loop = np.column_stack((wall_r, wall_z))
-    segment_count = wall_loop.shape[0] - 1
+    segment_table = _wall_segments(reference.units)
     outside = 0
     for index in range(int(dataset.sizes["time"])):
         frame = dataset.isel(time=index)
@@ -1565,25 +1832,26 @@ def count_labelled_outside_wall(
                 np.asarray(frame["strike_points_z"].values),
             )
         )
-        segments = np.asarray(frame["strike_segment"].values, dtype=np.int32)
+        segment_indices = np.asarray(frame["strike_segment"].values, dtype=np.int32)
         parameters = np.asarray(frame["strike_parameter"].values, dtype=np.float64)
-        if not _point_absent(axis) and not bool(
-            inside_polygon(axis[0], axis[1], wall_r, wall_z)
+        if not _point_absent(axis) and not _inside_occupiable_region(
+            axis, reference.units
         ):
             outside += 1
         for x_point in x_points:
-            if not _point_absent(x_point) and not bool(
-                inside_polygon(x_point[0], x_point[1], wall_r, wall_z)
+            if not _point_absent(x_point) and not _inside_occupiable_region(
+                x_point, reference.units
             ):
                 outside += 1
-        for strike, segment, parameter in zip(strikes, segments, parameters):
+        for strike, segment, parameter in zip(
+            strikes, segment_indices, parameters, strict=True
+        ):
             if _point_absent(strike):
                 continue
-            if not (0 <= segment < segment_count and 0.0 <= parameter <= 1.0):
+            if not (0 <= segment < len(segment_table) and 0.0 <= parameter <= 1.0):
                 outside += 1
                 continue
-            start = wall_loop[segment]
-            end = wall_loop[segment + 1]
+            start, end = segment_table[segment]
             reconstructed = start + parameter * (end - start)
             if not np.allclose(strike, reconstructed, rtol=0.0, atol=1.0e-12):
                 outside += 1
@@ -1595,13 +1863,17 @@ __all__ = [
     "FINITE_MASK_COMPONENTS",
     "N_STRIKE_POINTS",
     "SESSION_GROUP",
+    "WALL_GROUP",
     "SteeringAction",
     "SteeringFrame",
+    "WallReference",
     "assemble_frame",
     "count_labelled_outside_wall",
+    "dereference_wall",
     "frames_from_session",
     "policy_digest",
     "read_session",
     "session_dataset",
+    "wall_reference_from_session",
     "write_session",
 ]

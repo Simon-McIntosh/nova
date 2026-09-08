@@ -1,0 +1,39 @@
+{
+  "solver_source_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+  "certificate": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": -110,
+      "converged": false,
+      "terminal_residual": 0.007447526861632626,
+      "retained_h200_terminal_residual": 0.007447526861632619,
+      "axis_error_m": 0.013352807132301537,
+      "root_boundary_flux_wb": 10.395131850572081,
+      "analytic_boundary_flux_wb": 2.6722582192869963e-09,
+      "levels_wb": [
+        -62.01051211617961,
+        -50.293760672147585,
+        -38.577009228115564,
+        -26.860257784083544,
+        -15.143506340051516,
+        -3.4267548960194887,
+        2.6722582192869963e-09,
+        8.289996548012525,
+        10.395131850572081,
+        20.006747992044552,
+        31.72349943607658,
+        43.44025088010861,
+        55.157002324140635,
+        66.87375376817265,
+        78.59050521220466,
+        90.3072566562367,
+        102.02400810026872
+      ],
+      "path": "docs/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-reduced.png",
+      "project_src": "/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-reduced.png",
+      "solve_seconds": 102.82353951968253
+    }
+  ],
+  "jax_enable_x64": true,
+  "jax_platform": "cpu"
+}

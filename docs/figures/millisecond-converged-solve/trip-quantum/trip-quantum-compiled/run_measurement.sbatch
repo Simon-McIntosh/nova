@@ -8,15 +8,23 @@
 #SBATCH --mem=128G
 #SBATCH --gres=gpu:1
 #SBATCH --time=03:00:00
-#SBATCH --output=slurm-%j.out
-#SBATCH --error=slurm-%j.err
+#SBATCH --output=docs/figures/millisecond-converged-solve/trip-quantum/trip-quantum-compiled/slurm-%j.out
+#SBATCH --error=docs/figures/millisecond-converged-solve/trip-quantum/trip-quantum-compiled/slurm-%j.err
 
 set -euo pipefail
 
-# The receipt resolves the checkout root from its own committed location so it
-# runs unchanged from any clone or worktree this revision is checked into.
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-checkout_root="${NOVA_CHECKOUT_ROOT:-$(cd "$here/../../../../.." && pwd)}"
+# SLURM spools the batch script, so ``BASH_SOURCE`` does not name the
+# committed file; the job instead starts its working directory at the
+# submission directory.  The checkout root is therefore the submission
+# directory (or an explicit override), which keeps the runner bound to the
+# checkout it was launched from rather than to a fixed path.
+checkout_root="${NOVA_CHECKOUT_ROOT:-$(pwd)}"
+# A worktree's ``.git`` is a file pointing at the repository, not a directory.
+if [ ! -e "$checkout_root/.git" ]; then
+  echo "checkout root is not a repository (submit from the checkout root): " \
+    "$checkout_root" >&2
+  exit 2
+fi
 
 export TMPDIR=/tmp
 export OMP_NUM_THREADS=1

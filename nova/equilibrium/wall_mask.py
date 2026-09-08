@@ -51,6 +51,7 @@ logger = logging.getLogger("nova.equilibrium.wall_mask")
 __all__ = [
     "WallUnit",
     "WallDiagnostic",
+    "pack_wall_units",
     "supercover_raster",
     "build_wall_mask",
     "densify_units",
@@ -120,6 +121,34 @@ class WallUnit:
             )
         if self.r.size != self.z.size:
             raise ValueError("WallUnit r and z must have equal length")
+        if self.r.size < 2:
+            raise ValueError("WallUnit must contain at least two vertices")
+        if self.kind == "vessel" and not self.closed:
+            raise ValueError("a vessel WallUnit must be closed")
+
+    @property
+    def vertices(self) -> np.ndarray:
+        """Return the unit's ordered ``(r, z)`` vertices without changing them."""
+
+        return np.column_stack((self.r, self.z))
+
+
+def pack_wall_units(
+    units: list[WallUnit] | tuple[WallUnit, ...],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return flat vertices and offsets while retaining every unit boundary.
+
+    ``offsets`` has one more entry than ``units``. Unit ``i`` occupies
+    ``vertices[offsets[i]:offsets[i + 1]]``; no closing or inter-unit edge is
+    inserted into the packed coordinates.
+    """
+
+    collection = tuple(units)
+    offsets = np.zeros(len(collection) + 1, dtype=np.int64)
+    if not collection:
+        return np.empty((0, 2), dtype=np.float64), offsets
+    offsets[1:] = np.cumsum([unit.r.size for unit in collection])
+    return np.concatenate([unit.vertices for unit in collection]), offsets
 
 
 def vessel_unit(r, z, name: str = "vessel") -> WallUnit:

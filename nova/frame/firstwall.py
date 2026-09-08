@@ -8,6 +8,7 @@ from nova.graphics.plot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.poloidalgrid import PoloidalGrid
 from nova.geometry.polygon import Polygon
+from nova.equilibrium.wall_mask import WallUnit, pack_wall_units
 
 
 @dataclass
@@ -97,6 +98,13 @@ class FirstWall(Plot, PlasmaGrid, FrameSetLoc):
     """Mesh plasma rejoin."""
 
     name: str = "firstwall"
+    wall_units: tuple[WallUnit, ...] = field(init=False, default_factory=tuple)
+    wall_nodes: np.ndarray = field(
+        init=False, default_factory=lambda: np.empty((0, 2), dtype=np.float64)
+    )
+    wall_unit_offsets: np.ndarray = field(
+        init=False, default_factory=lambda: np.zeros(1, dtype=np.int64)
+    )
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -113,6 +121,24 @@ class FirstWall(Plot, PlasmaGrid, FrameSetLoc):
         if self.sloc["plasma"].sum() > 1:
             self.normalize_multiframe()
         self.update_aloc_hash("nturn")
+
+    def retain_units(self, units: list[WallUnit] | tuple[WallUnit, ...]) -> None:
+        """Retain a packed wall without joining or implicitly closing its units."""
+
+        self.wall_units = tuple(units)
+        self.wall_nodes, self.wall_unit_offsets = pack_wall_units(self.wall_units)
+
+    @property
+    def wall_unit_closed(self) -> np.ndarray:
+        """Return one closure flag per retained wall unit."""
+
+        return np.asarray([unit.closed for unit in self.wall_units], dtype=bool)
+
+    @property
+    def wall_unit_kinds(self) -> tuple[str, ...]:
+        """Return one semantic kind per retained wall unit."""
+
+        return tuple(unit.kind for unit in self.wall_units)
 
     def normalize_multiframe(self):
         """Normalize turn number for multiframe plasmas."""

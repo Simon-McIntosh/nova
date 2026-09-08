@@ -549,6 +549,43 @@ def _build_mast_members(
     }
 
 
+def _diiid_machine_artifact_evidence(
+    machine_cache: Path, surface_receipts: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Record the governed artifact behind cached or transported coordinates."""
+    artifact_digest = DEFAULT_MACHINE_ARTIFACT_DIGEST.removeprefix("sha256:")
+    manifest = machine_cache / "sha256" / artifact_digest / "manifest.json"
+    evidence = {
+        "cache": str(machine_cache),
+        "digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
+    }
+    if manifest.is_file():
+        evidence["manifest_sha256"] = _sha256(manifest)
+        return evidence
+    if surface_receipts and all(
+        receipt.get("coordinate_transport") for receipt in surface_receipts
+    ):
+        coordinate_digests = {
+            str(receipt["wall_coordinate_sha256"]) for receipt in surface_receipts
+        }
+        if len(coordinate_digests) != 1:
+            raise RuntimeError("DIII-D members consumed different transported walls")
+        evidence.update(
+            {
+                "manifest_sha256": artifact_digest,
+                "coordinate_transport": (
+                    "digest-qualified wall coordinates supplied to the compute node"
+                ),
+                "wall_coordinate_sha256": coordinate_digests.pop(),
+            }
+        )
+        return evidence
+    raise FileNotFoundError(
+        "DIII-D machine artifact manifest is unavailable and the members did not "
+        "consume the verified coordinate transport"
+    )
+
+
 def _build_diiid_members(
     machine_cache: Path, *, member_count: int = 5
 ) -> tuple[list[Member], dict[str, Any]]:
@@ -557,6 +594,7 @@ def _build_diiid_members(
     if not isinstance(rows, list) or len(rows) != 5:
         raise RuntimeError("the DIII-D bank must carry five frame records")
     members = []
+    surface_receipts = []
     if not 1 <= member_count <= len(rows):
         raise ValueError(f"DIII-D member count must be in [1, {len(rows)}]")
     for number, bank_row in enumerate(rows[:member_count], start=1):
@@ -570,6 +608,7 @@ def _build_diiid_members(
             machine_artifact_cache=machine_cache,
             machine_artifact_digest=DEFAULT_MACHINE_ARTIFACT_DIGEST,
         )
+        surface_receipts.append(built.surface_receipt)
         time_ms = float(row["efit_times"][frame])
         machine = dataset_machine_description(row, source_row=str(row["_source_path"]))
         shipped = shipped_current_at(
@@ -624,22 +663,14 @@ def _build_diiid_members(
             f"rss_mib={_PeakRssSampler._current_mib():.3f}",
             flush=True,
         )
-    manifest = (
-        machine_cache
-        / "sha256"
-        / DEFAULT_MACHINE_ARTIFACT_DIGEST.removeprefix("sha256:")
-        / "manifest.json"
-    )
     return members, {
         "bank": {
             "path": str(DIIID_BANK.relative_to(ROOT)),
             "sha256": _sha256(DIIID_BANK),
         },
-        "machine_artifact": {
-            "cache": str(machine_cache),
-            "digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
-            "manifest_sha256": _sha256(manifest),
-        },
+        "machine_artifact": _diiid_machine_artifact_evidence(
+            machine_cache, surface_receipts
+        ),
         "corpus_root": str(DIIID_DATA),
         "member_count": len(members),
     }

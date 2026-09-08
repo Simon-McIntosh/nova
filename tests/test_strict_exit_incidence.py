@@ -103,3 +103,30 @@ def test_mast_profile_tables_become_dynamic_leaves_without_numerical_change():
         np.asarray(sampled.core.ff_prime(evaluation)),
         np.asarray(original.core.ff_prime(evaluation)),
     )
+
+
+def test_diiid_transport_supplies_content_addressed_artifact_evidence(
+    tmp_path,
+):
+    coordinate_digest = (
+        "a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8"
+    )
+    evidence = incidence._diiid_machine_artifact_evidence(
+        tmp_path,
+        [
+            {
+                "coordinate_transport": "verified test transport",
+                "wall_coordinate_sha256": coordinate_digest,
+            },
+            {
+                "coordinate_transport": "verified test transport",
+                "wall_coordinate_sha256": coordinate_digest,
+            },
+        ],
+    )
+
+    assert evidence["manifest_sha256"] == (
+        incidence.DEFAULT_MACHINE_ARTIFACT_DIGEST.removeprefix("sha256:")
+    )
+    assert evidence["wall_coordinate_sha256"] == coordinate_digest
+    assert evidence["cache"] == str(tmp_path)

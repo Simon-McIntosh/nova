@@ -133,6 +133,19 @@ def _edge_vanishing_profile(amplitude):
     return gradient
 
 
+@pytest.mark.slow
+def test_diverted_normalised_certificate_rung_retains_finite_fallback(
+    monkeypatch, tmp_path
+):
+    """The constrained diverted rung re-reads its current support per trip."""
+    from benchmarks import solovev_certificate
+
+    monkeypatch.setattr(solovev_certificate, "PART_ROOT", tmp_path)
+    row = solovev_certificate._measure("diverted-jump-bearing", -300)
+
+    assert row["solver"]["terminal_fixed_point_residual"] == 0.025515711279493654
+
+
 @pytest.fixture(scope="module")
 def machine():
     """Return the bootstrapped free-boundary solve and its analytic seed."""

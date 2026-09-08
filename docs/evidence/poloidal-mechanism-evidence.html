@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="null-identification-authority">
 <meta name="plan-evidence-for" content="null-identification-authority">
 <meta name="plan-title" content="Poloidal mechanism evidence">
-<meta name="plan-summary" content="Partial retained-case contour evidence: two shared-level exact-solution overlays and the preserved unqualified cold-start topology read; remaining visual rows are explicitly pending the active CPU allocation.">
+<meta name="plan-summary" content="Partial retained-case contour evidence: three shared-level exact-solution overlays and the preserved unqualified cold-start topology read; the corrected locality contour, clip geometry, remaining certificate rows, and affine round trip are explicit placeholders.">
 <title>Poloidal mechanism evidence | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -18,19 +18,20 @@
 <header class="plan-hero">
 <p class="eyebrow">Evidence · poloidal mechanism · partial</p>
 <h1>Poloidal mechanism evidence</h1>
-<p class="lede">This is a durable partial evidence record, not a success claim. The retained H200 certificate says every exact-solution row is non-converged. The CPU renderer has preserved two terminal-versus-analytic shared-level contour overlays and the no-qualified-axis cold start; the remaining five requested visual products are named below with their exact current state.</p>
+<p class="lede">This is a durable partial evidence record, not a success claim. The retained H200 certificate says every exact-solution row is non-converged. The CPU renderer has preserved three terminal-versus-analytic shared-level contour overlays and the no-qualified-axis cold start. Every section not yet reached says <strong>placeholder</strong> beside the question it must answer.</p>
 </header>
 
 <section>
 <h2>Scope, retained records, and coverage</h2>
-<p>The source receipt is <code>triage/rebank-certificate-and-bank/artifacts/job-1267132</code>. It records weak-rotation reactor static terminal residuals 7.448e-3, 5.559e-3, 1.246e-3, and 5.401e-3 at 110, 300, 500, and 1000 cells, and moderate-rotation conventional static residuals 1.246e-2 and 8.456e-3 at 110 and 300 cells; all have <code>converged=false</code>. The CPU replay reproduces the first two terminal residuals without changing their classification.</p>
+<p>The source receipt is <code>triage/rebank-certificate-and-bank/artifacts/job-1267132</code>. It records weak-rotation reactor static terminal residuals 7.448e-3, 5.559e-3, 1.246e-3, and 5.401e-3 at 110, 300, 500, and 1000 cells, and moderate-rotation conventional static residuals 1.246e-2 and 8.456e-3 at 110 and 300 cells; all have <code>converged=false</code>. The CPU replay reproduces the first three terminal residuals without changing their classification.</p>
 <table><thead><tr><th>Requested evidence</th><th>Status</th><th>Reason if absent</th></tr></thead><tbody>
 <tr><td>Weak rotation, 110 cells</td><td>Rendered and committed</td><td>—</td></tr>
 <tr><td>Weak rotation, 300 cells</td><td>Rendered and committed</td><td>—</td></tr>
-<tr><td>Weak rotation, 500 and 1000 cells</td><td>Not yet rendered</td><td>The one bounded CPU allocation is still solving the 500-cell rung; no substitute field was drawn.</td></tr>
-<tr><td>Moderate rotation, 110 and 300 cells</td><td>Not yet rendered</td><td>They remain queued behind the higher-priority weak-rotation rows in that same allocation.</td></tr>
-<tr><td>Outboard 500-cell error locality</td><td>Not measured</td><td>It depends on the retained 500-cell terminal field; no brightness-based conclusion is stated.</td></tr>
-<tr><td>Boundary-cut cells, 110 and 342</td><td>Not yet rendered</td><td>The certificate sequence has priority and the two clip renders have not been submitted while it runs.</td></tr>
+<tr><td>Weak rotation, 500 cells</td><td>Rendered and committed</td><td>—</td></tr>
+<tr><td>Weak rotation, 1000 cells</td><td>Placeholder</td><td>Job 1267260 was cancelled at 25:31 after the 500-cell panel landed; no substitute field is drawn.</td></tr>
+<tr><td>Moderate rotation, 110 and 300 cells</td><td>Placeholder</td><td>They remained queued behind the weak-rotation rows when job 1267260 was cancelled.</td></tr>
+<tr><td>Outboard 500-cell error locality</td><td>Measured; corrected contour is a placeholder</td><td>The numeric test is complete, but the first rendered panel predates the line-contour correction and is not treated as evidence.</td></tr>
+<tr><td>Boundary-cut cells, 110 and 342</td><td>Placeholder</td><td>The certificate sequence had priority; the clip render was not submitted before the node time fence.</td></tr>
 </tbody></table>
 <p>The broader MAST and DIII-D corpus remains in the <a href="/nova/evidence/poloidal-convergence-atlas.html">poloidal convergence atlas</a>; it is linked rather than re-drawn here.</p>
 </section>
@@ -55,7 +56,54 @@
 <img src="/nova/figures/null-identification-authority/mechanism-evidence/certificate-weak-rotation-reactor-static-300.png" alt="Shared-level analytic and solved weak-rotation reactor-static flux contours at 300 cells with wall, boundary, and topology markers.">
 <figcaption><strong>Weak rotation, 300 cells: residual 5.559e-3; not converged.</strong> The axis displacement is 30.25 mm and solved boundary flux is -7.571 Wb, while the analytic boundary flux remains 2.67e-9 Wb. The sign change beside a larger axis error is evidence against a simple monotone resolution story; it is not filtered out because the row stalled.</figcaption>
 </figure>
+<figure>
+<img src="/nova/figures/null-identification-authority/mechanism-evidence/certificate-weak-rotation-reactor-static-500.png" alt="Shared-level analytic and solved weak-rotation reactor-static flux contours at 500 cells with wall, boundary, and topology markers.">
+<figcaption><strong>Weak rotation, 500 cells: residual 1.246e-3; not converged.</strong> The CPU replay measures a 52.41 mm axis displacement and solved boundary flux -12.471 Wb against analytic boundary flux 2.67e-9 Wb. A structurally wrong answer is a visibly deformed terminal field, a thick amber boundary displaced from red, or a missing or doubled critical point. If all three instead look right while the residual stays large, the residual definition or its support becomes the stronger suspect.</figcaption>
+</figure>
 </article>
+</section>
+
+<section>
+<h2>500-cell error locality — measured result; corrected figure placeholder</h2>
+<p><strong>Finding:</strong> the proposed bright outboard cluster is real locally but does not contain most of the error. The R = 7.25–7.75 m, Z = 0–0.5 m window is 1.44% of nodes and carries 6.33% of squared flux error. The largest 5% of node errors carry only 14.11%; reaching 90% requires 78.20% of nodes. The squared-error centre is at R = 6.312 m, Z approximately 0, 0.115 m from the analytic axis—within one 0.219 m characteristic pitch—but 1.489 m from both analytic boundary and wall. The concentration therefore coincides with the axis normalisation anchor, not a boundary contact or limiter touch, and the error is distributed rather than a single outboard structural cluster.</p>
+<table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>Outboard-window domain / squared-error fraction</td><td>1.44% / 6.33%</td></tr>
+<tr><td>Top-5% node squared-error fraction</td><td>14.11%</td></tr>
+<tr><td>Node fraction required for 90% squared error</td><td>78.20%</td></tr>
+<tr><td>Error centre</td><td>R 6.312 m, Z 3.5e-12 m</td></tr>
+<tr><td>Distance to axis / boundary / wall</td><td>0.115 m / 1.489 m / 1.489 m</td></tr>
+</tbody></table>
+<p><strong>Placeholder question:</strong> do line contours of the absolute error field show the same distributed support and axis-centred weight? The committed <code>weak-rotation-500-error-locality.png</code> predates the late instruction and marks high-error nodes as points, so it is retained for provenance but deliberately not embedded or treated as acceptable visual evidence. It must be redrawn as unfilled error contours before this section is complete.</p>
+</section>
+
+<section>
+<h2>Remaining exact rows — placeholder</h2>
+<p><strong>Placeholder question:</strong> at weak rotation with 1000 cells and moderate rotation with 110 and 300 cells, are the solved boundary, critical points, and overall equilibrium shape visibly wrong on the same physical contour levels as the analytic field, or does only the residual remain large? Job 1267260 was cancelled after 25:31, once the first three weak-rotation rows had landed. No finding is stated for the three unrendered rows.</p>
+</section>
+
+<section>
+<h2>Boundary-cut cells and true separatrix — placeholder</h2>
+<p><strong>Placeholder question:</strong> for all eight cut cells at 110 and all twenty at 342, do the computed polygonal chord support, the traced curved separatrix, the physical first-moment centroid, and the direct inside-region centroid agree geometrically? The figure must use <code>hex_mesh</code>, <code>clip_to_boundary</code>, and <code>draw_plasma_cells</code>; each displayed support must arrive already clipped. It must show the straight polygonal chord faithfully beside the traced curve, never curve the computed clip, and report the chord-versus-curve area difference in square metres and as a fraction of its cell. A centroid outside its clipped polygon or on the wrong side of the traced boundary is the visible failure. This section is awaiting those figures and measurements.</p>
+</section>
+
+<section>
+<h2>Affine flux-function round trip — result received</h2>
+<p><strong>Verdict:</strong> a literal forward-solve round trip remains structurally unavailable because the affine route requires a rectangular <code>FluxLattice</code>, whereas these forward Solovev receipts are unstructured hex maps. The independent node therefore measured the same extraction path on direct analytic rectangular rasters with all 24 normalized-flux bins and zero exclusions. P prime is recovered at binary64 noise. FF prime is not exact: it has a spatially uniform, second-order radial-stencil bias with bin-to-bin scatter at roundoff. The observed bias matches <code>-pressure_coefficient * radial_step**2</code> and converges with order 1.923; the finest relative sup error is 8.85e-5, 13.29 times below the measured 1.177e-3 operator-composition floor.</p>
+<table><thead><tr><th>Case and lattice</th><th>Profile</th><th>absolute sup</th><th>absolute RMS</th></tr></thead><tbody>
+<tr><td>weak, 33×49</td><td>p prime</td><td>9.721e-9</td><td>4.359e-9</td></tr>
+<tr><td>weak, 33×49</td><td>ff prime</td><td>4.457e-4</td><td>4.457e-4</td></tr>
+<tr><td>weak, 49×73</td><td>p prime</td><td>1.419e-8</td><td>6.389e-9</td></tr>
+<tr><td>weak, 49×73</td><td>ff prime</td><td>1.981e-4</td><td>1.981e-4</td></tr>
+<tr><td>weak, 67×103</td><td>p prime</td><td>1.510e-8</td><td>7.252e-9</td></tr>
+<tr><td>weak, 67×103</td><td>ff prime</td><td>1.048e-4</td><td>1.048e-4</td></tr>
+<tr><td>moderate, 33×49</td><td>p prime</td><td>6.781e-8</td><td>2.388e-8</td></tr>
+<tr><td>moderate, 33×49</td><td>ff prime</td><td>1.656e-4</td><td>1.656e-4</td></tr>
+<tr><td>moderate, 49×73</td><td>p prime</td><td>9.121e-8</td><td>3.854e-8</td></tr>
+<tr><td>moderate, 49×73</td><td>ff prime</td><td>7.358e-5</td><td>7.358e-5</td></tr>
+<tr><td>moderate, 67×103</td><td>p prime</td><td>6.397e-8</td><td>2.831e-8</td></tr>
+<tr><td>moderate, 67×103</td><td>ff prime</td><td>3.892e-5</td><td>3.892e-5</td></tr>
+</tbody></table>
+<p>Source: <code>gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267259.json</code>. The unanswered literal-forward question is whether a lead-approved tensor carrier reproduces this result without adding a hex-to-raster interpolation error.</p>
 </section>
 
 <section>
@@ -69,7 +117,7 @@
 <section>
 <h2>Method and continuation point</h2>
 <p>The renderer runs from a file on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>, calls <code>configure_dtypes()</code> before arrays exist, asserts x64, and reuses the shared poloidal contour, wall, boundary, cell, and containment-aware null painters. The exact carriers are hex meshes, so the renderer prepares a plotting raster explicitly before passing a common absolute level array to both contour calls. Machine-readable output and source paths are kept in <code>docs/figures/null-identification-authority/mechanism-evidence/evidence-receipt.json</code>.</p>
-<p>The next action is to resume from the active allocation, commit every completed panel, then render the two clip panels and append the measured 500-cell energy support, boundary distance, limiter distance, and axis-anchor distance. Until then, the document makes no claim about where the apparent outboard error lives.</p>
+<p>The next action is to commit each later certificate panel when it lands, redraw the error field as line contours, then render the two clip panels with both polygonal chords and traced separatrices plus their area discrepancy. The explicit placeholder sections above remain the authority on what has not yet been concluded.</p>
 </section>
 </main>
 </body>

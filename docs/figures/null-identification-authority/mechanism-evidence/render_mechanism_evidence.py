@@ -15,7 +15,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import numpy as np
-from shapely import LineString, Point
+from shapely import LineString, Point, Polygon
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 from benchmarks import solovev_certificate as certificate
@@ -33,6 +33,7 @@ from nova.media.poloidal import (
     draw_wall,
 )
 from nova.media.sources.frame import inside_wall_units
+from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.oracle_rebaseline import measure as recovery
 
@@ -403,33 +404,20 @@ def _draw_error_locality(record: dict[str, Any], locality: dict[str, Any]) -> st
     draw_flux_contours(axes, radius, height, solved, levels, color="#cc7722")
     draw_boundary(axes, boundary[:, 0], boundary[:, 1])
     draw_wall(axes, wall[:, 0], wall[:, 1])
-    machine = record["machine"]
-    root = np.asarray(record["state"], dtype=np.float64)[: len(machine.node)]
-    analytic_node = np.asarray(record["analytic_state"], dtype=np.float64)[
-        : len(machine.node)
-    ]
-    error = np.abs(root - analytic_node)
-    cutoff = float(np.quantile(error[np.isfinite(error)], 0.95))
-    high = np.isfinite(error) & (error >= cutoff)
-    axes.plot(
-        machine.node[high, 0],
-        machine.node[high, 1],
-        marker="o",
-        markersize=2.5,
+    absolute_error = np.abs(solved - analytic)
+    error_levels = contour_levels(absolute_error, count=9)
+    draw_flux_contours(
+        axes,
+        radius,
+        height,
+        absolute_error,
+        error_levels,
         color="#7a3e00",
-        linestyle="none",
-        label="top 5% |psi error| nodes",
+        linewidth=0.9,
     )
-    centre = np.asarray(locality["weighted_error_centre_rz_m"], dtype=float)
-    axes.plot(
-        centre[0],
-        centre[1],
-        marker="*",
-        markersize=7,
-        color="#7a3e00",
-        linestyle="none",
-        label="squared-error centre",
-    )
+    axes.plot([], [], color="#3366cc", lw=0.7, label="analytic flux")
+    axes.plot([], [], color="#cc7722", lw=0.7, label="terminal flux")
+    axes.plot([], [], color="#7a3e00", lw=0.9, label="absolute-error contours")
     axes.legend(loc="upper left", fontsize="xx-small", frameon=True)
     axes.set_title("weak rotation · 500 cells · error support", fontsize=8)
     path = OUTPUT / "weak-rotation-500-error-locality.png"
@@ -562,15 +550,48 @@ def _draw_clipped_cells(requested_cells: int) -> dict[str, Any]:
     direct_centroid = (
         centres[indices] + direct_first[indices] / direct_current[indices, None]
     )
-    view = poloidal_view(
-        _extent(*raw_polygons, record["boundary"], padding=0.25), height=5.8
-    )
+    mesh_cells, mesh_provenance = hex_mesh(record["wall"], cells=abs(requested_cells))
+    true_plasma_cells = clip_to_boundary(mesh_cells, record["boundary"])
+    traced_pieces: list[np.ndarray] = []
+    area_differences: list[dict[str, float | int]] = []
+    for cell_index, raw_polygon, chord_polygon in zip(
+        indices, raw_polygons, clipped_polygons, strict=True
+    ):
+        pieces = clip_to_boundary((raw_polygon,), record["boundary"])
+        traced_piece = max(
+            pieces,
+            key=lambda piece: Polygon(piece).area,
+            default=np.empty((0, 2), dtype=float),
+        )
+        if len(traced_piece) >= 3:
+            traced_pieces.append(traced_piece)
+        full_area = Polygon(raw_polygon).area
+        chord_area = Polygon(chord_polygon).area
+        traced_area = Polygon(traced_piece).area if len(traced_piece) >= 3 else 0.0
+        absolute_difference = abs(chord_area - traced_area)
+        area_differences.append(
+            {
+                "cell_index": int(cell_index),
+                "absolute_area_difference_m2": float(absolute_difference),
+                "cell_area_fraction": float(absolute_difference / full_area),
+            }
+        )
+    view = poloidal_view(_extent(record["wall"], record["boundary"]), height=5.8)
     axes = view.poloidal
     draw_plasma_cells(
         axes,
-        raw_polygons,
+        true_plasma_cells,
         facecolor="none",
-        edgecolor="#666666",
+        edgecolor="#dddddd",
+        linewidth=0.25,
+        alpha=0.7,
+    )
+    draw_plasma_cells(
+        axes,
+        traced_pieces,
+        facecolor="none",
+        edgecolor="#3366cc",
+        linewidth=1.0,
         alpha=1.0,
     )
     draw_plasma_cells(
@@ -624,6 +645,11 @@ def _draw_clipped_cells(requested_cells: int) -> dict[str, Any]:
         )
         > 0.0,
     )
+    total_area_difference = float(
+        sum(item["absolute_area_difference_m2"] for item in area_differences)
+    )
+    total_cut_cell_area = float(sum(Polygon(cell).area for cell in raw_polygons))
+    difference_fraction = total_area_difference / total_cut_cell_area
     return {
         "path": str(path.relative_to(ROOT)),
         "project_src": "/nova/figures/null-identification-authority/mechanism-evidence/"
@@ -631,6 +657,18 @@ def _draw_clipped_cells(requested_cells: int) -> dict[str, Any]:
         "boundary_cut_cells": int(len(indices)),
         "max_centroid_separation_m": float(np.max(differences)),
         "max_current_relative_error": float(np.max(current_error)),
+        "polygon_chord_vs_traced_curve": {
+            "absolute_area_difference_m2": total_area_difference,
+            "cut_cell_area_fraction": difference_fraction,
+            "maximum_cell_area_fraction": float(
+                max(item["cell_area_fraction"] for item in area_differences)
+            ),
+            "comparable_to_certificate_residual_band": bool(
+                difference_fraction >= 0.0012
+            ),
+            "cells": area_differences,
+        },
+        "mesh_provenance": mesh_provenance,
         "terminal_residual": record["residual"],
         "topology_trial_refusals": record["refusals"],
         "solve_seconds": record["solve_seconds"],

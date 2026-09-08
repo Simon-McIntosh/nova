@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T09:10:34",
+  "updated": "2026-09-08T09:23:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2386,6 +2386,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-cert-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-class-reader-x",
         "harness": "codex",
         "role": "implement",
@@ -3018,6 +3027,15 @@
         "created": "2026-09-08"
       },
       {
+        "id": "pfs-cjac-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-contract-rev",
         "harness": "clive",
         "role": "review",
@@ -3531,6 +3549,15 @@
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fbf-a99b-7161-98a8-e4f505e4f671"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-strike-gate-l",
+        "harness": "codex-luna",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-topo-x",
@@ -130533,6 +130560,305 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T061117985062-bob-merged-head-gate-2",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-merged-head-gate-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1761,
+                "cached_input_tokens": 392535,
+                "input_tokens": 394328,
+                "output_tokens": 1764,
+                "reasoning_output_tokens": 108,
+                "total_tokens": 396092,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "At the current head of main, each of tests/test_forward_operator_axes.py, tests/test_forward_operator_tangent.py, tests/test_batched_operator_boundary.py, tests/test_default_wiring.py, tests/test_forward_census.py, tests/test_route_solve_requests.py, tests/test_oracle_axis_admission.py and tests/test_stencil_mesh.py (skip any that does not exist and say so) runs as one fresh-process lane on sirius_debug or all_debug; write each lane as a small bash script under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-2-logs/ that unsets UV_NO_SYNC and UV_RUN_RECURSION_DEPTH, exports TMPDIR=/tmp JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv and PYTHONPATH set to the worktree root, then runs uv run --no-sync pytest -p no:cacheprovider --markexpr \"not slow\" on the one file, and launch it with srun --time=00:59:00 --cpus-per-task=4 --mem=48G bash that-script, capturing each log once; a lane must show the target file collected before it counts, and a lane that collects zero tests or skips on a missing-jax message is a broken lane to re-run with the environment fixed, never a green; tests/test_equilibrium_forward_solve.py runs through scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-2-logs/forward-solve-h200.log --wait and its header must show a cuda device (the shared environment's gpu extra was restored at 06:02Z; if the log shows no CUDA backend, stop and report that as the blocker with the header lines quoted); the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-gate-2.md tabulates per file collected, passed, failed, skipped, wall and exit status, names every failure with its first assertion line, and states for each whether it also fails at base 6fce8753 by running that one lane against a git archive of the base extracted under the logs directory with PYTHONPATH pointing at it; no source or test file is changed",
+          "estimated_hours": 1.0,
+          "goal": "The operator geometry and member-data boundary verified at the merged head across the forward-operator test surface, judged by delta against the pre-merge base",
+          "id": "bob-merged-head-gate-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061117985062-bob-merged-head-gate-2/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-gate-2.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-2-logs/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "bob-gate-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T06:11:35Z",
+        "completed_at": "2026-09-08T07:14:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3777,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3777,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2a7c0d1db3eb64849ce3792a7c6c7364aa069ef0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "seven srun sirius_debug one-file lane scripts (unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH; TMPDIR=/tmp JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT main venv PYTHONPATH worktree; uv run --no-sync pytest -p no:cacheprovider -m 'not slow' <file>) plus scripts/h200_test_lane/run.sh --wait on tests/test_equilibrium_forward_solve.py at head 2a7c0d1d and a base 6fce8753 archive replay of the failing file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-2-logs/forward-solve-h200.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T061117985062-bob-merged-head-gate-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fa4-b460-7f32-a84e-1bdbaeb650ba",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10678272,
+            "cached_input_tokens_cumulative": 10678272,
+            "input_tokens": 10959488,
+            "input_tokens_cumulative": 10959488,
+            "output_tokens": 38348,
+            "output_tokens_cumulative": 38348,
+            "reasoning_output_tokens": 14613,
+            "reasoning_output_tokens_cumulative": 14613
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 10678272,
+          "cumulative_input_tokens": 21637760,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 52961
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "test role; the gate evidence is the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-merged-head-gate-2",
+          "session_id": "01a07fa4-b460-7f32-a84e-1bdbaeb650ba",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T07:14:32Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T024807056211-nia-atlas-supplement",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-atlas-supplement",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1823,
+                "cached_input_tokens": 789140,
+                "input_tokens": 790995,
+                "output_tokens": 2136,
+                "reasoning_output_tokens": 143,
+                "total_tokens": 793131,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "docs/evidence/poloidal-convergence-atlas.html gains a supplement section, audit-doc clean, embedding with project-absolute src new panels under docs/figures/null-identification-authority/convergence-atlas/supplement/ for 27079 rows 15, 16 and 17 plus rows 11 to 14 as unconverged controls, each solved on a debug partition or one card with the flux raster persisted and drawn with contours, wall, axis, nulls, the selected boundary and the candidate anchors node 10 and node 25 marked from docs/figures/playable-forward-solve/limited-anchor/limited-anchor-candidates.csv, cross-linking the seven census panels already on main; and one slice of 22475, 22550 or 22626 solved with its raster persisted and drawn as it terminates, captioned with residual and qualification; captions carry shot, row, time, current, class and revision; the manifest states the panel count and per-frame render cost; the worker never reads a PNG; H200 or debug jobs use at most four cores and a per-job TMPDIR",
+          "estimated_hours": 1.5,
+          "goal": "The atlas supplement: the 27079 limited-class collapse frames and one reversed-current-block slice drawn in the atlas grammar with their flux persisted",
+          "id": "nia-atlas-supplement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T024807056211-nia-atlas-supplement/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/evidence/poloidal-convergence-atlas.html",
+            "docs/figures/null-identification-authority/convergence-atlas/supplement/",
+            "benchmarks/poloidal_convergence_atlas.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/convergence-atlas-supplement.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-atlas-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-08T02:48:21Z",
+        "completed_at": "2026-09-08T07:16:58.705Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 15979,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 16117,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "c8737ffcadff217c1e391ac95abccf2f5cad06e9",
+        "commits": [
+          "5540d255045e1e3f1bade6ef5e0b68e86ec8e8c1"
+        ],
+        "changed_lines": {
+          "added": 736,
+          "removed": 3,
+          "files": 27
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc docs/evidence/poloidal-convergence-atlas.html (OK, exit 0); ruff check benchmarks/poloidal_convergence_atlas.py; srun all_debug --supplement render exit 0",
+          "exit_status": 0,
+          "log_path": "/tmp/atlas-supplement7.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T024807056211-nia-atlas-supplement/manifest.md",
+        "scope_changed": false,
+        "session_id": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3230148,
+            "input_tokens_cumulative": 40292339,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 69360,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 40292339,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 16112.661,
+          "generated_tokens": 69360,
+          "generation_seconds": 15518.203,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 43.0,
+          "machine_seconds": 594.458,
+          "peak_input_tokens": 437059,
+          "tokens_per_second": 4.47,
+          "wall_tokens_per_second": 4.3
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-atlas-supplement",
+          "session_id": "72a9a5e9-f6cb-4311-a885-8501d0a8d16e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T07:16:58.705Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -130845,6 +131171,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2174
+    "_version": 2179
   }
 }

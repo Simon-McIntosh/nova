@@ -266,7 +266,7 @@ class ForwardLabelledFlux(NamedTuple):
     ``strike_points`` carries one exact inboard and one outboard separatrix
     crossing of the wall, ``strike_segment`` the wall segment index each lies
     on (the wall node the segment starts at, wrapping to node zero) and
-    ``strike_parameter`` the along-segment parameter in ``(0, 1)`` with
+    ``strike_parameter`` the along-segment parameter in ``[0, 1]`` with
     point = ``wall[segment] * (1 - parameter) + wall[segment + 1] * parameter``.
     """
 
@@ -434,7 +434,9 @@ class ForwardPerturbedSeedReceipt(NamedTuple):
     largest_passing_amplitude: jax.Array
 
 
-def _intersect_wall_level_curve(wall, wall_psi_norm, axis, x_point) -> tuple[jax.Array, jax.Array, jax.Array]:
+def _intersect_wall_level_curve(
+    wall, wall_psi_norm, axis, x_point
+) -> tuple[jax.Array, jax.Array, jax.Array]:
     """Return exact wall crossings of the boundary level curve.
 
     For each radial side of the X-point, locate the wall segment whose
@@ -444,7 +446,7 @@ def _intersect_wall_level_curve(wall, wall_psi_norm, axis, x_point) -> tuple[jax
     interpolation on that segment.  Returns fixed-shape arrays for the two
     side slots (inboard then outboard): the crossing point, the segment index
     (the wall node the segment starts at, wrapping to node zero) and the
-    along-segment parameter in ``(0, 1)`` with
+    along-segment parameter in ``[0, 1]`` with
     ``crossing = wall[segment] * (1 - parameter) + wall[segment + 1] * parameter``.
     A side without a crossing yields NaN coordinates, a zero segment index
     and a NaN parameter.  The computation is vectorised over the wall so the
@@ -455,7 +457,11 @@ def _intersect_wall_level_curve(wall, wall_psi_norm, axis, x_point) -> tuple[jax
     """
     level = wall_psi_norm - 1.0
     following_level = jnp.roll(level, -1)
-    crossing = (level < 0.0) != (following_level < 0.0)
+    crossing = (
+        ((level < 0.0) != (following_level < 0.0))
+        | (level == 0.0)
+        | (following_level == 0.0)
+    )
     finite = jnp.isfinite(wall_psi_norm) & jnp.all(jnp.isfinite(wall), axis=1)
     denominator = level - following_level
     fraction = jnp.where(

@@ -229,9 +229,22 @@ def _require_gpu_allocation(expected_cpu_count: int = 1) -> dict[str, Any]:
 
 
 def _require_cpu_self_check() -> dict[str, Any]:
-    """Validate the allocation-free CPU proof before a GPU measurement is submitted."""
-    if os.environ.get("SLURM_JOB_ID"):
-        raise RuntimeError("the CPU self-check must run without a SLURM allocation")
+    """Validate the CPU-allocation proof before a GPU measurement is submitted."""
+    job_id = os.environ.get("SLURM_JOB_ID")
+    if not job_id:
+        raise RuntimeError("the CPU self-check requires a SLURM allocation")
+    if os.environ.get("SLURM_JOB_PARTITION") != "all_debug":
+        raise RuntimeError("the CPU self-check requires the all_debug partition")
+    if int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) != 4:
+        raise RuntimeError("the CPU self-check requires exactly four allocated CPUs")
+    requested_memory_mib = int(os.environ.get("SLURM_MEM_PER_NODE", "0"))
+    if requested_memory_mib != 64 * 1024:
+        raise RuntimeError(
+            "the CPU self-check requires exactly 64 GiB of node memory, received "
+            f"{requested_memory_mib} MiB"
+        )
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("the CPU self-check requires TMPDIR=/tmp")
     if os.environ.get("JAX_PLATFORMS") != "cpu":
         raise RuntimeError("the CPU self-check requires JAX_PLATFORMS=cpu")
     devices = jax.devices()
@@ -240,22 +253,22 @@ def _require_cpu_self_check() -> dict[str, Any]:
             f"the CPU self-check requires one CPU device, received {devices}"
         )
     return {
-        "job_id": None,
-        "job_name": None,
+        "job_id": int(job_id),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
         "node": socket.gethostname(),
         "host": socket.gethostname(),
-        "partition": None,
-        "reservation": None,
-        "cpu_count": 1,
+        "partition": os.environ["SLURM_JOB_PARTITION"],
+        "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "cpu_count": int(os.environ["SLURM_CPUS_PER_TASK"]),
         "gpu_count": 0,
         "device": devices[0].device_kind,
         "jax_platforms": ["cpu"],
-        "tmpdir": os.environ.get("TMPDIR"),
-        "requested_time_limit": None,
-        "requested_memory_mib": None,
+        "tmpdir": os.environ["TMPDIR"],
+        "requested_time_limit": os.environ.get("SLURM_TIMELIMIT"),
+        "requested_memory_mib": requested_memory_mib,
         "attempt": 0,
         "prior_job_id": None,
-        "execution_mode": "allocation_free_cpu_self_check",
+        "execution_mode": "slurm_cpu_self_check",
     }
 
 

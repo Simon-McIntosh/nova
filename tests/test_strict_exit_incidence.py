@@ -23,3 +23,9 @@ def test_select_member_keeps_scalar_receipt_leaves_unindexed():
 
     assert int(selected["per_member"]) == 5
     assert int(selected["scalar"]) == 7
+
+
+def test_batch_member_result_selects_the_sequential_fallback_member():
+    results = ("first", "second")
+
+    assert incidence._batch_member_result(results, 1, stacked=False) == "second"

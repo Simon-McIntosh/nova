@@ -700,6 +700,11 @@ def _select_member(result: Any, index: int) -> Any:
     )
 
 
+def _batch_member_result(result: Any, index: int, *, stacked: bool) -> Any:
+    """Select a member from either the stacked or sequential execution route."""
+    return _select_member(result, index) if stacked else result[index]
+
+
 def _batch_stage_count(stages: list[dict[str, Any]], name: str) -> None:
     stages.append(_resource_stage(name))
 
@@ -1270,8 +1275,12 @@ def _measure_batched_machine(
 
     rows = []
     for index, member in enumerate(members):
-        without_exit = _select_member(arm_results["without_exit"], index)
-        with_exit = _select_member(arm_results["with_exit"], index)
+        without_exit = _batch_member_result(
+            arm_results["without_exit"], index, stacked=batch.stacked is not None
+        )
+        with_exit = _batch_member_result(
+            arm_results["with_exit"], index, stacked=batch.stacked is not None
+        )
         control = _arm_row(without_exit)
         exited = _arm_row(with_exit)
         fired = exited["termination"] == _termination_name(SETTLED_REASON)

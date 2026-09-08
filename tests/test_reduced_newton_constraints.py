@@ -397,6 +397,26 @@ def test_a_moved_target_is_reached_and_warm_starting_costs_less(steered):
     compensating = float(np.asarray(warm.constraints[0].physical_unknown)[0])
     assert compensating != 0.0
     assert np.all(np.isfinite(np.asarray(warm.prescribed_current)))
+    assert warm.jacobian_builds_per_trip[0] == warm.newton_steps_per_trip[0] + 1
+
+
+def test_the_current_cap_bounds_a_single_trip_displacement(steered):
+    """A bounded trial never applies more current than one trip admits."""
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    cap = 1.0e-3
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+        active_set_steps=1,
+        constraint_current_step_cap=cap,
+    )
+    assert result.newton_steps_per_trip[0] >= 1
+    assert abs(float(np.asarray(result.constraints[0].physical_unknown)[0])) <= cap
 
 
 def test_the_public_route_carries_the_rows_into_a_receipt(steered):

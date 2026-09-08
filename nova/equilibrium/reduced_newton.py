@@ -57,6 +57,16 @@ reduced route also publishes ``soft_mode_projection`` as ``None`` rather than
 ``NaN`` because a dense route carries no soft-mode projection, and refuses a
 constrained solve that has no prescribed current to fold its compensating
 currents into.
+
+Constrained trips additionally bound each compensating-current displacement
+to one kiloampere.  The bound is a physical stability limit rather than a
+numerical scale: a larger one-shot circuit displacement can change the plasma
+response regime that supplied the local implicit-function Jacobian.  The
+augmented merit line search therefore tests only bounded candidates, and a
+fresh Jacobian is formed after every accepted constrained candidate before the
+next direction is taken.  If no bounded grade lowers the augmented merit, the
+trip refuses with its ordinary exhausted-ladder termination instead of applying
+a current that increases the constraint residual.
 """
 
 from __future__ import annotations
@@ -124,6 +134,13 @@ _ACTIVE_SUPPORT_FLOOR = 0.0
 #: refusal-only policy is recovered exactly; ``None`` disables the contraction
 #: branch outright and is the strict refusal-only reference.
 JACOBIAN_REFRESH_THRESHOLD: float = 1.0
+
+#: Largest physical compensating-current displacement admitted within one
+#: frozen-topology trip.  A local response derivative is not a licence for an
+#: arbitrarily large command: beyond this interval the plasma can move into a
+#: different response regime, so the next accepted candidate must be
+#: re-linearised before it supplies another Newton direction.
+CONSTRAINT_CURRENT_CHANGE_CAP = 1_000.0
 
 #: Optional per-solve stage recording for the keyframe driver.  When enabled,
 #: the host loop records named boundaries (``convert``, ``shadow``, ``bind``,
@@ -893,21 +910,43 @@ def _lowers(merit: float, incumbent: float) -> bool:
     return bool(np.isfinite(merit)) and merit < incumbent
 
 
-def _score_grade(kernels, reduced, direction, factor, shadow, base_state, census):
+def _score_grade(
+    kernels,
+    reduced,
+    direction,
+    factor,
+    shadow,
+    base_state,
+    census,
+    *,
+    project_candidate=None,
+):
     """Score one backtracking grade and read its scalars to the host."""
-    candidate, scores = kernels["grade"](
-        reduced,
-        direction,
-        jnp.asarray(factor, dtype=reduced.dtype),
-        shadow,
-        base_state,
-    )
+    if project_candidate is None:
+        candidate, scores = kernels["grade"](
+            reduced,
+            direction,
+            jnp.asarray(factor, dtype=reduced.dtype),
+            shadow,
+            base_state,
+        )
+    else:
+        candidate = project_candidate(reduced + factor * direction)
+        scores = kernels["step_scores"](candidate, shadow, base_state)
     census["map_evaluations"] += 1
     return candidate, _host_scores(scores)
 
 
 def _first_accept_grades(
-    kernels, reduced, direction, merit, shadow, base_state, census
+    kernels,
+    reduced,
+    direction,
+    merit,
+    shadow,
+    base_state,
+    census,
+    *,
+    project_candidate=None,
 ):
     """Score grades in order and stop at the first that lowers the merit.
 
@@ -919,7 +958,14 @@ def _first_accept_grades(
     """
     for index, factor in enumerate(_BACKTRACKING_FACTORS):
         candidate, scores = _score_grade(
-            kernels, reduced, direction, factor, shadow, base_state, census
+            kernels,
+            reduced,
+            direction,
+            factor,
+            shadow,
+            base_state,
+            census,
+            project_candidate=project_candidate,
         )
         if _lowers(scores.merit, merit):
             return index, index + 1, (candidate, scores)
@@ -1005,6 +1051,8 @@ def _plain_newton_trip(
     steps: list[ReducedNewtonStep],
     scoring: str = LADDER_SCORING,
     refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    project_candidate=None,
+    relinearize_after_accept: bool = False,
 ) -> tuple[jax.Array, dict[str, float]]:
     """Take plain Newton steps on the reduced state of one frozen trip.
 
@@ -1078,9 +1126,27 @@ def _plain_newton_trip(
                 direction, _ = _timed(kernels["direction"], jacobian, scores.residual)
             else:
                 direction = kernels["direction"](jacobian, scores.residual)
-            accepted, _tried, promotion = grader(
-                kernels, reduced, direction, scores.merit, shadow, base_state, census
-            )
+            if project_candidate is None:
+                accepted, _tried, promotion = grader(
+                    kernels,
+                    reduced,
+                    direction,
+                    scores.merit,
+                    shadow,
+                    base_state,
+                    census,
+                )
+            else:
+                accepted, _tried, promotion = _first_accept_grades(
+                    kernels,
+                    reduced,
+                    direction,
+                    scores.merit,
+                    shadow,
+                    base_state,
+                    census,
+                    project_candidate=project_candidate,
+                )
             if accepted >= 0:
                 break
             census["rejected"] += 1
@@ -1119,7 +1185,16 @@ def _plain_newton_trip(
             reduced = reduced + factors[accepted] * direction
         else:
             reduced, carried = promotion
-        fresh = False
+        if relinearize_after_accept:
+            jacobian, refresh_wall = _timed(
+                kernels["jacobian"], reduced, shadow, base_state
+            )
+            census["jacobian_builds"] += 1
+            census["jacobian_wall"] += refresh_wall
+            census["contraction_refreshes"] += 1
+            fresh = True
+        else:
+            fresh = False
         census["steps"] += 1
         accepted_norm = scores.residual_norm
     return reduced, census
@@ -1137,6 +1212,9 @@ def _drive_trips(
     fused: bool,
     scoring: str,
     refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    project_candidate_factory: Callable[[jax.Array], Callable[[jax.Array], jax.Array]]
+    | None = None,
+    relinearize_after_accept: bool = False,
     regather: Callable[[jax.Array], jax.Array],
     dispatched_boundary: Callable[..., Any],
     stream: bool,
@@ -1185,6 +1263,12 @@ def _drive_trips(
             steps=steps,
             scoring=scoring,
             refresh_threshold=refresh_threshold,
+            project_candidate=(
+                None
+                if project_candidate_factory is None
+                else project_candidate_factory(reduced)
+            ),
+            relinearize_after_accept=relinearize_after_accept,
         )
         per_trip_steps.append(int(census["steps"]))
         per_trip_builds.append(int(census["jacobian_builds"]))
@@ -2109,6 +2193,7 @@ def solve_constrained_reduced_newton(
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    constraint_current_step_cap: float = CONSTRAINT_CURRENT_CHANGE_CAP,
     row_arguments: str = TRACED_ROWS,
     program: ReducedProgram | None = None,
     stream: bool = False,
@@ -2156,6 +2241,14 @@ def solve_constrained_reduced_newton(
     rebuilt, exactly as :func:`solve_reduced_newton` documents: the default of
     one leaves the refusal-only chord on the referee fixtures, and ``None``
     disables the contraction branch outright.
+
+    ``constraint_current_step_cap`` is the maximum physical compensating
+    current displacement, in amperes, within one active-set trip.  It is
+    applied to every backtracking candidate before that candidate's augmented
+    merit is scored.  The cap keeps a local implicit-function derivative from
+    taking a one-shot command across a nonlinear plasma-response regime; after
+    every accepted constrained candidate the dense Jacobian is rebuilt at the
+    accepted state before another direction is formed.
     """
     operator = profile.operator
     state = jnp.asarray(initial)
@@ -2194,6 +2287,8 @@ def solve_constrained_reduced_newton(
         )
     if row_arguments not in (TRACED_ROWS, CAPTURED_ROWS):
         raise ValueError(f"unknown row arguments {row_arguments!r}")
+    if pairs and constraint_current_step_cap <= 0.0:
+        raise ValueError("constraint current step cap must be positive")
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
@@ -2270,6 +2365,31 @@ def solve_constrained_reduced_newton(
     )
     _stage_mark("bind")
 
+    if augmentation is None:
+        project_candidate_factory = None
+    else:
+        ampere_scale = jnp.concatenate(
+            tuple(jnp.ravel(jnp.asarray(pair.unknown.ampere_scale)) for pair in pairs)
+        )
+        normalized_cap = (
+            jnp.asarray(constraint_current_step_cap, dtype=state.dtype) / ampere_scale
+        )
+
+        def project_candidate_factory(trip_origin):
+            """Keep a trip's compensating-current move in its local regime."""
+            origin_unknown = trip_origin[coordinates.size :]
+
+            def project(candidate):
+                unknown = candidate[coordinates.size :]
+                bounded = jnp.clip(
+                    unknown,
+                    origin_unknown - normalized_cap,
+                    origin_unknown + normalized_cap,
+                )
+                return candidate.at[coordinates.size :].set(bounded)
+
+            return project
+
     def regather(state):
         """Return the amplitudes one flux state drives, outside a program."""
         moments = _current_moments(operator, state, requested_class, target_current)
@@ -2322,6 +2442,8 @@ def solve_constrained_reduced_newton(
         fused=fused,
         scoring=ladder_scoring,
         refresh_threshold=jacobian_refresh_threshold,
+        project_candidate_factory=project_candidate_factory,
+        relinearize_after_accept=augmentation is not None,
         regather=regather,
         dispatched_boundary=dispatched_boundary,
         stream=stream,

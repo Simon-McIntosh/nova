@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T14:53:36",
+  "updated": "2026-09-08T15:52:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -175,6 +175,17 @@
         "session_model": "gpt-5.6-terra",
         "sessions": {
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08017-7ad3-7ae3-85f9-8e8af38d4585"
+        },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-fixvary-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": "01a0813c-e8ea-7071-b706-01939600432a",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0813c-e8ea-7071-b706-01939600432a"
         },
         "created": "2026-09-08"
       },
@@ -2253,6 +2264,17 @@
         "created": "2026-09-04"
       },
       {
+        "id": "msc-slicecall-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": "01a0813a-f3bc-7202-b260-e8fb40b5a540",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0813a-f3bc-7202-b260-e8fb40b5a540"
+        },
+        "created": "2026-09-08"
+      },
+      {
         "id": "msc-trip-kernels-x",
         "harness": "codex",
         "role": "implement",
@@ -2432,6 +2454,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "nia-carrycensus-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-census-compaction-x",
         "harness": "codex",
         "role": "implement",
@@ -2527,6 +2558,15 @@
       },
       {
         "id": "nia-clipmeas-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "nia-clipmoment-t",
         "harness": "codex-terra",
         "role": "implement",
         "session_id": null,
@@ -2822,9 +2862,11 @@
         "id": "nia-sepclip-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08115-5e2d-7f30-b899-67f18275ee3b",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08115-5e2d-7f30-b899-67f18275ee3b"
+        },
         "created": "2026-09-08"
       },
       {
@@ -3147,6 +3189,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-cacheloc-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-cachelock-c",
         "harness": "clive",
         "role": "test",
@@ -3430,6 +3481,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-labfig-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-labfig-l",
         "harness": "codex-luna",
         "role": "implement",
@@ -3521,6 +3581,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-parity-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-parity-t",
@@ -4777,6 +4846,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "session-9d6ba496cc54edb6cbf4",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": "01a08135-9400-77c0-9149-e1c8e3ab0dce",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08135-9400-77c0-9149-e1c8e3ab0dce"
+        },
+        "created": "2026-09-08"
       },
       {
         "id": "shadow-haiku-1",
@@ -135603,6 +135683,159 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T125406232531-nia-separatrix-clip-exposure",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-separatrix-clip-exposure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1461,
+                "cached_input_tokens": 951702,
+                "input_tokens": 953165,
+                "output_tokens": 1536,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 954701,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The lead expects our methods to transfer smoothly across cells because the support is clipped and the current allocation is quadratic. A measurement at head established that the net current is pinned by the lambda factor to a relative error of 1.4e-16, and that a one-cell reclassification moved the exact oracle target by 210.3 A discretely. Reading the source, nova/equilibrium/source.py current_moments states in its own docstring that it returns profile-owned current moments WITHOUT A BOUNDARY CLIP, that the static material boundary and the saddle-aware private-flux shadow are the only geometric participation decisions, and that a cell straddling the separatrix integrates both profiles only WHEN AN OPEN-FIELD-LINE CONTINUATION IS DECLARED through common_sol or private_flux, with the whole-cell path bit-identical otherwise. Establish and quantify this rather than assume it. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/separatrix-clip-exposure.md: FIRST whether the cell support passed to the current moments is clipped to the material boundary only or also to the plasma boundary, naming the file and line performing each clip and which mask decides participation; SECOND, on the diverted -110 and -342 Solovev rungs and on three MAST bank rows, how many cells the plasma boundary passes through, what fraction of each such cell lies inside, and what total current those cells carry as a fraction of the plasma current, which is the size of the exposure; THIRD what the total current would be if each boundary-cut cell contributed in proportion to its inside fraction instead of wholly, as a delta in amperes and as a fraction, computed from the existing terminal states without changing the solver; FOURTH whether the certificate and bank runs declare a continuation on common_sol or private_flux, since the docstring calls that the designed smoothing, and if they do not, what fraction of the boundary-cut current a continuation would have blended. Solves run on all_debug (4 CPUs, 64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, no explicit --no-sync on the compute node) and never on the login node. Change no solver source; the numbers are the deliverable and a recommendation at the end is welcome. Every uv command on the login node carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.5,
+          "goal": "How much current sits in cells the plasma boundary cuts, measured, so the sprint knows what a separatrix-clipped current integral would change",
+          "id": "nia-separatrix-clip-exposure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T125406232531-nia-separatrix-clip-exposure/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/separatrix-clip-exposure.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/separatrix-clip/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-sepclip-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T12:54:15Z",
+        "completed_at": "2026-09-08T13:50:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3363,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3363,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d4895cacc785975b4f729e760a5de7778986ef70",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sacct -j 1266942 -n -X -o State",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/separatrix-clip/centroid-measure-1266942.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T125406232531-nia-separatrix-clip-exposure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08115-5e2d-7f30-b899-67f18275ee3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5062912,
+            "cached_input_tokens_cumulative": 5062912,
+            "input_tokens": 5083866,
+            "input_tokens_cumulative": 5083866,
+            "output_tokens": 13530,
+            "output_tokens_cumulative": 13530,
+            "reasoning_output_tokens": 3300,
+            "reasoning_output_tokens_cumulative": 3300
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T13:50:18Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 38.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T13:50:18Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5062912,
+          "cumulative_input_tokens": 10146778,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 16830
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 7,
+        "scope_acceptances": null,
+        "no_commit": "measurement node: the deliverable is the report plus three JSON artifacts under the crew reports tree, and the brief forbade any source change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-separatrix-clip-exposure",
+          "session_id": "01a08115-5e2d-7f30-b899-67f18275ee3b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T13:50:18Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -135915,6 +136148,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2243
+    "_version": 2256
   }
 }

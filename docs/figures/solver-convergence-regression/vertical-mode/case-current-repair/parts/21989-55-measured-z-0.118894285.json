@@ -1,0 +1,48 @@
+{
+  "identity": "21989/55",
+  "part": "measured-z-0.118894285",
+  "request_identity": "mast:21989:55:case-current:measured:z:0.118894285",
+  "prescribed_current_digest_sha256": "5fa48e263ca42f968fb5ccc4de61c275a0d8750d87ff6c03dcdc7a5d0984237a",
+  "result": {
+    "terminal_residual": 3.2307566623903183e-16,
+    "converged": true,
+    "termination_code": 1,
+    "active_set_trips": 3,
+    "terminal_centroid": {
+      "r_m": 0.8069093389590754,
+      "z_m": 0.11889428493417938
+    },
+    "terminal_centroid_minus_seed_m": {
+      "r_m": -0.0031864913117729543,
+      "z_m": 0.10630823578062802
+    },
+    "resolved_defaults": {
+      "nova_version": "0.11.0.post4732+g7ee33926.d20260907",
+      "policy": {
+        "route": "newton_krylov",
+        "newton_steps": 10,
+        "gmres_iterations": 30,
+        "warmup": 0,
+        "relaxation": 0.5,
+        "step_cap": 10.0,
+        "active_set_steps": 16,
+        "kernel_tolerance": 1e-08,
+        "qualification_tolerance": 1e-10,
+        "current_pin": true,
+        "settled_exit": true,
+        "own_mask_acceptance": true,
+        "continuation": true,
+        "best_iterate_retention": true,
+        "stagnation_stop": true,
+        "exact_kernels": true,
+        "cached_machine": true,
+        "compilation_cache": true
+      },
+      "deviations": {},
+      "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+    },
+    "compensating_p6_current_a": 4960.380738785196,
+    "constraint_qualified": true,
+    "subsolve_wall_s": 333.2811465654522
+  }
+}

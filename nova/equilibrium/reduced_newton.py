@@ -65,8 +65,12 @@ response regime that supplied the local implicit-function Jacobian.  The
 augmented merit line search therefore tests only bounded candidates, and a
 fresh Jacobian is formed after every accepted constrained candidate before the
 next direction is taken.  If no bounded grade lowers the augmented merit, the
-trip refuses with its ordinary exhausted-ladder termination instead of applying
-a current that increases the constraint residual.
+trip reports a sufficient-decrease refusal instead of applying a current that
+increases the constraint residual.  Mandatory re-linearisation also removes
+the stale-chord history that a cold start can otherwise spend extra iterations
+discarding, so warm and cold constrained starts may legitimately take the same
+number of Newton steps.  Warm starting remains useful because it begins with a
+smaller constraint residual and is required never to cost more steps or trips.
 """
 
 from __future__ import annotations

@@ -465,6 +465,23 @@
     arms, two on the active-set iteration budget and two on a detected cycle, which is convergence evidence for this plan rather than a defect of the
     hooks. Recovery and one-read-per-trip contracts 6 passed with a durable interruption checkpoint.</p>
   </section>
+  <section id="the-compiled-route-pays-one-boundary-per-solve">
+    <h2>The compiled slice route pays one boundary per solve, and the banked baselines were stale (2026-09-08 03:47Z)</h2>
+    <p>Node <code>mcs-trip-quantum-compiled</code> (local lane; benchmark commits <code>4b7179c3</code> and <code>e0d97e95</code>, receipt and
+    figure rescued as <code>2456c03f</code> after the worker's declared wait resumed into a session that died at once; report by a fresh member;
+    merged at <code>a6be8a40</code>). One H200 job ran the host route and the compiled slice route over the same twelve MAST bank members at width
+    one. The host route closes every trip with its own compiled boundary and a device synchronisation, a near-constant 46 ms boundary dispatch per
+    trip, and 59 percent of its per-trip quantum is device work outside the trip: the per-solve topology shadow read, the initial gather and the
+    final synchronisation amortised over the trips. The compiled route is a single dispatch and read per solve, so the boundary cost is paid once
+    per solve rather than once per trip, which is the result the followup predicted. The width-1024 baselines re-measured at HEAD in the same job
+    read 1.7565 ms per member for the map application (2.24 times the banked 0.784 ms) and 2.7501 ms per member per trip for the quantum (0.11
+    times the banked 25.0 ms): the banked figures were stale because the census null polish entered the jitted topology read after they were
+    taken, so the plan's targets are now quoted against these. One deviation the report states rather than hides: the public entry point
+    <code>solve_reduced_newton_compiled</code> rebuilds a fresh jitted closure and re-traces the whole program on every call, so the saving is
+    realised only by callers that hold the program; that is the successor followup. Receipt and figure under
+    <code>docs/figures/millisecond-converged-solve/trip-quantum/</code>; report at
+    <code>~/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

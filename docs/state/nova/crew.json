@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T05:12:23",
+  "updated": "2026-09-08T05:50:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1900,9 +1900,11 @@
         "id": "mcs-quantum-c2",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "5bfafd91-96b7-464e-9929-08856e17714c",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "5bfafd91-96b7-464e-9929-08856e17714c"
+        },
         "created": "2026-09-08"
       },
       {
@@ -126337,6 +126339,154 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260908T023012033302-mcs-trip-quantum-compiled-report",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "mcs-trip-quantum-compiled-report",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2600,
+                "cached_input_tokens": 766049,
+                "input_tokens": 768651,
+                "output_tokens": 2275,
+                "reasoning_output_tokens": 254,
+                "total_tokens": 770926,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md states, from docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json at the worktree base (read with python, printing only the fields needed): the measurement revision and job ids, the per-member wall a solve, trips and the boundary against synchronisation split for the host route and the compiled slice route, the public-call and program-dispatch walls of the compiled arm, the width-1024 baselines and the baseline_summary figures (head quantum 2.75 ms against the stale 24.996 ms, head map 1.756 ms against 0.784 ms) with a plain statement of whether the compiled route shows one boundary cost per solve rather than per trip and why the map cost rose; the manifest cites the base commit as the delivered code, receipt and figure; no PNG is read, no job is run, no source file is changed; report under 150 lines",
+          "estimated_hours": 0.5,
+          "goal": "The width-one compiled-slice trip-quantum receipt verified and reported from the committed artifact at the worktree base, with no re-measurement",
+          "id": "mcs-trip-quantum-compiled-report",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T023012033302-mcs-trip-quantum-compiled-report/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "mcs-quantum-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-08T02:30:24Z",
+        "completed_at": "2026-09-08T03:47:14.403Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4535,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4610,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "2456c03f527d6d2e18eb9c3e43cd37d5d7d7795b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only cross-check of the committed width-one-compiled.json receipt against the report: per-member walls, trips, boundary against synchronisation split for both routes, and the re-measured width-1024 baselines",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T023012033302-mcs-trip-quantum-compiled-report/manifest.md",
+        "scope_changed": false,
+        "session_id": "5bfafd91-96b7-464e-9929-08856e17714c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2261305,
+            "input_tokens_cumulative": 2261305,
+            "output_tokens": 21024,
+            "output_tokens_cumulative": 21024,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4607.108,
+          "generated_tokens": 21024,
+          "generation_seconds": 4578.341,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 11.5,
+          "machine_seconds": 28.767,
+          "peak_input_tokens": 116420,
+          "tokens_per_second": 4.59,
+          "wall_tokens_per_second": 4.56
+        },
+        "follow_on_paths": [
+          "144/146/137",
+          "/",
+          "5379.8"
+        ],
+        "predecessor_run": "r-20260907T165338820236-mcs-trip-quantum-compiled",
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only node; the benchmark change, receipt and figure are commits 4b7179c3, e0d97e95 and the rescue 2456c03f merged alongside",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled-report",
+          "session_id": "5bfafd91-96b7-464e-9929-08856e17714c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T03:47:14.403Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -126649,6 +126799,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2117
+    "_version": 2119
   }
 }

@@ -1512,6 +1512,14 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 <figure><img src="/nova/figures/playable-forward-solve/early-frame-placement/early-frame-placement.png" alt="Wall, reconstruction and free versus conditioned contours for rows 15 to 17 with nodes 10 and 25 marked"><figcaption>Free and conditioned contours against the wall and the reconstruction; the mirror pair of anchor nodes is marked on every panel.</figcaption></figure>
 <p>Receipt: <code>docs/figures/playable-forward-solve/early-frame-placement/early-frame-placement.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/playable/early-frame-placement-test.md</code>.</p>
 </section>
+<section id="the-centroid-compensator-is-weak-on-every-frame"><h2>The centroid compensator is weak on every frame (2026-09-08 06:44Z)</h2>
+<p>Node <code>pfs-compensator-authority</code> (codex-terra, spec guided; commits <code>5519c368</code>, <code>8aacc66d</code>, merged at <code>fd802b9c</code>). Diagnosis only.</p>
+<p><strong>Question.</strong> The placement test attributed the unsatisfiable centroid row on 27079 rows 15 to 17 to a compensator authority of about 1e-7 that it took to be an early-frame collapse against about 1e-5 on flat top. Does that reproduce, and does the dominant-authority rule pick the wrong circuit?</p>
+<p><strong>Answer.</strong> Driving the labeller's own centroid pair and selection on rows 11 to 17 and on flat-top rows 95 to 97, every circuit's derivative of centroid height with respect to current is about 1e-6 m/A raw and 1e-7 normalised on every row; the rule already selects the strongest circuit (the solenoid on nine of ten rows); no circuit reaches 1e-5 m/A on any measured row; and the solenoid's derivative flips sign between adjacent frames. So the weakness is not an early-frame effect and the selection rule is not the cause.</p>
+<p><strong>What it points at.</strong> An up-down symmetric solenoid should carry no vertical authority, so a sign-flipping 1e-6 is noise about zero, and the antisymmetric circuits read no better; against the placement test's 7 to 8 kA warm-conditioning overshoot, the modelled response looks like the direct flux image without the plasma's free vertical response. That is the next measurement, as a finite-difference re-solve against the constraint Jacobian on one frame.</p>
+<figure><img src="/nova/figures/playable-forward-solve/compensator-authority/compensator-authority.png" alt="Selected and best circuit authority against frame for 27079"><figcaption>Selected and best-circuit centroid authority by frame; the early and flat-top rows sit on the same floor.</figcaption></figure>
+<p>Receipt: <code>docs/figures/playable-forward-solve/compensator-authority/compensator-authority.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/playable/compensator-authority.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

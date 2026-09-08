@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T08:36:45",
+  "updated": "2026-09-08T08:47:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1115,9 +1115,11 @@
         "id": "dvf-gate-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fb8-a983-7633-bd56-7f9a913b1830",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fb8-a983-7633-bd56-7f9a913b1830"
+        },
         "created": "2026-09-08"
       },
       {
@@ -2190,9 +2192,11 @@
         "id": "mulw-readers-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fc0-8bdf-7a71-bdae-1bb239656347",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fc0-8bdf-7a71-bdae-1bb239656347"
+        },
         "created": "2026-09-08"
       },
       {
@@ -130053,6 +130057,155 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260908T063129571690-pfs-compensator-authority",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-compensator-authority",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 6781,
+                "cached_input_tokens": 444865,
+                "input_tokens": 451678,
+                "output_tokens": 2910,
+                "reasoning_output_tokens": 437,
+                "total_tokens": 454588,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "A benchmark under benchmarks/compensator_authority.py computes, on a debug partition with a per-job TMPDIR and JAX_PLATFORMS=cpu, the derivative of the current-centroid height with respect to each circuit's current (d centroid_z / d I, in metres per ampere) on MAST 27079 rows 11 to 17 and on three flat-top rows of the same shot, using the same machinery the labeller's _centroid_pair and dominant-authority selection use in scripts/labeller_batch/shard.py (read that code, call it, do not re-implement it); the receipt under docs/figures/playable-forward-solve/compensator-authority/ tabulates per row the selected circuit, its authority, the largest authority over all circuits and which circuit carries it, the plasma current and the centroid height; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compensator-authority.md states whether the early-frame authority of about 1e-7 reported by the placement test (docs/figures/playable-forward-solve/early-frame-placement/early-frame-placement.json) reproduces, names the mechanism among small plasma current, centroid inside the limiter shadow, response-matrix conditioning, a sign in the selection rule, or another you find, with the numbers that show it, and states whether selecting the circuit by measured authority at the frame would give at least 1e-5 on rows 15 to 17; one figure of authority against frame for the selected and the best circuit; the figure is written but never read back; no repair; no tolerance set from observed values; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.5,
+          "goal": "The centroid compensator's authority measured across the 27079 frames, with the circuit the dominant-authority rule selects on early limited frames named and the collapse of its authority attributed",
+          "id": "pfs-compensator-authority",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T063129571690-pfs-compensator-authority/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/compensator_authority.py",
+            "docs/figures/playable-forward-solve/compensator-authority/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compensator-authority.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-authority-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T06:31:43Z",
+        "completed_at": "2026-09-08T06:44:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 759,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 759,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "0150f2897083289be21d0f023ba3f381098781fe",
+        "commits": [
+          "5519c3681d550bc225528f77164ccbc4bd27594d",
+          "8aacc66db97ceacd45b11f4fa1fe123c06ab6ae9"
+        ],
+        "changed_lines": {
+          "added": 641,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug --cpus-per-task=4 --mem=32G TMPDIR=/tmp JAX_PLATFORMS=cpu benchmarks/compensator_authority.py (job 1264897) exit 0; ruff check and format clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-compensator-authority/docs/figures/playable-forward-solve/compensator-authority/compensator-authority.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T063129571690-pfs-compensator-authority/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fb7-2538-7851-8a30-ef5d398f37e6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4906752,
+            "cached_input_tokens_cumulative": 4906752,
+            "input_tokens": 5070130,
+            "input_tokens_cumulative": 5070130,
+            "output_tokens": 24889,
+            "output_tokens_cumulative": 24889,
+            "reasoning_output_tokens": 7583,
+            "reasoning_output_tokens_cumulative": 7583
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4906752,
+          "cumulative_input_tokens": 9976882,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32472
+        },
+        "follow_on_paths": [
+          "m/A"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-compensator-authority",
+          "session_id": "01a07fb7-2538-7851-8a30-ef5d398f37e6",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T06:44:22Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -130365,6 +130518,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2166
+    "_version": 2169
   }
 }

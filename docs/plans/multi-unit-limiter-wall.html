@@ -23,7 +23,9 @@
 <title>Multi-unit limiter wall | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-impl" content="0.0">
+<meta name="plan-impl" content="0.35">
+<meta name="plan-modified" content="2026-09-08">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -69,53 +71,57 @@
 </section>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
-  <h2><span class="sec">&sect;</span> Decisions</h2>
-  <div class="r-dec" data-key="wall-representation" data-choice="packed-units-occupiable-region" data-by="reckon-ship" data-when="2026-09-08">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="wall-representation" data-choice="packed-units-occupiable-region" data-by="reckon-ship" data-when="2026-09-08">
     <p class="r-dec-q">How does Nova represent a first wall made of several units?</p>
     <p class="r-dec-ctx">The scout found the collapse to one closed polygon at eleven seams and one existing plural model, the typed WallUnit of nova/equilibrium/wall_mask.py with union-of-vessel and material-subtraction semantics.</p>
     <p class="r-dec-opts">
       <button class="r-opt chosen" data-value="packed-units-occupiable-region">Packed units with offsets, closure and kind; containment on the occupiable region</button>
       <button class="r-opt" data-value="concatenate-and-close">Concatenate units into one ring</button>
       <button class="r-opt" data-value="vessel-only">Read only the closed vessel unit and drop the rest</button>
-    </p>
-    <p class="r-dec-rat">Concatenation invents edges between disjoint structures and vessel-only drops the limiters that define the plasma on these machines; the packed collection reduces exactly to today's ring on single-unit machines, which is what makes bit-identity the regression contract.</p>
-  </div>
-  <div class="r-dec" data-key="wall-by-reference" data-choice="reference-with-digest" data-by="lead" data-when="2026-09-07">
-    <p class="r-dec-q">Does the labeller session carry the wall's coordinates or a reference to the machine description?</p>
+      </p>
+    <p class="r-dec-rat">Concatenation invents edges between disjoint structures and vessel-only drops the limiters that define the plasma on these machines; the packed collection reduces exactly to today&#x27;s ring on single-unit machines, which is what makes bit-identity the regression contract.</p>
+    </div>
+<div class="r-dec" data-key="wall-by-reference" data-choice="reference-with-digest" data-by="lead" data-when="2026-09-07">
+    <p class="r-dec-q">Does the labeller session carry the wall&#x27;s coordinates or a reference to the machine description?</p>
     <p class="r-dec-ctx">The wall group landed on 2026-09-07 writes one closed ring per session; the lead asked why geometry stable across campaigns is copied into every session.</p>
     <p class="r-dec-opts">
       <button class="r-opt chosen" data-value="reference-with-digest">A reference: machine, description source and digest, DD version, unit table</button>
       <button class="r-opt" data-value="copy-per-session">Copy the coordinates into every session</button>
-    </p>
-    <p class="r-dec-rat">Lead direction 2026-09-07: the wall is machine geometry with campaign-stable identity and belongs in the machine description; the session keeps its containment receipt computed at write time and a consumer dereferences the geometry to reproduce the solve's own admission decision.</p>
-  </div>
+      </p>
+    <p class="r-dec-rat">Lead direction 2026-09-07: the wall is machine geometry with campaign-stable identity and belongs in the machine description; the session keeps its containment receipt computed at write time and a consumer dereferences the geometry to reproduce the solve&#x27;s own admission decision.</p>
+    </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
-  <h2><span class="sec">&sect;</span> Followups</h2>
-  <article class="r-fu" data-id="f-mulw-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship multi-unit-limiter-wall">
-    <h4 class="r-fu-title">Read the wall losslessly, then move the session to a reference, then make the solver's consumers unit-aware</h4>
-    <div class="r-fu-body">Order: &sect;2 readers and fixtures with the ITER occurrence count as the first step; &sect;4 the session reference in one schema move before any corpus relabel; &sect;3 the solver consumers held for the lead; &sect;5 the painters. Every node keeps the single-closed-ring machines bit-identical and exercises the JT-60SA and ITER descriptions plus the synthetic two-unit fixture as positive controls.</div>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mulw-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship multi-unit-limiter-wall" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Read the wall losslessly, then move the session to a reference, then make the solver&#x27;s consumers unit-aware</h4>
+    <div class="r-fu-body">Order: §2 readers and fixtures with the ITER occurrence count as the first step; §4 the session reference in one schema move before any corpus relabel; §3 the solver consumers held for the lead; §5 the painters. Every node keeps the single-closed-ring machines bit-identical and exercises the JT-60SA and ITER descriptions plus the synthetic two-unit fixture as positive controls.</div>
     <pre class="r-fu-prompt">/reckon-ship multi-unit-limiter-wall</pre>
-  </article>
+    </article>
 </section>
 
 <section data-reckon="questions" id="questions" class="r-questions">
-  <h2><span class="sec">&sect;</span> Open questions</h2>
-  <div class="r-q" data-id="q-mulw-blade-anchors" data-section="s3" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-09-08">
-    <p class="r-q-body">Are open limiter structures admissible first-contact anchors for the limited boundary and do they cast wall-height shadows like the vessel, or is only the closed vessel ring the anchor set? Coordinator's reading: a limiter is where the plasma is limited, so its nodes are admissible anchors and its segments shadow like any other wall, with the unit index recorded so a receipt says which structure limited the plasma; the lead decides before &sect;3 merges.</p>
-  </div>
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-mulw-blade-anchors" data-section="s3" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-09-08" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Are open limiter structures admissible first-contact anchors for the limited boundary and do they cast wall-height shadows like the vessel, or is only the closed vessel ring the anchor set? Coordinator's reading: a limiter is where the plasma is limited, so its nodes are admissible anchors and its segments shadow like any other wall, with the unit index recorded so a receipt says which structure limited the plasma; the lead decides before §3 merges.</p>
+    </div>
 </section>
 
 <section data-reckon="research" id="research" class="r-research-list">
-  <h2><span class="sec">&sect;</span> Research</h2>
-  <div class="r-research" data-id="wall-units-inventory" data-type="reference" data-source="crew-report" data-added-by="reckon-ship" data-when="2026-09-08">
-    <span class="r-research-title">Wall-unit assumption inventory: 65 source files, 45 direct IDS-index hits, seven machine descriptions counted, two multi-unit (~/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md)</span>
-  </div>
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="wall-units-inventory" data-type="reference" data-source="crew-report" data-added-by="reckon-ship" data-when="2026-09-08">
+    <span class="r-research-title">Wall-unit assumption inventory: 65 source files, 45 direct IDS-index hits, seven machine descriptions counted, two multi-unit (~/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md)</span></div>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
-  <h2><span class="sec">&sect;</span> Comments</h2>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260908T030012137936-mulw-readers-lossless" data-who="mulw-readers-c" data-when="2026-09-08T06:41:23.373Z">
+    <div class="r-comment-body"><p>Multi-unit limiter wall readers and writers landed (clive 3.5 h with no file change, moved to codex-terra by crew redispatch, two resumes: a stale-handoff import line and an OOM census rerun at 32 GiB; merged into main). WallUnit gains vertex and closure validation; pack_wall_units keeps unit boundaries with offsets and inserts no joining edge; wall_units_from_ids reads every limiter unit of the single description with the IDS closure flag (endpoint identity as the fallback) and a kind derived from closure and name; Wall.units, segments and firstwall.retain_units preserve the collection; Wall.boundary returns the sole vessel unit and refuses otherwise; the MAST chain factory builds its occupiable mask through build_wall_mask over the units. Fixtures: JT-60SA five units (89 closed; 6, 6, 10, 8 open), default ITER two open units (19, 37), the four extra ITER occurrences counted [0, 0, 0, 2 units of 19 and 4 open], synthetic vessel-plus-blade mask excludes the blade; MAST and DIII-D single closed rings bit-identical. Gates: representation 21, reader 17, fixture and writer 19, the four attributable existing failures repaired, final focused gate 71 passed at 494088d3. Report ~/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md. Merged-head verification across the imas, first-wall and media surface follows as a test node.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260908T080129514656" data-who="reckon-ship" data-when="2026-09-08T08:00:00Z">
+    <div class="r-comment-body">mulw-readers-lossless LANDED (run r-20260908T030012137936; clive for 3.5 h with no file change, moved to codex-terra by crew redispatch, two resumes; commits 039cb106, 314e5676, 494088d3 merged at 5b025c5f). Section 1 representation: WallUnit validates at least two vertices and that a vessel unit is closed; pack_wall_units returns flat vertices plus offsets with no joining or closing edge inserted; wall_unit_from_ids reads one limiter unit with the IDS closure flag (endpoint identity as the fallback) and a kind derived from closure and name (closed and not named blade, tile, plate or shield reads vessel; otherwise material). Section 2 readers and writers: wall_units_from_ids keeps the single-description rule fail-closed and returns every limiter unit; Wall.units, Wall.segments and firstwall.retain_units preserve the collection with per-unit closure and kind; Wall.boundary returns the sole vessel unit for legacy consumers and refuses when there is not exactly one; the MAST chain factory builds its occupiable mask through build_wall_mask over the units and carries the packed nodes and offsets; the DIII-D reader, import path and writer, the MAST geometry writer and the seed-parameter binding preserve unit identity. Fixtures through imas-python at their own DD versions: JT-60SA five units (89 closed; 6, 6, 10, 8 open); default ITER iter_md/3/116000/2 two open units (19, 37); the four extra ITER occurrences counted on all_debug at 32 GiB after an 8 GiB OOM: iter_md/3/116100/1001, 2001, 3001 carry no limiter units and iter_md/3/116612/1 carries two open units of 19 and 4; the MAST artifact and the persisted DIII-D description load as one closed unit each with wall arrays bit-identical; the JT-60SA collection round-trips through the writer losslessly; the synthetic vessel-plus-blade fixture builds an occupiable mask that excludes the blade. Final focused gate 71 passed at 494088d3 after four attributable existing failures were repaired; a merged-head test node across the imas, first-wall, chain-factory and media surface follows, including a bit-identity check of the MAST chain-factory mask against the pre-merge base. For the lead's open question q-mulw-blade-anchors: the kind rule is name-derived for closed units, so a closed structure named blade or tile is excluded from the occupiable region by that word; the lead's decision on whether closure alone should decide stands open. Report ~/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md. Evidence: /nova/evidence/archive/multi-unit-limiter-wall-landed#every-limiter-unit-is-read-and-written-as-a-typed-collection</div>
+</div>
 </section>
 </main>
 </body>

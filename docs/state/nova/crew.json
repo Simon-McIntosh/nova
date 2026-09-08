@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T09:30:31",
+  "updated": "2026-09-08T10:00:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118,9 +118,11 @@
         "id": "bob-batch-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fe9-d6b5-7da2-aca2-eedbdbc96214",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fe9-d6b5-7da2-aca2-eedbdbc96214"
+        },
         "created": "2026-09-08"
       },
       {
@@ -2398,9 +2400,11 @@
         "id": "nia-cert-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fdf-1ff9-7433-bada-d621c76e1587",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fdf-1ff9-7433-bada-d621c76e1587"
+        },
         "created": "2026-09-08"
       },
       {
@@ -3039,9 +3043,11 @@
         "id": "pfs-cjac-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fdd-184e-7f93-84f7-4fb0f89ed8bf",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fdd-184e-7f93-84f7-4fb0f89ed8bf"
+        },
         "created": "2026-09-08"
       },
       {
@@ -131021,6 +131027,829 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T030012137936-mulw-readers-lossless",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a72",
+        "node": "mulw-readers-lossless",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1247,
+                "cached_input_tokens": 823596,
+                "input_tokens": 824875,
+                "output_tokens": 1816,
+                "reasoning_output_tokens": 457,
+                "total_tokens": 826691,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "As its first step the node counts the four ITER wall occurrences the scout left uncounted (iter_md/3/116100/1001, 2001, 3001 and iter_md/3/116612/1) on a debug partition with the scout's preserved probe and records them in the report; then nova/imas/mast_chain_factory.py, nova/imas/diiid_machine_ids.py (reader, import path and normalised writer) and nova/media/sources/diiid_efit.py parse every limiter unit of the single description into the WallUnit type of nova/equilibrium/wall_mask.py with the closed flag read from the IDS and a kind derived from closure and name, refusing a description count other than one and no longer refusing a unit count other than one; nova/imas/mast_geometry.py and the DIII-D writer preserve the unit collection and metadata; the FrameSpace first wall keeps unit identity with no nearest-endpoint concatenation between units; nova/imas/mast_seed_parameters.py carries a unit index in its limiter outline binding; tests assert that jt-60sa_md loads as 5 units (89 closed; 6, 6, 10, 8 open) and iter_md/3/116000/2 as 2 open units (19 and 37) through imas-python at their own DD versions, that the MAST artifact and the persisted DIII-D description load as one closed unit each with wall arrays bit-identical to main, that the JT-60SA collection round-trips through the writer losslessly, and that the synthetic two-unit fixture (a closed vessel ring with one open blade inside) builds an occupiable-region mask through build_wall_mask excluding the blade; the existing chain-factory, machine, DIII-D machine-ids and position-read tests stay green in the default lane with the two-unit refusal tests rewritten to assert the new contract; no structure excluded by name, no plan labels in source",
+          "estimated_hours": 3.0,
+          "goal": "The IMAS wall readers and writers parse and preserve every limiter unit as a typed collection, with the JT-60SA and default ITER descriptions and a synthetic two-unit machine as fixtures and the single-closed-ring machines bit-identical",
+          "id": "mulw-readers-lossless",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T030012137936-mulw-readers-lossless/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/imas/mast_chain_factory.py",
+            "nova/imas/diiid_machine_ids.py",
+            "nova/media/sources/diiid_efit.py",
+            "nova/imas/mast_geometry.py",
+            "nova/imas/mast_seed_parameters.py",
+            "nova/imas/machine.py",
+            "nova/frame/firstwall.py",
+            "nova/equilibrium/wall_mask.py",
+            "tests/test_imas_position_reads.py",
+            "tests/test_wall_units.py",
+            "tests/test_firstwall.py",
+            "tests/test_wall_mask.py",
+            "docs/figures/multi-unit-limiter-wall/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "mulw-readers-c",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T03:00:24Z",
+        "completed_at": "2026-09-08T06:41:23.373Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13217,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13259,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "5a2fb514c0e32421c8423003850ea54882c46b6c",
+        "commits": [
+          "039cb1067ecb604825236157d386273efecd248d",
+          "314e5676feeb2ced071971a251b0cabf49f96f95",
+          "494088d3f1bd3b0f7ddcbe67574db05701c8e147"
+        ],
+        "changed_lines": {
+          "added": 482,
+          "removed": 68,
+          "files": 12
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT main venv PYTHONPATH worktree uv run --no-sync pytest -p no:cacheprovider on tests/test_wall_units.py tests/test_wall_mask.py tests/test_firstwall.py tests/test_imas_position_reads.py and the chain-factory, machine and DIII-D machine-ids tests (71 passed); ITER census on all_debug at 32 GiB exit 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T030012137936-mulw-readers-lossless/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fc0-8bdf-7a71-bdae-1bb239656347",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12503296,
+            "cached_input_tokens_cumulative": 12503296,
+            "input_tokens": 12555921,
+            "input_tokens_cumulative": 12555921,
+            "output_tokens": 24580,
+            "output_tokens_cumulative": 24580,
+            "reasoning_output_tokens": 5127,
+            "reasoning_output_tokens_cumulative": 5127
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-08T06:41:59Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "three and a half hours on the local lane with no commit and no working-tree change, still grepping test files; the node opens the multi-unit limiter wall chain the lead asked for and the lead has directed less local dispatch while the contract is settled",
+              "session": "fresh",
+              "to_backend": "codex-terra",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260908T030012137936-mulw-readers-lossless"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12503296,
+          "cumulative_input_tokens": 25059217,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 29707
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mulw-readers-lossless",
+          "session_id": "01a07fc0-8bdf-7a71-bdae-1bb239656347",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T06:41:23.373Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T071714759795-pfs-strike-merged-head-gate",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-strike-merged-head-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2129,
+                "cached_input_tokens": 581595,
+                "input_tokens": 583756,
+                "output_tokens": 5150,
+                "reasoning_output_tokens": 263,
+                "total_tokens": 588906,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "At the current head of main, each of tests/test_steering_frames.py, tests/test_strike_points.py, tests/test_forward_operator_axes.py, tests/test_forward_operator_tangent.py, tests/test_forward_census.py, tests/test_route_solve_requests.py, tests/test_default_wiring.py, tests/test_topology_boundary.py and every test file under tests/ whose name contains media, poloidal, labeller, nova_labels or frame (list them in the report; skip any that does not exist and say so) runs as one fresh-process lane on all_debug or sirius_debug; write each lane as a small bash script under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-gate-logs/ that unsets UV_NO_SYNC and UV_RUN_RECURSION_DEPTH, exports TMPDIR=/tmp JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv and PYTHONPATH set to the worktree root, then runs uv run --no-sync pytest -p no:cacheprovider -m \"not slow\" on the one file, launched with srun --time=00:59:00 --cpus-per-task=4 --mem=48G bash that-script, one log each; a lane must show the target file collected before it counts and a lane that collects nothing or skips on a missing-jax message is re-run with the environment fixed, never reported green; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-merged-head-gate.md tabulates per file collected, passed, failed, skipped, wall and exit status, names every failure with its first assertion line, and states for each whether it also fails at base 55af2b26 by running that one lane against a git archive of the base extracted under the logs directory with PYTHONPATH pointing at it; no source or test file is changed",
+          "estimated_hours": 1.0,
+          "goal": "The exact strike-point change verified at the merged head across the forward, steering-frame, labeller and media test surface, judged by delta against the pre-merge base",
+          "id": "pfs-strike-merged-head-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071714759795-pfs-strike-merged-head-gate/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-merged-head-gate.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-gate-logs/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pfs-strike-gate-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T07:17:52Z",
+        "completed_at": "2026-09-08T07:53:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2141,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2141,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5f4e86629ed0d9e0217e8e4e2bc585ac4f20e750",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "26 head and 25 base one-file srun all_debug lanes (unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH; TMPDIR=/tmp JAX_PLATFORMS=cpu; uv run --no-sync pytest -p no:cacheprovider -m 'not slow' <file>) against a git archive of base 55af2b26",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/strike-merged-head-gate.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071714759795-pfs-strike-merged-head-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fe1-67e5-7000-bfbe-eb09c936e504",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10457600,
+            "cached_input_tokens_cumulative": 10457600,
+            "input_tokens": 10662243,
+            "input_tokens_cumulative": 10662243,
+            "output_tokens": 35563,
+            "output_tokens_cumulative": 35563,
+            "reasoning_output_tokens": 16216,
+            "reasoning_output_tokens_cumulative": 16216
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T07:53:33Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 19.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T07:53:33Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 10457600,
+          "cumulative_input_tokens": 21119843,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 51779
+        },
+        "follow_on_paths": [
+          "docs/figures/playable-forward-solve/batched-labeller/terminal-state-parity.png"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "test role; the gate evidence is the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-strike-merged-head-gate",
+          "session_id": "01a07fe1-67e5-7000-bfbe-eb09c936e504",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T07:53:33Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T041244207918-pfs-centroid-radius-attribution",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-centroid-radius-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1859,
+                "cached_input_tokens": 921568,
+                "input_tokens": 923459,
+                "output_tokens": 1366,
+                "reasoning_output_tokens": 84,
+                "total_tokens": 924825,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/centroid-radius-attribution.md states, for the seven bank rows the guard fails (12, 18, 24, 30, 36, 43, 45 of shot 22086, deltas -3.6 to -8.6 cm in docs/figures/playable-forward-solve/centroid-radius/centroid-radius-validation.json), the fraction of the inboard offset accounted for by (a) supplying the solved topology class to the moment read on slices where the emergent and requested classes differ, beside the bit-identical agree case, (b) the support declaration of the moment observation, and (c) the cell-current weighting, each with the numbers and method, and names the carrier or states plainly that none of the three carries it, read beside the axis adjudication and the placement test; the receipt under docs/figures/playable-forward-solve/centroid-attribution/ carries the per-row tables; solves run on a debug partition or one card with at most 4 cores; no repair, no tolerance from observed values, no PNG read back",
+          "estimated_hours": 1.2,
+          "goal": "An attribution of the inboard current-centroid major radius across the three named candidates, reported as the fraction of the offset each accounts for on the seven failing bank rows",
+          "id": "pfs-centroid-radius-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T041244207918-pfs-centroid-radius-attribution/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/centroid_radius_attribution.py",
+            "docs/figures/playable-forward-solve/centroid-attribution/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/centroid-radius-attribution.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-centroid-attr-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-08T04:12:54Z",
+        "completed_at": "2026-09-08T07:51:51.882Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13035,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13137,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "6fce8753af842d6a7eecf635a9b277157a3e9e18",
+        "commits": [
+          "ae03151b29bc224b16711e2f53e1874cfa974abc"
+        ],
+        "changed_lines": {
+          "added": 1218,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "two sbatch all_debug runs of benchmarks/centroid_radius_attribution.py (seven frozen rows; three native-anchor rows), 4 cores, CPU, 32G, both EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/centroid-radius-attribution.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T041244207918-pfs-centroid-radius-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "46366e7f-993a-43c3-b114-7664a8b19025",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 22666663,
+            "input_tokens_cumulative": 22666663,
+            "output_tokens": 90731,
+            "output_tokens_cumulative": 90731,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-08T07:51:51.882Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 22666663,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 13133.844,
+          "generated_tokens": 90731,
+          "generation_seconds": 12628.252,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 24.7,
+          "machine_seconds": 505.592,
+          "peak_input_tokens": 250966,
+          "tokens_per_second": 7.18,
+          "wall_tokens_per_second": 6.91
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-centroid-radius-attribution",
+          "session_id": "46366e7f-993a-43c3-b114-7664a8b19025",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T07:51:51.882Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T071448583940-nia-certificate-raster-receipt",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-certificate-raster-receipt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2129,
+                "cached_input_tokens": 581595,
+                "input_tokens": 583756,
+                "output_tokens": 5150,
+                "reasoning_output_tokens": 263,
+                "total_tokens": 588906,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "ForwardProfile.solve in nova/equilibrium/forward.py no longer raises 'raster receipts require a tensor-product forward grid' on a hex StencilMesh operator: the raster-flux receipt is built only when the operator carries a tensor-product raster geometry and is otherwise absent with the receipt stating why, the tensor-grid path unchanged; a test solves the reduced (-110) hex Solovev oracle through the request seam and gets a receipt, and an existing tensor-grid receipt test stays bitwise unchanged; benchmarks/solovev_certificate.py regenerates the sixteen rows on the H200 (one sbatch on betelgeuse under gpu_0003_grpA with an explicit --mem, persistent compilation cache on, per-job TMPDIR, the run script committed beside the receipt) with every residual field bit-identical to the last committed certificate 8fb5a767 where the row converged and any difference stated per row; the banked_read block from dbeac7df is present on every row; tests/test_banked_null_reads.py and the forward receipt tests green in the default lane; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/certificate-raster-receipt.md states the regeneration wall and the per-row comparison; no PNG read back; no tolerance set from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable",
+          "estimated_hours": 1.5,
+          "goal": "The raster receipt conditional on a tensor-product grid so the hex reduced Solovev oracle solves through the request seam again and the sixteen-row certificate regenerates",
+          "id": "nia-certificate-raster-receipt",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071448583940-nia-certificate-raster-receipt/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/",
+            "tests/test_forward_receipt_raster.py",
+            "tests/test_banked_null_reads.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/certificate-raster-receipt.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-cert-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T07:15:23Z",
+        "completed_at": "2026-09-08T07:54:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2336,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2336,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5f4e86629ed0d9e0217e8e4e2bc585ac4f20e750",
+        "commits": [
+          "ba16dd8209b47bd53861f7bde423382d2c8db1c0"
+        ],
+        "changed_lines": {
+          "added": 200,
+          "removed": 9,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug job 1265027 pytest -m 'slow or not slow' tests/test_forward_receipt_raster.py tests/test_raster_flux_receipt.py tests/test_banked_null_reads.py (8 passed); H200 job 1265028 regeneration FAILED at diverted -300",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-certificate-raster-receipt/docs/figures/gs-absolute-accuracy/solovev-certificate-h200-1265028.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071448583940-nia-certificate-raster-receipt/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fdf-1ff9-7433-bada-d621c76e1587",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1475200,
+            "cached_input_tokens_cumulative": 1475200,
+            "input_tokens": 1673340,
+            "input_tokens_cumulative": 1673340,
+            "output_tokens": 8554,
+            "output_tokens_cumulative": 8554,
+            "reasoning_output_tokens": 1940,
+            "reasoning_output_tokens_cumulative": 1940
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T07:54:19Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 19.0,
+              "resets_at": 1789439332,
+              "observed_at": "2026-09-08T07:54:19Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 1475200,
+          "cumulative_input_tokens": 3148540,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 10494
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 6,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-certificate-raster-receipt",
+          "session_id": "01a07fdf-1ff9-7433-bada-d621c76e1587",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T07:54:19Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T072650548440-bob-exit-incidence-batch",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-exit-incidence-batch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2663,
+                "cached_input_tokens": 609637,
+                "input_tokens": 612302,
+                "output_tokens": 1726,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 614028,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "benchmarks/strict_exit_incidence.py (the driver that banked the sequential width-1 measurement in docs/figures/millisecond-converged-solve/strict-exit-incidence.json; extend it, do not write a second driver) gains a batched mode that stacks the twelve MAST bank members as one program and the five DIII-D members as another through ForwardOperatorBatch and ForwardSolveMemberData from the landed operator boundary (commit 879a33ee), runs each program with the strict exit enabled and disabled as two passes over the same arguments, and records compile seconds, peak host RSS at every stage (from resource.getrusage, stated per stage), per-member firing trip, and per-machine milliseconds per member beside the sequential width-1 figure read from the banked receipt; it runs as ONE sbatch on betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache enabled through the same call the sequential driver uses, invoking /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on the compute node), with the run script committed beside the receipt; the receipt under docs/figures/batched-operator-boundary/exit-incidence/ carries every number above and states whether the width-12 program compiled once (compile count per pass) and whether peak host memory stayed under 16 GB; if the batch compiles more than once or a member falls back to the sequential route because geometry digests differ, the receipt says so with the digests; while the job runs, write the manifest with status waiting and a machine-readable declaration (wait_probe as a JSON argv array calling sacct with the job number, wait_terminal as a JSON array of terminal states, wait_started_at, resume_brief) and end your turn rather than polling; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md states the batched against sequential milliseconds per member per machine and the memory figure in one table; the EFIT-gate half of the section is a separate node and is not touched here; no PNG read back; no tolerance set from observed values; every uv command on the login node carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.0,
+          "goal": "The strict-exit incidence measurement repeated on the real MAST and DIII-D bank mixes as one width-12 and one width-5 batched program on the H200, compiled once under 16 GB host memory, with batched milliseconds per member beside the banked sequential width-1 figure",
+          "id": "bob-exit-incidence-batch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T072650548440-bob-exit-incidence-batch/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "docs/figures/batched-operator-boundary/exit-incidence/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-batch-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T07:27:05Z",
+        "completed_at": "2026-09-08T07:52:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1521,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1521,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "fdffa511c5332265d0f32f50dfcd739ab5482d8a",
+        "commits": [
+          "c783e4641806d7ff58fd180a1694fee06bd98e90",
+          "dc936be7b792fa40e86536f02e2d7c0ef0356187"
+        ],
+        "changed_lines": {
+          "added": 464,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1265049 run-batch.sh (FAILED after 00:00:13, exit 1:0, stale operand cache); py_compile, ruff, --preflight and bash -n passed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch/docs/figures/batched-operator-boundary/exit-incidence/batch-1265049.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T072650548440-bob-exit-incidence-batch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fe9-d6b5-7da2-aca2-eedbdbc96214",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 688256,
+            "cached_input_tokens_cumulative": 688256,
+            "input_tokens": 808005,
+            "input_tokens_cumulative": 808005,
+            "output_tokens": 5499,
+            "output_tokens_cumulative": 5499,
+            "reasoning_output_tokens": 1748,
+            "reasoning_output_tokens_cumulative": 1748
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T07:52:26Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 19.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T07:52:26Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 688256,
+          "cumulative_input_tokens": 1496261,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 7247
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch",
+          "session_id": "01a07fe9-d6b5-7da2-aca2-eedbdbc96214",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T07:52:26Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -131333,6 +132162,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2181
+    "_version": 2189
   }
 }

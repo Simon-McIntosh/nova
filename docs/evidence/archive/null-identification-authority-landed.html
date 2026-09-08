@@ -647,6 +647,12 @@
 <figure><img src="/nova/figures/null-identification-authority/convergence-atlas/supplement/27079-17.png" alt="27079 row 17 collapse frame with the wall, contours, nulls and the mirror anchor nodes marked"><figcaption>27079 row 17: the collapsed limited boundary with the upper anchor node 10 and its mirror node 25 marked.</figcaption></figure>
 <p>Lesson from the worker: the labeller sessions persist steering but not the flux raster, so every future panel of these frames re-solves; corpus-side raster persistence belongs with the relabel.</p>
 </section>
+<section id="the-hex-oracle-solves-again-and-the-certificate-has-drifted"><h2>The hex oracle solves again, and the certificate has drifted (2026-09-08 07:53Z)</h2>
+<p>Node <code>nia-certificate-raster-receipt</code> (codex-terra, spec guided; commit <code>ba16dd82</code>, merged at <code>de7d508d</code>; promoted as a negative result).</p>
+<p><strong>Landed.</strong> The solve receipt builds its raster-flux block only when the operator carries a tensor-product raster geometry and otherwise records why it is absent, so the reduced hex Solov'ev oracle solves through the request seam again after four days; a regression test pins the hex request and the tensor-grid receipt is unchanged (8 passed including the slow lanes).</p>
+<p><strong>Found.</strong> The sixteen-row certificate did not regenerate: the H200 job produced 13 rows and every regenerated residual block differs from the last committed certificate of 2026-09-04, including the baseline-qualified diverted -110 row, and the diverted -300 row raised a NaN current normalisation, so three rows never ran. The exact-solution pin has moved under the sprint's solver changes and one row now fails outright; attribution across the landed commits is the next node.</p>
+<p>Log: the worktree's <code>docs/figures/gs-absolute-accuracy/solovev-certificate-h200-1265028.log</code>. Report: <code>~/.config/reckon/crew/reports/nova/null-identification/certificate-raster-receipt.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

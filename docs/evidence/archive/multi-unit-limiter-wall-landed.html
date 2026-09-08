@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="multi-unit-limiter-wall-landed">
+  <meta name="plan-title" content="Multi-unit limiter wall — cumulative execution evidence">
+  <meta name="plan-summary" content="Every limiter unit of a wall description is read and written as a typed collection, with the single closed ring bit-identical and JT-60SA and ITER as the multi-unit fixtures.">
+  <meta name="plan-evidence-for" content="multi-unit-limiter-wall">
+  <meta name="plan-informs" content="playable-forward-solve,null-identification-authority">
+  <title>Multi-unit limiter wall — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Multi-unit limiter wall — cumulative execution evidence</h1>
+    <p class="lede">One stable anchor per material result. Each section names the node, the commits, the gate that measured it and what the measurement means.</p>
+  </header>
+<section id="every-limiter-unit-is-read-and-written-as-a-typed-collection"><h2>Every limiter unit is read and written as a typed collection (2026-09-08 07:50Z)</h2>
+<p>Node <code>mulw-readers-lossless</code> (local lane, then codex-terra after a lane change; commits <code>039cb106</code>, <code>314e5676</code>, <code>494088d3</code>, merged at <code>5b025c5f</code>).</p>
+<p><strong>Result.</strong> <code>WallUnit</code> is the representation: ordered vertices, a closure flag read from the IDS (endpoint identity as the fallback) and a kind derived from closure and name. <code>pack_wall_units</code> keeps unit boundaries as offsets and inserts no joining or closing edge. The IMAS wall reader returns every limiter unit of the single description; <code>Wall.units</code>, <code>Wall.segments</code> and the first-wall frame preserve the collection; <code>Wall.boundary</code> returns the sole vessel unit and refuses otherwise; the MAST chain factory builds its occupiable region through the wall-mask builder over the units; the DIII-D reader and writer and the MAST geometry writer round-trip the collection.</p>
+<p><strong>Measure.</strong> Through imas-python at their own DD versions: JT-60SA loads as five units (89 closed; 6, 6, 10 and 8 open); the default ITER description as two open units (19 and 37); the four extra ITER occurrences the scout left uncounted read no limiter units, no limiter units, no limiter units, and two open units of 19 and 4 (counted on a debug partition at 32 GB after an 8 GB out-of-memory); the MAST artifact and the persisted DIII-D description load as one closed unit each with wall arrays bit-identical; the JT-60SA collection round-trips through the writer losslessly; a synthetic vessel with an open blade inside builds an occupiable mask that excludes the blade. Focused gate 71 passed after four attributable existing failures were repaired.</p>
+<p><strong>Open for the lead.</strong> The kind rule reads a closed unit named blade, tile, plate or shield as material, so such a structure is excluded from the occupiable region by its name; whether closure alone should decide is the plan's open question.</p>
+<p>Report: <code>~/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/readers-lossless.md</code>.</p>
+</section>
+</main>
+</body>
+</html>

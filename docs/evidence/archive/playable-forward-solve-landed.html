@@ -1534,6 +1534,13 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 <figure><img src="/nova/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.svg" alt="Constraint Jacobian entry against free finite-difference response for two circuit directions on rows 16 and 96"><figcaption>Constraint entry against free response for p6_upper and the antisymmetric p6 pair on rows 16 and 96; the flat-top pair sits forty-fold apart.</figcaption></figure>
 <p>Receipt: <code>docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/playable/compensator-jacobian-response.md</code>.</p>
 </section>
+<section id="the-centroid-offset-is-pinned-to-the-case-state-anchor"><h2>The centroid offset is pinned to the case-state anchor (2026-09-08 07:52Z)</h2>
+<p>Node <code>pfs-centroid-radius-attribution</code> (local lane, spec guided; commit <code>ae03151b</code>, merged at <code>8b8ca69c</code>). Diagnosis only.</p>
+<p><strong>Question.</strong> Seven bank rows of 22086 read the current centroid 3.6 to 8.6 cm inboard of EFIT and fail the guard. Which of the class supplied to the moment read, the support declaration, or the cell-current weighting carries it?</p>
+<p><strong>Answer.</strong> None. Supplying the solved class is bit-identical on every row (fraction 0.000, including the row where the classes differ); the support declaration moves the centroid further inboard (median fraction -0.15); a uniform weighting sits 22 to 28 cm outboard, so the current weighting is essential, not the carrier. A slice-native anchor moves the centroid 5.6 cm toward EFIT on row 36 and is bit-identical to the frozen anchor on the calibration slice: the offset belongs to the solve's frozen case-state anchor, the mechanism the axis adjudication found. A uniform 4.1 to 4.4 cm inboard residual survives on every row and every anchor and is the next question.</p>
+<figure><img src="/nova/figures/playable-forward-solve/centroid-attribution/centroid-radius-attribution.png" alt="Per-row centroid offset under the three candidates and the two anchors on the seven failing rows"><figcaption>Offset per row under class, support and weighting, and under the frozen and slice-native anchors.</figcaption></figure>
+<p>Receipt: <code>docs/figures/playable-forward-solve/centroid-attribution/centroid-radius-attribution.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/playable/centroid-radius-attribution.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

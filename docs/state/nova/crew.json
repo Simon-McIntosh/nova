@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T13:00:46",
+  "updated": "2026-09-08T13:23:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2439,6 +2439,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-census-l",
+        "harness": "codex-luna",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-census-proto-x",
         "harness": "codex",
         "role": "implement",
@@ -2660,6 +2669,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-nanfix-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-nullfit-x",
         "harness": "clive",
         "role": "implement",
@@ -2822,6 +2840,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-06"
+      },
+      {
+        "id": "nia-target2-l",
+        "harness": "codex-luna",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "nia-test-health",
@@ -134600,6 +134627,168 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T110218147436-nia-promotion-fallback-nan",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-promotion-fallback-nan",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2556,
+                "cached_input_tokens": 851849,
+                "input_tokens": 854407,
+                "output_tokens": 2477,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 856884,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "c5e1498a (perf(equilibrium): carry unchanged promotion fallbacks) makes the diverted -300 reduced Solovev rung raise CurrentNormalisationError with a NaN source amplitude out of current_normalisation_amplitude via normalised_current_moments_and_observation, while its immediate predecessor e0eb4956 terminates finite and unqualified at residual 0.025515711279493654; the bracket evidence is in /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket-closure.md. A performance change carrying an unchanged fallback must not alter any value, so identify from the c5e1498a diff which carried quantity becomes NaN and on which trip (the cell-current sum entering the amplitude is the first suspect, since the amplitude is the target current divided by that sum), reproduce it on the CPU with the reduced hex oracle through benchmarks/solovev_certificate.py in a fresh-process all_debug lane, and repair it so the rung terminates finite with a residual equal to the e0eb4956 value wherever the carry is legitimately unchanged, stating both numbers; add a test that drives the carried fallback through the exact case that produced the NaN so the repair has a case it would fail without; and state whether any other certificate rung or bank row is affected by the same carry, since only this rung was probed. Fresh-process all_debug lanes of at most six tests for the solver test files that cover the changed paths, logs captured once; report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/promotion-fallback-nan.md. No tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 1.5,
+          "goal": "The reduced diverted Solovev rung terminates finite again, with the carried promotion fallback that turned its source amplitude to NaN repaired and pinned",
+          "id": "nia-promotion-fallback-nan",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T110218147436-nia-promotion-fallback-nan/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_reduced_newton.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/promotion-fallback-nan.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-nanfix-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T11:02:28Z",
+        "completed_at": "2026-09-08T11:20:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1088,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1088,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9f1d0db0eadd792546e60ad4ce7f2a574a19259c",
+        "commits": [
+          "8c2c4b2781c1e216d7c6132fb64161c1f71c2374"
+        ],
+        "changed_lines": {
+          "added": 16,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1265987 tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback (1 passed in 402 s); ruff check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/promotion-fallback-nan.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T110218147436-nia-promotion-fallback-nan/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a080af-063e-7bf1-aafe-e13ffc422faf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16783872,
+            "cached_input_tokens_cumulative": 16783872,
+            "input_tokens": 17042362,
+            "input_tokens_cumulative": 17042362,
+            "output_tokens": 31980,
+            "output_tokens_cumulative": 31980,
+            "reasoning_output_tokens": 9478,
+            "reasoning_output_tokens_cumulative": 9478
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T11:20:36Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 32.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T11:20:36Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 16783872,
+          "cumulative_input_tokens": 33826234,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 41458
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-promotion-fallback-nan",
+          "session_id": "01a080af-063e-7bf1-aafe-e13ffc422faf",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T11:20:36Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -134912,6 +135101,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2228
+    "_version": 2232
   }
 }

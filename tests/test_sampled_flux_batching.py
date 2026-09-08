@@ -21,6 +21,8 @@ from nova.jax.config import (
     default_persistent_compilation_cache_root,
 )
 
+configure_dtypes()
+
 
 def _array_sha256(value: np.ndarray) -> str:
     array = np.ascontiguousarray(value)
@@ -43,6 +45,7 @@ def _recording_function(function, batches: list[np.ndarray]):
 
 
 def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
+    assert jax.config.jax_enable_x64 is True
     coordinate = np.linspace(0.0, 1.0, 65)
     values = np.sin(coordinate) * 12345.6789
     sampled = SampledFluxFunction(coordinate, values)
